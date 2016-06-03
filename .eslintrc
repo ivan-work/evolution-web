@@ -1,0 +1,19 @@
+{
+  "extends": "airbnb",
+  "parser": "babel-eslint",
+  "env": {
+    "browser": true,
+    "node": true,
+    "mocha": true,
+   },
+   "ecmaFeatures": {
+    "jsx": true,
+    "es6": true,
+    "classes": true,
+   },
+   "rules": {
+     "comma-dangle": [1, "always-multiline"],
+     "max-len": [1, 180, 4],
+     "arrow-body-style": [0],
+   },
+}
