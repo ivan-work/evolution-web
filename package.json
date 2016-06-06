@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "blahblah",
   "scripts": {
-    "test:prepare": "node_modules/.bin/cross-env NODE_ENV=test node_modules/.bin/mocha --compilers js:babel-register --require shared/test-helper.js ",
+    "test:prepare": "node_modules/.bin/cross-env NODE_ENV=test node_modules/.bin/mocha --compilers js:babel-register --require shared/test-helper.js --bail",
       "test:server": "npm run test:prepare -- server/**/*.spec.js",
         "test:server:watch": "npm run test:server -- --watch",
       "test:client": "npm run test:prepare -- client/**/*.spec.js",
