@@ -6,12 +6,12 @@ import {createStore, applyMiddleware} from 'redux';
 import {Provider} from 'react-redux';
 //import io from 'socket.io-client';
 import reducer from './reducer';
-import {setClientId, setState, setConnectionState} from './action_creators';
+//import {setClientId, setState, setConnectionState} from './action_creators';
 import remoteActionMiddleware from './remote_action_middleware';
-import getClientId from './client_id';
+//import getClientId from './client_id';
 import App from './components/App';
-import {VotingContainer} from './components/Voting';
-import {ResultsContainer} from './components/Results';
+import {LoginContainer} from './components/Login';
+import {Lobbies} from './components/Lobbies';
 
 require('./style.css');
 
@@ -37,11 +37,11 @@ require('./style.css');
 //const store = createStoreWithMiddleware(reducer);
 const store = createStore(reducer);
 
-store.dispatch(setClientId(getClientId()));
+//store.dispatch(setClientId(getClientId()));
 
 const routes = <Route component={App}>
-  <Route path="/" component={VotingContainer} />
-  <Route path="/results" component={ResultsContainer} />
+  <Route path="/" component={LoginContainer} />
+  <Route path="/server" component={Lobbies} />
 </Route>;
 
 ReactDOM.render(
@@ -50,8 +50,3 @@ ReactDOM.render(
   </Provider>,
   document.getElementById('app')
 );
-
-//ReactDOM.render(
-//  <div>hao</div>,
-//  document.getElementById('app')
-//);
