@@ -1,52 +1,49 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-//import RR from 'react-router';
-import {Router, Route, hashHistory} from 'react-router';
-import {createStore, applyMiddleware} from 'redux';
-import {Provider} from 'react-redux';
-//import io from 'socket.io-client';
-import reducer from './reducer';
-//import {setClientId, setState, setConnectionState} from './action_creators';
-import remoteActionMiddleware from './remote_action_middleware';
-//import getClientId from './client_id';
-import App from './components/App';
-import {LoginContainer} from './components/Login';
-import {Lobbies} from './components/Lobbies';
+import { createDevTools } from 'redux-devtools'
+import LogMonitor from 'redux-devtools-log-monitor'
+import DockMonitor from 'redux-devtools-dock-monitor'
 
-require('./style.css');
+import {Map} from 'immutable';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import { createStore, combineReducers } from 'redux'
+import { Provider } from 'react-redux'
+import { Router, browserHistory } from 'react-router'
+import { syncHistoryWithStore, routerReducer } from 'react-router-redux'
 
-//const socket = io(`${location.protocol}//${location.hostname}:8090`);
-//socket.on('state', state =>
-//  store.dispatch(setState(state))
-//);
-//[
-//  'connect',
-//  'connect_error',
-//  'connect_timeout',
-//  'reconnect',
-//  'reconnecting',
-//  'reconnect_error',
-//  'reconnect_failed'
-//].forEach(ev =>
-//  socket.on(ev, () => store.dispatch(setConnectionState(ev, socket.connected)))
-//);
+import * as reducers from './reducers'
 
-//const createStoreWithMiddleware = applyMiddleware(
-//  remoteActionMiddleware(socket)
-//)(createStore);
-//const store = createStoreWithMiddleware(reducer);
-const store = createStore(reducer);
+import routes from './routes';
 
-//store.dispatch(setClientId(getClientId()));
+require("./styles/style.scss");
+require("./assets/materialize/materialize.min");
 
-const routes = <Route component={App}>
-  <Route path="/" component={LoginContainer} />
-  <Route path="/server" component={Lobbies} />
-</Route>;
+const reducer = combineReducers({
+  ...reducers,
+  routing: routerReducer
+});
+
+const DevTools = createDevTools(
+  <DockMonitor toggleVisibilityKey="ctrl-h" changePositionKey="ctrl-q">
+    <LogMonitor theme="tomorrow" preserveScrollTop={false} />
+  </DockMonitor>
+);
+
+const store = createStore(
+  reducer,
+  Map(),
+  DevTools.instrument()
+);
+
+const history = syncHistoryWithStore(browserHistory, store);
 
 ReactDOM.render(
   <Provider store={store}>
-    <Router history={hashHistory}>{routes}</Router>
+    <div>
+      <Router history={history}>
+        {routes}
+      </Router>
+      <DevTools />
+    </div>
   </Provider>,
   document.getElementById('app')
 );

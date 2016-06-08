@@ -1,7 +1,7 @@
 import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
-import actionCreators from 'actionCreators'
+import * as actionCreators from 'actions'
 
 export const Lobbies = React.createClass({
   mixins: [PureRenderMixin]
@@ -17,7 +17,7 @@ export const Lobbies = React.createClass({
   }
 });
 
-export const LobbiesnContainer = connect(
+export const LobbiesView = connect(
   (state) => {
     this.user = state.user;
   },
