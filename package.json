@@ -50,6 +50,7 @@
     "history": "*",
     "immutable": "^3.8.1",
     "isomorphic-fetch": "*",
+    "materialize-css": "^0.97.6",
     "mongoose": "*",
     "postcss-loader": "^0.9.1",
     "react": "*",
