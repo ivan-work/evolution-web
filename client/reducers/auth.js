@@ -2,9 +2,9 @@ import {createReducer} from '../utils';
 import {LOGIN_USER_REQUEST, LOGIN_USER_SUCCESS, LOGIN_USER_FAILURE, LOGOUT_USER} from '../constants';
 //import {pushState} from 'redux-router';
 //import jwtDecode from 'jwt-decode';
-import {fromJS} from 'immutable';
+import {Map} from 'immutable';
 
-const initialState = fromJS({
+const initialState = Map({
   token: null,
   userName: null,
   isAuthenticated: false,
@@ -14,13 +14,13 @@ const initialState = fromJS({
 
 export const auth = createReducer(initialState, {
   [LOGIN_USER_REQUEST]: (state, payload) => {
-    return state.merge(Map.of({
+    return state.merge(Map({
       'isAuthenticating': true,
       'statusText': null
     }));
   },
   [LOGIN_USER_SUCCESS]: (state, payload) => {
-    return state.merge(Map.of({
+    return state.merge(Map({
       'isAuthenticating': false,
       'isAuthenticated': true,
       //'token': payload.token,
@@ -31,7 +31,7 @@ export const auth = createReducer(initialState, {
 
   },
   [LOGIN_USER_FAILURE]: (state, payload) => {
-    return state.merge(Map.of({
+    return state.merge(Map({
       'isAuthenticating': false,
       'isAuthenticated': false,
       'token': null,
@@ -40,7 +40,7 @@ export const auth = createReducer(initialState, {
     }));
   },
   [LOGOUT_USER]: (state, payload) => {
-    return state.merge(Map.of({
+    return state.merge(Map({
       'isAuthenticated': false,
       'token': null,
       'userName': null,

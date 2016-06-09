@@ -6,20 +6,22 @@ import * as actionCreators from 'actions'
 export const Lobbies = React.createClass({
   mixins: [PureRenderMixin]
   , getInitialState: function () {
-    return {user: {
-      name: "user"
-    }};
+    return {
+      user: {
+        name: "user"
+      }
+    };
   }
   , render: function () {
     return <div className="loginForm">
-      <div>Hello {this.props.user.name}</div>
+      <div>Hello {this.state.user.name}</div>
     </div>;
   }
 });
 
 export const LobbiesView = connect(
-  (state) => {
-    this.user = state.user;
-  },
+  (state) => ({
+    user: state.user
+  }),
   actionCreators
 )(Lobbies);
