@@ -1,6 +1,6 @@
 import React from 'react';
 import {Route, IndexRoute} from 'react-router';
-import {App} from '../containers/App';
+import {App} from '../components/app/App';
 import {LoginView, LobbiesView} from '../views';
 import {requireAuthentication} from '../components/AuthenticatedComponent';
 
