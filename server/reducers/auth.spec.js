@@ -1,4 +1,4 @@
-import {User, UserRecord} from '../../shared/models/User';
+import {User, UserRecord} from '~/shared/models/User';
 import {Map} from 'immutable';
 import {login, logout} from './auth';
 

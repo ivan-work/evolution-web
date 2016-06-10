@@ -1,23 +1,72 @@
-import Express from 'express';
-import mongoose from 'mongoose';
-import bodyParser from 'body-parser';
+/**
+ * Module dependencies.
+ */
+var app = require('./app');
+var debug = require('debug')('sample-app:server');
+var http = require('http');
+var config = require('./config/config.js');
 
-import serverConfig from './config';
+import * as reducers from './reducers';
+import { createStore } from 'redux';
+import { combineReducers } from 'redux-immutable';
+import socketServer from './socket';
 
-const app = new Express();
-const frontend = require('./frontend');
-
-const webpackConfig = (process.env.NODE_ENV !== 'production'
-  ? require('../webpack.dev.babel')
-  : require('../webpack.prod.babel'));
-
-console.log((process.env.NODE_ENV !== 'production'));
-
-app.use(frontend(webpackConfig));
-
-app.listen(serverConfig.port, (error) => {
-  if (!error) {
-    console.log(`running on port: ${serverConfig.port}`); // eslint-disable-line
-  }
+/**
+ * Create HTTP server and sockets.
+ */
+const reducer = combineReducers({
+  ...reducers
 });
 
+const server = http.createServer(app);
+const store = createStore(reducer);
+
+socketServer(server, store);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(config.port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}

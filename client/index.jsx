@@ -10,7 +10,10 @@ import { createStore, compose, applyMiddleware } from 'redux'
 import { Provider } from 'react-redux'
 import { Router, browserHistory } from 'react-router'
 import { syncHistoryWithStore, routerMiddleware, LOCATION_CHANGE } from 'react-router-redux'
+
 import thunk from 'redux-thunk';
+import socketMiddleware from './socket/socketMiddleware';
+import createClient from './socket/client';
 
 import * as reducers from './reducers'
 import routes from './routes';
@@ -49,9 +52,12 @@ const store = createStore(
   , compose(
     applyMiddleware(thunk),
     applyMiddleware(routerMiddleware(browserHistory)),
+    applyMiddleware(socketMiddleware(client)),
     DevTools.instrument()
   )
 );
+
+const client =
 
 const history = syncHistoryWithStore(browserHistory, store, {
   selectLocationState: (state) => {
