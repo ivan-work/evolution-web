@@ -20,7 +20,7 @@ export const Login = React.createClass({
   }
   , login: function (e) {
     e.preventDefault();
-    this.props.actions.loginUser(this.state.username, this.state.password, this.state.redirectTo);
+    this.props.actions.loginUserRequest(this.state.username, this.state.password, this.state.redirectTo);
   }
   , render: function () {
     const usernameLink = this.linkState('username');

@@ -1,6 +1,5 @@
 export * from './auth';
 
-export const clientAction = (action) => ({
-  type: action.type
-  , action: action
-});
+import {client as authClient} from './auth';
+
+export const clientActions = Object.assign({}, authClient);

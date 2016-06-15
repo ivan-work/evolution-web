@@ -1,1 +1,1 @@
-export {reducer as auth} from './auth';
+export {reducer as users} from './users';
