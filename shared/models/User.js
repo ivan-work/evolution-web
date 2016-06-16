@@ -1,14 +1,16 @@
 import {Record} from 'immutable';
 
 export class UserRecord extends Record({
-  id: null,
-  name: null
+  id: null
+  , login: null
+  , connectionId: null
 }) {
 }
 
-export function User(id, name) {
+export function User(id, login, connectionId) {
   return new UserRecord({
     id: id
-    , name: name
+    , login: login
+    , connectionId: connectionId
   });
 }

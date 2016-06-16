@@ -1,15 +1,22 @@
 import {push} from 'react-router-redux';
-import {User} from '../models/User';
+import {UserRecord} from '../models/User';
 
 export const socketConnect = (connectionId, socket) => ({
   type: 'socketConnect'
   , data: {connectionId, socket}
 });
 
-export const socketDisconnect = (connectionId) => ({
-  type: 'socketDisconnect'
-  , data: {connectionId}
-});
+export const socketDisconnect = (connectionId) => (dispatch, getState) => {
+  const usersState = getState().get('users');
+  let user = usersState.find((user) => user.connectionId == connectionId);
+  if (!!user) {
+    dispatch(logoutUser(user.id))
+  }
+  dispatch({
+    type: 'socketDisconnect'
+    , data: {connectionId}
+  })
+};
 
 export const loginUserRequest = (redirect = "/", login, password) => {
   return {
@@ -37,28 +44,41 @@ export const loginUserFailure = (connectionId, msg) => ({
   }
 });
 
+export const logoutUser = (userId) => ({
+  type: 'logoutUser'
+  , data: userId
+});
+
+let userIds = 0;
+
 export const authClientToServer = {
   loginUserRequest: (connectionId, data) => (dispatch, getState) => {
-    const username = data.login;
+    console.log('loginUserRequest', data);
+    console.log('loginUserRequest', data.login);
+    const login = data.login;
     const state = getState().get('users');
-    const userExists = state.find(user => user.name === username);
+    const userExists = state.find(user => user.login === login);
     if (!userExists) {
-      const user = User(connectionId, data.username);
-      return dispatch(loginUserSuccess(connectionId, user));
+      const user = new UserRecord({
+        id: userIds++
+        , login: login
+        , connectionId: connectionId
+      });
+      dispatch(loginUserSuccess(connectionId, user));
     } else {
-      return dispatch(loginUserFailure(connectionId, 'User already exists'));
+      dispatch(loginUserFailure(connectionId, 'User already exists'));
     }
   }
 };
 
 export const authServerToClient = {
-  loginUserSuccess: (data) => {
-    console.log('login user success')
-    push('/lobbies');
-    return {
+  loginUserSuccess: (user) => (dispatch) => {
+    console.log(authServerToClient, user);
+    dispatch({
       type: 'loginUserSuccess'
-      , data: data
-    }
+      , data: user
+    });
+    dispatch(push('/lobbies'));
   }
 };
 

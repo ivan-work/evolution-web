@@ -1,6 +1,5 @@
 var router = require('express').Router();
 var path = require('path');
-import prune from 'json-prune';
 
 module.exports = (app, passport) => {
 // Rest API

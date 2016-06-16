@@ -14,7 +14,7 @@ export function createReducer(initialState, reducerMap) {
     const reducer = reducerMap[action.type];
 
     return reducer
-      ? reducer(state, action.payload)
+      ? reducer(state, action.data)
       : state;
   };
 }
