@@ -28,6 +28,8 @@ const store = createStore(
     , applyMiddleware(socketMiddleware(socket))
   ));
 
+app.set('store', store);
+app.set('state', store.getState());
 socketStore(socket, store);
 
 /**
