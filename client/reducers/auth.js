@@ -1,12 +1,12 @@
 import {createReducer} from '~/shared/utils';
 //import {pushState} from 'redux-router';
 //import jwtDecode from 'jwt-decode';
-import {Map} from 'immutable';
+import {fromJS} from 'immutable';
 import {UserRecord} from '../../shared/models/User';
 
-const initialState = Map({
+const initialState = fromJS({
   token: null,
-  user: null,
+  user: JSON.parse(window.localStorage.getItem('user')),
   isAuthenticated: false,
   isAuthenticating: false,
   statusText: null
@@ -26,7 +26,7 @@ export const auth = createReducer(initialState, {
       'isAuthenticated': true,
       //'token': payload.token,
       //'userName': jwtDecode(payload.token).userName,
-      'user': new UserRecord(data),
+      'user': new UserRecord(data.user),
       'statusText': 'You have been successfully logged in.'
     }));
 

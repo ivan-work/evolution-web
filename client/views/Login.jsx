@@ -12,7 +12,7 @@ export const Login = React.createClass({
     return {
       login: '',
       password: '',
-      redirectTo: this.props.location.query.next || '/'
+      redirectTo: this.props.location.query.redirect || '/'
     };
   }
   , componentDidMount() {

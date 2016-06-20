@@ -70,7 +70,7 @@ ReactDOM.render(
   <Provider store={store}>
     <div>
       <Router history={history}>
-        {routes}
+        {routes(store.getState)}
       </Router>
       <DevTools />
     </div>

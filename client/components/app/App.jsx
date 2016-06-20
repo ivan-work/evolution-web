@@ -12,8 +12,8 @@ export class App extends React.Component {
     const {dispatch} = this.props;
     const {socket} = this.props;
     return (
-      <Layout>
-        <Header title="Title" scroll>
+      <Layout fixedHeader>
+        <Header title="Title">
           <Navigation>
             <a href="">Link</a>
             <a href="">Link</a>
