@@ -14,7 +14,6 @@ export const socketMiddleware = socket => store => next => action => {
   return next(action);
 };
 
-
 export const socketStore = (socket, store) => {
   socket.on('connect', (socket) => {
     //console.log('connected');
