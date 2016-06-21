@@ -29,7 +29,7 @@ const store = createStore(
   ));
 
 app.set('store', store);
-app.set('state', store.getState());
+
 socketStore(socket, store);
 
 /**

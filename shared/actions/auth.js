@@ -76,7 +76,7 @@ export const authClientToServer = {
       //console.log(connectionId, state.get('connections').toJS())
       if (state.get('connections').has(connectionId)) {
         const user = new UserRecord({
-          id: userIds++
+          id: "" + userIds++
           , login: login
           , connectionId: connectionId
         });

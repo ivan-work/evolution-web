@@ -1,7 +1,7 @@
 import {createReducer} from '~/shared/utils';
 //import {pushState} from 'redux-router';
 //import jwtDecode from 'jwt-decode';
-import {fromJS} from 'immutable';
+import {Map, fromJS} from 'immutable';
 import {UserRecord} from '../../shared/models/User';
 
 const initialState = fromJS({
@@ -12,7 +12,7 @@ const initialState = fromJS({
   statusText: null
 });
 
-export const auth = createReducer(initialState, {
+export const reducer = createReducer(initialState, {
   loginUserRequest: (state, payload) => {
     return state.merge(Map({
       'isAuthenticating': true,
@@ -20,7 +20,6 @@ export const auth = createReducer(initialState, {
     }));
   }
   , loginUserSuccess: (state, data) => {
-    console.log('loginUserSuccess', state, data);
     return state.merge(Map({
       'isAuthenticating': false,
       'isAuthenticated': true,
