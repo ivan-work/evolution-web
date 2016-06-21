@@ -5,14 +5,6 @@ const gutil = require('gulp-util');
 const tape = require('gulp-tape');
 const mocha = require('gulp-mocha');
 const watch = require('gulp-watch');
-const tapReporter = require('tap-spec');
-
-//const testWatch = (path) => gulp.src(['./shared/test-helper.js', path])
-//  .pipe(tape({
-//    reporter: tapReporter()
-//    , bail: true
-//  }))
-//  .on('error', () => console.error('error'));
 
 const testWatch = (paths) => gulp.src(paths)
   .pipe(mocha({
