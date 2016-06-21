@@ -75,11 +75,13 @@ export const authClientToServer = {
     if (!userExists) {
       //console.log(connectionId, state.get('connections').toJS())
       if (state.get('connections').has(connectionId)) {
+        console.log('new user record', userIds, login)
         const user = new UserRecord({
-          id: "" + userIds++
+          id: "" + userIds
           , login: login
           , connectionId: connectionId
         });
+        userIds++;
         dispatch(onlineJoin(user.toSecure()));
         dispatch(loginUserSuccess(connectionId, user, data.redirect));
         dispatch(onlineSet(connectionId));

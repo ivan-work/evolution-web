@@ -28,23 +28,5 @@ export const reducer = createReducer(initialState, {
       'user': new UserRecord(data.user),
       'statusText': 'You have been successfully logged in.'
     }));
-
   }
-  //[LOGIN_USER_FAILURE]: (state, payload) => {
-  //  return state.merge(Map({
-  //    'isAuthenticating': false,
-  //    'isAuthenticated': false,
-  //    'token': null,
-  //    'userName': null,
-  //    'statusText': `Authentication Error: ${payload.status} ${payload.statusText}`
-  //  }));
-  //},
-  //[LOGOUT_USER]: (state, payload) => {
-  //  return state.merge(Map({
-  //    'isAuthenticated': false,
-  //    'token': null,
-  //    'userName': null,
-  //    'statusText': 'You have been successfully logged out.'
-  //  }));
-  //}
 });
