@@ -32,5 +32,5 @@ gulp.task('test:server:watch', () => {
 gulp.task('test:all:watch', () => {
   const paths = ['./shared/test-helper.js', 'shared/**/*.spec.js', 'server/**/*.spec.js', 'client/**/*.spec.js'];
   testWatch(paths);
-  return watch('{shared,server,client}/**/*.js', () => testWatch(paths));
+  return watch('{shared,server,client}/**/*.js*(x)', () => testWatch(paths));
 });

@@ -5,9 +5,9 @@ import {LoginView, RoomsView} from '../views/index';
 //import {requireAuthentication} from '../components/AuthenticatedComponent';
 
 const MakeAuthCheck = (getState) => (nextState, replace) => {
-  console.log('replace', replace);
-  console.log('getState', getState().get('auth').toJS());
-  const userExists = getState().get('auth').get('user') != null;
+  //console.log('replace', replace);
+  //console.log('getState', getState().get('auth').toJS());
+  const userExists = getState().get('users').get('user') != null;
   if (!userExists) {
     replace('/login?redirect=/rooms')
   }

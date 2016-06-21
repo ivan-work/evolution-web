@@ -1,25 +1,24 @@
-import socketio from 'socket.io';
+import io from 'socket.io';
 import {ObjectID} from 'mongodb';
 import {socketConnect, socketDisconnect, clientToServer} from '../shared/actions/actions'
 
 let connectionIds = 0;
 
-export const socketServer = (server) => socketio(server);
+export const socketServer = (server) => io(server);
 
 export const socketStore = (serverSocket, store) => {
   serverSocket.on('connect', (socket) => {
-    let connectionId = connectionIds++;
-    store.dispatch(socketConnect(connectionId, socket));
+    store.dispatch(socketConnect(socket.id, socket));
 
-    socket.emit('connectionId', connectionId);
+    socket.emit('connectionId', socket.id);
 
-    socket.on('disconnect', (data) => {
-      store.dispatch(socketDisconnect(connectionId));
+    socket.on('disconnect', () => {
+      store.dispatch(socketDisconnect(socket.id));
     });
 
     socket.on('action', (action) => {
       if (clientToServer[action.type]) {
-        store.dispatch(clientToServer[action.type](connectionId, action.data));
+        store.dispatch(clientToServer[action.type](socket.id, action.data));
       } else {
         console.warn('Client action doesnt exist: ' + action.type);
       }
@@ -27,11 +26,16 @@ export const socketStore = (serverSocket, store) => {
   });
 };
 
-export const socketMiddleware = socket => store => next => action => {
+export const socketMiddleware = io => store => next => action => {
   const state = store.getState().get('connections');
-  if (action.meta && action.meta.connectionId && state.has(action.meta.connectionId)) {
-    const clientSocket = state.get(action.meta.connectionId);
-    clientSocket.emit('action', action);
+  if (action.meta) {
+    if (action.meta.connectionId && state.has(action.meta.connectionId)) {
+      const clientSocket = state.get(action.meta.connectionId);
+      clientSocket.emit('action', action);
+    }
+    if (action.meta.clients) {
+      io.sockets.emit('action', action);
+    }
   }
   return next(action);
 };
