@@ -1,4 +1,5 @@
 import {push} from 'react-router-redux';
+import {List} from 'immutable';
 import {UserRecord} from '../models/User';
 
 export const socketConnect = (connectionId, socket) => ({
@@ -51,7 +52,7 @@ export const logoutUser = (userId) => ({
 });
 
 export const onlineSet = (connectionId) => (dispatch, getState) => {
-  const users = getState().get('users').toList().map(u => u.toSecure()).toJS();
+  const users = getState().get('users').toArray().map(u => u.toSecure());
   dispatch({
     type: 'onlineSet'
     , data: {users}
@@ -116,11 +117,11 @@ export const authServerToClient = {
   })
   , onlineSet: (data) => ({
     type: 'onlineSet'
-    , data: {users: data.users}
+    , data: {users: List(data.users.map(u => new UserRecord(u)))}
   })
   , onlineJoin: (data) => ({
     type: 'onlineJoin'
-    , data: {user: data.user}
+    , data: {user: new UserRecord(data.user)}
   })
 };
 

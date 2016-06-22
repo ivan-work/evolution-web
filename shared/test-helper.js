@@ -88,7 +88,7 @@ const testClientSocketMiddleware = (serverStore, connectionId) => store => next 
   next(action);
   if (action.meta && action.meta.server) {
     if (actions.clientToServer[action.type]) {
-      serverStore.dispatch(actions.clientToServer[action.type](connectionId, action.data));
+      serverStore.dispatch(actions.clientToServer[action.type](connectionId, JSON.parse(JSON.stringify(action.data))));
     } else {
       throw new Error(`actions.clientToServer[${action.type}] doesn't exist!`);
     }
@@ -108,7 +108,7 @@ const testServerSocketMiddleware = store => next => action => {
       if (actions.serverToClient[action.type]) {
         store.getState().get('connections').map(c => {
           if (typeof c === 'function') {
-            c().dispatch(actions.serverToClient[action.type](action.data))
+            c().dispatch(actions.serverToClient[action.type](JSON.parse(JSON.stringify(action.data))))
           }
         });
       } else {
