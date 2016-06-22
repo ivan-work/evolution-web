@@ -10,8 +10,8 @@ const testWatch = (paths) => gulp.src(paths)
   .pipe(mocha({
     bail: true
   }))
-  .on('error', () => console.error('error'));
-  //.on('error', (error) => console.error(error));
+  //.on('error', () => console.error('error'));
+  .on('error', (error) => console.error(error));
 
 gulp.task('test:server', () => {
   const paths = ['./shared/test-helper.js', 'shared/**/*.spec.js', 'server/**/*.spec.js'];

@@ -20,7 +20,7 @@ import 'react-mdl/extra/material.min.css'
 import 'react-mdl/extra/material.min.js'
 import './styles/style.scss';
 
-import {socket, socketStore, socketMiddleware} from './socket';
+import {makeSocketClient, socketStore, socketMiddleware} from './socket';
 
 const routerReducerState = Map({
   locationBeforeTransitions: null
@@ -46,18 +46,20 @@ const DevTools = createDevTools(
   </DockMonitor>
 );
 
+const socketClient = makeSocketClient(location.host);
+
 const store = createStore(
   reducer
   , Map()
   , compose(
     applyMiddleware(thunk)
     , applyMiddleware(routerMiddleware(browserHistory))
-    , applyMiddleware(socketMiddleware(socket))
+    , applyMiddleware(socketMiddleware(socketClient))
     , DevTools.instrument()
   )
 );
 
-socketStore(socket, store);
+socketStore(socketClient, store);
 
 const history = syncHistoryWithStore(browserHistory, store, {
   selectLocationState: (state) => {
