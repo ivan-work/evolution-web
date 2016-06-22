@@ -28,13 +28,13 @@ import * as actions from './actions/actions';
 const clientReducers = require('../client/reducers/index');
 const serverReducers = require('../server/reducers/index');
 
-const makeIoServer = require('socket.io');
-import {makeSocketClient, socketStore as socketClientStore, socketMiddleware as socketClientMiddleware} from '../client/socket';
-import {socketServer, socketStore as socketServerStore, socketMiddleware as socketServerMiddleware} from '../server/socket';
+import syncSocketIOServer from './test/sync-socket-io'
+import syncSocketIOClient from './test/sync-socket-io-client'
+import {socketStore as socketClientStore, socketMiddleware as socketClientMiddleware} from '../client/socket';
+import {socketStore as socketServerStore, socketMiddleware as socketServerMiddleware} from '../server/socket';
 
 global.mockServerStore = function (initialServerState) {
-  const ioServer = makeIoServer.listen(TEST_PORT);
-  console.log('ioServer', ioServer.connected);
+  const ioServer = syncSocketIOServer();
   const serverStore = createStore(
     combineReducers({...serverReducers})
     , initialServerState
@@ -53,65 +53,25 @@ global.mockServerStore = function (initialServerState) {
   serverStore.end = () => {
     ioServer.close();
   };
+
+  serverStore.spawnClient = function (initialClientState) {
+    const ioClient = syncSocketIOClient(ioServer);
+    const clientStore = createStore(
+      combineReducers({...clientReducers})
+      , initialClientState
+      , compose(
+        applyMiddleware(thunk)
+        , applyMiddleware(store => next => action => {
+          clientStore.actions.push(action);
+          next(action);
+        })
+        , applyMiddleware(socketClientMiddleware(ioClient))
+      ));
+    socketClientStore(ioClient, clientStore);
+    clientStore.actions = [];
+    clientStore.getActions = () => clientStore.actions;
+    clientStore.clearActions = () => clientStore.actions = [];
+    return clientStore
+  };
   return serverStore
 };
-
-global.mockClientStore = function (initialClientState) {
-  const ioClient = makeSocketClient(TEST_URL, {
-    //'reconnection delay' : 0
-    //, 'reopen delay' : 0
-    //, 'force new connection' : true
-  });
-  console.log('ioClient', ioClient.connected);
-  const clientStore = createStore(
-    combineReducers({...clientReducers})
-    , initialClientState
-    , compose(
-      applyMiddleware(thunk)
-      , applyMiddleware(store => next => action => {
-        clientStore.actions.push(action);
-        next(action);
-      })
-      , applyMiddleware(socketClientMiddleware(ioClient))
-    ));
-  socketClientStore(ioClient, clientStore);
-  clientStore.actions = [];
-  clientStore.getActions = () => clientStore.actions;
-  clientStore.clearActions = () => clientStore.actions = [];
-  return clientStore
-};
-
-//const testClientSocketMiddleware = (serverStore, connectionId) => store => next => action => {
-//  next(action);
-//  if (action.meta && action.meta.server) {
-//    if (actions.clientToServer[action.type]) {
-//      serverStore.dispatch(actions.clientToServer[action.type](connectionId, JSON.parse(JSON.stringify(action.data))));
-//    } else {
-//      throw new Error(`actions.clientToServer[${action.type}] doesn't exist!`);
-//    }
-//  }
-//};
-//
-//const testServerSocketMiddleware = store => next => action => {
-//  if (action.meta) {
-//    if (action.meta.connectionId) {
-//      if (actions.serverToClient[action.type]) {
-//        store.getState().get('connections').get(action.meta.connectionId)().dispatch(actions.serverToClient[action.type](action.data));
-//      } else {
-//        throw new Error(`actions.serverToClient[${action.type}] doesn't exist!`);
-//      }
-//    }
-//    if (action.meta.clients) {
-//      if (actions.serverToClient[action.type]) {
-//        store.getState().get('connections').map(c => {
-//          if (typeof c === 'function') {
-//            c().dispatch(actions.serverToClient[action.type](JSON.parse(JSON.stringify(action.data))))
-//          }
-//        });
-//      } else {
-//        throw new Error(`actions.serverToClient[${action.type}] doesn't exist!`);
-//      }
-//    }
-//  }
-//  next(action);
-//};
