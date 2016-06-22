@@ -1,21 +1,24 @@
 import chai from 'chai';
 import chaiImmutable from 'chai-immutable';
+import jsdom from 'jsdom';
 
 chai.use(chaiImmutable);
 
 global.expect = chai.expect;
 
-global.window = {
-  localStorage: storageMock()
-};
+global.document = jsdom.jsdom('<!doctype html><html><body></body></html>');
+global.window = document.defaultView;
+global.window.localStorage = storageMock();
 
-global.addSocketId = (connectionId, action) => {
-  action.meta.TEST_SOCKET_ID = connectionId;
-  return action;
-};
+Object.keys(window).forEach((key) => {
+  if (!(key in global)) {
+    global[key] = window[key];
+  }
+});
 
 function storageMock() {
   var storage = {};
+
 
   return {
     setItem: function (key, value) {
@@ -37,7 +40,6 @@ function storageMock() {
   };
 }
 
-import configureStore from './redux-mock-store';
 import { createStore, compose, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk';
 import { combineReducers } from 'redux-immutable';
