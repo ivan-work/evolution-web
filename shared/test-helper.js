@@ -16,6 +16,19 @@ global.expect = chai.expect;
 //  }
 //});
 
+Array.prototype.remove = function (argument) {
+  const removeFn = (typeof argument === 'function'
+    ? argument
+    : (item) => item === argument);
+  for (var i = 0; i < this.length; i++) {
+    if (removeFn(this[i])) {
+      this.splice(i, 1);
+      break;
+    }
+  }
+  return this;
+};
+
 process.env.DEBUG = '*';
 
 const TEST_PORT = 5000;
@@ -68,6 +81,10 @@ global.mockServerStore = function (initialServerState) {
         , applyMiddleware(socketClientMiddleware(ioClient))
       ));
     socketClientStore(ioClient, clientStore);
+    clientStore.getConnection = () => ({
+      connectionId: ioClient.id
+      , socket: ioClient
+    });
     clientStore.actions = [];
     clientStore.getActions = () => clientStore.actions;
     clientStore.clearActions = () => clientStore.actions = [];
