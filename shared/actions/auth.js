@@ -10,13 +10,13 @@ export const socketConnect = (connectionId, socket) => ({
 export const socketDisconnect = (connectionId) => (dispatch, getState) => {
   const usersState = getState().get('users');
   let user = usersState.find((user) => user.connectionId == connectionId);
-  if (!!user) {
-    dispatch(logoutUser(user.id))
-  }
   dispatch({
     type: 'socketDisconnect'
     , data: {connectionId}
-  })
+  });
+  if (!!user) {
+    dispatch(logoutUser(user.id))
+  }
 };
 
 export const loginUserRequest = (redirect, login, password) => {
@@ -76,7 +76,7 @@ export const authClientToServer = {
     if (!userExists) {
       //console.log(connectionId, state.get('connections').toJS())
       if (state.get('connections').has(connectionId)) {
-        console.log('new user record', userIds, login)
+        //console.log('new user record', userIds, login)
         const user = new UserRecord({
           id: "" + userIds
           , login: login
@@ -90,6 +90,7 @@ export const authClientToServer = {
         dispatch(loginUserFailure(connectionId, 'Connection is missing'));
       }
     } else {
+      console.log('User already exists:', login);
       dispatch(loginUserFailure(connectionId, 'User already exists'));
     }
   }

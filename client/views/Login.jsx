@@ -15,9 +15,6 @@ export const Login = React.createClass({
       redirectTo: this.props.location.query.redirect || '/'
     };
   }
-  , componentDidMount() {
-    console.log(this.props)
-  }
   , login: function (e) {
     e.preventDefault();
     this.props.actions.loginUserRequest(this.state.redirectTo, this.state.login, this.state.password);

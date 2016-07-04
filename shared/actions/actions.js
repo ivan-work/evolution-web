@@ -2,10 +2,10 @@ export * from './auth';
 
 import {authClientToServer} from './auth';
 import {authServerToClient} from './auth';
-
 export const clientToServer = Object.assign({}
-  , authClientToServer);
+  , authClientToServer
+);
 
 export const serverToClient = Object.assign({}
-  , authServerToClient);
-
+  , authServerToClient
+);

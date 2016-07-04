@@ -1,53 +1,53 @@
 import EventEmitter from 'events';
 
-class SyncSocketIORoom extends EventEmitter {
-  constructor(server, namespace) {
+class SyncSocketIO extends EventEmitter {
+  constructor(server, namespace = '/') {
     super();
-    this.server = server;
-    this.namespace = namespace;
-    this.clients = [];
-    this.fromClient = super.emit;
-    this.on('connect', (client) => {
-      //console.log(`room (${this.namespace}): client ${client.id} connected, ${this.clients.indexOf(client)}`);
-      if (!~this.clients.indexOf(client)) this.clients.push(client);
-      //console.log(`room (${this.namespace}:${this.clients.map(c => c.id).join(',')}:${this.clients.length})`);
+    this.rooms = {'/': this};
+    this.server = server || this;
+    this.namespace = normalizeNamespace(namespace);
+    this.sockets = [];
+
+    this.on('connect', (socket) => {
+      //console.log(`room (${this.namespace}): client ${client.id} connected, ${this.sockets.indexOf(client)}`);
+      if (!~this.sockets.indexOf(socket)) {
+        this.sockets.push(socket);
+      }
+      //console.log(`room (${this.namespace}:${this.sockets.map(c => c.id).join(',')}:${this.sockets.length})`);
     });
-    this.on('disconnect', (client) => {
-      //console.log(`room (${this.namespace}): client ${client.id} disconnect, ${this.clients.indexOf(client)}`);
-      //console.log(`room (${this.namespace}:${this.clients.map(c => c.id).join(',')}:${this.clients.length})`);
-      this.clients = this.clients.remove(client);
-      //console.log(`room (${this.namespace}:${this.clients.map(c => c.id).join(',')}:${this.clients.length})`);
+    this.on('disconnect', (socket) => {
+      //console.log(`room (${this.namespace}): client ${client.id} disconnect, ${this.sockets.indexOf(socket)}`);
+      //console.log(`room (${this.namespace}:${this.sockets.map(c => c.id).join(',')}:${this.sockets.length})`);
+      this.sockets = this.sockets.remove(socket);
+      //console.log(`room (${this.namespace}:${this.sockets.map(c => c.id).join(',')}:${this.sockets.length})`);
     });
+  }
+
+  emitSelf(...args) {
+    //console.log(`Room (${this.namespace}): Emitting to self`, args[0]);
+    super.emit(...args);
+    return this;
   }
 
   emit(...data) {
-    this.clients.forEach(client => {
-      client.fromServer(...data);
+    this.sockets.forEach(socket => {
+      socket.emit(...data);
     })
-  }
-}
-
-class SyncSocketIO extends SyncSocketIORoom {
-  constructor() {
-    super();
-    this.namespace = '$root';
-    this.server = this;
-    this.rooms = {};
   }
 
   of(namespace, onConnect) {
     namespace = normalizeNamespace(namespace);
-    if (!this.rooms[namespace])  {
-      this.rooms[namespace] = new SyncSocketIORoom(this.server, namespace);
+    if (!this.server.rooms[namespace]) {
+      this.server.rooms[namespace] = new SyncSocketIO(this.server, namespace);
     }
 
-    if (onConnect) this.rooms[namespace].on('connect', onConnect);
+    if (onConnect) this.server.rooms[namespace].on('connect', onConnect);
 
-    return this.rooms[namespace];
+    return this.server.rooms[namespace];
   }
 }
 
-export default (...args) => new SyncSocketIO(...args);
+export default (...args) => new SyncSocketIO(null);
 
 export const SyncSocketServer = SyncSocketIO;
 

@@ -1,20 +1,20 @@
 import chai from 'chai';
 import chaiImmutable from 'chai-immutable';
-//import jsdom from 'jsdom';
+import jsdom from 'jsdom';
 
 chai.use(chaiImmutable);
 
 global.expect = chai.expect;
 
-//global.document = jsdom.jsdom('<!doctype html><html><body></body></html>');
-//global.window = document.defaultView;
-//global.window.localStorage = require('./test/setup-local-storage-mock').default;
+global.document = jsdom.jsdom('<!doctype html><html><body></body></html>');
+global.window = document.defaultView;
+global.window.localStorage = require('./test/setup-local-storage-mock').default();
 
-//Object.keys(window).forEach((key) => {
-//  if (!(key in global)) {
-//    global[key] = window[key];
-//  }
-//});
+Object.keys(window).forEach((key) => {
+  if (!(key in global)) {
+    global[key] = window[key];
+  }
+});
 
 Array.prototype.remove = function (argument) {
   const removeFn = (typeof argument === 'function'
@@ -59,36 +59,48 @@ global.mockServerStore = function (initialServerState) {
       })
       , applyMiddleware(socketServerMiddleware(ioServer))
     ));
+
   socketServerStore(ioServer, serverStore);
+
+  serverStore.getSocket = () => ioServer;
+
   serverStore.actions = [];
   serverStore.getActions = () => serverStore.actions;
   serverStore.clearActions = () => serverStore.actions = [];
-  serverStore.end = () => {
-    ioServer.close();
+  return serverStore
+};
+
+global.mockClientStore = function (initialClientState) {
+  const ioClient = syncSocketIOClient();
+  const clientStore = createStore(
+    combineReducers({...clientReducers})
+    , initialClientState
+    , compose(
+      applyMiddleware(thunk)
+      , applyMiddleware(store => next => action => {
+        clientStore.actions.push(action);
+        next(action);
+      })
+      , applyMiddleware(socketClientMiddleware(ioClient))
+    ));
+  socketClientStore(ioClient, clientStore);
+
+  clientStore.getClient = () => ioClient;
+  clientStore.getSocket = () => ioClient.socket;
+  clientStore.getConnectionId = () => ioClient.id;
+
+  clientStore.getConnection = () => ({
+    connectionId: clientStore.getConnectionId()
+    , socket: clientStore.getSocket()
+  });
+
+  clientStore.connect = (serverStore) => {
+    ioClient.connect(serverStore.getSocket());
+    return clientStore;
   };
 
-  serverStore.spawnClient = function (initialClientState) {
-    const ioClient = syncSocketIOClient(ioServer);
-    const clientStore = createStore(
-      combineReducers({...clientReducers})
-      , initialClientState
-      , compose(
-        applyMiddleware(thunk)
-        , applyMiddleware(store => next => action => {
-          clientStore.actions.push(action);
-          next(action);
-        })
-        , applyMiddleware(socketClientMiddleware(ioClient))
-      ));
-    socketClientStore(ioClient, clientStore);
-    clientStore.getConnection = () => ({
-      connectionId: ioClient.id
-      , socket: ioClient
-    });
-    clientStore.actions = [];
-    clientStore.getActions = () => clientStore.actions;
-    clientStore.clearActions = () => clientStore.actions = [];
-    return clientStore
-  };
-  return serverStore
+  clientStore.actions = [];
+  clientStore.getActions = () => clientStore.actions;
+  clientStore.clearActions = () => clientStore.actions = [];
+  return clientStore
 };
