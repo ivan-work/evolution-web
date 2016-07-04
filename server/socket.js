@@ -2,8 +2,6 @@ import io from 'socket.io';
 import {ObjectID} from 'mongodb';
 import {socketConnect, socketDisconnect, clientToServer} from '../shared/actions/actions'
 
-let connectionIds = 0;
-
 export const socketServer = (server, options) => io(server, {
 });
 
