@@ -66,8 +66,6 @@ export const onlineJoin = (user) => ({
   , meta: {clients: true}
 });
 
-let userIds = 0;
-
 export const authClientToServer = {
   loginUserRequest: (connectionId, data) => (dispatch, getState) => {
     const login = data.login;
@@ -78,11 +76,10 @@ export const authClientToServer = {
       if (state.get('connections').has(connectionId)) {
         //console.log('new user record', userIds, login)
         const user = new UserRecord({
-          id: "" + userIds
+          id: "" + connectionId
           , login: login
           , connectionId: connectionId
         });
-        userIds++;
         dispatch(onlineJoin(user.toSecure()));
         dispatch(loginUserSuccess(connectionId, user, data.redirect));
         dispatch(onlineSet(connectionId));

@@ -39,7 +39,7 @@ describe('Auth testing', function () {
     it('valid Connection, single User', () => {
       const serverStore = mockServerStore();
       const clientStore = mockClientStore().connect(serverStore);
-      const User0 = new UserRecord({id: '0', login: 'testLogin', connectionId: clientStore.getConnectionId()});
+      const User0 = new UserRecord({id: clientStore.getConnectionId(), login: 'testLogin', connectionId: clientStore.getConnectionId()});
       serverStore.clearActions();
 
       clientStore.dispatch(loginUserRequest('/test', User0.login, 'testPassword'));
@@ -101,7 +101,7 @@ describe('Auth testing', function () {
 
       expect(serverStore.getState()).equal(fromJS({
         connections: {[clientStore.getConnectionId()]: clientStore.getConnection().socket}
-        , users: {'0': User0}
+        , users: {[clientStore.getConnectionId()]: User0}
       }));
 
       expect(clientStore.getState().get('users')).equal(fromJS({
@@ -118,8 +118,8 @@ describe('Auth testing', function () {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
       const clientStore1 = mockClientStore().connect(serverStore);
-      const User0 = new UserRecord({id: '1', login: 'User0', connectionId: clientStore0.getConnectionId()});
-      const User1 = new UserRecord({id: '2', login: 'User1', connectionId: clientStore1.getConnectionId()});
+      const User0 = new UserRecord({id: clientStore0.getConnectionId(), login: 'User0', connectionId: clientStore0.getConnectionId()});
+      const User1 = new UserRecord({id: clientStore1.getConnectionId(), login: 'User1', connectionId: clientStore1.getConnectionId()});
       serverStore.clearActions();
 
       clientStore0.dispatch(loginUserRequest('/test', User0.login, 'testPassword'));
@@ -129,7 +129,7 @@ describe('Auth testing', function () {
           [clientStore0.getConnectionId()]: clientStore0.getConnection().socket
           , [clientStore1.getConnectionId()]: clientStore1.getConnection().socket
         }
-        , users: {'1': User0}
+        , users: {[clientStore0.getConnectionId()]: User0}
       }));
 
       expect(clientStore0.getState().get('users'), 'clientStore0.getState(users)').equal(fromJS({
@@ -190,7 +190,7 @@ describe('Auth testing', function () {
       expect(serverStore.getState().get('users')).equal(Map());
 
       expect(serverStore.getActions()[0]).eql({type: 'socketDisconnect', data: {connectionId: clientStore0.getConnectionId()}});
-      expect(serverStore.getActions()[1]).eql({type: 'logoutUser', data: '3', meta: {clients: true}});
+      expect(serverStore.getActions()[1]).eql({type: 'logoutUser', data: clientStore0.getConnectionId(), meta: {clients: true}});
       expect(serverStore.getActions()[2]).eql({type: 'socketDisconnect', data: {connectionId: clientStore1.getConnectionId()}});
     })
   });
