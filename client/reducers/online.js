@@ -1,9 +1,9 @@
 import {createReducer} from '~/shared/utils';
 import {List, Map, fromJS} from 'immutable';
-import {UserRecord} from '~/shared/models/User';
+import {UserModel} from '~/shared/models/UserModel';
 
 export const reducer = createReducer(List(), {
-  onlineSet: (state, data) => data.users
-  , onlineJoin: (state, data) => state.push(Map(data.user))
+  onlineSet: (state, data) => data.users.map(u => new UserModel(u))
+  , onlineJoin: (state, data) => state.push(new UserModel(data.user))
   , logoutUser: (state, data) => state.remove(state.findIndex(u => u.id == data))
 });

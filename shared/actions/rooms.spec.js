@@ -1,34 +1,59 @@
 import {Map, List, fromJS} from 'immutable';
-import {UserRecord} from '../models/User';
+import {RoomModel} from '../models/RoomModel';
 import {loginUserRequest, roomCreateRequest} from '../actions/actions';
 
 describe('Rooms:', function () {
   describe('Create:', function () {
-    it('success', () => {
+    it('Simple Success:', () => {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
-      const clientStore1 = mockClientStore().connect(serverStore);
-      clientStore0.dispatch(loginUserRequest('/test', 'testLogin', 'testPassword'));
+      const User0ID = clientStore0.getConnectionId();
+      clientStore0.dispatch(loginUserRequest('/test', 'User0', 'testPassword'));
       serverStore.clearActions();
 
-      clientStore1.dispatch(loginUserRequest('/test', 'testLogin', 'testPassword'));
+      clientStore0.dispatch(roomCreateRequest());
 
-      expect(serverStore.getState().get('connections')).equal(Map());
-      expect(serverStore.getState().get('users')).equal(Map());
+      const Room = serverStore.getActions()[0].data.room;
 
       expect(serverStore.getActions()[0]).eql({
-        type: 'socketDisconnect',
-        data: {connectionId: clientStore0.getConnectionId()}
+        type: 'roomCreateSuccess'
+        , data: {room: Room}
+        , meta: {clients: true}
       });
-      expect(serverStore.getActions()[1]).eql({
-        type: 'logoutUser',
-        data: clientStore0.getConnectionId(),
-        meta: {clients: true}
-      });
-      expect(serverStore.getActions()[2]).eql({
-        type: 'socketDisconnect',
-        data: {connectionId: clientStore1.getConnectionId()}
-      });
+
+      console.log(serverStore.getState().get('rooms').toJS());
+
+      expect(serverStore.getState().get('rooms')).equal(Map({
+        [Room.id]: new RoomModel({
+          id: Room.id
+          , name: "Room " + Room.id
+          , maxSize: 4
+          //, users: List([User0ID])
+        })
+      }));
+
+      //expect(clientStore0.getActions()[0]).equal({
+      //  type: roomCreateRequest
+      //  , data: {}
+      //  , meta: {server: true, userID:}
+      //});
+
+      //expect(serverStore.getState().get('rooms')).equal(Map(new Room()));
+      //expect(serverStore.getState().get('users')).equal(Map());
+
+      //expect(serverStore.getActions()[0]).eql({
+      //  type: 'socketDisconnect',
+      //  data: {connectionId: clientStore0.getConnectionId()}
+      //});
+      //expect(serverStore.getActions()[1]).eql({
+      //  type: 'logoutUser',
+      //  data: clientStore0.getConnectionId(),
+      //  meta: {clients: true}
+      //});
+      //expect(serverStore.getActions()[2]).eql({
+      //  type: 'socketDisconnect',
+      //  data: {connectionId: clientStore1.getConnectionId()}
+      //});
     });
   });
 });

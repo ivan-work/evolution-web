@@ -6,7 +6,6 @@ import {
   Simulate
 } from 'react-addons-test-utils';
 import {List, Map} from 'immutable';
-import {UserRecord} from '~/shared/models/User';
 import {UsersList} from './UsersList.jsx';
 
 

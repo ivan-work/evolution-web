@@ -8,7 +8,7 @@ const webpack = require('webpack');
 module.exports = (options) => ({
   entry: options.entry,
   output: Object.assign({ // Compile into js/build.js
-    path: path.resolve(process.cwd(), 'build'),
+    path: path.resolve(process.cwd(), 'dist'),
     publicPath: 'http://localhost:8080/',
   }, options.output), // Merge with env dependent settings
   module: {
@@ -58,6 +58,7 @@ module.exports = (options) => ({
     new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
+        APP_ENV: JSON.stringify('browser')
       },
     }),
   ]),

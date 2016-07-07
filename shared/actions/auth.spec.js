@@ -1,6 +1,16 @@
 import {Map, List, fromJS} from 'immutable';
-import {UserRecord} from '../models/User';
+import {UserModel} from '../models/UserModel';
 import {authServerToClient, authClientToServer, socketConnect, socketDisconnect, loginUserRequest, loginUserSuccess, loginUserFailure} from './auth';
+
+//console.log('-----');
+//console.log('clientStore:');
+//console.log(clientStore.getState().toJS());
+//console.log(clientStore.getActions());
+//
+//console.log('-----');
+//console.log('serverStore:');
+//console.log(serverStore.getState().toJS());
+//console.log(serverStore.getActions());
 
 describe('Auth testing', function () {
   it('socketConnect', () => {
@@ -10,10 +20,8 @@ describe('Auth testing', function () {
       type: 'socketConnect',
       data: clientStore.getConnection()
     }]);
-    expect(serverStore.getState(), 'serverStore.getState()').equal(fromJS({
-      connections: {[clientStore.getConnectionId()]: clientStore.getSocket()},
-      users: {}
-    }));
+    expect(serverStore.getState().get('connections')).equal(Map({[clientStore.getConnectionId()]: clientStore.getSocket()}));
+    expect(serverStore.getState().get('users')).equal(Map());
   });
 
   it('socketDisconnect', () => {
@@ -29,31 +37,23 @@ describe('Auth testing', function () {
       {type: 'socketDisconnect', data: {connectionId: clientStore.getConnectionId()}}
     ]);
 
-    expect(serverStore.getState()).equal(fromJS({
-      connections: {}
-      , users: {}
-    }));
+    expect(serverStore.getState().get('connections')).equal(Map());
+    expect(serverStore.getState().get('users')).equal(Map());
   });
 
   describe('loginUserRequest', () => {
     it('valid Connection, single User', () => {
       const serverStore = mockServerStore();
       const clientStore = mockClientStore().connect(serverStore);
-      const User0 = new UserRecord({id: clientStore.getConnectionId(), login: 'testLogin', connectionId: clientStore.getConnectionId()});
+      const User0 = new UserModel({id: clientStore.getConnectionId(), login: 'testLogin', connectionId: clientStore.getConnectionId()})
+        .sign();
       serverStore.clearActions();
 
       clientStore.dispatch(loginUserRequest('/test', User0.login, 'testPassword'));
 
-      //console.log('-----');
-      //console.log('clientStore:');
-      //console.log(clientStore.getState().toJS());
-      //console.log(clientStore.getActions());
-      //
-      //console.log('-----');
-      //console.log('serverStore:');
-      //console.log(serverStore.getState().toJS());
-      //console.log(serverStore.getActions());
-
+      /*
+      * Client Actions
+      * */
       expect(clientStore.getActions()[0], 'clientStore.getActions()[0]').eql({
         type: 'loginUserRequest',
         data: {
@@ -64,7 +64,7 @@ describe('Auth testing', function () {
         meta: {server: true}
       });
       expect(clientStore.getActions()[1], 'clientStore.getActions()[1]').eql({
-        type: 'onlineJoin', data: {user: User0.toSecure()}
+        type: 'onlineJoin', data: {user: User0.toOthers()}
       });
       expect(clientStore.getActions()[2], 'clientStore.getActions()[2]').eql({
         type: 'loginUserSuccess',
@@ -75,14 +75,17 @@ describe('Auth testing', function () {
         payload: {method: 'push', args: ['/test']}
       });
       expect(clientStore.getActions()[4], 'clientStore.getActions()[4]').eql({
-        type: 'onlineSet', data: {users: List.of(User0.toSecure())}
+        type: 'onlineSet', data: {users: List.of(User0.toOthers())}
       });
       expect(clientStore.getActions()[5]).undefined;
 
+      /*
+       * Server Actions
+       * */
       expect(serverStore.getActions().length, 'serverStore.getActions().length').equal(3);
       expect(serverStore.getActions()[0], 'serverStore.getActions()[0]').eql({
         type: 'onlineJoin',
-        data: {user: User0.toSecure()},
+        data: {user: User0.toOthers()},
         meta: {clients: true}
       });
       expect(serverStore.getActions()[1], 'serverStore.getActions()[1]').eql({
@@ -91,56 +94,57 @@ describe('Auth testing', function () {
           user: User0,
           redirect: '/test'
         },
-        meta: {connectionId: clientStore.getConnectionId()}
+        meta: {clients: [clientStore.getConnectionId()]}
       });
       expect(serverStore.getActions()[2], 'serverStore.getActions()[2]').eql({
         type: 'onlineSet',
-        data: {users: [User0.toSecure()]},
-        meta: {connectionId: clientStore.getConnectionId()}
+        data: {users: [User0.toOthers()]},
+        meta: {clients: [clientStore.getConnectionId()]}
       });
 
-      expect(serverStore.getState()).equal(fromJS({
-        connections: {[clientStore.getConnectionId()]: clientStore.getConnection().socket}
-        , users: {[clientStore.getConnectionId()]: User0}
-      }));
-
+      /*
+       * States
+       * */
       expect(clientStore.getState().get('users')).equal(fromJS({
         token: null,
-        user: User0.toSecure(),
+        user: User0,
         isAuthenticated: true,
         isAuthenticating: false,
         statusText: 'You have been successfully logged in.'
       }));
-      expect(clientStore.getState().get('online')).equal(List([User0.toSecure()]));
+      expect(clientStore.getState().get('online')).equal(List([User0.toOthers()]));
+
+      expect(serverStore.getState().get('connections')).equal(Map({[clientStore.getConnectionId()]: clientStore.getConnection().socket}));
+      expect(serverStore.getState().get('users')).equal(Map({[clientStore.getConnectionId()]: User0}));
     });
 
     it('valid Connection, two Users', () => {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
       const clientStore1 = mockClientStore().connect(serverStore);
-      const User0 = new UserRecord({id: clientStore0.getConnectionId(), login: 'User0', connectionId: clientStore0.getConnectionId()});
-      const User1 = new UserRecord({id: clientStore1.getConnectionId(), login: 'User1', connectionId: clientStore1.getConnectionId()});
+      const User0 = new UserModel({id: clientStore0.getConnectionId(), login: 'User0', connectionId: clientStore0.getConnectionId()})
+        .sign();
+      const User1 = new UserModel({id: clientStore1.getConnectionId(), login: 'User1', connectionId: clientStore1.getConnectionId()})
+        .sign();
       serverStore.clearActions();
 
       clientStore0.dispatch(loginUserRequest('/test', User0.login, 'testPassword'));
 
-      expect(serverStore.getState(), 'serverStore.getState()').equal(fromJS({
-        connections: {
-          [clientStore0.getConnectionId()]: clientStore0.getConnection().socket
-          , [clientStore1.getConnectionId()]: clientStore1.getConnection().socket
-        }
-        , users: {[clientStore0.getConnectionId()]: User0}
+      expect(serverStore.getState().get('connections')).equal(Map({
+        [clientStore0.getConnectionId()]: clientStore0.getConnection().socket
+        , [clientStore1.getConnectionId()]: clientStore1.getConnection().socket
       }));
+      expect(serverStore.getState().get('users')).equal(Map({[clientStore0.getConnectionId()]: User0}));
 
       expect(clientStore0.getState().get('users'), 'clientStore0.getState(users)').equal(fromJS({
         token: null,
-        user: User0.toSecure(),
+        user: User0,
         isAuthenticated: true,
         isAuthenticating: false,
         statusText: 'You have been successfully logged in.'
       }));
       expect(clientStore0.getState().get('online'), 'clientStore0.getState(online)')
-        .equal(List([User0.toSecure()]));
+        .equal(List([User0.toOthers()]));
 
       expect(clientStore1.getState().get('users'), 'clientStore1.getState(users)').equal(fromJS({
         token: null,
@@ -150,29 +154,29 @@ describe('Auth testing', function () {
         statusText: null
       }));
       expect(clientStore1.getState().get('online'), 'clientStore1.getState(online)')
-        .equal(List([User0.toSecure()]));
+        .equal(List([User0.toOthers()]));
 
       clientStore1.dispatch(loginUserRequest('/test', User1.login, 'testPassword'));
 
       expect(clientStore0.getState().get('users'), 'clientStore0.getState(users)').equal(fromJS({
         token: null,
-        user: User0.toSecure(),
+        user: User0,
         isAuthenticated: true,
         isAuthenticating: false,
         statusText: 'You have been successfully logged in.'
       }));
       expect(clientStore0.getState().get('online'), 'clientStore0.getState(online)')
-        .equal(List([User0.toSecure(), User1.toSecure()]));
+        .equal(List([User0.toOthers(), User1.toOthers()]));
 
       expect(clientStore1.getState().get('users'), 'clientStore1.getState(users)').equal(fromJS({
         token: null,
-        user: User1.toSecure(),
+        user: User1,
         isAuthenticated: true,
         isAuthenticating: false,
         statusText: 'You have been successfully logged in.'
       }));
       expect(clientStore1.getState().get('online'), 'clientStore1.getState(online)')
-        .equal(List.of(User0.toSecure(), User1.toSecure()));
+        .equal(List.of(User0.toOthers(), User1.toOthers()));
     });
   });
   describe('disconnecting', function () {

@@ -1,6 +1,8 @@
 import {push} from 'react-router-redux';
 import {List} from 'immutable';
-import {UserRecord} from '../models/User';
+import {UserModel} from '../models/UserModel';
+import uuid from 'node-uuid';
+import jwt from 'jsonwebtoken';
 
 export const socketConnect = (connectionId, socket) => ({
   type: 'socketConnect'
@@ -33,7 +35,7 @@ export const loginUserSuccess = (connectionId, user, redirect) => ({
   type: 'loginUserSuccess'
   , data: {user, redirect}
   , meta: {
-    connectionId: connectionId
+    clients: [connectionId]
   }
 });
 
@@ -41,7 +43,7 @@ export const loginUserFailure = (connectionId, msg) => ({
   type: 'loginUserFailure'
   , data: msg
   , meta: {
-    connectionId: connectionId
+    clients: [connectionId]
   }
 });
 
@@ -52,11 +54,13 @@ export const logoutUser = (userId) => ({
 });
 
 export const onlineSet = (connectionId) => (dispatch, getState) => {
-  const users = getState().get('users').toArray().map(u => u.toSecure());
+  const users = getState().get('users').toArray().map(u => u.toOthers());
   dispatch({
     type: 'onlineSet'
     , data: {users}
-    , meta: {connectionId}
+    , meta: {
+      clients: [connectionId]
+    }
   });
 };
 
@@ -67,28 +71,27 @@ export const onlineJoin = (user) => ({
 });
 
 export const authClientToServer = {
-  loginUserRequest: (connectionId, data) => (dispatch, getState) => {
+  loginUserRequest: (meta, data) => (dispatch, getState) => {
     const login = data.login;
     const state = getState();
     const userExists = state.get('users').find(user => user.login == login);
     if (!userExists) {
       //console.log(connectionId, state.get('connections').toJS())
-      if (state.get('connections').has(connectionId)) {
+      if (state.get('connections').has(meta.connectionId)) {
         //console.log('new user record', userIds, login)
-        const user = new UserRecord({
-          id: "" + connectionId
-          , login: login
-          , connectionId: connectionId
-        });
-        dispatch(onlineJoin(user.toSecure()));
-        dispatch(loginUserSuccess(connectionId, user, data.redirect));
-        dispatch(onlineSet(connectionId));
+        const user = UserModel.new({
+          login: login
+          , connectionId: meta.connectionId
+        }).sign();
+        dispatch(onlineJoin(user.toOthers()));
+        dispatch(loginUserSuccess(meta.connectionId, user, data.redirect));
+        dispatch(onlineSet(meta.connectionId));
       } else {
-        dispatch(loginUserFailure(connectionId, 'Connection is missing'));
+        dispatch(loginUserFailure(meta.connectionId, 'Connection is missing'));
       }
     } else {
       console.log('User already exists:', login);
-      dispatch(loginUserFailure(connectionId, 'User already exists'));
+      dispatch(loginUserFailure(meta.connectionId, 'User already exists'));
     }
   }
 };
@@ -115,11 +118,11 @@ export const authServerToClient = {
   })
   , onlineSet: (data) => ({
     type: 'onlineSet'
-    , data: {users: List(data.users.map(u => new UserRecord(u)))}
+    , data: {users: List(data.users.map(u => new UserModel(u)))}
   })
   , onlineJoin: (data) => ({
     type: 'onlineJoin'
-    , data: {user: new UserRecord(data.user)}
+    , data: {user: new UserModel(data.user)}
   })
 };
 
