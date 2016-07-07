@@ -7,7 +7,7 @@ export class RoomModel extends Record({
   , users: List()
 }) {
   create(data) {
-    const id =
+    //const id =
     return new RoomModel()
   }
 

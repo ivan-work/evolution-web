@@ -138,6 +138,7 @@
     "redux-mock-store": "^1.1.1",
     "rimraf": "*",
     "sass-loader": "^3.2.0",
+    "sinon": "^1.17.4",
     "style-loader": "^0.13.1",
     "supertest": "*",
     "webpack": "*",

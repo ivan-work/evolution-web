@@ -79,10 +79,7 @@ export const authClientToServer = {
       //console.log(connectionId, state.get('connections').toJS())
       if (state.get('connections').has(meta.connectionId)) {
         //console.log('new user record', userIds, login)
-        const user = UserModel.new({
-          login: login
-          , connectionId: meta.connectionId
-        }).sign();
+        const user = UserModel.new(login, meta.connectionId);
         dispatch(onlineJoin(user.toOthers()));
         dispatch(loginUserSuccess(meta.connectionId, user, data.redirect));
         dispatch(onlineSet(meta.connectionId));
