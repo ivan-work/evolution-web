@@ -1,4 +1,5 @@
 import {Record, List} from 'immutable';
+import uuid from 'node-uuid';
 
 export class RoomModel extends Record({
   id: null
@@ -6,14 +7,20 @@ export class RoomModel extends Record({
   , maxSize: 4
   , users: List()
 }) {
-  create(data) {
-    //const id =
-    return new RoomModel()
+  static fromJS(js) {
+    return new RoomModel({
+      ...js
+      , users: List(js.users)
+    });
   }
 
-  join(user) {
-    if (this.get('users').size == this.maxSize) throw new RoomModel.MaxSizeError();
-    return this.update('users', (users) => users.push(user));
+  static new(user) {
+    const id = uuid.v4().slice(0, 6);
+    return new RoomModel({
+      id: id
+      , name: "Room " + id
+      , users: List()
+    })
   }
 }
 

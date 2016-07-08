@@ -1,5 +1,6 @@
 import io, {SyncSocketServer} from './sync-socket-io';
 import ioc, {SyncSocketClient} from './sync-socket-io-client';
+import {Map} from 'immutable';
 
 describe('Sync-socket-io:', function () {
   describe('Basic:', function () {
@@ -59,6 +60,22 @@ describe('Sync-socket-io:', function () {
       client.disconnect();
       expect(clientConnections).equal(0);
       expect(serverConnections, 'serverConnections').equal(0);
+    });
+    it('should stringify data', function () {
+      let server = io();
+      let client = ioc();
+      let object = Map({id: 123});
+      server.on('connect', (socket) => {
+        socket.emit('object', object);
+        socket.on('clientObject', (obj) => {
+          expect(obj).eql({id: 123});
+        });
+      });
+      client.on('object', (obj) => {
+        expect(obj).eql({id: 123});
+      });
+      client.connect(server);
+      client.emit(object);
     });
   });
 

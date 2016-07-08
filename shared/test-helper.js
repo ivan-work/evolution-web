@@ -53,10 +53,12 @@ import {socketStore as socketServerStore, socketMiddleware as socketServerMiddle
 const mixinActions = (store => {
   store.actions = [];
   store.getActions = () => store.actions;
+  store.getActionTypes = () => store.getActions().map(a => a.type)
   store.clearActions = () => store.actions = [];
   store.getAction = (i) => store.getActions()[i];
-  store.getActionData = (i) => store.getActions()[i].data;
   store.getActionType = (i) => store.getActions()[i].type;
+  store.getActionData = (i) => store.getActions()[i].data;
+  store.getActionMeta = (i) => store.getActions()[i].meta;
   store.hook = (actionType, callback) => {
     //store.hooks.
   };

@@ -15,17 +15,63 @@ export const roomCreateSuccess = (room) => ({
     clients: true
   }
 });
+export const roomJoinRequest = (roomId) => ({
+  type: 'roomJoinRequest'
+  , data: {roomId}
+  , meta: {
+    server: true
+  }
+});
+export const roomJoinSuccess = (userId, roomId) => ({
+  type: 'roomJoinSuccess'
+  , data: {userId, roomId}
+  , meta: {
+    clients: true
+  }
+});
+//export const roomLeaveRequest = () => ({
+//  type: 'roomLeaveRequest'
+//  , data: {}
+//  , meta: {
+//    server: true
+//  }
+//});
+//export const roomLeaveSuccess = (room) => ({
+//  type: 'roomLeaveSuccess'
+//  , data: {room}
+//  , meta: {
+//    clients: true
+//  }
+//});
 export const roomsClientToServer = {
-  roomCreateRequest: (meta, data) => (dispatch, getState) => {
+  roomCreateRequest: (data, meta) => (dispatch, getState) => {
     const state = getState();
-    const id = (process.env.TEST ? uuid.v4().substr(0, 4) : uuid.v4())
-    const room = new RoomModel({
-      id: id
-      , name: 'Room ' + id
-    });
-    console.log('meta', meta);
+    const room = RoomModel.new();
+    //console.log('meta', meta);
     dispatch(roomCreateSuccess(room));
+    dispatch(roomJoinSuccess(meta.user.id, room.id));
+  }
+  , roomJoinRequest: (data, meta) => (dispatch, getState) => {
+    dispatch(roomJoinSuccess(meta.user.id, data.roomId));
   }
 };
 
-export const roomsServerToClient = {};
+export const roomsServerToClient = {
+  roomCreateSuccess: (data) => ({
+    type: 'roomCreateSuccess'
+    , data: {room: RoomModel.fromJS(data.room)}
+  })
+  , roomJoinSuccess: (data, user) =>  (dispatch, getState) => {
+    dispatch({
+      type: 'roomJoinSuccess'
+      , data
+    });
+    if (user.id === data.userId) {
+      const room = getState().getIn(['rooms', data.roomId]);
+      dispatch({
+        type: 'roomJoinSuccessSelf'
+        , data: {room}
+      });
+    }
+  }
+};

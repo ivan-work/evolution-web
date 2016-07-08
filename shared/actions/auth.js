@@ -71,7 +71,7 @@ export const onlineJoin = (user) => ({
 });
 
 export const authClientToServer = {
-  loginUserRequest: (meta, data) => (dispatch, getState) => {
+  loginUserRequest: (data, meta) => (dispatch, getState) => {
     const login = data.login;
     const state = getState();
     const userExists = state.get('users').find(user => user.login == login);
@@ -99,9 +99,7 @@ export const authServerToClient = {
     window.localStorage.setItem('user', JSON.stringify(data.user));
     dispatch({
       type: 'loginUserSuccess'
-      , data: {
-        user: data.user
-      }
+      , data: {user: new UserModel(data.user)}
     });
     dispatch(push(data.redirect || '/'));
   }
@@ -115,11 +113,11 @@ export const authServerToClient = {
   })
   , onlineSet: (data) => ({
     type: 'onlineSet'
-    , data: {users: List(data.users.map(u => new UserModel(u)))}
+    , data: {users: List(data.users.map(u => new UserModel(u).toOthers()))}
   })
   , onlineJoin: (data) => ({
     type: 'onlineJoin'
-    , data: {user: new UserModel(data.user)}
+    , data: {user: new UserModel(data.user).toOthers()}
   })
 };
 
