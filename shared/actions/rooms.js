@@ -62,15 +62,16 @@ export const roomsServerToClient = {
     , data: {room: RoomModel.fromJS(data.room)}
   })
   , roomJoinSuccess: (data, user) =>  (dispatch, getState) => {
+    const {userId, roomId} = data;
+    // data.userId data.roomId
     dispatch({
       type: 'roomJoinSuccess'
       , data
     });
     if (user.id === data.userId) {
-      const room = getState().getIn(['rooms', data.roomId]);
       dispatch({
         type: 'roomJoinSuccessSelf'
-        , data: {room}
+        , data: {roomId}
       });
     }
   }

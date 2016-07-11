@@ -20,6 +20,7 @@ export const Login = React.createClass({
     this.props.actions.loginUserRequest(this.state.redirectTo, this.state.login, this.state.password);
   }
   , render: function () {
+    console.log('Rendering login', this.props)
     const loginLink = this.linkState('login');
     var handleChange = (e) => loginLink.requestChange(e.target.value);
 
@@ -35,14 +36,9 @@ export const Login = React.createClass({
             onChange={handleChange}
             label='Username'
           />
-          {/*<div className='form-group'>
-           <input type='password'
-           className='form-control input-lg'
-           value={this.linkState('password')}
-           placeholder='Password'/>
-           </div>*/}
           <div>
             <MDL.Button
+              id="Login"
               type='submit'
               raised colored
               disabled={this.props.isAuthenticating}

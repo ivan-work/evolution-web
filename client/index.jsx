@@ -8,13 +8,12 @@ import ReactDOM from 'react-dom'
 import { combineReducers } from 'redux-immutable';
 import { createStore, compose, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk';
-import { Provider } from 'react-redux'
-import { Router, browserHistory } from 'react-router'
-import { syncHistoryWithStore, routerMiddleware, LOCATION_CHANGE } from 'react-router-redux'
+
+import { browserHistory } from 'react-router'
+import { routerMiddleware, LOCATION_CHANGE } from 'react-router-redux'
 
 
 import * as reducers from './reducers'
-import routes from './routes';
 
 import 'react-mdl/extra/material.min.css'
 import 'react-mdl/extra/material.min.js'
@@ -50,7 +49,6 @@ const socketClient = makeSocketClient(location.host);
 
 const store = createStore(
   reducer
-  , Map()
   , compose(
     applyMiddleware(thunk)
     , applyMiddleware(routerMiddleware(browserHistory))
@@ -61,21 +59,12 @@ const store = createStore(
 
 socketStore(socketClient, store);
 
-const history = syncHistoryWithStore(browserHistory, store, {
-  selectLocationState: (state) => {
-    //console.log('selectLocationState', state.toJS());
-    return state.get('routing').toJS();
-  }
-});
+import {Root} from './components/app/Root.jsx';
 
+console.warn('GLOBAL RENDEEER');
 ReactDOM.render(
-  <Provider store={store}>
-    <div>
-      <Router history={history}>
-        {routes(store.getState)}
-      </Router>
-      <DevTools />
-    </div>
-  </Provider>,
+  <Root store={store}>
+    <DevTools />
+  </Root>,
   document.getElementById('app')
 );

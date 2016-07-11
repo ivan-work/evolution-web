@@ -9,6 +9,7 @@ import {Layout, Header, Navigation, Drawer, Content} from 'react-mdl';
 
 export const App = React.createClass({
   render: function() {
+    console.log("APP PROPS", this.props);
     const {dispatch} = this.props;
     const {socket} = this.props;
     return (
