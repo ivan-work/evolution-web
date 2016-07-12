@@ -1,8 +1,6 @@
-import {push} from 'react-router-redux';
-import {List} from 'immutable';
 import {UserModel} from '../models/UserModel';
-import uuid from 'node-uuid';
-import jwt from 'jsonwebtoken';
+import {List} from 'immutable';
+import {push} from 'react-router-redux';
 
 export const socketConnect = (connectionId, socket) => ({
   type: 'socketConnect'
@@ -80,14 +78,14 @@ export const authClientToServer = {
       if (state.get('connections').has(meta.connectionId)) {
         //console.log('new user record', userIds, login)
         const user = UserModel.new(login, meta.connectionId);
-        dispatch(onlineJoin(user.toOthers()));
         dispatch(loginUserSuccess(meta.connectionId, user, data.redirect));
+        dispatch(onlineJoin(user.toOthers()));
         dispatch(onlineSet(meta.connectionId));
       } else {
         dispatch(loginUserFailure(meta.connectionId, 'Connection is missing'));
       }
     } else {
-      console.log('User already exists:', login);
+      console.warn('User already exists:', login);
       dispatch(loginUserFailure(meta.connectionId, 'User already exists'));
     }
   }

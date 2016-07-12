@@ -1,5 +1,5 @@
 import {RoomModel} from '../models/RoomModel'
-import uuid from 'node-uuid';
+import {push} from 'react-router-redux';
 
 export const roomCreateRequest = () => ({
   type: 'roomCreateRequest'
@@ -73,6 +73,7 @@ export const roomsServerToClient = {
         type: 'roomJoinSuccessSelf'
         , data: {roomId}
       });
+      dispatch(push(`/room/${roomId}`));
     }
   }
 };

@@ -22,6 +22,7 @@ export const socketStore = (serverSocket, store) => {
 
       }
       if (clientToServer[action.type]) {
+        //console.log('action.meta', action.meta)
         store.dispatch(clientToServer[action.type](action.data, {
           connectionId: socket.id
           , ...action.meta
@@ -38,8 +39,11 @@ export const socketMiddleware = io => store => next => action => {
   const nextResult = next(action);
   if (action.meta) {
     if (action.meta.clients === true) {
-      io.emit('action', action);
-    } else if (Array.isArray(action.meta.clients)) {
+      action.meta.clients = store.getState().get('users')
+        .map((user) => user.connectionId);
+    }
+
+    if (Array.isArray(action.meta.clients)) {
       action.meta.clients
         .filter(connectionId => state.has(connectionId))
         .map(connectionId => state.get(connectionId))

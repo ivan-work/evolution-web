@@ -14,12 +14,12 @@ export class RoomModel extends Record({
     });
   }
 
-  static new(user) {
+  static new(userId) {
     const id = uuid.v4().slice(0, 6);
     return new RoomModel({
       id: id
       , name: "Room " + id
-      , users: List()
+      , users: userId ? List.of(userId) : List()
     })
   }
 }

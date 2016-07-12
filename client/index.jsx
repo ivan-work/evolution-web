@@ -1,18 +1,19 @@
+import React from 'react'
+import ReactDOM from 'react-dom'
+// DevTools
 import { createDevTools } from 'redux-devtools'
 import LogMonitor from 'redux-devtools-log-monitor'
 import DockMonitor from 'redux-devtools-dock-monitor'
 
-import {Map} from 'immutable';
-import React from 'react'
-import ReactDOM from 'react-dom'
 import { combineReducers } from 'redux-immutable';
 import { createStore, compose, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk';
+// History
+import { browserHistory } from 'react-router';
+import { syncHistoryWithStore } from 'react-router-redux'
+import {routerReducer, appRouterMiddleware} from './routing';
 
-import { browserHistory } from 'react-router'
-import { routerMiddleware, LOCATION_CHANGE } from 'react-router-redux'
-
-
+import {Root} from './components/app/Root.jsx';
 import * as reducers from './reducers'
 
 import 'react-mdl/extra/material.min.css'
@@ -20,19 +21,6 @@ import 'react-mdl/extra/material.min.js'
 import './styles/style.scss';
 
 import {makeSocketClient, socketStore, socketMiddleware} from './socket';
-
-const routerReducerState = Map({
-  locationBeforeTransitions: null
-});
-const routerReducer = (state = routerReducerState, action) => {
-  //console.log('state', state.toJS());
-  if (action.type === LOCATION_CHANGE) {
-    return state.merge({
-      locationBeforeTransitions: action.payload
-    });
-  }
-  return state;
-};
 
 const reducer = combineReducers({
   ...reducers,
@@ -51,19 +39,21 @@ const store = createStore(
   reducer
   , compose(
     applyMiddleware(thunk)
-    , applyMiddleware(routerMiddleware(browserHistory))
+    , applyMiddleware(appRouterMiddleware(browserHistory))
     , applyMiddleware(socketMiddleware(socketClient))
     , DevTools.instrument()
   )
 );
 
-socketStore(socketClient, store);
+const history = syncHistoryWithStore(browserHistory, store, {
+  selectLocationState: (state) => state.get('routing').toJS()
+});
 
-import {Root} from './components/app/Root.jsx';
+socketStore(socketClient, store);
 
 console.warn('GLOBAL RENDEEER');
 ReactDOM.render(
-  <Root store={store}>
+  <Root store={store} history={history}>
     <DevTools />
   </Root>,
   document.getElementById('app')

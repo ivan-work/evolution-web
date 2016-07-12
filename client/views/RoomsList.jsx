@@ -7,7 +7,7 @@ export const RoomsList = React.createClass({
   mixins: [PureRenderMixin]
   , render: function () {
     return <ul className="RoomsList">
-      {this.props.list.map((room) => <li key={room.id}>{room.name}</li>)}
+      {Object.keys(this.props.map).map((roomId) => <li key={roomId}>{this.props.map[roomId].name}</li>)}
     </ul>;
   }
 });

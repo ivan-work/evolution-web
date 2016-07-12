@@ -28,6 +28,14 @@ global.navigator = {
 
 global.window.localStorage = require('./test/setup-local-storage-mock').default();
 
+global.window.matchMedia = window.matchMedia || (() => ({
+    matches: false
+    , addListener: () => {
+    }
+    , removeListener: () => {
+    }
+  }));
+
 //https://github.com/tleunen/react-mdl/issues/193
 require('react-mdl/extra/material');
 global.Element = global.window.Element;
@@ -63,6 +71,9 @@ import { createStore, compose, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk';
 import { combineReducers } from 'redux-immutable';
 import * as actions from './actions/actions';
+import { createMemoryHistory } from 'react-router';
+import {routerReducer, appRouterMiddleware} from '~/client/routing';
+
 const clientReducers = require('../client/reducers/index');
 const serverReducers = require('../server/reducers/index');
 
@@ -80,9 +91,6 @@ const mixinActions = (store => {
   store.getActionType = (i) => store.getActions()[i].type;
   store.getActionData = (i) => store.getActions()[i].data;
   store.getActionMeta = (i) => store.getActions()[i].meta;
-  store.hook = (actionType, callback) => {
-    //store.hooks.
-  };
 });
 
 global.mockServerStore = function (initialServerState) {
@@ -111,7 +119,7 @@ global.mockServerStore = function (initialServerState) {
 global.mockClientStore = function (initialClientState) {
   const ioClient = syncSocketIOClient();
   const clientStore = createStore(
-    combineReducers({...clientReducers})
+    combineReducers({...clientReducers, routing: routerReducer})
     , initialClientState
     , compose(
       applyMiddleware(thunk)
@@ -119,6 +127,7 @@ global.mockClientStore = function (initialClientState) {
         clientStore.actions.push(action);
         next(action);
       })
+      , applyMiddleware(appRouterMiddleware(createMemoryHistory('/')))
       , applyMiddleware(socketClientMiddleware(ioClient))
     ));
   socketClientStore(ioClient, clientStore);

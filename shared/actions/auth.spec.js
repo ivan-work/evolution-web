@@ -66,15 +66,14 @@ describe('Auth testing', function () {
       /*
        * Client Actions
        * */
-      expect(clientStore.getActions().length, 'clientStore.getActions().length').equal(5);
 
       expect(clientStore.getActionType(0), 'clientStore.getActionType(0)').eql('loginUserRequest');
 
-      expect(clientStore.getActionType(1), 'clientStore.getActionType(1)').eql('onlineJoin');
-      expect(clientStore.getActionData(1), 'clientStore.getActionData(1)').eql({user: User0.toOthers()});
+      expect(clientStore.getActionType(1), 'clientStore.getActionType(2)').eql('loginUserSuccess');
+      expect(clientStore.getActionData(1).user, 'clientStore.getActionData(2)').equal(User0);
 
-      expect(clientStore.getActionType(2), 'clientStore.getActionType(2)').eql('loginUserSuccess');
-      expect(clientStore.getActionData(2).user, 'clientStore.getActionData(2)').equal(User0);
+      expect(clientStore.getActionType(2), 'clientStore.getActionType(1)').eql('onlineJoin');
+      expect(clientStore.getActionData(2), 'clientStore.getActionData(1)').eql({user: User0.toOthers()});
 
       expect(clientStore.getActionType(3), 'clientStore.getActionType(3)').eql('@@router/CALL_HISTORY_METHOD');
       expect(clientStore.getAction(3).payload, 'clientStore.getAction(3).payload').eql({
@@ -84,6 +83,8 @@ describe('Auth testing', function () {
 
       expect(clientStore.getActionType(4), 'clientStore.getActionType(4)').eql('onlineSet');
       expect(clientStore.getActionData(4), 'clientStore.getActionData(4)').eql({users: List.of(User0.toOthers())});
+
+      expect(clientStore.getActions().length, 'clientStore.getActions().length').equal(5);
 
       /*
        * Server Actions
@@ -102,13 +103,7 @@ describe('Auth testing', function () {
       /*
        * States
        * */
-      expect(clientStore.getState().get('user')).equal(fromJS({
-        token: null,
-        user: User0,
-        isAuthenticated: true,
-        isAuthenticating: false,
-        statusText: 'You have been successfully logged in.'
-      }));
+      expect(clientStore.getState().get('user')).equal(User0);
       expect(clientStore.getState().get('online')).equal(List([User0.toOthers()]));
 
       expect(serverStore.getState().get('connections')).equal(Map({[clientStore.getConnectionId()]: clientStore.getConnection().socket}));
@@ -134,13 +129,7 @@ describe('Auth testing', function () {
       }));
       expect(serverStore.getState().get('users')).equal(Map({[User0.id]: User0}));
 
-      expect(clientStore0.getState().get('user'), 'clientStore0.getState(users)').equal(fromJS({
-        token: null,
-        user: User0,
-        isAuthenticated: true,
-        isAuthenticating: false,
-        statusText: 'You have been successfully logged in.'
-      }));
+      expect(clientStore0.getState().get('user'), 'clientStore0.getState(users)').equal(User0);
       expect(clientStore0.getState().get('online'), 'clientStore0.getState(online)')
         .equal(List([User0.toOthers()]));
 
@@ -148,13 +137,7 @@ describe('Auth testing', function () {
        * User1 is not logged in, but online is here
        * */
 
-      expect(clientStore1.getState().get('user'), 'clientStore1.getState(users)').equal(fromJS({
-        token: null,
-        user: null,
-        isAuthenticated: false,
-        isAuthenticating: false,
-        statusText: null
-      }));
+      expect(clientStore1.getState().get('user'), 'clientStore1.getState(users)').equal(null);
       expect(clientStore1.getState().get('online'), 'clientStore1.getState(online)')
         .equal(List([User0.toOthers()]));
 
@@ -166,23 +149,11 @@ describe('Auth testing', function () {
       const User1 = UserSpy.lastCall.returnValue;
 
 
-      expect(clientStore0.getState().get('user'), 'clientStore0.getState(users)').equal(fromJS({
-        token: null,
-        user: User0,
-        isAuthenticated: true,
-        isAuthenticating: false,
-        statusText: 'You have been successfully logged in.'
-      }));
+      expect(clientStore0.getState().get('user'), 'clientStore0.getState(user)').equal(User0);
       expect(clientStore0.getState().get('online'), 'clientStore0.getState(online)')
         .equal(List([User0.toOthers(), User1.toOthers()]));
 
-      expect(clientStore1.getState().get('user'), 'clientStore1.getState(users)').equal(fromJS({
-        token: null,
-        user: User1,
-        isAuthenticated: true,
-        isAuthenticating: false,
-        statusText: 'You have been successfully logged in.'
-      }));
+      expect(clientStore1.getState().get('user'), 'clientStore1.getState(users)').equal(User1);
       expect(clientStore1.getState().get('online'), 'clientStore1.getState(online)')
         .equal(List.of(User0.toOthers(), User1.toOthers()));
     });

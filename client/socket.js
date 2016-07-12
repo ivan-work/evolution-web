@@ -8,8 +8,7 @@ export const socketMiddleware = socket => store => next => action => {
   if (action.meta && action.meta.server) {
     //const clientId = store.getState().get('clientId');
     //socket.emit('action', objectAssign({}, action, {clientId}));
-    action.meta.user = store.getState().getIn(['user', 'user']);
-    action.meta.token = store.getState().getIn(['user', 'token']);
+    action.meta.user = store.getState().get('user');
     socket.emit('action', action);
   }
   return nextResult;
@@ -27,7 +26,8 @@ export const socketStore = (socket, store) => {
   //});
   socket.on('action', (action) => {
     if (serverToClient[action.type]) {
-      const user = store.getState().get('user').get('user');
+      const user = store.getState().get('user');
+      //console.log('user', user);
       store.dispatch(serverToClient[action.type](action.data, user));
     } else {
       console.warn('serverToClient action doesnt exist: ' + action.type);
