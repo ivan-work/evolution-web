@@ -130,6 +130,7 @@
     "rimraf": "*",
     "sass-loader": "^3.2.0",
     "sinon": "^1.17.4",
+    "source-map-support": "^0.4.1",
     "style-loader": "^0.13.1",
     "supertest": "*",
     "webpack": "*",

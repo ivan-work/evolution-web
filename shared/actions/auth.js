@@ -46,7 +46,7 @@ export const loginUserFailure = (connectionId, msg) => ({
 
 export const logoutUser = (userId) => ({
   type: 'logoutUser'
-  , data: userId
+  , data: {userId}
   , meta: {clients: true}
 });
 
@@ -103,9 +103,9 @@ export const authServerToClient = {
     type: 'loginUserFailure'
     , data: message
   })
-  , logoutUser: (id) => ({
+  , logoutUser: (data) => ({
     type: 'logoutUser'
-    , data: id
+    , data: {userId: data.userId}
   })
   , loginState: (data) => ({
     type: 'loginState'

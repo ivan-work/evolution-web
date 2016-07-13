@@ -1,5 +1,6 @@
 import {createReducer} from '~/shared/utils';
 
 export const reducer = createReducer(null, {
-  roomJoinSuccessSelf: (state, data) =>  data.roomId
+  roomJoinSuccessSelf: (state, data) => data.roomId
+  , roomExitSuccessSelf: (state, data) => null
 });

@@ -8,6 +8,7 @@ const watch = require('gulp-watch');
 const testWatch = (paths) => gulp.src(paths)
   .pipe(mocha({
     bail: true
+    , require: 'source-map-support/register'
   }))
   .on('error', () => console.error('error'));
   //.on('error', (error) => console.error(error));

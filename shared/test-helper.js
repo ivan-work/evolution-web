@@ -1,3 +1,5 @@
+//require('source-map-support').install();
+
 import chai from 'chai';
 import sinon from 'sinon';
 import chaiImmutable from 'chai-immutable';
@@ -6,7 +8,7 @@ import {shallow, mount} from 'enzyme';
 
 
 chai.use(chaiImmutable);
-chai.Assertion.includeStack = true;
+chai.config.includeStack = true;
 
 global.sinon = sinon;
 global.expect = chai.expect;
@@ -150,4 +152,27 @@ global.mockClientStore = function (initialClientState) {
   mixinActions(clientStore);
 
   return clientStore
+};
+
+import {UserModel} from '~/shared/models/UserModel';
+import {loginUserRequest} from '~/shared/actions/actions';
+global.mockStores = (count = 2, initialServerStore = void 0) => {
+  const serverStore = mockServerStore(initialServerStore);
+  const result = [];
+  const sandbox = sinon.sandbox.create();
+  const UserSpy = sandbox.spy(UserModel, 'new');
+  for (let i = 0; i < count; ++i) {
+    const clientStore = mockClientStore().connect(serverStore);
+    clientStore.dispatch(loginUserRequest('/test', 'User' + i, 'testPassword'));
+    const User = UserSpy.lastCall.returnValue;
+    result.push({
+      ['clientStore' + i]: clientStore
+      , ['User' + i]: User
+    });
+  }
+  result.forEach((r, i) => r['clientStore' + i].clearActions())
+  serverStore.clearActions();
+  sandbox.restore();
+  result.unshift(serverStore);
+  return result;
 };
