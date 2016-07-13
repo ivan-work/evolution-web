@@ -1,5 +1,6 @@
 import {UserModel} from '../models/UserModel';
-import {List} from 'immutable';
+import {RoomModel} from '../models/RoomModel';
+import {List, Map} from 'immutable';
 import {push} from 'react-router-redux';
 
 export const socketConnect = (connectionId, socket) => ({
@@ -29,12 +30,10 @@ export const loginUserRequest = (redirect, login, password) => {
   }
 };
 
-export const loginUserSuccess = (connectionId, user, redirect) => ({
+export const loginUserSuccess = (user, redirect) => ({
   type: 'loginUserSuccess'
   , data: {user, redirect}
-  , meta: {
-    clients: [connectionId]
-  }
+  , meta: {user}
 });
 
 export const loginUserFailure = (connectionId, msg) => ({
@@ -51,21 +50,20 @@ export const logoutUser = (userId) => ({
   , meta: {clients: true}
 });
 
-export const onlineSet = (connectionId) => (dispatch, getState) => {
-  const users = getState().get('users').toArray().map(u => u.toOthers());
+export const loginState = (user) => (dispatch, getState) => {
+  const online = getState().get('users').toArray().map(u => u.toOthers());
+  const rooms = getState().get('rooms').toJS();
   dispatch({
-    type: 'onlineSet'
-    , data: {users}
-    , meta: {
-      clients: [connectionId]
-    }
+    type: 'loginState'
+    , data: {online, rooms}
+    , meta: {user}
   });
 };
 
 export const onlineJoin = (user) => ({
   type: 'onlineJoin'
-  , data: {user}
-  , meta: {clients: true}
+  , data: {user: user.toOthers()}
+  , meta: {users: true}
 });
 
 export const authClientToServer = {
@@ -76,11 +74,11 @@ export const authClientToServer = {
     if (!userExists) {
       //console.log(connectionId, state.get('connections').toJS())
       if (state.get('connections').has(meta.connectionId)) {
-        //console.log('new user record', userIds, login)
         const user = UserModel.new(login, meta.connectionId);
-        dispatch(loginUserSuccess(meta.connectionId, user, data.redirect));
-        dispatch(onlineJoin(user.toOthers()));
-        dispatch(onlineSet(meta.connectionId));
+        //console.log('new user record', user.id, user.login)
+        dispatch(onlineJoin(user));
+        dispatch(loginUserSuccess(user, data.redirect));
+        dispatch(loginState(user));
       } else {
         dispatch(loginUserFailure(meta.connectionId, 'Connection is missing'));
       }
@@ -109,9 +107,12 @@ export const authServerToClient = {
     type: 'logoutUser'
     , data: id
   })
-  , onlineSet: (data) => ({
-    type: 'onlineSet'
-    , data: {users: List(data.users.map(u => new UserModel(u).toOthers()))}
+  , loginState: (data) => ({
+    type: 'loginState'
+    , data: {
+      online: List(data.online.map(u => new UserModel(u).toOthers()))
+      , rooms: Map(data.rooms).map(r => RoomModel.fromJS(r))
+    }
   })
   , onlineJoin: (data) => ({
     type: 'onlineJoin'

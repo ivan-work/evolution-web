@@ -6,6 +6,7 @@ import {shallow, mount} from 'enzyme';
 
 
 chai.use(chaiImmutable);
+chai.Assertion.includeStack = true;
 
 global.sinon = sinon;
 global.expect = chai.expect;

@@ -1,4 +1,4 @@
-import {Map, List, fromJS} from 'immutable';
+import {Map, List} from 'immutable';
 import {UserModel} from '../models/UserModel';
 import {authServerToClient, authClientToServer, socketConnect, socketDisconnect, loginUserRequest, loginUserSuccess, loginUserFailure} from './auth';
 
@@ -13,7 +13,7 @@ import {authServerToClient, authClientToServer, socketConnect, socketDisconnect,
 //console.log(serverStore.getActions());
 
 
-describe('Auth testing', function () {
+describe('Auth:', function () {
   var sandbox;
   var UserSpy;
 
@@ -54,8 +54,8 @@ describe('Auth testing', function () {
     expect(serverStore.getState().get('users')).equal(Map());
   });
 
-  describe('loginUserRequest', () => {
-    it('valid Connection, single User', () => {
+  describe('loginUserRequest:', () => {
+    it('single User:', () => {
       const serverStore = mockServerStore();
       const clientStore = mockClientStore().connect(serverStore);
 
@@ -68,23 +68,19 @@ describe('Auth testing', function () {
        * */
 
       expect(clientStore.getActionType(0), 'clientStore.getActionType(0)').eql('loginUserRequest');
-
-      expect(clientStore.getActionType(1), 'clientStore.getActionType(2)').eql('loginUserSuccess');
+      expect(clientStore.getActionType(1), 'clientStore.getActionType(1)').eql('loginUserSuccess');
       expect(clientStore.getActionData(1).user, 'clientStore.getActionData(2)').equal(User0);
-
-      expect(clientStore.getActionType(2), 'clientStore.getActionType(1)').eql('onlineJoin');
-      expect(clientStore.getActionData(2), 'clientStore.getActionData(1)').eql({user: User0.toOthers()});
-
-      expect(clientStore.getActionType(3), 'clientStore.getActionType(3)').eql('@@router/CALL_HISTORY_METHOD');
-      expect(clientStore.getAction(3).payload, 'clientStore.getAction(3).payload').eql({
+      expect(clientStore.getActionType(2), 'clientStore.getActionType(3)').eql('@@router/CALL_HISTORY_METHOD');
+      expect(clientStore.getAction(2).payload, 'clientStore.getAction(3).payload').eql({
         method: 'push',
         args: ['/test']
       });
-
-      expect(clientStore.getActionType(4), 'clientStore.getActionType(4)').eql('onlineSet');
-      expect(clientStore.getActionData(4), 'clientStore.getActionData(4)').eql({users: List.of(User0.toOthers())});
-
-      expect(clientStore.getActions().length, 'clientStore.getActions().length').equal(5);
+      expect(clientStore.getActionType(3), 'clientStore.getActionType(4)').eql('loginState');
+      expect(clientStore.getActionData(3), 'clientStore.getActionData(4)').eql({
+        online: List.of(User0.toOthers())
+        , rooms: Map()
+      });
+      expect(clientStore.getActions().length, 'clientStore.getActions().length').equal(4);
 
       /*
        * Server Actions
@@ -97,8 +93,8 @@ describe('Auth testing', function () {
       expect(serverStore.getActionType(1), 'serverStore.getActionType(1)').eql('loginUserSuccess');
       expect(serverStore.getActionData(1), 'serverStore.getActionData(1)').eql({user: User0, redirect: '/test'});
 
-      expect(serverStore.getActionType(2), 'serverStore.getActionType(2)').eql('onlineSet');
-      expect(serverStore.getActionData(2), 'serverStore.getActionData(2)').eql({users: [User0.toOthers()]});
+      expect(serverStore.getActionType(2), 'serverStore.getActionType(2)').eql('loginState');
+      expect(serverStore.getActionData(2), 'serverStore.getActionData(2)').eql({online: [User0.toOthers()], rooms: {}});
 
       /*
        * States
@@ -110,7 +106,7 @@ describe('Auth testing', function () {
       expect(serverStore.getState().get('users')).equal(Map({[User0.id]: User0}));
     });
 
-    it('valid Connection, two Users', () => {
+    it('two Users', () => {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
       const clientStore1 = mockClientStore().connect(serverStore);
@@ -122,7 +118,6 @@ describe('Auth testing', function () {
       /*
        * User0 connects
        * */
-
       expect(serverStore.getState().get('connections')).equal(Map({
         [clientStore0.getConnectionId()]: clientStore0.getConnection().socket
         , [clientStore1.getConnectionId()]: clientStore1.getConnection().socket
@@ -134,20 +129,16 @@ describe('Auth testing', function () {
         .equal(List([User0.toOthers()]));
 
       /*
-       * User1 is not logged in, but online is here
+       * User1 is connected, but not logged in
        * */
-
       expect(clientStore1.getState().get('user'), 'clientStore1.getState(users)').equal(null);
-      expect(clientStore1.getState().get('online'), 'clientStore1.getState(online)')
-        .equal(List([User0.toOthers()]));
+      expect(clientStore1.getState().get('online'), 'clientStore1.getState(online)').equal(List());
 
       /*
        * User1 connects
        * */
-
       clientStore1.dispatch(loginUserRequest('/test', 'User1', 'testPassword'));
       const User1 = UserSpy.lastCall.returnValue;
-
 
       expect(clientStore0.getState().get('user'), 'clientStore0.getState(user)').equal(User0);
       expect(clientStore0.getState().get('online'), 'clientStore0.getState(online)')
