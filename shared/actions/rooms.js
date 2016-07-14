@@ -34,9 +34,9 @@ export const roomJoinSuccessSelf = (roomId) => ({
   type: 'roomJoinSuccessSelf'
   , data: {roomId}
 });
-export const roomExitRequest = () => ({
+export const roomExitRequest = () => (dispatch, getState) => dispatch({
   type: 'roomExitRequest'
-  , data: {}
+  , data: {roomId: getState().get('room')}
   , meta: {
     server: true
   }
@@ -77,12 +77,13 @@ export const roomsClientToServer = {
   }
   , roomExitRequest: (data, meta) => (dispatch, getState) => {
     const userId = meta.user.id;
-    const room = getState().get('rooms')
-      .find((room) => {
-        let index = room.users.indexOf(userId);
-        return index => 0;
-      });
-    dispatch(roomExitSuccess(meta.user.id, room.id));
+    const roomId = data.roomId;
+    const room = getState().get('rooms').get(roomId);
+    if (room && ~room.users.indexOf(userId)) {
+      dispatch(roomExitSuccess(meta.user.id, roomId));
+    } else {
+      throw 'room not found'
+    }
   }
 };
 
@@ -101,7 +102,7 @@ export const roomsServerToClient = {
     const {userId, roomId} = data;
     dispatch(roomExitSuccess(userId, roomId));
     if (user.id === data.userId) {
-      dispatch(roomExitSuccessSelf())
+      dispatch(roomExitSuccessSelf());
       dispatch(push(`/`));
     }
   }

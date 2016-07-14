@@ -9,6 +9,7 @@ export const socketMiddleware = socket => store => next => action => {
     //const clientId = store.getState().get('clientId');
     //socket.emit('action', objectAssign({}, action, {clientId}));
     action.meta.user = store.getState().get('user');
+    //console.log('client:send:', action.type);
     socket.emit('action', action);
   }
   return nextResult;
