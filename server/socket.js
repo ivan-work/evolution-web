@@ -41,7 +41,9 @@ export const socketMiddleware = io => store => next => action => {
     if (action.meta.clients === true) {
       // Clients == true => to all
       io.emit('action', action);
-    } else if (action.meta.users === true) {
+      return;
+    }
+    if (action.meta.users === true) {
       // Users == true => to all users
       action.meta.clients = store.getState().get('users')
         .map((user) => user.connectionId)
@@ -59,7 +61,9 @@ export const socketMiddleware = io => store => next => action => {
       action.meta.clients = [store.getState().getIn(['users', action.meta.userId, 'connectionId'])];
       //console.log('action.meta.clients', action.meta.clients, action.type)
     }
-    if (action.meta.clients == true && action.meta.clients !== true) {//TODO i fucked up
+    //console.log(action.meta.clients == true)
+    //console.log(action.meta.clients !== true)
+    if (action.meta.clients) {//TODO i fucked up
       if (Array.isArray(action.meta.clients)) {
         action.meta.clients
           .filter(connectionId => state.has(connectionId))

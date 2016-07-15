@@ -151,17 +151,12 @@ describe('Rooms:', function () {
       //console.log(clientStore0.getActions())
       //console.log(serverStore.getState().toJS())
       expect(serverStore.getState().getIn(['rooms', Room.id, 'users'])).equal(List.of(User1.id));
-      expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(null);
       expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
       expect(clientStore1.getState().getIn(['rooms', Room.id, 'users']), 'clientStore1.rooms').equal(List.of(User1.id));
 
       clientStore1.getClient().disconnect();
 
       expect(serverStore.getState().get('rooms')).equal(Map());
-      expect(clientStore0.getState().get('room'), 'clientStore0.room').null;
-      expect(clientStore0.getState().get('rooms')).equal(Map());
-      expect(clientStore1.getState().get('room'), 'clientStore1.room').null;
-      expect(clientStore1.getState().get('rooms')).equal(Map());
     });
   });
 });

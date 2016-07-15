@@ -2,6 +2,7 @@ import {UserModel} from '../models/UserModel';
 import {RoomModel} from '../models/RoomModel';
 import {List, Map} from 'immutable';
 import {push} from 'react-router-redux';
+import {roomsClientToServer} from './rooms';
 
 export const socketConnect = (connectionId, socket) => ({
   type: 'socketConnect'
@@ -45,20 +46,15 @@ export const loginUserFailure = (connectionId, msg) => ({
 });
 
 export const logoutUser = (userId) => (dispatch, getState) => {
+  const user = getState().get('users').get(userId);
   const room = getState().get('rooms').find(room => ~room.get('users').indexOf(userId));
-  //if (room) {
-  //  dispatch()
-  //}
-  //
-  //dispatch({
-  //  type: 'logoutUser'
-  //  , data: {userId}
-  //  , meta: {clients: true}
-  //});
+  if (room) {
+    dispatch(roomsClientToServer.roomExitRequest({roomId: room.id}, {user}));
+  }
   dispatch({
     type: 'logoutUser'
     , data: {userId}
-    , meta: {clients: true}
+    , meta: {users: true}
   });
 };
 
@@ -89,6 +85,7 @@ export const authClientToServer = {
         const user = UserModel.new(login, meta.connectionId);
         //console.log('new user record', user.id, user.login)
         dispatch(onlineJoin(user));
+        //console.log('dispatching loginUserSuccess')
         dispatch(loginUserSuccess(user, data.redirect));
         dispatch(loginState(user));
       } else {
