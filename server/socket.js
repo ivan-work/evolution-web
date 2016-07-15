@@ -54,14 +54,20 @@ export const socketMiddleware = io => store => next => action => {
       //  console.log(`ENDOF Server:${action.type}`);
       //  console.log(` `);
       //}
-    } else if (action.meta.user) {
-      action.meta.clients = [action.meta.user.connectionId];
+    } else if (action.meta.userId) {
+      //console.log('action.meta.userId', action.meta)
+      action.meta.clients = [store.getState().getIn(['users', action.meta.userId, 'connectionId'])];
+      //console.log('action.meta.clients', action.meta.clients, action.type)
     }
-    if (Array.isArray(action.meta.clients)) {
-      action.meta.clients
-        .filter(connectionId => state.has(connectionId))
-        .map(connectionId => state.get(connectionId))
-        .forEach((clientSocket) => clientSocket.emit('action', action));
+    if (action.meta.clients == true && action.meta.clients !== true) {//TODO i fucked up
+      if (Array.isArray(action.meta.clients)) {
+        action.meta.clients
+          .filter(connectionId => state.has(connectionId))
+          .map(connectionId => state.get(connectionId))
+          .forEach((clientSocket) => clientSocket.emit('action', action));
+      } else {
+        console.error('clients is not array', action.meta.clients);
+      }
     }
   }
   return nextResult;

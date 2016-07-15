@@ -9,30 +9,12 @@ export const roomCreateRequest = () => ({
     server: true
   }
 });
-export const roomCreateSuccess = (room) => ({
-  type: 'roomCreateSuccess'
-  , data: {room}
-  , meta: {
-    users: true
-  }
-});
 export const roomJoinRequest = (roomId) => ({
   type: 'roomJoinRequest'
   , data: {roomId}
   , meta: {
     server: true
   }
-});
-export const roomJoinSuccess = (userId, roomId) => ({
-  type: 'roomJoinSuccess'
-  , data: {userId, roomId}
-  , meta: {
-    users: true
-  }
-});
-export const roomJoinSuccessSelf = (roomId) => ({
-  type: 'roomJoinSuccessSelf'
-  , data: {roomId}
 });
 export const roomExitRequest = () => (dispatch, getState) => dispatch({
   type: 'roomExitRequest'
@@ -41,69 +23,63 @@ export const roomExitRequest = () => (dispatch, getState) => dispatch({
     server: true
   }
 });
-export const roomExitSuccess = (userId, roomId) => ({
-  type: 'roomExitSuccess'
-  , data: {userId, roomId}
+export const roomUpdate = (roomId, room) => ({
+  type: 'roomUpdate'
+  , data: {roomId, room}
   , meta: {users: true}
 });
-export const roomExitSuccessSelf = () => ({
-  type: 'roomExitSuccessSelf'
-  , data: {}
+export const roomJoinSuccess = (roomId, userId) => ({
+  type: 'roomJoinSuccess'
+  , data: {roomId}
+  , meta: {userId}
 });
-//export const roomLeaveRequest = () => ({
-//  type: 'roomLeaveRequest'
-//  , data: {}
-//  , meta: {
-//    server: true
-//  }
-//});
-//export const roomLeaveSuccess = (room) => ({
-//  type: 'roomLeaveSuccess'
-//  , data: {room}
-//  , meta: {
-//    clients: true
-//  }
-//});
+export const roomExitSuccess = (userId) => ({
+  type: 'roomExitSuccess'
+  , data: {}
+  , meta: {userId}
+});
 export const roomsClientToServer = {
   roomCreateRequest: (data, meta) => (dispatch, getState) => {
+    const userId = meta.user.id;
     const state = getState();
-    const room = RoomModel.new();
-    //console.log('meta', meta);
-    dispatch(roomCreateSuccess(room));
-    dispatch(roomJoinSuccess(meta.user.id, room.id));
+    const room = RoomModel.new(userId);
+    dispatch(roomJoinSuccess(room.id, userId));
+    dispatch(roomUpdate(room.id, room))
   }
   , roomJoinRequest: (data, meta) => (dispatch, getState) => {
-    dispatch(roomJoinSuccess(meta.user.id, data.roomId));
+    const userId = meta.user.id;
+    const {roomId} = data;
+    const room = getState().getIn(['rooms', roomId]);
+    const newRoom = room.update('users', (users) => users.push(userId));
+    dispatch(roomJoinSuccess(roomId, userId));
+    dispatch(roomUpdate(roomId, newRoom));
   }
   , roomExitRequest: (data, meta) => (dispatch, getState) => {
     const userId = meta.user.id;
     const roomId = data.roomId;
-    const room = getState().get('rooms').get(roomId);
-    if (room && ~room.users.indexOf(userId)) {
-      dispatch(roomExitSuccess(meta.user.id, roomId));
+
+    const room = getState().getIn(['rooms', roomId]);
+    let index = room.users.indexOf(userId);
+    let newRoom;
+    if (room.users.size == 1) {
+      newRoom = null;
     } else {
-      throw 'room not found'
+      newRoom = room.update('users', users => users.remove(index))
     }
+    dispatch(roomUpdate(roomId, newRoom));
+    dispatch(roomExitSuccess(userId));
   }
 };
 
 export const roomsServerToClient = {
-  roomCreateSuccess: (data) => roomCreateSuccess(RoomModel.fromJS(data.room))
-  , roomJoinSuccess: (data, user) =>  (dispatch, getState) => {
-    const {userId, roomId} = data;
-    // data.userId data.roomId
-    dispatch(roomJoinSuccess(userId, roomId));
-    if (user.id === data.userId) {
-      dispatch(roomJoinSuccessSelf(roomId));
-      dispatch(push(`/room/${roomId}`));
-    }
+  roomUpdate: (data) => roomUpdate(data.roomId, RoomModel.fromJS(data.room))
+  , roomJoinSuccess: (data, user) => (dispatch, getState) => {
+    const {roomId} = data;
+    dispatch(roomJoinSuccess(roomId));
+    dispatch(push(`/room/${roomId}`));
   }
   , roomExitSuccess: (data, user) => (dispatch, getState) => {
-    const {userId, roomId} = data;
-    dispatch(roomExitSuccess(userId, roomId));
-    if (user.id === data.userId) {
-      dispatch(roomExitSuccessSelf());
-      dispatch(push(`/`));
-    }
+    dispatch(roomExitSuccess());
+    dispatch(push(`/`));
   }
 };

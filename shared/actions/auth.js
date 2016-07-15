@@ -33,7 +33,7 @@ export const loginUserRequest = (redirect, login, password) => {
 export const loginUserSuccess = (user, redirect) => ({
   type: 'loginUserSuccess'
   , data: {user, redirect}
-  , meta: {user}
+  , meta: {userId: user.id}
 });
 
 export const loginUserFailure = (connectionId, msg) => ({
@@ -44,11 +44,23 @@ export const loginUserFailure = (connectionId, msg) => ({
   }
 });
 
-export const logoutUser = (userId) => ({
-  type: 'logoutUser'
-  , data: {userId}
-  , meta: {clients: true}
-});
+export const logoutUser = (userId) => (dispatch, getState) => {
+  const room = getState().get('rooms').find(room => ~room.get('users').indexOf(userId));
+  //if (room) {
+  //  dispatch()
+  //}
+  //
+  //dispatch({
+  //  type: 'logoutUser'
+  //  , data: {userId}
+  //  , meta: {clients: true}
+  //});
+  dispatch({
+    type: 'logoutUser'
+    , data: {userId}
+    , meta: {clients: true}
+  });
+};
 
 export const loginState = (user) => (dispatch, getState) => {
   const online = getState().get('users').toArray().map(u => u.toOthers());
@@ -56,7 +68,7 @@ export const loginState = (user) => (dispatch, getState) => {
   dispatch({
     type: 'loginState'
     , data: {online, rooms}
-    , meta: {user}
+    , meta: {userId: user.id}
   });
 };
 
@@ -93,10 +105,7 @@ export const authServerToClient = {
   loginUserSuccess: (data) => (dispatch) => {
     //console.log('authServerToClient', data);
     window.localStorage.setItem('user', JSON.stringify(data.user));
-    dispatch({
-      type: 'loginUserSuccess'
-      , data: {user: new UserModel(data.user)}
-    });
+    dispatch(loginUserSuccess(new UserModel(data.user)));
     dispatch(push(data.redirect || '/'));
   }
   , loginUserFailure: (message) => ({
