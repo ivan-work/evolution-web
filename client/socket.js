@@ -20,7 +20,6 @@ export const socketStore = (socket, store) => {
     //console.log('Client store:',store.getState());
     const user = store.getState().get('user');
     if (user != null) {
-      console.log('Client store (reloginUserRequest):',store.getState());
       store.dispatch(loginUserRequest('/'));
     }
   });

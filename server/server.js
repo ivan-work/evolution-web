@@ -9,7 +9,7 @@ var config = require('./config/config.js');
 import * as reducers from './reducers';
 import { createStore, compose, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk';
-import { reduxTimeout } from 'redux-timeout'
+import { reduxTimeout } from '~/shared/utils/reduxTimeout'
 import { combineReducers } from 'redux-immutable';
 import {socketServer, socketStore, socketMiddleware} from './socket';
 

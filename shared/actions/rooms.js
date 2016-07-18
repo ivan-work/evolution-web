@@ -60,7 +60,6 @@ export const roomsClientToServer = {
   , roomExitRequest: (data, meta) => (dispatch, getState) => {
     const userId = meta.user.id;
     const roomId = data.roomId;
-
     const room = getState().getIn(['rooms', roomId]);
     let index = room.users.indexOf(userId);
     let newRoom;
@@ -71,6 +70,14 @@ export const roomsClientToServer = {
     }
     dispatch(roomUpdate(roomId, newRoom));
     dispatch(roomExitSuccess(userId));
+  }
+  , roomStartGameRequest: (data, meta) => (dispatch, getState) => {
+    const userId = meta.user.id;
+    const roomId = data.roomId;
+    const room = getState().getIn(['rooms', roomId]);
+    if(room.canStart(userId)) {
+      dispatch(GameModel.new(gameStart(room)));
+    }
   }
 };
 
