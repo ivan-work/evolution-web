@@ -24,6 +24,10 @@ export class RoomModel extends Record({
       , users: userId ? List.of(userId) : List()
     })
   }
+
+  canStart(userId) {
+    return this.users.get(0) === userId && this.users.size > 1;
+  }
 }
 
 RoomModel.MaxSizeError = class MaxSizeError extends Error {

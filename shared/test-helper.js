@@ -72,6 +72,8 @@ const TEST_URL = 'http://localhost:' + TEST_PORT;
 
 import { createStore, compose, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk';
+import { reduxTimeout } from './utils/reduxTimeout';
+//import { reduxTimeout } from 'redux-timeout';
 import { combineReducers } from 'redux-immutable';
 import * as actions from './actions/actions';
 import { createMemoryHistory } from 'react-router';
@@ -103,6 +105,7 @@ global.mockServerStore = function (initialServerState) {
     , initialServerState
     , compose(
       applyMiddleware(thunk)
+      , applyMiddleware(reduxTimeout())
       , applyMiddleware(store => next => action => {
         serverStore.actions.push(action);
         next(action);
@@ -125,7 +128,8 @@ global.mockClientStore = function (initialClientState) {
     combineReducers({...clientReducers, routing: routerReducer})
     , initialClientState
     , compose(
-      applyMiddleware(thunk)
+      applyMiddleware(reduxTimeout())
+      , applyMiddleware(thunk)
       , applyMiddleware(store => next => action => {
         clientStore.actions.push(action);
         next(action);

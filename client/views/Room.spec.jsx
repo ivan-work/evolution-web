@@ -14,11 +14,9 @@ describe('Room', () => {
       const clientStore = mockClientStore(Map({
         user: User0
         , room: Room0.id
-        , rooms: List.of(Room0)
+        , rooms: Map({[Room0.id]: Room0})
       }));
-      const $Room = shallow(<Room room={Room0}/>, {
-        context: {store: clientStore}
-      });
+      const $Room = shallow(<RoomView store={clientStore}/>).shallow();
       //expect($room.text().includes(RoomModel.name));
       //
       //expect($wrapper.text().includes('Hello User0')).true

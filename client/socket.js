@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import {serverToClient} from '../shared/actions/actions'
+import {serverToClient, loginUserRequest} from '../shared/actions/actions'
 
 export const makeSocketClient = (url, options) => io(url, options);
 
@@ -16,9 +16,14 @@ export const socketMiddleware = socket => store => next => action => {
 };
 
 export const socketStore = (socket, store) => {
-  //socket.on('connect', () => {
-  //  console.log('client:connect');
-  //});
+  socket.on('connect', () => {
+    //console.log('Client store:',store.getState());
+    const user = store.getState().get('user');
+    if (user != null) {
+      console.log('Client store (reloginUserRequest):',store.getState());
+      store.dispatch(loginUserRequest('/'));
+    }
+  });
   //socket.on('connect_error', function(error) {
   //  console.log('client:connect_error', error);
   //});

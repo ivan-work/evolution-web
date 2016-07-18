@@ -150,7 +150,7 @@ describe('Auth:', function () {
     });
   });
   describe('disconnecting', function () {
-    it('clears everything', () => {
+    it('clears everything', (done) => {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
       const clientStore1 = mockClientStore().connect(serverStore);
@@ -161,17 +161,46 @@ describe('Auth:', function () {
       clientStore0.getClient().disconnect();
       clientStore1.getClient().disconnect();
 
-      expect(serverStore.getState().get('connections')).equal(Map());
-      expect(serverStore.getState().get('users')).equal(Map());
+      setTimeout(() => {
+        expect(serverStore.getState().get('connections')).equal(Map());
+        expect(serverStore.getState().get('users')).equal(Map());
 
-      expect(serverStore.getActionType(0)).eql('socketDisconnect');
-      expect(serverStore.getActionData(0)).eql({connectionId: clientStore0.getConnectionId()});
+        expect(serverStore.getActionType(0)).eql('socketDisconnect');
+        expect(serverStore.getActionData(0)).eql({connectionId: clientStore0.getConnectionId()});
 
-      expect(serverStore.getActionType(1)).eql('logoutUser');
-      expect(serverStore.getActionData(1)).eql({userId: User0.id});
+        expect(serverStore.getActionType(1)).eql('@@reduxTimeout/addTimeout');
 
-      expect(serverStore.getActionType(2)).eql('socketDisconnect');
-      expect(serverStore.getActionData(2)).eql({connectionId: clientStore1.getConnectionId()});
+        expect(serverStore.getActionType(2)).eql('socketDisconnect');
+        expect(serverStore.getActionData(2)).eql({connectionId: clientStore1.getConnectionId()});
+
+        expect(serverStore.getActionType(3)).eql('logoutUser');
+        expect(serverStore.getActionData(3)).eql({userId: User0.id});
+        done();
+      }, 20);
+    });
+  });
+
+  describe('LocalStorage remembers User:', () => {
+    it('single User:', (done) => {
+      const serverStore = mockServerStore();
+      const clientStore0 = mockClientStore().connect(serverStore);
+      clientStore0.dispatch(loginUserRequest('/test', 'testLogin', 'testPassword'));
+      const User = UserSpy.lastCall.returnValue;
+      clientStore0.getClient().disconnect();
+      const clientStore1 = mockClientStore(Map({user: User})).connect(serverStore);
+
+      expect(serverStore.getState().get('users')).equal(Map({[User.id]: User.set('connectionId', clientStore1.getConnectionId())}));
+      expect(serverStore.getState().get('connections')).equal(Map({[clientStore1.getConnectionId()]: clientStore1.getSocket()}));
+      setTimeout(() => {
+
+        console.log('serverStore', serverStore.getActions());
+        // Check for login timeout
+        expect(serverStore.getState().get('users')).equal(Map({
+          [User.id]: User.set('connectionId', clientStore1.getConnectionId())
+        }));
+        expect(serverStore.getState().get('connections')).equal(Map({[clientStore1.getConnectionId()]: clientStore1.getSocket()}));
+        done();
+      }, 20);
     });
   });
 });

@@ -3,6 +3,7 @@ import {RoomModel} from '../models/RoomModel';
 import {List, Map} from 'immutable';
 import {push} from 'react-router-redux';
 import {roomsClientToServer} from './rooms';
+import {addTimeout, cancelTimeout} from '~/shared/utils/reduxTimeout';
 
 export const socketConnect = (connectionId, socket) => ({
   type: 'socketConnect'
@@ -17,7 +18,10 @@ export const socketDisconnect = (connectionId) => (dispatch, getState) => {
     , data: {connectionId}
   });
   if (!!user) {
-    dispatch(logoutUser(user.id))
+    dispatch(addTimeout(
+      !process.env.TEST ? 10000 : 10
+      , 'logoutUser' + user.id
+      , logoutUser(user.id)));
   }
 };
 
@@ -25,9 +29,7 @@ export const loginUserRequest = (redirect, login, password) => {
   return {
     type: 'loginUserRequest'
     , data: {redirect, login, password}
-    , meta: {
-      server: true
-    }
+    , meta: {server: true}
   }
 };
 
@@ -76,12 +78,24 @@ export const onlineJoin = (user) => ({
 
 export const authClientToServer = {
   loginUserRequest: (data, meta) => (dispatch, getState) => {
-    const login = data.login;
     const state = getState();
-    const userExists = state.get('users').find(user => user.login == login);
-    if (!userExists) {
-      //console.log(connectionId, state.get('connections').toJS())
-      if (state.get('connections').has(meta.connectionId)) {
+    const login = data.login;
+
+    // Trying to relogin existing user:
+    if (meta.user && meta.user.token) {
+      const userExists = state.get('users').find(user => user.token === meta.user.token);
+      if (userExists) {
+        const user = userExists.set('connectionId', meta.connectionId);
+        dispatch(cancelTimeout('logoutUser' + user.id));
+        dispatch(loginUserSuccess(user, data.redirect));
+        dispatch(loginState(user));
+        return true;
+      }
+    }
+    // Otherwise try to login normally
+    if (login) {
+      const userExists = state.get('users').find(user => user.login === login);
+      if (!userExists) {
         const user = UserModel.new(login, meta.connectionId);
         //console.log('new user record', user.id, user.login)
         dispatch(onlineJoin(user));
@@ -89,13 +103,22 @@ export const authClientToServer = {
         dispatch(loginUserSuccess(user, data.redirect));
         dispatch(loginState(user));
       } else {
-        dispatch(loginUserFailure(meta.connectionId, 'Connection is missing'));
+        console.warn('User already exists:', login);
+        dispatch(loginUserFailure(meta.connectionId, 'User already exists'));
       }
-    } else {
-      console.warn('User already exists:', login);
-      dispatch(loginUserFailure(meta.connectionId, 'User already exists'));
+      return;
     }
+    dispatch(loginUserFailure(meta.connectionId, 'Login is not supplied'));
   }
+  //, reloginUserRequest: (data, meta) => (dispatch, getState) => {
+  //  console.log('reloginUserRequest');
+  //  console.log('===========');
+  //  console.log('===========');
+  //  console.log('reloginUserRequest::DATA', data);
+  //  console.log('reloginUserRequest::META', meta);
+  //  console.log('===========');
+  //  console.log('===========');
+  //}
 };
 
 export const authServerToClient = {

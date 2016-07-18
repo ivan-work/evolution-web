@@ -5,24 +5,24 @@ import {List} from 'immutable';
 export const roomCreateRequest = () => ({
   type: 'roomCreateRequest'
   , data: {}
-  , meta: {
-    server: true
-  }
+  , meta: {server: true}
 });
 export const roomJoinRequest = (roomId) => ({
   type: 'roomJoinRequest'
   , data: {roomId}
-  , meta: {
-    server: true
-  }
+  , meta: {server: true}
 });
 export const roomExitRequest = () => (dispatch, getState) => dispatch({
   type: 'roomExitRequest'
   , data: {roomId: getState().get('room')}
-  , meta: {
-    server: true
-  }
+  , meta: {server: true}
 });
+export const roomStartGameRequest = (roomId) => ({
+  type: 'roomStartGameRequest'
+  , data: {roomId}
+  , meta: {server: true}
+});
+
 export const roomUpdate = (roomId, room) => ({
   type: 'roomUpdate'
   , data: {roomId, room}
@@ -38,6 +38,7 @@ export const roomExitSuccess = (userId) => ({
   , data: {}
   , meta: {userId}
 });
+
 export const roomsClientToServer = {
   roomCreateRequest: (data, meta) => (dispatch, getState) => {
     const userId = meta.user.id;
@@ -50,9 +51,11 @@ export const roomsClientToServer = {
     const userId = meta.user.id;
     const {roomId} = data;
     const room = getState().getIn(['rooms', roomId]);
-    const newRoom = room.update('users', (users) => users.push(userId));
+    if (!room.users.some(uid => userId === uid)) {
+      const newRoom = room.update('users', (users) => users.push(userId));
+      dispatch(roomUpdate(roomId, newRoom));
+    }
     dispatch(roomJoinSuccess(roomId, userId));
-    dispatch(roomUpdate(roomId, newRoom));
   }
   , roomExitRequest: (data, meta) => (dispatch, getState) => {
     const userId = meta.user.id;

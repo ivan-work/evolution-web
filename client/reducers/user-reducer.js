@@ -4,7 +4,22 @@ import {createReducer} from '~/shared/utils';
 import {Map, fromJS} from 'immutable';
 import {UserModel} from '../../shared/models/UserModel';
 
-export const reducer = createReducer(null, {
+const getInitialUser = () => {
+  let user = window.localStorage.getItem('user');
+  if (user != null) {
+    user = JSON.parse(user);
+    if (typeof user === 'object') {
+      user = new UserModel(user);
+      if (user.token !== null) {
+        return user;
+      }
+    }
+  }
+  return null;
+};
+
+console.log('Storage User:', getInitialUser());
+export const reducer = createReducer(getInitialUser(), {
   loginUserSuccess: (state, data) => {
     const {user} = data;
     return user;
