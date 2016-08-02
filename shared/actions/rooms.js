@@ -1,4 +1,4 @@
-import {RoomModel} from '../models/RoomModel'
+import {RoomModel} from '../models/RoomModel';
 import {push} from 'react-router-redux';
 import {List} from 'immutable';
 
@@ -70,14 +70,6 @@ export const roomsClientToServer = {
     }
     dispatch(roomUpdate(roomId, newRoom));
     dispatch(roomExitSuccess(userId));
-  }
-  , roomStartGameRequest: (data, meta) => (dispatch, getState) => {
-    const userId = meta.user.id;
-    const roomId = data.roomId;
-    const room = getState().getIn(['rooms', roomId]);
-    if(room.canStart(userId)) {
-      dispatch(GameModel.new(gameStart(room)));
-    }
   }
 };
 

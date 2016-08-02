@@ -9,7 +9,7 @@ export const socketMiddleware = socket => store => next => action => {
     //const clientId = store.getState().get('clientId');
     //socket.emit('action', objectAssign({}, action, {clientId}));
     action.meta.user = store.getState().get('user');
-    //console.log('client:send:', action.type);
+    //console.log('Client:Send', action.type);
     socket.emit('action', action);
   }
   return nextResult;
@@ -30,7 +30,7 @@ export const socketStore = (socket, store) => {
   //  console.log('client:disconnect');
   //});
   socket.on('action', (action) => {
-    //console.log('Client:Action', action);
+    //console.log('Client:Receive', action.type);
     if (serverToClient[action.type]) {
       const user = store.getState().get('user');
       //console.log('user', user);

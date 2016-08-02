@@ -10,8 +10,8 @@ const testWatch = (paths) => gulp.src(paths)
     bail: true
     , require: 'source-map-support/register'
   }))
-  .on('error', () => console.error('error'));
-  //.on('error', (error) => console.error(error));
+  //.on('error', () => console.error('error'));
+  .on('error', (error) => console.error(error));
 
 gulp.task('test:server', () => {
   const paths = ['./shared/test-helper.js', 'shared/**/*.spec.js', 'server/**/*.spec.js'];
