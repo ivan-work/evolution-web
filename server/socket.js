@@ -35,45 +35,34 @@ export const socketStore = (serverSocket, store) => {
 };
 
 export const socketMiddleware = io => store => next => action => {
-  const state = store.getState().get('connections');
+  const state = store.getState();
+  const stateConnections = state.get('connections');
+  const stateUsers = state.get('users');
   const nextResult = next(action);
+  //console.log(`Server:Prepare:${action.type}`, action.meta);
   if (action.meta) {
-    if (action.meta.clients === true) {
-      // Clients == true => to all
-      //console.log('Server:SendAll', action.type);
-      io.emit('action', action);
-      return;
-    }
-    if (action.meta.users === true) {
-      // Users == true => to all users
-      action.meta.clients = store.getState().get('users')
-        .map((user) => user.connectionId)
-        .toArray();
-      //if (action.type === 'onlineJoin') {
-      //  console.log(` `);
-      //  console.log(`START Server:${action.type}`);
-      //  console.log(`Current state: `, store.getState().get('users').map(u => ([u.login, u.id, u.connectionId])));
-      //  console.log(`Sending to: `, action.meta.clients);
-      //  console.log(`ENDOF Server:${action.type}`);
-      //  console.log(` `);
-      //}
+    let sockets = [];
+    if (Array.isArray(action.meta.users)) {
+      sockets = action.meta.users
+        .map(userId => stateUsers.get(userId))
+        .map(user => user.connectionId);
+    } else if (action.meta.users === true) {
+      sockets = stateUsers.toArray()
+        .map(user => user.connectionId);
+    } else if (Array.isArray(action.meta.clients)) {
+      sockets = action.meta.clients;
+    } else if (action.meta.clients === true) {
+      sockets = stateConnections.toArray();
     } else if (action.meta.userId) {
-      //console.log('action.meta.userId', action.meta)
-      action.meta.clients = [store.getState().getIn(['users', action.meta.userId, 'connectionId'])];
-      //console.log('action.meta.clients', action.meta.clients, action.type)
+      sockets = [store.getState().getIn(['users', action.meta.userId, 'connectionId'])];
+    } else {
+      console.error('Meta not valid', action.type, action.meta);
     }
-    //console.log(action.meta.clients == true)
-    //console.log(action.meta.clients !== true)
-    if (action.meta.clients) {//TODO i fucked up
-      if (Array.isArray(action.meta.clients)) {
-        action.meta.clients
-          .filter(connectionId => state.has(connectionId))
-          .map(connectionId => state.get(connectionId))
-          .forEach((clientSocket) => clientSocket.emit('action', action));
-      } else {
-        console.error('clients is not array', action.meta.clients);
-      }
-    }
+    //console.log('Server:Send', action.type, action.meta, sockets);
+    sockets
+      .filter(connectionId => stateConnections.has(connectionId))
+      .map(connectionId => stateConnections.get(connectionId))
+      .forEach((clientSocket) => clientSocket.emit('action', action));
   }
   return nextResult;
 };

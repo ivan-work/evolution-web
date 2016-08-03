@@ -8,8 +8,15 @@ export class CardModel extends Record({
   , imageFront: ''
   , imageBack: ''
 }) {
-  static new() {
-    return new CardModel();
+  static fromJS(js) {
+    //checkNotNull(js)
+    return new CardModel(js);
+  }
+  static new(index) {
+    return new CardModel({
+      id: index
+      , name: 'Card#' + index
+    });
   }
 }
 

@@ -123,10 +123,10 @@ export const authServerToClient = {
     dispatch(loginUserSuccess(new UserModel(data.user)));
     dispatch(push(data.redirect || '/'));
   }
-  , loginUserFailure: (message) => (dispatch) => {return{
+  , loginUserFailure: (message) => ({
     type: 'loginUserFailure'
     , data: message
-  }}
+  })
   , logoutUser: (data) => ({
     type: 'logoutUser'
     , data: {userId: data.userId}
