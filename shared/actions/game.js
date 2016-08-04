@@ -11,8 +11,7 @@ export const gameStartRequest = (roomId) => ({
 
 export const gameStartSuccess = (game) => ({
   type: 'gameStartSuccess'
-  , data: {game}
-  , meta: {users: game.players.keySeq().toArray()}
+  , data: {game: game}
 });
 
 export const gameReadyRequest = () => (dispatch, getState) => dispatch({
@@ -28,14 +27,17 @@ export const gameReadySuccess = (game, userId) => ({
   , meta: {users: game.players.keySeq().toArray()}
 });
 
-export const gameGiveCards = (game, cardsCount) => (dispatch, getState) => {
-  const cards = game.deck.take(6);
-  dispatch({
-    type: 'gameGiveCards'
-    , data: {gameId: game.id, cards}
-    , meta: {users: game.players.keySeq().toArray()}
-  });
-};
+export const gameGiveCards = (gameId, userId, cards) => ({
+  type: 'gameGiveCards'
+  , data: {gameId, userId, cards}
+  , meta: {userId}
+});
+
+export const gameUpdate = (game) => ({
+  type: 'gameUpdate'
+  , data: {game : game.toClient()}
+  , meta: {users: game.players.keySeq().toArray()}
+});
 
 export const gameClientToServer = {
   gameStartRequest: (data, meta) => (dispatch, getState) => {
@@ -48,25 +50,35 @@ export const gameClientToServer = {
     }
   }
   , gameReadyRequest: (data, meta) => (dispatch, getState) => {
-    const state = getState();
     const userId = meta.user.id;
     const gameId = data.gameId;
-    const game = state.getIn(['games', gameId]);
-    dispatch(gameReadySuccess(game, userId));
+    const game = () => getState().getIn(['games', gameId]);
+    dispatch(gameReadySuccess(getState().getIn(['games', gameId]), userId));
+    /*
+     * Actual starting
+     * */
     if (getState().getIn(['games', gameId]).players.every(player => player.status > 0)) {
-      dispatch(gameGiveCards(game, 6));
+      const INITIAL_HAND_SIZE = 6;
+      getState().getIn(['games', gameId]).players.forEach((player) => {
+        const cards = game().deck.take(INITIAL_HAND_SIZE);
+        dispatch(gameGiveCards(gameId, player.id, cards));
+      });
     }
+    dispatch(gameUpdate(game()));
   }
 };
 
 export const gameServerToClient = {
-  gameStartSuccess: (data) => gameStartSuccess(GameModel.fromJS(data.game))
+  gameStartSuccess: (data) => gameStartSuccess(GameModel.fromServer(data.game))
   , gameReadySuccess: (data, user) => ({
     type: 'gameReadySuccess'
     , data: {userId: user.id}
   })
   , gameGiveCards: (data, user) => ({
     type: 'gameGiveCards'
-    , data: {userId: user.id, cards: data.cards.map(card => CardModel.fromJS(card))}
+    , data: {
+      userId: user.id
+      , cards: List(data.cards).map(card => CardModel.fromJS(card))
+    }
   })
 };

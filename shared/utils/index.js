@@ -29,8 +29,17 @@ export function checkHttpStatus(response) {
   }
 }
 
+export function ensureParameter (data, type, optional) {
+  if (!data && !optional) throw new Error('Required data is undefined');
+  if (typeof type === 'string') {
+    if (typeof data !== type) {
+      throw new Error(`Data [${data}] is not typeof ${type}`);
+    }
+  } else if (!(data instanceof type)) {
+    throw new Error(`Data [${data}] is not instanceof of ${type}`);
+  }
+}
+
 export function parseJSON(response) {
   return response.json()
-
-
 }

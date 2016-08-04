@@ -12,14 +12,21 @@ export class GameModel extends Record({
   , players: Map()
   //, field: Map()
 }) {
-  static fromJS(js) {
+  toClient() {
+    return this
+      .set('deck', this.deck.size)
+      .set('players', this.players.map(player => player.toClient()))
+  }
+
+  static fromServer(js) {
     return js == null
       ? null
       : new GameModel({
       ...js
-      , players: Map(js.players).map(p => PlayerModel.fromJS(p))
+      , players: Map(js.players).map(p => PlayerModel.fromServer(p))
     });
   }
+
   static new(room) {
     return new GameModel({
       id: uuid.v4()

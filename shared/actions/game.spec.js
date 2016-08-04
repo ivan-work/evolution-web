@@ -28,14 +28,18 @@ describe('Game:', function () {
     //console.log(clientStore0.getState().get('game').toJS())
     expect(Game().players.get(User0.id).status, 'Game.players.get(User0).state 1').equal(1);
     expect(Game().players.get(User1.id).status, 'Game.players.get(User1).state 1').equal(0);
-    expect(Game().players.get(User0.id).hand.size).equal(0);
-    expect(Game().players.get(User1.id).hand.size).equal(0);
+    expect(Game().players.get(User0.id).hand).equal(0);
+    expect(Game().players.get(User1.id).hand).equal(0);
     clientStore1.dispatch(gameReadyRequest());
     expect(Game().players.get(User0.id).status, 'Game.players.get(0).state 2').equal(1);
     expect(Game().players.get(User1.id).status, 'Game.players.get(1).state 2').equal(1);
     // server dispatched turn 1 here
-    expect(Game().players.get(User0.id).hand.size).equal(6);
-    expect(Game().players.get(User1.id).hand.size).equal(6);
-    expect(Game().players.get(User1.id).deck.size).equal(24);
+    expect(Game().players.get(User0.id).hand).equal(6);
+    expect(Game().players.get(User1.id).hand).equal(6);
+    const clientGame0 = clientStore0.getState().get('game');
+    //expect(clientGame0).ok;
+    //expect(clientGame0.board).equal(Map({deck: 24}));
+    //expect(clientGame0.hand).ok;
+    //expect(clientGame0.hand.size).equal(6);
   });
 });
