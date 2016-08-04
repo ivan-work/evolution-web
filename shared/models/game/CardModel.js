@@ -18,6 +18,9 @@ export class CardModel extends Record({
       , name: 'Card#' + index
     });
   }
+  toString() {
+    return this.name;
+  }
 }
 
 CardModel.DefaultCard = new CardModel({

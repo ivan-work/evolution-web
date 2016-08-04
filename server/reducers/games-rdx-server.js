@@ -9,12 +9,9 @@ export const reducer = createReducer(Map(), {
     ensureParameter(data.gameId, 'string');
     ensureParameter(data.userId, 'string');
     ensureParameter(data.cards, List);
-    return state.update(data.gameId, game =>game
-      .update('deck', deck => deck.slice(0, data.cards.size))
+    return state.update(data.gameId, game => game
+      .update('deck', deck => deck.skip(data.cards.size))
       .updateIn(['players', data.userId, 'hand'], hand => hand.concat(data.cards))
     );
-  }
-  , gameUpdate: (state, data) => {
-    return state.merge(data.game.id, data.game)
   }
 });

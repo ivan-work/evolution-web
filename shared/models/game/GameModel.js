@@ -1,4 +1,4 @@
-import {Record, Map, Range} from 'immutable';
+import {Record, Map, Range, List} from 'immutable';
 
 import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
@@ -8,14 +8,14 @@ import uuid from 'node-uuid';
 export class GameModel extends Record({
   id: null
   , roomId: null
-  , deck: Range(0, 36).map(i => CardModel.new(i)).toList()
+  , deck: Range(0, 12).map(i => CardModel.new(i)).toList()
   , players: Map()
-  //, field: Map()
+  , board: Map()
 }) {
-  toClient() {
+  toClient(userId) {
     return this
       .set('deck', this.deck.size)
-      .set('players', this.players.map(player => player.toClient()))
+      .set('players', this.players.map(player => player.id === userId ? player : player.toClient()))
   }
 
   static fromServer(js) {
@@ -34,5 +34,19 @@ export class GameModel extends Record({
       //, deck: DeckModel.new()
       , players: room.users.reduce((result, userId) => result.set(userId, PlayerModel.new(userId)), Map())
     })
+  }
+}
+
+export class GameModelClient extends Record({
+  id: null
+  , roomId: null
+  , deck: -1
+  , players: null
+  , board: null
+  , hand: List()
+}) {
+  static fromGameModel(game, userId) {
+    return new GameModelClient(game)
+      .set('hand', game.players.getIn([userId, 'hand'], List()));
   }
 }

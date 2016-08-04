@@ -46,8 +46,7 @@ export const roomsClientToServer = {
     const {roomId} = data;
     const room = getState().getIn(['rooms', roomId]);
     if (!room.users.some(uid => userId === uid)) {
-      const newRoom = room.update('users', (users) => users.push(userId));
-      dispatch(roomUpdate(roomId, newRoom));
+      dispatch(roomUpdate(roomId, room.join(userId)));
     }
     dispatch(roomJoinSuccess(roomId, userId));
   }
@@ -55,13 +54,7 @@ export const roomsClientToServer = {
     const userId = meta.user.id;
     const roomId = data.roomId;
     const room = getState().getIn(['rooms', roomId]);
-    let index = room.users.indexOf(userId);
-    let newRoom;
-    if (room.users.size == 1) {
-      newRoom = null;
-    } else {
-      newRoom = room.update('users', users => users.remove(index))
-    }
+    let newRoom = room.leave(userId);
     dispatch(roomUpdate(roomId, newRoom));
     dispatch(roomExitSuccess(userId));
   }
