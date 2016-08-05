@@ -7,17 +7,17 @@ import {Map} from 'immutable';
 import * as MDL from 'react-mdl';
 import {UsersList} from './UsersList.jsx';
 
-import {roomExitRequest, roomStartGameRequest} from '~/shared/actions/actions';
+import {roomExitRequest, gameStartRequest} from '~/shared/actions/actions';
 import {RoomModel} from '~/shared/models/RoomModel';
 
 export const Room = React.createClass({
   mixins: [PureRenderMixin]
   , render: function () {
     return <div className="Room">
-      <MDL.Button raised onClick={this.props.$back}>Back</MDL.Button>
-      <MDL.Button raised onClick={this.props.$exit}>Exit</MDL.Button>
-      <MDL.Button raised onClick={this.props.$start(this.props.room.id)}
-                  disabled={!this.props.room.canStart(this.props.user.id)}>Start</MDL.Button>
+      <MDL.Button id="Room$back" raised onClick={this.props.$back}>back</MDL.Button>
+      <MDL.Button id="Room$exit" raised onClick={this.props.$exit}>exit</MDL.Button>
+      <MDL.Button id="Room$start" raised onClick={this.props.$start(this.props.room.id)}
+                  disabled={this.props.room.validateCanStart(this.props.user.id) !== true}>start</MDL.Button>
       <div>Room {this.props.room.name}</div>
       <div>Online users: <UsersList list={this.props.online}/></div>
       <div>In this room: <UsersList list={this.props.online.filter(user => {
@@ -41,6 +41,6 @@ export const RoomView = connect(
   , (dispatch) => ({
     $back: () => dispatch(push(`/`))
     , $exit: () => dispatch(roomExitRequest())
-    , $start: roomId => () => dispatch(roomStartGameRequest(roomId))
+    , $start: roomId => () => dispatch(gameStartRequest(roomId))
   })
 )(Room);

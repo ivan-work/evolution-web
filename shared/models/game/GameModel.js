@@ -8,7 +8,7 @@ import uuid from 'node-uuid';
 export class GameModel extends Record({
   id: null
   , roomId: null
-  , deck: Range(0, 12).map(i => CardModel.new(i)).toList()
+  , deck: null
   , players: Map()
   , board: Map()
 }) {
@@ -31,7 +31,7 @@ export class GameModel extends Record({
     return new GameModel({
       id: uuid.v4()
       , roomId: room.id
-      //, deck: DeckModel.new()
+      , deck: CardModel.generate(24)
       , players: room.users.reduce((result, userId) => result.set(userId, PlayerModel.new(userId)), Map())
     })
   }

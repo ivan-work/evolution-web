@@ -2,6 +2,7 @@ import {GameModel, GameModelClient} from '../models/game/GameModel';
 import {CardModel} from '../models/game/CardModel';
 import {push} from 'react-router-redux';
 import {List} from 'immutable';
+import {actionError} from './generic';
 
 export const gameStartRequest = (roomId) => ({
   type: 'gameStartRequest'
@@ -33,17 +34,20 @@ export const gameGiveCards = (gameId, userId, cards) => ({
   //, meta: {userId}
 });
 
-export const gameUpdate = (game) => (dispatch, getState) => {
+export const gameUpdate = (game, redirect = false) => (dispatch, getState) => {
   game.players.forEach((player) => {
     dispatch({
       type: 'gameUpdate'
-      , data: {game: game.toClient(player.id)}
+      , data: {game: game.toClient(player.id), redirect}
       , meta: {userId: player.id}
     });
   });
 };
 
-export const gameUpdate_Client = (game, userId) => ({type: 'gameUpdate', data: {userId, game: GameModel.fromServer(game)}});
+export const gameUpdate_Client = (game, userId) => ({
+  type: 'gameUpdate',
+  data: {userId, game: GameModel.fromServer(game)}
+});
 
 export const gameClientToServer = {
   gameStartRequest: (data, meta) => (dispatch, getState) => {
@@ -51,10 +55,14 @@ export const gameClientToServer = {
     const userId = meta.user.id;
     const roomId = data.roomId;
     const room = state.getIn(['rooms', roomId]);
-    if (room.canStart(userId)) {
+    const error = room.validateCanStart(userId);
+    console.log('errrrror', error)
+    if (error === true) {
       const game = GameModel.new(room);
       dispatch(gameStartSuccess(game));
-      dispatch(gameUpdate(game));
+      dispatch(gameUpdate(game, true));
+    } else {
+      dispatch(actionError(userId, error));
     }
   }
   , gameReadyRequest: (data, meta) => (dispatch, getState) => {
@@ -77,5 +85,10 @@ export const gameClientToServer = {
 };
 
 export const gameServerToClient = {
-  gameUpdate: (data, user) => gameUpdate_Client(data.game, user.id)
+  gameUpdate: (data, user) => (dispatch) => {
+    dispatch(gameUpdate_Client(data.game, user.id));
+    if (data.redirect) {
+      dispatch(push('/game'));
+    }
+  }
 };
