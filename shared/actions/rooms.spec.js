@@ -2,6 +2,7 @@ import {Map, List, fromJS} from 'immutable';
 import {UserModel} from '../models/UserModel';
 import {RoomModel} from '../models/RoomModel';
 import {loginUserRequest, roomCreateRequest, roomJoinRequest, roomExitRequest} from '../actions/actions';
+import {selectRoom} from '../selectors';
 
 describe('Rooms:', function () {
   describe('Lifecycle:', function () {
@@ -58,24 +59,13 @@ describe('Rooms:', function () {
       const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2, Map({rooms: Map({[Room.id]: Room})}));
       clientStore0.dispatch(roomJoinRequest(Room.id));
       clientStore1.dispatch(roomJoinRequest(Room.id));
-
-      expect(serverStore.getState().getIn(['rooms', Room.id, 'users'])).equal(List.of(User0.id, User1.id));
-      expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(Room.id);
-      expect(clientStore0.getState().getIn(['rooms', Room.id, 'users']), 'clientStore0.rooms').equal(List.of(User0.id, User1.id));
-      expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
-      expect(clientStore1.getState().getIn(['rooms', Room.id, 'users']), 'clientStore1.rooms').equal(List.of(User0.id, User1.id));
-
       clientStore0.dispatch(roomExitRequest());
-      //console.log(serverStore.getActions())
-      //console.log('-----')
-      //console.log('-----')
-      //console.log('-----')
-      //console.log(clientStore0.getActions())
-      //console.log(serverStore.getState().toJS())
-      expect(serverStore.getState().getIn(['rooms', Room.id, 'users'])).equal(List.of(User1.id));
+
+      expect(selectRoom(serverStore, Room.id).users).equal(List.of(User1.id));
       expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(null);
+      expect(selectRoom(clientStore0, Room.id).users, 'clientStore0.rooms').equal(List.of(User1.id));
       expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
-      expect(clientStore1.getState().getIn(['rooms', Room.id, 'users']), 'clientStore1.rooms').equal(List.of(User1.id));
+      expect(selectRoom(clientStore1, Room.id).users, 'clientStore1.rooms').equal(List.of(User1.id));
 
       clientStore1.dispatch(roomExitRequest());
 
@@ -92,28 +82,59 @@ describe('Rooms:', function () {
       clientStore0.dispatch(roomJoinRequest(Room.id));
       clientStore1.dispatch(roomJoinRequest(Room.id));
 
-      expect(serverStore.getState().getIn(['rooms', Room.id, 'users'])).equal(List.of(User0.id, User1.id));
-      expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(Room.id);
-      expect(clientStore0.getState().getIn(['rooms', Room.id, 'users']), 'clientStore0.rooms').equal(List.of(User0.id, User1.id));
-      expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
-      expect(clientStore1.getState().getIn(['rooms', Room.id, 'users']), 'clientStore1.rooms').equal(List.of(User0.id, User1.id));
-
       serverStore.clearActions();
       clientStore0.getClient().disconnect();
       setTimeout(() => {
-        expect(serverStore.getState().getIn(['rooms', Room.id, 'users'])).equal(List.of(User1.id));
+        expect(selectRoom(serverStore, Room.id).users).equal(List.of(User1.id));
+        expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(null);
+        expect(clientStore0.getState().get('rooms')).equal(Map());
         expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
-        expect(clientStore1.getState().getIn(['rooms', Room.id, 'users']), 'clientStore1.rooms').equal(List.of(User1.id));
+        expect(selectRoom(clientStore1, Room.id).users).equal(List.of(User1.id));
+
         clientStore1.getClient().disconnect();
+
         setTimeout(() => {
           expect(serverStore.getState().get('rooms')).equal(Map());
+          expect(clientStore1.getState().get('rooms')).equal(Map());
+          expect(clientStore1.getState().get('room'), 'clientStore0.room').equal(null);
           done();
         }, 20);
       }, 20);
     });
+
+    it('User0, User1 in Room, User0 disconnects, User0 rejoins', (done) => {
+      const Room = RoomModel.new();
+      const [serverStore, {clientStore0, User0}, {clientStore1, User1}]= mockStores(2, Map({rooms: Map({[Room.id]: Room})}));
+      clientStore0.dispatch(roomJoinRequest(Room.id));
+      clientStore1.dispatch(roomJoinRequest(Room.id));
+
+      clientStore0.getClient().disconnect();
+
+      expect(selectRoom(serverStore, Room.id).users).equal(List.of(User0.id, User1.id));
+      expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(null);
+      expect(clientStore0.getState().get('rooms')).equal(Map());
+      expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
+      expect(selectRoom(clientStore1, Room.id).users).equal(List.of(User0.id, User1.id));
+
+      clientStore0.connect(serverStore);
+
+      expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(Room.id);
+      expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
+      expect(selectRoom(serverStore, Room.id).users).equal(List.of(User0.id, User1.id));
+      expect(selectRoom(clientStore0, Room.id).users).equal(List.of(User0.id, User1.id));
+      expect(selectRoom(clientStore1, Room.id).users).equal(List.of(User0.id, User1.id));
+
+      setTimeout(() => {
+        expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(Room.id);
+        expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
+        expect(selectRoom(serverStore, Room.id).users).equal(List.of(User0.id, User1.id));
+        expect(selectRoom(clientStore0, Room.id).users).equal(List.of(User0.id, User1.id));
+        expect(selectRoom(clientStore1, Room.id).users).equal(List.of(User0.id, User1.id));
+      }, 20);
+    });
   });
   describe('Errors:', function () {
-    it('User0 rejoins into same room', () => {
+    it('User0 joins into same room', () => {
       const Room = RoomModel.new();
       const [serverStore, {clientStore0, User0}]= mockStores(1, Map({rooms: Map({[Room.id]: Room})}));
       clientStore0.dispatch(roomJoinRequest(Room.id));
@@ -121,7 +142,7 @@ describe('Rooms:', function () {
       const newRoom = serverStore.getState().getIn(['rooms', Room.id]);
       expect(newRoom.users).equal(List.of(User0.id));
     });
-    it('User0 rejoins into another room', () => {
+    it('User0 joins into another room', () => {
       const Room0 = RoomModel.new();
       const Room1 = RoomModel.new();
       const [serverStore, {clientStore0, User0}, {clientStore1, User1}]= mockStores(2, Map({

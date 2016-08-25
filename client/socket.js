@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import {serverToClient, loginUserRequest} from '../shared/actions/actions'
+import {serverToClient, loginUserRequest, clientSelfDisconnect} from '../shared/actions/actions'
 
 export const makeSocketClient = (url, options) => io(url, options);
 
@@ -26,9 +26,10 @@ export const socketStore = (socket, store) => {
   //socket.on('connect_error', function(error) {
   //  console.log('client:connect_error', error);
   //});
-  //socket.on('disconnect', () => {
-  //  console.log('client:disconnect');
-  //});
+  socket.on('disconnect', (reason) => {
+    //console.log('client:disconnect');
+    store.dispatch(clientSelfDisconnect(reason));
+  });
   socket.on('action', (action) => {
     //console.log('Client:Receive', action.type);
     if (serverToClient[action.type]) {

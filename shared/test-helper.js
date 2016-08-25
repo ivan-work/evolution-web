@@ -43,6 +43,7 @@ global.window.matchMedia = window.matchMedia || (() => ({
 //https://github.com/tleunen/react-mdl/issues/193
 require('react-mdl/extra/material');
 global.Element = global.window.Element;
+global.CustomEvent = global.window.CustomEvent;
 global.Event = global.window.Event;
 
 //Object.keys(window).forEach((key) => {

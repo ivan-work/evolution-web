@@ -20,9 +20,7 @@ export const Room = React.createClass({
                   disabled={this.props.room.validateCanStart(this.props.user.id) !== true}>start</MDL.Button>
       <div>Room {this.props.room.name}</div>
       <div>Online users: <UsersList list={this.props.online}/></div>
-      <div>In this room: <UsersList list={this.props.online.filter(user => {
-      return ~this.props.room.users.indexOf(user.id)
-      })}/></div>
+      <div className="Room-online">In this room: <UsersList list={this.props.online.filter(user => ~this.props.room.users.indexOf(user.id))}/></div>
     </div>;
   }
 });
