@@ -22,11 +22,12 @@ describe('Room', () => {
     expect(getOnlineLengthForRoom(clientStore0), 'User1 joins @clientStore0').eql(2);
     expect(getOnlineLengthForRoom(clientStore1), 'User1 joins @clientStore1').eql(2);
 
-    clientStore0.getClient().disconnect(SOCKET_DISCONNECT_NOW);
+    //clientStore0.getClient().disconnect(SOCKET_DISCONNECT_NOW);
     //console.log(shallow(<RoomView store={clientStore0}/>).shallow().find('UsersList').at(0).shallow().debug())
     //console.log(clientStore0.getState().toJS())
     //console.log(shallow(<RoomView store={clientStore0}/>).shallow().find('UsersList').at(1).shallow().debug())
     //expect(getOnlineLengthForRoom(clientStore0), 'User0 left @clientStore0').eql(0);
+    //console.log('clientStore1', clientStore1.getState().toJS())
     //expect(getOnlineLengthForRoom(clientStore1), 'User0 left @clientStore1').eql(1);
   });
 

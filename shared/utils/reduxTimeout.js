@@ -21,7 +21,6 @@ export const reduxTimeout = function () {
   return store => next => action => {
     if (action.type === '@@reduxTimeout/addTimeout') {
       const {duration, name, callback} = action.data;
-      console.log('timeout set')
       if (timeouts[name]) throw new Error(`reduxTimeout: timeout[${name}] already occupied!`);
       timeouts[name] = setTimeout(() => {
         //console.log('Aftertimeout', typeof callback)
