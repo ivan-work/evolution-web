@@ -23,7 +23,7 @@ export const Game = React.createClass({
       <CardCollection
         ref="Deck" name="Deck"
         position={Map({right: 0, top: 0})}
-        shift={List.of(-25, 1)}
+        shift={[-25, 1]}
         cards={game.deck}/>
       <CardCollection
         ref="Hand" name="Hand"
@@ -36,7 +36,7 @@ export const Game = React.createClass({
           return <CardCollection
             ref={player.id} name={player.id} key={player.id}
             position={CARD_POSITIONS[i]}
-            shift={List.of(-25, 1)}
+            shift={[-25, 1]}
             cards={game.hand}/>
           })
         }

@@ -53,7 +53,6 @@ const history = syncHistoryWithStore(browserHistory, store, {
 
 socketStore(socketClient, store);
 
-console.warn('GLOBAL RENDEEER');
 ReactDOM.render(
   <Root store={store} history={history}>
     <DevTools />
