@@ -70,6 +70,7 @@ export const roomsClientToServer = {
 export const roomsServerToClient = {
   roomUpdate: (data) => roomUpdate(data.roomId, RoomModel.fromJS(data.room))
   , roomJoinSuccess: (data, user) => (dispatch, getState) => {
+    //console.log('roomJoinSuccess', data)
     const {roomId} = data;
     dispatch(roomJoinSuccess(roomId));
     dispatch(push(`/room/${roomId}`));

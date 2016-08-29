@@ -5,10 +5,10 @@ import {LoginView, RoomsView, RoomView, GameView} from '../views/index';
 
 const MakeAuthCheck = (getState) => (nextState, replace) => {
   //console.log('getState', getState().toJS());
-  console.log('Auth check!');
+  //console.log('Auth check');
   const userExists = getState().get('user') != null;
   if (!userExists) {
-    console.log('replace');
+    console.log('Auth check failed, redirecting to /login');
     //replace('/login?redirect=/rooms')
     replace('/login')
   }

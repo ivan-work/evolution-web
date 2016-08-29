@@ -6,7 +6,26 @@ import { Router, browserHistory } from 'react-router'
 import routes from '~/client/routes/index.jsx';
 
 export const Root = React.createClass({
-  render: function () {
+  componentWillMount () {
+    console.log('componentWillMount')
+  }
+  ,
+  componentDidMount () {
+    console.log('componentDidMount')
+  }
+  ,
+  componentWillReceiveProps  () {
+    console.log('componentWillReceiveProps ')
+  }
+  ,
+  shouldComponentUpdate  () {
+    console.log('shouldComponentUpdate ')
+  }
+  ,
+  componentWillUnmount  () {
+    console.log('componentWillUnmount ')
+  }
+  , render: function () {
     return <Provider store={this.props.store}>
       <div>
         <Router history={this.props.history}>
