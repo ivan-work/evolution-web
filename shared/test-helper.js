@@ -40,17 +40,17 @@ global.window.matchMedia = window.matchMedia || (() => ({
     }
   }));
 
-//https://github.com/tleunen/react-mdl/issues/193
+////https://github.com/tleunen/react-mdl/issues/193
 require('react-mdl/extra/material');
 global.Element = global.window.Element;
 global.CustomEvent = global.window.CustomEvent;
 global.Event = global.window.Event;
 
-Object.keys(window).forEach((key) => {
-  if (!(key in global)) {
-    global[key] = window[key];
-  }
-});
+//Object.keys(window).forEach((key) => {
+//  if (!(key in global)) {
+//    global[key] = window[key];
+//  }
+//});
 
 Array.prototype.remove = function (argument) {
   const removeFn = (typeof argument === 'function'
@@ -127,6 +127,9 @@ global.mockServerStore = function (initialServerState) {
 
 global.mockClientStore = function (initialClientState) {
   const ioClient = syncSocketIOClient();
+
+  const history = createMemoryHistory('/');
+  history.listen((a) => console.log('client history', ...a));
   const clientStore = createStore(
     combineReducers({...clientReducers, routing: routerReducer})
     , initialClientState
@@ -137,7 +140,7 @@ global.mockClientStore = function (initialClientState) {
         clientStore.actions.push(action);
         next(action);
       })
-      , applyMiddleware(appRouterMiddleware(createMemoryHistory('/')))
+      , applyMiddleware(appRouterMiddleware(history))
       , applyMiddleware(socketClientMiddleware(ioClient))
     ));
   socketClientStore(ioClient, clientStore);

@@ -5,9 +5,10 @@ import {Map, fromJS} from 'immutable';
 import {UserModel} from '../../shared/models/UserModel';
 
 const getInitialUser = () => {
-  let user = !window ? null
-    : !window.sessionStorage ? null
-    : window.sessionStorage.getItem('user');
+  let user = null;
+  if (typeof (window) != 'undefined') {
+    user = window.sessionStorage.getItem('user');
+  }
   if (user != null) {
     user = JSON.parse(user);
     if (typeof user === 'object') {

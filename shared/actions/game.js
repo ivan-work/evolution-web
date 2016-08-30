@@ -55,14 +55,13 @@ export const gameClientToServer = {
     const userId = meta.user.id;
     const roomId = data.roomId;
     const room = state.getIn(['rooms', roomId]);
-    const error = room.validateCanStart(userId);
-    console.log('errrrror', error)
-    if (error === true) {
+    const validation = room.validateCanStart(userId);
+    if (validation === true) {
       const game = GameModel.new(room);
       dispatch(gameStartSuccess(game));
       dispatch(gameUpdate(game, true));
     } else {
-      dispatch(actionError(userId, error));
+      dispatch(actionError(userId, validation));
     }
   }
   , gameReadyRequest: (data, meta) => (dispatch, getState) => {
