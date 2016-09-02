@@ -1,5 +1,5 @@
 import {Map} from 'immutable';
-import { createMemoryHistory } from 'react-router';
+import { browserHistory } from 'react-router';
 import { syncHistoryWithStore as $syncHistoryWithStore, routerMiddleware, LOCATION_CHANGE } from 'react-router-redux';
 
 const routerReducerState = Map({
@@ -14,7 +14,7 @@ export const routerReducer = (state = routerReducerState, action) => {
   });
 };
 
-export const syncHistoryWithStore = (store, history = createMemoryHistory('/')) => $syncHistoryWithStore(history, store, {
+export const syncHistoryWithStore = (store, history = browserHistory) => $syncHistoryWithStore(history, store, {
   selectLocationState: (state) => state.get('routing').toJS()
 });
 

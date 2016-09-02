@@ -1,6 +1,6 @@
 import React from 'react';
 import {Route, IndexRoute} from 'react-router';
-import {App} from '../components/app/App.jsx';
+import {App} from '../components/App.jsx';
 import {LoginView, RoomsView, RoomView, GameView} from '../views/index';
 
 const MakeAuthCheck = (getState) => (nextState, replace) => {
