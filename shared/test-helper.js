@@ -78,15 +78,15 @@ import { reduxTimeout } from './utils/reduxTimeout';
 //import { reduxTimeout } from 'redux-timeout';
 import { combineReducers } from 'redux-immutable';
 import * as actions from './actions/actions';
-import { createMemoryHistory } from 'react-router';
-import {routerReducer, appRouterMiddleware} from '~/client/routing';
+import { browserHistory } from 'react-router';
+import {routerReducer, appRouterMiddleware} from '../client/configuration/routing';
 
 const clientReducers = require('../client/reducers/index');
 const serverReducers = require('../server/reducers/index');
 
 import syncSocketIOServer from './test/sync-socket-io'
 import syncSocketIOClient from './test/sync-socket-io-client'
-import {socketStore as socketClientStore, socketMiddleware as socketClientMiddleware} from '../client/socket';
+import {socketStore as socketClientStore, socketMiddleware as socketClientMiddleware} from '../client/configuration/socket';
 import {socketStore as socketServerStore, socketMiddleware as socketServerMiddleware} from '../server/socket';
 
 const mixinActions = (store => {
@@ -127,9 +127,6 @@ global.mockServerStore = function (initialServerState) {
 
 global.mockClientStore = function (initialClientState) {
   const ioClient = syncSocketIOClient();
-
-  const history = createMemoryHistory('/');
-  history.listen((a) => console.log('client history', ...a));
   const clientStore = createStore(
     combineReducers({...clientReducers, routing: routerReducer})
     , initialClientState
