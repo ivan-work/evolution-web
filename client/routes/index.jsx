@@ -19,7 +19,6 @@ export default (getState) => {
   return <Route path='/' component={App}>
     <IndexRoute component={RoomsView} onEnter={AuthCheck}/>
     <Route path='login' component={LoginView}/>
-    <Route path='test' component={LoginView}/>
     <Route path='room/*' component={RoomView} onEnter={AuthCheck}/>
     <Route path='game' component={GameView} onEnter={AuthCheck}/>
   </Route>

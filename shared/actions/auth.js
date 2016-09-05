@@ -73,10 +73,19 @@ export const logoutUser = (userId) => (dispatch, getState) => {
 
 export const loginState = (user) => (dispatch, getState) => {
   const online = getState().get('users').toArray().map(u => u.toOthers());
-  const rooms = getState().get('rooms').toJS();
+  const rooms = getState().get('rooms');
+  const room = rooms.find(room => {
+    //console.log(user.id, room)
+    //console.log(room.users.indexOf(user.id))
+    //console.log(~room.users.indexOf(user.id))
+    //console.log(!~room.users.indexOf(user.id))
+    return ~room.users.indexOf(user.id);
+  }) || null;
+  console.log('room', room)
+  const game = null;
   dispatch({
     type: 'loginState'
-    , data: {online, rooms}
+    , data: {online, rooms, room, game}
     , meta: {userId: user.id}
   });
 };
@@ -92,6 +101,7 @@ export const authClientToServer = {
     const state = getState();
     const login = data.login;
 
+    console.log('login user request', meta.user)
     if (meta.user == void 0 || meta.user.token == void 0) {
       if (!login) {
         dispatch(loginUserFailure(meta.connectionId, 'Login is not supplied'));
@@ -119,6 +129,7 @@ export const authClientToServer = {
         dispatch(loginUserFailure(meta.connectionId, 'Duplicate tabs are not supported'));
         return;
       }
+      console.log('login user request success')
       const user = userExists.set('connectionId', meta.connectionId);
       dispatch(cancelTimeout('logoutUser' + user.id));
       dispatch(loginUserSuccess(user, data.redirect));

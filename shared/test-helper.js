@@ -1,11 +1,10 @@
 //require('source-map-support').install();
-
+import polyfills from '../shared/utils/polyfills'
 import chai from 'chai';
 import sinon from 'sinon';
 import chaiImmutable from 'chai-immutable';
 import jsdom from 'jsdom';
 import {shallow, mount} from 'enzyme';
-
 
 chai.use(chaiImmutable);
 chai.config.includeStack = true;
@@ -45,6 +44,8 @@ require('react-mdl/extra/material');
 global.Element = global.window.Element;
 global.CustomEvent = global.window.CustomEvent;
 global.Event = global.window.Event;
+global.NodeList = global.window.NodeList;
+global.Node = global.window.Node;
 
 //Object.keys(window).forEach((key) => {
 //  if (!(key in global)) {
@@ -52,18 +53,15 @@ global.Event = global.window.Event;
 //  }
 //});
 
-Array.prototype.remove = function (argument) {
-  const removeFn = (typeof argument === 'function'
-    ? argument
-    : (item) => item === argument);
-  for (var i = 0; i < this.length; i++) {
-    if (removeFn(this[i])) {
-      this.splice(i, 1);
-      break;
-    }
-  }
-  return this;
-};
+//let warn = console.error;
+//console.error = function(warning) {
+//  if (/^Warning: (Invalid prop|Failed prop type)/.test(warning)) {
+//    //console.error('uhh', warning)
+//    console.log(warning);
+//    throw new Error('Invalid prop/Failed prop type');
+//  }
+//  warn.apply(console, arguments);
+//};
 
 process.env.TEST = true;
 process.env.DEBUG = '*';
@@ -78,8 +76,8 @@ import { reduxTimeout } from './utils/reduxTimeout';
 //import { reduxTimeout } from 'redux-timeout';
 import { combineReducers } from 'redux-immutable';
 import * as actions from './actions/actions';
-import { browserHistory } from 'react-router';
-import {routerReducer, appRouterMiddleware} from '../client/configuration/routing';
+import { createMemoryHistory } from 'react-router';
+import {routerReducer, appRouterMiddleware, syncHistoryWithStore} from '../client/configuration/routing';
 
 const clientReducers = require('../client/reducers/index');
 const serverReducers = require('../server/reducers/index');
@@ -127,6 +125,7 @@ global.mockServerStore = function (initialServerState) {
 
 global.mockClientStore = function (initialClientState) {
   const ioClient = syncSocketIOClient();
+  const history = createMemoryHistory('/');
   const clientStore = createStore(
     combineReducers({...clientReducers, routing: routerReducer})
     , initialClientState
@@ -142,6 +141,7 @@ global.mockClientStore = function (initialClientState) {
     ));
   socketClientStore(ioClient, clientStore);
 
+  clientStore.getHistory = () => history;
   clientStore.getClient = () => ioClient;
   clientStore.getSocket = () => ioClient.socket;
   clientStore.getConnectionId = () => ioClient.id;
@@ -170,7 +170,7 @@ global.mockStores = (count = 2, initialServerStore = void 0) => {
   const UserSpy = sandbox.spy(UserModel, 'new');
   for (let i = 0; i < count; ++i) {
     const clientStore = mockClientStore().connect(serverStore);
-    clientStore.dispatch(loginUserRequest('/test', 'User' + i, 'testPassword'));
+    clientStore.dispatch(loginUserRequest('/', 'User' + i, 'testPassword'));
     const User = UserSpy.lastCall.returnValue;
     result.push({
       ['clientStore' + i]: clientStore

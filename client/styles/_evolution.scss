@@ -1,4 +1,10 @@
 .Game {
+  .CardCollection {
+    position: absolute;
+    .Card {
+      position: absolute;
+    }
+  }
   .Board {
     background: #eee
   }

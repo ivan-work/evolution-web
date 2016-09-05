@@ -17,7 +17,7 @@ export const Rooms = React.createClass({
       <div>Hello {this.props.username}</div>
       <div>Online: <UsersList list={this.props.online}/></div>
       <div>Rooms: <RoomsList map={this.props.rooms} onItemClick={this.props.actions.roomJoinRequest}/></div>
-      <MDL.Button raised colored onClick={this.props.actions.roomCreateRequest}>Create room</MDL.Button>
+      <MDL.Button raised colored id="Rooms$create" onClick={this.props.actions.roomCreateRequest}>Create room</MDL.Button>
     </div>;
   }
 });
