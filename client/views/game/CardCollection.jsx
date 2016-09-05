@@ -42,7 +42,7 @@ export class CardCollection extends React.Component {
   render() {
     const user = this.props.user;
     const game = this.props.game;
-    return <div className="CardCollection">
+    return <div className="CardCollection" style={this.props.position}>
       {this.state.map((cardModel, index) => {
         return <Card
           key={index} index={index}

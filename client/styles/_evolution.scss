@@ -3,6 +3,10 @@
     position: absolute;
     .Card {
       position: absolute;
+      border: 1px solid black;
+      background: gray;
+      width: 60px;
+      height: 80px;
     }
   }
   .Board {

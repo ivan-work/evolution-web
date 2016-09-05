@@ -15,8 +15,10 @@ export class Card extends React.Component {
 
   render() {
     const model = this.props.model;
-    return <div
-      className='card'>
+    return <div className='Card' style={{
+      top: this.props.defaultPosition[0] + 'px'
+      , left: this.props.defaultPosition[1] + 'px'
+    }}>
       <div className='inner'>
         {this.props.index}
         <br/>{model.name}
