@@ -71,9 +71,15 @@ describe('Game:', function () {
     clientStore0.dispatch(gameStartRequest(roomId));
     clientStore0.dispatch(gameReadyRequest());
     clientStore1.dispatch(gameReadyRequest());
+    const gameId = serverStore.getState().get('games').first().id;
 
     clientStore1.getClient().disconnect();
 
     expect(ClientGame1()).null;
+
+    clientStore1.connect(serverStore);
+
+    expect(ClientGame1()).ok;
+    expect(ClientGame1().id).equal(gameId);
   });
 });

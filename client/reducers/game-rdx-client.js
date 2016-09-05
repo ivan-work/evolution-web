@@ -4,7 +4,8 @@ import {GameModel, GameModelClient} from '~/shared/models/game/GameModel';
 import {STATE_READY} from '~/shared/models/game/PlayerModel';
 
 export const reducer = createReducer(null, {
-  gameUpdate: (state, data) => {
+  loginState: (state, {game}) => game
+  , gameUpdate: (state, data) => {
     ensureParameter(data.userId, 'string');
     ensureParameter(data.game, GameModel);
     return GameModelClient.fromGameModel(data.game, data.userId);

@@ -24,7 +24,6 @@ class SyncSocketIOClient extends EventEmitter {
     this.id = uuid.v4().substr(0, 6);
 
     this.socket = new SyncSocketIOClientSocket(this);
-    this.socket.id = this.id;
 
     this.rooms = [];
 
@@ -49,6 +48,7 @@ class SyncSocketIOClient extends EventEmitter {
     }
     this.server = server.server;
     this.connected = true;
+    this.socket.id = uuid.v4().substr(0, 6);
 
     [this.id, normalizeNamespace(namespace)]
       .filter(name => name != void 0)
@@ -69,6 +69,9 @@ class SyncSocketIOClient extends EventEmitter {
 
     this.server = null;
     this.connected = false;
+
+    this.socket.removeAllListeners();
+    //this.removeAllListeners();
 
     return this;
   }

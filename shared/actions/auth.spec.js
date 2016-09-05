@@ -166,56 +166,65 @@ describe('Auth:', function () {
       expect(serverStore.getState().get('users')).equal(Map({[User.id]: User.set('connectionId', clientStore0.getConnectionId())}));
       expect(serverStore.getState().get('connections')).equal(Map({[clientStore0.getConnectionId()]: clientStore0.getSocket()}));
 
+      setTimeout(() => {
+        // Check for login timeout
+        expect(serverStore.getState().get('users')).equal(Map({[User.id]: User.set('connectionId', clientStore0.getConnectionId())}));
+        expect(serverStore.getState().get('connections')).equal(Map({[clientStore0.getConnectionId()]: clientStore0.getSocket()}));
+        done();
+      }, 5);
+    });
+
+    it('Remembers User from another store', (done) => {
+      const serverStore = mockServerStore();
+      const clientStore0 = mockClientStore().connect(serverStore);
+
+      clientStore0.dispatch(loginUserRequest('/test', 'testLogin', 'testPassword'));
+      const User = UserSpy.lastCall.returnValue;
+
+      //console.log('serverStore', serverStore.clearActions());
+      serverStore.clearActions();
+      clientStore0.clearActions();
+
       clientStore0.getClient().disconnect();
 
       expect(serverStore.getState().get('users')).equal(Map({[User.id]: User}));
       expect(serverStore.getState().get('connections')).equal(Map());
 
-      clientStore0.connect(serverStore);
+      const clientStore1 = mockClientStore(Map({user: User})).connect(serverStore);
 
-      expect(serverStore.getState().get('users')).equal(Map({[User.id]: User.set('connectionId', clientStore0.getConnectionId())}));
-      expect(serverStore.getState().get('connections')).equal(Map({[clientStore0.getConnectionId()]: clientStore0.getSocket()}));
+      expect(serverStore.getState().get('users')).equal(Map({[User.id]: User.set('connectionId', clientStore1.getConnectionId())}));
+      expect(serverStore.getState().get('connections')).equal(Map({[clientStore1.getConnectionId()]: clientStore1.getSocket()}));
 
-      //console.log(clientStore0.getClient())
-      //console.log(serverStore.getActions())
-
-      //const clientStore1 = mockClientStore(Map({user: User})).connect(serverStore);
-      //
-      //expect(serverStore.getState().get('users')).equal(Map({[User.id]: User.set('connectionId', clientStore1.getConnectionId())}));
-      //expect(serverStore.getState().get('connections')).equal(Map({[clientStore1.getConnectionId()]: clientStore1.getSocket()}));
-      //
-      //setTimeout(() => {
-      //  //console.log('serverStore', serverStore.getActions());
-      //  // Check for login timeout
-      //  expect(serverStore.getState().get('users')).equal(Map({
-      //    [User.id]: User.set('connectionId', clientStore1.getConnectionId())
-      //  }));
-      //  expect(serverStore.getState().get('connections')).equal(Map({[clientStore1.getConnectionId()]: clientStore1.getSocket()}));
+      setTimeout(() => {
+        // Check for login timeout
+        expect(serverStore.getState().get('users')).equal(Map({[User.id]: User.set('connectionId', clientStore1.getConnectionId())}));
+        expect(serverStore.getState().get('connections')).equal(Map({[clientStore1.getConnectionId()]: clientStore1.getSocket()}));
         done();
-      //}, 20);
+      }, 5);
     });
 
-    //it('Doesnt allow two Users:', (done) => {
-    //  const serverStore = mockServerStore();
-    //  const clientStore0 = mockClientStore().connect(serverStore);
-    //  clientStore0.dispatch(loginUserRequest('/test', 'testLogin', 'testPassword'));
-    //  const User = UserSpy.lastCall.returnValue;
-    //  //console.log('serverStore', serverStore.clearActions());
-    //  const clientStore1 = mockClientStore(Map({user: User})).connect(serverStore);
-    //
-    //  expect(serverStore.getState().get('users')).equal(Map({[User.id]: User}));
-    //  expect(serverStore.getState().get('connections')).equal(Map({
-    //    [clientStore0.getConnectionId()]: clientStore0.getSocket()
-    //    , [clientStore1.getConnectionId()]: clientStore1.getSocket()
-    //  }));
-    //  setTimeout(() => {
-    //    expect(serverStore.getState().get('users')).equal(Map({[User.id]: User}));
-    //    expect(serverStore.getState().get('connections')).equal(Map({
-    //      [clientStore0.getConnectionId()]: clientStore0.getSocket()
-    //      , [clientStore1.getConnectionId()]: clientStore1.getSocket()
-    //    }));
-    //    done();
-    //  }, 20);
-    //});
+    it('Doesnt allow two Users:', (done) => {
+      const serverStore = mockServerStore();
+      const clientStore0 = mockClientStore().connect(serverStore);
+
+      clientStore0.dispatch(loginUserRequest('/test', 'testLogin', 'testPassword'));
+      const User = UserSpy.lastCall.returnValue;
+
+      const clientStore1 = mockClientStore(Map({user: User})).connect(serverStore);
+
+      expect(serverStore.getState().get('users')).equal(Map({[User.id]: User}));
+      expect(serverStore.getState().get('connections')).equal(Map({
+        [clientStore0.getConnectionId()]: clientStore0.getSocket()
+        , [clientStore1.getConnectionId()]: clientStore1.getSocket()
+      }));
+      setTimeout(() => {
+        expect(serverStore.getState().get('users')).equal(Map({[User.id]: User}));
+        expect(serverStore.getState().get('connections')).equal(Map({
+          [clientStore0.getConnectionId()]: clientStore0.getSocket()
+          , [clientStore1.getConnectionId()]: clientStore1.getSocket()
+        }));
+        done();
+      }, 5);
+    });
   });
 });
