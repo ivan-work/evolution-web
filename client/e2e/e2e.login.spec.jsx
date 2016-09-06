@@ -16,7 +16,6 @@ describe('e2e (login): ', () => {
     expect($client0.find('Rooms').length).equal(0);
     expect($client0.find('Login').length).equal(1);
   });
-
   it('Should not redirect to login', () => {
     const serverStore = mockServerStore();
     const clientStore0 = mockClientStore().connect(serverStore);
