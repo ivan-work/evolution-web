@@ -17,12 +17,12 @@ export class RoomModel extends Record({
     });
   }
 
-  static new(userId) {
+  static new() {
     const id = uuid.v4().slice(0, 6);
     return new RoomModel({
       id: id
       , name: "Room " + id
-      , users: userId ? List.of(userId) : List()
+      , users: List()
     })
   }
 
@@ -31,15 +31,19 @@ export class RoomModel extends Record({
     return this.update('users', (users) => users.push(userId))
   }
 
+  hasUser(userId) {
+    ensureParameter(userId, 'string');
+    return !!~this.users.indexOf(userId);
+  }
+
   leave(userId) {
     ensureParameter(userId, 'string');
     let index = this.users.indexOf(userId);
-    let newRoom;
-    if (index === -1) throw new Error(RoomModel.ERRORS.room_error_user_not_in_room);
     return (this.users.size == 1
-        ? null
-        : this.update('users', users => users.remove(index))
-    );
+      ? null
+      : !~index
+      ? this
+      : this.update('users', users => users.remove(index)));
   }
 
   validateCanStart(userId) {

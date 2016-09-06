@@ -1,9 +1,14 @@
 import {createReducer} from '~/shared/utils';
-import {Map, List} from 'immutable';
-import {RoomModel} from '~/shared/models/RoomModel';
+import {Map} from 'immutable';
 
-export const reducer = createReducer(Map(), {
-  loginState: (state, data) => data.rooms
-  , roomUpdate: (state, data) => data.room != null ? state.set(data.roomId, data.room) : state.remove(data.roomId)
-  , clientSelfDisconnect: (state, data) => Map()
+import {roomJoinSuccess, roomExitSuccess} from '../../server/reducers/rooms-rdx-server';
+
+const initialState = Map();
+
+export const reducer = createReducer(initialState, {
+  loginUserSuccess: (state, {rooms}) => rooms
+  , roomCreateSuccess: (state, {room}) => state.set(room.id, room)
+  , roomJoinSuccess
+  , roomExitSuccess
+  , clientDisconnectSelf: (state, data) => initialState
 });
