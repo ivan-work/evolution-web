@@ -9,7 +9,7 @@ import {PlayerModel} from '../models/game/PlayerModel';
 import {SOCKET_DISCONNECT_NOW, roomCreateRequest, roomJoinRequest, gameStartRequest, gameReadyRequest} from '../actions/actions';
 
 describe('Game:', function () {
-  it('Start for two:', () => {
+  it('Start for two', () => {
     const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
     clientStore0.dispatch(roomCreateRequest());
     const roomId = serverStore.getState().get('rooms').first().id;
@@ -61,7 +61,7 @@ describe('Game:', function () {
     expect(ClientGame1().getIn(['players', User0.id, 'hand'])).equal(6);
   });
 
-  it('Reload:', () => {
+  it('Reload', () => {
     const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
     clientStore0.dispatch(roomCreateRequest());
     const roomId = serverStore.getState().get('rooms').first().id;

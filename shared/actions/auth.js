@@ -1,6 +1,6 @@
 import {UserModel} from '../models/UserModel';
 import {RoomModel} from '../models/RoomModel';
-import {GameModel} from '../models/game/GameModel';
+import {GameModel, GameModelClient} from '../models/game/GameModel';
 import {List, Map} from 'immutable';
 import {push} from 'react-router-redux';
 import {roomsClientToServer} from './rooms';
@@ -82,9 +82,10 @@ export const loginState = (user) => (dispatch, getState) => {
   const room = rooms.find(room => ~room.users.indexOf(user.id)) || {id: null};
   const roomId = room.id;
   const game = games.find(game => game.roomId === roomId) || null;
+  const clientGame = game !== null ? game.toClient(user.id) : null;
   dispatch({
     type: 'loginState'
-    , data: {user, online, rooms, roomId, game}
+    , data: {online, rooms, roomId, game: clientGame}
     , meta: {userId: user.id}
   });
 };
@@ -143,22 +144,25 @@ export const authServerToClient = {
     dispatch(loginUserSuccess(new UserModel(data.user)));
     dispatch(push(data.redirect || '/'));
   }
-  , loginUserFailure: (message) => ({
-    type: 'loginUserFailure'
-    , data: message
-  })
+, loginUserFailure: (message) => (dispatch) => {
+    dispatch({
+      type: 'loginUserFailure'
+      , data: message
+    });
+    dispatch(push('/login'));
+  }
   , logoutUser: (data) => ({
     type: 'logoutUser'
     , data: {userId: data.userId}
   })
-  , loginState: ({user, online, rooms, roomId, game}) => ({
+  , loginState: ({online, rooms, roomId, game}, user) => ({
     type: 'loginState'
     , data: {
       user
       , online: List(online.map(u => new UserModel(u).toOthers()))
       , rooms: Map(rooms).map(r => RoomModel.fromJS(r))
       , roomId
-      , game: GameModel.fromServer(game)
+      , game: GameModelClient.fromServer(game, user.id)
     }
   })
   , onlineJoin: (data) => ({

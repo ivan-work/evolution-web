@@ -22,10 +22,16 @@ describe('Game', () => {
       clientStore0.dispatch(roomJoinRequest(roomId));
       clientStore1.dispatch(roomJoinRequest(roomId));
       clientStore0.dispatch(gameStartRequest(roomId));
+      clientStore0.dispatch(gameReadyRequest());
+      clientStore1.dispatch(gameReadyRequest());
 
       const $Game = shallow(<GameView store={clientStore0}/>).shallow();
 
+      expect($Game.find({name: 'Deck'}).props().count, 'Deck.count > 0').above(0);
+      expect($Game.find({name: 'Hand'}).props().cards.size, 'Hand.size > 0').above(0);
+
       //console.log(clientStore0.getState().get('game'))
       //console.log($Game.debug())
+      //console.log($Game.find({name: 'Hand'}).props().cards.size)
     });
 });

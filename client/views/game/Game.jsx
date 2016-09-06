@@ -8,29 +8,32 @@ import * as MDL from 'react-mdl';
 
 import {UserModel} from '~/shared/models/UserModel';
 import {GameModelClient} from '~/shared/models/game/GameModel';
+import {CardModel} from '~/shared/models/game/CardModel';
 import {gameReadyRequest} from '~/shared/actions/actions';
 
 import {CardCollection} from './CardCollection.jsx';
 
 import {redirectTo} from '~/shared/utils'
 
+const DECK_POSITION = {left: '50%', top: '50%'};
+const PLAYER_POSITION = {left: '10%', bottom: '100px'};
 const CARD_POSITIONS = {
   0: null
   , 1: null
   , 2: {
-    deck: {left: '50%', top: '50%'}
-    , player: {left: '50%', bottom: 0}
-    , 0: {top: 0, left: '50%'}
+    deck: DECK_POSITION
+    , player: PLAYER_POSITION
+    , 0: {top: '80px', left: '50%', transform: 'rotate(180deg)'}
   }
   , 3: {
-    deck: {right: 0, top: 0}
-    , player: {left: '50%', bottom: 0}
+    deck: DECK_POSITION
+    , player: PLAYER_POSITION
     , 0: {top: 0, left: '50%'}
     , 1: {top: 0, left: '50%'}
   }
   , 4: {
-    deck: {right: 0, top: 0}
-    , player: {left: '50%', bottom: 0}
+    deck: DECK_POSITION
+    , player: PLAYER_POSITION
     , 0: {top: 0, left: '50%'}
     , 1: {top: 0, left: '50%'}
   }
@@ -47,15 +50,17 @@ export class Game extends React.Component {
   }
 
   componentDidMount() {
-    //console.log('game did mount');
-    this.props.$ready();
+    if (this.ready)
+      this.props.$ready();
   }
 
   render() {
     const user = this.props.user;
     const game = this.props.game;
-    //console.log('GameRender: =====')
-    //console.log('game', game.toJS())
+    if (!user || !game) return <div>Loading</div>;
+    this.ready = true;
+    console.log('GameRender: =====')
+    console.log('game', game.hand.toJS())
     return <div className="Game">
       <CardCollection
         ref="Deck" name="Deck"
@@ -64,8 +69,8 @@ export class Game extends React.Component {
         count={game.deck}/>
       <CardCollection
         ref="Hand" name="Hand"
-        position={CARD_POSITIONS[game.players.size][0]}
-        shift={[10, 10]}
+        position={CARD_POSITIONS[game.players.size].player}
+        shift={[0, 60]}
         cards={game.hand}/>
       {
         game.players.valueSeq()
@@ -74,7 +79,7 @@ export class Game extends React.Component {
           return <CardCollection
             ref={player.id} name={player.id} key={player.id}
             position={CARD_POSITIONS[game.players.size][i]}
-            shift={[-25, 1]}
+            shift={[0, 10]}
             count={player.hand}/>
           })
         }

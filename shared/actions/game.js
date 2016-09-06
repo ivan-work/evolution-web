@@ -46,7 +46,7 @@ export const gameUpdate = (game, redirect = false) => (dispatch, getState) => {
 
 export const gameUpdate_Client = (game, userId) => ({
   type: 'gameUpdate',
-  data: {userId, game: GameModel.fromServer(game)}
+  data: {userId, game: GameModelClient.fromServer(game, userId)}
 });
 
 export const gameClientToServer = {
@@ -84,9 +84,9 @@ export const gameClientToServer = {
 };
 
 export const gameServerToClient = {
-  gameUpdate: (data, user) => (dispatch) => {
-    dispatch(gameUpdate_Client(data.game, user.id));
-    if (data.redirect) {
+  gameUpdate: ({game, redirect}, user) => (dispatch) => {
+    dispatch(gameUpdate_Client(game, user.id));
+    if (redirect) {
       dispatch(push('/game'));
     }
   }

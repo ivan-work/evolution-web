@@ -29,7 +29,7 @@ export class CardCollection extends React.Component {
 
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     if (props.cards) {
       this.state = props.cards
     } else if (typeof props.count === 'number') {
@@ -39,9 +39,18 @@ export class CardCollection extends React.Component {
     }
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.cards) {
+      this.state = nextProps.cards
+    } else if (typeof nextProps.count === 'number') {
+      this.state = CardModel.generate(nextProps.count)
+    } else {
+      throw new Error(`CardCollection[${this.props.name}] doesnt have .cards or .count`)
+    }
+  }
+
   render() {
-    const user = this.props.user;
-    const game = this.props.game;
+    //console.log(this.state)
     return <div className="CardCollection" style={this.props.position}>
       {this.state.map((cardModel, index) => {
         return <Card
