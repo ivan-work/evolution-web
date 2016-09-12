@@ -157,6 +157,8 @@ global.mockClientStore = function (initialClientState) {
     return clientStore;
   };
 
+  clientStore.disconnect = (reason) => clientStore.getClient().disconnect(reason);
+
   mixinActions(clientStore);
 
   return clientStore

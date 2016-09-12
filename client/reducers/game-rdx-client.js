@@ -5,7 +5,7 @@ import {GameModel, GameModelClient} from '~/shared/models/game/GameModel';
 export const reducer = createReducer(null, {
   loginUserSuccess: (state, {game}) => game
   , gameCreateSuccess: (state, {game}) => game
-  , gamePlayerStatusChange: (game, {userId, status}) => game.setIn(['players', userId, 'state'], status)
+  , gamePlayerStatusChange: (game, {userId, status}) => game.setIn(['players', userId, 'status'], status)
   , gameGiveCards: (game, {userId, cards}) => {
     ensureParameter(userId, 'string');
     ensureParameter(cards, List);

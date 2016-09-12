@@ -4,6 +4,7 @@ import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
 
 import uuid from 'node-uuid';
+import {ensureParameter} from '~/shared/utils';
 
 export class GameModel extends Record({
   id: null
@@ -34,6 +35,13 @@ export class GameModel extends Record({
       , deck: CardModel.generate(24)
       , players: room.users.reduce((result, userId) => result.set(userId, PlayerModel.new(userId)), Map())
     })
+  }
+
+  leave(userId) {
+    ensureParameter(userId, 'string');
+    return (this.players.size == 1
+      ? null
+      : this.removeIn(['players', userId]));
   }
 }
 

@@ -25,6 +25,7 @@ export const socketDisconnect = (connectionId, reason) => (dispatch, getState) =
     type: 'socketDisconnect'
     , data: {connectionId}
   });
+  //console.log('socket Disconnect', !!user)
   if (!!user) {
     if (reason !== SOCKET_DISCONNECT_NOW) {
       dispatch(addTimeout(
@@ -35,6 +36,7 @@ export const socketDisconnect = (connectionId, reason) => (dispatch, getState) =
       dispatch(logoutUser(user.id));
     }
   }
+  //console.log(' ')
 };
 
 export const loginUserRequest = (redirect, login, password) => {
