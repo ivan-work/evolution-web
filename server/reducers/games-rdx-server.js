@@ -3,15 +3,17 @@ import {Map, List} from 'immutable';
 import {STATE_READY} from '~/shared/models/game/PlayerModel';
 
 export const reducer = createReducer(Map(), {
-  gameStartSuccess: (state, data) => state.set(data.game.id, data.game)
-  , gameReadySuccess: (state, data) => state.setIn([data.gameId, 'players', data.userId, 'status'], STATE_READY)
-  , gameGiveCards: (state, data) => {
-    ensureParameter(data.gameId, 'string');
-    ensureParameter(data.userId, 'string');
-    ensureParameter(data.cards, List);
-    return state.update(data.gameId, game => game
-      .update('deck', deck => deck.skip(data.cards.size))
-      .updateIn(['players', data.userId, 'hand'], hand => hand.concat(data.cards))
+  gameCreateSuccess: (state, {game}) => {
+    console.log('gameCreateSuccess')
+    return state.set(game.id, game)}
+  , gamePlayerStatusChange: (state, {gameId, userId, status}) => state.setIn([gameId, 'players', userId, 'status'], status)
+  , gameGiveCards: (state, {gameId, userId, cards}) => {
+    ensureParameter(gameId, 'string');
+    ensureParameter(userId, 'string');
+    ensureParameter(cards, List);
+    return state.update(gameId, game => game
+      .update('deck', deck => deck.skip(cards.size))
+      .updateIn(['players', userId, 'hand'], hand => hand.concat(cards))
     );
   }
 });

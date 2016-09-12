@@ -61,11 +61,11 @@ describe('Rooms:', function () {
       clientStore1.dispatch(roomJoinRequest(Room.id));
       clientStore0.dispatch(roomExitRequest());
 
-      expect(selectRoom(serverStore, Room.id).users).equal(List.of(User1.id));
+      expect(selectRoom(serverStore.getState, Room.id).users).equal(List.of(User1.id));
       expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(null);
-      expect(selectRoom(clientStore0, Room.id).users, 'clientStore0.rooms').equal(List.of(User1.id));
+      expect(selectRoom(clientStore0.getState, Room.id).users, 'clientStore0.rooms').equal(List.of(User1.id));
       expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
-      expect(selectRoom(clientStore1, Room.id).users, 'clientStore1.rooms').equal(List.of(User1.id));
+      expect(selectRoom(clientStore1.getState, Room.id).users, 'clientStore1.rooms').equal(List.of(User1.id));
 
       clientStore1.dispatch(roomExitRequest());
 
@@ -85,11 +85,11 @@ describe('Rooms:', function () {
       serverStore.clearActions();
       clientStore0.getClient().disconnect();
       setTimeout(() => {
-        expect(selectRoom(serverStore, Room.id).users).equal(List.of(User1.id));
+        expect(selectRoom(serverStore.getState, Room.id).users).equal(List.of(User1.id));
         expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(null);
         expect(clientStore0.getState().get('rooms')).equal(Map());
         expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
-        expect(selectRoom(clientStore1, Room.id).users).equal(List.of(User1.id));
+        expect(selectRoom(clientStore1.getState, Room.id).users).equal(List.of(User1.id));
 
         clientStore1.getClient().disconnect();
 
@@ -112,27 +112,27 @@ describe('Rooms:', function () {
       clientStore0.clearActions();
       clientStore0.getClient().disconnect();
 
-      expect(selectRoom(serverStore, Room.id).users).equal(List.of(User0.id, User1.id));
+      expect(selectRoom(serverStore.getState, Room.id).users).equal(List.of(User0.id, User1.id));
       expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(null);
       expect(clientStore0.getState().get('rooms')).equal(Map());
       expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
-      expect(selectRoom(clientStore1, Room.id).users).equal(List.of(User0.id, User1.id));
+      expect(selectRoom(clientStore1.getState, Room.id).users).equal(List.of(User0.id, User1.id));
 
       clientStore0.connect(serverStore);
 
       //TODO enable rejoin func
       expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(Room.id);
       expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
-      expect(selectRoom(serverStore, Room.id).users).equal(List.of(User0.id, User1.id));
-      expect(selectRoom(clientStore0, Room.id).users).equal(List.of(User0.id, User1.id));
-      expect(selectRoom(clientStore1, Room.id).users).equal(List.of(User0.id, User1.id));
+      expect(selectRoom(serverStore.getState, Room.id).users).equal(List.of(User0.id, User1.id));
+      expect(selectRoom(clientStore0.getState, Room.id).users).equal(List.of(User0.id, User1.id));
+      expect(selectRoom(clientStore1.getState, Room.id).users).equal(List.of(User0.id, User1.id));
 
       setTimeout(() => {
         expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(Room.id);
         expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
-        expect(selectRoom(serverStore, Room.id).users).equal(List.of(User0.id, User1.id));
-        expect(selectRoom(clientStore0, Room.id).users).equal(List.of(User0.id, User1.id));
-        expect(selectRoom(clientStore1, Room.id).users).equal(List.of(User0.id, User1.id));
+        expect(selectRoom(serverStore.getState, Room.id).users).equal(List.of(User0.id, User1.id));
+        expect(selectRoom(clientStore0.getState, Room.id).users).equal(List.of(User0.id, User1.id));
+        expect(selectRoom(clientStore1.getState, Room.id).users).equal(List.of(User0.id, User1.id));
       }, 5);
       done();
     });

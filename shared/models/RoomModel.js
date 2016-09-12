@@ -7,6 +7,7 @@ export class RoomModel extends Record({
   , name: null
   , maxSize: 4
   , users: List()
+  , gameId: null
 }) {
   static fromJS(js) {
     return js == null

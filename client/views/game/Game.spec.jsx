@@ -6,7 +6,7 @@ import {UserModel} from '../../../shared/models/UserModel';
 import {RoomModel} from '../../../shared/models/RoomModel';
 import {GameModel, GameModelClient} from '../../../shared/models/game/GameModel';
 import {CardModel} from '../../../shared/models/game/CardModel';
-import {roomCreateRequest, roomJoinRequest, gameStartRequest, gameReadyRequest} from '../../../shared/actions/actions';
+import {roomCreateRequest, roomJoinRequest, gameCreateRequest, gameReadyRequest} from '../../../shared/actions/actions';
 
 describe('Game', () => {
   //describe('Empty Navigation', () => {
@@ -21,7 +21,7 @@ describe('Game', () => {
       const roomId = serverStore.getState().get('rooms').first().id;
       clientStore0.dispatch(roomJoinRequest(roomId));
       clientStore1.dispatch(roomJoinRequest(roomId));
-      clientStore0.dispatch(gameStartRequest(roomId));
+      clientStore0.dispatch(gameCreateRequest(roomId));
       clientStore0.dispatch(gameReadyRequest());
       clientStore1.dispatch(gameReadyRequest());
 

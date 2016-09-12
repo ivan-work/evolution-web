@@ -7,7 +7,7 @@ import {Map} from 'immutable';
 import * as MDL from 'react-mdl';
 import {UsersList} from './UsersList.jsx';
 
-import {roomExitRequest, gameStartRequest} from '~/shared/actions/actions';
+import {roomExitRequest, gameCreateRequest} from '~/shared/actions/actions';
 import {RoomModel} from '~/shared/models/RoomModel';
 
 export const Room = React.createClass({
@@ -39,6 +39,6 @@ export const RoomView = connect(
   , (dispatch) => ({
     $back: () => dispatch(push(`/`))
     , $exit: () => dispatch(roomExitRequest())
-    , $start: roomId => () => dispatch(gameStartRequest(roomId))
+    , $start: roomId => () => dispatch(gameCreateRequest(roomId))
   })
 )(Room);
