@@ -51,10 +51,11 @@ export class CardCollection extends React.Component {
   }
 
   render() {
-    //console.log(this.state)
+    console.log(this.props.draggableCards)
     return <div className="CardCollection" style={this.props.position}>
       {this.state.map((cardModel, index) => {
         return <Card
+          draggable={this.props.draggableCards}
           key={index} index={index}
           defaultPosition={[this.props.shift[0] * index, this.props.shift[1] * index]}
           model={cardModel}

@@ -11,11 +11,12 @@ import {GameModelClient} from '~/shared/models/game/GameModel';
 import {CardModel} from '~/shared/models/game/CardModel';
 import {gameReadyRequest} from '~/shared/actions/actions';
 
+import {Board} from './Board.jsx';
 import {CardCollection} from './CardCollection.jsx';
 
 import {redirectTo} from '~/shared/utils'
 
-const DECK_POSITION = {left: '50%', top: '50%'};
+const DECK_POSITION = {right: '0', top: '50%'};
 const PLAYER_POSITION = {left: '10%', bottom: '100px'};
 const CARD_POSITIONS = {
   0: null
@@ -62,13 +63,14 @@ export class Game extends React.Component {
     //console.log('GameRender: =====')
     //console.log('game', game.hand.toJS())
     return <div className="Game">
+      <Board/>
       <CardCollection
         ref="Deck" name="Deck"
         position={CARD_POSITIONS[game.players.size].deck}
         shift={[1, 2]}
         count={game.deck}/>
       <CardCollection
-        ref="Hand" name="Hand"
+        ref="Hand" name="Hand" draggableCards
         position={CARD_POSITIONS[game.players.size].player}
         shift={[0, 60]}
         cards={game.hand}/>
