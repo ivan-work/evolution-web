@@ -19,34 +19,39 @@ describe('Game', () => {
   //  const $Game = shallow(<GameView store={clientStore0}/>).shallow();
   //  //expect('asdf').ok;
   //});
-
-  const user = new UserModel({
-    id: 'User0'
-    , login: 'User0'
-    , status: STATUS.OFFLINE
-  });
   const hand = CardModel.generate(TEST_HAND_SIZE);
-  const game = new GameModelClient({
-    id: null
-    , roomId: null
-    , deck: TEST_DECK_SIZE - TEST_HAND_SIZE - TEST_HAND_SIZE
-    , players: List.of(new PlayerModel({
+  const props = {
+    user: new UserModel({
       id: 'User0'
-      , hand: hand
-      , status: STATUS.LOADING
-    }), new PlayerModel({
-      id: 'User1'
-      , hand: TEST_HAND_SIZE
-      , status: STATUS.LOADING
-    }))
-    , board: null
-    , hand
-  });
+      , login: 'User0'
+      , status: STATUS.OFFLINE
+    })
+    , game: new GameModelClient({
+      id: null
+      , userId: 'User0'
+      , roomId: null
+      , deck: TEST_DECK_SIZE - TEST_HAND_SIZE - TEST_HAND_SIZE
+      , players: Map({
+        User0: new PlayerModel({
+          id: 'User0'
+          , hand: hand
+          , status: STATUS.LOADING
+        })
+        , User1: new PlayerModel({
+          id: 'User1'
+          , hand: TEST_HAND_SIZE
+          , status: STATUS.LOADING
+        })
+      })
+    })
+    , $ready: () => {}
+    , $playCard: () => {}
+  };
 
   it('Displays default game', () => {
-    const $Game = shallow(<Game game={game} user={user} />);
+    const $Game = shallow(<Game {...props}/>);
 
-    expect($Game.find({name: 'Deck'}).props().children.length, 'Deck.length> 0').equal(TEST_DECK_SIZE - TEST_HAND_SIZE - TEST_HAND_SIZE);
+    expect($Game.find({name: 'Deck'}).props().children.length, 'Deck.length > 0').equal(TEST_DECK_SIZE - TEST_HAND_SIZE - TEST_HAND_SIZE);
     expect($Game.find({name: 'Hand'}).props().children.length, 'Hand.length > 0').equal(TEST_HAND_SIZE);
 
     //console.log(clientStore0.getState().get('game'))
@@ -56,18 +61,20 @@ describe('Game', () => {
 
   it('Displays DDCGame', () => {
     const TestContext = DragDropContext(TestBackend)(Game);
-    const $Game = mount(<TestContext game={game} user={user}/>);
+    const $Game = mount(<TestContext {...props}/>);
 
     const dndBackend = $Game.instance().getManager().getBackend();
-    //console.log($Game.props())
-    console.log($Game.instance().getManager().getBackend())
 
-    //expect($Game.find({name: 'Deck'}).props().children.length, 'Deck.length> 0').equal(TEST_DECK_SIZE - TEST_HAND_SIZE - TEST_HAND_SIZE);
-    //expect($Game.find({name: 'Hand'}).props().children.length, 'Hand.length > 0').equal(TEST_HAND_SIZE);
+    const cardHID = $Game.find('DragSource(Component)').get(1).getHandlerId();
 
-    //console.log(clientStore0.getState().get('game'))
-    //console.log($Game.debug())
-    //console.log($Game.find({name: 'Hand'}).props().cards.size)
+    dndBackend.simulateBeginDrag([cardHID]);
+
+
+    const PlayerContinentHID = $Game.find('DropTarget(PlayerContinentDropTargetZone)').get(0).getHandlerId()
+
+    dndBackend.simulateHover([PlayerContinentHID]);
+
+    dndBackend.simulateDrop();
   });
 });
 

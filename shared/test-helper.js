@@ -72,6 +72,7 @@ const TEST_PORT = 5000;
 const TEST_URL = 'http://localhost:' + TEST_PORT;
 
 import { createStore, compose, applyMiddleware } from 'redux'
+import configureStore from '../client/configuration/configureStore'
 import thunk from 'redux-thunk';
 import { reduxTimeout } from './utils/reduxTimeout';
 //import { reduxTimeout } from 'redux-timeout';
@@ -112,7 +113,6 @@ global.mockServerStore = function (initialServerState) {
         next(action);
       })
       , applyMiddleware(socketServerMiddleware(ioServer))
-      //, applyMiddleware(thunk)
     ));
 
   socketServerStore(ioServer, serverStore);
@@ -127,19 +127,14 @@ global.mockServerStore = function (initialServerState) {
 global.mockClientStore = function (initialClientState) {
   const ioClient = syncSocketIOClient();
   const history = createMemoryHistory('/');
-  const clientStore = createStore(
-    combineReducers({...clientReducers, routing: routerReducer})
-    , initialClientState
-    , compose(
-      applyMiddleware(thunk)
-      , applyMiddleware(reduxTimeout())
-      , applyMiddleware(store => next => action => {
-        clientStore.actions.push(action);
-        next(action);
-      })
-      , applyMiddleware(appRouterMiddleware(history))
-      , applyMiddleware(socketClientMiddleware(ioClient))
-    ));
+  const clientStore = configureStore(combineReducers({...clientReducers, routing: routerReducer}), initialClientState, [
+    (store => next => action => {
+      clientStore.actions.push(action);
+      next(action);
+    })
+    , appRouterMiddleware(history)
+    , socketClientMiddleware(ioClient)
+  ]);
   socketClientStore(ioClient, clientStore);
 
   clientStore.getHistory = () => history;

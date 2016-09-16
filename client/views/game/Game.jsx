@@ -7,10 +7,10 @@ import {UserModel} from '~/shared/models/UserModel';
 import {GameModelClient} from '~/shared/models/game/GameModel';
 import {CardModel} from '~/shared/models/game/CardModel';
 
-import {gameReadyRequest} from '~/shared/actions/actions';
+import {gameReadyRequest, gamePlayCard} from '~/shared/actions/actions';
 import {redirectTo} from '~/shared/utils'
 
-import {Board} from './Board.jsx';
+import {PlayerContinent} from './PlayerContinent.jsx';
 import {CardCollection} from './CardCollection.jsx';
 import {Card, DragCard} from './Card.jsx';
 
@@ -52,25 +52,30 @@ export class Game extends React.Component {
 
   constructor(props) {
     super(props);
+    this.cardPlayed = this.cardPlayed.bind(this)
   }
 
   componentDidMount() {
-    if (this.ready) {
-      this.props.$ready();
-    }
+    if (this.props.game && !this.props.game.started) this.props.$ready();
+  }
+
+  cardPlayed(model, cardPosition, animalPosition) {
+    this.props.$playCard(model, cardPosition, animalPosition);
   }
 
   render() {
     const user = this.props.user;
     const game = this.props.game;
-    if (!user || !game) return <div>Loading</div>;
-    this.ready = true;
-    console.log('GameRender: =====')
-    console.log('game', game)
-    console.log('game', CARD_POSITIONS[game.players.size], game.players.size)
-    return <div className="Game">
 
-      <Board/>
+    if (!user || !game) return <div>Loading</div>;
+    const player = game.getPlayer();
+    //console.log('GameRender: =====')
+    //console.log('game', player)
+    //console.log('game', CARD_POSITIONS[game.players.size], game.players.size)
+    return <div className="Game">
+      <PlayerContinent onCardDropped={this.cardPlayed}>
+        {player.continent.toArray().map((animal, i) => <Card key={i}/>)}
+      </PlayerContinent>
 
       <CardCollection
         ref="Deck" name="Deck"
@@ -81,10 +86,10 @@ export class Game extends React.Component {
       </CardCollection>
 
       <CardCollection
-        ref="Hand" name="Hand"
+        ref="Hand" name="Hand" namex="Hand"
         position={CARD_POSITIONS[game.players.size].player}
         shift={[20, 0]}>
-        {game.hand.toArray().map((cardModel, i) => <DragCard key={i}/>)}
+        {player.hand.toArray().map((cardModel, i) => <DragCard model={cardModel} key={i} position={i} />)}
       </CardCollection>
 
       {
@@ -112,5 +117,6 @@ export const GameView = connect(
   }
   , (dispatch) => ({
     $ready: () => dispatch(gameReadyRequest())
+    , $playCard: (...args) => dispatch(gamePlayCard(...args))
   })
 )(DDCGame);

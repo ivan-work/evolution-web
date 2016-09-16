@@ -58,7 +58,7 @@ export const loginUserSuccess = (user, redirect) => (dispatch, getState) => {
   dispatch({
     type: 'loginUserSuccess'
     , data: {user, redirect, online, rooms, roomId, game: clientGame}
-    , meta: {userId: user.id}
+    , meta: {clients: [user.connectionId]}
   });
   dispatch({
     type: 'onlineUpdate'
@@ -93,6 +93,7 @@ export const logoutUser = (userId) => (dispatch, getState) => {
 
 export const authClientToServer = {
   loginUserRequest: ({login, password, redirect = '/'}, {user, connectionId}) => (dispatch, getState) => {
+    //console.log('loginUserRequest', login, password, redirect, user)
     const state = getState();
     if (user == void 0 || user.token == void 0) {
       if (!login) {
@@ -109,7 +110,7 @@ export const authClientToServer = {
       //console.log('new user record', user.id, user.login)
       dispatch(loginUserSuccess(user, redirect));
     } else {
-      const userExists = state.get('users').find(user => user.token === user.token);
+      const userExists = state.get('users').find(u => u.token === user.token);
       if (!userExists) {
         dispatch(loginUserFailure(connectionId, 'Invalid token'));
         return;

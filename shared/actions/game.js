@@ -1,16 +1,20 @@
+import {List} from 'immutable';
+
 import {STATUS} from '../models/UserModel';
+
 import {GameModel, GameModelClient} from '../models/game/GameModel';
 import {CardModel} from '../models/game/CardModel';
-import {push} from 'react-router-redux';
-import {List} from 'immutable';
+import {AnimalModel} from '../models/game/evolution/AnimalModel';
+
 import {actionError} from './generic';
+import {redirectTo} from '../utils';
 import {selectRoom, selectGame} from '../selectors';
 
 const getPlayers = (game) => game.players.keySeq().toArray();
 const selectPlayers = (getState, gameId) => getState().getIn(['games', gameId, 'players']).keySeq().toArray();
 
 /*
- * Game Start
+ * Game Create
  * */
 export const gameCreateRequest = (roomId) => ({
   type: 'gameCreateRequest'
@@ -30,6 +34,15 @@ export const server$gameCreateSuccess = (game) => (dispatch) => {
     ));
   });
 };
+export const server$gameStart = (gameId) => (dispatch, getState) => dispatch(
+  Object.assign(gameStart(gameId), {
+    meta: {users: selectPlayers(getState, gameId)}
+  })
+);
+export const gameStart = (gameId) => ({
+  type: 'gameStart'
+  , data: {gameId}
+});
 /*
  * Game Ready Request
  * */
@@ -53,19 +66,40 @@ export const gameGiveCards = (gameId, userId, cards) => ({
   , data: {gameId, userId, cards}
 });
 
-export const gameGiveCardsNotify = (gameId, userId, count) => ({
-  type: 'gameGiveCardsNotify'
-  , data: {gameId, userId, count}
-});
-
 export const server$gameGiveCards = (gameId, userId, cards) => (dispatch, getState) => {
   dispatch(Object.assign(
     gameGiveCards(gameId, userId, cards)
     , {meta: {userId}}
   ));
   dispatch(Object.assign(
-    gameGiveCardsNotify(gameId, userId, cards.size)
-    , {meta: {users: selectPlayers(getState, gameId).filter(uid => uid !== userId)}}
+    gameGiveCards(gameId, userId, CardModel.generate(cards.size))
+    , {meta: {clientOnly: true, users: selectPlayers(getState, gameId).filter(uid => uid !== userId)}}
+  ));
+};
+
+/*
+ * Play!
+ * */
+
+export const gamePlayCard = (card, cardPosition, animalPosition) => (dispatch, getState) =>dispatch({
+  type: 'gamePlayCard'
+  , data: {gameId: getState().get('game').id, card, cardPosition, animalPosition}
+  , meta: {server: true}
+});
+
+export const gamePlayAnimal = (gameId, userId, animal, animalPosition, cardPosition) => ({
+  type: 'gamePlayAnimal'
+  , data: {gameId, userId, animal, animalPosition, cardPosition}
+});
+
+export const server$gamePlayAnimal = (gameId, userId, animal, cardPosition, animalPosition) => (dispatch, getState) => {
+  dispatch(Object.assign(
+    gamePlayAnimal(gameId, userId, animal, cardPosition, animalPosition)
+    , {meta: {userId}}
+  ));
+  dispatch(Object.assign(
+    gamePlayAnimal(gameId, userId, animal.toOthers(), cardPosition, animalPosition)
+    , {meta: {clientOnly: true, users: selectPlayers(getState, gameId).filter(uid => uid !== userId)}}
   ));
 };
 
@@ -84,32 +118,45 @@ export const gameClientToServer = {
   }
   , gameReadyRequest: ({gameId, ready}, {user}) => (dispatch, getState) => {
     const userId = user.id;
+    const game = selectGame(getState, gameId);
     dispatch(server$gamePlayerStatusChange(gameId, userId, ready ? STATUS.READY : STATUS.LOADING));
     /*
      * Actual starting
      * */
-    if (selectGame(getState, gameId).players.every(player => player.status === STATUS.READY)) {
+    if (!game().started && game().players.every(player => player.status === STATUS.READY)) {
       const INITIAL_HAND_SIZE = 6;
       //new Array(INITIAL_HAND_SIZE).fill().every(() => {
       //  return true;
       //})
-      selectGame(getState, gameId).players.forEach((player) => {
-        const cards = selectGame(getState, gameId).deck.take(INITIAL_HAND_SIZE);
+      dispatch(server$gameStart(gameId));
+      game().players.forEach((player) => {
+        const cards = game().deck.take(INITIAL_HAND_SIZE);
         dispatch(server$gameGiveCards(gameId, player.id, cards));
       });
     }
   }
+  , gamePlayCard: ({gameId, card, cardPosition, animalPosition}, {user}) => (dispatch, getState) => {
+    const userId = user.id;
+    const game = selectGame(getState, gameId);
+    // TODO check if user has card
+    const animal = AnimalModel.new(card);
+    dispatch(server$gamePlayAnimal(gameId, userId, animal, cardPosition, animalPosition))
+  }
 };
 
 export const gameServerToClient = {
-  gameCreateSuccess: ({game}) => (dispatch) => {
-    dispatch(gameCreateSuccess(GameModelClient.fromServer(game)));
-    dispatch(push('/game'));
-  }
+  gameCreateSuccess: (({game}, currentUserId) => (dispatch) => {
+    dispatch(gameCreateSuccess(GameModelClient.fromServer(game, currentUserId)));
+    dispatch(redirectTo('/game'));
+  })
+  ,
+  gameStart: ({gameId}) => gameStart(gameId)
   ,
   gamePlayerStatusChange: ({gameId, userId, status}) => gamePlayerStatusChange(gameId, userId, status)
   ,
-  gameGiveCards: ({gameId, userId, cards}) => gameGiveCards(gameId, userId, List(cards).map(card => CardModel.fromJS(card)))
+  gameGiveCards: ({gameId, userId, cards}) =>
+    gameGiveCards(gameId, userId, List(cards).map(card => CardModel.fromServer(card)))
   ,
-  gameGiveCardsNotify: ({gameId, userId, count}) => gameGiveCardsNotify(gameId, userId, count)
+  gamePlayAnimal: ({gameId, userId, animal, cardPosition, animalPosition}) => gamePlayAnimal(gameId, userId, AnimalModel.fromServer(animal), cardPosition, animalPosition)
+
 };

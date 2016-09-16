@@ -1,20 +1,21 @@
 import { createStore, compose, applyMiddleware } from 'redux'
 
-// Components
-import { Root } from '../components/Root.jsx';
-import { DevTools } from '../components/DevTools.jsx';
-
 // Basic Middleware
 import thunk from 'redux-thunk';
 import { reduxTimeout } from '~/shared/utils/reduxTimeout'
 
-export default ({reducer, router, socket}) => createStore(
+
+export default (reducer, initialState, middleware = [], appliedMiddleware = []) => createStore(
   reducer
+  , initialState
   , compose(
     applyMiddleware(thunk)
     , applyMiddleware(reduxTimeout())
-    , applyMiddleware(router)
-    , applyMiddleware(socket)
-    , DevTools.instrument()
+    , applyMiddleware(store => next => action => {
+      action.user = store.getState().get('user');
+      next(action);
+    })
+    , ...middleware.map(middleware => applyMiddleware(middleware))
+    , ...appliedMiddleware
   )
 );

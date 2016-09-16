@@ -5,11 +5,13 @@ import {CardModel} from './CardModel';
 export class PlayerModel extends Record({
   id: null
   , hand: List()
+  , continent: List()
   , status: STATUS.LOADING
 }) {
-  toClient() {
+  toOthers() {
     return this
-      .set('hand', this.hand.size);
+      .set('hand', CardModel.generate(this.hand.size))
+      .set('continent', this.continent.map(animalModel => animalModel.toOthers()));
   }
 
   static fromServer(js) {
@@ -17,8 +19,9 @@ export class PlayerModel extends Record({
       ? null
       : new PlayerModel(js)
         .set('hand', Array.isArray(js.hand)
-        ? List(js.hand).map(card => CardModel.fromJS(card))
-        : js.hand);
+        ? List(js.hand).map(card => CardModel.fromServer(card))
+        : js.hand)
+        .set('continent', List(js.continent).map(card => CardModel.fromServer(card)));
   }
 
   static new(userId) {

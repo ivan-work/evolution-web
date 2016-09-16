@@ -1,7 +1,7 @@
 import {RoomModel} from '../models/RoomModel';
-import {push} from 'react-router-redux';
-import {List, Map} from 'immutable';
+
 import {actionError} from './generic';
+import {redirectTo} from '../utils';
 
 export const roomCreateRequest = () => ({
   type: 'roomCreateRequest'
@@ -72,18 +72,18 @@ export const roomsClientToServer = {
 
 export const roomsServerToClient = {
   roomCreateSuccess: ({room}) => roomCreateSuccess(RoomModel.fromJS(room))
-  , roomJoinSuccess: ({roomId, userId}, user) => (dispatch, getState) => {
+  , roomJoinSuccess: ({roomId, userId}, currentUserId) => (dispatch, getState) => {
     dispatch(roomJoinSuccessNotify(roomId, userId));
-    if (user.id === userId) {
+    if (currentUserId === userId) {
       dispatch(roomJoinSuccess(roomId));
-      dispatch(push(`/room/${roomId}`));
+      dispatch(redirectTo(`/room/${roomId}`));
     }
   }
-  , roomExitSuccess: ({roomId, userId}, user) => (dispatch, getState) => {
+  , roomExitSuccess: ({roomId, userId}, currentUserId) => (dispatch, getState) => {
     dispatch(roomExitSuccessNotify(roomId, userId));
-    if (user.id === userId) {
+    if (currentUserId === userId) {
       dispatch(roomExitSuccess(roomId));
-      dispatch(push(`/`));
+      dispatch(redirectTo(`/`));
     }
   }
 };
