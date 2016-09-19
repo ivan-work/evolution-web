@@ -81,9 +81,9 @@ export const server$gameGiveCards = (gameId, userId, cards) => (dispatch, getSta
  * Play!
  * */
 
-export const gamePlayCard = (card, cardPosition, animalPosition) => (dispatch, getState) =>dispatch({
+export const gamePlayCard = (cardId, cardPosition, animalPosition) => (dispatch, getState) =>dispatch({
   type: 'gamePlayCard'
-  , data: {gameId: getState().get('game').id, card, cardPosition, animalPosition}
+  , data: {gameId: getState().get('game').id, cardId, cardPosition, animalPosition}
   , meta: {server: true}
 });
 
@@ -135,12 +135,16 @@ export const gameClientToServer = {
       });
     }
   }
-  , gamePlayCard: ({gameId, card, cardPosition, animalPosition}, {user}) => (dispatch, getState) => {
+  , gamePlayCard: ({gameId, cardId, cardPosition, animalPosition}, {user}) => (dispatch, getState) => {
     const userId = user.id;
     const game = selectGame(getState, gameId);
     // TODO check if user has card
-    const animal = AnimalModel.new(card);
-    dispatch(server$gamePlayAnimal(gameId, userId, animal, cardPosition, animalPosition))
+    const card = game().players.get(user.id).hand.find(card => card.id === cardId);
+    console.log('gamePlayCard', card)
+    if (card) {
+      const animal = AnimalModel.new(card);
+      dispatch(server$gamePlayAnimal(gameId, userId, animal, cardPosition, animalPosition))
+    }
   }
 };
 
@@ -149,14 +153,11 @@ export const gameServerToClient = {
     dispatch(gameCreateSuccess(GameModelClient.fromServer(game, currentUserId)));
     dispatch(redirectTo('/game'));
   })
-  ,
-  gameStart: ({gameId}) => gameStart(gameId)
-  ,
-  gamePlayerStatusChange: ({gameId, userId, status}) => gamePlayerStatusChange(gameId, userId, status)
-  ,
-  gameGiveCards: ({gameId, userId, cards}) =>
+  , gameStart: ({gameId}) => gameStart(gameId)
+  , gamePlayerStatusChange: ({gameId, userId, status}) => gamePlayerStatusChange(gameId, userId, status)
+  , gameGiveCards: ({gameId, userId, cards}) =>
     gameGiveCards(gameId, userId, List(cards).map(card => CardModel.fromServer(card)))
-  ,
-  gamePlayAnimal: ({gameId, userId, animal, cardPosition, animalPosition}) => gamePlayAnimal(gameId, userId, AnimalModel.fromServer(animal), cardPosition, animalPosition)
+  , gamePlayAnimal: ({gameId, userId, animal, cardPosition, animalPosition}) =>
+    gamePlayAnimal(gameId, userId, AnimalModel.fromServer(animal), cardPosition, animalPosition)
 
 };

@@ -22,24 +22,33 @@ export class Card extends React.Component {
 
   render() {
     const model = this.props.model || {name: 'cardback'};
-    return <div className='Card' style={CARD_SIZE}>
+    const connectDragSource = this.props.connectDragSource;
+    const body = <div className='Card' style={CARD_SIZE}>
       <div className='inner'>
         {this.props.index}
         <br/>{model.name}
       </div>
     </div>;
+    return connectDragSource ? connectDragSource(body) : body;
   }
 }
+
+export const UnknownCard = (props) => <div className='Card' style={CARD_SIZE}>
+  <div className='inner'>
+    {props.index}
+    <br/>Unknown card
+  </div>
+</div>;
 
 export const DragCard = DragSource("Card"
   , {
     beginDrag: (props) => ({
       model: props.model
-      , position: props.position
+      , position: props.index
     })
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource(),
     isDragging: monitor.isDragging()
   })
-)(props => props.connectDragSource(<div><Card {...props}/></div>));
+)(Card);

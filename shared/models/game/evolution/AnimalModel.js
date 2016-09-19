@@ -1,6 +1,6 @@
 import {Record} from 'immutable';
 import uuid from 'node-uuid';
-//import {}
+import {CardModel} from '../CardModel';
 
 export class AnimalModel extends Record({
   id: null
@@ -9,13 +9,15 @@ export class AnimalModel extends Record({
   static new(card) {
     return new AnimalModel({
       id: uuid.v4().slice(0, 2)
-      , card: null
+      , card: card
     });
   }
 
   static fromServer(js) {
-    //checkNotNull(js)
-    return new AnimalModel(js);
+    return js == null
+      ? null
+      : new AnimalModel(js)
+      .set('card', CardModel.fromServer(js.card));
   }
 
   toOthers() {

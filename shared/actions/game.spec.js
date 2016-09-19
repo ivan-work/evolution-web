@@ -4,6 +4,7 @@ import {RoomModel} from '../models/RoomModel';
 
 import {GameModel, TEST_DECK_SIZE, TEST_HAND_SIZE} from '../models/game/GameModel';
 import {CardModel} from '../models/game/CardModel';
+import {AnimalModel} from '../models/game/evolution/AnimalModel';
 import {PlayerModel} from '../models/game/PlayerModel';
 
 import {SOCKET_DISCONNECT_NOW, roomCreateRequest, roomJoinRequest, gameCreateRequest, gameReadyRequest, gamePlayCard} from '../actions/actions';
@@ -73,15 +74,33 @@ describe('Game:', function () {
     clientStore1.dispatch(gameReadyRequest());
     checkFinalGame();
 
-    clientStore0.dispatch(gamePlayCard(ClientGame0().getIn(['player', 'hand', 0]), 0, 0))
+    clientStore0.dispatch(gamePlayCard(ClientGame0().getPlayer().hand.get(0).id, 0, 0));
+
+    expect(ServerGame().getIn(['players', User0.id, 'hand']).size, 'Server: User0.hand').equal(TEST_HAND_SIZE - 1);
+    expect(ServerGame().getIn(['players', User0.id, 'continent']).size, 'Server: User0.continent').equal(1);
+    expect(ServerGame().getIn(['players', User0.id, 'continent', 0]), 'Server: User0.continent(animal)').instanceof(AnimalModel);
 
     expect(ClientGame0().getPlayer().continent.size, 'User0.continent').equal(1);
-    expect(ClientGame0().getPlayer().continent.get(0), 'User0.continent(animal)').ok;
+    expect(ClientGame0().getPlayer().continent.get(0), 'User0.continent(animal)').instanceof(AnimalModel);
     expect(ClientGame0().getPlayer().hand.size, 'User0.hand').equal(TEST_HAND_SIZE - 1);
 
     expect(ClientGame1().getIn(['players', User0.id, 'continent']).size, 'User1 see User0.continent').equal(1);
     expect(ClientGame1().getIn(['players', User0.id, 'continent', 0]), 'User1 see User0.continent').ok;
+    expect(ClientGame1().getIn(['players', User0.id, 'continent', 0]).card, 'User0.continent(animal)').null;
     expect(ClientGame1().getIn(['players', User0.id, 'hand']).size, 'User1 see User0.hand').equal(TEST_HAND_SIZE - 1);
+
+    clientStore0.dispatch(gamePlayCard(ClientGame0().getPlayer().hand.get(0).id, 0, 0));
+
+    expect(ServerGame().getIn(['players', User0.id, 'hand']).size, 'Server: User0.hand').equal(TEST_HAND_SIZE - 2);
+    expect(ServerGame().getIn(['players', User0.id, 'continent']).size, 'Server: User0.continent').equal(2);
+    expect(ServerGame().getIn(['players', User0.id, 'continent', 0]), 'Server: User0.continent(animal)').instanceof(AnimalModel);
+    expect(ServerGame().getIn(['players', User0.id, 'continent', 1]), 'Server: User0.continent(animal)').instanceof(AnimalModel);
+
+    expect(ClientGame0().getPlayer().continent.size, 'User0.continent').equal(2);
+    expect(ClientGame0().getPlayer().continent.get(0), 'User0.continent(animal)').instanceof(AnimalModel);
+    expect(ClientGame0().getPlayer().continent.get(1), 'User0.continent(animal)').instanceof(AnimalModel);
+    expect(ClientGame0().getPlayer().hand.size, 'User0.hand').equal(TEST_HAND_SIZE - 2);
+
   });
 
   it('Reload', () => {

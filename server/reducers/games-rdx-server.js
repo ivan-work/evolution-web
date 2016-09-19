@@ -1,5 +1,6 @@
 import {createReducer, ensureParameter} from '~/shared/utils';
 import {Map, List} from 'immutable';
+import {AnimalModel} from '~/shared/models/game/evolution/AnimalModel';
 
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
@@ -21,5 +22,16 @@ export const reducer = createReducer(Map(), {
       .update('deck', deck => deck.skip(cards.size))
       .updateIn(['players', userId, 'hand'], hand => hand.concat(cards))
     );
+  }
+  , gamePlayAnimal: (state, {gameId, userId, animal, animalPosition, cardPosition}, currentUserId) => {
+    console.log({gameId, userId, animal, animalPosition, cardPosition})
+    ensureParameter(gameId, 'string');
+    ensureParameter(userId, 'string');
+    ensureParameter(animal, AnimalModel);
+    ensureParameter(cardPosition, 'number');
+    ensureParameter(animalPosition, 'number');
+    return state.update(gameId, game => game
+      .removeIn(['players', userId, 'hand', cardPosition])
+      .updateIn(['players', userId, 'continent'], continent => continent.insert(animalPosition, animal)))
   }
 });
