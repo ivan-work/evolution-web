@@ -81,9 +81,9 @@ export const server$gameGiveCards = (gameId, userId, cards) => (dispatch, getSta
  * Play!
  * */
 
-export const gamePlayCard = (cardId, cardPosition, animalPosition) => (dispatch, getState) =>dispatch({
+export const gamePlayCard = (cardId, animalPosition) => (dispatch, getState) =>dispatch({
   type: 'gamePlayCard'
-  , data: {gameId: getState().get('game').id, cardId, cardPosition, animalPosition}
+  , data: {gameId: getState().get('game').id, cardId, animalPosition}
   , meta: {server: true}
 });
 
@@ -92,13 +92,13 @@ export const gamePlayAnimal = (gameId, userId, animal, animalPosition, cardPosit
   , data: {gameId, userId, animal, animalPosition, cardPosition}
 });
 
-export const server$gamePlayAnimal = (gameId, userId, animal, cardPosition, animalPosition) => (dispatch, getState) => {
+export const server$gamePlayAnimal = (gameId, userId, animal, animalPosition, cardPosition) => (dispatch, getState) => {
   dispatch(Object.assign(
-    gamePlayAnimal(gameId, userId, animal, cardPosition, animalPosition)
+    gamePlayAnimal(gameId, userId, animal, animalPosition, cardPosition)
     , {meta: {userId}}
   ));
   dispatch(Object.assign(
-    gamePlayAnimal(gameId, userId, animal.toOthers(), cardPosition, animalPosition)
+    gamePlayAnimal(gameId, userId, animal.toOthers(), animalPosition, cardPosition)
     , {meta: {clientOnly: true, users: selectPlayers(getState, gameId).filter(uid => uid !== userId)}}
   ));
 };
@@ -135,15 +135,16 @@ export const gameClientToServer = {
       });
     }
   }
-  , gamePlayCard: ({gameId, cardId, cardPosition, animalPosition}, {user}) => (dispatch, getState) => {
+  , gamePlayCard: ({gameId, cardId, animalPosition}, {user}) => (dispatch, getState) => {
     const userId = user.id;
     const game = selectGame(getState, gameId);
     // TODO check if user has card
-    const card = game().players.get(user.id).hand.find(card => card.id === cardId);
-    console.log('gamePlayCard', card)
+    const cardIndex = game().players.get(user.id).hand.findIndex(card => card.id === cardId);
+    const card = game().players.get(user.id).hand.get(cardIndex);
+    console.log('gamePlayCard', cardIndex, card)
     if (card) {
       const animal = AnimalModel.new(card);
-      dispatch(server$gamePlayAnimal(gameId, userId, animal, cardPosition, animalPosition))
+      dispatch(server$gamePlayAnimal(gameId, userId, animal, animalPosition, cardIndex))
     }
   }
 };
@@ -157,7 +158,7 @@ export const gameServerToClient = {
   , gamePlayerStatusChange: ({gameId, userId, status}) => gamePlayerStatusChange(gameId, userId, status)
   , gameGiveCards: ({gameId, userId, cards}) =>
     gameGiveCards(gameId, userId, List(cards).map(card => CardModel.fromServer(card)))
-  , gamePlayAnimal: ({gameId, userId, animal, cardPosition, animalPosition}) =>
-    gamePlayAnimal(gameId, userId, AnimalModel.fromServer(animal), cardPosition, animalPosition)
+  , gamePlayAnimal: ({gameId, userId, animal, animalPosition, cardPosition}) =>
+    gamePlayAnimal(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardPosition)
 
 };

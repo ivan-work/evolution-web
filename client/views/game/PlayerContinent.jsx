@@ -17,16 +17,10 @@ export class PlayerContinent extends React.Component {
   }
 
   onOver(index, isOver) {
-    console.log('current: ', this.state.over);
-    console.log('incoming: ', index, isOver);
     if (isOver) {
-      console.log('change to index');
       this.setState({over: index});
     } else if (this.state.over === index) {
-      console.log('nullify');
       this.setState({over: null});
-    } else {
-      console.log('ignore');
     }
   }
 
