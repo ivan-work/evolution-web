@@ -8,7 +8,7 @@ export class AnimalModel extends Record({
 }) {
   static new(card) {
     return new AnimalModel({
-      id: uuid.v4().slice(0, 2)
+      id: uuid.v4().slice(0, 4)
       , card: card
     });
   }
@@ -25,6 +25,6 @@ export class AnimalModel extends Record({
   }
 
   toString() {
-    return this.id;
+    return `Animal#${this.id}`;
   }
 }

@@ -86,7 +86,7 @@ export class Game extends React.Component {
         </CardCollection>
       </div>
 
-      <div className='PlayerWrapper' style={CARD_POSITIONS[game.players.size].player}>
+      <div className='PlayerWrapper UserWrapper' style={CARD_POSITIONS[game.players.size].player}>
         <PlayerContinent onCardDropped={this.cardPlayed}>
           {player.continent.toArray().map((animal, i) => <Animal index={i} key={i} model={animal}/>)}
         </PlayerContinent>
@@ -94,7 +94,7 @@ export class Game extends React.Component {
         <CardCollection
           ref="Hand" name="Hand"
           shift={[55, 0]}>
-          {player.hand.toArray().map((cardModel, i) => <DragCard model={cardModel} key={i} index={i}/>)}
+          {player.hand.toArray().map((cardModel, i) => <DragCard model={cardModel} key={cardModel} index={i}/>)}
         </CardCollection>
       </div>
 
@@ -102,7 +102,7 @@ export class Game extends React.Component {
         game.players.valueSeq()
           .filter(enemy => enemy.id !== user.id)
           .map((enemy, i) => {
-          return <div className='PlayerWrapper' key={enemy.id} style={CARD_POSITIONS[game.players.size][i]}>
+          return <div className='PlayerWrapper EnemyWrapper' key={enemy.id} style={CARD_POSITIONS[game.players.size][i]}>
             <CardCollection
               ref={enemy.id} name={enemy.id}
               shift={[20, 0]}>

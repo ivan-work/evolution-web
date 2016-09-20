@@ -1,6 +1,7 @@
 import {Record, List, Map} from 'immutable';
 import {UserModel, STATUS} from '../UserModel';
 import {CardModel} from './CardModel';
+import {AnimalModel} from './evolution/AnimalModel';
 
 export class PlayerModel extends Record({
   id: null
@@ -21,7 +22,7 @@ export class PlayerModel extends Record({
         .set('hand', Array.isArray(js.hand)
         ? List(js.hand).map(card => CardModel.fromServer(card))
         : js.hand)
-        .set('continent', List(js.continent).map(card => CardModel.fromServer(card)));
+        .set('continent', List(js.continent).map(animalModel => AnimalModel.fromServer(animalModel)));
   }
 
   static new(userId) {

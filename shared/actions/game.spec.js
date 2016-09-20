@@ -100,7 +100,6 @@ describe('Game:', function () {
     expect(ClientGame0().getPlayer().continent.get(0), 'User0.continent(animal)').instanceof(AnimalModel);
     expect(ClientGame0().getPlayer().continent.get(1), 'User0.continent(animal)').instanceof(AnimalModel);
     expect(ClientGame0().getPlayer().hand.size, 'User0.hand').equal(TEST_HAND_SIZE - 2);
-
   });
 
   it('Reload', () => {
@@ -143,5 +142,24 @@ describe('Game:', function () {
     clientStore1.disconnect(SOCKET_DISCONNECT_NOW);
 
     expect(serverStore.getState().get('games')).equal(Map());
+  });
+
+  it('Reload, after card played', () => {
+    const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
+    const ClientGame0 = () => clientStore0.getState().get('game');
+    clientStore0.dispatch(roomCreateRequest());
+    const roomId = serverStore.getState().get('rooms').first().id;
+    clientStore0.dispatch(roomJoinRequest(roomId));
+    clientStore1.dispatch(roomJoinRequest(roomId));
+    clientStore0.dispatch(gameCreateRequest(roomId));
+    clientStore0.dispatch(gameReadyRequest());
+    clientStore1.dispatch(gameReadyRequest());
+    clientStore0.dispatch(gamePlayCard(clientStore0.getState().get('game').getPlayer().hand.get(0).id, 0, 0));
+
+    const oldClientGame0 = ClientGame0();
+    clientStore0.disconnect();
+    clientStore0.connect(serverStore);
+    //expect(ClientGame0().toJS()).eql(oldClientGame0.toJS())
+    expect(ClientGame0()).equal(oldClientGame0.setIn(['players', User1.id, 'hand'], ClientGame0().getIn(['players', User1.id, 'hand'])))
   });
 });
