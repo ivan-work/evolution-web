@@ -1,17 +1,26 @@
 import {Record} from 'immutable';
 
-export const TARGETING_TYPE = (i => ({
-  TO_ANIMAL    : 1 << i++
-  , SELF       : 1 << i++
-  , ENEMY      : 1 << i++
-  , LINK_SELF  : 1 << i++
-  , LINK_ENEMY : 1 << i++
+export const TARGET_TYPE = (i => ({
+  DROP_AS_ANIMAL : 1 << i++
+  , ANIMAL_SELF  : 1 << i++
+  , ANIMAL_ENEMY : 1 << i++
+  , LINK_SELF    : 1 << i++
+  , LINK_ENEMY   : 1 << i++
 }))(0);
+
+const ExampleCard = {
+  type: 'string'
+  , name: 'string'
+  , targeting: TARGET_TYPE.DROP_AS_ANIMAL | TARGET_TYPE.DROP_AS_ANIMAL
+  , trait: {
+    active: false // Can/Cannot use ability
+  }
+};
 
 export const CardCamouflage = {
   type: 'CardCamouflage'
   , name: 'Camouflage'
-  , targeting: TARGETING_TYPE.SELF
+  , target: TARGET_TYPE.ANIMAL_SELF
   , trait: {
   }
   //onHunterTargets(hunter) {
@@ -22,7 +31,7 @@ export const CardCamouflage = {
 export const CardCarnivorous = {
   type: 'CardCarnivorous'
   , name: 'Carnivorous'
-  , targeting: TARGETING_TYPE.SELF
+  , target: TARGET_TYPE.ANIMAL_SELF
   , trait: {
     active: true
   }
@@ -31,5 +40,5 @@ export const CardCarnivorous = {
 export const CardSharpVision = {
   type: 'CardSharpVision'
   , name: 'Sharp Vision'
-  , targeting: TARGETING_TYPE.SELF
+  , target: TARGET_TYPE.ANIMAL_SELF
 };

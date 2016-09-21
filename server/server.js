@@ -4,7 +4,7 @@
 import polyfills from '../shared/utils/polyfills'
 
 var app = require('./app');
-var debug = require('debug')('sample-app:server');
+//var debug = require('debug')('sample-app:server');
 var http = require('http');
 var config = require('./config/config.js');
 

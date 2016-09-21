@@ -41,6 +41,7 @@
     "classnames": "^2.2.5",
     "compression": "*",
     "cross-env": "*",
+    "debug": "^2.2.0",
     "dotenv": "*",
     "eventsource-polyfill": "*",
     "express": "*",
@@ -72,7 +73,8 @@
     "redux-timeout": "*",
     "sanitize-html": "*",
     "socket.io": "^1.4.6",
-    "socket.io-client": "^1.4.6"
+    "socket.io-client": "^1.4.6",
+    "winston": "^2.2.0"
   },
   "devDependencies": {
     "babel-core": "*",

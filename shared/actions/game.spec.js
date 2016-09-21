@@ -11,7 +11,7 @@ import {SOCKET_DISCONNECT_NOW, roomCreateRequest, roomJoinRequest, gameCreateReq
 
 describe('Game:', function () {
   it('Game for two', () => {
-    const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
+    const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(3);
     clientStore0.dispatch(roomCreateRequest());
     const roomId = serverStore.getState().get('rooms').first().id;
     clientStore0.dispatch(roomJoinRequest(roomId));

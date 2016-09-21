@@ -1,3 +1,5 @@
+import logger from '~/shared/utils/logger';
+import {ActionCheckError} from '~/shared/utils/ActionCheckError';
 import {List} from 'immutable';
 
 import {STATUS} from '../models/UserModel';
@@ -119,6 +121,8 @@ export const gameClientToServer = {
   , gameReadyRequest: ({gameId, ready}, {user}) => (dispatch, getState) => {
     const userId = user.id;
     const game = selectGame(getState, gameId);
+    checkGameDefined(game(), gameId);
+    checkGameHasUser(game(), userId);
     dispatch(server$gamePlayerStatusChange(gameId, userId, ready ? STATUS.READY : STATUS.LOADING));
     /*
      * Actual starting
@@ -138,13 +142,17 @@ export const gameClientToServer = {
   , gamePlayCard: ({gameId, cardId, animalPosition}, {user}) => (dispatch, getState) => {
     const userId = user.id;
     const game = selectGame(getState, gameId);
+    checkGameDefined(game(), gameId);
+    checkGameHasUser(game(), userId);
     // TODO check if user has card
     const cardIndex = game().players.get(user.id).hand.findIndex(card => card.id === cardId);
-    const card = game().players.get(user.id).hand.get(cardIndex);
-    console.log('gamePlayCard', cardIndex, card)
-    if (card) {
+    if (~cardIndex) {
+      const card = game().players.get(user.id).hand.get(cardIndex);
+      logger.verbose('game>gamePlayCard', card);
       const animal = AnimalModel.new(card);
       dispatch(server$gamePlayAnimal(gameId, userId, animal, animalPosition, cardIndex))
+    } else {
+      logger.warn(`game>gamePlayCard: ${cardId} not found in ${userId}`);
     }
   }
 };
@@ -161,4 +169,14 @@ export const gameServerToClient = {
   , gamePlayAnimal: ({gameId, userId, animal, animalPosition, cardPosition}) =>
     gamePlayAnimal(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardPosition)
 
+};
+
+const checkGameDefined = (game, gameId) => {
+  if (game === void 0)
+    throw new ActionCheckError('checkGameDefined', 'Cannot find game %s', gameId);
+};
+
+const checkGameHasUser = (game, userId) => {
+  if (!game.players.has(userId))
+    throw new ActionCheckError('checkGameHasUser', 'Game %s has no player %s', game.id, userId);
 };

@@ -88,6 +88,7 @@ import syncSocketIOServer from './test/sync-socket-io'
 import syncSocketIOClient from './test/sync-socket-io-client'
 import {socketStore as socketClientStore, socketMiddleware as socketClientMiddleware} from '../client/configuration/socket';
 import {socketStore as socketServerStore, socketMiddleware as socketServerMiddleware} from '../server/socket';
+import {errorMiddleware as serverErrorMiddleware} from '../server/middleware/error';
 
 const mixinActions = (store => {
   store.actions = [];
@@ -101,16 +102,18 @@ const mixinActions = (store => {
 });
 
 global.mockServerStore = function (initialServerState) {
+  const errorInterceptor = () => {console.log('intercepted')};
   const ioServer = syncSocketIOServer();
   const serverStore = createStore(
     combineReducers({...serverReducers})
     , initialServerState
     , compose(
-      applyMiddleware(thunk)
+      applyMiddleware(serverErrorMiddleware(errorInterceptor))
+      , applyMiddleware(thunk)
       , applyMiddleware(reduxTimeout())
       , applyMiddleware(store => next => action => {
         serverStore.actions.push(action);
-        next(action);
+        return next(action);
       })
       , applyMiddleware(socketServerMiddleware(ioServer))
     ));
@@ -118,6 +121,8 @@ global.mockServerStore = function (initialServerState) {
   socketServerStore(ioServer, serverStore);
 
   serverStore.getSocket = () => ioServer;
+
+  serverStore.errorInterceptor = errorInterceptor;
 
   mixinActions(serverStore);
 
@@ -130,7 +135,7 @@ global.mockClientStore = function (initialClientState) {
   const clientStore = configureStore(combineReducers({...clientReducers, routing: routerReducer}), initialClientState, [
     (store => next => action => {
       clientStore.actions.push(action);
-      next(action);
+      return next(action);
     })
     , appRouterMiddleware(history)
     , socketClientMiddleware(ioClient)
