@@ -11,7 +11,7 @@ export const ANIMAL_SIZE = {
 
 export class Animal extends React.Component {
   static defaultProps = {
-    model: {name: 'default animal', card: {name: 'default card'}}
+    model: {name: 'default animal', base: {name: 'default card'}}
   };
 
   static propTypes = {
@@ -30,7 +30,7 @@ export class Animal extends React.Component {
     const body = <div className='Animal' style={ANIMAL_SIZE}>
       <div className='inner'>
         {index}
-        <br/>{model && model.card && model.card.name}
+        <br/>{model && model.base && model.base.name}
       </div>
     </div>;
     return connectDropTarget ? connectDropTarget(body) : body;
