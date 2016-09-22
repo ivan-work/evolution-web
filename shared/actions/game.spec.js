@@ -15,7 +15,8 @@ import {
   gameCreateRequest,
   gameReadyRequest,
   gameDeployAnimalRequest,
-  gameDeployTraitRequest
+  gameDeployTraitRequest,
+  gameEndDeployRequest
 } from '../actions/actions';
 
 describe('Game:', function () {
@@ -230,8 +231,10 @@ describe('Game:', function () {
     expect(ClientGame0().getPlayerAnimal(User0, 0).cards).equal(List.of(traitCamouflage));
     expect(ClientGame1().getPlayerAnimal(User0, 0).cards).equal(List.of(traitCamouflage));
 
-    // TODO SKIP TURN
-    clientStore1.dispatch(gameDeployTraitRequest(ClientGame1().getPlayerCard(null, 0).id, ClientGame1().getPlayerAnimal(null, 0).id));
+    serverStore.clearActions();
+    clientStore1.clearActions();
+
+    clientStore1.dispatch(gameEndDeployRequest());
 
     clientStore0.dispatch(
       gameDeployTraitRequest(traitSharpVision.id

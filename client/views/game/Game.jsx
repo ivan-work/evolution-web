@@ -78,7 +78,7 @@ export class Game extends React.Component {
     //console.log('game', CARD_POSITIONS[game.players.size], game.players.size)
     return <div className="Game">
 
-      <!-- DECK-->
+      {/* DECK */}
 
       <div className='DeckWrapper' style={CARD_POSITIONS[game.players.size].deck}>
         <CardCollection
@@ -89,7 +89,7 @@ export class Game extends React.Component {
         </CardCollection>
       </div>
 
-      <!-- USER -->
+      {/* USER */}
 
       <div className='PlayerWrapper UserWrapper' style={CARD_POSITIONS[game.players.size].player}>
         <PlayerContinent onCardDropped={this.cardPlayed}>
@@ -103,7 +103,7 @@ export class Game extends React.Component {
         </CardCollection>
       </div>
 
-      <!-- ENEMIES -->
+      {/* ENEMIES */}
 
       {
         game.players.valueSeq()

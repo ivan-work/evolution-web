@@ -24,6 +24,19 @@ const StatusRecord = Record({
   , phase: PHASE.NONE
 });
 
+const rollDice = () => Math.floor(6 * Math.random()) + 1;
+const FOOD_TABLE = [
+  () => 10
+  , () => 10
+  , () => rollDice() + 2
+  , () => rollDice() + rollDice()
+  , () => rollDice() + rollDice() + 2
+  , () => rollDice() + rollDice() + rollDice() + 2
+  , () => rollDice() + rollDice() + rollDice() + 4
+  , () => rollDice() + rollDice() + rollDice() + rollDice() + 2
+  , () => rollDice() + rollDice() + rollDice() + rollDice() + 4
+];
+
 export class GameModel extends Record({
   id: null
   , roomId: null
@@ -36,6 +49,10 @@ export class GameModel extends Record({
   static generateDeck(config, shuffle) {
     const result = config.reduce((result, config) => result.concat(Array.from({length: config[0]}).map(u => CardModel.new(config[1]))), []);
     return List(shuffle ? doShuffle(result) : result);
+  }
+
+  static generateFood() {
+    return FOOD_TABLE[this.players.size];
   }
 
   static new(room) {

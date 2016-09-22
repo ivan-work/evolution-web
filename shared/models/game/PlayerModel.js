@@ -9,6 +9,7 @@ export class PlayerModel extends Record({
   , continent: List()
   , status: STATUS.LOADING
   , index: -1
+  , ended: false
 }) {
   toOthers() {
     return this
