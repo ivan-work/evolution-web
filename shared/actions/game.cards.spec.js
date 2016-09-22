@@ -7,7 +7,7 @@
 ////import {AnimalModel} from '../models/game/evolution/AnimalModel';
 ////import {PlayerModel} from '../models/game/PlayerModel';
 ////
-////import {SOCKET_DISCONNECT_NOW, roomCreateRequest, roomJoinRequest, gameCreateRequest, gameReadyRequest, gamePlayCard} from '../actions/actions';
+////import {SOCKET_DISCONNECT_NOW, roomCreateRequest, roomJoinRequest, gameCreateRequest, gameReadyRequest, gameDeployAnimalRequest} from '../actions/actions';
 //
 //describe('Game:', function () {
 //  it('Game for two', () => {
@@ -30,6 +30,6 @@
 //    const User0Card2 = getUser0Card(2);
 //    const User0Card3 = getUser0Card(3);
 //
-//    clientStore0.dispatch(gamePlayCard(User0Card0.id, 0, 0));
+//    clientStore0.dispatch(gameDeployAnimalRequest(User0Card0.id, 0, 0));
 //  });
 //});

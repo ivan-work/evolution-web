@@ -1,12 +1,6 @@
 import {Record} from 'immutable';
 
-export const TARGET_TYPE = (i => ({
-  DROP_AS_ANIMAL : 1 << i++
-  , ANIMAL_SELF  : 1 << i++
-  , ANIMAL_ENEMY : 1 << i++
-  , LINK_SELF    : 1 << i++
-  , LINK_ENEMY   : 1 << i++
-}))(0);
+import {TARGET_TYPE} from '../../CardModel'
 
 const ExampleCard = {
   type: 'string'

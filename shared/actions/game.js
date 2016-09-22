@@ -5,7 +5,7 @@ import {List} from 'immutable';
 import {STATUS} from '../models/UserModel';
 
 import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
-import {CardModel} from '../models/game/CardModel';
+import {CardModel, TARGET_TYPE} from '../models/game/CardModel';
 import {AnimalModel} from '../models/game/evolution/AnimalModel';
 
 import {actionError} from './generic';
@@ -84,35 +84,51 @@ export const server$gameGiveCards = (gameId, userId, cards) => (dispatch, getSta
  * Play!
  * */
 
-export const gamePlayCard = (cardId, animalPosition) => (dispatch, getState) =>dispatch({
-  type: 'gamePlayCard'
+export const gameDeployAnimalRequest = (cardId, animalPosition) => (dispatch, getState) =>dispatch({
+  type: 'gameDeployAnimalRequest'
   , data: {gameId: getState().get('game').id, cardId, animalPosition}
   , meta: {server: true}
 });
 
-export const gamePlayAnimal = (gameId, userId, animal, animalPosition, cardPosition) => ({
-  type: 'gamePlayAnimal'
+export const gameDeployAnimal = (gameId, userId, animal, animalPosition, cardPosition) => ({
+  type: 'gameDeployAnimal'
   , data: {gameId, userId, animal, animalPosition, cardPosition}
 });
 
-export const server$gamePlayAnimal = (gameId, userId, animal, animalPosition, cardPosition) => (dispatch, getState) => {
+export const server$gameDeployAnimal = (gameId, userId, animal, animalPosition, cardPosition) => (dispatch, getState) => {
   dispatch(Object.assign(
-    gamePlayAnimal(gameId, userId, animal, animalPosition, cardPosition)
+    gameDeployAnimal(gameId, userId, animal, animalPosition, cardPosition)
     , {meta: {userId}}
   ));
   dispatch(Object.assign(
-    gamePlayAnimal(gameId, userId, animal.toOthers(), animalPosition, cardPosition)
+    gameDeployAnimal(gameId, userId, animal.toOthers(), animalPosition, cardPosition)
     , {meta: {clientOnly: true, users: selectPlayers(getState, gameId).filter(uid => uid !== userId)}}
   ));
 };
 
-
-export const gameNextPlayer = (gameId, userId) => ({
-  type: 'gameNextPlayer'
-  , data: {gameId, userId}
+export const gameDeployTraitRequest = (cardId, animalId) => (dispatch, getState) =>dispatch({
+  type: 'gameDeployTraitRequest'
+  , data: {gameId: getState().get('game').id, cardId, animalId}
+  , meta: {server: true}
 });
-export const server$gameNextPlayer = (gameId, userId) => (dispatch, getState) => dispatch(
-  Object.assign(gameNextPlayer(gameId, userId), {
+
+export const gameDeployTrait = (gameId, userId, animalId, card) => ({
+  type: 'gameDeployTrait'
+  , data: {gameId, userId, animalId, card}
+});
+
+export const server$gameDeployTrait = (gameId, userId, animalId, card) => (dispatch, getState) => dispatch(Object.assign(
+  gameDeployTrait(gameId, userId, animalId, card)
+  , {meta: {users: selectPlayers(getState, gameId)}}
+));
+
+
+export const gameNextPlayer = (gameId) => ({
+  type: 'gameNextPlayer'
+  , data: {gameId}
+});
+export const server$gameNextPlayer = (gameId) => (dispatch, getState) => dispatch(
+  Object.assign(gameNextPlayer(gameId), {
     meta: {users: selectPlayers(getState, gameId)}
   })
 );
@@ -151,18 +167,40 @@ export const gameClientToServer = {
       });
     }
   }
-  , gamePlayCard: ({gameId, cardId, animalPosition}, {user}) => (dispatch, getState) => {
+  , gameDeployAnimalRequest: ({gameId, cardId, animalPosition = 0}, {user}) => (dispatch, getState) => {
     const userId = user.id;
     const game = selectGame(getState, gameId);
     checkGameDefined(getState, gameId);
     checkGameHasUser(getState, gameId, userId);
     checkPlayerTurnAndPhase(getState, gameId, userId);
+    checkValidAnimalPosition(getState, gameId, userId, animalPosition);
     const cardIndex = checkPlayerHasCard(getState, gameId, userId, cardId);
     const card = game().players.get(userId).hand.get(cardIndex);
     const animal = AnimalModel.new(card);
-    logger.verbose('game > gamePlayCard', card);
-    dispatch(server$gamePlayAnimal(gameId, userId, animal, animalPosition, cardIndex))
-    dispatch(server$gameNextPlayer(gameId, userId));
+    logger.verbose('game > gameDeployAnimalRequest', card);
+    dispatch(server$gameDeployAnimal(gameId, userId, animal, parseInt(animalPosition), cardIndex));
+    dispatch(server$gameNextPlayer(gameId));
+  }
+  , gameDeployTraitRequest: ({gameId, animalId, cardId}, {user}) => (dispatch, getState) => {
+    const userId = user.id;
+    const game = selectGame(getState, gameId);
+    checkGameDefined(getState, gameId);
+    checkGameHasUser(getState, gameId, userId);
+    checkPlayerTurnAndPhase(getState, gameId, userId);
+
+    const cardIndex = checkPlayerHasCard(getState, gameId, userId, cardId);
+    const card = game().players.get(userId).hand.get(cardIndex);
+    if (card.target & TARGET_TYPE.ANIMAL_SELF) {
+      const animal = checkPlayerHasAnimal(getState, gameId, userId, animalId);
+      const animalValidation = animal.validateTrait(card);
+      if (animalValidation !== true) {
+        dispatch(actionError(userId, animalValidation));
+        return;
+      }
+      logger.verbose('game > gameDeployTraitRequest', animal, card);
+      dispatch(server$gameDeployTrait(gameId, userId, animalId, card));
+      dispatch(server$gameNextPlayer(gameId));
+    }
   }
 };
 
@@ -175,10 +213,17 @@ export const gameServerToClient = {
   , gamePlayerStatusChange: ({gameId, userId, status}) => gamePlayerStatusChange(gameId, userId, status)
   , gameGiveCards: ({gameId, userId, cards}) =>
     gameGiveCards(gameId, userId, List(cards).map(card => CardModel.fromServer(card)))
-  , gamePlayAnimal: ({gameId, userId, animal, animalPosition, cardPosition}) =>
-    gamePlayAnimal(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardPosition)
-
+  , gameDeployAnimal: ({gameId, userId, animal, animalPosition, cardPosition}) =>
+    gameDeployAnimal(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardPosition)
+  , gameDeployTrait: ({gameId, userId, animalId, card}) =>
+    gameDeployTrait(gameId, userId, animalId, CardModel.fromServer(card))
+  , gameNextPlayer: ({gameId}) => gameNextPlayer(gameId)
 };
+
+/*
+ * Checks
+ * */
+
 const checkGameDefined = (getState, gameId) => {
   const game = selectGame(getState, gameId)();
   if (game === void 0)
@@ -200,6 +245,15 @@ const checkPlayerHasCard = (getState, gameId, userId, cardId) => {
   return cardIndex;
 };
 
+const checkPlayerHasAnimal = (getState, gameId, userId, animalId) => {
+  const game = selectGame(getState, gameId)();
+  const animalIndex = game.players.get(userId).continent.findIndex(animal => animal.id === animalId);
+  if (!~animalIndex) {
+    throw new ActionCheckError(`checkPlayerHasCard(${gameId})`, 'Animal#%s not found in Player#%s', animalId, userId);
+  }
+  return game.players.get(userId).continent.get(animalIndex);
+};
+
 const checkPlayerTurnAndPhase = (getState, gameId, userId) => {
   const game = selectGame(getState, gameId)();
   if (game.status.phase !== PHASE.DEPLOY) {
@@ -210,12 +264,13 @@ const checkPlayerTurnAndPhase = (getState, gameId, userId) => {
       , 'Wrong turn (%s), offender %s (%s)'
       , game.status.player, userId, game.players.get(userId).index);
   }
-  // const playerOrder = game.playersOrder.find()
-  // const cardIndex = game.players.get(userId).hand.findIndex(card => card.id === cardId);
-  // if (!~cardIndex) {
-  //   throw new ActionCheckError('game>gamePlayCard', 'Card #%s not found in %s', cardId, userId);
-  // }
-  // return cardIndex;
+};
+
+const checkValidAnimalPosition = (getState, gameId, userId, animalPosition) => {
+  const game = selectGame(getState, gameId)();
+  if (isNaN(parseInt(animalPosition)) || animalPosition < 0 || animalPosition > game.players.get(userId).continent.size) {
+    throw new ActionCheckError(`checkValidAnimalPosition@Game(${gameId})`, 'Wrong animal position (%s)', animalPosition);
+  }
 };
 
 
