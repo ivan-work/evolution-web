@@ -17,6 +17,13 @@ export const PHASE = {
   , DIE: 3
 };
 
+const StatusRecord = Record({
+  turn: 0
+  , round: 0
+  , player: 0
+  , phase: PHASE.NONE
+});
+
 export class GameModel extends Record({
   id: null
   , roomId: null
@@ -24,22 +31,17 @@ export class GameModel extends Record({
   , players: Map()
   , board: Map()
   , started: false
-  , playersOrder: List()
-  , status: Map({
-    turn: 0
-    , round: 0
-    , phase: PHASE.NONE
-  })
+  , status: new StatusRecord()
 }) {
   static new(room) {
     return new GameModel({
-      id: uuid.v4()
+      id: uuid.v4().slice(0,4)
       , roomId: room.id
       , deck: List(shuffle([
         [12, cardTypes.CardCamouflage]
         , [12, cardTypes.CardCarnivorous]
       ].reduce((result, config) => result.concat(Array.from({length: config[0]}).map(u => CardModel.new(config[1]))), [])))
-      , players: room.users.reduce((result, userId) => result.set(userId, PlayerModel.new(userId)), Map())
+      , players: room.users.reduce((result, userId, index) => result.set(userId, PlayerModel.new(userId, index)), Map())
     })
   }
 
@@ -55,8 +57,7 @@ export class GameModel extends Record({
       : new GameModel({
       ...js
       , players: Map(js.players).map(p => PlayerModel.fromServer(p))
-      , playersOrder: Map(js.playersOrder)
-      , status: Map(js.status)
+      , status: new StatusRecord(js.status)
     });
   }
 
