@@ -1,15 +1,15 @@
-import {Record, List} from 'immutable';
-import uuid from 'node-uuid';
-import * as traits from './traits';
+import {Record} from 'immutable';
 
 export class TraitModel extends Record({
   type: null
   , name: null
-  , active: false
+  , action: null
+  , canTarget: null
+  , food: 0 // additinal food
 }) {
-  static new(traitType) {
+  static new(traitModel) {
     return new TraitModel({
-      ...traits[traitType]
+      ...traitModel
     });
   }
 

@@ -44,3 +44,10 @@ export function ensureParameter(data, type, optional) {
     throw new Error(`Data [${data}] is not instanceof of ${type}`);
   }
 }
+
+export function validateParameter(data, validateFn, string) {
+  const validation = typeof validateFn !== 'function' ? validateFn : validateFn(data);
+  if (validation !== true) {
+    throw new Error(`${string} (${data})`);
+  }
+}

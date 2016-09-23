@@ -10,8 +10,9 @@ import {
   , gameNextPlayer
   , gameDeployAnimal
   , gameDeployTrait
-  , gameEndDeploy
+  , gameEndTurn
   , gameStartEat
+  , gameGiveFood
 } from '../../server/reducers/games-rdx-server';
 
 export const reducer = createReducer(null, {
@@ -26,6 +27,7 @@ export const reducer = createReducer(null, {
   , gameNextPlayer
   , gameDeployAnimal
   , gameDeployTrait
-  , gameEndDeploy
+  , gameEndTurn
   , gameStartEat
+  , gameGiveFood
 });

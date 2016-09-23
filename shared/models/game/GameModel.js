@@ -17,7 +17,7 @@ export const PHASE = {
   , DIE: 3
 };
 
-const StatusRecord = Record({
+export const StatusRecord = Record({
   turn: 0
   , round: 0
   , player: 0
@@ -37,7 +37,7 @@ const FOOD_TABLE = [
   , () => rollDice() + rollDice() + rollDice() + rollDice() + 4
 ];
 
-export class GameModel extends Record({
+const GameModelData = {
   id: null
   , roomId: null
   , deck: null
@@ -45,7 +45,9 @@ export class GameModel extends Record({
   , food: -1
   , started: false
   , status: new StatusRecord()
-}) {
+};
+
+export class GameModel extends Record(GameModelData) {
   static generateDeck(config, shuffle) {
     const result = config.reduce((result, config) => result.concat(Array.from({length: config[0]}).map(u => CardModel.new(config[1]))), []);
     return List(shuffle ? doShuffle(result) : result);
@@ -111,16 +113,23 @@ export class GameModel extends Record({
   getPlayerAnimal(pid, index) {
     return this.getPlayer(pid).continent.get(index);
   }
+
+  locateAnimal(animalId) {
+    let playerId, animalIndex;
+    this.players.some(player => {
+      animalIndex = player.continent.findIndex(animal => animal.id === animalId);
+      if (~animalIndex) {
+        playerId = player.id;
+        return true;
+      }
+    });
+    return {playerId, animalIndex};
+  }
 }
 
 export class GameModelClient extends Record({
-  id: null
+  ...GameModelData
   , userId: null
-  , roomId: null
-  , deck: null
-  , started: false
-  , players: null
-  , status: null
 }) {
   static fromServer(js, userId) {
     const game = GameModel.fromServer(js);
@@ -142,6 +151,7 @@ export class GameModelClient extends Record({
 GameModelClient.prototype.start = GameModel.prototype.start;
 GameModelClient.prototype.getPlayerCard = GameModel.prototype.getPlayerCard;
 GameModelClient.prototype.getPlayerAnimal = GameModel.prototype.getPlayerAnimal;
+GameModelClient.prototype.locateAnimal = GameModel.prototype.locateAnimal;
 
 // TODO move to utils
 function doShuffle(array) {

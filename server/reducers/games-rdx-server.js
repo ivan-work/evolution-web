@@ -1,5 +1,5 @@
 import logger from '~/shared/utils/logger';
-import {createReducer, ensureParameter} from '~/shared/utils';
+import {createReducer, ensureParameter, validateParameter} from '~/shared/utils';
 import {Map, List} from 'immutable';
 import {GameModel, PHASE} from '../../shared/models/game/GameModel';
 import {CardModel} from '../../shared/models/game/CardModel';
@@ -64,7 +64,7 @@ export const gameNextPlayer = (game) => {
     .setIn(['status', 'player'], playerIndex);
 };
 
-export const gameEndDeploy = (game, {userId}) => {
+export const gameEndTurn = (game, {userId}) => {
   ensureParameter(userId, 'string');
   return game
     .setIn(['players', userId, 'ended'], true);
@@ -77,6 +77,18 @@ export const gameStartEat = (game, {food}) => {
     .setIn(['status', 'phase'], PHASE.EAT)
     .setIn(['status', 'round'], 0)
     .setIn(['status', 'player'], 0);
+};
+
+export const gameGiveFood = (game, {animalIds}) => {
+  validateParameter(animalIds, Array.isArray(animalIds), 'Animals is not Array');
+  return game
+    .update(game => {
+      return animalIds.reduce((game, animalId) => {
+        const {playerId, animalIndex} = game.locateAnimal(animalId);
+        return game.updateIn(['players', playerId, 'continent', animalIndex, 'food'], food => food + 1);
+      }, game)
+    })
+    .update('food', food => food - animalIds.length);
 };
 
 export const reducer = createReducer(Map(), {
@@ -95,6 +107,7 @@ export const reducer = createReducer(Map(), {
   , gameNextPlayer: (state, data) => state.update(data.gameId, game => gameNextPlayer(game, data))
   , gameDeployAnimal: (state, data) => state.update(data.gameId, game => gameDeployAnimal(game, data))
   , gameDeployTrait: (state, data) => state.update(data.gameId, game => gameDeployTrait(game, data))
-  , gameEndDeploy: (state, data) => state.update(data.gameId, game => gameEndDeploy(game, data))
+  , gameEndTurn: (state, data) => state.update(data.gameId, game => gameEndTurn(game, data))
   , gameStartEat: (state, data) => state.update(data.gameId, game => gameStartEat(game, data))
+  , gameGiveFood: (state, data) => state.update(data.gameId, game => gameGiveFood(game, data))
 });

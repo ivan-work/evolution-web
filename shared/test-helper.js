@@ -154,4 +154,20 @@ global.mockClientStore = function (initialClientState) {
   return clientStore
 };
 
+global.expectUnchanged = (cb, ...stores) => {
+  let previousStates = stores.map(store => store.getState());
+  cb();
+  stores.forEach((store, i) => {
+    expect(store.getState().toJS()).eql(previousStates[i].toJS());
+  });
+};
+
+global.expectChanged = (cb, ...stores) => {
+  let previousStates = stores.map(store => store.getState());
+  cb();
+  stores.forEach((store, i) => {
+    expect(store.getState()).not.equal(previousStates[i]);
+  });
+};
+
 import './test-helper-mocks';
