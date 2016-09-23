@@ -9,18 +9,14 @@ export const TARGET_TYPE = (i => ({
   , LINK_ENEMY: 1 << i++
 }))(0);
 
-export class Trait extends Record({
-  active: false
-}) {
-}
-
 export class CardModel extends Record({
   id: null
   , type: null
   , name: 'UNKNOWN CARD'
   , image: 'http://evolive.ru/images/def.png'
-  , target: -1
-  , trait: null
+  , target: TARGET_TYPE.DROP_AS_ANIMAL
+  , trait1type: null
+  , trait2type: null
 }) {
   static new(cardClass) {
     const id = uuid.v4().slice(0, 4);
@@ -37,18 +33,10 @@ export class CardModel extends Record({
   static fromServer(js) {
     return js == null
       ? null
-      : new CardModel(js)
-      .set('trait', new Trait(js.trait));
+      : new CardModel(js);
   }
 
   toString() {
     return `Card #${this.id} (${this.type})`;
   }
 }
-
-CardModel.DefaultCard = new CardModel({
-  id: 'DefaultCard'
-  , name: 'Default Card'
-  , description: 'Default Card'
-  , imageBack: 'http://evolive.ru/images/def.png'
-});

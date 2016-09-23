@@ -4,6 +4,7 @@ import {Map, List} from 'immutable';
 import {GameModel, PHASE} from '../../shared/models/game/GameModel';
 import {CardModel} from '../../shared/models/game/CardModel';
 import {AnimalModel} from '../../shared/models/game/evolution/AnimalModel';
+import {TraitModel} from '../../shared/models/game/evolution/TraitModel';
 
 export const gameStart = game => game.start();
 
@@ -28,13 +29,16 @@ export const gameDeployAnimal = (game, {userId, animal, animalPosition, cardPosi
     .updateIn(['players', userId, 'continent'], continent => continent.insert(animalPosition, animal))
 };
 
-export const gameDeployTrait = (game, {userId, animalId, card}) => {
+export const gameDeployTrait = (game, {userId, cardId, animalId, trait}) => {
   ensureParameter(userId, 'string');
+  ensureParameter(cardId, 'string');
   ensureParameter(animalId, 'string');
-  ensureParameter(card, CardModel);
+  ensureParameter(trait, TraitModel);
+  const cardIndex = game.getIn(['players', userId, 'hand']).findIndex(card => card.id === cardId);
   const animalIndex = game.getIn(['players', userId, 'continent']).findIndex(animal => animal.id === animalId);
   return game
-    .updateIn(['players', userId, 'continent', animalIndex, 'cards'], cards => cards.push(card))
+    .removeIn(['players', userId, 'hand', cardIndex])
+    .updateIn(['players', userId, 'continent', animalIndex, 'traits'], traits => traits.push(trait))
 };
 
 export const gameNextPlayer = (game) => {

@@ -7,6 +7,7 @@ import {STATUS} from '../models/UserModel';
 import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
 import {CardModel, TARGET_TYPE} from '../models/game/CardModel';
 import {AnimalModel} from '../models/game/evolution/AnimalModel';
+import {TraitModel} from '../models/game/evolution/TraitModel';
 
 import {actionError} from './generic';
 import {redirectTo} from '../utils';
@@ -116,13 +117,13 @@ export const gameDeployTraitRequest = (cardId, animalId) => (dispatch, getState)
   , meta: {server: true}
 });
 
-export const gameDeployTrait = (gameId, userId, animalId, card) => ({
+export const gameDeployTrait = (gameId, userId, cardId, animalId, trait) => ({
   type: 'gameDeployTrait'
-  , data: {gameId, userId, animalId, card}
+  , data: {gameId, userId, cardId, animalId, trait}
 });
 
-export const server$gameDeployTrait = (gameId, userId, animalId, card) => (dispatch, getState) => dispatch(Object.assign(
-  gameDeployTrait(gameId, userId, animalId, card)
+export const server$gameDeployTrait = (gameId, userId, cardId, animalId, trait) => (dispatch, getState) => dispatch(Object.assign(
+  gameDeployTrait(gameId, userId, cardId, animalId, trait)
   , {meta: {users: selectPlayers(getState, gameId)}}
 ));
 
@@ -171,7 +172,7 @@ export const server$gameEndDeploy = (gameId, userId) => (dispatch, getState) => 
 export const server$gameEndDeployAction = (gameId, userId) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   if (game().getPlayer(userId).hand.size === 0) {
-    dispatch(server$gameEndDeploy(gameId));
+    dispatch(server$gameEndDeploy(gameId, userId));
   } else {
     dispatch(server$gameNextPlayer(gameId));
   }
@@ -237,11 +238,11 @@ export const gameClientToServer = {
     const cardIndex = checkPlayerHasCard(getState, gameId, userId, cardId);
     const card = game().getPlayer(userId).hand.get(cardIndex);
     const animal = AnimalModel.new(card);
-    logger.verbose('game > gameDeployAnimalRequest', card);
+    logger.verbose('game > gameDeployAnimalRequest:', card);
     dispatch(server$gameDeployAnimal(gameId, userId, animal, parseInt(animalPosition), cardIndex));
     dispatch(server$gameEndDeployAction(gameId, userId));
   }
-  , gameDeployTraitRequest: ({gameId, animalId, cardId}, {user}) => (dispatch, getState) => {
+  , gameDeployTraitRequest: ({gameId, cardId, animalId}, {user}) => (dispatch, getState) => {
     const userId = user.id;
     const game = selectGame(getState, gameId);
     checkGameDefined(getState, gameId);
@@ -252,13 +253,14 @@ export const gameClientToServer = {
     const card = game().players.get(userId).hand.get(cardIndex);
     if (card.target & TARGET_TYPE.ANIMAL_SELF) {
       const animal = checkPlayerHasAnimal(getState, gameId, userId, animalId);
-      const animalValidation = animal.validateTrait(card);
+      const trait = TraitModel.new(card.trait1type);
+      const animalValidation = animal.validateTrait(trait);
       if (animalValidation !== true) {
         dispatch(actionError(userId, animalValidation));
         return;
       }
-      logger.verbose('game > gameDeployTraitRequest', animal, card);
-      dispatch(server$gameDeployTrait(gameId, userId, animalId, card));
+      logger.verbose('game > gameDeployTraitRequest:', animal, card, trait);
+      dispatch(server$gameDeployTrait(gameId, userId, cardId, animalId, trait));
       dispatch(server$gameEndDeployAction(gameId, userId));
     }
   }
@@ -275,8 +277,8 @@ export const gameServerToClient = {
     gameGiveCards(gameId, userId, List(cards).map(card => CardModel.fromServer(card)))
   , gameDeployAnimal: ({gameId, userId, animal, animalPosition, cardPosition}) =>
     gameDeployAnimal(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardPosition)
-  , gameDeployTrait: ({gameId, userId, animalId, card}) =>
-    gameDeployTrait(gameId, userId, animalId, CardModel.fromServer(card))
+  , gameDeployTrait: ({gameId, userId, cardId, animalId, trait}) =>
+    gameDeployTrait(gameId, userId, cardId, animalId, TraitModel.fromServer(trait))
   , gameNextPlayer: ({gameId}) => gameNextPlayer(gameId)
   , gameEndDeploy: ({gameId, userId}) => gameEndDeploy(gameId, userId)
   , gameStartEat: ({gameId, food}) => gameStartEat(gameId, food)
