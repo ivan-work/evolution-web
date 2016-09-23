@@ -115,7 +115,7 @@ export class GameModel extends Record(GameModelData) {
   }
 
   locateAnimal(animalId) {
-    let playerId, animalIndex;
+    let playerId = -1, animalIndex = -1;
     this.players.some(player => {
       animalIndex = player.continent.findIndex(animal => animal.id === animalId);
       if (~animalIndex) {

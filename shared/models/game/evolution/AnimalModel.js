@@ -2,6 +2,7 @@ import {Record, List} from 'immutable';
 import uuid from 'node-uuid';
 import {CardModel} from '../CardModel';
 import {TraitModel} from './TraitModel';
+import {TraitDataModel} from './TraitDataModel';
 
 export class AnimalModel extends Record({
   id: null
@@ -9,11 +10,10 @@ export class AnimalModel extends Record({
   , food: 0
   , traits: List()
 }) {
-  static new(card, traits) {
+  static new(card) {
     return new AnimalModel({
       id: uuid.v4().slice(0, 4)
       , base: card
-      , ...traits
     });
   }
 
@@ -23,6 +23,11 @@ export class AnimalModel extends Record({
       : new AnimalModel(js)
       .set('base', CardModel.fromServer(js.base))
       .set('traits', List(js.traits).map(trait => TraitModel.fromServer(trait)));
+  }
+
+  toClient() {
+    return this
+      .update('traits', traits => traits.map(trait => trait.toClient()))
   }
 
   toOthers() {
@@ -40,11 +45,15 @@ export class AnimalModel extends Record({
     return true;
   }
 
+  hasTrait(type) {
+    return this.traits.some(trait => trait.type === type)
+  }
+
   canEat() {
     return this.food < this.getMaxFood();
   }
 
   getMaxFood() {
-    return 1 + this.traits.reduce((result, trait) => result + trait.food, 0);
+    return 1 + this.traits.reduce((result, trait) => result + trait.dataModel.food, 0);
   }
 }
