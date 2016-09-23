@@ -8,7 +8,7 @@ import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
 import {CardModel, CARD_TARGET_TYPE} from '../models/game/CardModel';
 import {AnimalModel} from '../models/game/evolution/AnimalModel';
 import {TraitModel} from '../models/game/evolution/TraitModel';
-import {TRAIT_TARGET_TYPE} from '../models/game/evolution/traitData/constants';
+import {TRAIT_TARGET_TYPE} from '../models/game/evolution/constants';
 
 import {actionError} from './generic';
 import {redirectTo} from '../utils';
