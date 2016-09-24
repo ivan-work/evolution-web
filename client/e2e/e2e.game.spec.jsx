@@ -29,7 +29,7 @@
 //    const userWrapper1 = $Game1.find('.PlayerWrapper.UserWrapper');
 //    const enemyWrapper1 = $Game1.find('.PlayerWrapper.EnemyWrapper');
 //
-//    const getDropZoneHID = (i) => userWrapper0.find('DropTarget(PlayerContinentDropTargetZone)').get(i).getHandlerId();
+//    const getDropZoneHID = (i) => userWrapper0.find('DropTarget(ContinentZone)').get(i).getHandlerId();
 //    /*
 //     * Test UI
 //     * */
@@ -38,7 +38,7 @@
 //    expect($Game0.find('.CardCollection.Deck').find('.Card'), 'Deck.length > 0').length(TEST_DECK_SIZE - TEST_HAND_SIZE - TEST_HAND_SIZE);
 //    expect(userWrapper0.find('.CardCollection.Hand')).length(1);
 //    expect(userWrapper0.find('.CardCollection.Hand').find('.Card'), 'Hand.length == 6').length(TEST_HAND_SIZE);
-//    expect(userWrapper0.find('DropTarget(PlayerContinentDropTargetZone)')).length(1);
+//    expect(userWrapper0.find('DropTarget(ContinentZone)')).length(1);
 //    expect(userWrapper0.find('.animal-wrapper')).length(0);
 //    expect(userWrapper0.find('Animal')).length(0);
 //
@@ -58,12 +58,12 @@
 //
 //    dndBackend0.simulateBeginDrag([cardHID]);
 //
-//    expect(userWrapper0.find('PlayerContinentDropTargetZone').props().isOver).false;
+//    expect(userWrapper0.find('ContinentZone').props().isOver).false;
 //
 //    dndBackend0.simulateHover([getDropZoneHID(0)]);
 //
-//    expect(userWrapper0.find('PlayerContinentDropTargetZone').props().isOver).true;
-//    expect(userWrapper0.find('PlayerContinentDropTargetZone')).length(1);
+//    expect(userWrapper0.find('ContinentZone').props().isOver).true;
+//    expect(userWrapper0.find('ContinentZone')).length(1);
 //    expect(userWrapper0.find('.animal-wrapper'), '.animal-wrapper length').length(1);
 //    expect(userWrapper0.find('Animal')).length(0);
 //    expect(enemyWrapper1.find('.animal-wrapper')).length(0);
@@ -71,7 +71,7 @@
 //
 //    dndBackend0.simulateDrop();
 //
-//    expect(userWrapper0.find('PlayerContinentDropTargetZone')).length(2);
+//    expect(userWrapper0.find('ContinentZone')).length(2);
 //    expect(userWrapper0.find('.animal-wrapper'), '.animal-wrapper length').length(1);
 //    expect(userWrapper0.find('Animal'), 'userWrapper0 Animal').length(1);
 //    expect(enemyWrapper1.find('.animal-wrapper'), 'enemyWrapper1 .animal-wrapper').length(1);

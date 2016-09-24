@@ -2,7 +2,7 @@ import React from 'react';
 import Immutable from 'immutable';
 import { DropTarget } from 'react-dnd';
 
-export class PlayerContinentDropTargetZone extends React.Component {
+export class ContinentZone extends React.Component {
   static propTypes = {
     width: React.PropTypes.string.isRequired
     , index: React.PropTypes.number.isRequired
@@ -16,18 +16,18 @@ export class PlayerContinentDropTargetZone extends React.Component {
 
   render() {
     const {width} = this.props;
-    return this.props.connectDropTarget(<div className="PlayerContinentDropTargetZone" style={{width}}>
+    return this.props.connectDropTarget(<div className="ContinentZone" style={{width}}>
     </div>);
   }
 }
 
-export const DropTargetPlayerContinentDropTargetZone = DropTarget("Card", {
+export const DropTargetContinentZone = DropTarget("Card", {
   drop(props, monitor, component) {
-    const {model, position} = monitor.getItem();
-    props.onCardDropped(model, props.index);
+    const {card} = monitor.getItem();
+    props.onCardDropped(card, props.index);
   }
 }, (connect, monitor) => ({
   connectDropTarget: connect.dropTarget(),
   isOver: monitor.isOver(),
   canDrop: monitor.canDrop()
-}))(PlayerContinentDropTargetZone);
+}))(ContinentZone);

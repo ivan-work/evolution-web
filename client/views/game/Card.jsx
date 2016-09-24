@@ -17,13 +17,12 @@ export class Card extends React.Component {
 
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    // this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
   }
 
   render() {
-    const model = this.props.model || {name: 'cardback'};
-    const connectDragSource = this.props.connectDragSource;
-    const body = <div className='Card' style={CARD_SIZE}>
+    const {connectDragSource, disabled, model = {name: 'cardback'}} = this.props;
+    const body = <div className={`Card ${disabled?'disabled':'enabled'}`} style={CARD_SIZE}>
       <div className='inner'>
         {this.props.index}
         <br/>{model.name}
@@ -33,22 +32,15 @@ export class Card extends React.Component {
   }
 }
 
-export const UnknownCard = (props) => <div className='Card' style={CARD_SIZE}>
-  <div className='inner'>
-    {props.index}
-    <br/>Unknown card
-  </div>
-</div>;
-
 export const DragCard = DragSource("Card"
   , {
     beginDrag: (props) => ({
-      model: props.model
-      , position: props.index
+      card: props.model
     })
+    , canDrag: (props, monitor) => !props.disabled
   }
   , (connect, monitor) => ({
-    connectDragSource: connect.dragSource(),
-    isDragging: monitor.isDragging()
+    connectDragSource: connect.dragSource()
+    , isDragging: monitor.isDragging()
   })
 )(Card);

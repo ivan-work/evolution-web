@@ -21,7 +21,7 @@
       height: 200px;
       background: #aaf;
 
-      .PlayerContinentDropTargetZone {
+      .ContinentZone {
         float: left;
         height: 100%;
         outline: 2px solid green;
@@ -65,8 +65,12 @@
     border: 1px solid black;
     background: gray;
     word-wrap: break-word;
-    &[draggable] {
+    &.enabled[draggable] {
       cursor: -webkit-grab;
+      background: #797;
+    }
+    &.disabled {
+      background: #977;
     }
     &.drag {
       cursor: -webkit-grabbing;

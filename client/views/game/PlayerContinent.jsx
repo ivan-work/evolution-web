@@ -1,6 +1,6 @@
 import React from 'react';
 import Immutable from 'immutable';
-import {DropTargetPlayerContinentDropTargetZone} from './PlayerContinentDropTargetZone.jsx'
+import {DropTargetContinentZone} from './ContinentZone.jsx'
 
 import {ANIMAL_SIZE} from './Animal.jsx'
 export const ANIMAL_MARGIN = 10;
@@ -33,7 +33,7 @@ export class PlayerContinent extends React.Component {
     } else {
       width = ANIMAL_SIZE.width + ANIMAL_MARGIN * 2 + 'px'
     }
-    return <DropTargetPlayerContinentDropTargetZone
+    return <DropTargetContinentZone
       key={index}
       width={width}
       index={index}

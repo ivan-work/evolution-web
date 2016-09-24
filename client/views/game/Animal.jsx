@@ -25,11 +25,11 @@ export class Animal extends React.Component {
   }
 
   render() {
-    const {index, model, connectDropTarget} = this.props;
+    const {index, model, connectDropTarget, isOver} = this.props;
 
     const body = <div className='Animal' style={ANIMAL_SIZE}>
       <div className='inner'>
-        {index}
+        {index}{isOver ? 'ITS OVER' : ''}
         <br/>{model && model.base && model.base.name}
       </div>
     </div>;
@@ -39,8 +39,8 @@ export class Animal extends React.Component {
 
 export const DropTargetAnimal = DropTarget("Card", {
   drop(props, monitor, component) {
-    const {model, position} = monitor.getItem();
-    props.onCardDropped(model, position, props.index);
+    const {card} = monitor.getItem();
+    props.onCardDropped(card, props.model);
   }
 }, (connect, monitor) => ({
   connectDropTarget: connect.dropTarget(),
