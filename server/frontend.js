@@ -9,9 +9,9 @@ const webpack = require('webpack');
 const addDevMiddlewares = (app, options) => {
   const compiler = webpack(options);
   const middleware = webpackDevMiddleware(compiler, {
-    noInfo: true,
+    noInfo: false,
     publicPath: options.output.publicPath,
-    silent: true,
+    silent: false,
     stats: 'errors-only',
   });
 
@@ -23,9 +23,6 @@ const addDevMiddlewares = (app, options) => {
   const fs = middleware.fileSystem;
 
   app.get('*', (req, res) => {
-
-    console.log(options.output.path)
-
     const file = fs.readFileSync(path.join(compiler.outputPath, 'index.html'));
     res.send(file.toString());
   });
@@ -51,7 +48,6 @@ module.exports = (options) => {
   const isProd = process.env.NODE_ENV === 'production';
 
   const app = express();
-
   if (isProd) {
     addProdMiddlewares(app, options);
   } else {
