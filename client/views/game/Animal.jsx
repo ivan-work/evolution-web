@@ -21,6 +21,13 @@ export class Animal extends React.Component {
     , onOver: React.PropTypes.func
   };
 
+  componentWillReceiveProps(nextProps) {
+    // @HACK for mouse leave
+    if (this.props.isOver && !nextProps.isOver) {
+      nextProps.onOver(nextProps.isOver, nextProps.index);
+    }
+  }
+
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
@@ -29,10 +36,15 @@ export class Animal extends React.Component {
   render() {
     const {index, model, connectDropTarget, isOver} = this.props;
 
-    const body = <div className='Animal' style={ANIMAL_SIZE}>
+    const body = <div className='Animal'>
+      <div className='traits'>
+        {model.traits.map((trait, index) => {
+          return <div key={index} style={{top: `-${index * 1.6 + 1}em`}}className='AnimalTrait'>{trait.type.replace('Trait', '')}</div>
+          })}
+      </div>
       <div className='inner'>
         {index}{isOver ? 'ITS OVER' : ''}
-        <br/>{model && model.base && model.base.name}
+        <br/>{model.base && model.base.name}
       </div>
     </div>;
     return connectDropTarget ? connectDropTarget(body) : body;
