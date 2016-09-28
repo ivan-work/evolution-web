@@ -21,7 +21,7 @@ const makeClientState = () => Map({
     id: null
     , userId: 'User0'
     , roomId: null
-    , deck: 12
+    , deck: GameModel.generateDeck([[12, cardTypes.CardCarnivorous]])
     , players: Map({
       User0: new PlayerModel({
         id: 'User0'
@@ -64,7 +64,7 @@ const clientAnimalHID = ($Game, index) => $Game.find('DropTarget(Animal)').get(i
 describe('Game: Deploying:', () => {
   it('Displays default game', () => {
     const $Game = mount(<DDCGame {...makeClientState().toObject()}/>);
-    //expect($Game.find('.CardCollection.Deck').children(), '.CardCollection.Deck').length(12);
+    expect($Game.find('.CardCollection.Deck').children(), '.CardCollection.Deck').length(12);
     expect($Game.find('.CardCollection.Hand').children(), '.CardCollection.Hand').length(3);
     expect($Game.find('.CardCollection.User1').children(), '.CardCollection.User1').length(6);
   });
