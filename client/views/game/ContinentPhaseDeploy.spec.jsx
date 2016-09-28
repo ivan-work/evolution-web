@@ -1,18 +1,17 @@
 import React from 'react';
 import {List, Map, Range} from 'immutable';
-import {Continent} from './Continent.jsx';
+import {ContinentPhaseDeploy} from './ContinentPhaseDeploy.jsx';
 import {Card} from './Card.jsx';
 
 import {AnimalModel} from '../../../shared/models/game/evolution/AnimalModel';
-//import {roomCreateRequest, roomJoinRequest, gameCreateRequest, gameReadyRequest} from '../../../shared/actions/actions';
 
 describe('Continent', () => {
   it('Empty', () => {
-    const $Continent = shallow(<Continent isUserContinent={true}/>);
+    const $Continent = shallow(<ContinentPhaseDeploy isUserContinent={true}/>);
     expect($Continent.find('DropTarget(ContinentZone)').length).equal(1);
   });
   it('One Card', () => {
-    const $Continent = shallow(<Continent isUserContinent={true} continent={List.of(AnimalModel.new())}/>);
+    const $Continent = shallow(<ContinentPhaseDeploy isUserContinent={true} continent={List.of(AnimalModel.new())}/>);
     expect($Continent.find('DropTarget(Animal)'), 'child.length').length(1);
     expect($Continent.find('DropTarget(ContinentZone)'), 'ContinentZone').length(2);
   });
