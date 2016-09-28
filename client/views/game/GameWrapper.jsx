@@ -3,10 +3,6 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import {Map} from 'immutable';
 
-import {STATUS} from '../../../shared/models/UserModel';
-import {PHASE} from '../../../shared/models/game/GameModel';
-import {Continent} from './Continent.jsx';
-
 import {
   gameEndTurnRequest
   , gameReadyRequest
@@ -40,27 +36,14 @@ export class GameWrapper extends React.Component {
 
   constructor(props) {
     super(props);
-    this.makeContinent = this.makeContinent.bind(this);
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this)
   }
 
   componentDidUpdate() {
     console.log('componentDidUpdate', this.props.gameActions)
-    if (!this.ready && this.props.game && this.props.game.getPlayer().status !== STATUS.READY) {
+    if (!this.ready && this.props.game) {
       this.ready = true;
       this.props.$ready();
-    }
-  }
-
-  makeContinent(continent, isUserContinent) {
-    switch (this.props.game.status.phase) {
-      case PHASE.DEPLOY:
-        return <Continent
-          isUserContinent={isUserContinent}
-          continent={continent}
-          $deployAnimal={this.props.$deployAnimal}
-          $deployTrait={this.props.$deployTrait}
-        />
     }
   }
 
@@ -70,7 +53,7 @@ export class GameWrapper extends React.Component {
 
     if (!user || !game) return <div>Loading</div>;
 
-    return <Game user={user} game={game} makeContinent={this.makeContinent}/>;
+    return <Game user={user} game={game}/>;
   }
 }
 

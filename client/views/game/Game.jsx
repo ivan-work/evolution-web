@@ -3,12 +3,14 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import * as MDL from 'react-mdl';
 
 import {UserModel} from '~/shared/models/UserModel';
-import {GameModelClient} from '../../../shared/models/game/GameModel';
+import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 
 import {CARD_POSITIONS} from './CARD_POSITIONS';
 import {CardCollection} from './CardCollection.jsx';
 import {Card, DragCard} from './Card.jsx';
-import {Continent} from './Continent.jsx';
+import {ContinentDeploy} from './ContinentDeploy.jsx';
+import {ContinentFeeding} from './ContinentFeeding.jsx';
+import {DragFood} from './Food.jsx';
 
 export class Game extends React.Component {
   static contextTypes = {
@@ -44,6 +46,12 @@ export class Game extends React.Component {
     const disabled = game.status.player != game.getPlayer().index;
     const player = game.getPlayer();
 
+    const GameContinent = (game.status.phase === PHASE.DEPLOY
+      ? ContinentDeploy
+      : game.status.phase === PHASE.FEEDING
+      ? ContinentFeeding
+      : React.DOM.div);
+
     return <div className="Game">
 
       {/* DECK */}
@@ -66,10 +74,13 @@ export class Game extends React.Component {
         </CardCollection>
       </div>
 
-      {/* USER */}
+      {game.status.phase === PHASE.FEEDING ? <div className='GameFoodContainer'>
+        {Array.from({length: game.food}).map((u, index) => <DragFood key={index} disabled={false} index={index}/>)}
+      </div>: null}
 
+      {/* USER */}
       <div className='PlayerWrapper UserWrapper' style={CARD_POSITIONS[game.players.size].player}>
-        <Continent
+        <GameContinent
           isUserContinent={true}
           continent={player.continent}
         />
@@ -96,7 +107,7 @@ export class Game extends React.Component {
               {enemy.hand.toArray().map((cardModel, i) => <Card model={cardModel} key={i} index={i}/>)}
             </CardCollection>
 
-            <Continent
+            <GameContinent
               continent={enemy.continent}
             />
           </div>

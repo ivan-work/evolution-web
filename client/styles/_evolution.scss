@@ -136,6 +136,15 @@ $ANIMAL_MARGIN: 10px;
       }
     }
 
+    .food {
+      .AnimalFood {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        margin: .2em;
+      }
+    }
+
     .inner {
       width: 100%;
       height: $ANIMAL_HEIGHT;

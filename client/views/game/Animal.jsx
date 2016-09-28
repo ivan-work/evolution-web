@@ -8,11 +8,6 @@ import { DND_ITEM_TYPE } from './DND_ITEM_TYPE';
 import { AnimalModel } from '~/shared/models/game/evolution/AnimalModel';
 import { AnimalTrait, DragAnimalTrait } from './AnimalTrait.jsx';
 
-export const ANIMAL_SIZE = {
-  width: 60
-  , height: 80
-};
-
 export class Animal extends React.Component {
   static defaultProps = {
     model: {name: 'default animal', base: {name: 'default card'}}
@@ -20,6 +15,8 @@ export class Animal extends React.Component {
 
   static propTypes = {
     model: React.PropTypes.instanceOf(AnimalModel).isRequired
+    , onCardDropped: React.PropTypes.func
+    , onFoodDropped: React.PropTypes.func
   };
 
   constructor(props) {
@@ -46,7 +43,7 @@ export class Animal extends React.Component {
       <div className='inner'>
         {model.base && model.base.name}
         <div className='food'>
-          {Array.from({length: model.food}).map((u, index) => <div className='AnimalFood'></div>)}
+          {Array.from({length: model.food}).map((u, index) => <div key={index} className='AnimalFood'></div>)}
         </div>
       </div>
     </div>;
@@ -59,10 +56,10 @@ export const DropTargetAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FO
     const {item} = monitor.getItem();
     if (monitor.getItemType() === DND_ITEM_TYPE.CARD) {
       props.onCardDropped(item, props.model);
-    }
-    /* else if (monitor.getItemType() === ITEM_TYPE.FOOD) {
-     props.onFoodDropped(props.model);
-     }*/
+    } else if (monitor.getItemType() === DND_ITEM_TYPE.FOOD) {
+      const {index} = monitor.getItem();
+      props.onFoodDropped(props.model, index);
+   }
   }
 }, (connect, monitor) => ({
   connectDropTarget: connect.dropTarget(),

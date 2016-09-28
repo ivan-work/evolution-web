@@ -9,7 +9,6 @@ import {GameModel, GameModelClient, StatusRecord, PHASE} from '../../../shared/m
 import {CardModel} from '../../../shared/models/game/CardModel';
 import {AnimalModel} from '../../../shared/models/game/evolution/AnimalModel';
 import * as cardTypes from '../../../shared/models/game/evolution/cards';
-import {roomCreateRequest, roomJoinRequest, gameCreateRequest, gameReadyRequest} from '../../../shared/actions/actions';
 
 const makeClientState = () => Map({
   user: new UserModel({

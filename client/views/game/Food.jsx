@@ -5,16 +5,9 @@ import classnames from 'classnames';
 import { DragSource } from 'react-dnd';
 import { DND_ITEM_TYPE } from './DND_ITEM_TYPE';
 
-import { TraitModel } from '~/shared/models/game/evolution/TraitModel';
-
-export class AnimalTrait extends React.Component {
-  static defaultProps = {
-    disabled: false
-  };
-
+export class Food extends React.Component {
   static propTypes = {
-    trait: React.PropTypes.instanceOf(TraitModel).isRequired
-    , index: React.PropTypes.number.isRequired
+    index: React.PropTypes.number.isRequired
     , disabled: React.PropTypes.bool.isRequired
   };
 
@@ -24,28 +17,28 @@ export class AnimalTrait extends React.Component {
   }
 
   render() {
-    const {trait, index, disabled, connectDragSource, isDragging} = this.props;
+    const {index, disabled, connectDragSource, isDragging} = this.props;
 
     const className = classnames({
-      AnimalTrait: true
+      Food: true
       , disabled: disabled
       , enabled: !disabled
       , isDragging: isDragging
     });
 
-    const body = <div className={className} style={{top: `-${(index + 1) * 1.6}em`}}>{trait.type.replace('Trait', '')}</div>;
+    const body = <div className={className}></div>;
 
     return connectDragSource ? connectDragSource(body) : body;
   }
 }
 
-export const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
+export const DragFood = DragSource(DND_ITEM_TYPE.FOOD
   , {
-    beginDrag: (props) => ({item: props.trait})
+    beginDrag: (props) => ({index: props.index})
     , canDrag: (props, monitor) => !props.disabled
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource()
     , isDragging: monitor.isDragging()
   })
-)(AnimalTrait);
+)(Food);
