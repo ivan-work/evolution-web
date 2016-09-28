@@ -34,6 +34,7 @@ export const Login = React.createClass({
             floatingLabel
             value={loginLink.value}
             onChange={handleChange}
+            autoComplete="off"
             label='Username'
           />
           <div>

@@ -8,7 +8,7 @@ import {CardModel} from '../../../shared/models/game/CardModel';
 describe('CardCollection', () => {
   it('Displays children', () => {
     const $CardCollection = shallow(<CardCollection
-      ref="testcc" name="testcc"
+      name="testcc"
       shift={[10, 5]}>
       <div className='child' id="0"/>
       <div className='child' id="1"/>
@@ -22,7 +22,7 @@ describe('CardCollection', () => {
 
   it('Displays child', () => {
     const $CardCollection = shallow(<CardCollection
-      ref="testcc" name="testcc"
+      name="testcc"
       shift={[10, 5]}>
       <div id="0"/>
     </CardCollection>);
@@ -32,7 +32,7 @@ describe('CardCollection', () => {
 
   it('Displays empty', () => {
     const $CardCollection = shallow(<CardCollection
-      ref="testcc" name="testcc"
+      name="testcc"
       shift={[10, 5]}>
     </CardCollection>);
     expect($CardCollection.children().length).equal(0);
@@ -41,7 +41,7 @@ describe('CardCollection', () => {
   it('Wraps into CardPlace', () => {
     const cards = CardModel.generate(3);
     const $CardCollection = shallow(<CardCollection
-      ref="testcc" name="testcc"
+      name="testcc"
       shift={[10, 5]}>
       <div id="1"/>
       <div id="2"/>

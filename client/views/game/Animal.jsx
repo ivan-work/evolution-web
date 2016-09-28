@@ -1,9 +1,12 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
-import { AnimalModel } from '~/shared/models/game/evolution/AnimalModel';
+
 import { DropTarget } from 'react-dnd';
+import { DND_ITEM_TYPE } from './DND_ITEM_TYPE';
+
+import { AnimalModel } from '~/shared/models/game/evolution/AnimalModel';
+import { AnimalTrait, DragAnimalTrait } from './AnimalTrait.jsx';
 
 export const ANIMAL_SIZE = {
   width: 60
@@ -17,16 +20,7 @@ export class Animal extends React.Component {
 
   static propTypes = {
     model: React.PropTypes.instanceOf(AnimalModel).isRequired
-    , index: React.PropTypes.number.isRequired
-    , onOver: React.PropTypes.func
   };
-
-  componentWillReceiveProps(nextProps) {
-    // @HACK for mouse leave
-    if (this.props.isOver && !nextProps.isOver) {
-      nextProps.onOver(nextProps.isOver, nextProps.index);
-    }
-  }
 
   constructor(props) {
     super(props);
@@ -34,30 +28,41 @@ export class Animal extends React.Component {
   }
 
   render() {
-    const {index, model, connectDropTarget, isOver} = this.props;
+    const {model, connectDropTarget, isOver} = this.props;
 
-    const body = <div className='Animal'>
+    const className = classnames({
+      Animal: true
+      , highlight: isOver
+    });
+
+    const body = <div className={className}>
       <div className='traits'>
-        {model.traits.map((trait, index) => {
-          return <div key={index} style={{top: `-${index * 1.6 + 1}em`}}className='AnimalTrait'>{trait.type.replace('Trait', '')}</div>
-          })}
+        {model.traits.map((trait, index) => (
+          trait.dataModel.targetType
+            ? <DragAnimalTrait key={index} index={index} trait={trait}/>
+            : <AnimalTrait key={index} index={index} trait={trait}/>)
+          )}
       </div>
       <div className='inner'>
-        {index}{isOver ? 'ITS OVER' : ''}
-        <br/>{model.base && model.base.name}
+        {model.base && model.base.name}
+        <div className='food'>
+          {Array.from({length: model.food}).map((u, index) => <div className='AnimalFood'></div>)}
+        </div>
       </div>
     </div>;
     return connectDropTarget ? connectDropTarget(body) : body;
   }
 }
 
-export const DropTargetAnimal = DropTarget("Card", {
+export const DropTargetAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT], {
   drop(props, monitor, component) {
-    const {card} = monitor.getItem();
-    props.onCardDropped(card, props.model);
-  }
-  , hover(props, monitor, component) {
-    props.onOver(monitor.isOver({shallow: true}), props.index);
+    const {item} = monitor.getItem();
+    if (monitor.getItemType() === DND_ITEM_TYPE.CARD) {
+      props.onCardDropped(item, props.model);
+    }
+    /* else if (monitor.getItemType() === ITEM_TYPE.FOOD) {
+     props.onFoodDropped(props.model);
+     }*/
   }
 }, (connect, monitor) => ({
   connectDropTarget: connect.dropTarget(),

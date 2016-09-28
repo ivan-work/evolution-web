@@ -54,7 +54,7 @@ const makeClientState = () => Map({
   , $ready: () => 0
   , $deployAnimal: () => 0
   , $deployTrait: () => 0
-  , $gameEndTurnRequest: () => 0
+  , $endTurn: () => 0
 });
 
 const clientCardHID = ($Game, index) => $Game.find('DragSource(Card)').get(index).getHandlerId();
@@ -77,9 +77,9 @@ describe('Game: Deploying:', () => {
 
     //console.log($Game.find('.PlayerWrapper').debug())
 
-    expect($Game.find('DropTarget(ContinentZone)'), 'DropTarget(ContinentZone)').length(1);
+    expect($Game.find('.ContinentZone'), '.ContinentZone').length(1);
     expect($Game.find('DragSource(Card)').at(0).prop('disabled'), 'Card(0) is enabled').false;
-    expect($Game.find('.animal-wrapper')).length(0);
+    expect($Game.find('.Animal')).length(0);
 
     dndBackend.simulateBeginDrag([clientCardHID($Game, 0)]);
     expect($Game.find('.ContinentZone.highlight')).length(0);
@@ -101,7 +101,7 @@ describe('Game: Deploying:', () => {
       cardId: 'card1'
       , animalPosition: 0
     });
-    expect($Game.find('.animal-wrapper'), 'hover reverts back').length(0);
+    expect($Game.find('.Animal'), 'hover reverts back').length(0);
   });
 
   it('0-0, board with 2 animals', () => {
@@ -118,9 +118,9 @@ describe('Game: Deploying:', () => {
     const $Game = mount(<DnDContextGameWrapper {...props} $deployAnimal={$deployAnimal} $deployTrait={$deployTrait}/>);
     const dndBackend = $Game.instance().getManager().getBackend();
 
-    expect($Game.find('DropTarget(ContinentZone)'), 'DropTarget(ContinentZone)').length(3);
+    expect($Game.find('.ContinentZone'), '.ContinentZone').length(3);
     expect($Game.find('DropTarget(Animal)'), 'DropTarget(Animal)').length(2);
-    expect($Game.find('.animal-wrapper')).length(2);
+    expect($Game.find('.Animal')).length(2);
 
     // Deploy Animal
     expect($Game.find('.ContinentZone')).length(3);
@@ -137,11 +137,11 @@ describe('Game: Deploying:', () => {
     });
 
     // Deploy Trait
-    expect($Game.find('.animal-wrapper')).length(2);
+    expect($Game.find('.Animal')).length(2);
     dndBackend.simulateBeginDrag([clientCardHID($Game, 2)]);
     dndBackend.simulateHover([clientAnimalHID($Game, 1)]);
     dndBackend.simulateHover([clientAnimalHID($Game, 1)]);
-    expect($Game.find('.animal-wrapper'), 'Deploy.trait:hover').length(2);
+    expect($Game.find('.Animal'), 'Deploy.trait:hover').length(2);
     dndBackend.simulateDrop();
     dndBackend.simulateEndDrag();
     expect(deployTrait).eql({

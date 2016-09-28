@@ -2,10 +2,18 @@ $CARD_WIDTH: 60px;
 $ANIMAL_WIDTH: 60px;
 $ANIMAL_HEIGHT: 80px;
 $ANIMAL_MARGIN: 10px;
+
+.enabled[draggable] {
+  cursor: -webkit-grab;
+}
+.enabled.drag {
+  cursor: -webkit-grabbing;
+}
+
 .Game {
   position: relative;
   width: 600px;
-  height: 800px;
+  height: 600px;
   background: #dfd;
 
   .DeckWrapper {
@@ -33,15 +41,15 @@ $ANIMAL_MARGIN: 10px;
         text-align: center;
         .animals-container-inner {
           display: inline-block;
-          .animal-wrapper {
+          .Animal {
             display: inline-block;
-            padding: 10px 0 10px 0;
+            margin: 10px 0 10px 0;
             z-index: 4;
             position: relative;
             vertical-align: top;
             width: $ANIMAL_WIDTH;
             height: $ANIMAL_HEIGHT;
-            &.highlight .Animal {
+            &.highlight {
               box-shadow: 0px 0px 1em 1em yellow;
             }
           }
@@ -90,15 +98,13 @@ $ANIMAL_MARGIN: 10px;
     border: 1px solid black;
     background: gray;
     word-wrap: break-word;
-    &.enabled[draggable] {
-      cursor: -webkit-grab;
+    &.enabled {
       background: #797;
     }
     &.disabled {
       background: #977;
     }
     &.drag {
-      cursor: -webkit-grabbing;
       .inner {
         user-select: none;
         width: 100%;
@@ -119,11 +125,15 @@ $ANIMAL_MARGIN: 10px;
     .AnimalTrait {
       width: 100%;
       font-size: .8em;
+      height: 1.6em;
       word-wrap: break-word;
       outline: 1px solid black;
       background: #9fe1e7;
       position: absolute;
       //top: -1em;
+      &[draggable] {
+        background: #f90;
+      }
     }
 
     .inner {
