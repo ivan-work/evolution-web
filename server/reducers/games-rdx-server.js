@@ -78,7 +78,7 @@ export const gameStartEat = (game, {food}) => {
   ensureParameter(food, 'number');
   return game
     .setIn(['food'], food)
-    .setIn(['status', 'phase'], PHASE.EAT)
+    .setIn(['status', 'phase'], PHASE.FEEDING)
     .setIn(['status', 'round'], 0)
     .setIn(['status', 'player'], 0);
 };

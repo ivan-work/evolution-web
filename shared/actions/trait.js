@@ -116,7 +116,7 @@ export const traitClientToServer = {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
-    checkPlayerTurnAndPhase(game, userId, PHASE.EAT);
+    checkPlayerTurnAndPhase(game, userId, PHASE.FEEDING);
     const animal = checkPlayerHasAnimal(game, userId, animalId);
     if (game.food < 1) {
       throw new ActionCheckError(`traitTakeFoodRequest@Game(${gameId})`, 'Not enough food (%s)', game.food)
@@ -137,7 +137,7 @@ export const traitClientToServer = {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
-    checkPlayerTurnAndPhase(game, userId, PHASE.EAT);
+    checkPlayerTurnAndPhase(game, userId, PHASE.FEEDING);
     const sourceAnimal = checkPlayerHasAnimal(game, userId, animalId);
     const trait = sourceAnimal.traits.find(trait => trait.type === traitType);
     if (!trait) {

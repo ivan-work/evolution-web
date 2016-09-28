@@ -42,31 +42,32 @@ export const roomExitSuccessNotify = (roomId, userId) => ({
   , data: {roomId, userId}
 });
 
+const server$roomJoinRequest = ({roomId}, {user: {id: userId}}) => (dispatch, getState) => {
+  const room = getState().getIn(['rooms', roomId]);
+  if (!room) {
+    dispatch(actionError(userId, 'bad room')); // TODO add validation
+    return;
+  }
+  const userAlreadyInRoom = room.users.some(uid => uid === userId);
+  if (!userAlreadyInRoom) {
+    const previousRoom = getState().get('rooms').find(room => {
+      return room.users.some(uid => uid === userId);
+    });
+    if (previousRoom) {
+      dispatch(roomExitSuccess(previousRoom.id, userId));
+    }
+    dispatch(roomJoinSuccess(roomId, userId));
+  }
+};
+
 export const roomsClientToServer = {
   roomCreateRequest: (data, {user}) => (dispatch, getState) => {
     const userId = user.id;
     const room = RoomModel.new();
     dispatch(roomCreateSuccess(room));
-    dispatch(roomJoinSuccess(room.id, userId));
+    dispatch(server$roomJoinRequest({roomId: room.id}, {user}));
   }
-  , roomJoinRequest: ({roomId}, {user}) => (dispatch, getState) => {
-    const userId = user.id;
-    const room = getState().getIn(['rooms', roomId]);
-    if (!room) {
-      dispatch(actionError(userId, 'bad room')); // TODO add validation
-      return;
-    }
-    const userAlreadyInRoom = room.users.some(uid => uid === userId);
-    if (!userAlreadyInRoom) {
-      const previousRoom = getState().get('rooms').find(room => {
-        return room.users.some(uid => uid === userId);
-      });
-      if (previousRoom) {
-        dispatch(roomExitSuccess(previousRoom.id, userId));
-      }
-      dispatch(roomJoinSuccess(roomId, userId));
-    }
-  }
+  , roomJoinRequest: server$roomJoinRequest
   , roomExitRequest: ({roomId}, {user}) => roomExitSuccess(roomId, user.id)
 };
 
