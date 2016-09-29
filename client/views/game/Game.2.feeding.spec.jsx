@@ -93,7 +93,7 @@ const clientContinentZoneHID = ($Game, index) => $Game.find('DropTarget(Continen
 const clientAnimalHID = ($Game, index) => $Game.find('DropTarget(Animal)').get(index).getHandlerId();
 const clientTraitHID = ($Game, animalIndex, traitIndex) => $Game
   .find('DropTarget(Animal)').at(animalIndex)
-  .find('DragSource(AnimalTraitRaw)').get(traitIndex)
+  .find('DragSource(_AnimalTrait)').get(traitIndex)
   .getHandlerId();
 const clientFoodHID = ($Game, index) => $Game
   .find('DragSource(Food)').get(index)

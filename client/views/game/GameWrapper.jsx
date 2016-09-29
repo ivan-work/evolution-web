@@ -13,6 +13,7 @@ import {
 } from '~/shared/actions/actions';
 
 import {Game} from './Game.jsx';
+import {GameModelClient} from '../../../shared/models/game/GameModel';
 
 import {DragDropContext} from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
@@ -20,18 +21,22 @@ import TestBackend from 'react-dnd-test-backend';
 
 export class GameWrapper extends React.Component {
   static childContextTypes = {
-    gameActions: React.PropTypes.object
+    game: React.PropTypes.instanceOf(GameModelClient)
+    , gameActions: React.PropTypes.object
   };
 
   getChildContext() {
-    return {gameActions: {
-      $endTurn: this.props.$endTurn
-      , $ready: this.props.$ready
-      , $deployAnimal: this.props.$deployAnimal
-      , $deployTrait: this.props.$deployTrait
-      , $traitTakeFood: this.props.$traitTakeFood
-      , $traitActivate: this.props.$traitActivate
-    }};
+    return {
+      game: this.props.game
+      , gameActions: {
+        $endTurn: this.props.$endTurn
+        , $ready: this.props.$ready
+        , $deployAnimal: this.props.$deployAnimal
+        , $deployTrait: this.props.$deployTrait
+        , $traitTakeFood: this.props.$traitTakeFood
+        , $traitActivate: this.props.$traitActivate
+      }
+    };
   }
 
   constructor(props) {
@@ -40,20 +45,19 @@ export class GameWrapper extends React.Component {
   }
 
   componentDidUpdate() {
-    console.log('componentDidUpdate', this.props.gameActions)
     if (!this.ready && this.props.game) {
       this.ready = true;
       this.props.$ready();
     }
   }
 
-  render () {
+  render() {
     const user = this.props.user;
     const game = this.props.game;
 
-    if (!user || !game) return <div>Loading</div>;
+    if (!user || !game || game.status.phase === 0) return <div>Loading</div>;
 
-    return <Game user={user} game={game}/>;
+    return <Game user={user}/>;
   }
 }
 

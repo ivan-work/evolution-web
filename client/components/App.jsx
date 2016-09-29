@@ -30,7 +30,7 @@ export const App = React.createClass({
           </Navigation>
         </Drawer>*/}
         <Content>
-          <div className="layout-padding">
+          <div className="layout-paddingx">
             {this.props.children}
           </div>
         </Content>

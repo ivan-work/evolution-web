@@ -3,7 +3,7 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
 import { DragSource } from 'react-dnd';
-import { DND_ITEM_TYPE } from './DND_ITEM_TYPE';
+import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
 
 export class Food extends React.Component {
   static propTypes = {
