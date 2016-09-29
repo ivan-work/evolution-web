@@ -6,7 +6,7 @@ import {DropTargetAnimal} from './Animal.jsx';
 export class ContinentFeeding extends Continent {
   componentWillMount() {
     this.$traitTakeFood = (animal) => this.context.gameActions.$traitTakeFood(animal.id);
-    this.$traitActivate = (source, trait, target) => this.context.gameActions.$traitActivate(source.id, trait.type, target.id);
+    this.$traitActivate = this.context.gameActions.$traitActivate;
   }
 
   renderPlaceholderWrapper() {
@@ -18,7 +18,8 @@ export class ContinentFeeding extends Continent {
       key={animal.id}
       index={index}
       model={animal}
-      onCardDropped={this.$traitActivate}
+      isUserAnimal={this.props.isUserContinent}
+      onTraitDropped={this.$traitActivate}
       onFoodDropped={this.$traitTakeFood} />
   }
 }

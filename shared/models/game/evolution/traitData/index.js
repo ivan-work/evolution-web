@@ -51,7 +51,7 @@ export const TraitPiracy = {
     }
   }
   , checkAction: (game, sourceAnimal) => sourceAnimal.canEat()
-  , checkTarget: (target) => target.canEat()
+  , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.canEat()
 };
 
 export const TraitTailLoss = {
@@ -75,8 +75,7 @@ export const TraitGrazing = {
       // dispatch(traitStealFood)
     }
   }
-  , checkAction: (game, sourceAnimal) => game.food > 0
-  , checkTarget: (target) => target.canEat()
+  , checkAction: (game, sourceAnimal) => game.food > 0 && sourceAnimal.canEat()
 };
 
 export const TraitHighBodyWeight = {

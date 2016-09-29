@@ -16,11 +16,16 @@ export class Card extends React.Component {
   static propTypes = {
     model: React.PropTypes.instanceOf(CardModel).isRequired
     , index: React.PropTypes.number.isRequired
+    , disabled: React.PropTypes.bool.isRequired
+  };
+
+  static defaultProps = {
+    disabled: false
   };
 
   constructor(props) {
     super(props);
-     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
   }
 
   render() {

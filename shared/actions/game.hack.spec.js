@@ -118,11 +118,11 @@ describe('Hacking Game:', function () {
       players: {
         [User0.id]: {
           hand: GameModel.generateDeck([[6, cardTypes.CardCamouflage]])
-          , continent: [AnimalModel.new(CardModel.new(cardTypes.CardCamouflage))]
+          , continent: [AnimalModel.new(User0.id)]
         }
         , [User1.id]: {
           hand: GameModel.generateDeck([[6, cardTypes.CardCamouflage]])
-          , continent: [AnimalModel.new(CardModel.new(cardTypes.CardCamouflage))]
+          , continent: [AnimalModel.new(User1.id)]
         }
       }
     });

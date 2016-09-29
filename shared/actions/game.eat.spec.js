@@ -18,12 +18,12 @@ describe('Game (EAT PHASE):', function () {
     CreateGame({
       players: {
         [User0.id]: {continent: [
-          AnimalModel.new(CardModel.new(cardTypes.CardCamouflage))
-          , AnimalModel.new(CardModel.new(cardTypes.CardCamouflage))
+          AnimalModel.new(User0.id)
+          , AnimalModel.new(User0.id)
         ]}
         , [User1.id]: {continent: [
-          AnimalModel.new(CardModel.new(cardTypes.CardCamouflage))
-          , AnimalModel.new(CardModel.new(cardTypes.CardCamouflage))
+          AnimalModel.new(User1.id)
+          , AnimalModel.new(User1.id)
         ]}
       }
       , food: 2
@@ -71,7 +71,7 @@ describe('Game (EAT PHASE):', function () {
     CreateGame({
       players: {
         [User0.id]: {continent: [
-          AnimalModel.new().set('traits', List.of(TraitModel.new('TraitCarnivorous')))
+          AnimalModel.new(User0.id).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
         ]}
         , [User1.id]: {continent: []}
       }
@@ -99,16 +99,16 @@ describe('Game (EAT PHASE):', function () {
     CreateGame({
       players: {
         [User0.id]: {continent: [
-          AnimalModel.new(CardModel.new(cardTypes.CardCamouflage)).set('traits', List.of(
+          AnimalModel.new(User0.id).set('traits', List.of(
             TraitModel.new('TraitCarnivorous')
           ))
-          , AnimalModel.new(CardModel.new(cardTypes.CardCamouflage)).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
-          , AnimalModel.new(CardModel.new(cardTypes.CardCamouflage)).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
+          , AnimalModel.new(User0.id).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
+          , AnimalModel.new(User0.id).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
         ]}
         , [User1.id]: {continent: [
-          AnimalModel.new(CardModel.new(cardTypes.CardCamouflage)).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
-          , AnimalModel.new(CardModel.new(cardTypes.CardCamouflage)).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
-          , AnimalModel.new(CardModel.new(cardTypes.CardCamouflage)).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
+          AnimalModel.new(User1.id).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
+          , AnimalModel.new(User1.id).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
+          , AnimalModel.new(User1.id).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
         ]}
       }
       , food: 10

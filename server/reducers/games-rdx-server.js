@@ -87,14 +87,14 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
   ensureParameter(animalId, 'string');
   ensureParameter(amount, 'number');
   const {playerId, animalIndex} = game.locateAnimal(animalId);
-  const addedFood = game
+  const updatedGame = game
     .updateIn(['players', playerId, 'continent', animalIndex, 'food'], food => food + amount);
 
   switch (sourceType) {
     case FOOD_SOURCE_TYPE.GAME:
-      return addedFood.update('food', food => food - amount);
+      return updatedGame.update('food', food => food - amount);
     default:
-      return addedFood;
+      return updatedGame;
   }
 };
 

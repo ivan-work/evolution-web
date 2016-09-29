@@ -109,10 +109,8 @@ describe('Game:', function () {
       .equal(TEST_HAND_SIZE - 1);
     expect(ClientGame1().getIn(['players', User0.id, 'hand']), 'User1 see User0.hand')
       .not.equal(ServerGame().getIn(['players', User0.id, 'hand']));
-    expect(ClientGame1().getIn(['players', User0.id, 'continent']).size, 'User1 see User0.continent')
-      .equal(1);
     expect(ClientGame1().getIn(['players', User0.id, 'continent']), 'User1 see User0.continent')
-      .not.equal(ServerGame().getIn(['players', User0.id, 'continent']));
+      .equal(ServerGame().getIn(['players', User0.id, 'continent']));
 
     /*
      * State: 0-0-1
@@ -178,16 +176,16 @@ describe('Game:', function () {
     expect(ServerGame().getIn(['players', User0.id, 'hand', 1]), 'Server: User0.hand.1').equal(User0OriginalHand.get(3));
     expect(ServerGame().getIn(['players', User0.id, 'hand', 2]), 'Server: User0.hand.1').equal(User0OriginalHand.get(5));
     expect(ServerGame().getIn(['players', User0.id, 'continent']).size, 'Server: User0.continent').equal(3);
-    expect(ServerGame().getIn(['players', User0.id, 'continent', 0, 'base']), 'Server: User0.continent(animal)').equal(User0OriginalHand.get(2));
-    expect(ServerGame().getIn(['players', User0.id, 'continent', 1, 'base']), 'Server: User0.continent(animal)').equal(User0OriginalHand.get(4));
-    expect(ServerGame().getIn(['players', User0.id, 'continent', 2, 'base']), 'Server: User0.continent(animal)').equal(User0OriginalHand.get(0));
+    expect(ServerGame().getIn(['players', User0.id, 'continent', 0, 'ownerId']), 'Server: User0.continent(animal)').equal(User0.id);
+    expect(ServerGame().getIn(['players', User0.id, 'continent', 1, 'ownerId']), 'Server: User0.continent(animal)').equal(User0.id);
+    expect(ServerGame().getIn(['players', User0.id, 'continent', 2, 'ownerId']), 'Server: User0.continent(animal)').equal(User0.id);
 
     expect(ServerGame().getIn(['players', User1.id, 'hand']).size, 'Server: User1.hand').equal(TEST_HAND_SIZE - 2);
     expect(ServerGame().getIn(['players', User1.id, 'hand', 0]), 'Server: User1.hand.0').equal(User1OriginalHand.get(2));
     expect(ServerGame().getIn(['players', User1.id, 'hand', 1]), 'Server: User1.hand.1').equal(User1OriginalHand.get(3));
     expect(ServerGame().getIn(['players', User1.id, 'continent']).size, 'Server: User1.continent').equal(2);
-    expect(ServerGame().getIn(['players', User1.id, 'continent', 0, 'base']), 'Server: User1.continent(animal)').equal(User1OriginalHand.get(1));
-    expect(ServerGame().getIn(['players', User1.id, 'continent', 1, 'base']), 'Server: User1.continent(animal)').equal(User1OriginalHand.get(0));
+    expect(ServerGame().getIn(['players', User1.id, 'continent', 0, 'ownerId']), 'Server: User1.continent(animal)').equal(User1.id);
+    expect(ServerGame().getIn(['players', User1.id, 'continent', 1, 'ownerId']), 'Server: User1.continent(animal)').equal(User1.id);
 
     expect(ClientGame0().getIn(['players', User0.id, 'hand']), 'User0.hand')
       .equal(ServerGame().getIn(['players', User0.id, 'hand']));
@@ -198,10 +196,8 @@ describe('Game:', function () {
       .equal(TEST_HAND_SIZE - 3);
     expect(ClientGame1().getIn(['players', User0.id, 'hand']), 'User1 see User0.hand')
       .not.equal(ServerGame().getIn(['players', User0.id, 'hand']));
-    expect(ClientGame1().getIn(['players', User0.id, 'continent']).size, 'User1 see User0.continent')
-      .equal(3);
     expect(ClientGame1().getIn(['players', User0.id, 'continent']), 'User1 see User0.continent')
-      .not.equal(ServerGame().getIn(['players', User0.id, 'continent']));
+      .equal(ServerGame().getIn(['players', User0.id, 'continent']));
   });
 
   it('Play as upgrade', () => {
@@ -210,10 +206,10 @@ describe('Game:', function () {
       players: {
         [User0.id]: {
           hand: GameModel.generateDeck([[1, cardTypes.CardCamouflage], [1, cardTypes.CardSharpVision]])
-          , continent: [AnimalModel.new(CardModel.new(cardTypes.CardCamouflage))]
+          , continent: [AnimalModel.new(User0.id)]
         }, [User1.id]: {
           hand: GameModel.generateDeck([[6, cardTypes.CardCamouflage]])
-          , continent: [AnimalModel.new(CardModel.new(cardTypes.CardCamouflage))]
+          , continent: [AnimalModel.new(User1.id)]
         }
       }
     });
