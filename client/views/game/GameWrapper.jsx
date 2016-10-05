@@ -44,7 +44,7 @@ export class GameWrapper extends React.Component {
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this)
   }
 
-  componentDidUpdate() {
+  componentDidMount() {
     if (!this.ready && this.props.game) {
       this.ready = true;
       this.props.$ready();

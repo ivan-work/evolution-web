@@ -29,8 +29,8 @@ export class ContinentZone extends React.Component {
 
 export const DropTargetContinentZone = DropTarget(DND_ITEM_TYPE.CARD, {
   drop(props, monitor, component) {
-    const {item} = monitor.getItem();
-    props.onCardDropped(item, props.index);
+    const {card} = monitor.getItem();
+    props.onCardDropped(card, props.index);
   }
 }, (connect, monitor) => ({
   connectDropTarget: connect.dropTarget(),

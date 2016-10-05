@@ -57,6 +57,22 @@ export class Card extends React.Component {
   }
 }
 
+export const DragCardPreview = ({offset, velocity, afterStart, card}) => {
+  if (!offset) return null;
+  const {x, y} = offset;
+  const VELOCITY = 2;
+  return <div className='Card' style={{
+    ...CARD_SIZE
+    , transform: `translate(${x}px, ${y}px) perspective(400px) rotateY(${-velocity.x * VELOCITY}deg) rotateX(${velocity.y * VELOCITY}deg)`
+    , transition: 'box-shadow .5s'
+    , boxShadow: afterStart ? '5px 5px 5px black' : ''
+    }}>
+    <div className='inner'>
+      {card.name} {velocity.x * VELOCITY} {velocity.y * VELOCITY}
+    </div>
+  </div>
+};
+
 export const DragCard = DragSource(DND_ITEM_TYPE.CARD
   , {
     beginDrag: (props) => ({card: props.card})
