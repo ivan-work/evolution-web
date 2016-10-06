@@ -2,10 +2,13 @@ import {Record, List} from 'immutable';
 import uuid from 'node-uuid';
 import {ensureParameter} from '~/shared/utils';
 
+const ROOM_MIN_USERS = 2;
+const ROOM_MAX_USERS = 4;
+
 export class RoomModel extends Record({
   id: null
   , name: null
-  , maxSize: 4
+  , maxUsers: 4
   , users: List()
   , gameId: null
 }) {
@@ -24,6 +27,7 @@ export class RoomModel extends Record({
       id: id
       , name: "Room " + id
       , users: List()
+      , maxUsers: 4
     })
   }
 

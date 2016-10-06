@@ -7,20 +7,34 @@ import * as MDL from 'react-mdl';
 import {UsersList} from './UsersList.jsx';
 import {RoomsList} from './RoomsList.jsx';
 
-import {roomCreateRequest, roomJoinRequest} from '~/shared/actions/actions';
+import {redirectTo} from '../../shared/utils';
+import {roomCreateRequest, roomJoinRequest} from '../../shared/actions/actions';
 
-export const Rooms = React.createClass({
-  mixins: [PureRenderMixin]
-  , render: function () {
+export class Rooms extends React.Component {
+  constructor(props) {
+    super(props);
+    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    this.onRoomClick = this.onRoomClick.bind(this);
+  }
+
+  onRoomClick(roomId) {
+    if (this.props.room === roomId) {
+      this.props.$redirectTo(roomId);
+    } else {
+      this.props.$joinRequest(roomId);
+    }
+  }
+
+  render() {
     //console.log('RENDERING Rooms', this.props.actions.roomJoinRequest)
     return <div className="loginForm">
       <div>Hello {this.props.username}</div>
       <div>Online: <UsersList list={this.props.online}/></div>
-      <div>Rooms: <RoomsList map={this.props.rooms} onItemClick={this.props.actions.roomJoinRequest}/></div>
-      <MDL.Button raised colored id="Rooms$create" onClick={this.props.actions.roomCreateRequest}>Create room</MDL.Button>
+      <div>Rooms: <RoomsList rooms={this.props.roomsList} onRoomClick={this.onRoomClick}/></div>
+      <MDL.Button raised colored id="Rooms$create" onClick={this.props.$createRequest}>Create room</MDL.Button>
     </div>;
   }
-});
+}
 
 export const RoomsView = connect(
   (state) => {
@@ -28,16 +42,13 @@ export const RoomsView = connect(
     return {
       username: state.getIn(['user', 'login'], '%USERNAME%')
       , online: state.getIn(['online'], [])
-      , rooms: state.getIn(['rooms'], Map()).filter(room => !room.gameId).toJS()
+      , room: state.get('room')
+      , roomsList: state.getIn(['rooms'], Map()).filter(room => !room.gameId)
     }
   }
   , (dispatch) => ({
-    actions: {
-      roomCreateRequest: () => dispatch(roomCreateRequest())
-      , roomJoinRequest: function (e) {
-        e.preventDefault();
-        dispatch(roomJoinRequest(e.target.getAttribute('data-id')))
-      }
-    }
+    $createRequest: () => dispatch(roomCreateRequest())
+    , $joinRequest: (roomId) => dispatch(roomJoinRequest(roomId))
+    , $redirectTo: (roomId) => dispatch(redirectTo(`/room/${roomId}`))
   })
 )(Rooms);

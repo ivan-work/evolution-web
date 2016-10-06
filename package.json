@@ -60,6 +60,7 @@
     "react-dnd-html5-backend": "^2.1.2",
     "react-dom": "*",
     "react-helmet": "*",
+    "react-immutable-proptypes": "^2.1.0",
     "react-mdl": "*",
     "react-redux": "*",
     "react-router": "*",

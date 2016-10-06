@@ -4,6 +4,7 @@ import {connect} from 'react-redux';
 
 import {Layout, Header, Navigation, Drawer, Content} from 'react-mdl';
 
+import {AdminPanelView} from './AdminPanel.jsx'
 
 //import '../styles/core.scss';
 
@@ -30,6 +31,7 @@ export const App = React.createClass({
           </Navigation>
         </Drawer>*/}
         <Content>
+          <AdminPanelView/>
           <div className="layout-padding">
             {this.props.children}
           </div>

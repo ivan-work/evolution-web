@@ -23,6 +23,9 @@ const reducer = combineReducers({
   ...reducers
 });
 
+const timeouts = {};
+app.set('timeouts', timeouts);
+
 const server = http.createServer(app);
 const socket = socketServer(server);
 const store = createStore(
@@ -30,7 +33,7 @@ const store = createStore(
   , compose(
     applyMiddleware(errorMiddleware())
     , applyMiddleware(thunk)
-    , applyMiddleware(reduxTimeout())
+    , applyMiddleware(reduxTimeout(timeouts))
     , applyMiddleware(socketMiddleware(socket))
   ));
 

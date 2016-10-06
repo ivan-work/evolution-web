@@ -24,6 +24,15 @@ module.exports = (app, passport) => {
     res.send(format(JSON.stringify(state, null, '  ')));
   });
 
+  router.get('/timeouts', function (req, res, next) {
+    const timeouts = app.get('timeouts');
+    res.status(200).json(Object.keys(timeouts).reduce((result, key) => {
+      const timer = timeouts[key];
+      result[key] = timer ? timer.getRemaining() : timer;
+      return result;
+    }, {}));
+  });
+
   // set authentication routes
   //require('./authentication.js')(app, passport);
 
