@@ -2,6 +2,7 @@ import React from 'react';
 import { DragLayer } from 'react-dnd';
 import { DND_ITEM_TYPE } from './DND_ITEM_TYPE';
 import { Card, DragCardPreview } from '../Card.jsx';
+import { AnimalTraitArrow } from '../AnimalTraitArrow.jsx';
 
 const layerStyles = {
   position: 'fixed',
@@ -25,28 +26,55 @@ class CustomDragLayer extends React.Component {
       case DND_ITEM_TYPE.CARD:
         return <DragCardPreview card={item.card} {...dragProps}/>;
       case DND_ITEM_TYPE.TRAIT:
-      //return <Card card={item.card}/>;
+        return <AnimalTraitArrow trait={item.trait} {...dragProps}/>;
     }
   }
 
   render() {
     const { item, itemType, isDragging } = this.props;
-    const offset = this.props.getSourceClientOffset;
+    const offset = this.props.getClientOffset;
+    const initialOffset = this.props.getInitialSourceClientOffset;
 
     this.animationCounter = item ? ++this.animationCounter : 0;
 
+    const MAX_VELOCITY = 60;
+    const VELOCITY = 6;
     const velocity = {x: 0, y: 0};
     if (offset) {
       if (this.previousOffset) {
         velocity.x = offset.x - this.previousOffset.x;
         velocity.y = offset.y - this.previousOffset.y;
+
+        velocity.x *= VELOCITY;
+        velocity.y *= VELOCITY;
+
+        velocity.x = velocity.x > MAX_VELOCITY
+          ? MAX_VELOCITY
+          : velocity.x < -MAX_VELOCITY
+          ? -MAX_VELOCITY
+          : velocity.x;
+        velocity.y = velocity.y > MAX_VELOCITY
+          ? MAX_VELOCITY
+          : velocity.y < -MAX_VELOCITY
+          ? -MAX_VELOCITY
+          : velocity.y;
       }
       this.previousOffset = offset;
     }
 
+    //if (this.props.getInitialClientOffset)
+    //  console.log(this.props.getInitialClientOffset.x
+    //    , this.props.getInitialSourceClientOffset.x
+    //    , this.props.getClientOffset.x
+    //    , this.props.getDifferenceFromInitialOffset.x
+    //    , this.props.getSourceClientOffset.x
+    //  );
+
     const dragProps = {
       offset
+      , initialOffset
       , velocity
+      , animationCounter: this.animationCounter
       , afterStart: this.animationCounter > 2
     };
 
@@ -54,10 +82,24 @@ class CustomDragLayer extends React.Component {
       <div style={layerStyles}>
         {this.animationCounter}
         {isDragging && offset ? this.renderItem(itemType, item, dragProps) : null}
+        {/*<Marker offset={this.props.getInitialClientOffset} color="red"/>
+        <Marker offset={this.props.getInitialSourceClientOffset} color="teal"/>
+        <Marker offset={this.props.getClientOffset} color="green"/>
+        <Marker offset={this.props.getDifferenceFromInitialOffset} color="blue"/>
+        <Marker offset={this.props.getSourceClientOffset} color="orange"/>*/}
       </div>
     );
   }
 }
+
+const Marker = ({offset, color}) => offset === null ? null : <div style={{
+        background: color
+        , width: '5px', height: '5px'
+        , position: 'absolute'
+        , left: offset.x + 'px'
+        , top: offset.y + 'px'
+        }}></div>
+
 
 export default DragLayer((monitor) => ({
   item: monitor.getItem()

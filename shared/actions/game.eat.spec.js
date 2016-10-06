@@ -39,8 +39,10 @@ describe('Game (EAT PHASE):', function () {
     expectUnchanged(() => clientStore1.dispatch(gameEndTurnRequest()), serverStore, clientStore1);
 
     //clientStore0.clearActions();
+    console.log('d', serverStore.getState().get('games').first().players)
     clientStore0.dispatch(traitTakeFoodRequest(ClientGame0().getPlayerAnimal(User0, 0).id));
     //console.log(clientStore0.getActions())
+    console.log('d')
 
     expectUnchanged(() => clientStore0.dispatch(traitTakeFoodRequest(ClientGame0().getPlayerAnimal(User0, 0).id)), serverStore, clientStore0);
 

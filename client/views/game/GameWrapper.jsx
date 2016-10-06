@@ -1,10 +1,12 @@
 import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
+import * as MDL from 'react-mdl';
 import {connect} from 'react-redux';
 import {Map} from 'immutable';
 
 import {
-  gameEndTurnRequest
+  roomExitRequest
+  , gameEndTurnRequest
   , gameReadyRequest
   , gameDeployAnimalRequest
   , gameDeployTraitRequest
@@ -55,9 +57,15 @@ export class GameWrapper extends React.Component {
     const user = this.props.user;
     const game = this.props.game;
 
-    if (!user || !game || game.status.phase === 0) return <div>Loading</div>;
+    const gameView = (!user || !game || game.status.phase === 0)
+      ? <div>Loading</div>
+      : <Game user={user}/>;
 
-    return <Game user={user}/>;
+    return <div>
+      <MDL.Button className="EndTurn" raised
+                  onClick={this.props.$exit}>Exit Game</MDL.Button>
+      {gameView}
+    </div>;
   }
 }
 
@@ -74,6 +82,7 @@ export const GameWrapperView = connect(
   , (dispatch) => ({
     // GLOBAL
     $endTurn: () => dispatch(gameEndTurnRequest())
+    , $exit: () => dispatch(roomExitRequest())
     // PHASE.PREPARE
     , $ready: () => dispatch(gameReadyRequest())
     // PHASE.DEPLOY

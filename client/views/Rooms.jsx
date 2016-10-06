@@ -28,7 +28,7 @@ export const RoomsView = connect(
     return {
       username: state.getIn(['user', 'login'], '%USERNAME%')
       , online: state.getIn(['online'], [])
-      , rooms: state.getIn(['rooms'], Map()).toJS()
+      , rooms: state.getIn(['rooms'], Map()).filter(room => !room.gameId).toJS()
     }
   }
   , (dispatch) => ({

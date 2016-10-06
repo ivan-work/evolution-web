@@ -22,7 +22,15 @@ function makeLogger() {
   winston.emitErrs = true;
 
   return new winston.Logger({
-    transports: [
+    colors: {
+      error: 'red',
+      warn: 'yellow',
+      info: 'green',
+      verbose: 'cyan',
+      debug: 'gray',
+      silly: 'magenta'
+    }
+    , transports: [
       new winston.transports.Console({
         level: process.env.LOG_LEVEL || 'debug',
         handleExceptions: true,
@@ -49,7 +57,7 @@ function makeLogger() {
             ? [options.message]
             : [options.message.substring(0, delimeterIndex)
             , options.message.substring(delimeterIndex + 1)];
-          const header = `${options.level.toUpperCase().slice(0, 4)}:${parts[0]}`;
+          const header = `${options.level.toUpperCase().slice(0, 5)}:${parts[0]}`;
           const body = `${parts[1] || ''} ${obj}`;
           return config.colorize(options.level, header) + body;
           //if (showLevel) {
