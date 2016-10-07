@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {Continent} from './Continent.jsx'
-import {DropTargetAnimal} from './Animal.jsx';
+import {DroppableAnimal} from './Animal.jsx';
 
 export class ContinentFeeding extends Continent {
   componentWillMount() {
@@ -14,9 +14,8 @@ export class ContinentFeeding extends Continent {
   }
 
   renderAnimal(animal, index) {
-    return <DropTargetAnimal
+    return <DroppableAnimal
       key={animal.id}
-      index={index}
       model={animal}
       isUserAnimal={this.props.isUserContinent}
       onTraitDropped={this.$traitActivate}

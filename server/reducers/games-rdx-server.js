@@ -45,6 +45,7 @@ export const gameDeployTrait = (game, {userId, cardId, animalId, trait}) => {
 
 export const gameNextPlayer = (game) => {
   let playerIndex = game.getIn(['status', 'player']);
+  let previousPlayer = game.players.find(player => player.index === playerIndex);
   let emergencyCount = game.players.size;
   let totalPlayers = game.players.size;
   let round = game.getIn(['status', 'round']);
@@ -65,8 +66,22 @@ export const gameNextPlayer = (game) => {
   return emergencyCount < 0 ? game : game
     .setIn(['status', 'round'], round)
     .setIn(['status', 'player'], playerIndex)
-    .update('cooldowns', cooldowns => cooldowns.eventNextPlayer(roundChanged));
+    .update('cooldowns', cooldowns => cooldowns.eventNextPlayer(roundChanged))
+    .updateIn(['players', previousPlayer.id], player => {
+      const ended = player.skipped > 0;
+      return player
+        .set('acted', false)
+        .set('ended', ended)
+        .set('skipped', ended || player.acted ? 0 : 1 + player.skipped)
+    });
 };
+
+export const playerActed = (game, {userId}) => {
+  return game
+    .setIn(['players', userId, 'acted'], true)
+    .setIn(['players', userId, 'skipped'], 0);
+};
+
 
 export const gameEndTurn = (game, {userId}) => {
   ensureParameter(userId, 'string');
@@ -82,7 +97,6 @@ export const gameStartEat = (game, {food}) => {
     .setIn(['status', 'round'], 0)
     .setIn(['status', 'player'], 0);
 };
-
 export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) => {
   ensureParameter(animalId, 'string');
   ensureParameter(amount, 'number');
@@ -126,6 +140,7 @@ export const reducer = createReducer(Map(), {
   , gameDeployTrait: (state, data) => state.update(data.gameId, game => gameDeployTrait(game, data))
   , gameEndTurn: (state, data) => state.update(data.gameId, game => gameEndTurn(game, data))
   , gameStartEat: (state, data) => state.update(data.gameId, game => gameStartEat(game, data))
+  , playerActed: (state, data) => state.update(data.gameId, game => playerActed(game, data))
   , traitMoveFood: (state, data) => state.update(data.gameId, game => traitMoveFood(game, data))
   , startCooldown: (state, data) => state.update(data.gameId, game => startCooldown(game, data))
   , traitKillAnimal: (state, data) => state.update(data.gameId, game => traitKillAnimal(game, data))

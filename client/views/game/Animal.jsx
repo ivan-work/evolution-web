@@ -7,8 +7,11 @@ import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
 
 import { AnimalModel } from '~/shared/models/game/evolution/AnimalModel';
 import { AnimalTrait, DraggableAnimalTrait } from './AnimalTrait.jsx';
+import {GameProvider} from './providers/GameProvider.jsx';
 
-export class Animal extends React.Component {
+class _Animal extends React.Component {
+  static displayName = 'Animal';
+
   static defaultProps = {
     isUserAnimal: false
   };
@@ -19,6 +22,16 @@ export class Animal extends React.Component {
     , onCardDropped: React.PropTypes.func
     , onFoodDropped: React.PropTypes.func
     , onTraitDropped: React.PropTypes.func
+    // by DropTarget
+    , connectDropTarget: React.PropTypes.func
+    , isOver: React.PropTypes.bool
+    , canDrop: React.PropTypes.bool
+    // by GameProvider
+    , game: React.PropTypes.object.isRequired
+    , isUserTurn: React.PropTypes.bool.isRequired
+    , currentUserId: React.PropTypes.string.isRequired
+    , isDeploy: React.PropTypes.bool.isRequired
+    , isFeeding: React.PropTypes.bool.isRequired
   };
 
   constructor(props) {
@@ -44,8 +57,8 @@ export class Animal extends React.Component {
       </div>
       <div className='inner'>
         {model.id}
-        <div className='food'>
-          {Array.from({length: model.food}).map((u, index) => <div key={index} className='Food AnimalFood'></div>)}
+        <div className='AnimalFoodContainer'>
+          {Array.from({length: model.food}).map((u, index) => <div key={index} className='Food'></div>)}
         </div>
       </div>
     </div>;
@@ -53,7 +66,7 @@ export class Animal extends React.Component {
   }
 }
 
-export const DropTargetAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT], {
+const _DroppableAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT], {
   drop(props, monitor, component) {
     switch (monitor.getItemType()) {
       case DND_ITEM_TYPE.CARD:
@@ -89,4 +102,7 @@ export const DropTargetAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FO
   connectDropTarget: connect.dropTarget(),
   isOver: monitor.isOver(),
   canDrop: monitor.canDrop()
-}))(Animal);
+}))(_Animal);
+
+export const DroppableAnimal = GameProvider(_DroppableAnimal);
+export const Animal = GameProvider(_Animal);

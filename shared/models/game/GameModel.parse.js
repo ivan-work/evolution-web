@@ -32,18 +32,24 @@ export const parseAnimalList = (userId, string) => {
   invariant(typeof userId === 'string', `GameModel.parseAnimalList wrong userId: (${userId})`)
   invariant(typeof string === 'string', `GameModel.parseAnimalList wrong string: (${string})`)
   return List(string.split(','))
+    .map(raw => raw.trim())
     .filter(raw => raw.length > 0)
-    .map(raw => AnimalModel.new(userId)
-      .set('traits', List(raw.trim().split(' ')).map(traitSeed =>
-        TraitModel.parse(traitSeed)
-      ))
+    .map(raw => {
+        const animal = AnimalModel.new(userId);
+        return raw === '$'
+          ? animal
+          : animal
+          .set('traits', List(raw.split(' ')).map(traitSeed =>
+            TraitModel.parse(traitSeed)
+          ))
+      }
     );
 };
 
 export const parse = (room, string) => {
   const seed = yaml.load(string);
 
-  const deck = parseCardList(seed.deck);
+  const deck = parseCardList(seed.deck || '');
 
   const players = room.users.reduce((result, id, index) => {
     const player = new PlayerModel({
@@ -63,7 +69,7 @@ export const parse = (room, string) => {
     , food: seed.food
     , started: true
     , status: new StatusRecord({
-      phase: seed.phase
+      phase: seed.phase || 1
     })
     , deck
     , players

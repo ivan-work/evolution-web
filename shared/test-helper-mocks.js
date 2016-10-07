@@ -51,10 +51,8 @@ import {
 
     const room = result[0].serverStore.getState().get('rooms').first();
 
-    result[0].CreateGame = (gameState) => {
-      const gameModel = GameModel.new(room).start()
-        .mergeDeep(gameState).toJS();
-      result[0].serverStore.dispatch(gameCreateSuccess(GameModel.fromServer(gameModel)));
+    result[0].ParseGame = (string) => {
+      result[0].serverStore.dispatch(gameCreateSuccess(GameModel.parse(room, string)));
 
       for (let i = 0; i < count; ++i) {
         const clientStore = mockedStores[i + 1]['clientStore' + i];

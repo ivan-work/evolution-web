@@ -10,6 +10,8 @@ export class PlayerModel extends Record({
   , status: STATUS.LOADING
   , index: -1
   , ended: false
+  , acted: false
+  , skipped: 0
 }) {
   toOthers() {
     return this

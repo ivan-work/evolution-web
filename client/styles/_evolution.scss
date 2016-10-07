@@ -134,8 +134,8 @@ $ANIMAL_MARGIN: 10px;
       }
     }
 
-    .food {
-      .AnimalFood {
+    .AnimalFoodContainer {
+      .Food {
         display: inline-block;
         margin: .2em;
       }
@@ -152,6 +152,11 @@ $ANIMAL_MARGIN: 10px;
 
   .GameFoodContainer {
     position: absolute;
+    width: 6em;
+    .Food {
+      display: inline-block;
+      margin: .2em;
+    }
   }
 
   .Food {
@@ -159,5 +164,8 @@ $ANIMAL_MARGIN: 10px;
     height: 1em;
     background: #FF0;
     outline: 1px solid black;
+    &.disabled {
+      background: #888;
+    }
   }
 }
