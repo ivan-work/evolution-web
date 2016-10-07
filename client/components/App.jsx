@@ -31,7 +31,7 @@ export const App = React.createClass({
           </Navigation>
         </Drawer>*/}
         <Content>
-          <AdminPanelView/>
+          <AdminPanelView location={this.props.location}/>
           <div className="layout-padding">
             {this.props.children}
           </div>

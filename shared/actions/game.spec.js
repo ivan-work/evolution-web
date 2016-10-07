@@ -31,6 +31,10 @@ describe('Game:', function () {
     const ClientGame0 = () => clientStore0.getState().get('game');
     const ClientGame1 = () => clientStore1.getState().get('game');
 
+    expect(serverStore.getState().getIn(['rooms', roomId, 'gameId'])).equal(ServerGame().id);
+    expect(clientStore0.getState().getIn(['rooms', roomId, 'gameId'])).equal(ServerGame().id);
+    expect(clientStore1.getState().getIn(['rooms', roomId, 'gameId'])).equal(ServerGame().id);
+
     expect(ServerGame().roomId).equal(roomId);
     expect(ServerGame().players.size).equal(2);
 

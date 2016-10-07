@@ -24,9 +24,9 @@ import {
 } from './checks';
 
 // Game Create
-export const gameCreateRequest = (roomId) => ({
+export const gameCreateRequest = (roomId, seed) => ({
   type: 'gameCreateRequest'
-  , data: {roomId}
+  , data: {roomId, seed}
   , meta: {server: true}
 });
 export const gameCreateSuccess = (game) => ({
@@ -206,13 +206,15 @@ export const server$gameEndEatingAction = (gameId, userId) => (dispatch, getStat
  * gameClientToServer
  * */
 export const gameClientToServer = {
-  gameCreateRequest: (data, meta) => (dispatch, getState) => {
+  gameCreateRequest: ({roomId, seed}, meta) => (dispatch, getState) => {
+    if (process.env.NODE_ENV === 'production') seed = null;
     const userId = meta.user.id;
-    const roomId = data.roomId;
     const room = getState().getIn(['rooms', roomId]);
     const validation = room.validateCanStart(userId);
     if (validation === true) {
-      const game = GameModel.new(room);
+      const game = !seed
+        ? GameModel.new(room)
+        : GameModel.parse(room, seed);
       dispatch(server$gameCreateSuccess(game));
     } else {
       dispatch(actionError(userId, validation));

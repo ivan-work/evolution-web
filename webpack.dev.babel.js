@@ -12,8 +12,10 @@ const postcssFocus = require('postcss-focus');
 const postcssReporter = require('postcss-reporter');
 
 module.exports = require('./webpack.base.babel')({
+  //devtool: 'cheap-module-eval-source-map'
+  devtool: 'inline-source-map'
   // Add hot reloading in development
-  entry: [
+  , entry: [
     'webpack-hot-middleware/client',
     path.join(process.cwd(), 'client/index.jsx'), // Start with js/app.js
   ],
@@ -53,7 +55,4 @@ module.exports = require('./webpack.base.babel')({
   babelQuery: {
     presets: ['es2015', 'react', 'react-hmre', 'stage-0'],
   },
-
-  // Emit a source map for easier debugging
-  devtool: 'cheap-module-eval-source-map',
 });

@@ -1,10 +1,10 @@
 /**
  * Module dependencies.
  */
+import logger from '../shared/utils/logger';
 import polyfills from '../shared/utils/polyfills'
 
 var app = require('./app');
-var debug = require('debug')('sample-app:server');
 var http = require('http');
 var config = require('./config/config.js');
 
@@ -86,5 +86,6 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+  logger.info('Listening on ' + bind);
+  logger.info('process.env.NODE_ENV=', process.env.NODE_ENV);
 }

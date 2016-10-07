@@ -33,7 +33,6 @@ $ANIMAL_MARGIN: 10px;
     .Continent {
       position: relative;
       width: 500px;
-      height: 200px;
       background: #aaf;
 
       .animals-container-outer {
@@ -130,7 +129,7 @@ $ANIMAL_MARGIN: 10px;
       background: #9fe1e7;
       position: absolute;
       //top: -1em;
-      &[draggable] {
+      &[draggable].enabled {
         background: #f90;
       }
     }
@@ -138,8 +137,6 @@ $ANIMAL_MARGIN: 10px;
     .food {
       .AnimalFood {
         display: inline-block;
-        width: 1em;
-        height: 1em;
         margin: .2em;
       }
     }
@@ -151,5 +148,16 @@ $ANIMAL_MARGIN: 10px;
       outline: 1px solid black;
       background: #9fe1e7;
     }
+  }
+
+  .GameFoodContainer {
+    position: absolute;
+  }
+
+  .Food {
+    width: 1em;
+    height: 1em;
+    background: #FF0;
+    outline: 1px solid black;
   }
 }

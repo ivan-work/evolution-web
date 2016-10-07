@@ -1,7 +1,9 @@
 function makeLogger() {
   if (process.env.BROWSER) {
     var Logger = function () {
+      this.silly = this.log.bind(this, 'silly');
       this.debug = this.log.bind(this, 'debug');
+      this.verbose = this.log.bind(this, 'verbose');
       this.info = this.log.bind(this, 'info');
       this.warn = this.log.bind(this, 'warn');
       this.error = this.log.bind(this, 'error');
@@ -25,10 +27,10 @@ function makeLogger() {
     colors: {
       error: 'red',
       warn: 'yellow',
-      info: 'green',
-      verbose: 'cyan',
-      debug: 'gray',
-      silly: 'magenta'
+      info: 'cyan',
+      verbose: 'magenta',
+      debug: 'green',
+      silly: 'gray'
     }
     , transports: [
       new winston.transports.Console({

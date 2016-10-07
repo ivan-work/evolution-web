@@ -2,6 +2,7 @@ import {List, Map} from 'immutable';
 import {GameModel} from '../GameModel';
 import {AnimalModel} from './AnimalModel';
 import {TraitModel} from './TraitModel';
+import {STATUS} from '../../UserModel';
 import * as cardTypes from './cards';
 
 describe('GameModel.parse', () => {
@@ -29,18 +30,15 @@ describe('GameModel.parse', () => {
 
 
   it('Valid Seed', () => {
-    const parsed = GameModel.parse({id:'r0', users: List(['u0', 'u1'])}, {
-      deck: '12 carnivorous, 6 sharp'
-      , status: '1 2 3 0'
-      , food: 2
-      , players: [{
-        hand: '2 carn'
-        , continent: 'carn sharp, sharp camo'
-      }, {
-        hand: void 0
-        , continent: void 0
-      }]
-    });
+    const parsed = GameModel.parse({id:'r0', users: List(['u0', 'u1'])}
+      , `
+deck: 12 carnivorous, 6 sharp
+phase: 2
+food: 2
+players:
+  - hand: 2 carn
+    continent: carn sharp, sharp camo
+`);
 
     const target = GameModel.fromServer({
       roomId: 'r0'
@@ -61,10 +59,10 @@ describe('GameModel.parse', () => {
       , food: 2
       , started: true
       , status: {
-        turn: 1
-        , round: 2
-        , player: 3
-        , phase: 0
+        turn: 0
+        , round: 0
+        , player: 0
+        , phase: 2
       }
     });
 
@@ -75,6 +73,7 @@ describe('GameModel.parse', () => {
     expect(parsed.deck.size).equal(target.deck.size);
     expect(parsed.deck.first().type).equal(target.deck.first().type);
     expect(parsed.deck.last().type).equal(target.deck.last().type);
+    expect(parsed.getIn(['players', 'u0', 'status'])).equal(STATUS.READY);
     expect(parsed.getIn(['players', 'u0', 'hand']).size).equal(target.getIn(['players', 'u0', 'hand']).size);
     expect(parsed.getIn(['players', 'u0', 'hand']).first().type).equal(target.getIn(['players', 'u0', 'hand']).first().type);
     expect(parsed.getIn(['players', 'u0', 'hand']).last().type).equal(target.getIn(['players', 'u0', 'hand']).last().type);
@@ -89,6 +88,7 @@ describe('GameModel.parse', () => {
     expect(parsedContinent.last().traits.first().type ).equal(targetContinent.last().traits.first().type );
     expect(parsedContinent.last().traits.last().type  ).equal(targetContinent.last().traits.last().type  );
 
+    expect(parsed.getIn(['players', 'u1', 'status'])).equal(STATUS.READY);
     expect(parsed.getIn(['players', 'u1', 'hand'])).equal(target.getIn(['players', 'u1', 'hand']));
     expect(parsed.getIn(['players', 'u1', 'continent'])).equal(target.getIn(['players', 'u1', 'continent']));
   });
