@@ -27,7 +27,7 @@ describe('Animal', () => {
   });
   //it('Displays traits', () => {
   //  const $Animal = shallow(<Animal model={
-  //    AnimalModel.new(CardModel.new(cardTypes.CardCamouflage))
+  //    AnimalModel.new(CardModel.new(cardClasses.CardCamouflage))
   //      .set('traits', List.of(
   //        TraitModel.new('TraitCarnivorous')
   //      ))

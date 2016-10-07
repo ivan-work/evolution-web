@@ -67,7 +67,7 @@ describe('Auth:', function () {
        * States
        * */
       expect(clientStore.getState().get('user')).equal(User0);
-      expect(clientStore.getState().get('online')).equal(List([User0.toOthers()]));
+      expect(clientStore.getState().get('online')).equal(Map({[User0.id]: User0.toOthers()}));
 
       expect(serverStore.getState().get('connections')).equal(Map({[clientStore.getConnectionId()]: clientStore.getConnection().socket}));
       expect(serverStore.getState().get('users')).equal(Map({[User0.id]: User0}));
@@ -93,13 +93,13 @@ describe('Auth:', function () {
 
       expect(clientStore0.getState().get('user'), 'clientStore0.getState(users)').equal(User0);
       expect(clientStore0.getState().get('online'), 'clientStore0.getState(online)')
-        .equal(List([User0.toOthers()]));
+        .equal(Map({[User0.id]: User0.toOthers()}));
 
       /*
        * User1 is connected, but not logged in
        * */
       expect(clientStore1.getState().get('user'), 'clientStore1.getState(users)').equal(null);
-      expect(clientStore1.getState().get('online'), 'clientStore1.getState(online)').equal(List());
+      expect(clientStore1.getState().get('online'), 'clientStore1.getState(online)').equal(Map());
 
       /*
        * User1 connects
@@ -109,11 +109,11 @@ describe('Auth:', function () {
 
       expect(clientStore0.getState().get('user'), 'clientStore0.getState(user)').equal(User0);
       expect(clientStore0.getState().get('online'), 'clientStore0.getState(online)')
-        .equal(List([User0.toOthers(), User1.toOthers()]));
+        .equal(Map({[User0.id]: User0.toOthers(), [User1.id]: User1.toOthers()}));
 
       expect(clientStore1.getState().get('user'), 'clientStore1.getState(users)').equal(User1);
       expect(clientStore1.getState().get('online'), 'clientStore1.getState(online)')
-        .equal(List.of(User0.toOthers(), User1.toOthers()));
+        .equal(Map({[User0.id]: User0.toOthers(), [User1.id]: User1.toOthers()}));
     });
   });
 
@@ -137,8 +137,8 @@ describe('Auth:', function () {
         expect(serverStore.getState().get('connections')).equal(Map({[clientStore1.getConnectionId()]: clientStore1.getConnection().socket}));
         expect(serverStore.getState().get('users')).equal(Map({[User1.id]: User1}));
 
-        expect(clientStore0.getState().get('online')).equal(List());
-        expect(clientStore1.getState().get('online')).equal(List.of(User1.toOthers()));
+        expect(clientStore0.getState().get('online')).equal(Map());
+        expect(clientStore1.getState().get('online')).equal(Map({[User1.id]: User1.toOthers()}));
         done();
       }, 20);
     });

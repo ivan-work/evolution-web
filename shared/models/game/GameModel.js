@@ -8,6 +8,8 @@ import * as cardTypes from './evolution/cards';
 import uuid from 'node-uuid';
 import {ensureParameter} from '~/shared/utils';
 
+import {parse, parseCardList, parseAnimalList} from './GameModel.parse';
+
 export const TEST_DECK_SIZE = 24;
 export const TEST_HAND_SIZE = 6;
 
@@ -163,6 +165,9 @@ export class GameModelClient extends Record({
   }
 }
 
+GameModel.parse = parse;
+GameModel.parseCardList = parseCardList;
+GameModel.parseAnimalList = parseAnimalList;
 GameModelClient.prototype.start = GameModel.prototype.start;
 GameModelClient.prototype.getPlayerCard = GameModel.prototype.getPlayerCard;
 GameModelClient.prototype.getPlayerAnimal = GameModel.prototype.getPlayerAnimal;
