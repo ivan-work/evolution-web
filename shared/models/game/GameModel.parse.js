@@ -48,16 +48,16 @@ export const parseAnimalList = (userId, string) => {
       }, AnimalModel.new(userId)));
 };
 
-export const parse = (room, string) => {
-  const seed = yaml.load(string);
+export const parse = (room, string = '') => {
+  const seed = yaml.load(string) || {};
 
   const deck = parseCardList(seed.deck || '');
 
   const players = room.users.reduce((result, id, index) => {
     const player = new PlayerModel({
       id
-      , hand: parseCardList(seed.players[index] && seed.players[index].hand || '')
-      , continent: parseAnimalList(id, seed.players[index] && seed.players[index].continent || '')
+      , hand: parseCardList(seed.players && seed.players[index] && seed.players[index].hand || '')
+      , continent: parseAnimalList(id, seed.players && seed.players[index] && seed.players[index].continent || '')
       , status: STATUS.READY
       , index
       , ended: false
@@ -68,7 +68,7 @@ export const parse = (room, string) => {
   return GameModel.fromServer({
     id: uuid.v4().slice(0, 4)
     , roomId: room.id
-    , food: seed.food
+    , food: seed.food || 0
     , started: true
     , status: new StatusRecord({
       phase: seed.phase || 1

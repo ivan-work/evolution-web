@@ -49,6 +49,8 @@ const GameModelData = {
   , started: false
   , status: new StatusRecord()
   , cooldowns: CooldownList.new()
+  , scoreboardFinal: null
+  , winnerId: null
 };
 
 export class GameModel extends Record(GameModelData) {
@@ -147,7 +149,8 @@ export class GameModelClient extends Record({
   }
 
   isUserTurn() {
-    return this.getPlayer().index === this.status.player;
+    return this.getPlayer().index === this.status.player
+      && (this.status.phase === PHASE.DEPLOY || this.status.phase === PHASE.FEEDING);
   }
 
   isDeploy() {

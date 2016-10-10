@@ -13,6 +13,32 @@ h1, h2, h3, h4, h5, h6 {
   padding: 2em;
 }
 
+.DialogContainer {
+  z-index: 999;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  .Backdrop {
+    width: 100%;
+    height: 100%;
+    padding: 10%;
+    background: rgba(0,0,0,.5);
+  }
+  .Dialog {
+    background: white;
+    width: 100%;
+    //margin: 0 auto;
+    min-width: 400px;
+    max-width: 600px;
+  }
+  .DialogActions {
+    margin: 1em;
+    padding: 1em;
+  }
+}
+
 #Room\$back {
   background: red
 }

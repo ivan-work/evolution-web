@@ -239,7 +239,7 @@ export const server$gameExtict = (gameId) => (dispatch, getState) => {
         }
       });
     }
-    dispatch(gameStartDeploy(gameId));
+    dispatch(server$game(gameId, gameStartDeploy(gameId)));
   } else {
     dispatch(server$game(gameId, gameEnd(gameId, selectGame(getState, gameId))));
   }
@@ -351,6 +351,8 @@ export const gameServerToClient = {
     dispatch(redirectTo('/game'));
   })
   , gameStart: ({gameId}) => gameStart(gameId)
+  , gameStartDeploy: ({gameId}) => gameStartDeploy(gameId)
+  , gameStartEat: ({gameId, food}) => gameStartEat(gameId, food)
   , gamePlayerStatusChange: ({gameId, userId, status}) => gamePlayerStatusChange(gameId, userId, status)
   , gameGiveCards: ({gameId, userId, cards}) =>
     gameGiveCards(gameId, userId, List(cards).map(card => CardModel.fromServer(card)))
@@ -361,7 +363,6 @@ export const gameServerToClient = {
   , gameNextPlayer: ({gameId}) => gameNextPlayer(gameId)
   , gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
   , gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
-  , gameStartEat: ({gameId, food}) => gameStartEat(gameId, food)
   , animalStarve: ({gameId, userId, ownerId}) => animalStarve(gameId, userId, ownerId)
 };
 
