@@ -12,6 +12,8 @@ import {
   , TRAIT_COOLDOWN_LINK
 } from '../models/game/evolution/constants';
 
+import {server$actionsChain} from './generic';
+
 import {selectRoom, selectGame, selectPlayers} from '../selectors';
 
 import {
@@ -53,11 +55,6 @@ export const server$traitKillAnimal = (gameId, sourcePlayerId, sourceAnimalId, t
   Object.assign(traitKillAnimal(gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId)
     , {meta: {users: selectPlayers(getState, gameId)}}));
 
-const executeFeeding = (gameId, actionsList) => ({
-  type: 'executeFeeding'
-  , data: {gameId, actionsList}
-});
-
 const playerActed = (gameId, userId) => ({
   type: 'playerActed'
   , data: {gameId, userId}
@@ -69,31 +66,12 @@ export const server$playerActed = (gameId, userId) => (dispatch, getState) => di
 
 // complexActions
 
-const client$executeFeeding = (gameId, actionsList) => (dispatch, getState) => {
-  //actionsList.reduce((result, action) => {
-  //  return result.then(dispatch(action))
-  //}, Promise.resolve());
-  //console.log('client$executeFeeding', actionsList)
-  actionsList.forEach((action) => {
-    dispatch(action);
-  });
-};
-
-export const server$executeFeeding = (gameId, actionsList) => (dispatch, getState) => {
-  actionsList.forEach((action) => {
-    dispatch(action);
-  });
-  dispatch(Object.assign(executeFeeding(gameId, actionsList), {
-    meta: {clientOnly: true, users: selectPlayers(getState, gameId)}
-  }));
-};
-
 export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   const actionsList = [];
   const requiredAmount = (animal.getMaxFood() + animal.getMaxFat()) - (animal.getFood() + animal.getFat());
   actionsList.push(traitMoveFood(gameId, animal.id, Math.min(amount, requiredAmount), sourceType, sourceId)); // TODO bug with 2 amount on animal 2/3
-  dispatch(server$executeFeeding(gameId, actionsList));
+  dispatch(server$actionsChain(gameId, actionsList));
 };
 
 // Cooldowns
@@ -193,7 +171,6 @@ export const traitClientToServer = {
 
 export const traitServerToClient = {
   traitMoveFood: ({gameId, animalId, amount, sourceType, sourceId}) => traitMoveFood(gameId, animalId, amount, sourceType, sourceId)
-  , executeFeeding: ({gameId, actionsList}) => client$executeFeeding(gameId, actionsList)
   , startCooldown: ({gameId, link, duration, place, placeId}) => startCooldown(gameId, link, duration, place, placeId)
   , traitKillAnimal: ({gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId}) =>
     traitKillAnimal(gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId)

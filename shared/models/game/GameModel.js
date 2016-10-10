@@ -17,7 +17,7 @@ export const PHASE = {
   PREPARE: 0
   , DEPLOY: 1
   , FEEDING: 2
-  , EXTINCTION: 3
+  , FINAL: 3
 };
 
 export const StatusRecord = Record({
@@ -90,12 +90,6 @@ export class GameModel extends Record(GameModelData) {
       , status: new StatusRecord(js.status)
       , cooldowns: CooldownList.fromServer(js.cooldowns)
     });
-  }
-
-  start() {
-    return this
-      .setIn(['started'], true)
-      .setIn(['status', 'phase'], PHASE.DEPLOY)
   }
 
   leave(userId) {

@@ -1,3 +1,4 @@
+import logger from '~/shared/utils/logger';
 import {UserModel} from '~/shared/models/UserModel';
 import {GameModel} from '~/shared/models/game/GameModel';
 import {loginUserRequest} from '~/shared/actions/actions';
@@ -14,15 +15,18 @@ import {
     const result = [];
     const sandbox = sinon.sandbox.create();
     const UserSpy = sandbox.spy(UserModel, 'new');
+    let debugInfo = 'Started test with ';
     for (let i = 0; i < count; ++i) {
       const clientStore = mockClientStore().connect(serverStore);
       clientStore.dispatch(loginUserRequest('/', 'User' + i, 'testPassword'));
       const User = UserSpy.lastCall.returnValue;
+      debugInfo += `(${User.id}) `;
       result.push({
         ['clientStore' + i]: clientStore
         , ['User' + i]: User
       });
     }
+    logger.info(debugInfo);
     result.forEach((r, i) => r['clientStore' + i].clearActions())
     serverStore.clearActions();
     sandbox.restore();

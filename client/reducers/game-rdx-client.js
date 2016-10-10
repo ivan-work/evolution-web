@@ -11,7 +11,10 @@ import {
   , gameDeployAnimal
   , gameDeployTrait
   , gameEndTurn
+  , gameEnd
   , gameStartEat
+  , gameStartDeploy
+  , playerActed
   , traitMoveFood
   , startCooldown
   , traitKillAnimal
@@ -30,7 +33,10 @@ export const reducer = createReducer(null, {
   , gameDeployAnimal
   , gameDeployTrait
   , gameEndTurn
+  , gameEnd
   , gameStartEat
+  , gameStartDeploy
+  , playerActed
   , traitMoveFood
   , startCooldown
   , traitKillAnimal

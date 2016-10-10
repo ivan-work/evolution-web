@@ -8,7 +8,11 @@ import {AnimalModel} from '../../shared/models/game/evolution/AnimalModel';
 import {TraitModel} from '../../shared/models/game/evolution/TraitModel';
 import {FOOD_SOURCE_TYPE} from '../../shared/models/game/evolution/constants';
 
-export const gameStart = game => game.start();
+export const gameStart = game => game
+  .setIn(['started'], true)
+  .setIn(['status', 'phase'], PHASE.DEPLOY)
+  .setIn(['status', 'round'], 0)
+  .setIn(['status', 'player'], 0);
 
 export const gamePlayerStatusChange = (game, {userId, status}) => game
   .setIn(['players', userId, 'status'], status);
@@ -44,8 +48,8 @@ export const gameDeployTrait = (game, {userId, cardId, animalId, trait}) => {
 };
 
 export const gameNextPlayer = (game) => {
+  //console.log('gameNextPlayer', game.players.toJS());
   let playerIndex = game.getIn(['status', 'player']);
-  let previousPlayer = game.players.find(player => player.index === playerIndex);
   let emergencyCount = game.players.size;
   let totalPlayers = game.players.size;
   let round = game.getIn(['status', 'round']);
@@ -63,17 +67,11 @@ export const gameNextPlayer = (game) => {
       break;
     }
   } while (emergencyCount >= 0);
-  return emergencyCount < 0 ? game : game
+  if (emergencyCount < 0) throw new Error('emergency count');
+  return game
     .setIn(['status', 'round'], round)
     .setIn(['status', 'player'], playerIndex)
-    .update('cooldowns', cooldowns => cooldowns.eventNextPlayer(roundChanged))
-    .updateIn(['players', previousPlayer.id], player => {
-      const ended = player.skipped > 0;
-      return player
-        .set('acted', false)
-        .set('ended', ended)
-        .set('skipped', ended || player.acted ? 0 : 1 + player.skipped)
-    });
+    .update('cooldowns', cooldowns => cooldowns.eventNextPlayer(roundChanged));
 };
 
 export const playerActed = (game, {userId}) => {
@@ -82,21 +80,49 @@ export const playerActed = (game, {userId}) => {
     .setIn(['players', userId, 'skipped'], 0);
 };
 
-
 export const gameEndTurn = (game, {userId}) => {
+  //console.log('gameEndTurn for ' + userId);
   ensureParameter(userId, 'string');
   return game
-    .setIn(['players', userId, 'ended'], true);
+    .updateIn(['players', userId], player => {
+      //console.log(`skipped: ${player.skipped}, acted: ${player.acted}`);
+      const ended = player.skipped > 0;
+      if (ended) {
+        logger.silly(`Player#${player.id} ended by skipping.`);
+      }
+      return player
+        .set('acted', false)
+        .set('ended', ended)
+        .set('skipped', ended || player.acted ? 0 : 1 + player.skipped)
+    });
 };
 
 export const gameStartEat = (game, {food}) => {
   ensureParameter(food, 'number');
   return game
+    .update('players', players => players.map(player => player
+      .set('ended', false)
+      .set('skipped', 0)
+    ))
     .setIn(['food'], food)
     .setIn(['status', 'phase'], PHASE.FEEDING)
     .setIn(['status', 'round'], 0)
     .setIn(['status', 'player'], 0);
 };
+
+export const gameStartDeploy = (game) => {
+  return game
+    .update('players', players => players.map(player => player
+      .set('ended', false)
+      .set('skipped', 0)
+    ))
+    .setIn(['food'], 0)
+    .setIn(['status', 'phase'], PHASE.DEPLOY)
+    .updateIn(['status', 'turn'], turn => ++turn)
+    .setIn(['status', 'round'], 0)
+    .setIn(['status', 'player'], 0);
+};
+
 export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) => {
   ensureParameter(animalId, 'string');
   ensureParameter(amount, 'number');
@@ -119,8 +145,17 @@ export const traitKillAnimal = (game, {targetAnimalId}) => {
     .removeIn(['players', playerId, 'continent', animalIndex])
 };
 
+export const animalStarve = (game, {userId, animalId}) => {
+  const {playerId, animalIndex} = game.locateAnimal(animalId);
+  return game
+    .removeIn(['players', playerId, 'continent', animalIndex])
+};
+
 export const startCooldown = (game, {link, duration, place, placeId}) =>
   game.update('cooldowns', cooldowns => cooldowns.startCooldown(link, duration, place, placeId));
+
+export const gameEnd = (state, {game}) =>
+  game.setIn(['status', 'phase'], PHASE.FINAL);
 
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
@@ -139,9 +174,12 @@ export const reducer = createReducer(Map(), {
   , gameDeployAnimal: (state, data) => state.update(data.gameId, game => gameDeployAnimal(game, data))
   , gameDeployTrait: (state, data) => state.update(data.gameId, game => gameDeployTrait(game, data))
   , gameEndTurn: (state, data) => state.update(data.gameId, game => gameEndTurn(game, data))
+  , gameEnd: (state, data) => state.update(data.gameId, game => gameEnd(game, data))
   , gameStartEat: (state, data) => state.update(data.gameId, game => gameStartEat(game, data))
+  , gameStartDeploy: (state, data) => state.update(data.gameId, game => gameStartDeploy(game, data))
   , playerActed: (state, data) => state.update(data.gameId, game => playerActed(game, data))
   , traitMoveFood: (state, data) => state.update(data.gameId, game => traitMoveFood(game, data))
   , startCooldown: (state, data) => state.update(data.gameId, game => startCooldown(game, data))
   , traitKillAnimal: (state, data) => state.update(data.gameId, game => traitKillAnimal(game, data))
+  , animalStarve: (state, data) => state.update(data.gameId, game => animalStarve(game, data))
 });

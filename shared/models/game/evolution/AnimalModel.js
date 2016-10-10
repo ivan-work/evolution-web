@@ -70,4 +70,8 @@ export class AnimalModel extends Record({
   canEat() {
     return this.food < (this.getMaxFood() + this.getMaxFat());
   }
+
+  countScore() {
+    return 2 + this.traits.reduce((result, trait) => result + 1 + trait.dataModel.food, 0);
+  }
 }

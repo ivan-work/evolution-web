@@ -19,7 +19,7 @@ export class UserModel extends Record({
 }) {
   static new(login, connectionId) {
     return new UserModel({
-      id: uuid.v4().slice(0, 6)
+      id: uuid.v4().slice(0, 4)
       , login, connectionId
     }).sign()
   }

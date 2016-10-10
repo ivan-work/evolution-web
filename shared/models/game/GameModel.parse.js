@@ -32,18 +32,20 @@ export const parseAnimalList = (userId, string) => {
   invariant(typeof userId === 'string', `GameModel.parseAnimalList wrong userId: (${userId})`)
   invariant(typeof string === 'string', `GameModel.parseAnimalList wrong string: (${string})`)
   return List(string.split(','))
-    .map(raw => raw.trim())
-    .filter(raw => raw.length > 0)
-    .map(raw => {
-        const animal = AnimalModel.new(userId);
-        return raw === '$'
-          ? animal
-          : animal
-          .set('traits', List(raw.split(' ')).map(traitSeed =>
-            TraitModel.parse(traitSeed)
-          ))
-      }
-    );
+    .map(rawAnimal => rawAnimal.trim())
+    .filter(rawAnimal => rawAnimal.length > 0)
+    .map(rawAnimal => rawAnimal
+      .split(' ')
+      .reduce((animal, prop) => {
+        prop = prop.trim();
+        if ('$' === prop) {
+          return animal;
+        } else if (/^\++$/.test(prop)) {
+          return animal.set('food', prop.length)
+        } else {
+          return animal.update('traits', traits => traits.push(TraitModel.parse(prop)))
+        }
+      }, AnimalModel.new(userId)));
 };
 
 export const parse = (room, string) => {
