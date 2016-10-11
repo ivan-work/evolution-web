@@ -1,38 +1,68 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
+import {Portal} from './Portal.jsx';
+import shallowEqual from 'shallowequal';
+
+const transitionTime = 500;
 
 export class Dialog extends Component {
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    this.state = {
+      isShowing: props.show
+      , show: props.show
+    }
   }
 
-  componentDidMount() {
-    this.popup = document.createElement('div');
-    this.popup.classList.add('DialogContainer');
-    document.body.appendChild(this.popup);
-    this._renderLayer();
-  }
-
-  componentDidUpdate() {
-    this._renderLayer();
-  }
-
-  componentWillUnmount() {
-    ReactDOM.unmountComponentAtNode(this.popup);
-    document.body.removeChild(this.popup);
-  }
-
-  _renderLayer() {
-    ReactDOM.render(<div className='Backdrop'>
-      <div className='Dialog mdl-dialog'>{this.props.children}</div>
-    </div>, this.popup);
+  componentWillReceiveProps(nextProps) {
+    const {show: prevShow} = this.props;
+    const {show: nextShow} = nextProps;
+    if (prevShow && !nextShow) {
+      this.setState({isShowing: false});
+      setTimeout(() => {
+        this.setState({
+          show: nextShow
+        });
+      }, transitionTime);
+    } else if (!prevShow && nextShow) {
+      this.setState({
+        show: nextShow
+      });
+      setTimeout(() => {
+        this.setState({
+          isShowing: true
+        });
+      }, 17);
+    }
   }
 
   render() {
-    // Render a placeholder
-    return <div></div>;
+    const {show} = this.state;
+    if (!show) {
+      return null;
+    }
+    return <Portal className='DialogContainer'>
+      <div className='Backdrop' style={{
+        background: this.state.isShowing ? '' : 'none'
+        , transition: `${transitionTime}ms all`
+      }}>
+        <div className='Dialog mdl-dialog' ref={() => this.rendered()} style={{
+        marginTop: this.state.isShowing ? '' : '-10%'
+        , transform: this.state.isShowing ? '' : 'translate(0,-125%)'
+        , transition: `${transitionTime}ms all`
+      }}>{this.props.children}</div>
+      </div>
+    </Portal>;
+  }
+
+  rendered() {
+    //if (this.props.show && !this.state.isShowing) {
+    //  this.setState({
+    //    isShowing: true
+    //  });
+    //}
   }
 }
 

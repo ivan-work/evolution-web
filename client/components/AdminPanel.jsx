@@ -21,7 +21,7 @@ export class AdminPanel extends Component {
 
   render() {
     return <div className="AdminPanel" style={{
-      position: 'fixed'
+      position: 'absolute'
       , left: '240px'
       , top: 0
       , zIndex: 1337

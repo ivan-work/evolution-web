@@ -13,7 +13,7 @@ import {ContinentDeploy} from './ContinentDeploy.jsx';
 import {ContinentFeeding} from './ContinentFeeding.jsx';
 import {DragFood} from './Food.jsx';
 import CustomDragLayer from './dnd/CustomDragLayer.jsx';
-import {GameScoreboardFinal} from './ui/GameScoreboardFinal.jsx';
+import {GameScoreboardFinalView} from './ui/GameScoreboardFinal.jsx';
 
 class _Game extends React.Component {
   static contextTypes = {
@@ -45,8 +45,6 @@ class _Game extends React.Component {
       : Card);
 
     return <div className="Game">
-      {game.status.phase === PHASE.FINAL ? <GameScoreboardFinal game={game} show={true}/> : null}
-      <GameScoreboardFinal game={game} show={true}/>
       {/* DECK */}
       <div className='DeckWrapper' style={GAME_POSITIONS[game.players.size].deck}>
         <div className="GameStatus">
@@ -59,6 +57,8 @@ class _Game extends React.Component {
         <MDL.Button className="EndTurn"
                     raised disabled={!isUserTurn}
                     onClick={this.context.gameActions.$endTurn}>EndTurn</MDL.Button>
+
+        <GameScoreboardFinalView/>
 
         <CardCollection
           ref="Deck" name="Deck"

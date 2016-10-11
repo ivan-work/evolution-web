@@ -14,7 +14,7 @@ export const App = React.createClass({
     const {socket} = this.props;
     return (
       <Layout fixedHeader>
-        {/*<Header title="Title">
+        {<Header title="Evolution" hideSpacer={true}>
           <Navigation>
             <a href="">Link</a>
             <a href="">Link</a>
@@ -22,7 +22,7 @@ export const App = React.createClass({
             <a href="">Link</a>
           </Navigation>
         </Header>
-        <Drawer title="Title">
+        /*<Drawer title="Title">
           <Navigation>
             <a href="">Link</a>
             <a href="">Link</a>
