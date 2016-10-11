@@ -96,9 +96,41 @@ export class GameModel extends Record(GameModelData) {
 
   leave(userId) {
     ensureParameter(userId, 'string');
-    return (this.players.size == 1
-      ? null
-      : this.removeIn(['players', userId]));
+    switch (this.players.size) {
+      case 1:
+        return null;
+      case 2:
+        return this
+          .removeIn(['players', userId])
+          .end();
+      default:
+        return this.removeIn(['players', userId])
+    }
+  }
+
+  end() {
+    let scoreboard = [];
+    let winnerId = null;
+    let maxScore = -1;
+    this.players.forEach((player, playerId) => {
+      const score = player.countScore();
+      if (score > maxScore) {
+        winnerId = playerId;
+        maxScore = score;
+      }
+      scoreboard.push({
+        playerId
+        , score
+      })
+    });
+    scoreboard = scoreboard.sort((p1, p2) => p1.score < p2.score);
+    return this
+      .set('scoreboardFinal', scoreboard)
+      .set('winnerId', winnerId)
+      .setIn(['status', 'phase'], PHASE.FINAL);
+  }
+
+  makeScoreboard() {
   }
 
   getPlayer(pid) {
@@ -165,7 +197,7 @@ export class GameModelClient extends Record({
 GameModel.parse = parse;
 GameModel.parseCardList = parseCardList;
 GameModel.parseAnimalList = parseAnimalList;
-GameModelClient.prototype.start = GameModel.prototype.start;
+GameModelClient.prototype.end = GameModel.prototype.end;
 GameModelClient.prototype.getPlayerCard = GameModel.prototype.getPlayerCard;
 GameModelClient.prototype.getPlayerAnimal = GameModel.prototype.getPlayerAnimal;
 GameModelClient.prototype.locateAnimal = GameModel.prototype.locateAnimal;

@@ -160,28 +160,7 @@ export const animalStarve = (game, {userId, animalId}) => {
 export const startCooldown = (game, {link, duration, place, placeId}) =>
   game.update('cooldowns', cooldowns => cooldowns.startCooldown(link, duration, place, placeId));
 
-export const gameEnd = (state, {game}) => {
-  // Player score
-  // Player (wins/losses) score achievements
-  const scoreboard = [];
-  let winnerId = null;
-  let maxScore = 0;
-  game.players.forEach((player, playerId) => {
-    const score = player.countScore();
-    if (score > maxScore) {
-      winnerId = playerId;
-      maxScore = score;
-    }
-    scoreboard.push({
-      playerId
-      , score
-    })
-  });
-  return game
-    .setIn(['status', 'phase'], PHASE.FINAL)
-    .set('scoreboardFinal', scoreboard.sort((p1, p2) => p1.score < p2.score))
-    .set('winnerId', winnerId);
-};
+export const gameEnd = (state, {game}) => game.end();
 
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)

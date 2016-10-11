@@ -5,6 +5,7 @@ import {PHASE} from '../../shared/models/game/GameModel';
 import {
   traitTakeFoodRequest
   , gameEndTurnRequest
+  , SOCKET_DISCONNECT_NOW
 } from '../actions/actions';
 
 describe('Game (ENDING PHASE):', function () {
@@ -163,5 +164,13 @@ players:
     expect(ServerGame().getPlayer(User1).countScore(), 'score for User1').equal(4);
     expect(ServerGame().getPlayer(User2).countScore(), 'score for User2').equal(2);
     expect(ServerGame().status.phase).equal(PHASE.FINAL);
+  });
+
+  it('User0, User1 in Game, User0 disconnects, User1 win', () => {
+    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+    ParseGame(``);
+    clientStore0.disconnect(SOCKET_DISCONNECT_NOW);
+    expect(ServerGame().status.phase).equal(PHASE.FINAL);
+    expect(ServerGame().winnerId).equal(User1.id);
   });
 });
