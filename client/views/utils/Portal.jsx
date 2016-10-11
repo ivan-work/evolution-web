@@ -1,34 +1,37 @@
 import React, {Component} from 'react';
-import ReactDOM from 'react-dom';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
+
+import {PortalTargets} from './PortalTarget.jsx';
 
 export class Portal extends Component {
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
+  static propTypes = {
+    target: React.PropTypes.string.isRequired
+  };
 
   componentDidMount() {
-    this.portalElement = document.createElement('div');
-    document.body.appendChild(this.portalElement);
-    this.renderElement();
+    this.id = Math.floor(Math.random() * 0xFFFFFF);
+    this.target = PortalTargets[this.target];
+    if (this.target) {
+      this.target.add(this);
+    }
   }
 
   componentWillUnmount() {
-    ReactDOM.unmountComponentAtNode(this.portalElement);
-    document.body.removeChild(this.portalElement);
+    if (this.target) {
+      this.target.remove(this);
+    }
   }
 
   componentDidUpdate() {
-    this.renderElement();
+    if (this.target) {
+      this.target.update();
+    }
   }
 
-  renderElement() {
-    ReactDOM.render(<div {...this.props}>{this.props.children}</div>, this.portalElement);
+  renderChildren() {
+    return <span>{this.props.children}</span>;
   }
 
   render() {
-    // Render a placeholder
-    return <div></div>;
+    return <span></span>
   }
 }

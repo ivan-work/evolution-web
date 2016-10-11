@@ -18,15 +18,15 @@ export const GAME_POSITIONS = {
     deck: DECK_POSITION
     , player: PLAYER_POSITION
     , food: FOOD_POSITION
-    , 0: {top: 0, left: '50%'}
-    , 1: {top: 0, left: '50%'}
+    , 0: {top: `0`, left: `0`, transform: 'scale(.75)'}
+    , 1: {top: `0`, left: `${500*.75}px`, transform: 'scale(.75)'}
   }
   , 4: {
     deck: DECK_POSITION
     , player: PLAYER_POSITION
     , food: FOOD_POSITION
-    , 0: {top: 0, left: '50%'}
-    , 1: {top: 0, left: '50%'}
-    , 2: {top: 0, left: '50%'}
+    , 0: {top: `0`, left: `0`}
+    , 1: {top: `0`, left: `0`}
+    , 2: {top: `0`, left: `0`}
   }
 };
