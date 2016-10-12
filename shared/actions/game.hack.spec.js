@@ -8,21 +8,6 @@ import {
   gameDeployTraitRequest,
 } from '../actions/actions';
 
-const expectUnchanged = (cb, ...stores) => {
-  let previousStates = stores.map(store => store.getState());
-  cb();
-  stores.forEach((store, i) => {
-    expect(store.getState().toJS()).eql(previousStates[i].toJS());
-  });
-};
-const expectChanged = (cb, ...stores) => {
-  let previousStates = stores.map(store => store.getState());
-  cb();
-  stores.forEach((store, i) => {
-    expect(store.getState()).not.equal(previousStates[i]);
-  });
-};
-
 describe('Hacking Game:', function () {
   //it('Game for two', () => {
 
@@ -34,6 +19,7 @@ describe('Hacking Game:', function () {
   //expect(previousClientState).equal(clientStore0.getState());
   //
   //})
+
   it('gameReadyRequest', () => {
     const [serverStore, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockStores(3);
     clientStore0.dispatch(roomCreateRequest());
@@ -89,7 +75,7 @@ players:
 
     // gameDeployAnimalRequest (0:0:0) User0 turn
     expectChanged(() => clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id, 0)), serverStore, clientStore0);
-    expect(ServerGame().status.player, 'ServerGame().status.player').equal(1);
+    expect(ServerGame().status.currentPlayer, 'ServerGame().status.currentPlayer').equal(1);
 
     // gameDeployAnimalRequest (0:0:1) User0 second try
     expectUnchanged(() => clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id, 0))
@@ -97,8 +83,8 @@ players:
 
     // gameDeployAnimalRequest (0:0:1) User1 turn
     expectChanged(() => clientStore1.dispatch(gameDeployAnimalRequest(ClientGame1().getPlayerCard(User1, 1).id, 0)), serverStore, clientStore1);
-    expect(ServerGame().status.round, 'ServerGame().status.player').equal(1);
-    expect(ServerGame().status.player, 'ServerGame().status.player').equal(0);
+    expect(ServerGame().status.round, 'ServerGame().status.currentPlayer').equal(1);
+    expect(ServerGame().status.currentPlayer, 'ServerGame().status.currentPlayer').equal(0);
 
     // gameDeployAnimalRequest (0:1:0) User1 second try
     expectUnchanged(() => clientStore1.dispatch(gameDeployAnimalRequest(ClientGame1().getPlayerCard(User1, 0).id, 0))

@@ -1,5 +1,6 @@
 //require('source-map-support').install();
 import polyfills from '../shared/utils/polyfills'
+import logger from '../shared/utils/logger';
 import chai from 'chai';
 import sinon from 'sinon';
 import chaiImmutable from 'chai-immutable';
@@ -155,11 +156,14 @@ global.mockClientStore = function (initialClientState) {
 };
 
 global.expectUnchanged = (cb, ...stores) => {
+  const LOG_LEVEL = logger.transports.console.level;
+  logger.transports.console.level = 'error';
   let previousStates = stores.map(store => store.getState());
   cb();
   stores.forEach((store, i) => {
     expect(store.getState().toJS()).eql(previousStates[i].toJS());
   });
+  logger.transports.console.level = LOG_LEVEL;
 };
 
 global.expectChanged = (cb, ...stores) => {

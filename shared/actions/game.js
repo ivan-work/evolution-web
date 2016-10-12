@@ -5,10 +5,10 @@ import {List} from 'immutable';
 import {STATUS} from '../models/UserModel';
 
 import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
-import {CardModel, CARD_TARGET_TYPE} from '../models/game/CardModel';
+import {CardModel} from '../models/game/CardModel';
 import {AnimalModel} from '../models/game/evolution/AnimalModel';
 import {TraitModel} from '../models/game/evolution/TraitModel';
-import {TRAIT_TARGET_TYPE} from '../models/game/evolution/constants';
+import {CARD_TARGET_TYPE, TRAIT_TARGET_TYPE} from '../models/game/evolution/constants';
 
 import {actionError} from './generic';
 import {server$game} from './generic';

@@ -23,7 +23,8 @@ export const PHASE = {
 export const StatusRecord = Record({
   turn: 0
   , round: 0
-  , player: 0
+  , currentPlayer: 0
+  , roundPlayer: 0
   , phase: PHASE.PREPARE
 });
 
@@ -181,7 +182,7 @@ export class GameModelClient extends Record({
   }
 
   isUserTurn() {
-    return this.getPlayer().index === this.status.player
+    return this.getPlayer().index === this.status.currentPlayer
       && (this.status.phase === PHASE.DEPLOY || this.status.phase === PHASE.FEEDING);
   }
 

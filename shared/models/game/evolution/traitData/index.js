@@ -42,7 +42,7 @@ export const TraitPiracy = {
   type: 'TraitPiracy'
   , targetType: TRAIT_TARGET_TYPE.ANIMAL
   , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
-  , cooldownDuration: TRAIT_COOLDOWN_DURATION.PHASE
+  , cooldownDuration: TRAIT_COOLDOWN_DURATION.TURN
   , cooldownLink: 'TraitPiracy'
   , action: (target) => (getState, dispatch) => {
     // TODO target is animal
@@ -87,7 +87,7 @@ export const TraitHibernation = {
   type: 'TraitHibernation'
   , disableLastRound: true
   , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
-  , cooldownDuration: TRAIT_COOLDOWN_DURATION.TWO_ROUNDS
+  , cooldownDuration: TRAIT_COOLDOWN_DURATION.TWO_TURNS
   , cooldownLink: 'TraitHibernation'
 };
 

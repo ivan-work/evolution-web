@@ -31,10 +31,10 @@ export const checkPlayerTurnAndPhase = (game, userId, phase = -1) => {
   if (~phase && game.status.phase !== phase) {
     throw new ActionCheckError(`checkPlayerTurnAndPhase@Game(${game.id})`, 'Wrong phase (%s)', game.status.phase);
   }
-  if (game.players.get(userId).index !== game.status.player) {
+  if (game.players.get(userId).index !== game.status.currentPlayer) {
     throw new ActionCheckError(`checkPlayerTurnAndPhase@Game(${game.id})`
       , 'Wrong turn (%s), offender %s (%s)'
-      , game.status.player, userId, game.players.get(userId).index);
+      , game.status.currentPlayer, userId, game.players.get(userId).index);
   }
 };
 
