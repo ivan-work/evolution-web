@@ -17,7 +17,7 @@ export const ANIMAL_TRAIT_SIZE = {
 
 class _AnimalTrait extends React.Component {
   static defaultProps = {
-    isUserTurn: false
+    isPlayerTurn: false
   };
 
   static propTypes = {
@@ -31,7 +31,7 @@ class _AnimalTrait extends React.Component {
     , canDrag: React.PropTypes.bool
     // by GameProvider
     , game: React.PropTypes.object.isRequired
-    , isUserTurn: React.PropTypes.bool.isRequired
+    , isPlayerTurn: React.PropTypes.bool.isRequired
     , currentUserId: React.PropTypes.string.isRequired
     , isDeploy: React.PropTypes.bool.isRequired
     , isFeeding: React.PropTypes.bool.isRequired
@@ -71,7 +71,7 @@ class _AnimalTrait extends React.Component {
 const _DraggableAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
   , {
     beginDrag: (props) => ({trait: props.trait, owner: props.owner})
-    , canDrag: (props, monitor) => props.isUserTurn
+    , canDrag: (props, monitor) => props.isPlayerTurn
       && props.owner.ownerId === props.currentUserId
       && props.isFeeding
       && props.trait.dataModel.checkAction(props.game, props.owner)

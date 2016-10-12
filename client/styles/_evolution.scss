@@ -3,11 +3,24 @@ $ANIMAL_WIDTH: 60px;
 $ANIMAL_HEIGHT: 80px;
 $ANIMAL_MARGIN: 10px;
 
+$CURRENT_TURN_BACKGROUND: #dfd;
+
 .enabled[draggable] {
   cursor: -webkit-grab;
 }
 .enabled.drag {
   cursor: -webkit-grabbing;
+}
+
+.PlayersList {
+  margin: .5em;
+  .Player {
+
+  }
+  .isPlayerTurn {
+    background: $CURRENT_TURN_BACKGROUND;
+    font-weight: bold;
+  }
 }
 
 .Game {
