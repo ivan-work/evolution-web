@@ -3,8 +3,8 @@ import {RoomModel} from '../models/RoomModel';
 import {GameModel, GameModelClient} from '../models/game/GameModel';
 import {List, Map} from 'immutable';
 import {push} from 'react-router-redux';
-import {roomExitSuccess} from './rooms';
-import {addTimeout, cancelTimeout} from '~/shared/utils/reduxTimeout';
+import {server$roomExit} from './rooms';
+import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 
 export const SOCKET_DISCONNECT_NOW = 'SOCKET_DISCONNECT_NOW';
 export const TIMEOUT = 2 * 60 * 1000;
@@ -22,11 +22,11 @@ export const clientDisconnectSelf = (reason) => ({
 
 export const socketDisconnect = (connectionId, reason) => (dispatch, getState) => {
   const usersState = getState().get('users');
-  let user = usersState.find((user) => user.connectionId == connectionId);
   dispatch({
     type: 'socketDisconnect'
     , data: {connectionId}
   });
+  let user = usersState.find((user) => user.connectionId == connectionId);
   //console.log('socket Disconnect', !!user)
   if (!!user) {
     if (reason !== SOCKET_DISCONNECT_NOW) {
@@ -81,10 +81,10 @@ export const loginUserFailure = (connectionId, msg) => {
 };
 
 export const logoutUser = (userId) => (dispatch, getState) => {
-  const user = getState().get('users').get(userId);
   const room = getState().get('rooms').find(room => ~room.get('users').indexOf(userId));
   if (room) {
-    dispatch(roomExitSuccess(room.id, userId));
+    console.log('server$roomExit PRE')
+    dispatch(server$roomExit(room.id, userId));
   }
   dispatch({
     type: 'logoutUser'

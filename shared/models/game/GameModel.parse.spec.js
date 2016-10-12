@@ -2,7 +2,6 @@ import {List, Map} from 'immutable';
 import {GameModel, StatusRecord} from './GameModel';
 import {AnimalModel} from './evolution/AnimalModel';
 import {TraitModel} from './evolution/TraitModel';
-import {STATUS} from '../UserModel';
 import * as cardTypes from './evolution/cards';
 
 describe('GameModel.parse', () => {
@@ -74,7 +73,7 @@ players:
     expect(parsed.deck.size).equal(18);
     expect(parsed.deck.first().type).equal('CardCarnivorous');
     expect(parsed.deck.last().type).equal('CardSharpVision');
-    expect(parsed.getIn(['players', 'u0', 'status'])).equal(STATUS.READY);
+    expect(parsed.getIn(['players', 'u0', 'ready'])).equal(true);
     expect(parsed.getIn(['players', 'u0', 'hand']).size).equal(2);
     expect(parsed.getIn(['players', 'u0', 'hand']).first().type).equal('CardCarnivorous');
     expect(parsed.getIn(['players', 'u0', 'hand']).last().type).equal('CardCarnivorous');
@@ -88,7 +87,7 @@ players:
     expect(parsedContinent.last().traits.first().type).equal('TraitSharpVision');
     expect(parsedContinent.last().traits.last().type).equal('TraitCamouflage');
 
-    expect(parsed.getIn(['players', 'u1', 'status'])).equal(STATUS.READY);
+    expect(parsed.getIn(['players', 'u1', 'ready'])).true;
     expect(parsed.getIn(['players', 'u1', 'hand'])).equal(List());
     expect(parsed.getIn(['players', 'u1', 'continent'])).equal(List());
   });
@@ -112,10 +111,10 @@ players:
       , phase: 2
     }));
     expect(ServerGame().deck.size).equal(18);
-    expect(ServerGame().getIn(['players', User0.id, 'status'])).equal(STATUS.READY);
+    expect(ServerGame().getIn(['players', User0.id, 'ready'])).true;
     expect(ServerGame().getIn(['players', User0.id, 'hand']).size).equal(2);
     expect(ServerGame().getIn(['players', User0.id, 'continent']).size).equal(2);
-    expect(ServerGame().getIn(['players', User1.id, 'status'])).equal(STATUS.READY);
+    expect(ServerGame().getIn(['players', User1.id, 'ready'])).true;
     expect(ServerGame().getIn(['players', User1.id, 'hand'])).equal(List());
     expect(ServerGame().getIn(['players', User1.id, 'continent'])).equal(List());
   });

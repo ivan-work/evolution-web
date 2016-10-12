@@ -2,8 +2,6 @@ import logger from '~/shared/utils/logger';
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import {List} from 'immutable';
 
-import {STATUS} from '../models/UserModel';
-
 import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
 import {CardModel} from '../models/game/CardModel';
 import {AnimalModel} from '../models/game/evolution/AnimalModel';
@@ -44,6 +42,38 @@ export const server$gameCreateSuccess = (game) => (dispatch, getState) => {
   });
 };
 
+// Game Leave
+export const gamePlayerLeft = (gameId, userId) => ({
+  type: 'gamePlayerLeft'
+  , data: {gameId, userId}
+});
+
+export const gamePlayerLeftNotification = (gameId, userId) => ({
+  type: 'gamePlayerLeftNotification'
+  , data: {gameId, userId}
+});
+
+export const gameDestroy = (gameId) => ({
+  type: 'gameDestroy'
+  , data: {gameId}
+});
+
+export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  dispatch(server$game(gameId, gamePlayerLeft(gameId, userId)));
+  switch (game.players.size) {
+    case 1:
+      dispatch(server$game(gameId, gameDestroy(gameId)));
+      break;
+    case 2:
+      if (game.status.phase !== PHASE.FINAL) {
+        dispatch(server$game(gameId, gameEnd(gameId, selectGame(getState, gameId))));
+      }
+      break;
+    default:
+  }
+};
+
 // Game Start
 export const server$gameStart = (gameId) => (dispatch, getState) =>
   dispatch(Object.assign(gameStart(gameId), {
@@ -60,14 +90,10 @@ export const gameReadyRequest = (ready = true) => (dispatch, getState) => dispat
   , data: {gameId: getState().get('game').id, ready}
   , meta: {server: true}
 });
-export const gamePlayerStatusChange = (gameId, userId, status) => ({
-  type: 'gamePlayerStatusChange'
-  , data: {gameId, userId, status}
+export const gamePlayerReadyChange = (gameId, userId, ready) => ({
+  type: 'gamePlayerReadyChange'
+  , data: {gameId, userId, ready}
 });
-export const server$gamePlayerStatusChange = (gameId, userId, status) => (dispatch, getState) =>
-  dispatch(Object.assign(gamePlayerStatusChange(gameId, userId, status), {
-    meta: {users: selectPlayers(getState, gameId)}
-  }));
 
 // Game Give Cards
 export const gameGiveCards = (gameId, userId, cards) => ({
@@ -210,7 +236,7 @@ export const server$gameExtict = (gameId) => (dispatch, getState) => {
   const cardGivePerPlayer = {};
   let deckSize = game.deck.size;
   let lastTurn = deckSize === 0;
-  
+
   game.players.forEach((player, pid) => {
     cardGivePerPlayer[pid] = 0;
     cardNeedToPlayer[pid] = 1;
@@ -271,12 +297,12 @@ export const gameClientToServer = {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
-    dispatch(server$gamePlayerStatusChange(gameId, userId, ready ? STATUS.READY : STATUS.LOADING));
+    dispatch(server$game(gameId, gamePlayerReadyChange(gameId, userId, ready)));
     /*
      * Actual starting
      * */
     const newGame = selectGame(getState, gameId);
-    if (!newGame.started && newGame.players.every(player => player.status === STATUS.READY)) {
+    if (!newGame.started && newGame.players.every(player => player.ready)) {
       const INITIAL_HAND_SIZE = 6;
       //new Array(INITIAL_HAND_SIZE).fill().every(() => {
       //  return true;
@@ -353,7 +379,7 @@ export const gameServerToClient = {
   , gameStart: ({gameId}) => gameStart(gameId)
   , gameStartDeploy: ({gameId}) => gameStartDeploy(gameId)
   , gameStartEat: ({gameId, food}) => gameStartEat(gameId, food)
-  , gamePlayerStatusChange: ({gameId, userId, status}) => gamePlayerStatusChange(gameId, userId, status)
+  , gamePlayerReadyChange: ({gameId, userId, ready}) => gamePlayerReadyChange(gameId, userId, ready)
   , gameGiveCards: ({gameId, userId, cards}) =>
     gameGiveCards(gameId, userId, List(cards).map(card => CardModel.fromServer(card)))
   , gameDeployAnimal: ({gameId, userId, animal, animalPosition, cardPosition}) =>
@@ -363,6 +389,13 @@ export const gameServerToClient = {
   , gameNextPlayer: ({gameId}) => gameNextPlayer(gameId)
   , gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
   , gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
+  , gamePlayerLeft: ({gameId, userId}, currentUserId) => (dispatch, getState) => {
+    dispatch(gamePlayerLeftNotification(gameId, userId));
+    if (currentUserId === userId) {
+      dispatch(gamePlayerLeft(gameId, userId));
+      dispatch(redirectTo(`/`));
+    }
+  }
   , animalStarve: ({gameId, userId, ownerId}) => animalStarve(gameId, userId, ownerId)
 };
 

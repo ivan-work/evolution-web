@@ -46,6 +46,7 @@ const GameModelData = {
   , roomId: null
   , deck: null
   , players: Map()
+  , leavers: Map()
   , food: -1
   , started: false
   , status: new StatusRecord()
@@ -81,6 +82,7 @@ export class GameModel extends Record(GameModelData) {
     return this
       .set('deck', CardModel.generate(this.deck.size))
       .set('players', this.players.map(player => player.id === userId ? player : player.toOthers()))
+      .set('leavers', this.leavers.map(leaver => leaver.toOthers()))
   }
 
   static fromServer(js) {
@@ -90,23 +92,10 @@ export class GameModel extends Record(GameModelData) {
       ...js
       , deck: List(js.deck).map(c => CardModel.fromServer(c))
       , players: Map(js.players).map(p => PlayerModel.fromServer(p))
+      , leavers: Map(js.leavers).map(p => PlayerModel.fromServer(p))
       , status: new StatusRecord(js.status)
       , cooldowns: CooldownList.fromServer(js.cooldowns)
     });
-  }
-
-  leave(userId) {
-    ensureParameter(userId, 'string');
-    switch (this.players.size) {
-      case 1:
-        return null;
-      case 2:
-        return this
-          .removeIn(['players', userId])
-          .end();
-      default:
-        return this.removeIn(['players', userId])
-    }
   }
 
   end() {

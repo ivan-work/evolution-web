@@ -3,7 +3,7 @@ import React from 'react';
 import {List, Map} from 'immutable';
 import {DnDContextGameWrapper} from './GameWrapper.jsx';
 
-import {UserModel, STATUS} from '../../../shared/models/UserModel';
+import {UserModel} from '../../../shared/models/UserModel';
 import {PlayerModel} from '../../../shared/models/game/PlayerModel';
 import {GameModel, GameModelClient, StatusRecord, PHASE} from '../../../shared/models/game/GameModel';
 import {CardModel} from '../../../shared/models/game/CardModel';
@@ -14,7 +14,6 @@ const makeClientState = () => Map({
   user: new UserModel({
     id: 'User0'
     , login: 'User0'
-    , status: STATUS.OFFLINE
   })
   , game: new GameModelClient({
     id: null
@@ -30,7 +29,6 @@ const makeClientState = () => Map({
           , CardModel.new(cardTypes.CardCarnivorous).set('id', 'card2')
         ])
         , index: 0
-        , status: STATUS.LOADING
       })
       , User1: new PlayerModel({
         id: 'User1'
@@ -40,7 +38,6 @@ const makeClientState = () => Map({
           , [2, cardTypes.CardSharpVision]
         ])
         , index: 1
-        , status: STATUS.LOADING
       })
     })
     , status: new StatusRecord({

@@ -1,5 +1,5 @@
 import {Record, List, Map} from 'immutable';
-import {UserModel, STATUS} from '../UserModel';
+import {UserModel} from '../UserModel';
 import {CardModel} from './CardModel';
 import {AnimalModel} from './evolution/AnimalModel';
 
@@ -7,8 +7,9 @@ export class PlayerModel extends Record({
   id: null
   , hand: List()
   , continent: List()
-  , status: STATUS.LOADING
   , index: -1
+  , ready: false
+  , playing: true
   , ended: false
   , acted: false
   , skipped: 0

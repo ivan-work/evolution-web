@@ -1,5 +1,4 @@
 import {Map, List} from 'immutable';
-import {STATUS} from '../models/UserModel';
 
 import {GameModel, TEST_DECK_SIZE, TEST_HAND_SIZE} from '../models/game/GameModel';
 import {CardModel} from '../models/game/CardModel';
@@ -43,16 +42,16 @@ describe('Game:', function () {
 
     clientStore0.dispatch(gameReadyRequest());
 
-    expect(ServerGame().players.get(User0.id).status, 'Game.players.get(User0).status 1').equal(STATUS.READY);
-    expect(ServerGame().players.get(User1.id).status, 'Game.players.get(User1).status 1').equal(STATUS.LOADING);
+    expect(ServerGame().players.get(User0.id).ready, 'Game.players.get(User0).ready').true;
+    expect(ServerGame().players.get(User1.id).ready, 'Game.players.get(User1).ready').false;
 
     expect(ServerGame().players.get(User0.id).hand.size).equal(0);
     expect(ServerGame().players.get(User1.id).hand.size).equal(0);
 
     clientStore1.dispatch(gameReadyRequest());
 
-    expect(ServerGame().players.get(User0.id).status, 'Game.players.get(0).status 2').equal(STATUS.READY);
-    expect(ServerGame().players.get(User1.id).status, 'Game.players.get(1).status 2').equal(STATUS.READY);
+    expect(ServerGame().players.get(User0.id).ready, 'Game.players.get(0).status 2').true;
+    expect(ServerGame().players.get(User1.id).ready, 'Game.players.get(1).status 2').true;
     expect(ServerGame().deck.size).equal(TEST_DECK_SIZE - TEST_HAND_SIZE - TEST_HAND_SIZE);
     expect(ServerGame().players.get(User0.id).hand.size).equal(TEST_HAND_SIZE);
     expect(ServerGame().players.get(User1.id).hand.size).equal(TEST_HAND_SIZE);
@@ -290,9 +289,20 @@ players:
     clientStore1.dispatch(gameReadyRequest());
     const gameId = serverStore.getState().get('games').first().id;
     serverStore.clearActions();
+    console.log('PARTY STARTED')
+    console.log('PARTY STARTED')
+    console.log('PARTY STARTED')
+    console.log('PARTY STARTED')
+    console.log('PARTY STARTED')
 
     clientStore0.disconnect(SOCKET_DISCONNECT_NOW);
     //console.log(serverStore.getState().getIn(['games', gameId, 'players']).keySeq().toArray())
+    console.log('PARTY ENNDEDED')
+    console.log('PARTY ENNDEDED')
+    console.log('PARTY ENNDEDED')
+    console.log('PARTY ENNDEDED')
+    console.log('PARTY ENNDEDED')
+
     clientStore1.disconnect(SOCKET_DISCONNECT_NOW);
 
     expect(serverStore.getState().get('games')).equal(Map());

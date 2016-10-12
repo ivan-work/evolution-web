@@ -1,8 +1,11 @@
 import logger from '~/shared/utils/logger';
 import {RoomModel} from '../models/RoomModel';
 
+import {server$gameLeave} from './game';
+
 import {actionError} from './generic';
 import {redirectTo} from '../utils';
+import {selectRoom} from '../selectors';
 
 export const roomCreateRequest = () => ({
   type: 'roomCreateRequest'
@@ -42,6 +45,15 @@ export const roomExitSuccessNotify = (roomId, userId) => ({
   type: 'roomExitSuccessNotify'
   , data: {roomId, userId}
 });
+
+export const server$roomExit = (roomId, userId) => (dispatch, getState) => {
+  console.log('server$roomExit')
+  const room = selectRoom(getState, roomId);
+  dispatch(roomExitSuccess(roomId, userId));
+  if (room && room.gameId) {
+    dispatch(server$gameLeave(room.gameId, userId));
+  }  
+};
 
 const server$roomJoinRequest = ({roomId}, {user: {id: userId}}) => (dispatch, getState) => {
   const room = getState().getIn(['rooms', roomId]);

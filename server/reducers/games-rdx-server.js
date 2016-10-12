@@ -14,8 +14,8 @@ export const gameStart = game => game
   .setIn(['status', 'round'], 0);
   //.setIn(['status', 'currentPlayer'], 0); // TODO RANDOMIZE
 
-export const gamePlayerStatusChange = (game, {userId, status}) => game
-  .setIn(['players', userId, 'status'], status);
+export const gamePlayerReadyChange = (game, {userId, ready}) => game
+  .setIn(['players', userId, 'ready'], ready);
 
 export const gameGiveCards = (game, {userId, cards}) => {
   ensureParameter(userId, 'string');
@@ -169,26 +169,27 @@ export const animalStarve = (game, {userId, animalId}) => {
 export const startCooldown = (game, {link, duration, place, placeId}) =>
   game.update('cooldowns', cooldowns => cooldowns.startCooldown(link, duration, place, placeId));
 
+// Transferring new game for game.end
 export const gameEnd = (state, {game}) => game.end();
+
+export const gamePlayerLeft = (game, {userId}) => game
+  .removeIn(['players', userId])
+  .setIn(['leavers', userId], game.getPlayer(userId)
+    .set('playing', false));
 
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
-  , roomExitSuccess: (state, {roomId, userId}) => {
-    let game = state.find(game => game.roomId === roomId);
-    if (!game) return state;
-    const updGame = game.leave(userId);
-    return !updGame
-      ? state.remove(game.id)
-      : state.set(game.id, updGame);
-  }
+  , gameDestroy: (state, data) => state.remove(data.gameId)
+  , gameLeave: (state, data) => state.update(data.gameId, game => gameLeave(game, data))
   , gameStart: (state, data) => state.update(data.gameId, game => gameStart(game, data))
-  , gamePlayerStatusChange: (state, data) => state.update(data.gameId, game => gamePlayerStatusChange(game, data))
+  , gamePlayerReadyChange: (state, data) => state.update(data.gameId, game => gamePlayerReadyChange(game, data))
   , gameGiveCards: (state, data) => state.update(data.gameId, game => gameGiveCards(game, data))
   , gameNextPlayer: (state, data) => state.update(data.gameId, game => gameNextPlayer(game, data))
   , gameDeployAnimal: (state, data) => state.update(data.gameId, game => gameDeployAnimal(game, data))
   , gameDeployTrait: (state, data) => state.update(data.gameId, game => gameDeployTrait(game, data))
   , gameEndTurn: (state, data) => state.update(data.gameId, game => gameEndTurn(game, data))
   , gameEnd: (state, data) => state.update(data.gameId, game => gameEnd(game, data))
+  , gamePlayerLeft: (state, data) => state.update(data.gameId, game => gamePlayerLeft(game, data))
   , gameStartEat: (state, data) => state.update(data.gameId, game => gameStartEat(game, data))
   , gameStartDeploy: (state, data) => state.update(data.gameId, game => gameStartDeploy(game, data))
   , playerActed: (state, data) => state.update(data.gameId, game => playerActed(game, data))
