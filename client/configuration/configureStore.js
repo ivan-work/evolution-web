@@ -9,13 +9,15 @@ export default (reducer, initialState, middleware = [], appliedMiddleware = []) 
   reducer
   , initialState
   , compose(
-    applyMiddleware(thunk)
-    , applyMiddleware(reduxTimeout())
-    , applyMiddleware(store => next => action => {
-      action.user = store.getState().get('user');
-      next(action);
-    })
-    , ...middleware.map(middleware => applyMiddleware(middleware))
+    applyMiddleware(
+      thunk
+      , reduxTimeout()
+      , (store => next => action => {
+        action.user = store.getState().get('user');
+        next(action);
+      })
+      , ...middleware
+    )
     , ...appliedMiddleware
   )
 );
