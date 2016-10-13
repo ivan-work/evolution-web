@@ -18,6 +18,7 @@ describe('Continent', () => {
       isUserContinent={true}
       continent={List.of(AnimalModel.new())}
       phase={0}/>);
+    console.log($Continent.debug())
     expect($Continent.find('DropTarget(Animal)'), 'child.length').length(1);
     expect($Continent.find('DropTarget(ContinentZone)'), 'ContinentZone').length(2);
   });

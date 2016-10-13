@@ -50,7 +50,6 @@ export const reduxTimeout = (timeouts = {}) => ({dispatch, getState}) => next =>
     const {duration, name, callback} = action.data;
     logger.silly('@@reduxTimeout/addTimeout', name, typeof callback);
     if (timeouts[name]) throw new Error(`reduxTimeout: timeout[${name}] already occupied!`);
-
     timeouts[name] = new Timer(() => {
       timeouts[name] = void 0;
       dispatch(callback)

@@ -4,7 +4,7 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {BodyPortal} from './BodyPortal.jsx';
 import shallowEqual from 'shallowequal';
 
-const transitionTime = 500;
+const transitionTime = 200;
 
 export class Dialog extends Component {
   constructor(props) {
@@ -16,24 +16,36 @@ export class Dialog extends Component {
     }
   }
 
+  componentDidMount() {
+    this.$isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this.$isMounted = false;
+  }
+
   componentWillReceiveProps(nextProps) {
     const {show: prevShow} = this.props;
     const {show: nextShow} = nextProps;
     if (prevShow && !nextShow) {
       this.setState({isShowing: false});
       setTimeout(() => {
-        this.setState({
-          show: nextShow
-        });
+        if (this.$isMounted) {
+          this.setState({
+            show: nextShow
+          });
+        }
       }, transitionTime);
     } else if (!prevShow && nextShow) {
       this.setState({
         show: nextShow
       });
       setTimeout(() => {
-        this.setState({
-          isShowing: true
-        });
+        if (this.$isMounted) {
+          this.setState({
+            isShowing: true
+          });
+        }
       }, 17);
     }
   }

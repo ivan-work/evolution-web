@@ -28,7 +28,9 @@ export class BodyPortal extends Component {
   }
 
   render() {
-    // Render a placeholder
+    if (process.env.TEST) {
+      return <div>{this.props.children}</div>
+    }
     return <div></div>;
   }
 }

@@ -2,10 +2,12 @@ import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {GameModelClient} from '../../../../shared/models/game/GameModel';
 
-export const GameProvider = (DecoratedComponent) => class extends React.Component {
+export const GameProvider = (DecoratedComponent) => class GameProvider extends React.Component {
   static contextTypes = {
-    game: React.PropTypes.instanceOf(GameModelClient)
+    game: React.PropTypes.instanceOf(GameModelClient).isRequired
   };
+
+  static displayName = DecoratedComponent.displayName;
 
   constructor(props) {
     super(props);
