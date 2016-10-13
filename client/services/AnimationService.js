@@ -6,6 +6,9 @@ class AnimationServiceClass {
   }
 
   after(actionType, callback) {
+    if (this.$actions[actionType]) {
+      throw 'multiple action NYI' + actionType;
+    }
     this.$actions[actionType] = {
       callback
     };
