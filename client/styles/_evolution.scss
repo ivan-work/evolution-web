@@ -5,12 +5,19 @@ $ANIMAL_MARGIN: 10px;
 
 $CURRENT_TURN_BACKGROUND: #dfd;
 
-.enabled[draggable] {
-  cursor: -webkit-grab;
+.enabled[draggable]
+, .draggable.canDrag {
+  cursor: -webkit-grab; /* Chrome 1-21, Safari 4+ */
+  cursor: -moz-grab; /* Firefox 1.5-26 */
+  cursor: grab; /* W3C standards syntax, should come least */
 }
 
-.enabled.drag {
-  cursor: -webkit-grabbing;
+.enabled.drag
+, .draggable.isDragging
+, .bodyDragging {
+  cursor: -webkit-grabbing; /* Chrome 1-21, Safari 4+ */
+  cursor: -moz-grabbing; /* Firefox 1.5-26 */
+  cursor: grabbing; /* W3C standards syntax, should come least */
 }
 
 .GameUI {
@@ -107,7 +114,7 @@ $CURRENT_TURN_BACKGROUND: #dfd;
       background: #9fe1e7;
       position: absolute;
       //top: -1em;
-      &[draggable].enabled {
+      &.draggable.canDrag {
         background: #f90;
       }
     }
@@ -178,20 +185,12 @@ $CURRENT_TURN_BACKGROUND: #dfd;
   border: 1px solid #555;
   background: gray;
   word-wrap: break-word;
-  &.enabled {
+  &.Preview {
+  }
+  &.canDrag {
     background: #797;
   }
-  &.disabled {
-    background: #977;
-  }
-  &.drag {
-    .inner {
-      user-select: none;
-      width: 100%;
-      height: 100%;
-      //transform: translate(-3px, -3px);
-      box-shadow: 3px 3px 1px;
-      transition: transform .25s, box-shadow .25s;
-    }
+  &.isDragging {
+    opacity: 0;
   }
 }

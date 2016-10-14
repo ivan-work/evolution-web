@@ -31,7 +31,7 @@ export class Food extends React.Component {
   }
 
   render() {
-    const {index, canDrag, connectDragSource, isDragging} = this.props;
+    const {index, canDrag, connectDragSource, connectDragPreview, isDragging} = this.props;
 
     const className = classnames({
       Food: true
@@ -55,6 +55,7 @@ export const DragFood = GameProvider(DragSource(DND_ITEM_TYPE.FOOD
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource()
+    , connectDragPreview: connect.dragPreview()
     , isDragging: monitor.isDragging()
     , canDrag: monitor.canDrag()
   })
