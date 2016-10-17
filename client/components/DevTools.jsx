@@ -16,7 +16,12 @@ export const DevTools = createDevTools(
       gameGiveCards: (count) => (dispatch, getState) => {
         const gameId = getState().getIn(['game', 'id']);
         const userId = getState().getIn(['user', 'id']);
-        const cards = getState().getIn(['user', 'id']);
+        dispatch(gameGiveCards(gameId, userId, CardModel.generate(count, CardCamouflage)));
+      }
+      , gameGiveCardsRandom: (count) => (dispatch, getState) => {
+        const gameId = getState().getIn(['game', 'id']);
+        const players = getState().getIn(['game', 'players']);
+        const userId = players.toList().get(Math.floor(Math.random() * players.size)).id;
         dispatch(gameGiveCards(gameId, userId, CardModel.generate(count, CardCamouflage)));
       }
     }}/>

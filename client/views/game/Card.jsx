@@ -60,10 +60,14 @@ export class Card extends React.Component {
   }
 }
 
-export const DragCardPreview = ({offset, velocity, afterStart, card, animationCounter}) => {
+export const DragCardPreview = ({offset, initialOffset, velocity, afterStart, card, animationCounter}) => {
   if (!offset) return null;
   const {x, y} = offset;
-  const translate = afterStart ? `translate(${-CARD_SIZE.width / 2}px, ${-CARD_SIZE.height / 2}px)` : '';
+  //console.log(offset, initialOffset)
+  //const translate = `translate(${initialOffset.x - offset.x}px,${initialOffset.y - offset.y}px)`;
+  const translate = afterStart
+    ? `translate(${-CARD_SIZE.width / 2}px, ${-CARD_SIZE.height / 2}px)`
+    : `translate(${initialOffset.x - offset.x}px,${initialOffset.y - offset.y}px)`;
   return <div className='Card Preview' style={{
     ...CARD_SIZE
     //, transform: `translate(${x}px, ${y}px) perspective(400px) rotateY(${velocity.x * VELOCITY}deg) rotateX(${-velocity.y * VELOCITY}deg)`

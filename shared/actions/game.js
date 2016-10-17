@@ -235,7 +235,6 @@ export const server$gameExtict = (gameId) => (dispatch, getState) => {
   const cardNeedToPlayer = {};
   const cardGivePerPlayer = {};
   let deckSize = game.deck.size;
-  let lastTurn = deckSize === 0;
 
   game.players.forEach((player, pid) => {
     cardGivePerPlayer[pid] = 0;
@@ -252,7 +251,8 @@ export const server$gameExtict = (gameId) => (dispatch, getState) => {
     }
   });
 
-  if (!lastTurn) {
+  if (deckSize !== 0) {
+    dispatch(server$game(gameId, gameStartDeploy(gameId)));
     while (deckSize > 0 && Object.keys(cardNeedToPlayer).length > 0) {
       game.players.forEach((player, pid) => {
         if (deckSize <= 0) return true;
@@ -265,7 +265,6 @@ export const server$gameExtict = (gameId) => (dispatch, getState) => {
         }
       });
     }
-    dispatch(server$game(gameId, gameStartDeploy(gameId)));
   } else {
     dispatch(server$game(gameId, gameEnd(gameId, selectGame(getState, gameId))));
   }

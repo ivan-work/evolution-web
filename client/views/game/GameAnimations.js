@@ -5,12 +5,10 @@ import {CardUnknown} from '../../../shared/models/game/evolution/cards'
 
 export const gameGiveCards = (done, game, cards, Deck, Cards) => {
   const DeckHtml = ReactDOM.findDOMNode(Deck);
-  console.log('game.deck.size', game.deck.size);
 
   cards.map((card, index) => {
     try {
       const CardComponent = Cards[card.id];
-      console.log(CardComponent);
       const CardHtml = ReactDOM.findDOMNode(CardComponent);
 
       const sourceBbx = DeckHtml.getBoundingClientRect();
