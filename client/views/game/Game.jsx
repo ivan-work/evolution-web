@@ -39,7 +39,7 @@ class _Game extends React.Component {
     super(props);
     this.Cards = {};
     this.CardCollections = {};
-    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    //this.shouldCmponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
   }
 
   render() {
@@ -50,6 +50,11 @@ class _Game extends React.Component {
     const GameContinent = (game.status.phase === PHASE.DEPLOY
       ? ContinentDeploy
       : ContinentFeeding);
+
+    const gameClassName = cn({
+      Game: true
+      , isPlayerTurn
+    });
 
     return <div style={{display: 'flex'}}>
       <GameScoreboardFinalView/>
@@ -67,9 +72,7 @@ class _Game extends React.Component {
         {this.renderDeck(game)}
       </div>
 
-      <div className="Game" style={{
-      background: game.isPlayerTurn() ? '#dfd' : '#fdd'
-    }}>
+      <div className={gameClassName}>
         <Portal target='header'>
           <ControlGroup name='Game'>
             <MDL.Button id="Game$exit" onClick={this.context.gameActions.$exit}>Exit</MDL.Button>

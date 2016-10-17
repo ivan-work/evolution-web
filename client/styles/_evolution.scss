@@ -1,7 +1,7 @@
 $CARD_WIDTH: 60px;
 $ANIMAL_WIDTH: 60px;
 $ANIMAL_HEIGHT: 80px;
-$ANIMAL_MARGIN: 10px;
+$ANIMAL_MARGIN: 20px;
 
 $CURRENT_TURN_BACKGROUND: #dfd;
 
@@ -29,6 +29,11 @@ $CURRENT_TURN_BACKGROUND: #dfd;
   position: relative;
   width: 600px;
   height: 600px;
+  background: #eee;
+
+  &.isPlayerTurn {
+    background: #fff;
+  }
 
   .PlayerWrapper {
     position: absolute;
@@ -65,26 +70,24 @@ $CURRENT_TURN_BACKGROUND: #dfd;
             padding: 10px 0 10px 0;
             z-index: 1;
             position: relative;
-            width: ($ANIMAL_WIDTH + $ANIMAL_MARGIN * 2);
+            width: ($ANIMAL_MARGIN * 2);
             height: $ANIMAL_HEIGHT;
-            margin-left: -($ANIMAL_WIDTH/2);
-            margin-right: -($ANIMAL_WIDTH/2);
             transition: width .1s;
-            background: #77a;
+            background: #aaaafa;
 
             .inner {
               position: absolute;
-              bottom: 0;
               left: ($ANIMAL_MARGIN);
               right: ($ANIMAL_MARGIN);
               height: 100%;
             }
 
             &.highlight {
-              width: ($ANIMAL_WIDTH * 2 + $ANIMAL_MARGIN * 2);
+              width: ($ANIMAL_WIDTH + $ANIMAL_MARGIN * 2);
               .inner {
-                left: ($ANIMAL_WIDTH / 2 + $ANIMAL_MARGIN);
-                right: ($ANIMAL_WIDTH / 2 + $ANIMAL_MARGIN);
+                left: ($ANIMAL_MARGIN);
+                right: ($ANIMAL_MARGIN);
+                height: $ANIMAL_HEIGHT;
                 outline: 2px dotted green;
               }
             }

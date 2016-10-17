@@ -70,14 +70,16 @@ export class Card extends React.Component {
     const body = <div className={className} style={style}>
       {Card.renderInner(card)}
     </div>;
-    return connectDragSource ? connectDragSource(body) : body;
+    return connectDragSource ? connectDragSource(body, {opt: 'hey'}) : body;
   }
 }
 
 export const DragCardPreview = ({offset, initialOffset, velocity, afterStart, card, animationCounter}) => {
   if (!offset) return null;
   const {x, y} = offset;
-  //console.log(offset, initialOffset)
+  const upsideDown = false;
+  //const upsideDown = card.trait2type !== null && offset.y - initialOffset.y > CARD_SIZE.height / 2;
+  //console.log(upsideDown);
   //const translate = `translate(${initialOffset.x - offset.x}px,${initialOffset.y - offset.y}px)`;
   const translate = afterStart
     ? `translate(${-CARD_SIZE.width / 2}px, ${-CARD_SIZE.height / 2}px)`
@@ -88,7 +90,7 @@ export const DragCardPreview = ({offset, initialOffset, velocity, afterStart, ca
     , left: x + 'px'
     , top: y + 'px'
     , position: 'absolute'
-    , transform: `${translate} perspective(400px) rotateY(${velocity.x}deg) rotateX(${-velocity.y}deg)`
+    , transform: `${translate} perspective(400px) rotateY(${velocity.x}deg) rotateX(${-velocity.y}deg) rotate(${upsideDown ? 0 : .5}turn)`
     , transition: 'box-shadow .5s, transform .2s'
     , boxShadow: afterStart ? '5px 5px 5px black' : ''
     , pointerEvents: 'none'
@@ -99,7 +101,10 @@ export const DragCardPreview = ({offset, initialOffset, velocity, afterStart, ca
 
 export const DragCard = DragSource(DND_ITEM_TYPE.CARD
   , {
-    beginDrag: (props) => ({card: props.card})
+    beginDrag: (props, monitor, component) => {
+      console.log(monitor, component)
+      return {card: props.card}
+    }
     , canDrag: (props, monitor) => true
   }
   , (connect, monitor) => ({
