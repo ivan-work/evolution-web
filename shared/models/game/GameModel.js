@@ -70,9 +70,9 @@ export class GameModel extends Record(GameModelData) {
       id: uuid.v4().slice(0, 4)
       , roomId: room.id
       , deck: GameModel.generateDeck([
-        [8, cardTypes.CardCamouflage]
-        , [8, cardTypes.CardCarnivorous]
-        , [8, cardTypes.CardSharpVision]
+        //[8, cardTypes.CardCamouflage]
+        [16, cardTypes.CardPoisonousCarnivore]
+        //, [8, cardTypes.CardSharpVision]
       ], true)
       , players: room.users.reduce((result, userId, index) => result.set(userId, PlayerModel.new(userId, index)), Map())
     })

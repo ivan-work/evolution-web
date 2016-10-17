@@ -34,6 +34,22 @@ export class Card extends React.Component {
     //  this.props.connectDragPreview(getEmptyImage());
   }
 
+  static renderInner(card) {
+    return <div>
+      {card.trait2type === null
+        ? (<div className='trait trait-single'>{card.name}</div>)
+        : null}
+
+      {card.trait2type !== null
+        ? (<div className='trait trait1'>{card.name}</div>)
+        : null}
+
+      {card.trait2type !== null
+        ? (<div className='trait trait2'>{card.name2}</div>)
+        : null}
+    </div>
+  }
+
   render() {
     const {card, canDrag, connectDragSource, isDragging} = this.props;
 
@@ -52,9 +68,7 @@ export class Card extends React.Component {
       style.backgroundImage = `url(${card.image})`;
 
     const body = <div className={className} style={style}>
-      <div className='inner'>
-        {card.name} {isDragging}
-      </div>
+      {Card.renderInner(card)}
     </div>;
     return connectDragSource ? connectDragSource(body) : body;
   }
@@ -79,9 +93,7 @@ export const DragCardPreview = ({offset, initialOffset, velocity, afterStart, ca
     , boxShadow: afterStart ? '5px 5px 5px black' : ''
     , pointerEvents: 'none'
     }}>
-    <div className='inner'>
-      {card.name} {velocity.x} {velocity.y}
-    </div>
+    {Card.renderInner(card)}
   </div>
 };
 

@@ -7,6 +7,22 @@ export const CardUnknown = {
   , image: 'http://evolive.ru/images/def.png'
 };
 
+export const CardPiracy = {
+  type: 'CardPiracy'
+  , name: 'Piracy'
+  , target: CARD_TARGET_TYPE.ANIMAL_SELF
+  , trait1type: traitData.TraitPiracy.type
+};
+
+export const CardPoisonousCarnivore = {
+  type: 'CardPoisonousCarnivore'
+  , name: 'Poisonous'
+  , name2: 'Carnivorous'
+  , target: CARD_TARGET_TYPE.ANIMAL_SELF
+  , trait1type: traitData.TraitPoisonous.type
+  , trait2type: traitData.TraitCarnivorous.type
+};
+
 export const CardCamouflage = {
   type: 'CardCamouflage'
   , name: 'Camouflage'
