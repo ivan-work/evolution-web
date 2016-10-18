@@ -119,38 +119,12 @@ $CURRENT_TURN_BACKGROUND: #dfd;
       }
     }
 
-    .AnimalFoodContainer {
-      .Food {
-        display: inline-block;
-        margin: .2em;
-      }
-    }
-
     .inner {
       width: 100%;
       height: $ANIMAL_HEIGHT;
       word-wrap: break-word;
       outline: 1px solid black;
       background: #9fe1e7;
-    }
-  }
-
-  .GameFoodContainer {
-    position: absolute;
-    width: 6em;
-    .Food {
-      display: inline-block;
-      margin: .2em;
-    }
-  }
-
-  .Food {
-    width: 1em;
-    height: 1em;
-    background: #FF0;
-    outline: 1px solid black;
-    &.disabled {
-      background: #888;
     }
   }
 }

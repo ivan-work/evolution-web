@@ -1,0 +1,33 @@
+.GameFoodContainer {
+  position: absolute;
+  width: 12em;
+  .Food {
+    display: inline-block;
+    margin: .2em;
+  }
+}
+
+.AnimalFoodContainer {
+  .Food {
+    display: inline-block;
+    color: #ff0;
+  }
+}
+.Food {
+  //cursor: pointer;
+  width: 1em;
+  height: 1em;
+  color: #888;
+  //background: #FF0;
+  //outline: 1px solid black;
+  &.canDrag {
+    color: #00A000;
+    //background: #888;
+  }
+  &.isDragging {
+    opacity: 0;
+  }
+}
+.Preview .Food {
+  color: #00A000;
+}

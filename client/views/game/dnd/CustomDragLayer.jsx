@@ -28,8 +28,8 @@ class CustomDragLayer extends React.Component {
         return <DragCardPreview card={item.card} alternateTrait={item.alternateTrait} {...dragProps}/>;
       case DND_ITEM_TYPE.TRAIT:
         return <AnimalTraitArrow trait={item.trait} {...dragProps}/>;
-      case DND_ITEM_TYPE.TRAIT:
-        return <Food {...dragProps}/>;
+      case DND_ITEM_TYPE.FOOD:
+        return <DefaultPreview {...dragProps}><Food/></DefaultPreview>;
     }
   }
 
@@ -78,10 +78,10 @@ class CustomDragLayer extends React.Component {
         {this.animationCounter}
         {isDragging && offset ? this.renderItem(itemType, item, dragProps) : null}
         {/*<Marker offset={this.props.getInitialClientOffset} color="red"/>
-        <Marker offset={this.props.getInitialSourceClientOffset} color="teal"/>
-        <Marker offset={this.props.getClientOffset} color="green"/>
-        <Marker offset={this.props.getDifferenceFromInitialOffset} color="blue"/>
-        <Marker offset={this.props.getSourceClientOffset} color="orange"/>*/}
+         <Marker offset={this.props.getInitialSourceClientOffset} color="teal"/>
+         <Marker offset={this.props.getClientOffset} color="green"/>
+         <Marker offset={this.props.getDifferenceFromInitialOffset} color="blue"/>
+         <Marker offset={this.props.getSourceClientOffset} color="orange"/>*/}
       </div>
     );
   }
@@ -94,6 +94,21 @@ const Marker = ({offset, color}) => offset === null ? null : <div style={{
         , left: offset.x + 'px'
         , top: offset.y + 'px'
         }}></div>
+
+const DefaultPreview = (props) => {
+  const {offset} = props;
+  if (!offset) return null;
+  const {x, y} = offset;
+  return <div className='Preview draggable isDragging' style={{
+    left: x + 'px'
+    , top: y + 'px'
+    , position: 'absolute'
+    , transform: 'translate(-50%, -50%)'
+    , pointerEvents: 'none'
+    }}>
+    {props.children}
+  </div>
+};
 
 
 export default DragLayer((monitor) => ({

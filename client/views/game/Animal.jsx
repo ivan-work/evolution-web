@@ -8,6 +8,7 @@ import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
 import { AnimalModel } from '~/shared/models/game/evolution/AnimalModel';
 import { AnimalTrait, DraggableAnimalTrait } from './AnimalTrait.jsx';
 import {GameProvider} from './providers/GameProvider.jsx';
+import {Food} from './Food.jsx';
 
 export class _Animal extends React.Component {
   static displayName = 'Animal';
@@ -58,7 +59,7 @@ export class _Animal extends React.Component {
       <div className='inner'>
         {model.id}
         <div className='AnimalFoodContainer'>
-          {Array.from({length: model.food}).map((u, index) => <div key={index} className='Food'></div>)}
+          {Array.from({length: model.food}).map((u, index) => <Food key={index}/>)}
         </div>
       </div>
     </div>;
