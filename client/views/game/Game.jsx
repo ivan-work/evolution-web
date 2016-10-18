@@ -104,9 +104,8 @@ class _Game extends React.Component {
   }
 
   renderUser(game, player, GameContinent) {
-    const GameCard = (game.status.phase === PHASE.DEPLOY
-      ? DragCard
-      : Card);
+    const dragEnabled = game.status.phase === PHASE.DEPLOY
+      && game.isPlayerTurn();
 
     return <div className='PlayerWrapper UserWrapper' style={GAME_POSITIONS[game.players.size].player}>
       <GameContinent
@@ -118,11 +117,11 @@ class _Game extends React.Component {
         name="Hand" ref={(component) => this.CardCollections[player.id] = component}
         shift={[55, 0]}>
         {player.hand.toArray().map((cardModel, i) =>
-        <GameCard
+        <DragCard
           key={cardModel}
           card={cardModel}
           ref={(component) => this.Cards[cardModel.id] = component}
-          disabled={!game.isPlayerTurn()}/>
+          dragEnabled={dragEnabled}/>
           )}
       </CardCollection>
     </div>;

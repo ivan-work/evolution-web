@@ -70,8 +70,8 @@ const _DroppableAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND
   drop(props, monitor, component) {
     switch (monitor.getItemType()) {
       case DND_ITEM_TYPE.CARD:
-        const {card} = monitor.getItem();
-        props.onCardDropped(card, props.model);
+        const {card, alternateTrait} = monitor.getItem();
+        props.onCardDropped(card, props.model, alternateTrait);
         break;
       case DND_ITEM_TYPE.FOOD:
         const {index} = monitor.getItem();

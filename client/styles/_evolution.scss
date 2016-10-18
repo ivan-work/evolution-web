@@ -5,16 +5,13 @@ $ANIMAL_MARGIN: 20px;
 
 $CURRENT_TURN_BACKGROUND: #dfd;
 
-.enabled[draggable]
-, .draggable.canDrag {
+.enabled[draggable], .draggable.canDrag {
   cursor: -webkit-grab; /* Chrome 1-21, Safari 4+ */
   cursor: -moz-grab; /* Firefox 1.5-26 */
   cursor: grab; /* W3C standards syntax, should come least */
 }
 
-.enabled.drag
-, .draggable.isDragging
-, .bodyDragging {
+.enabled.drag, .draggable.isDragging, .bodyDragging {
   cursor: -webkit-grabbing; /* Chrome 1-21, Safari 4+ */
   cursor: -moz-grabbing; /* Firefox 1.5-26 */
   cursor: grabbing; /* W3C standards syntax, should come least */
@@ -171,7 +168,7 @@ $CURRENT_TURN_BACKGROUND: #dfd;
   margin-top: .5em;
   .key {
     display: inline-block;
-    width:4em;
+    width: 4em;
     font-weight: bold;
   }
 }
@@ -185,12 +182,18 @@ $CURRENT_TURN_BACKGROUND: #dfd;
 
 .Card {
   position: absolute;
-  border: 1px solid #555;
-  background: #ddd;
-  border-radius: .2em;
-  &.Preview {
+  .inner {
+    transition: transform .5s;
+    background: #ddd;
+    border: 1px solid #555;
+    border-radius: .2em;
+    width: 100%;
+    height: 100%;
   }
-  &.canDrag {
+  &.alternateTrait .inner {
+    transform: rotate(180deg);
+  }
+  &.canDrag .inner {
     background: #dfd;
   }
   &.isDragging {

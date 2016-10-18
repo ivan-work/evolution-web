@@ -26,10 +26,6 @@ export class Continent extends React.Component {
     //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
   }
 
-  renderDialogs() {
-    return null;
-  }
-
   render() {
     const {continent} = this.props;
     const className = classnames({
@@ -38,7 +34,6 @@ export class Continent extends React.Component {
       , EnemyContinent: !this.props.isUserContinent
     });
     return <div className={className}>
-      {this.renderDialogs()}
       <div className="animals-container-outer">
         <div className="animals-container-inner">
           {this.renderPlaceholderWrapper(0)}

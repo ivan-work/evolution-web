@@ -16,100 +16,120 @@ export const CARD_SIZE = {
 export class Card extends React.Component {
   static propTypes = {
     card: React.PropTypes.instanceOf(CardModel).isRequired
-    , disabled: React.PropTypes.bool
+    , dragEnabled: React.PropTypes.bool
   };
 
   static defaultProps = {
-    disabled: false
+    dragEnabled: false
     , isDragging: false
   };
 
   constructor(props) {
     super(props);
+    this.state = {alternateTrait: false};
     //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    this.switchTrait = this.switchTrait.bind(this);
   }
 
-  componentDidMount() {
-    //if (this.props.connectDragPreview && !process.env.TEST)
-    //  this.props.connectDragPreview(getEmptyImage());
+  switchTrait(e) {
+    if (this.cooldown) {
+      console.warn('switchTrait cooldown active', this.props.card.id);
+      return;
+    }
+    this.setState({alternateTrait: !this.state.alternateTrait});
   }
 
-  static renderInner(card) {
-    return <div>
-      {card.trait2type === null
-        ? (<div className='trait trait-single'>{card.name}</div>)
-        : null}
+  static renderCard(card, props) {
+    props.mixClassName = props.mixClassName || {};
+    const className = classnames({
+      Card: true
+      , ['trait-count-' + card.traitsCount]: true
+      , ...props.mixClassName
+    });
+    delete props.mixClassName;
+    const style = {
+      ...CARD_SIZE
+    };
+    const innerStyle = {
+      backgroundSize: `${CARD_SIZE.width}px ${CARD_SIZE.height}px`
+    };
+    if (card.image) {
+      innerStyle.backgroundImage = `url(${card.image})`;
+    }
+    return <div className={className} style={style} {...props}>
+      <div className='inner' style={innerStyle}>
+        {card.traitsCount === 1
+          ? (<div className='trait trait-single'>{card.name}</div>)
+          : null}
 
-      {card.trait2type !== null
-        ? (<div className='trait trait1'>{card.name}</div>)
-        : null}
+        {card.traitsCount === 2
+          ? (<div className='trait trait1'>{card.name}</div>)
+          : null}
 
-      {card.trait2type !== null
-        ? (<div className='trait trait2'>{card.name2}</div>)
-        : null}
+        {card.traitsCount === 2
+          ? (<div className='trait trait2'>{card.name2}</div>)
+          : null}
+      </div>
     </div>
   }
 
   render() {
     const {card, canDrag, connectDragSource, isDragging} = this.props;
 
-    const className = classnames({
-      Card: true
-      , canDrag: canDrag
-      , isDragging: isDragging
-      , draggable: connectDragSource
+    const onClick = (card.traitsCount === 2
+    && canDrag
+      ? this.switchTrait
+      : null);
+
+    const body = Card.renderCard(card, {
+      mixClassName: {
+        canDrag
+        , isDragging
+        , draggable: connectDragSource
+        , alternateTrait: this.state.alternateTrait
+      }
+      , onClick
     });
-
-    const style = {
-      ...CARD_SIZE
-      , backgroundSize: `${CARD_SIZE.width}px ${CARD_SIZE.height}px`
-    };
-    if (card.image)
-      style.backgroundImage = `url(${card.image})`;
-
-    const body = <div className={className} style={style}>
-      {Card.renderInner(card)}
-    </div>;
-    return connectDragSource ? connectDragSource(body, {opt: 'hey'}) : body;
+    return connectDragSource ? connectDragSource(body) : body;
   }
 }
 
-export const DragCardPreview = ({offset, initialOffset, velocity, afterStart, card, animationCounter}) => {
+export const DragCardPreview = ({offset, initialOffset, velocity, afterStart, card, animationCounter, alternateTrait}) => {
   if (!offset) return null;
   const {x, y} = offset;
-  const upsideDown = false;
-  //const upsideDown = card.trait2type !== null && offset.y - initialOffset.y > CARD_SIZE.height / 2;
-  //console.log(upsideDown);
-  //const translate = `translate(${initialOffset.x - offset.x}px,${initialOffset.y - offset.y}px)`;
   const translate = afterStart
     ? `translate(${-CARD_SIZE.width / 2}px, ${-CARD_SIZE.height / 2}px)`
     : `translate(${initialOffset.x - offset.x}px,${initialOffset.y - offset.y}px)`;
-  return <div className='Card Preview' style={{
+  return <div className='CardPreview' style={{
     ...CARD_SIZE
     //, transform: `translate(${x}px, ${y}px) perspective(400px) rotateY(${velocity.x * VELOCITY}deg) rotateX(${-velocity.y * VELOCITY}deg)`
     , left: x + 'px'
     , top: y + 'px'
     , position: 'absolute'
-    , transform: `${translate} perspective(400px) rotateY(${velocity.x}deg) rotateX(${-velocity.y}deg) rotate(${upsideDown ? 0 : .5}turn)`
+    , transform: `${translate} perspective(400px) rotateY(${velocity.x}deg) rotateX(${-velocity.y}deg)`
     , transition: 'box-shadow .5s, transform .2s'
     , boxShadow: afterStart ? '5px 5px 5px black' : ''
     , pointerEvents: 'none'
     }}>
-    {Card.renderInner(card)}
+    {Card.renderCard(card, {mixClassName: {alternateTrait}})}
   </div>
 };
 
 export const DragCard = DragSource(DND_ITEM_TYPE.CARD
   , {
-    beginDrag: (props, monitor, component) => {
-      console.log(monitor, component)
-      return {card: props.card}
+    beginDrag: (props, monitor, component) => ({card: props.card, alternateTrait: component.state.alternateTrait})
+    , canDrag: (props, monitor) => props.dragEnabled
+    , endDrag: (props, monitor, component) => {
+      if (component !== null) {
+        component.cooldown = true;
+        setTimeout(() => {
+          component.cooldown = false;
+        }, 200);
+      }
     }
-    , canDrag: (props, monitor) => true
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource()
-    , connectDragPreview: connect.dragPreview()
     , isDragging: monitor.isDragging()
     , canDrag: monitor.canDrag()
   })

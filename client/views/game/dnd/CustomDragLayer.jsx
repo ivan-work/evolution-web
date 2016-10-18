@@ -25,7 +25,7 @@ class CustomDragLayer extends React.Component {
   renderItem(type, item, dragProps) {
     switch (type) {
       case DND_ITEM_TYPE.CARD:
-        return <DragCardPreview card={item.card} {...dragProps}/>;
+        return <DragCardPreview card={item.card} alternateTrait={item.alternateTrait} {...dragProps}/>;
       case DND_ITEM_TYPE.TRAIT:
         return <AnimalTraitArrow trait={item.trait} {...dragProps}/>;
       case DND_ITEM_TYPE.TRAIT:
@@ -37,21 +37,12 @@ class CustomDragLayer extends React.Component {
     const { item, itemType, isDragging } = this.props;
     const offset = this.props.getClientOffset;
     const initialOffset = this.props.getInitialSourceClientOffset;
-    //console.log(offset);
-    //console.log(initialOffset);
 
     this.animationCounter = item ? ++this.animationCounter : 0;
 
     const MAX_VELOCITY = 30;
     const VELOCITY = 5;
     const velocity = {x: 0, y: 0};
-    //if (offset) {
-    //  document.body.style.cursor = 'grabbing';
-    //  document.body.style.cursor = '-webkit-grabbing';
-    //  document.body.style.cursor = 'grabbing';
-    //} else {
-    //  document.body.style.cursor = '';
-    //}
     if (offset) {
       if (this.previousOffset) {
         velocity.x = offset.x - this.previousOffset.x;
@@ -73,14 +64,6 @@ class CustomDragLayer extends React.Component {
       }
       this.previousOffset = offset;
     }
-
-    //if (this.props.getInitialClientOffset)
-    //  console.log(this.props.getInitialClientOffset.x
-    //    , this.props.getInitialSourceClientOffset.x
-    //    , this.props.getClientOffset.x
-    //    , this.props.getDifferenceFromInitialOffset.x
-    //    , this.props.getSourceClientOffset.x
-    //  );
 
     const dragProps = {
       offset
