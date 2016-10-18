@@ -3,6 +3,7 @@ export const CARD_TARGET_TYPE = (i => ({
   , ANIMAL_SELF: 1 << i++
   , ANIMAL_ENEMY: 1 << i++
   , LINK_SELF: 1 << i++
+  , LINK_SELF_ONEWAY: 1 << i++
   , LINK_ENEMY: 1 << i++
 }))(0);
 

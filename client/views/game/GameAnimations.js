@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 import Velocity from 'velocity-animate'
 
-import {CardUnknown} from '../../../shared/models/game/evolution/cards'
+import {CardUnknown} from '../../../shared/models/game/evolution/cardData'
 
 export const gameGiveCards = (done, game, cards, Deck, Cards) => {
   const DeckHtml = ReactDOM.findDOMNode(Deck);

@@ -2,7 +2,6 @@ import {Map, List} from 'immutable';
 
 import {GameModel, TEST_DECK_SIZE, TEST_HAND_SIZE} from '../models/game/GameModel';
 import {CardModel} from '../models/game/CardModel';
-import * as cardTypes from '../models/game/evolution/cards';
 import {AnimalModel} from '../models/game/evolution/AnimalModel';
 import {TraitModel} from '../models/game/evolution/TraitModel';
 

@@ -3,16 +3,16 @@ import uuid from 'node-uuid';
 
 import {CARD_TARGET_TYPE} from './evolution/constants';
 
-import {CardUnknown} from './evolution/cards'
+import {TraitDataModel} from './evolution/TraitDataModel'
+import {CardUnknown} from './evolution/cardData'
 
 
 export class CardModel extends Record({
   id: null
   , type: null
-  , name: null
-  , name2: null
   , image: null
-  , target: CARD_TARGET_TYPE.DROP_AS_ANIMAL
+  , trait1: null
+  , trait2: null
   , trait1type: null
   , trait2type: null
 }) {
@@ -20,7 +20,7 @@ export class CardModel extends Record({
     const id = !process.env.BROWSER
       ? uuid.v4().slice(0, 4)
       : Math.floor(Math.random() * 0xFFFF);
-    // TODO check for class
+    if (!cardClass) throw new Error('CardClass is null!');
     return CardModel.fromServer({
       id
       , ...cardClass
@@ -32,13 +32,32 @@ export class CardModel extends Record({
   }
 
   static fromServer(js) {
+    if (js !== null && js.type !== 'CardUnknown' && js.trait1type === null) {
+      throw new Error(`Card ${js.type} doesn't have trait #1`)
+    }
     return js == null
       ? null
-      : new CardModel(js);
+      : new CardModel(js)
+        .set('trait1', js.trait1type ? TraitDataModel.new(js.trait1type) : null)
+        .set('trait2', js.trait2type ? TraitDataModel.new(js.trait2type) : null)
+        .remove('trait1type')
+        .remove('trait2type');
+  }
+
+  toClient() {
+    return this
+      .set('trait1type', this.trait1 && this.trait1.type)
+      .set('trait2type', this.trait2 && this.trait2.type)
+      .set('trait1', null)
+      .set('trait2', null);
+  }
+
+  toOthers() {
+    return CardModel.new(CardUnknown)
   }
 
   get traitsCount () {
-    return this.trait2type === null ? 1 : 2;
+    return this.trait2 === null ? 1 : 2;
   }
 
   toString() {

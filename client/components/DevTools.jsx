@@ -7,7 +7,7 @@ import Dispatcher from 'redux-devtools-dispatch'
 
 import {List} from 'immutable';
 import {CardModel} from '../../shared/models/game/CardModel';
-import {CardCamouflage} from '../../shared/models/game/evolution/cards';
+import {CardCamouflage} from '../../shared/models/game/evolution/cardData';
 import {gameGiveCards} from '../../shared/actions/actions';
 
 export const DevTools = createDevTools(

@@ -17,6 +17,29 @@ $CURRENT_TURN_BACKGROUND: #dfd;
   cursor: grabbing; /* W3C standards syntax, should come least */
 }
 
+.GameToast {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 99999;
+  .inner {
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    padding: .25em;
+    height: 1em;
+    box-shadow: 0 0 1em .5em rgba(255, 255, 255, 0.75);
+    font-size: 10em;
+    background: rgba(255, 255, 255, 0.75);
+  }
+}
+
 .GameUI {
   width: 120px;
   padding: .5em 1em 0;

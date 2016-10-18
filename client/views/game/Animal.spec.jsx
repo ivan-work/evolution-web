@@ -7,7 +7,6 @@ import {GameModel, GameModelClient} from '../../../shared/models/game/GameModel'
 import {CardModel} from '../../../shared/models/game/CardModel';
 import {AnimalModel} from '../../../shared/models/game/evolution/AnimalModel';
 import {TraitModel} from '../../../shared/models/game/evolution/TraitModel';
-import * as cardTypes from '../../../shared/models/game/evolution/cards';
 //
 //describe('Animal', () => {
 //  it('Displays from Enemy', () => {

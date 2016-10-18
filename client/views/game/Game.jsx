@@ -1,5 +1,6 @@
 import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import * as MDL from 'react-mdl';
 import cn from 'classnames';
 
@@ -8,6 +9,7 @@ import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 
 import {GAME_POSITIONS} from './GAME_POSITIONS';
 import {Portal} from '../utils/Portal.jsx';
+import {BodyPortal} from '../utils/BodyPortal.jsx';
 import {ControlGroup} from '../utils/ControlGroup.jsx';
 import {GameProvider} from './providers/GameProvider.jsx';
 import {CardCollection} from './CardCollection.jsx';
@@ -57,6 +59,12 @@ class _Game extends React.Component {
     });
 
     return <div style={{display: 'flex'}}>
+      <BodyPortal>
+        <ReactCSSTransitionGroup transitionName="example">
+          <div className='GameToast'><div className='inner'>Your turn!</div></div>
+        </ReactCSSTransitionGroup>
+      </BodyPortal>
+
       <GameScoreboardFinalView/>
 
       <div className='GameUI'>
@@ -157,6 +165,14 @@ export const Game = GameProvider(AnimationServiceHOC({
     gameGiveCards: (done, component, {cards}) => {
       const {game} = component.props;
       GameAnimations.gameGiveCards(done, game, cards, component.Deck, component.Cards);
+    }
+    , gameNextPlayer: (done, component, {cards}) => {
+      component.setState({
+        toastYourTurn: true
+      });
+      setTimeout(() => {
+        done();
+      }, 5000);
     }
     //onlineUpdate: (done, component) => {
     //  const {game} = component.props;

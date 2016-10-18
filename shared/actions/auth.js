@@ -56,7 +56,7 @@ export const loginUserSuccess = (user, redirect) => (dispatch, getState) => {
   const room = rooms.find(room => ~room.users.indexOf(user.id)) || {id: null};
   const roomId = room.id;
   const game = games.find(game => game.roomId === roomId) || null;
-  const clientGame = game !== null ? game.toClient(user.id) : null;
+  const clientGame = game !== null ? game.toOthers(user.id).toClient() : null;
   dispatch({
     type: 'loginUserSuccess'
     , data: {user, redirect, online, rooms, roomId, game: clientGame}

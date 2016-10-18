@@ -36,7 +36,7 @@ export const server$gameCreateSuccess = (game) => (dispatch, getState) => {
   dispatch(gameCreateSuccess(game));
   selectPlayers(getState, game.id).forEach(userId => {
     dispatch(Object.assign(
-      gameCreateSuccess(game.toClient(userId))
+      gameCreateSuccess(game.toOthers(userId).toClient())
       , {meta: {userId, clientOnly: true}}
     ));
   });
@@ -67,7 +67,7 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
       break;
     case 2:
       if (game.status.phase !== PHASE.FINAL) {
-        dispatch(server$game(gameId, gameEnd(gameId, selectGame(getState, gameId))));
+        dispatch(server$game(gameId, gameEnd(gameId, selectGame(getState, gameId).toClient())));
       }
       break;
     default:
@@ -104,10 +104,13 @@ export const server$gameGiveCards = (gameId, userId, count) => (dispatch, getSta
   const cards = selectGame(getState, gameId).deck.take(count);
   dispatch(Object.assign(
     gameGiveCards(gameId, userId, cards)
-    , {meta: {userId}}
   ));
   dispatch(Object.assign(
-    gameGiveCards(gameId, userId, CardModel.generate(cards.size))
+    gameGiveCards(gameId, userId, cards.map(card => card.toClient()))
+    , {meta: {clientOnly: true, userId}}
+  ));
+  dispatch(Object.assign(
+    gameGiveCards(gameId, userId, cards.map(card => card.toOthers().toClient()))
     , {meta: {clientOnly: true, users: selectPlayers(getState, gameId).filter(uid => uid !== userId)}}
   ));
 };
@@ -253,15 +256,16 @@ export const server$gameExtict = (gameId) => (dispatch, getState) => {
 
   if (deckSize !== 0) {
     dispatch(server$game(gameId, gameStartDeploy(gameId)));
+    const players = GameModel.getSortedPlayersByIndex(selectGame(getState, gameId));
     while (deckSize > 0 && Object.keys(cardNeedToPlayer).length > 0) {
-      game.players.forEach((player, pid) => {
+      players.forEach((player) => {
         if (deckSize <= 0) return true;
-        if (cardNeedToPlayer[pid] > 0) {
-          cardNeedToPlayer[pid] -= 1;
-          dispatch(server$gameGiveCards(gameId, pid, 1));
+        if (cardNeedToPlayer[player.id] > 0) {
+          cardNeedToPlayer[player.id] -= 1;
+          dispatch(server$gameGiveCards(gameId, player.id, 1));
           deckSize--;
         } else {
-          delete cardNeedToPlayer[pid];
+          delete cardNeedToPlayer[player.id];
         }
       });
     }
@@ -351,15 +355,18 @@ export const gameClientToServer = {
 
     const cardIndex = checkPlayerHasCard(game, userId, cardId);
     const card = game.players.get(userId).hand.get(cardIndex);
-    const traitType = !alternateTrait ? card.trait1type : card.trait2type;
-    if (!traitType) {
-      throw new ActionCheckError(`checkCardHasTrait@Game(${game.id})`, 'Card(%s;%s) doesn\'t have trait (%s)', card.trait1type, card.trait2type, traitType);
+    const cardTrait = !alternateTrait ? card.trait1 : card.trait2;
+    if (!cardTrait) {
+      throw new ActionCheckError(`checkCardHasTrait@Game(${game.id})`, 'Card(%s;%s) doesn\'t have trait (%s)'
+        , card.trait1 && card.trait1.type
+        , card.trait2 && card.trait2.type
+        , cardTrait);
     }
 
-    if (card.target & CARD_TARGET_TYPE.ANIMAL_SELF) {
+    if (cardTrait.cardTargetType & CARD_TARGET_TYPE.ANIMAL_SELF) {
       const animal = checkPlayerHasAnimal(game, userId, animalId);
       // TODO check if exists
-      const trait = TraitModel.new(traitType);
+      const trait = TraitModel.new(cardTrait.type);
       const animalValidation = animal.validateTrait(trait);
       if (animalValidation !== true) {
         dispatch(actionError(userId, animalValidation));
@@ -368,6 +375,8 @@ export const gameClientToServer = {
       logger.verbose('selectGame > gameDeployTraitRequest:', animal, card, trait);
       dispatch(server$gameDeployTrait(gameId, userId, cardId, animalId, trait));
       dispatch(server$gameDeployNext(gameId, userId));
+    } else {
+      throw new ActionCheckError(`checkCardTargetType@Game(${game.id})`, 'unknown type');
     }
   }
 };
