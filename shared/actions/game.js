@@ -366,12 +366,28 @@ export const gameClientToServer = {
     if (cardTrait.cardTargetType & CARD_TARGET_TYPE.ANIMAL_SELF) {
       const animal = checkPlayerHasAnimal(game, userId, animalId);
       // TODO check if exists
+
       const trait = TraitModel.new(cardTrait.type);
       const animalValidation = animal.validateTrait(trait);
       if (animalValidation !== true) {
         dispatch(actionError(userId, animalValidation));
         return;
       }
+
+      logger.verbose('selectGame > gameDeployTraitRequest:', animal, card, trait);
+      dispatch(server$gameDeployTrait(gameId, userId, cardId, animalId, trait));
+      dispatch(server$gameDeployNext(gameId, userId));
+    } else if (cardTrait.cardTargetType & CARD_TARGET_TYPE.ANIMAL_ENEMY) {
+      const {playerId, animalIndex} = game.locateAnimal(animalId);
+      const animal = checkPlayerHasAnimal(game, playerId, animalId);
+
+      const trait = TraitModel.new(cardTrait.type);
+      const animalValidation = animal.validateTrait(trait);
+      if (animalValidation !== true) {
+        dispatch(actionError(userId, animalValidation));
+        return;
+      }
+
       logger.verbose('selectGame > gameDeployTraitRequest:', animal, card, trait);
       dispatch(server$gameDeployTrait(gameId, userId, cardId, animalId, trait));
       dispatch(server$gameDeployNext(gameId, userId));
