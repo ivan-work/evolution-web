@@ -58,12 +58,12 @@ class _Game extends React.Component {
       , isPlayerTurn
     });
 
-    return <div style={{display: 'flex'}}>
-      <BodyPortal>
-        <ReactCSSTransitionGroup transitionName="example">
-          <div className='GameToast'><div className='inner'>Your turn!</div></div>
-        </ReactCSSTransitionGroup>
-      </BodyPortal>
+    //<BodyPortal>
+    //  <ReactCSSTransitionGroup transitionName="example">
+    //    <div className='GameToast'><div className='inner'>Your turn!</div></div>
+    //  </ReactCSSTransitionGroup>
+    //</BodyPortal>
+    return <div id='game' style={{display: 'flex'}}>
 
       <GameScoreboardFinalView/>
 
@@ -123,7 +123,7 @@ class _Game extends React.Component {
 
       <CardCollection
         name="Hand" ref={(component) => this.CardCollections[player.id] = component}
-        shift={[55, 0]}>
+        shift={[65, 0]}>
         {player.hand.toArray().map((cardModel, i) =>
         <DragCard
           key={cardModel}
@@ -166,14 +166,14 @@ export const Game = GameProvider(AnimationServiceHOC({
       const {game} = component.props;
       GameAnimations.gameGiveCards(done, game, cards, component.Deck, component.Cards);
     }
-    , gameNextPlayer: (done, component, {cards}) => {
-      component.setState({
-        toastYourTurn: true
-      });
-      setTimeout(() => {
-        done();
-      }, 5000);
-    }
+    //, gameNextPlayer: (done, component, {cards}) => {
+    //  component.setState({
+    //    toastYourTurn: true
+    //  });
+    //  setTimeout(() => {
+    //    done();
+    //  }, 5000);
+    //}
     //onlineUpdate: (done, component) => {
     //  const {game} = component.props;
     //  GameAnimations.gameGiveCards(done, game, game.getPlayer().hand, component.Deck, component.Cards);

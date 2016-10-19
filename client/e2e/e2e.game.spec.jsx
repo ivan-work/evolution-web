@@ -1,28 +1,35 @@
-//import {Map} from 'immutable';
-//import {push} from 'react-router-redux';
-////import React from 'react';
-//import {mountClient} from '~/shared/test/test-helpers.jsx'
-//import {GameModel, GameModelClient, TEST_DECK_SIZE, TEST_HAND_SIZE} from '../../shared/models/game/GameModel';
-////var TestLocation = require('react-router');
-//
-//describe('e2e (game): ', () => {
-//  it('Should play a game', () => {
-//    const [serverStore, {clientStore0, User0}, {clientStore1, User1}]= mockStores(2);
-//    const $client0 = mountClient(clientStore0);
-//    const $client1 = mountClient(clientStore1);
-//
-//    $client0.find('#Rooms$create').simulate('click');
-//    const roomId = serverStore.getState().get('rooms').first().id;
-//    $client1.find(`RoomsList`).find({'data-id': roomId}).simulate('click');
-//    $client0.find('#Room$start').simulate('click');
-//
-//    expect($client0.find('Game').length).equal(1);
-//    expect($client1.find('Game').length).equal(1);
-//
-//    const $Game0 = $client0.find('DragDropContext(Game)');
-//    const $Game1 = $client1.find('DragDropContext(Game)');
-//    const dndBackend0 = $Game0.get(0).getManager().getBackend();
-//
+import {Map} from 'immutable';
+import {push} from 'react-router-redux';
+//import React from 'react';
+import {mountClient} from '~/shared/test/test-helpers.jsx'
+import {GameModel, GameModelClient, TEST_DECK_SIZE, TEST_HAND_SIZE} from '../../shared/models/game/GameModel';
+//var TestLocation = require('react-router');
+
+describe('e2e (game): ', () => {
+  it('Should play a game', () => {
+    const [serverStore, {clientStore0, User0}, {clientStore1, User1}]= mockStores(2);
+    const $client0 = mountClient(clientStore0);
+    const $client1 = mountClient(clientStore1);
+
+
+    expect($client0.find('#Rooms$create')).length(1);
+    $client0.find('#Rooms$create').simulate('click');
+    expect($client0.find('#RoomCreateDialog$ok'), 'RoomCreateDialog$ok').length(1);
+    $client0.find('#RoomCreateDialog$ok').simulate('click');
+
+    const roomId = serverStore.getState().get('rooms').first().id;
+
+    $client1.find(`RoomsList a`).simulate('click');
+    $client0.find('#Room$start').simulate('click');
+
+    expect($client0.find('DragDropContext(GameWrapper)')).length(1);
+    expect($client1.find('DragDropContext(GameWrapper)')).length(1);
+
+    const $Game0 = $client0.find('DragDropContext(GameWrapper)');
+    const $Game1 = $client1.find('DragDropContext(GameWrapper)');
+    console.log($Game0.get(0))
+    //const dndBackend0 = $Game0.get(0).getManager().getBackend();
+
 //    const userWrapper0 = $Game0.find('.PlayerWrapper.UserWrapper');
 //    const enemyWrapper0 = $Game0.find('.PlayerWrapper.EnemyWrapper');
 //
@@ -94,5 +101,5 @@
 //    clientStore0.connect(serverStore);
 //
 //    expect($client0.find('App').props().location.pathname).equal('/game');
-//  });
-//});
+  });
+});

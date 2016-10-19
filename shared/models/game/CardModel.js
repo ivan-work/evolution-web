@@ -38,10 +38,10 @@ export class CardModel extends Record({
     return js == null
       ? null
       : new CardModel(js)
-        .set('trait1', js.trait1type ? TraitDataModel.new(js.trait1type) : null)
-        .set('trait2', js.trait2type ? TraitDataModel.new(js.trait2type) : null)
-        .remove('trait1type')
-        .remove('trait2type');
+      .set('trait1', js.trait1type ? TraitDataModel.new(js.trait1type) : null)
+      .set('trait2', js.trait2type ? TraitDataModel.new(js.trait2type) : null)
+      .remove('trait1type')
+      .remove('trait2type');
   }
 
   toClient() {
@@ -56,8 +56,12 @@ export class CardModel extends Record({
     return CardModel.new(CardUnknown)
   }
 
-  get traitsCount () {
-    return this.trait2 === null ? 1 : 2;
+  get traitsCount() {
+    return (this.trait1 === null
+      ? 0
+      : this.trait2 === null
+      ? 1
+      : 2)
   }
 
   toString() {

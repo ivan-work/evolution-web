@@ -381,7 +381,7 @@ export const gameClientToServer = {
         throw new ActionCheckError(`checkCardTargetType(${game.id})`, `CardType(ANIMAL_ENEMY) User#%s applies to self`, userId);
     if (cardTrait.cardTargetType & CTT_PARAMETER.LINK) {
       if (!linkedAnimal)
-        throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Player#%s doesn\'t have Animal#%s', playerId, linkedAnimal);
+        throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Player#%s doesn\'t have linked Animal#%s', playerId, linkedAnimal);
       if (cardTrait.cardTargetType & CTT_PARAMETER.SELF)
         if (linkedPlayerId !== userId)
           throw new ActionCheckError(`checkCardTargetType(${game.id})`, `CardType(LINK_SELF) Player(%s) linking to Player(%s)`, playerId, linkedPlayerId);

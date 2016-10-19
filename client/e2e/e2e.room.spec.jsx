@@ -14,7 +14,6 @@ describe('e2e (rooms): ', () => {
 
     expect($client0.find('#Rooms$create')).length(1);
     $client0.find('#Rooms$create').simulate('click');
-
     expect($client0.find('#RoomCreateDialog$ok'), 'RoomCreateDialog$ok').length(1);
     $client0.find('#RoomCreateDialog$ok').simulate('click');
 
