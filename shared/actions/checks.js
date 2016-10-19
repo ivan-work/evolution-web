@@ -20,11 +20,11 @@ export const checkPlayerHasCard = (game, userId, cardId) => {
 };
 
 export const checkPlayerHasAnimal = (game, userId, animalId) => {
-  const animalIndex = game.players.get(userId).continent.findIndex(animal => animal.id === animalId);
-  if (!~animalIndex) {
-    throw new ActionCheckError(`checkPlayerHasCard(${game.id})`, 'Animal#%s not found in Player#%s', animalId, userId);
+  const {playerId, animal} = game.locateAnimal(animalId);
+  if (playerId !== userId) {
+    throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Animal#%s not found in Player#%s', animalId, userId);
   }
-  return game.players.get(userId).continent.get(animalIndex);
+  return animal;
 };
 
 export const checkPlayerTurnAndPhase = (game, userId, phase = -1) => {

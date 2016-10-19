@@ -164,17 +164,17 @@ players:
   - continent: $ + camo sharp
   - continent: $ +,$,$,$
 `);
-    expect(ServerGame().getPlayer(User0).countScore(), 'score for User0').equal(4);
-    expect(ServerGame().getPlayer(User1).countScore(), 'score for User1').equal(4);
-    expect(ServerGame().getPlayer(User2).countScore(), 'score for User2').equal(8);
+    expect(ServerGame().getPlayer(User0).countScore(), 'score for User0 before').equal(4);
+    expect(ServerGame().getPlayer(User1).countScore(), 'score for User1 before').equal(4);
+    expect(ServerGame().getPlayer(User2).countScore(), 'score for User2 before').equal(8);
 
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore1.dispatch(gameEndTurnRequest());
     clientStore2.dispatch(gameEndTurnRequest());
 
-    expect(ServerGame().getPlayer(User0).countScore(), 'score for User0').equal(2);
-    expect(ServerGame().getPlayer(User1).countScore(), 'score for User1').equal(4);
-    expect(ServerGame().getPlayer(User2).countScore(), 'score for User2').equal(2);
+    expect(ServerGame().getPlayer(User0).countScore(), 'score for User0 after').equal(2);
+    expect(ServerGame().getPlayer(User1).countScore(), 'score for User1 after').equal(4);
+    expect(ServerGame().getPlayer(User2).countScore(), 'score for User2 after').equal(2);
     expect(ServerGame().status.phase).equal(PHASE.FINAL);
   });
 

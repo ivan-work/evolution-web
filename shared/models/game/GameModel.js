@@ -155,7 +155,21 @@ export class GameModel extends Record(GameModelData) {
         return true;
       }
     });
-    return {playerId, animalIndex};
+    const animal = playerId !== null ? this.getPlayer(playerId).getAnimal(animalIndex) : null;
+    return {playerId, animalIndex, animal};
+  }
+
+  locateCard(cardId) {
+    let playerId = null, cardIndex = -1;
+    this.players.some(player => {
+      cardIndex = player.hand.findIndex(card => card.id === cardId);
+      if (~cardIndex) {
+        playerId = player.id;
+        return true;
+      }
+    });
+    const card = playerId !== null ? this.getPlayer(playerId).getCard(cardIndex) : null;
+    return {playerId, cardIndex, card};
   }
 
   static getSortedPlayersByIndex(game) {
@@ -209,6 +223,7 @@ GameModelClient.prototype.end = GameModel.prototype.end;
 GameModelClient.prototype.getPlayerCard = GameModel.prototype.getPlayerCard;
 GameModelClient.prototype.getPlayerAnimal = GameModel.prototype.getPlayerAnimal;
 GameModelClient.prototype.locateAnimal = GameModel.prototype.locateAnimal;
+GameModelClient.prototype.locateCard = GameModel.prototype.locateCard;
 
 // TODO move to utils
 function doShuffle(array) {

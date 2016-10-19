@@ -40,13 +40,6 @@ export class AnimalModel extends Record({
     return `Animal#${this.id}`;
   }
 
-  validateTrait(trait) {
-    if (!trait.multiple && this.traits.some(t => t.type === trait.type)) {
-      return 'duplicate type';
-    }
-    return true;
-  }
-
   hasTrait(type) {
     return this.traits.some(trait => trait.type === type)
   }

@@ -108,28 +108,28 @@ players:
     // gameDeployTraitRequest invalid card
     expectUnchanged(() => clientStore0.dispatch(gameDeployTraitRequest(
       '123'
-      , ClientGame0().getPlayerAnimal(null, 0).id))
+      , ClientGame0().getPlayer().getAnimal(0).id))
       , serverStore, clientStore0);
 
     // gameDeployTraitRequest invalid animal
     expectUnchanged(() => clientStore0.dispatch(gameDeployTraitRequest(
-      ClientGame0().getPlayerCard(null, 0).id
+      ClientGame0().getPlayer().getCard(0).id
       , '123'))
       , serverStore, clientStore0);
 
     // gameDeployTraitRequest valid card, valid animal
     expectChanged(() => clientStore0.dispatch(gameDeployTraitRequest(
-      ClientGame0().getPlayerCard(null, 0).id
-      , ClientGame0().getPlayerAnimal(null, 0).id))
+      ClientGame0().getPlayer().getCard(0).id
+      , ClientGame0().getPlayer().getAnimal(0).id))
       , serverStore, clientStore0);
 
     // wait turn
-    clientStore1.dispatch(gameDeployTraitRequest(ClientGame1().getPlayerCard(null, 0).id, ClientGame1().getPlayerAnimal(null, 0).id));
+    clientStore1.dispatch(gameDeployTraitRequest(ClientGame1().getPlayer().getCard(0).id, ClientGame1().getPlayer().getAnimal(0).id));
 
     // gameDeployTraitRequest already has trait, valid animal
     expectUnchanged(() => clientStore0.dispatch(gameDeployTraitRequest(
-      ClientGame0().getPlayerCard(null, 0).id
-      , ClientGame0().getPlayerAnimal(null, 0).id))
+      ClientGame0().getPlayer().getCard(0).id
+      , ClientGame0().getPlayer().getAnimal(0).id))
       , serverStore, clientStore0);
   });
 });
