@@ -16,7 +16,7 @@ export const socketStore = (serverSocket, store) => {
     });
 
     socket.on('action', (action) => {
-      logger.silly('Server:Receive', action.type);
+      logger.silly('Server:Receive', action.type, action.data);
       if (!clientToServer.$unprotected) {
 
       }

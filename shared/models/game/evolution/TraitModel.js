@@ -40,7 +40,7 @@ export class TraitModel extends Record({
   linkBetween(animal1, animal2) {
     if (animal1.hasTrait(this.type)
       && animal2.hasTrait(this.type)
-      && !animal1.traits.some((trait) => trait.type === this.type && trait.hostAnimalId === animal2.id || trait.linkAnimalId === animal2.id)
+      && animal1.traits.some((trait) => trait.type === this.type && (trait.hostAnimalId === animal2.id || trait.linkAnimalId === animal2.id))
     ) {
       throw new ActionCheckError(`TraitModelValidation`, `Animal#%s already has LinkedTrait(%s) on Animal#%s`, animal1.id, this.type, animal2.id);
     }
