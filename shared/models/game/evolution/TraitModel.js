@@ -2,6 +2,7 @@ import {Record} from 'immutable';
 import {TraitDataModel} from './TraitDataModel';
 import * as traitData from './traitData'
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
+import {CTT_PARAMETER} from './constants';
 
 export class TraitModel extends Record({
   type: null
@@ -48,6 +49,10 @@ export class TraitModel extends Record({
       .set('ownerId', animal1.ownerId)
       .set('hostAnimalId', animal1.id)
       .set('linkAnimalId', animal2.id);
+  }
+
+  isLinked() {
+    return this.dataModel && this.dataModel.cardTargetType & CTT_PARAMETER.LINK
   }
 
   toClient() {

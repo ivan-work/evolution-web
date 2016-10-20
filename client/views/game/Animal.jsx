@@ -6,7 +6,11 @@ import { DropTarget } from 'react-dnd';
 import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
 
 import { AnimalModel } from '~/shared/models/game/evolution/AnimalModel';
+import { TraitModel } from '~/shared/models/game/evolution/TraitModel';
+import {ActionCheckError} from '~/shared/models/ActionCheckError';
+
 import { AnimalTrait, DraggableAnimalTrait } from './AnimalTrait.jsx';
+import { AnimalLinkedTrait } from './AnimalLinkedTrait.jsx';
 import { AnimalSelectLink } from './AnimalSelectLink.jsx'
 import {GameProvider} from './providers/GameProvider.jsx';
 import {Food} from './Food.jsx';
@@ -58,8 +62,15 @@ export class _Animal extends React.Component {
     });
 
     const body = <div className={className}>
+        {model.traits
+          .toArray()
+          .filter(trait => trait.isLinked())
+          .map((trait, index) => <AnimalLinkedTrait key={index} trait={trait} sourceAnimalId={model.id}/>)}
       <div className='traits'>
-        {model.traits.map((trait, index) => (
+        {model.traits
+          .toArray()
+          .filter(trait => !trait.isLinked())
+          .map((trait, index) => (
           trait.dataModel.targetType
             ? <DraggableAnimalTrait key={index} index={index} trait={trait} owner={model}/>
             : <AnimalTrait key={index} index={index} trait={trait} owner={model}/>)
@@ -113,6 +124,17 @@ const _DroppableAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND
       case DND_ITEM_TYPE.ANIMAL_LINK:
         const {model: targetAnimal} = props;
         const {card, animal: sourceAnimal, alternateTrait} = monitor.getItem();
+        if (card && targetAnimal) {
+          try {
+            TraitModel.new(card.getTraitDataModel(alternateTrait).type).linkBetween(sourceAnimal, targetAnimal)
+          } catch (e) {
+            if (e instanceof ActionCheckError) {
+              return false;
+            } else {
+              throw e;
+            }
+          }
+        }
         return targetAnimal !== sourceAnimal
           && targetAnimal.ownerId === sourceAnimal.ownerId;
       default:

@@ -14,7 +14,7 @@ export class ContinentDeploy extends Continent {
   componentWillMount() {
     this.$deployAnimal = (card, zoneIndex) => this.context.gameActions.$deployAnimal(card.id, zoneIndex);
     this.$deployTrait = (card, animal, alternateTrait, component) => {
-      if (card.getTraitModel(alternateTrait).cardTargetType & CTT_PARAMETER.LINK) {
+      if (card.getTraitDataModel(alternateTrait).cardTargetType & CTT_PARAMETER.LINK) {
         component.setState({selectLink: {card, animal, alternateTrait}});
       } else {
         this.context.gameActions.$deployTrait(card.id, animal.id, alternateTrait);

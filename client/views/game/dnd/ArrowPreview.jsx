@@ -2,6 +2,8 @@ import React, {Component, PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 
+import {Portal} from '../../utils/Portal.jsx'
+
 export class ArrowPreview extends React.Component {
   constructor(props) {
     super(props);
@@ -47,13 +49,13 @@ export class ArrowPreview extends React.Component {
 
     const x1 = initialOffset.x + initialOffsetShift.x;
     const y1 = initialOffset.y + initialOffsetShift.y;
-    const length = Math.sqrt((x - x1)*(x - x1) + (y - y1)*(y - y1));
+    const length = Math.sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1));
     const lineWidth = length / 20;
     const angle = Math.atan2(y - y1, x - x1);
     const x2 = x1 + Math.cos(angle) * (length - lineWidth);
     const y2 = y1 + Math.sin(angle) * (length - lineWidth);
 
-    return <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0'}}>
+    return (<Portal target='game-svg'>
       <defs>
         <marker id="arrow" ref={this.setupMarker}>
           <path d={`M0,0 L0,${this.props.markerSize} L${this.props.markerSize/4*3},${this.props.markerSize/2} z`} style={{
@@ -69,7 +71,6 @@ export class ArrowPreview extends React.Component {
               , markerEnd: 'url(#arrow)'
             }}
       />
-
-    </svg>
+    </Portal>)
   }
 }
