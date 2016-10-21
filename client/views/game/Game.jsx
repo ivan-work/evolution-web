@@ -66,15 +66,18 @@ class _Game extends React.Component {
     //</BodyPortal>
     return <div id='game' style={{display: 'flex'}}>
 
-      <GameScoreboardFinalView/>
-
       <div className='GameUI'>
         <PlayersList game={game}/>
 
-        <MDL.Button id="Game$endTurn" colored raised
+        {player.acted
+          ? <MDL.Button id="Game$endTurn" colored raised
                     disabled={!isPlayerTurn}
                     style={{width: '100%'}}
-                    onClick={this.context.gameActions.$endTurn}>EndTurn</MDL.Button>
+                    onClick={this.context.gameActions.$endTurn}>End Turn</MDL.Button>
+          : <MDL.Button id="Game$endTurn" accent raised
+                    disabled={!isPlayerTurn}
+                    style={{width: '100%'}}
+                    onClick={this.context.gameActions.$endTurn}>End Phase</MDL.Button>}
 
         <GameStatusDisplay game={game}/>
 
@@ -85,6 +88,7 @@ class _Game extends React.Component {
         <Portal target='header'>
           <ControlGroup name='Game'>
             <MDL.Button id="Game$exit" onClick={this.context.gameActions.$exit}>Exit</MDL.Button>
+            <GameScoreboardFinalView/>
           </ControlGroup>
         </Portal>
 

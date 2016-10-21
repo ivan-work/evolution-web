@@ -29,10 +29,9 @@ export class GameScoreboardFinal extends Component {
   render() {
     const {game, online} = this.props;
 
-    return <div>
+    return <span>
       {game.status.phase === PHASE.FINAL
         ? <MDL.Button className="ShowScoreboardFinal"
-                      raised
                       onClick={() => this.setState({show: true})}>Scores</MDL.Button>
         : null}
       <Dialog show={this.state.show}>
@@ -57,7 +56,7 @@ export class GameScoreboardFinal extends Component {
           <MDL.Button type='button' raised primary onClick={() => this.setState({show: false})}>OK</MDL.Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </span>
   }
 }
 

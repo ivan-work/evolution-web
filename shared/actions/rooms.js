@@ -80,7 +80,7 @@ export const roomsClientToServer = {
     dispatch(server$roomJoinRequest({roomId: room.id}, {user}));
   }
   , roomJoinRequest: server$roomJoinRequest
-  , roomExitRequest: ({roomId}, {user}) => roomExitSuccess(roomId, user.id)
+  , roomExitRequest: ({roomId}, {user}) => server$roomExit(roomId, user.id)
 };
 
 export const roomsServerToClient = {

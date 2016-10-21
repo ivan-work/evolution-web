@@ -12,7 +12,7 @@ export const gameStart = game => game
   .setIn(['started'], true)
   .setIn(['status', 'phase'], PHASE.DEPLOY)
   .setIn(['status', 'round'], 0);
-  //.setIn(['status', 'currentPlayer'], 0); // TODO RANDOMIZE
+//.setIn(['status', 'currentPlayer'], 0); // TODO RANDOMIZE
 
 export const gamePlayerReadyChange = (game, {userId, ready}) => game
   .setIn(['players', userId, 'ready'], ready);
@@ -58,7 +58,8 @@ export const gameDeployTrait = (game, {cardId, traitType, animalId, linkedAnimal
 export const playerActed = (game, {userId}) => {
   return game
     .setIn(['players', userId, 'acted'], true)
-    .setIn(['players', userId, 'skipped'], 0);
+    .setIn(['players', userId, 'skipped'], 0)
+    .update('cooldowns', cooldowns => cooldowns.eventNextAction());
 };
 
 export const gameEndTurn = (game, {userId}) => {
@@ -166,13 +167,18 @@ export const traitKillAnimal = (game, {targetAnimalId}) => {
   const {playerId, animalIndex} = game.locateAnimal(targetAnimalId);
   return game
     .removeIn(['players', playerId, 'continent', animalIndex])
+    .updateIn(['players', playerId, 'continent'], continent => continent
+      .map(animal => animal.update('traits', traits => traits
+        .filter(trait => trait.linkAnimalId !== targetAnimalId))))
 };
 
 export const animalStarve = (game, {animalId}) => {
-  const {playerId, animalIndex, animal} = game.locateAnimal(animalId);
-  if (!animal) throw new Error('reducer error animalStarve')
+  const {playerId, animalIndex} = game.locateAnimal(animalId);
   return game
     .removeIn(['players', playerId, 'continent', animalIndex])
+    .updateIn(['players', playerId, 'continent'], continent => continent
+      .map(animal => animal.update('traits', traits => traits
+        .filter(trait => trait.linkAnimalId !== animalId))))
 };
 
 export const startCooldown = (game, {link, duration, place, placeId}) =>

@@ -38,46 +38,59 @@ export class CooldownList extends Record(
     return !!global || !!player || !!animal;
   }
 
-  eventNextPlayer(nextRound) {
+  updateDuration(durationUpdateFn) {
     return this
       .map(placeType => placeType
         .map(placeIdsList => placeIdsList
           .map(cooldown =>
-            cooldown.update('duration', duration => {
-              switch (duration) {
-                case TRAIT_COOLDOWN_DURATION.ACTIVATION:
-                  return null;
-                case TRAIT_COOLDOWN_DURATION.ROUND:
-                  return nextRound ? null : duration;
-                case TRAIT_COOLDOWN_DURATION.TURN:
-                  return duration;
-                case TRAIT_COOLDOWN_DURATION.TWO_TURNS:
-                  return duration;
-              }
-            })
+            cooldown.update('duration', durationUpdateFn)
           )
           .filter(cooldown => cooldown.duration !== null)))
   }
 
+  eventNextAction() {
+    return this.updateDuration(duration => {
+      switch (duration) {
+        case TRAIT_COOLDOWN_DURATION.ACTIVATION:
+          return null;
+        case TRAIT_COOLDOWN_DURATION.ROUND:
+          return duration;
+        case TRAIT_COOLDOWN_DURATION.TURN:
+          return duration;
+        case TRAIT_COOLDOWN_DURATION.TWO_TURNS:
+          return duration;
+      }
+    });
+  }
+
+  eventNextPlayer(nextRound) {
+    return this.updateDuration(duration => {
+      switch (duration) {
+        case TRAIT_COOLDOWN_DURATION.ACTIVATION:
+          return null;
+        case TRAIT_COOLDOWN_DURATION.ROUND:
+          return nextRound ? null : duration;
+        case TRAIT_COOLDOWN_DURATION.TURN:
+          return duration;
+        case TRAIT_COOLDOWN_DURATION.TWO_TURNS:
+          return duration;
+      }
+    });
+  }
+
   eventNextTurn() {
-    return this
-      .map(placeType => placeType
-        .map(placeIdsList => placeIdsList
-          .map(cooldown =>
-            cooldown.update('duration', duration => {
-              switch (duration) {
-                case TRAIT_COOLDOWN_DURATION.ACTIVATION:
-                  return null;
-                case TRAIT_COOLDOWN_DURATION.ROUND:
-                  return null;
-                case TRAIT_COOLDOWN_DURATION.TURN:
-                  return null;
-                case TRAIT_COOLDOWN_DURATION.TWO_TURNS:
-                  return TRAIT_COOLDOWN_DURATION.TURN;
-              }
-            })
-          )
-          .filter(cooldown => cooldown.duration !== null)))
+    return this.updateDuration(duration => {
+      switch (duration) {
+        case TRAIT_COOLDOWN_DURATION.ACTIVATION:
+          return null;
+        case TRAIT_COOLDOWN_DURATION.ROUND:
+          return null;
+        case TRAIT_COOLDOWN_DURATION.TURN:
+          return null;
+        case TRAIT_COOLDOWN_DURATION.TWO_TURNS:
+          return TRAIT_COOLDOWN_DURATION.TURN;
+      }
+    });
   }
 }
 
