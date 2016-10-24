@@ -30,7 +30,7 @@ export const TraitCarnivorous = {
         game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id))) {
       return false;
     }
-    return sourceAnimal.canEat()
+    return sourceAnimal.needsFood() > 0
   }
   , checkTarget: (game, sourceAnimal, targetAnimal) => (
     (sourceAnimal.hasTrait('TraitSharpVision') || !targetAnimal.hasTrait('TraitCamouflage'))

@@ -1,4 +1,5 @@
-import {selectPlayers} from '../selectors';
+import {selectPlayers, selectAnimal} from '../selectors';
+import {traitActivateRequest} from './actions';
 
 export const actionError = (userId, error) => ({
   type: 'actionError'
@@ -35,6 +36,15 @@ export const server$game = (gameId, action) => (dispatch, getState) =>
   dispatch(Object.assign(action, {
     meta: {users: selectPlayers(getState, gameId)}
   }));
+
+export const makeGameActionHelpers = (getState, gameId) => ({
+  activateTrait: (sourceUser, sourceAnimalIndex, traitName, targetUser, targetAnimalIndex) =>
+    traitActivateRequest(
+      selectAnimal(getState, gameId, sourceUser, sourceAnimalIndex).id
+      , traitName
+      , selectAnimal(getState, gameId, targetUser, targetAnimalIndex).id
+    )
+});
 
 export const genericClientToServer = {};
 

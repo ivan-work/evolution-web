@@ -10,6 +10,7 @@ export class TraitModel extends Record({
   , hostAnimalId: null
   , linkAnimalId: null
   , dataModel: null
+  , value: null
 }) {
   static new(type) {
     return TraitModel.fromServer({type});

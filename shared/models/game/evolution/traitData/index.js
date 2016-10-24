@@ -19,6 +19,7 @@ export const TraitParasite = {
 
 export const TraitFatTissue = {
   type: 'TraitFatTissue'
+  , multiple: true
 };
 
 //
@@ -61,8 +62,8 @@ export const TraitPiracy = {
       // dispatch(traitStealFood)
     }
   }
-  , checkAction: (game, sourceAnimal) => sourceAnimal.canEat()
-  , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.canEat()
+  , checkAction: (game, sourceAnimal) => sourceAnimal.needsFood() > 0
+  , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.needOfNormalFood() > 0
 };
 
 export const TraitTailLoss = {
@@ -96,7 +97,7 @@ export const TraitGrazing = {
       // dispatch(traitStealFood)
     }
   }
-  , checkAction: (game, sourceAnimal) => game.food > 0 && sourceAnimal.canEat()
+  , checkAction: (game, sourceAnimal) => game.food > 0
 };
 
 export const TraitHighBodyWeight = {
