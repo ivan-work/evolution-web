@@ -13,7 +13,7 @@ const testWatch = (paths) => gulp.src(paths)
     , require: ['source-map-support/register', 'ignore-styles']
   }))
   //.on('error', () => console.error('error'));
-  .on('error', (error) => {
+  .on('error', function (error) {
     console.error(error)
     (watching
       ? this.emit('end')
