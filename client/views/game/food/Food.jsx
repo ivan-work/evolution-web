@@ -4,12 +4,12 @@ import classnames from 'classnames';
 
 import './Food.scss';
 
-import {GameProvider} from './providers/GameProvider.jsx';
+import {GameProvider} from '../providers/GameProvider.jsx';
 
 import { DragSource } from 'react-dnd';
-import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
+import { DND_ITEM_TYPE } from '../dnd/DND_ITEM_TYPE';
 
-import {TRAIT_COOLDOWN_LINK} from '../../../shared/models/game/evolution/constants';
+import {TRAIT_COOLDOWN_LINK} from '../../../../shared/models/game/evolution/constants';
 
 //const graphics = ['\u1F345']/*, '&#127814;', '&#127815;'
 //  , '&#127816;', '&#127817;', '&#127818;', '&#127819;', '&#127820;'
@@ -56,9 +56,9 @@ export class Food extends React.Component {
 export const DragFood = GameProvider(DragSource(DND_ITEM_TYPE.FOOD
   , {
     beginDrag: (props) => ({index: props.index})
-    , canDrag: (props, monitor) => !props.disabled
-      && props.isPlayerTurn
-      && !props.game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, props.currentUserId, null)
+    , canDrag: (props, monitor) =>
+    props.isPlayerTurn
+    && !props.game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, props.currentUserId, null)
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource()
