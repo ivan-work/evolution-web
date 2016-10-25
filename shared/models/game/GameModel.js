@@ -175,8 +175,11 @@ export class GameModel extends Record(GameModelData) {
   static getSortedPlayersByIndex(game) {
     let players = [];
     for (let i = 0, c = game.status.roundPlayer; i < game.players.size; ++i) {
-      players.push(game.players.find(player => player.index === c));
-      c = (c + 1) % game.players.size;
+      const player = game.players.find(p => p.index === c);
+      const leaver = game.leavers.find(p => p.index === c);
+      if (player) players.push(player);
+      if (leaver) players.push(leaver);
+      c = (c + 1) % (game.players.size + game.leavers.size);
     }
     return players;
   }
@@ -196,10 +199,10 @@ export class GameModelClient extends Record({
 
   getPlayer(pid) {
     return pid === void 0 || pid === null
-      ? this.players.get(this.userId)
+      ? (this.players.get(this.userId) || this.leavers.get(this.userId))
       : pid.id
-      ? this.players.get(pid.id)
-      : this.players.get(pid);
+      ? (this.players.get(pid.id) || this.leavers.get(pid.id))
+      : (this.players.get(pid) || this.leavers.get(pid));
   }
 
   isPlayerTurn(userId) {

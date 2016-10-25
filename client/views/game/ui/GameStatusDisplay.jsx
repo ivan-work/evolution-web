@@ -19,7 +19,7 @@ export class GameStatusDisplay extends Component {
   }
 
   static getPhaseAsString(phase) {
-    switch (phase){
+    switch (phase) {
       case PHASE.DEPLOY:
         return 'Deploy';
       case PHASE.FEEDING:
@@ -31,7 +31,10 @@ export class GameStatusDisplay extends Component {
 
   getPlayerNameByIndex(players, index) {
     const player = players.find(player => player.index === index);
-    return UserService.get(player.id).login;
+    if (player)
+      return UserService.get(player.id).login;
+    else
+      return 'undef'
   }
 
   render() {

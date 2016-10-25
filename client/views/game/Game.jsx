@@ -8,9 +8,11 @@ import {UserModel} from '../../../shared/models/UserModel';
 import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 
 import {GAME_POSITIONS} from './GAME_POSITIONS';
+
+import {GameUI} from './ui/GameUI.jsx';
+
 import {Portal} from '../utils/Portal.jsx';
 import {BodyPortal} from '../utils/BodyPortal.jsx';
-import {PortalTarget} from '../utils/PortalTarget.jsx';
 import {ControlGroup} from '../utils/ControlGroup.jsx';
 import {GameProvider} from './providers/GameProvider.jsx';
 import {CardCollection} from './CardCollection.jsx';
@@ -20,9 +22,8 @@ import {ContinentFeeding} from './ContinentFeeding.jsx';
 import {GameFoodContainer} from './food/GameFoodContainer.jsx';
 import CustomDragLayer from './dnd/CustomDragLayer.jsx';
 
+
 import {GameScoreboardFinalView} from './ui/GameScoreboardFinal.jsx';
-import {GameStatusDisplay} from './ui/GameStatusDisplay.jsx';
-import {PlayersList} from './ui/PlayersList.jsx';
 
 import {AnimationServiceContext, AnimationServiceRef} from '../../services/AnimationService';
 import * as GameAnimations from './GameAnimations';
@@ -30,7 +31,6 @@ import * as GameAnimations from './GameAnimations';
 class _Game extends React.Component {
   static contextTypes = {
     gameActions: React.PropTypes.object
-    , game: React.PropTypes.instanceOf(GameModelClient)
   };
 
   static propTypes = {
@@ -40,9 +40,8 @@ class _Game extends React.Component {
 
   constructor(props) {
     super(props);
-    this.Cards = {};
-    this.CardCollections = {};
     //this.shouldCmponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    this.refCard = this.refCard.bind(this);
   }
 
   render() {
@@ -65,24 +64,7 @@ class _Game extends React.Component {
     //  </ReactCSSTransitionGroup>
     //</BodyPortal>
     return <div id='game' style={{display: 'flex'}}>
-
-      <div className='GameUI'>
-        <PlayersList game={game}/>
-
-        {player.acted
-          ? <MDL.Button id="Game$endTurn" colored raised
-                        disabled={!isPlayerTurn}
-                        style={{width: '100%'}}
-                        onClick={this.context.gameActions.$endTurn}>End Turn</MDL.Button>
-          : <MDL.Button id="Game$endTurn" accent raised
-                        disabled={!isPlayerTurn}
-                        style={{width: '100%'}}
-                        onClick={this.context.gameActions.$endTurn}>End Phase</MDL.Button>}
-
-        <GameStatusDisplay status={game.status} players={game.players}/>
-
-        {this.renderDeck(game)}
-      </div>
+      <GameUI/>
 
       <div className={gameClassName}>
         <Portal target='header'>
@@ -106,15 +88,12 @@ class _Game extends React.Component {
     </div>;
   }
 
-  renderDeck(game) {
-    return <div className='DeckWrapper'>
-      <h6>Deck ({game.deck.size}):</h6>
-      <CardCollection
-        name="Deck" ref={(component) => this.Deck = component}
-        shift={[2, 1]}>
-        {game.deck.toArray().map((cardModel, i) => <Card card={cardModel} key={i} index={i}/>)}
-      </CardCollection>
-    </div>
+  refCard(cardModel) {
+    return (component) => {
+      const Cards = this.props.getRef('Cards') || {};
+      Cards[cardModel.id] = component;
+      this.props.connectRef('Cards')(Cards);
+    }
   }
 
   renderUser(game, player, GameContinent) {
@@ -134,7 +113,7 @@ class _Game extends React.Component {
         <DragCard
           key={cardModel}
           card={cardModel}
-          ref={this.props.connectRef('Cards')({this.Cards[cardModel.id] = component})
+          ref={this.refCard(cardModel)}
           dragEnabled={dragEnabled}/>
           )}
       </CardCollection>
@@ -154,7 +133,7 @@ class _Game extends React.Component {
             <Card
               key={i}
               card={cardModel}
-              ref={(component) => this.Cards[cardModel.id] = component}
+              ref={this.refCard(cardModel)}
             />)}
           </CardCollection>
 
@@ -167,11 +146,11 @@ class _Game extends React.Component {
 }
 
 export const Game = GameProvider(AnimationServiceContext({
-  animations: (getRef) => ({
+  animations: ({getRef}) => ({
     gameGiveCards: (done, {game}, {cards}) => {
       GameAnimations.gameGiveCards(done, game, cards, getRef('Deck'), getRef('Cards'));
     }
-    //, gameNextPlayer: (done, component, {cards}) => {
+//, gameNextPlayer: (done, component, {cards}) => {
     //  component.setState({
     //    toastYourTurn: true
     //  });
