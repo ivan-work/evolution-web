@@ -1,8 +1,3 @@
-import React, {Component} from 'react';
-
-const debug = false;
-const log = debug ? console.log : () => null;
-
 class QueueItem {
   constructor(action, next) {
     this.action = action;
@@ -12,27 +7,28 @@ class QueueItem {
   }
 }
 
-class AnimationServiceClass {
-  constructor() {
+export class AnimationServiceClass {
+  constructor(log = () => null) {
     this.currentAnimation = null;
     this.$subscribers = {};
     this.$queue = [];
+    this.log = log;
   }
 
   componentSubscribe(component, actionType) {
-    log(`${component.displayName} subscribed for ${actionType}`);
+    this.log(`${component.displayName} subscribed for ${actionType}`);
     if (!this.$subscribers[actionType]) this.$subscribers[actionType] = [];
     this.$subscribers[actionType].push(component)
   }
 
   componentUpdated(updatedComponent) {
-    log(`${updatedComponent.displayName} updated`, updatedComponent.state.animation);
+    this.log(`${updatedComponent.displayName} updated`, updatedComponent.state.animation);
     if (updatedComponent.state.animation) {
       const animation = this.currentAnimation;
       const actionType = animation.action.type;
       const subscribersForAction = this.$subscribers[actionType];
 
-      log(`${updatedComponent.displayName} has animation ${actionType} in state`);
+      this.log(`${updatedComponent.displayName} has animation ${actionType} in state`);
 
       // reset animation;
       updatedComponent.setState({animation: null});
@@ -43,10 +39,10 @@ class AnimationServiceClass {
           && !~animation.processedBy.indexOf(component) // is not processed yet by updated component
         );
         if (component) {
-          log(`${component.displayName} activating animation for ${actionType}`);
+          this.log(`${component.displayName} activating animation for ${actionType}`);
           animation.processedBy.push(component); // start processing;
           component.getAnimation(actionType)
-            .call(null, () => this.completeCurrentAnimation(component), component.wrappedComponent, animation.action.data)
+            .call(null, () => this.completeCurrentAnimation(component), component.props, animation.action.data)
         }
       }
     }
@@ -62,14 +58,14 @@ class AnimationServiceClass {
   }
 
   processAction(next, action) {
-    log(`processing action: ${action.type}`);
+    this.log(`processing action: ${action.type}`);
     if (this.currentAnimation) {
-      log(`currently has animation: ${this.currentAnimation.action.type}. pushing to queue`);
+      this.log(`currently has animation: ${this.currentAnimation.action.type}. pushing to queue`);
       // If something is animating = add action to the queue
       this.$queue.push(new QueueItem(action, next));
     } else {
       // dispatch
-      log(`dispatching ${action.type}`);
+      this.log(`dispatching ${action.type}`);
       next(action);
       // If not - check if we should animate this action
       this.startAnimation(new QueueItem(action));
@@ -97,13 +93,13 @@ class AnimationServiceClass {
       const subscribersForAction = this.$subscribers[this.currentAnimation.action.type];
       if (subscribersForAction.some(c => c === component) && !this.currentAnimation.completedBy.some(c => c === component)) {
         this.currentAnimation.completedBy.push(component);
-        log(`completed ${this.currentAnimation.action.type}, ${this.currentAnimation.completedBy.length}/${subscribersForAction.length}`);
+        this.log(`completed ${this.currentAnimation.action.type}, ${this.currentAnimation.completedBy.length}/${subscribersForAction.length}`);
         if (this.currentAnimation.completedBy.length === subscribersForAction.length) {
-          log(`queue length: ${this.$queue.length}`);
+          this.log(`queue length: ${this.$queue.length}`);
           if (this.$queue.length > 0) {
             const nextAnimation = this.$queue[0];
             this.$queue = this.$queue.slice(1);
-            log(`changing current animation to`, nextAnimation);
+            this.log(`changing current animation to`, nextAnimation);
             nextAnimation.next(nextAnimation.action);
             this.startAnimation(nextAnimation)
           } else {
@@ -114,48 +110,3 @@ class AnimationServiceClass {
     }
   }
 }
-
-export const AnimationService = new AnimationServiceClass();
-
-export const animationMiddleware = () => ({dispatch, getState}) => next => action => {
-  AnimationService.processAction(next, action);
-  //console.log('processing action', action.type)
-  //next(action)
-};
-
-export const AnimationServiceHOC = ({animations}) => (WrappedComponentClass) => class AnimationServiceHOC extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
-  componentDidMount() {
-    this.displayName = 'ASHOC' + Math.floor(Math.random() * 0xFF);
-    log(`Component ${this.displayName} initialized`);
-    this._isMounted = true;
-    this.animations = animations;
-    Object.keys(animations).forEach((actionType) => {
-      AnimationService.componentSubscribe(this, actionType);
-    });
-  }
-
-  componentDidUpdate() {
-    AnimationService.componentUpdated(this)
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-    AnimationService.componentUnsubscribe(this)
-  }
-
-  getAnimation(actionType) {
-    return this.animations[actionType];
-  }
-
-  render() {
-    return React.createElement(WrappedComponentClass, {
-      ref: (component) => this.wrappedComponent = component
-      , ...this.props
-    });
-  }
-};

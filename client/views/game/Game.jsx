@@ -24,7 +24,7 @@ import {GameScoreboardFinalView} from './ui/GameScoreboardFinal.jsx';
 import {GameStatusDisplay} from './ui/GameStatusDisplay.jsx';
 import {PlayersList} from './ui/PlayersList.jsx';
 
-import {AnimationService, AnimationServiceHOC} from '../../services/AnimationService';
+import {AnimationServiceContext, AnimationServiceRef} from '../../services/AnimationService';
 import * as GameAnimations from './GameAnimations';
 
 class _Game extends React.Component {
@@ -128,13 +128,13 @@ class _Game extends React.Component {
       />
 
       <CardCollection
-        name="Hand" ref={(component) => this.CardCollections[player.id] = component}
+        name="Hand"
         shift={[65, 0]}>
         {player.hand.toArray().map((cardModel, i) =>
         <DragCard
           key={cardModel}
           card={cardModel}
-          ref={(component) => this.Cards[cardModel.id] = component}
+          ref={this.props.connectRef('Cards')({this.Cards[cardModel.id] = component})
           dragEnabled={dragEnabled}/>
           )}
       </CardCollection>
@@ -166,11 +166,10 @@ class _Game extends React.Component {
   }
 }
 
-export const Game = GameProvider(AnimationServiceHOC({
-  animations: {
-    gameGiveCards: (done, component, {cards}) => {
-      const {game} = component.props;
-      GameAnimations.gameGiveCards(done, game, cards, component.Deck, component.Cards);
+export const Game = GameProvider(AnimationServiceContext({
+  animations: (getRef) => ({
+    gameGiveCards: (done, {game}, {cards}) => {
+      GameAnimations.gameGiveCards(done, game, cards, getRef('Deck'), getRef('Cards'));
     }
     //, gameNextPlayer: (done, component, {cards}) => {
     //  component.setState({
@@ -185,5 +184,5 @@ export const Game = GameProvider(AnimationServiceHOC({
     //  GameAnimations.gameGiveCards(done, game, game.getPlayer().hand, component.Deck, component.Cards);
     //}
     //,
-  }
-})(_Game));
+  })
+})(AnimationServiceRef(_Game)));
