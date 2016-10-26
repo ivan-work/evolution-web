@@ -1,5 +1,5 @@
-import {selectPlayers, selectAnimal} from '../selectors';
-import {traitActivateRequest} from './actions';
+import {selectPlayers, selectCard, selectAnimal} from '../selectors';
+import {gameDeployAnimalRequest, traitActivateRequest} from './actions';
 
 export const actionError = (userId, error) => ({
   type: 'actionError'
@@ -44,6 +44,8 @@ export const makeGameActionHelpers = (getState, gameId) => ({
       , traitName
       , selectAnimal(getState, gameId, targetUser, targetAnimalIndex).id
     )
+  , deployAnimal: (sourceUser, cardIndex, animalPosition) =>
+    gameDeployAnimalRequest(selectCard(getState, gameId, sourceUser, cardIndex).id, animalPosition)
 });
 
 export const genericClientToServer = {};

@@ -4,9 +4,10 @@ import {
   , traitTakeFoodRequest
   , traitActivateRequest
 } from '../actions';
-import {makeGameActionHelpers} from '../generic';
+
 import {PHASE} from '../../models/game/GameModel';
 
+import {makeGameActionHelpers} from '../generic';
 import {makeGameSelectors} from '../../selectors';
 
 describe('TraitFatTissue:', () => {
