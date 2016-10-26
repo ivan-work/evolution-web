@@ -4,6 +4,10 @@ import {Continent} from './Continent.jsx'
 import {DroppableAnimal} from '../Animal.jsx';
 
 export class ContinentFeeding extends Continent {
+  getClassName() {
+    return 'ContinentFeeding';
+  }
+
   componentWillMount() {
     this.$traitTakeFood = (animal) => this.context.gameActions.$traitTakeFood(animal.id);
     this.$traitActivate = this.context.gameActions.$traitActivate;
