@@ -6,7 +6,7 @@ import {
   gameReadyRequest,
   gameDeployAnimalRequest,
   gameDeployTraitRequest,
-} from '../actions/actions';
+} from '../actions';
 
 describe('Hacking Game:', function () {
   //it('Game for two', () => {

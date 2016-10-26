@@ -5,8 +5,8 @@ export const selectRoom = (getState, roomId) => getState().getIn(['rooms', roomI
 export const selectGame = (getState, gameId) =>
   getState().getIn(['games', gameId]);
 
-export const selectPlayers = (getState, gameId) =>
-  getState().getIn(['games', gameId, 'players']).keySeq().toArray();
+export const selectPlayers4Sockets = (getState, gameId) =>
+  getState().getIn(['games', gameId, 'players']).filter(p => p.playing).keySeq().toArray();
 
 export const selectPlayer = (getState, gameId, user) =>
   selectGame(getState, gameId).getPlayer(user);

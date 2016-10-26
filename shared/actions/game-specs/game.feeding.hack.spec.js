@@ -1,12 +1,10 @@
-import {Map, List} from 'immutable';
-
 import {
   traitTakeFoodRequest
   , gameEndTurnRequest
   , traitActivateRequest
   , gameDeployAnimalRequest
   , gameDeployTraitRequest
-} from '../actions/actions';
+} from '../actions';
 
 describe('Game Hacking (EAT PHASE):', function () {
   it('Simple eating', () => {

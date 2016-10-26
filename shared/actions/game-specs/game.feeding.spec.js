@@ -4,7 +4,7 @@ import {
   traitTakeFoodRequest
   , gameEndTurnRequest
   , traitActivateRequest
-} from '../actions/actions';
+} from '../actions';
 
 describe('Game (EAT PHASE):', function () {
   it('Simple eating', () => {

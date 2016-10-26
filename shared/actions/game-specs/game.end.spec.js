@@ -1,13 +1,13 @@
 import {Map, List} from 'immutable';
 
-import {PHASE} from '../../shared/models/game/GameModel';
+import {PHASE} from '../../models/game/GameModel';
 
 import {
   traitTakeFoodRequest
   , gameEndTurnRequest
   , roomExitRequest
   , SOCKET_DISCONNECT_NOW
-} from '../actions/actions';
+} from '../actions';
 
 describe('Game (ENDING PHASE):', function () {
   it('Skip Turn limit', () => {

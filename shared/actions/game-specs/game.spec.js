@@ -1,9 +1,9 @@
 import {Map, List} from 'immutable';
 
-import {GameModel, TEST_DECK_SIZE, TEST_HAND_SIZE} from '../models/game/GameModel';
-import {CardModel} from '../models/game/CardModel';
-import {AnimalModel} from '../models/game/evolution/AnimalModel';
-import {TraitModel} from '../models/game/evolution/TraitModel';
+import {GameModel, TEST_DECK_SIZE, TEST_HAND_SIZE} from '../../models/game/GameModel';
+import {CardModel} from '../../models/game/CardModel';
+import {AnimalModel} from '../../models/game/evolution/AnimalModel';
+import {TraitModel} from '../../models/game/evolution/TraitModel';
 
 import {
   SOCKET_DISCONNECT_NOW,
@@ -14,7 +14,7 @@ import {
   gameDeployAnimalRequest,
   gameDeployTraitRequest,
   gameEndTurnRequest
-} from '../actions/actions';
+} from '../actions';
 
 describe('Game:', function () {
   it('Game start', () => {

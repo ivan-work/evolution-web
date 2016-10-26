@@ -1,4 +1,4 @@
-import {selectPlayers, selectCard, selectAnimal} from '../selectors';
+import {selectPlayers4Sockets, selectCard, selectAnimal} from '../selectors';
 import {gameDeployAnimalRequest, traitActivateRequest} from './actions';
 
 export const actionError = (userId, error) => ({
@@ -28,13 +28,13 @@ export const server$actionsChain = (gameId, actionsList) => (dispatch, getState)
     dispatch(action);
   });
   dispatch(Object.assign(actionsChain(gameId, actionsList), {
-    meta: {clientOnly: true, users: selectPlayers(getState, gameId)}
+    meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId)}
   }));
 };
 
 export const server$game = (gameId, action) => (dispatch, getState) =>
   dispatch(Object.assign(action, {
-    meta: {users: selectPlayers(getState, gameId)}
+    meta: {users: selectPlayers4Sockets(getState, gameId)}
   }));
 
 export const makeGameActionHelpers = (getState, gameId) => ({
