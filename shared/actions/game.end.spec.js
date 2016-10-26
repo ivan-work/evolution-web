@@ -108,7 +108,9 @@ players:
     expect(ServerGame().getPlayerAnimal(User0, 1).getFood()).equal(0);
     expect(ServerGame().getPlayerAnimal(User0, 2).getFood()).equal(0);
     expect(ServerGame().getPlayer(User1).continent).size(2);
+    expect(ClientGame0().getPlayer(User1).continent).size(2);
     expect(ServerGame().getPlayer(User2).continent).size(0);
+    expect(ClientGame0().getPlayer(User2).continent).size(0);
     expect(ServerGame().getPlayer(User0).hand).size(4);
     expect(ServerGame().getPlayer(User1).hand).size(3);
     expect(ServerGame().getPlayer(User2).hand).size(6);

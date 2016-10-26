@@ -1,9 +1,8 @@
 import React from 'react';
 import {List, Map, Range} from 'immutable';
 import {ContinentDeploy} from './ContinentDeploy.jsx';
-import {Card} from './Card.jsx';
 
-import {AnimalModel} from '../../../shared/models/game/evolution/AnimalModel';
+import {AnimalModel} from '../../../../shared/models/game/evolution/AnimalModel';
 
 describe('Continent', () => {
   it('Empty', () => {

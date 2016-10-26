@@ -4,7 +4,9 @@ import classnames from 'classnames';
 
 import {List} from 'immutable';
 
-import {DropTargetContinentZone} from './ContinentZone.jsx'
+import {DropTargetContinentZone} from './ContinentZone.jsx';
+
+import './Continent.scss';
 
 export class Continent extends React.Component {
   static contextTypes = {

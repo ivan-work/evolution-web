@@ -8,7 +8,7 @@ export class Test extends Component {
     super(props);
     this.state = {
       show: true
-      , food: Array.from({length: 37}).map((u, i) => i)
+      , food: 244
     };
     //setInterval(() => {
     //  //console.log((this.state.food + 1) % 25)
@@ -20,9 +20,7 @@ export class Test extends Component {
     return <div>
       <div style={{margin: '200px 200px 0 200px'}}>
         <GameFoodContainer food={this.state.food} onFoodRemoved={(index) => {
-          let food = this.state.food;
-          food.remove(index);
-          this.setState({food})
+          this.setState({food: this.state.food - 1})
         }
         }/>
       </div>

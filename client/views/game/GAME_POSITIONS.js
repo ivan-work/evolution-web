@@ -1,6 +1,6 @@
 const DECK_POSITION = {};
-const PLAYER_POSITION = {left: '10%', bottom: '0'};
-const FOOD_POSITION = {left: '50%', top: '50%'};
+const PLAYER_POSITION = {left: '0px', bottom: '0px'};
+const FOOD_POSITION = {position: 'absolute', left: '10px', top: '50%'};
 export const GAME_POSITIONS = {
   0: null
   , 1: {
