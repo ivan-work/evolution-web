@@ -4,9 +4,13 @@ import cn from 'classnames';
 
 import {GameModel, GameModelClient} from '../../../../shared/models/game/GameModel';
 
-import {UserService} from '../../../services/UserService'
+import {UserServicePropType} from '../../../services/UserService'
 
 export class PlayersList extends Component {
+  static contextTypes = {
+    userService: UserServicePropType
+  };
+
   static propTypes = {
     game: React.PropTypes.instanceOf(GameModelClient).isRequired
   };
@@ -16,14 +20,16 @@ export class PlayersList extends Component {
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
   }
 
-  static renderPlayer(game, player) {
-    const user = UserService.get(player.id);
+  renderPlayer(game, player) {
+    const {userService} = this.context;
+
+    const user = userService.get(player.id);
     const className = cn({
       Player: true
       , isPlayerTurn: game.isPlayerTurn(player.id)
     });
     return <li key={player.id} className={className}>
-      {user.login}
+      {user ? user.login : '---'}
     </li>
   }
 
@@ -32,7 +38,7 @@ export class PlayersList extends Component {
     return <ul className='PlayersList'>
       <h6>Players:</h6>
       {GameModel.getSortedPlayersByIndex(game)
-        .map(player => PlayersList.renderPlayer(game, player))}
+        .map(player => this.renderPlayer(game, player))}
     </ul>
   }
 }

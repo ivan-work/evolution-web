@@ -1,5 +1,8 @@
-class UserServiceClass {
-  start(getState) {
+import {PropTypes} from 'react';
+
+export class UserServiceClass {
+  constructor(getState) {
+    //if (!getState) throw new Error('UserService is not initialized');
     this.getState = getState;
   }
 
@@ -9,3 +12,5 @@ class UserServiceClass {
 }
 
 export const UserService = new UserServiceClass();
+
+export const UserServicePropType = PropTypes.instanceOf(UserServiceClass).isRequired;
