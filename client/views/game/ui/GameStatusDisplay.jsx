@@ -5,12 +5,16 @@ import IPT from 'react-immutable-proptypes';
 import {StatusRecord, PHASE} from '../../../../shared/models/game/GameModel';
 import {PlayerModel} from '../../../../shared/models/game/PlayerModel';
 
-import {UserService} from '../../../services/UserService'
+import {UserServicePropType} from '../../../services/UserService'
 
 export class GameStatusDisplay extends Component {
   static propTypes = {
     status: PropTypes.instanceOf(StatusRecord).isRequired
     , players: IPT.mapOf(PropTypes.instanceOf(PlayerModel), PropTypes.string).isRequired
+  };
+
+  static contextTypes = {
+    userService: UserServicePropType
   };
 
   constructor(props) {
@@ -30,11 +34,12 @@ export class GameStatusDisplay extends Component {
   }
 
   getPlayerNameByIndex(players, index) {
+    const {userService} = this.context;
     const player = players.find(player => player.index === index);
-    if (player)
-      return UserService.get(player.id).login;
-    else
-      return 'undef'
+    return (player && player.id && userService.get(player.id) && userService.get(player.id).login
+      ? userService.get(player.id).login
+      : '---'
+    );
   }
 
   render() {

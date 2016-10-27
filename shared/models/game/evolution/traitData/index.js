@@ -34,6 +34,9 @@ export const TraitRunning = {
 
 export const TraitMimicry = {
   type: 'TraitMimicry'
+  , action: ({game, sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}) => (dispatch, getState) => {
+    //dispatch(askPlayer)
+  }
 };
 
 export const TraitScavenger = {

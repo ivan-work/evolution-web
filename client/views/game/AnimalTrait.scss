@@ -1,0 +1,11 @@
+.AnimalTrait {
+  width: 100%;
+  font-size: 10px;
+  word-wrap: break-word;
+  outline: 1px solid black;
+  background: #9fe1e7;
+  //top: -1em;
+  &.draggable.canDrag {
+    background: #f90;
+  }
+}

@@ -43,7 +43,7 @@ export class AnimalModel extends Record({
   }
 
   hasTrait(type) {
-    return this.traits.some(trait => trait.type === type)
+    return this.traits.find(trait => trait.type === type)
   }
 
   getFood() {

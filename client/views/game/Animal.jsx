@@ -9,7 +9,7 @@ import { AnimalModel } from '~/shared/models/game/evolution/AnimalModel';
 import { TraitModel } from '~/shared/models/game/evolution/TraitModel';
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 
-import { AnimalTrait, DraggableAnimalTrait } from './AnimalTrait.jsx';
+import { AnimalTrait, DraggableAnimalTrait, ANIMAL_TRAIT_SIZE } from './AnimalTrait.jsx';
 import { AnimalLinkedTrait } from './AnimalLinkedTrait.jsx';
 import { AnimalSelectLink } from './AnimalSelectLink.jsx'
 import {GameProvider} from './providers/GameProvider.jsx';
@@ -53,6 +53,16 @@ export class _Animal extends React.Component {
     }
   }
 
+  renderTrait(trait, animal) {
+    if (trait.isLinked()) {
+      return <AnimalLinkedTrait trait={trait} sourceAnimalId={animal.id}/>;
+    } else if (trait.dataModel.targetType) {
+      return <DraggableAnimalTrait trait={trait} owner={animal}/>;
+    } else {
+      return <AnimalTrait trait={trait} owner={animal}/>;
+    }
+  }
+
   render() {
     const {model, connectDropTarget, isOver, canDrop} = this.props;
 
@@ -61,20 +71,25 @@ export class _Animal extends React.Component {
       , highlight: isOver && canDrop
     });
 
+    let traitHeight = 0;
+
     const body = <div className={className}>
-        {model.traits
-          .toArray()
-          .filter(trait => trait.isLinked())
-          .map((trait, index) => <AnimalLinkedTrait key={index} trait={trait} sourceAnimalId={model.id}/>)}
       <div className='traits'>
         {model.traits
+          .sort((t1, t2) => t1.isLinked() ? 1 : -1)
           .toArray()
-          .filter(trait => !trait.isLinked())
-          .map((trait, index) => (
-          trait.dataModel.targetType
-            ? <DraggableAnimalTrait key={index} index={index} trait={trait} owner={model}/>
-            : <AnimalTrait key={index} index={index} trait={trait} owner={model}/>)
-          )}
+          .map((trait, index) =>{
+          if (!trait.isLinked()) {
+            traitHeight -= ANIMAL_TRAIT_SIZE.height;
+          }
+          return <div key={index}
+                      style={{
+            position: 'absolute'
+            , top: traitHeight + 'px'
+            , width: ANIMAL_TRAIT_SIZE.width + 'px'
+            }}>
+            {this.renderTrait(trait, model)}
+          </div>})}
       </div>
       {this.renderSelectLink()}
       <div className='inner'>
@@ -96,7 +111,7 @@ const _DroppableAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND
         props.onCardDropped(card, props.model, alternateTrait, component);
         break;
       case DND_ITEM_TYPE.FOOD:
-      const {index} = monitor.getItem();
+        const {index} = monitor.getItem();
         props.onFoodDropped(props.model, index);
         break;
       case DND_ITEM_TYPE.TRAIT:

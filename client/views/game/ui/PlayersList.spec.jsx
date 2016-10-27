@@ -4,7 +4,7 @@ import {PlayersList} from './PlayersList.jsx';
 import {UserServiceClass} from '../../../services/UserService';
 import {SOCKET_DISCONNECT_NOW} from '../../../../shared/actions/actions';
 
-describe.only('PlayersList:', () => {
+describe('PlayersList:', () => {
   it('default:', () => {
     const [{serverStore, ServerGame, ParseGame}
       , {clientStore0, User0, ClientGame0}

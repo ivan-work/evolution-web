@@ -7,12 +7,12 @@ import {GameModel, GameModelClient} from '../../../../shared/models/game/GameMod
 import {UserServicePropType} from '../../../services/UserService'
 
 export class PlayersList extends Component {
-  static contextTypes = {
-    userService: UserServicePropType
-  };
-
   static propTypes = {
     game: React.PropTypes.instanceOf(GameModelClient).isRequired
+  };
+
+  static contextTypes = {
+    userService: UserServicePropType
   };
 
   constructor(props) {
