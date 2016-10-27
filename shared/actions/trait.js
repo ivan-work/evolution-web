@@ -12,7 +12,7 @@ import {
   , TRAIT_COOLDOWN_LINK
 } from '../models/game/evolution/constants';
 
-import {server$actionsChain, server$game} from './generic';
+import {server$game} from './generic';
 
 import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
 
@@ -66,6 +66,11 @@ export const server$playerActed = (gameId, userId) => (dispatch, getState) => di
   Object.assign(playerActed(gameId, userId)
     , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
 
+const traitQuestion = (gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId) => ({
+  type: 'traitQuestion'
+  , data: {gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId}
+});
+
 // complexActions
 
 export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId) => (dispatch, getState) => {
@@ -98,29 +103,6 @@ export const server$startCooldown = (gameId, link, duration, place, placeId) => 
   Object.assign(startCooldown(gameId, link, duration, place, placeId), {
     meta: {users: selectPlayers4Sockets(getState, gameId)}
   }));
-
-//export const cancelCooldown = (gameId, link, playerId, animalId) => ({
-//  type: 'cancelCooldown'
-//  , data: {gameId, link, playerId, animalId}
-//});
-
-export const server$cancelCooldown = (gameId, link, place, placeId) => (dispatch, getState) => {
-  throw 'NYI';
-  //dispatch(
-  //  Object.assign(cancelCooldown(gameId, link, duration, place, placeId), {
-  //    meta: {users: selectPlayers(getState, gameId)}
-  //  }));
-}
-
-// traitClientToServer
-//const server$traitActivate = () => {
-//    const game = selectGame(getState, gameId);
-//    const {animal} = game.locateAnimal(animalId);
-//    if (!animal) {
-//      throw 'no animal'
-//    }
-//
-//}
 
 export const traitClientToServer = {
   traitTakeFoodRequest: ({gameId, animalId}, {user: {id: userId}}) => (dispatch, getState) => {

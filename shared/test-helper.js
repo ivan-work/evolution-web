@@ -105,7 +105,7 @@ global.mockServerStore = function (initialServerState) {
       , reduxTimeout()
       , store => next => action => {
         serverStore.actions.push(action);
-        next(action);
+        return next(action);
       }
       , socketServerMiddleware(ioServer)
     ));

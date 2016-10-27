@@ -64,6 +64,6 @@ export const reduxTimeout = (timeouts = {}) => ({dispatch, getState}) => next =>
       timeouts[nameToClear] = void 0;
     }
   } else {
-    next(action);
+    return next(action);
   }
 };
