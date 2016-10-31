@@ -1,49 +1,70 @@
 import logger from '~/shared/utils/logger';
 
-export const server$askQuestion = (action) => (dispatch, getState) =>
-  new Promise((resolve, reject) => {
-    if (typeof action !== 'object') throw new Error('action is not an object');
-    const id = Math.floor(Math.random() * 0xFFFFFF);
-    globalPromiseStore[id] = {resolve, reject};
-    dispatch(actionQuestion(id, action));
-  });
-
-const actionQuestion = (id, action) => ({
-  type: '@@reduxQuestion/actionQuestion'
-  , data: {id, action}
-  , meta: action.meta
+export const rqActionAsk = (question, maxTime) => ({
+  type: '@@reduxQuestion/rqActionAsk'
+  , data: {question, maxTime}
 });
 
-const actionAnswer = (id, data) => ({
-  type: '@@reduxQuestion/actionAnswer'
+const rqActionQuestion = (id, question) => ({
+  type: '@@reduxQuestion/rqActionQuestion'
+  , data: {id, question}
+  , meta: question.meta
+});
+
+const rqActionAnswer = (id, data) => ({
+  type: '@@reduxQuestion/rqActionAnswer'
   , data: {id, data}
   , meta: {server: true}
 });
 
-export const reduxQuestion = (promises = {}) => ({dispatch, getState}) => next => action => {
-  if (action.type === '@@reduxQuestion/actionQuestion') {
-    const {action, maxTime} = action.data;
+export const reduxQuestion = (promisesStore = {}) => ({dispatch, getState}) => next => action => {
+  if (action.type === '@@reduxQuestion/rqActionAsk') {
+    const {question, maxTime} = action.data;
 
-    const id = Math.floor(Math.random() * 0xFFFFFF);
-    promises[id] = action
+    const questionPromise = new Promise((resolve, reject) => {
+      if (typeof question !== 'object') throw new Error('question is not an object');
+      const id = Math.floor(Math.random() * 0xFFFFFF);
+      promisesStore[id] = {resolve, reject};
+      dispatch(rqActionQuestion(id, question));
+    })
 
-
-    //logger.silly('@@reduxTimeout/addTimeout', name, typeof callback);
-    //if (timeouts[name]) throw new Error(`reduxTimeout: timeout[${name}] already occupied!`);
-    //timeouts[name] = new Timer(() => {
-    //  timeouts[name] = void 0;
-    //  dispatch(callback)
-    //}, duration);
-  } else if (action.type === '@@reduxQuestion/actionAnswer') {
-    //const nameToClear = action.data.name;
-    //logger.silly('@@reduxTimeout/cancelTimeout', nameToClear);
-    ////console.log('cancelTimeout', action.type)
-    ////if (!timeouts[nameToClear]) throw new Error(`reduxTimeout: timeout[${name}] doesnt exists!`);
-    //if (timeouts[nameToClear]) {
-    //  timeouts[nameToClear].pause();
-    //  timeouts[nameToClear] = void 0;
-    //}
+    // If max time not set = return just promise. Race with time otherwise
+    return (maxTime === void 0
+      ? questionPromise
+      : Promise.race([
+      questionPromise
+      , new Promise((resolve, reject) => setTimeout(() => resolve(null), maxTime))
+    ]));
+  } else if (action.type === '@@reduxQuestion/rqActionAnswer') {
+    const {id, data} = action.data;
+    if (promisesStore[id]) {
+      const {resolve, reject} = promisesStore[id];
+      delete promisesStore[id];
+      resolve(data);
+    }
   } else {
     return next(action);
   }
+};
+
+export const rqClientToServer = {
+  '@@reduxQuestion/rqActionAnswer': ({id, data}) => rqActionAnswer(id, data)
+};
+
+export const rqServerToClient = {
+  '@@reduxQuestion/rqActionQuestion': ({id, question}) => (dispatch, getState) => {
+    if (clientOnQuestion[question.type]) {
+      let answer = dispatch(clientOnQuestion[question.type](question.data));
+      if (!answer || typeof answer.then !== 'function') {
+        answer = Promise.resolve(answer);
+      }
+      answer.then((data) => dispatch(rqActionAnswer(id, data)));
+    } else {
+      logger.warn('clientOnQuestion action doesnt exist: ' + question.type);
+    }
+  }
+};
+
+export const clientOnQuestion = {
+  testAction: (data) => (dispatch) => 'test' + data
 };
