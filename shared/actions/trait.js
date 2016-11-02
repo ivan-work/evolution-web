@@ -2,9 +2,6 @@ import logger from '~/shared/utils/logger';
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import {List} from 'immutable';
 
-import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
-import {TraitDataModel} from '../models/game/evolution/TraitDataModel';
-import {CooldownList} from '../models/game/CooldownList';
 import {
   FOOD_SOURCE_TYPE
   , TRAIT_TARGET_TYPE
@@ -17,6 +14,9 @@ import {server$game} from './generic';
 
 import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
 
+import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
+import {TraitDataModel} from '../models/game/evolution/TraitDataModel';
+import {CooldownList} from '../models/game/CooldownList';
 import {TraitCommunication, TraitMimicry} from '../models/game/evolution/traitData';
 
 import {
@@ -29,6 +29,8 @@ import {
   , checkTraitActivation
   , checkTraitActivation_Animal
 } from './checks';
+
+import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 
 // Activation
 
@@ -64,20 +66,22 @@ export const server$traitActivate = (game, sourceAnimal, traitData, ...params) =
       throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
         , 'Animal(%s):Trait(%s) unknown target type %s', sourceAnimal.id, traitData.type, traitData.targetType)
   }
-  if (result) {
-    traitData.cooldowns.forEach(([link, place, duration]) => {
-      const placeId = (place === TRAIT_COOLDOWN_PLACE.PLAYER
-        ? sourceAnimal.ownerId
-        : sourceAnimal.id);
-      dispatch(server$startCooldown(game.id, link, duration, place, placeId));
-    });
-  }
   return result;
 };
 
-const server$traitActivate_Animal = (game, sourceAnimal, traitData, targetAid) => {
+const server$traitActivate_Animal = (game, sourceAnimal, traitData, targetAid, ...params) => {
   const targetAnimal = checkTraitActivation_Animal(game, sourceAnimal, traitData, targetAid);
-  return traitData.action(game, sourceAnimal, targetAnimal);
+
+  return traitData.action(game, sourceAnimal, targetAnimal, ...params);
+};
+
+export const server$traitStartCooldown = (gameId, traitData, sourceAnimal) => (dispatch) => {
+  traitData.cooldowns.forEach(([link, place, duration]) => {
+    const placeId = (place === TRAIT_COOLDOWN_PLACE.PLAYER
+      ? sourceAnimal.ownerId
+      : sourceAnimal.id);
+    dispatch(server$startCooldown(gameId, link, duration, place, placeId));
+  });
 };
 
 // simpleActions
@@ -157,11 +161,21 @@ const traitMimicryQuestionNotify = (gameId, sourcePlayerId, sourceAnimalId, targ
   , data: {gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId}
 });
 
-export const traitMimicryAnswer = (sourcePid, sourceAid, traitType, targetPid, targetAid, newTargetPid, newTargetAid) => (dispatch, getState) => dispatch({
-  type: 'traitMimicryAnswer'
+export const traitMimicryAnswerRequest = (sourcePid, sourceAid, traitType, targetPid, targetAid, newTargetPid, newTargetAid) => (dispatch, getState) => dispatch({
+  type: 'traitMimicryAnswerRequest'
   , data: {gameId: getState().get('game').id, sourcePid, sourceAid, traitType, targetPid, targetAid, newTargetPid, newTargetAid}
   , meta: {server: true}
 });
+
+export const server$traitMimicryAnswer = (gameId, sourcePid, sourceAid, traitType, targetPid, targetAid, newTargetPid, newTargetAid) => (dispatch, getState) => {
+  console.log('traitMimicryAnswer', sourcePid, sourceAid, traitType, targetPid, targetAid, newTargetPid, newTargetAid)
+  const game = selectGame(getState, gameId);
+  const {sourceAnimal, traitData} = checkTraitActivation(game, sourcePid, sourceAid, traitType);
+  checkTraitActivation_Animal(game, sourceAnimal, traitData, targetAid);
+  checkTraitActivation_Animal(game, sourceAnimal, traitData, newTargetAid);
+  dispatch(cancelTimeout('traitAnswer'));
+  dispatch(server$traitActivate(game, sourceAnimal, traitData, newTargetAid));
+};
 
 export const server$traitMimicryQuestion = (gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId) => (dispatch, getState) => dispatch(
   Object.assign(traitMimicryQuestion(gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId)
@@ -198,14 +212,8 @@ export const traitClientToServer = {
       dispatch(server$playerActed(gameId, userId));
     }
   }
-  , traitMimicryAnswer: ({gameId, sourcePid, sourceAid, traitType, targetPid, targetAid, newTargetPid, newTargetAid}) => (dispatch, getState) => {
-    console.log('traitMimicryAnswer', sourcePid, sourceAid, traitType, targetPid, targetAid, newTargetPid, newTargetAid)
-    const game = selectGame(getState, gameId);
-    const {sourceAnimal, traitData} = checkTraitActivation(game, sourcePid, sourceAid, traitType);
-    checkTraitActivation_Animal(game, sourceAnimal, traitData, targetAid);
-    checkTraitActivation_Animal(game, sourceAnimal, traitData, newTargetAid);
-    dispatch(server$traitActivate(game, sourceAnimal, traitData, newTargetAid));
-  }
+  , traitMimicryAnswerRequest: ({gameId, sourcePid, sourceAid, traitType, targetPid, targetAid, newTargetPid, newTargetAid}) =>
+    server$traitMimicryAnswer(gameId, sourcePid, sourceAid, traitType, targetPid, targetAid, newTargetPid, newTargetAid)
 };
 
 export const traitServerToClient = {

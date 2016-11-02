@@ -118,7 +118,7 @@ describe('Auth:', function () {
   });
 
   describe('disconnecting', function () {
-    it('clears everything', (done) => {
+    it('clears everything', async () => {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
       const clientStore1 = mockClientStore().connect(serverStore);
@@ -134,19 +134,18 @@ describe('Auth:', function () {
 
       clientStore0.disconnect();
 
-      setTimeout(() => {
-        expect(serverStore.getState().get('connections')).equal(Map({[clientStore1.getConnectionId()]: clientStore1.getConnection().socket}));
-        expect(serverStore.getState().get('users')).equal(Map({[User1.id]: User1}));
+      await new Promise(resolve => setTimeout(resolve, 1));
 
-        expect(clientStore0.getState().get('online')).equal(Map());
-        expect(clientStore1.getState().get('online')).equal(Map({[User1.id]: User1.toOthers()}));
-        done();
-      }, 20);
+      expect(serverStore.getState().get('connections')).equal(Map({[clientStore1.getConnectionId()]: clientStore1.getConnection().socket}));
+      expect(serverStore.getState().get('users')).equal(Map({[User1.id]: User1}));
+
+      expect(clientStore0.getState().get('online')).equal(Map());
+      expect(clientStore1.getState().get('online')).equal(Map({[User1.id]: User1.toOthers()}));
     });
   });
 
   describe('LocalStorage:', () => {
-    it('Remembers User', (done) => {
+    it('Remembers User', async () => {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
 
@@ -167,15 +166,14 @@ describe('Auth:', function () {
       expect(serverStore.getState().get('users')).equal(Map({[User.id]: User.set('connectionId', clientStore0.getConnectionId())}));
       expect(serverStore.getState().get('connections')).equal(Map({[clientStore0.getConnectionId()]: clientStore0.getSocket()}));
 
-      setTimeout(() => {
-        // Check for login timeout
-        expect(serverStore.getState().get('users')).equal(Map({[User.id]: User.set('connectionId', clientStore0.getConnectionId())}));
-        expect(serverStore.getState().get('connections')).equal(Map({[clientStore0.getConnectionId()]: clientStore0.getSocket()}));
-        done();
-      }, 5);
+      await new Promise(resolve => setTimeout(resolve, 1));
+
+      // Check for login timeout
+      expect(serverStore.getState().get('users')).equal(Map({[User.id]: User.set('connectionId', clientStore0.getConnectionId())}));
+      expect(serverStore.getState().get('connections')).equal(Map({[clientStore0.getConnectionId()]: clientStore0.getSocket()}));
     });
 
-    it('Remembers User from another store', (done) => {
+    it('Remembers User from another store', async () => {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
 
@@ -196,15 +194,14 @@ describe('Auth:', function () {
       expect(serverStore.getState().get('users')).equal(Map({[User.id]: User.set('connectionId', clientStore1.getConnectionId())}));
       expect(serverStore.getState().get('connections')).equal(Map({[clientStore1.getConnectionId()]: clientStore1.getSocket()}));
 
-      setTimeout(() => {
-        // Check for login timeout
-        expect(serverStore.getState().get('users')).equal(Map({[User.id]: User.set('connectionId', clientStore1.getConnectionId())}));
-        expect(serverStore.getState().get('connections')).equal(Map({[clientStore1.getConnectionId()]: clientStore1.getSocket()}));
-        done();
-      }, 5);
+      await new Promise(resolve => setTimeout(resolve, 1));
+
+      // Check for login timeout
+      expect(serverStore.getState().get('users')).equal(Map({[User.id]: User.set('connectionId', clientStore1.getConnectionId())}));
+      expect(serverStore.getState().get('connections')).equal(Map({[clientStore1.getConnectionId()]: clientStore1.getSocket()}));
     });
 
-    it('Doesnt allow two Users:', (done) => {
+    it('Doesnt allow two Users:', async () => {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
 
@@ -218,14 +215,14 @@ describe('Auth:', function () {
         [clientStore0.getConnectionId()]: clientStore0.getSocket()
         , [clientStore1.getConnectionId()]: clientStore1.getSocket()
       }));
-      setTimeout(() => {
-        expect(serverStore.getState().get('users')).equal(Map({[User.id]: User}));
-        expect(serverStore.getState().get('connections')).equal(Map({
-          [clientStore0.getConnectionId()]: clientStore0.getSocket()
-          , [clientStore1.getConnectionId()]: clientStore1.getSocket()
-        }));
-        done();
-      }, 5);
+
+      await new Promise(resolve => setTimeout(resolve, 1));
+
+      expect(serverStore.getState().get('users')).equal(Map({[User.id]: User}));
+      expect(serverStore.getState().get('connections')).equal(Map({
+        [clientStore0.getConnectionId()]: clientStore0.getSocket()
+        , [clientStore1.getConnectionId()]: clientStore1.getSocket()
+      }));
     });
 
     it('Bug with stealing identity', () => {

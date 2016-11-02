@@ -8,7 +8,6 @@ import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 
 export const SOCKET_DISCONNECT_NOW = 'SOCKET_DISCONNECT_NOW';
 export const TIMEOUT = 2 * 60 * 1000;
-export const TIMEOUT_TEST = 1;
 
 export const socketConnect = (connectionId, socket) => ({
   type: 'socketConnect'
@@ -31,7 +30,7 @@ export const socketDisconnect = (connectionId, reason) => (dispatch, getState) =
   if (!!user) {
     if (reason !== SOCKET_DISCONNECT_NOW) {
       dispatch(addTimeout(
-        !process.env.TEST ? TIMEOUT : TIMEOUT_TEST
+        TIMEOUT
         , 'logoutUser' + user.id
         , logoutUser(user.id)));
     } else {

@@ -32,7 +32,7 @@ class Timer {
 export const addTimeout = (duration, name, callback) => ({
   type: '@@reduxTimeout/addTimeout',
   data: {
-    duration,
+    duration: (!process.env.TEST ? duration : 0),
     name,
     callback
   }

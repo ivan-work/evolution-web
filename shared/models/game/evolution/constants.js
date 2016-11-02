@@ -1,3 +1,5 @@
+export const TRAIT_RESPONSE_TIMEOUT = 30;
+
 export const CTT_PARAMETER = (i => ({
   ANIMAL: 1 << i++
   , SELF: 1 << i++
@@ -22,7 +24,7 @@ export const FOOD_SOURCE_TYPE = {
 
 export const TRAIT_TARGET_TYPE = {
   ANIMAL: 'ANIMAL'
-  , ANIMAL_SELF: 'ANIMAL_SELF'
+  , TRAIT: 'TRAIT'
 };
 
 export const TRAIT_COOLDOWN_PLACE = {

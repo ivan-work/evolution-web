@@ -3,15 +3,20 @@ import {TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
   , TRAIT_COOLDOWN_LINK
-  , CARD_TARGET_TYPE} from '../constants';
+  , CARD_TARGET_TYPE
+  , TRAIT_RESPONSE_TIMEOUT} from '../constants';
 
 import {
   server$startFeeding
   , server$traitMimicryQuestion
+  , server$traitMimicryAnswer
+  , server$traitStartCooldown
 } from '../../../../actions/actions';
 
-export {TraitCarnivorous} from './TraitCarnivorous';
+import {addTimeout} from '../../../../utils/reduxTimeout';
+import {RandomGenerator} from '../../../../utils/randomGenerator';
 
+export {TraitCarnivorous} from './TraitCarnivorous';
 
 export const TraitParasite = {
   type: 'TraitParasite'
@@ -32,6 +37,10 @@ export const TraitSwimming = {
 
 export const TraitRunning = {
   type: 'TraitRunning'
+  , cooldowns: fromJS([
+    ['TraitRunning', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
+  ])
+  , action: () => RandomGenerator.generate(0, 6) > 3
 };
 
 export const TraitMimicry = {
@@ -40,9 +49,36 @@ export const TraitMimicry = {
   , cooldowns: fromJS([
     ['TraitMimicry', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
-  , action: (game, mimicryAnimal, aggressorAnimal) => (dispatch, getState) => {
-    dispatch(server$traitMimicryQuestion(game.id, mimicryAnimal.ownerId, mimicryAnimal.id, aggressorAnimal.ownerId, aggressorAnimal.id));
-    return true;
+  , action: (game, mimicryAnimal, aggressorAnimal, traitData) => (dispatch, getState) => {
+    const candidates = game.getPlayer(mimicryAnimal.ownerId).continent.filter((animal) =>
+      mimicryAnimal.id !== animal.id
+      && traitData.checkTarget(game, aggressorAnimal, animal)
+    );
+    switch (candidates.size) {
+      case 0:
+        return false;
+      case 1:
+        dispatch(server$traitStartCooldown(game.id, TraitMimicry, mimicryAnimal));
+        dispatch(server$traitMimicryAnswer(game.id
+          , aggressorAnimal.ownerId, aggressorAnimal.id
+          , traitData.type
+          , mimicryAnimal.ownerId, mimicryAnimal.id
+          , candidates.get(0).ownerId, candidates.get(0).id
+        ));
+        return true;
+      default:
+        dispatch(server$traitStartCooldown(game.id, TraitMimicry, mimicryAnimal));
+        dispatch(addTimeout(TRAIT_RESPONSE_TIMEOUT, 'traitAnswer', (dispatch, getState) => {
+          dispatch(server$traitMimicryAnswer(game.id
+            , aggressorAnimal.ownerId, aggressorAnimal.id
+            , traitData.type
+            , mimicryAnimal.ownerId, mimicryAnimal.id
+            , candidates.get(0).ownerId, candidates.get(0).id
+          ));
+        }));
+        dispatch(server$traitMimicryQuestion(game.id, mimicryAnimal.ownerId, mimicryAnimal.id, aggressorAnimal.ownerId, aggressorAnimal.id));
+        return true;
+    }
   }
 };
 
@@ -78,6 +114,20 @@ export const TraitPiracy = {
 
 export const TraitTailLoss = {
   type: 'TraitTailLoss'
+  , targetType: TRAIT_TARGET_TYPE.TRAIT
+  , cooldowns: fromJS([
+    ['TraitTailLoss', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
+  ])
+  , action: (game, mimicryAnimal, aggressorAnimal) => (dispatch, getState) => {
+    //const candidates = game.getPlayer(mimicryAnimal.ownerId).continent.map((animal) => {
+    //  animal
+    //});
+    //dispatch(addTimeout(TRAIT_RESPONSE_TIMEOUT, 'userResponse', (dispatch, getState) => {
+    //  dispatch(ser)
+    //}));
+    //dispatch(server$traitMimicryQuestion(game.id, mimicryAnimal.ownerId, mimicryAnimal.id, aggressorAnimal.ownerId, aggressorAnimal.id));
+    return true;
+  }
 };
 
 export const TraitCommunication = {
