@@ -6,6 +6,7 @@ import {TRAIT_TARGET_TYPE
 
 import {
   server$startFeeding
+  , server$traitMimicryQuestion
 } from '../../../../actions/actions';
 
 export {TraitCarnivorous} from './TraitCarnivorous';
@@ -35,7 +36,7 @@ export const TraitRunning = {
 export const TraitMimicry = {
   type: 'TraitMimicry'
   , action: ({game, sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}) => (dispatch, getState) => {
-    //dispatch(askPlayer)
+    dispatch(server$traitMimicryQuestion(game.id, sourcePlayerId, sourceAnimal.id, targetPlayerId, targetAnimal.id));
   }
 };
 

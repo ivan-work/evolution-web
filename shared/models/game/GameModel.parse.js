@@ -50,8 +50,8 @@ export const parseAnimalList = (userId, string) => {
       .split(' ')
       .reduce((animal, prop) => {
         prop = prop.trim();
-        if ('$' === prop) {
-          return animal;
+        if (/^\$.*$/.test(prop)) {
+          return prop.length > 1 ? animal.set('id', prop) : animal;
         } else if (/^\++$/.test(prop)) {
           return animal.set('food', prop.length)
         } else {

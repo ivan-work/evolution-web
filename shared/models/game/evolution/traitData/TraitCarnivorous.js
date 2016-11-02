@@ -3,6 +3,7 @@ import {TRAIT_TARGET_TYPE, TRAIT_COOLDOWN_DURATION, TRAIT_COOLDOWN_PLACE, TRAIT_
 import {
   server$traitKillAnimal
   , server$startFeeding
+  , server$startCooldown
 } from '../../../../actions/actions';
 import {TraitMimicry} from './index';
 
@@ -15,30 +16,19 @@ export const TraitCarnivorous = {
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: ({game, sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}) => (dispatch, getState) => {
-    //game.eventAttack(sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal)
-
-    //if (mimicry) {
-    //  requestUserMimicry()
-    //}
-
-    //let huntingPromise = Promise.resolve({sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal});
-    //const mimicryTrait = targetAnimal.hasTrait(TraitMimicry.type);
-    //if (mimicryTrait) {
-    //  huntingPromise = huntingPromise
-    //    .then(({game, sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}) => {
-    //      dispatch(mimicryTrait.dataModel.action({game, sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}))
-    //    });
-    //}
-
-    //if (mimicry) {
-    //  askUser()
-    //    .then()
-    //}
-    //return huntingPromise.then(({sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}) => {
+    const mimicryTrait = targetAnimal.hasTrait(TraitMimicry.type);
+    if (mimicryTrait) {
+      dispatch(mimicryTrait.dataModel.action({game, sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}))
+    } else {
+      TraitCarnivorous.cooldowns.forEach(([link, place, duration]) => {
+        const placeId = (place === TRAIT_COOLDOWN_PLACE.PLAYER
+          ? sourcePlayerId
+          : sourceAnimal.id);
+        dispatch(server$startCooldown(game.id, link, duration, place, placeId));
+      });
       dispatch(server$traitKillAnimal(game.id, sourcePlayerId, sourceAnimal.id, targetPlayerId, targetAnimal.id));
       dispatch(server$startFeeding(game.id, sourceAnimal, 2));
-      // dispatch(traitScavenger)
-    //});
+    }
   }
   , checkAction: (game, sourceAnimal) => {
     if (TraitCarnivorous.cooldowns.some(([link, place]) =>

@@ -16,7 +16,7 @@ import {server$game} from './generic';
 
 import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
 
-import {TraitCommunication} from '../models/game/evolution/traitData';
+import {TraitCommunication, TraitMimicry} from '../models/game/evolution/traitData';
 
 import {
   checkGameDefined
@@ -25,6 +25,7 @@ import {
   , checkPlayerHasAnimal
   , checkPlayerTurnAndPhase
   , checkValidAnimalPosition
+  , checkTraitActivation
 } from './checks';
 
 // Activation
@@ -104,6 +105,28 @@ export const server$startCooldown = (gameId, link, duration, place, placeId) => 
     meta: {users: selectPlayers4Sockets(getState, gameId)}
   }));
 
+// Mimicry
+
+const traitMimicryQuestion = (gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId) => ({
+  type: 'traitMimicryQuestion'
+  , data: {gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId}
+});
+
+const traitMimicryQuestionNotify = (gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId) => ({
+  type: 'traitMimicryQuestionNotify'
+  , data: {gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId}
+});
+
+export const traitMimicryAnswer = (sourcePid, sourceAid, traitType, targetPid, targetAid, newTargetPid, newTargetAid) => (dispatch, getState) => dispatch({
+  type: 'traitMimicryAnswer'
+  , data: {gameId: getState().get('game').id, sourcePid, sourceAid, traitType, targetPid, targetAid, newTargetPid, newTargetAid}
+  , meta: {server: true}
+});
+
+export const server$traitMimicryQuestion = (gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId) => (dispatch, getState) => dispatch(
+  Object.assign(traitMimicryQuestion(gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId)
+    , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId)}}));
+
 export const traitClientToServer = {
   traitTakeFoodRequest: ({gameId, animalId}, {user: {id: userId}}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
@@ -129,55 +152,31 @@ export const traitClientToServer = {
   }
   , traitActivateRequest: ({gameId, animalId, traitType, targetId}, {user: {id: userId}}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
-    checkGameDefined(game);
-    checkGameHasUser(game, userId);
-    checkPlayerTurnAndPhase(game, userId, PHASE.FEEDING);
-    const sourceAnimal = checkPlayerHasAnimal(game, userId, animalId);
-    const trait = sourceAnimal.traits.find(trait => trait.type === traitType);
-    if (!trait) {
-      throw new ActionCheckError(`traitActivateRequest@Game(${gameId})`, 'Animal(%s) doesnt have Trait(%s)', animalId, traitType)
-    }
-    const traitData = trait.dataModel;
-    if (traitData.cooldowns && traitData.cooldowns.some(([link, place]) =>
-        game.cooldowns.checkFor(link, userId, animalId))) {
-      throw new ActionCheckError(`traitActivateRequest@Game(${gameId})`, 'Animal(%s):Trait(%s) has cooldown active', animalId, traitType)
-    }
-    if (!traitData.action) {
-      throw new ActionCheckError(`traitActivateRequest@Game(${gameId})`, 'Animal(%s):Trait(%s) is not active', animalId, traitType)
-    }
-    if (traitData.checkAction && !traitData.checkAction(game, sourceAnimal)) {
-      throw new ActionCheckError(`traitActivateRequest@Game(${gameId})`, 'Animal(%s):Trait(%s) checkAction failed', animalId, traitType)
-    }
-    if (traitData.targetType !== null) {
-      if (traitData.targetType === TRAIT_TARGET_TYPE.ANIMAL) {
-        if (animalId === targetId) {
-          throw new ActionCheckError(`traitActivateRequest@Game(${gameId})`, 'Animal(%s):Trait(%s) cant target self', animalId, traitType)
-        }
-        const {playerId, animalIndex, animal: targetAnimal} = game.locateAnimal(targetId);
-        if (playerId === null || !targetAnimal) {
-          throw new ActionCheckError(`traitActivateRequest@Game(${gameId})`, 'Animal(%s):Trait(%s) cant locate Animal(%s)', animalId, traitType, targetId)
-        }
-        if (traitData.checkTarget && !traitData.checkTarget(game, sourceAnimal, targetAnimal)) {
-          throw new ActionCheckError(`traitActivateRequest@Game(${gameId})`, 'Animal(%s):Trait(%s) checkTarget failed', animalId, traitType)
-        }
-        if (traitData.cooldowns) {
-          traitData.cooldowns.forEach(([link, place, duration]) => {
-            const placeId = (place === TRAIT_COOLDOWN_PLACE.PLAYER
-              ? userId
-              : sourceAnimal.id);
-            dispatch(server$startCooldown(game.id, link, duration, place, placeId));
-          })
-        }
-        dispatch(server$playerActed(gameId, userId));
-        dispatch(traitData.action({
-          game: game
-          , sourcePlayerId: userId
-          , sourceAnimal: sourceAnimal
-          , targetPlayerId: playerId
-          , targetAnimal: targetAnimal
-        }));
-      }
-    }
+    const {sourceAnimal, traitData, targetPid, targetAnimal} =
+      checkTraitActivation(game, userId, animalId, traitType, targetId);
+    dispatch(server$playerActed(gameId, userId));
+    dispatch(traitData.action({
+      game: game
+      , sourcePlayerId: userId
+      , sourceAnimal: sourceAnimal
+      , targetPlayerId: targetPid
+      , targetAnimal: targetAnimal
+    }));
+  }
+  , traitMimicryAnswer: ({gameId, sourcePid, sourceAid, traitType, targetPid, targetAid, newTargetPid, newTargetAid}) => (dispatch, getState) => {
+    console.log(sourcePid, sourceAid, traitType, targetPid, targetAid, newTargetPid, newTargetAid)
+    const game = selectGame(getState, gameId);
+    const {sourceAnimal, targetAnimal, traitData} =
+      checkTraitActivation(game, sourcePid, sourceAid, traitType, targetAid);
+    const {targetAnimal: newTargetAnimal} =
+      checkTraitActivation(game, sourcePid, sourceAid, traitType, newTargetAid);
+    dispatch(traitData.action({
+      game: game
+      , sourcePlayerId: sourcePid
+      , sourceAnimal: sourceAnimal
+      , targetPlayerId: newTargetPid
+      , targetAnimal: newTargetAnimal
+    }));
   }
 };
 
@@ -188,4 +187,9 @@ export const traitServerToClient = {
     traitKillAnimal(gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId)
   , playerActed: ({gameId, userId}) =>
     playerActed(gameId, userId)
+  , traitMimicryQuestion: ({gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId}, currentUserId) => (dispatch) => {
+    if (currentUserId === targetPlayerId)
+      dispatch(traitMimicryQuestion({gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId}));
+    dispatch(traitMimicryQuestionNotify({gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId}));
+  }
 };

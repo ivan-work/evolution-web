@@ -20,14 +20,16 @@ describe('GameModel.parse', () => {
   });
 
   it('parseAnimalList', () => {
-    const list = GameModel.parseAnimalList('u', ' carn sharp , sharp camo ');
-    expect(list.size).equal(2);
-    expect(list.first().traits.size).equal(2);
-    expect(list.last().traits.size).equal(2);
-    expect(list.first().traits.first().type).equal('TraitCarnivorous');
-    expect(list.first().traits.last().type).equal('TraitSharpVision');
-    expect(list.last().traits.first().type).equal('TraitSharpVision');
-    expect(list.last().traits.last().type).equal('TraitCamouflage');
+    const list = GameModel.parseAnimalList('u', ' carn sharp , sharp camo , $A ');
+    expect(list.size).equal(3);
+    expect(list.get(0).traits.size).equal(2);
+    expect(list.get(0).traits.first().type).equal('TraitCarnivorous');
+    expect(list.get(0).traits.last().type).equal('TraitSharpVision');
+    expect(list.get(1).traits.size).equal(2);
+    expect(list.get(1).traits.first().type).equal('TraitSharpVision');
+    expect(list.get(1).traits.last().type).equal('TraitCamouflage');
+    expect(list.get(2).id).equal('$A');
+    expect(list.get(2).traits.size).equal(0);
 
     expect(GameModel.parseAnimalList('u', ''), 'parseAnimalList(empty)').equal(List());
 
@@ -36,10 +38,12 @@ describe('GameModel.parse', () => {
   });
 
   it('parseAnimalListWithFood', () => {
-    const list = GameModel.parseAnimalList('u', '$, +, $ ++ carn sharp, $ sharp camo, + camo');
+    const list = GameModel.parseAnimalList('u', '$A, +, $B ++ carn sharp, $ sharp camo, + camo');
     expect(list.size).equal(5);
     expect(list.get(0).traits.size).equal(0);
+    expect(list.get(0).id).equal('$A');
     expect(list.get(1).traits.size).equal(0);
+    expect(list.get(2).id).equal('$B');
     expect(list.get(2).traits.size).equal(2);
     expect(list.get(2).traits.get(0).type).equal('TraitCarnivorous');
     expect(list.get(2).traits.get(1).type).equal('TraitSharpVision');
