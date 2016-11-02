@@ -1,3 +1,4 @@
+import {fromJS} from 'immutable';
 import {TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
@@ -35,8 +36,13 @@ export const TraitRunning = {
 
 export const TraitMimicry = {
   type: 'TraitMimicry'
-  , action: ({game, sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}) => (dispatch, getState) => {
-    dispatch(server$traitMimicryQuestion(game.id, sourcePlayerId, sourceAnimal.id, targetPlayerId, targetAnimal.id));
+  , targetType: TRAIT_TARGET_TYPE.ANIMAL
+  , cooldowns: fromJS([
+    ['TraitMimicry', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
+  ])
+  , action: (game, mimicryAnimal, aggressorAnimal) => (dispatch, getState) => {
+    dispatch(server$traitMimicryQuestion(game.id, mimicryAnimal.ownerId, mimicryAnimal.id, aggressorAnimal.ownerId, aggressorAnimal.id));
+    return true;
   }
 };
 

@@ -22,6 +22,7 @@ export const FOOD_SOURCE_TYPE = {
 
 export const TRAIT_TARGET_TYPE = {
   ANIMAL: 'ANIMAL'
+  , ANIMAL_SELF: 'ANIMAL_SELF'
 };
 
 export const TRAIT_COOLDOWN_PLACE = {

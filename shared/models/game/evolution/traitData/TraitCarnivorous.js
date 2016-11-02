@@ -4,8 +4,9 @@ import {
   server$traitKillAnimal
   , server$startFeeding
   , server$startCooldown
+  , server$traitActivate
 } from '../../../../actions/actions';
-import {TraitMimicry} from './index';
+import {TraitMimicry, TraitRunning} from './index';
 
 export const TraitCarnivorous = {
   type: 'TraitCarnivorous'
@@ -15,26 +16,22 @@ export const TraitCarnivorous = {
     ['TraitCarnivorous', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
-  , action: ({game, sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}) => (dispatch, getState) => {
-    const mimicryTrait = targetAnimal.hasTrait(TraitMimicry.type);
-    if (mimicryTrait) {
-      dispatch(mimicryTrait.dataModel.action({game, sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}))
-    } else {
-      TraitCarnivorous.cooldowns.forEach(([link, place, duration]) => {
-        const placeId = (place === TRAIT_COOLDOWN_PLACE.PLAYER
-          ? sourcePlayerId
-          : sourceAnimal.id);
-        dispatch(server$startCooldown(game.id, link, duration, place, placeId));
-      });
-      dispatch(server$traitKillAnimal(game.id, sourcePlayerId, sourceAnimal.id, targetPlayerId, targetAnimal.id));
+  , action: (game, sourceAnimal, targetAnimal) => (dispatch, getState) => {
+    let success = true;
+    const traitMimicry = targetAnimal.hasTrait(TraitMimicry.type);
+    const traitRunning = targetAnimal.hasTrait(TraitRunning.type);
+    if (traitMimicry) {
+      //dispatch(server$traitActivate(game, sourceAnimal, TraitMimicry, targetAnimal.id))
+      success = !dispatch(server$traitActivate(game, targetAnimal, TraitMimicry, sourceAnimal.id))
+    }
+
+    if (success) {
+      dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
       dispatch(server$startFeeding(game.id, sourceAnimal, 2));
+      return true;
     }
   }
-  , checkAction: (game, sourceAnimal) => {
-    if (TraitCarnivorous.cooldowns.some(([link, place]) =>
-        game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id))) {
-      return false;
-    }
+  , $checkAction: (game, sourceAnimal) => {
     return sourceAnimal.needsFood() > 0
   }
   , checkTarget: (game, sourceAnimal, targetAnimal) => (

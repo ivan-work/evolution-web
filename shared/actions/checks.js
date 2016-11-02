@@ -55,7 +55,7 @@ export const checkValidAnimalPosition = (game, userId, animalPosition) => {
   }
 };
 
-export const checkTraitActivation = (game, sourcePid, sourceAid, traitType, targetAid) => {
+export const checkTraitActivation = (game, sourcePid, sourceAid, traitType) => {
   checkGameDefined(game);
   const gameId = game.id;
   checkGameHasUser(game, sourcePid);
@@ -66,31 +66,27 @@ export const checkTraitActivation = (game, sourcePid, sourceAid, traitType, targ
     throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s) doesnt have Trait(%s)', sourceAid, traitType)
   }
   const traitData = trait.dataModel;
-  if (traitData.cooldowns && traitData.cooldowns.some(([link, place]) =>
-      game.cooldowns.checkFor(link, sourcePid, sourceAid))) {
-    throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s):Trait(%s) has cooldown active', sourceAid, traitType)
-  }
   if (!traitData.action) {
     throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s):Trait(%s) is not active', sourceAid, traitType)
   }
-  if (traitData.checkAction && !traitData.checkAction(game, sourceAnimal)) {
-    throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s):Trait(%s) checkAction failed', sourceAid, traitType)
+  return {sourceAnimal, traitData};
+};
+
+export const checkTraitActivation_Animal = (game, sourceAnimal, traitData, targetAid) => {
+  const gameId = game.id;
+  if (sourceAnimal.id === targetAid) {
+    throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
+      , 'Animal(%s):Trait(%s) cant target self', sourceAnimal.id, traitData.type)
   }
-  if (!traitData.targetType) {
-    throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s):Trait(%s) no targetType', sourceAid, traitType)
+
+  const {animal: targetAnimal} = game.locateAnimal(targetAid);
+  if (!targetAnimal) {
+    throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
+      , 'Animal(%s):Trait(%s) cant locate Animal(%s)', sourceAnimal.id, traitData.type, targetAid)
   }
-  if (traitData.targetType === TRAIT_TARGET_TYPE.ANIMAL) {
-    if (sourceAid === targetAid) {
-      throw new ActionCheckError(`traitActivateRequest@Game(${gameId})`, 'Animal(%s):Trait(%s) cant target self', sourceAid, traitType)
-    }
-    const {playerId: targetPid, animal: targetAnimal} = game.locateAnimal(targetAid);
-    if (!targetAnimal) {
-      throw new ActionCheckError(`traitActivateRequest@Game(${gameId})`, 'Animal(%s):Trait(%s) cant locate Animal(%s)', sourceAid, traitType, targetId)
-    }
-    if (traitData.checkTarget && !traitData.checkTarget(game, sourceAnimal, targetAnimal)) {
-      throw new ActionCheckError(`traitActivateRequest@Game(${gameId})`, 'Animal(%s):Trait(%s) checkTarget failed', sourceAid, traitType)
-    }
-    return {game, sourceAnimal, traitData, targetPid, targetAnimal};
+  if (traitData.checkTarget && !traitData.checkTarget(game, sourceAnimal, targetAnimal)) {
+    throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
+      , 'Animal(%s):Trait(%s) checkTarget on Animal(%s) failed', sourceAnimal.id, traitData.type, targetAnimal.id)
   }
-  throw new ActionCheckError(`traitActivateRequest@Game(${gameId})`, 'Animal(%s):Trait(%s) unknown target type %s', sourceAid, traitType, traitData.targetType)
+  return targetAnimal;
 };
