@@ -6,7 +6,7 @@ import {
   //, SOCKET_DISCONNECT_NOW
 } from '../actions/actions';
 
-describe.only('Generic actions', () => {
+describe('Generic actions', () => {
   it('Promises', async () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
