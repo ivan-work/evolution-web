@@ -24,16 +24,16 @@ players:
     const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     expect(selectCard(User0, 0).trait1.type).equal('TraitCarnivorous');
     expect(selectCard(User0, 1).trait1.type).equal('TraitScavenger');
-    expectUnchanged(() => clientStore0.dispatch(
+    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(
       gameDeployTraitRequest(selectCard(User0, 0).id, '$A')
     ), serverStore, clientStore0, clientStore1);
-    expectUnchanged(() => clientStore0.dispatch(
+    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(
       gameDeployTraitRequest(selectCard(User0, 0).id, '$B')
     ), serverStore, clientStore0, clientStore1);
-    expectUnchanged(() => clientStore0.dispatch(
+    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(
       gameDeployTraitRequest(selectCard(User0, 1).id, '$A')
     ), serverStore, clientStore0, clientStore1);
-    expectUnchanged(() => clientStore0.dispatch(
+    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(
       gameDeployTraitRequest(selectCard(User0, 1).id, '$B')
     ), serverStore, clientStore0, clientStore1);
   });

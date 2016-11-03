@@ -6,10 +6,12 @@ import {
   , gameDeployTraitRequest
 } from '../actions';
 
+import {makeGameSelectors} from '../../selectors';
+
 describe('Game Hacking (EAT PHASE):', function () {
   it('Simple eating', () => {
-    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
-    ParseGame(`
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
 food: 2
 phase: 2
 players:
@@ -17,7 +19,10 @@ players:
     continent: $,$
   - continent: $,$
 `);
+    const {selectCard} = makeGameSelectors(serverStore.getState, gameId);
 
-    expectUnchanged(() => clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id, 0)), serverStore, clientStore1);
+    expectUnchanged(`Can't deploy animal on FEEDING`, () =>
+        clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id, 0))
+      , serverStore, clientStore1);
   });
 });

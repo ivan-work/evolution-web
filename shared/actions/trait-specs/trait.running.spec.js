@@ -62,7 +62,7 @@ players:
     });
 
     replaceRandom(() => 0, () => {
-      expectUnchanged(() => clientStore0.dispatch(activateTrait(User0, 1, 'TraitCarnivorous', User1, 0)), serverStore, clientStore0);
+      expectUnchanged('CHANGEIT', () => clientStore0.dispatch(activateTrait(User0, 1, 'TraitCarnivorous', User1, 0)), serverStore, clientStore0);
       clientStore0.dispatch(activateTrait(User0, 0, 'TraitCarnivorous', User1, 0));
       expect(selectAnimal(User0, 0).getFood()).equal(2);
       expect(selectAnimal(User1, 0)).undefined;

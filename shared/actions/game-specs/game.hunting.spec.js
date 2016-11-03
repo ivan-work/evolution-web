@@ -35,31 +35,31 @@ players:
     expect(ServerGame().food).equal(10);
     expect(selectAnimal(User0, 0).food).equal(2);
 
-    expectUnchanged(() =>
+    expectUnchanged('CHANGEIT', () =>
       clientStore0.dispatch(activateTrait(User0, 1, 'TraitCarnivorous', User1, 0))
       , serverStore, clientStore0, clientStore1);
-    expectUnchanged(() =>
+    expectUnchanged('CHANGEIT', () =>
       clientStore0.dispatch(traitTakeFoodRequest(ClientGame0().getPlayerAnimal(User0, 0).id))
       , serverStore, clientStore0, clientStore1);
-    expectUnchanged(() =>
+    expectUnchanged('CHANGEIT', () =>
       clientStore1.dispatch(traitTakeFoodRequest(ClientGame0().getPlayerAnimal(User1, 0).id))
       , serverStore, clientStore0, clientStore1);
 
     clientStore0.dispatch(gameEndTurnRequest());
 
-    expectChanged(() => clientStore1.dispatch(traitTakeFoodRequest(ClientGame0().getPlayerAnimal(User1, 1).id)), serverStore, clientStore0, clientStore1);
+    expectChanged('CHANGEIT', () => clientStore1.dispatch(traitTakeFoodRequest(ClientGame0().getPlayerAnimal(User1, 1).id)), serverStore, clientStore0, clientStore1);
 
     clientStore1.dispatch(gameEndTurnRequest());
 
-    expectUnchanged(() =>
+    expectUnchanged('CHANGEIT', () =>
         clientStore1.dispatch(activateTrait(User1, 1, 'TraitCarnivorous', User0, 0))
       , serverStore, clientStore0, clientStore1);
 
-    expectUnchanged(() =>
+    expectUnchanged('CHANGEIT', () =>
       clientStore0.dispatch(activateTrait(User0, 0, 'TraitCarnivorous', User0, 0))
       , serverStore, clientStore0, clientStore1);
 
-    expectChanged(() =>
+    expectChanged('CHANGEIT', () =>
       clientStore0.dispatch(activateTrait(User0, 1, 'TraitCarnivorous', User1, 0))
       , serverStore, clientStore0, clientStore1);
 
@@ -68,7 +68,7 @@ players:
 
     clientStore0.dispatch(gameEndTurnRequest());
 
-    expectChanged(() =>
+    expectChanged('CHANGEIT', () =>
       clientStore1.dispatch(activateTrait(User1, 0, 'TraitCarnivorous', User0, 2))
       , serverStore, clientStore0, clientStore1);
 
