@@ -37,7 +37,7 @@ export class PlayersList extends Component {
     const {game} = this.props;
     return <ul className='PlayersList'>
       <h6>Players:</h6>
-      {GameModel.getSortedPlayersByIndex(game)
+      {GameModel.sortPlayersFromIndex(game).toArray()
         .map(player => this.renderPlayer(game, player))}
     </ul>
   }

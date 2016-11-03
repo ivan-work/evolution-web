@@ -35,9 +35,9 @@ players:
 `);
     const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     const {activateTrait} = makeGameActionHelpers(serverStore.getState, gameId);
-    replaceRandom(() => 1, () => {
-      expect(selectTrait(User1, 0, 0).type).equal('TraitRunning');
+    expect(selectTrait(User1, 0, 0).type).equal('TraitRunning');
 
+    replaceRandom(() => 1, () => {
       clientStore0.dispatch(activateTrait(User0, 1, 'TraitCarnivorous', User1, 0));
 
       expect(ServerGame().getPlayer(User0).acted, 'User0 has acted').true;
