@@ -6,7 +6,8 @@ import {CooldownList} from './CooldownList';
 import * as cardData from './evolution/cardData';
 
 import uuid from 'node-uuid';
-import {ensureParameter} from '~/shared/utils';
+import {ensureParameter} from '../../utils';
+import {getRandom} from '../../utils/randomGenerator';
 
 import {parseFromRoom, parseCardList, parseAnimalList} from './GameModel.parse';
 
@@ -28,7 +29,8 @@ export const StatusRecord = Record({
   , phase: PHASE.PREPARE
 });
 
-const rollDice = () => Math.floor(6 * Math.random()) + 1;
+const rollDice = () => getRandom(1, 6);
+
 const FOOD_TABLE = [
   () => 10
   , () => 10

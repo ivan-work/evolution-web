@@ -9,6 +9,7 @@ export class TraitModel extends Record({
   , ownerId: null
   , hostAnimalId: null
   , linkAnimalId: null
+  , symbioticAid: null
   , dataModel: null
   , value: null
 }) {
@@ -50,6 +51,11 @@ export class TraitModel extends Record({
       .set('ownerId', animal1.ownerId)
       .set('hostAnimalId', animal1.id)
       .set('linkAnimalId', animal2.id);
+  }
+
+  linkOneway(animal1, animal2, from1to2) {
+    return this.linkBetween(animal1, animal2)
+      .set('symbioticAid', from1to2 ? animal1.id : animal2.id);
   }
 
   isLinked() {

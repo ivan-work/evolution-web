@@ -6,7 +6,7 @@ import {CardModel} from '../../shared/models/game/CardModel';
 import {CooldownList} from '../../shared/models/game/CooldownList';
 import {AnimalModel} from '../../shared/models/game/evolution/AnimalModel';
 import {TraitModel} from '../../shared/models/game/evolution/TraitModel';
-import {FOOD_SOURCE_TYPE} from '../../shared/models/game/evolution/constants';
+import {FOOD_SOURCE_TYPE, CTT_PARAMETER} from '../../shared/models/game/evolution/constants';
 
 export const gameStart = game => game
   .setIn(['started'], true)
@@ -40,14 +40,24 @@ export const gameDeployTrait = (game, {cardId, traitType, animalId, linkedAnimal
   const {playerId: animalOwnerId, animalIndex, animal} = game.locateAnimal(animalId);
   const {playerId: linkedAnimalOwnerId, animalIndex: linkedAnimalIndex, animal: linkedAnimal} = game.locateAnimal(linkedAnimalId);
 
-  if (linkedAnimalId == void 0) {
+  const traitData = TraitModel.new(traitType).dataModel;
+
+  if (!(traitData.cardTargetType & CTT_PARAMETER.LINK)) {
     const trait = TraitModel.new(traitType).attachTo(animal);
     return game
       .removeIn(['players', cardOwnerId, 'hand', cardIndex])
       .updateIn(['players', animalOwnerId, 'continent', animalIndex, 'traits'], traits => traits.push(trait))
-  } else {
-    const trait1 = TraitModel.new(traitType).linkBetween(animal, linkedAnimal);
-    const trait2 = TraitModel.new(traitType).linkBetween(linkedAnimal, animal);
+  } else  {
+    let trait1;
+    let trait2;
+    if (!(traitData.cardTargetType & CTT_PARAMETER.ONEWAY)) {
+      trait1 = TraitModel.new(traitType).linkBetween(animal, linkedAnimal);
+      trait2 = TraitModel.new(traitType).linkBetween(linkedAnimal, animal);
+    } else {
+      trait1 = TraitModel.new(traitType).linkOneway(animal, linkedAnimal, true);
+      trait2 = TraitModel.new(traitType).linkOneway(linkedAnimal, animal, false);
+    }
+
     return game
       .removeIn(['players', cardOwnerId, 'hand', cardIndex])
       .updateIn(['players', animalOwnerId, 'continent', animalIndex, 'traits'], traits => traits.push(trait1))

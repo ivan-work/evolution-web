@@ -131,7 +131,7 @@ const _DroppableAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND
         return true;
       case DND_ITEM_TYPE.FOOD:
         const {index} = monitor.getItem();
-        return props.isUserAnimal && props.model.needsFood() > 0;
+        return props.isUserAnimal && props.model.canEat(props.game);
       case DND_ITEM_TYPE.TRAIT:
         const {trait, owner} = monitor.getItem();
         const targetCheck = !trait.dataModel.checkTarget || trait.dataModel.checkTarget(props.game, owner, props.model);

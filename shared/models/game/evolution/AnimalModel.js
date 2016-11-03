@@ -3,7 +3,7 @@ import uuid from 'node-uuid';
 import {TraitModel} from './TraitModel';
 import {TraitDataModel} from './TraitDataModel';
 
-import {TraitFatTissue} from './traitData';
+import {TraitFatTissue, TraitSymbiosis} from './traitData';
 
 export class AnimalModel extends Record({
   id: null
@@ -62,6 +62,17 @@ export class AnimalModel extends Record({
     return this.traits.filter(trait => trait.type === TraitFatTissue.type).size
   }
 
+  canEat(game) {
+    return this.needsFood() > 0 && this.traits
+        .filter(trait => trait.type === TraitSymbiosis.type && trait.symbioticAid === this.id)
+        .filter(trait => {
+          //console.log(`${this.id} is living on ${trait.linkAnimalId}`);
+          const {animal: hostAnimal} = game.locateAnimal(trait.linkAnimalId);
+          //console.log(`And ${trait.linkAnimalId} ${hostAnimal.canSurvive() ? `can` : `can't`} survive`)
+          return !hostAnimal.canSurvive();
+        }).size == 0;
+  }
+
   needsFood() {
     return this.sizeOfNormalFood() + this.sizeOfFat() - this.getFood();
   }
@@ -100,8 +111,7 @@ export class AnimalModel extends Record({
   }
 
   digestFood() {
-    let foodBalance = -this.needsFood(); // +1 - overeat, -1 ot ate
-    const fat = this.getFat();
+    let foodBalance = -this.needsFood(); // +1 means animal overate, -1 means to generate from fat
     let self = this;
     while (foodBalance < 0 && self.getFat().size > 0) {
       foodBalance++;

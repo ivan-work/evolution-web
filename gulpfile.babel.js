@@ -16,7 +16,10 @@ const testWatch = (paths) => gulp.src(paths)
     bail: true
     , require: ['source-map-support/register', 'ignore-styles', './shared/test-helper.js']
   }))
-  .on('error', gutil.log);
+  .on('error', function (e) {
+    gutil.log(e);
+    this.emit('end');
+  });
 
 gulp.task('test:setup', () => {
   watching = true;
