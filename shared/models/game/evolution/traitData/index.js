@@ -14,7 +14,9 @@ import {
 } from '../../../../actions/actions';
 
 import {addTimeout} from '../../../../utils/reduxTimeout';
-import {RandomGenerator} from '../../../../utils/randomGenerator';
+import {getRandom} from '../../../../utils/randomGenerator';
+
+//
 
 export {TraitCarnivorous} from './TraitCarnivorous';
 
@@ -37,10 +39,7 @@ export const TraitSwimming = {
 
 export const TraitRunning = {
   type: 'TraitRunning'
-  , cooldowns: fromJS([
-    ['TraitRunning', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
-  ])
-  , action: () => RandomGenerator.generate(0, 6) > 3
+  , action: () => getRandom(0, 1) > 0
 };
 
 export const TraitMimicry = {
@@ -84,15 +83,12 @@ export const TraitMimicry = {
 
 export const TraitScavenger = {
   type: 'TraitScavenger'
-  , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
-  , cooldownDuration: TRAIT_COOLDOWN_DURATION.ROUND
-  , cooldownLink: 'TraitScavenger'
 };
 
 //
 
-export const TraitSymbiosys = {
-  type: 'TraitSymbiosys'
+export const TraitSymbiosis = {
+  type: 'Symbiosis'
   , cardTargetType: CARD_TARGET_TYPE.LINK_SELF_ONEWAY
 };
 

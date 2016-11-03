@@ -7,39 +7,36 @@ const watch = require('gulp-watch');
 
 let watching = false;
 
+const TEST_PATH_WATCH = '{shared,server,client}/**/*.js*(x)';
+const TEST_PATH_SERVER = ['shared/**/*.spec.js', 'server/**/*.spec.js'];
+const TEST_PATH_CLIENT = ['client/**/*.spec.js', 'client/**/*.spec.jsx'];
+
 const testWatch = (paths) => gulp.src(paths)
   .pipe(mocha({
     bail: true
-    , require: ['source-map-support/register', 'ignore-styles']
+    , require: ['source-map-support/register', 'ignore-styles', './shared/test-helper.js']
   }))
-  //.on('error', () => console.error('error'));
-  .on('error', function (error) {
-    console.error(error);
-    watching
-      ? this.emit('end')
-      : process.exit(1);
-  });
+  .on('error', gutil.log);
 
-gulp.task('test:server', () => {
+gulp.task('test:setup', () => {
   watching = true;
   process.env.NODE_ENV = 'test';
-  const paths = ['./shared/test-helper.js', 'shared/**/*.spec.js', 'server/**/*.spec.js'];
-  testWatch(paths);
-  return watch('{shared,server,client}/**/*.js*(x)', () => testWatch(paths));
 });
 
-gulp.task('test:client', () => {
-  watching = true;
-  process.env.NODE_ENV = 'test';
-  const paths = ['./shared/test-helper.js', 'client/**/*.spec.js', 'client/**/*.spec.jsx'];
-  testWatch(paths);
-  return watch('{shared,server,client}/**/*.js*(x)', () => testWatch(paths));
-});
+gulp.task('test:server:single', ['test:setup'], () =>
+  testWatch(TEST_PATH_SERVER));
 
-gulp.task('test:all', () => {
-  watching = true;
-  process.env.NODE_ENV = 'test';
-  const paths = ['./shared/test-helper.js', 'shared/**/*.spec.js', 'server/**/*.spec.js', 'client/**/*.spec.js', 'client/**/*.spec.jsx'];
-  testWatch(paths);
-  return watch('{shared,server,client}/**/*.js*(x)', () => testWatch(paths));
-});
+gulp.task('test:client:single', ['test:setup'], () =>
+  testWatch(TEST_PATH_CLIENT));
+
+gulp.task('test:all:single', ['test:setup'], () =>
+  testWatch([].concat(TEST_PATH_SERVER, TEST_PATH_CLIENT)));
+
+gulp.task('test:server', ['test:server:single'], () =>
+  gulp.watch(TEST_PATH_WATCH, ['test:server:single']));
+
+gulp.task('test:client', ['test:client:single'], () =>
+  gulp.watch(TEST_PATH_WATCH, ['test:client:single']));
+
+gulp.task('test:all', ['test:all:single'], () =>
+  gulp.watch(TEST_PATH_WATCH, ['test:all:single']));

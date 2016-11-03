@@ -21,7 +21,14 @@ export const TraitCarnivorous = {
     let success = true;
     const traitMimicry = targetAnimal.hasTrait(TraitMimicry.type);
     const traitRunning = targetAnimal.hasTrait(TraitRunning.type);
-    if (traitMimicry) {
+    if (traitRunning) {
+      success = !TraitRunning.action();
+      if (!success) {
+        dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, sourceAnimal));
+        return true;
+      }
+    }
+    if (success && traitMimicry) {
       //dispatch(server$traitActivate(game, sourceAnimal, TraitMimicry, targetAnimal.id))
       success = !dispatch(server$traitActivate(game, targetAnimal, TraitMimicry, sourceAnimal.id, TraitCarnivorous))
     }
