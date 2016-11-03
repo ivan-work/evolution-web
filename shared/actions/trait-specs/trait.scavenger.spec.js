@@ -10,12 +10,36 @@ import {PHASE} from '../../models/game/GameModel';
 import {getRandom} from '../../utils/RandomGenerator';
 import {TraitRunning} from '../../models/game/evolution/traitData';
 
-import {makeGameActionHelpers} from '../generic';
 import {makeGameSelectors} from '../../selectors';
 
 describe('TraitScavenger:', () => {
+  it('Carnivore <> Scavenger', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {User1, clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: 1
+players:
+  - hand: 1 carn, 1 scavenger
+    continent: $A carn, $B scavenger
+`);
+    const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    expect(selectCard(User0, 0).trait1.type).equal('TraitCarnivorous');
+    expect(selectCard(User0, 1).trait1.type).equal('TraitScavenger');
+    expectUnchanged(() => clientStore0.dispatch(
+      gameDeployTraitRequest(selectCard(User0, 0).id, '$A')
+    ), serverStore, clientStore0, clientStore1);
+    expectUnchanged(() => clientStore0.dispatch(
+      gameDeployTraitRequest(selectCard(User0, 0).id, '$B')
+    ), serverStore, clientStore0, clientStore1);
+    expectUnchanged(() => clientStore0.dispatch(
+      gameDeployTraitRequest(selectCard(User0, 1).id, '$A')
+    ), serverStore, clientStore0, clientStore1);
+    expectUnchanged(() => clientStore0.dispatch(
+      gameDeployTraitRequest(selectCard(User0, 1).id, '$B')
+    ), serverStore, clientStore0, clientStore1);
+  });
+
   it('A > B1 D+; B > E A1+; C > B2 A2+', () => {
-    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0}, {User1, clientStore1}, {User2, clientStore2}] = mockGame(3);
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {User1, clientStore1}, {User2, clientStore2}] = mockGame(3);
     const gameId = ParseGame(`
 phase: 2
 players:
@@ -24,7 +48,6 @@ players:
   - continent: $A2 scavenger, $B2
 `);
     const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    const {activateTrait} = makeGameActionHelpers(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitScavenger');
     expect(selectTrait(User2, 0, 0).type).equal('TraitScavenger');
 

@@ -9,6 +9,7 @@ export class TraitDataModel extends Record({
   type: null
   , food: 0
   , cardTargetType: CARD_TARGET_TYPE.ANIMAL_SELF
+  , checkTraitPlacement: null
   , targetType: null
   , cooldowns: null
   , multiple: false
