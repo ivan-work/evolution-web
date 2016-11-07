@@ -1,5 +1,6 @@
 var router = require('express').Router();
 var path = require('path');
+import oauth from './oauth';
 
 module.exports = (app, passport) => {
 // Rest API
@@ -33,6 +34,7 @@ module.exports = (app, passport) => {
     }, {}));
   });
 
+  router.use('/oauth', oauth);
   // set authentication routes
   //require('./authentication.js')(app, passport);
 
