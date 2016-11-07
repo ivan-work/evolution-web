@@ -16,7 +16,7 @@ export const socketStore = (serverSocket, store) => {
     });
 
     socket.on('action', (action) => {
-      logger.silly('Server:Receive', action.type, action.data);
+      logger.silly('Server Recv:', action.type, action.data);
       if (!clientToServer.$unprotected) {
 
       }
@@ -44,7 +44,7 @@ export const socketMiddleware = io => store => next => action => {
   const nextResult = (action.meta && action.meta.clientOnly
     ? null
     : next(action));
-  logger.silly(`Server:Prepare:${action.type}`, action.meta);
+  logger.silly(`Server Send:`, action.type, action.meta);
   if (action.meta) {
     let sockets = [];
     if (Array.isArray(action.meta.users)) {

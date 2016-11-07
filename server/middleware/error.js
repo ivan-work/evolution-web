@@ -9,6 +9,7 @@ export const errorMiddleware = (interceptor = () => null) => store => next => ac
     let actionType = action.type ? `(${action.type})` : '';
     if (error instanceof ActionCheckError) {
       logger.warn(`${error.name}${actionType}: ` + util.format(error.message, ...error.data));
+      return false;
     } else {
       logger.error(`GenericError${actionType}:`, error);
     }

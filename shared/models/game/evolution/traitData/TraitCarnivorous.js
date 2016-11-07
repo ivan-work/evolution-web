@@ -8,7 +8,7 @@ import {
   , server$traitStartCooldown
 } from '../../../../actions/actions';
 import {GameModel} from '../../GameModel';
-import {TraitMimicry, TraitRunning, TraitScavenger} from './index';
+import {TraitMimicry, TraitRunning, TraitScavenger, TraitSymbiosis} from './index';
 
 export const TraitCarnivorous = {
   type: 'TraitCarnivorous'
@@ -58,11 +58,12 @@ export const TraitCarnivorous = {
   }
   , checkTarget: (game, sourceAnimal, targetAnimal) => (
     (sourceAnimal.hasTrait('TraitSharpVision') || !targetAnimal.hasTrait('TraitCamouflage'))
-    //&& (sourceAnimal.hasTrait('TraitMassive') || !targetAnimal.hasTrait('TraitMassive'))
-    //&& (!targetAnimal.canSurvive() || targetAnimal.hasTrait('TraitBurrowing'))
-    //&& (
-    //  (sourceAnimal.hasTrait('TraitSwimming') && targetAnimal.hasTrait('TraitSwimming'))
-    //  || (!sourceAnimal.hasTrait('TraitSwimming') && !targetAnimal.hasTrait('TraitSwimming'))
-    //)
+    && (!targetAnimal.traits.some(trait => trait.type === 'TraitSymbiosis' && trait.symbioticAid === targetAnimal.id))
+    && (sourceAnimal.hasTrait('TraitMassive') || !targetAnimal.hasTrait('TraitMassive'))
+    && !(targetAnimal.canSurvive() && targetAnimal.hasTrait('TraitBurrowing'))
+    && (
+      (sourceAnimal.hasTrait('TraitSwimming') && targetAnimal.hasTrait('TraitSwimming'))
+      || (!sourceAnimal.hasTrait('TraitSwimming') && !targetAnimal.hasTrait('TraitSwimming'))
+    )
   )
 };

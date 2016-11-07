@@ -132,7 +132,7 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
     .forEach(trait => {
       const game = selectGame(getState, gameId);
       const {animal: linkedAnimal} = game.locateAnimal(trait.linkAnimalId);
-      if (!game.cooldowns.checkFor(TraitCommunication.cooldownLink, linkedAnimal.ownerId, linkedAnimal.id)) {
+      if (!game.cooldowns.checkFor(TraitCommunication.type, linkedAnimal.ownerId, linkedAnimal.id)) {
         dispatch(server$startFeeding(gameId, linkedAnimal, 1, FOOD_SOURCE_TYPE.ANIMAL_COPY, animal.id));
       }
     });
@@ -170,7 +170,6 @@ export const traitMimicryAnswerRequest = (sourcePid, sourceAid, traitType, targe
 });
 
 export const server$traitMimicryAnswer = (gameId, sourcePid, sourceAid, traitType, targetPid, targetAid, newTargetPid, newTargetAid) => (dispatch, getState) => {
-  console.log('traitMimicryAnswer', sourcePid, sourceAid, traitType, targetPid, targetAid, newTargetPid, newTargetAid)
   const game = selectGame(getState, gameId);
   const {sourceAnimal, traitData} = checkTraitActivation(game, sourcePid, sourceAid, traitType);
   checkTraitActivation_Animal(game, sourceAnimal, traitData, targetAid);
@@ -210,6 +209,9 @@ export const traitClientToServer = {
     const game = selectGame(getState, gameId);
     const {sourceAnimal, traitData} = checkTraitActivation(game, userId, sourceAid, traitType);
     const result = dispatch(server$traitActivate(game, sourceAnimal, traitData, targetId));
+    if (result === void 0) {
+      throw new Error(`traitActivateRequest@Game(${gameId}): Animal(${sourceAid})-${traitType}-Animal(${targetId}) result undefined`);
+    }
     if (result) {
       dispatch(server$playerActed(gameId, userId));
     }
