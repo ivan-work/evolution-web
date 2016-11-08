@@ -25,7 +25,7 @@ phase: 0
 deck: 50 camo
 `);
     const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    const {deployAnimal, activateTrait} = makeGameActionHelpers(serverStore.getState, gameId);
+    const {deployAnimal} = makeGameActionHelpers(serverStore.getState, gameId);
 
     expect(ServerGame().getIn(['status', 'turn'])).equal(0);
     expect(ServerGame().getIn(['status', 'phase'])).equal(PHASE.DEPLOY);

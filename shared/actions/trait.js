@@ -64,6 +64,7 @@ export const server$traitActivate = (game, sourceAnimal, traitData, ...params) =
       throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
         , 'Animal(%s):Trait(%s) unknown target type %s', sourceAnimal.id, traitData.type, traitData.targetType)
   }
+  logger.silly('server$traitActivate finish:', traitData.type, result);
   return result;
 };
 
@@ -104,6 +105,17 @@ export const server$traitKillAnimal = (gameId, sourceAnimal, targetAnimal) => (d
     , targetAnimal.ownerId, targetAnimal.id)
     , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
 
+export const server$traitAnimalDropTrait = (gameId, sourceAnimal, traitIndex) => (dispatch, getState) => dispatch(
+  Object.assign(traitKillAnimal(gameId
+    , sourceAnimal.ownerId, sourceAnimal.id
+    , traitIndex)
+    , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
+
+const traitAnimalDropTrait = (gameId, sourcePid, sourceAid, traitIndex) => ({
+  type: 'traitAnimalDropTrait'
+  , data: {gameId, sourcePid, sourceAid, traitIndex}
+});
+
 const playerActed = (gameId, userId) => ({
   type: 'playerActed'
   , data: {gameId, userId}
@@ -113,10 +125,20 @@ export const server$playerActed = (gameId, userId) => (dispatch, getState) => di
   Object.assign(playerActed(gameId, userId)
     , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
 
-const traitQuestion = (gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId) => ({
-  type: 'traitQuestion'
-  , data: {gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId}
+const traitNotify = (gameId, traitPack) => ({
+  type: 'traitNotify'
+  , data: {gameId, traitPack}
 });
+
+export const server$traitNotify = (gameId, traitType, sourceAnimal, targetAnimal) => (dispatch, getState) => dispatch(
+  Object.assign(traitNotify(gameId, {
+      sourcePid: sourceAnimal.ownerId
+      , sourceAid: sourceAnimal.id
+      , traitType
+      , targetPid: targetAnimal.ownerId
+      , targetAid: targetAnimal.id
+    })
+    , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
 
 // complexActions
 
@@ -186,18 +208,22 @@ export const server$traitDefenceAnswer = (gameId
   const {sourceAnimal: defenceAnimal, traitData: defenceTraitData} =
     checkTraitActivation(game, attack.targetPid, attack.targetAid, defence.traitType);
 
+  let result = false;
   dispatch(cancelTimeout('traitAnswer' + gameId));
   switch (defenceTraitData.targetType) {
     case TRAIT_TARGET_TYPE.ANIMAL:
-      dispatch(server$traitActivate(game, defenceAnimal, defenceTraitData, defence.targetAid, attackAnimal, attackTraitData));
+      result = dispatch(server$traitActivate(game, defenceAnimal, defenceTraitData, defence.targetAid, attackAnimal, attackTraitData));
       break;
     case TRAIT_TARGET_TYPE.TRAIT:
-      dispatch(server$traitActivate(game, defenceAnimal, defenceTraitData, defence.targetIndex, attackAnimal, attackTraitData));
+      result = dispatch(server$traitActivate(game, defenceAnimal, defenceTraitData, defence.targetIndex, attackAnimal, attackTraitData));
       break;
     default:
-      //throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
-      //  , 'Animal(%s):Trait(%s) unknown target type %s', sourceAnimal.id, traitData.type, traitData.targetType)
+    //throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
+    //  , 'Animal(%s):Trait(%s) unknown target type %s', sourceAnimal.id, traitData.type, traitData.targetType)
   }
+  logger.silly('server$traitDefenceAnswer result:', attack.traitType, defence.traitType, result);
+  return result;
+  //dispatch(server$playerActed(gameId, attackAnimal.ownerId));
 };
 
 
@@ -253,4 +279,5 @@ export const traitServerToClient = {
     if (currentUserId === attack.targetPid)
       dispatch(traitDefenceQuestion(gameId, attack));
   }
+  , traitNotify: ({gameId, traitPack}, currentUserId) => traitNotify(gameId, traitPack)
 };

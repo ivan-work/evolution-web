@@ -8,7 +8,6 @@ import {
 
 import {PHASE} from '../../models/game/GameModel';
 
-import {makeGameActionHelpers} from '../generic';
 import {makeGameSelectors} from '../../selectors';
 
 describe('TraitMimicry:', () => {
@@ -21,9 +20,8 @@ players:
   - continent: $B mimicry, $C camo
 `);
     const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    const {activateTrait} = makeGameActionHelpers(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
-    clientStore0.dispatch(activateTrait(User0, 0, 'TraitCarnivorous', User1, 0));
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
     expect(selectAnimal(User0, 0).getFood()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$C');
     expect(selectAnimal(User1, 1)).undefined;
@@ -38,9 +36,8 @@ players:
   - continent: $B mimicry, $C
 `);
     const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    const {activateTrait} = makeGameActionHelpers(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
-    clientStore0.dispatch(activateTrait(User0, 0, 'TraitCarnivorous', User1, 0));
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
     expect(selectAnimal(User0, 0).getFood()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$B');
     expect(selectAnimal(User1, 1)).undefined;
@@ -55,9 +52,8 @@ players:
   - continent: $B mimicry, $C mimicry
 `);
     const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    const {activateTrait} = makeGameActionHelpers(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
-    clientStore0.dispatch(activateTrait(User0, 0, 'TraitCarnivorous', User1, 0));
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
     expect(selectAnimal(User0, 0).getFood()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$C');
     expect(selectAnimal(User1, 1)).undefined;
@@ -72,9 +68,8 @@ players:
   - continent: $B mimicry, $C, $D
 `);
     const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    const {activateTrait} = makeGameActionHelpers(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
-    clientStore0.dispatch(activateTrait(User0, 0, 'TraitCarnivorous', User1, 0));
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
     clientStore1.dispatch(traitDefenceAnswerRequest({
       sourcePid: selectAnimal(User0, 0).ownerId
       , sourceAid: selectAnimal(User0, 0).id
@@ -101,9 +96,8 @@ players:
   - continent: $B mimicry, $C mimicry, $D
 `);
     const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    const {activateTrait} = makeGameActionHelpers(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
-    clientStore0.dispatch(activateTrait(User0, 0, 'TraitCarnivorous', User1, 0));
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
 
     clientStore1.dispatch(traitDefenceAnswerRequest({
       sourcePid: User0.id
@@ -144,9 +138,8 @@ players:
   - continent: $B mimicry, $C, $D
 `);
     const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    const {activateTrait} = makeGameActionHelpers(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
-    clientStore0.dispatch(activateTrait(User0, 0, 'TraitCarnivorous', User1, 0));
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
 
     expect(selectAnimal(User0, 0).getFood()).equal(0);
     expect(selectAnimal(User1, 0).id).equal('$B');

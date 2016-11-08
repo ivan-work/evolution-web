@@ -9,6 +9,9 @@ import {
   server$startFeeding
   , server$traitActivate
   , server$traitStartCooldown
+  , server$traitNotify
+  , server$traitAnimalDropTrait
+  , server$playerActed
 } from '../../../../actions/actions';
 
 import {getRandom} from '../../../../utils/randomGenerator';
@@ -17,6 +20,7 @@ import {FOOD_SOURCE_TYPE} from '../constants';
 
 //
 
+import {TraitCarnivorous} from './TraitCarnivorous';
 export {TraitCarnivorous} from './TraitCarnivorous';
 
 export const TraitParasite = {
@@ -38,7 +42,14 @@ export const TraitSwimming = {
 
 export const TraitRunning = {
   type: 'TraitRunning'
-  , action: () => getRandom(0, 1) > 0
+  , action: (game, runningAnimal, attackAnimal) => dispatch => {
+    if (getRandom(0, 1) > 0) {
+      dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, attackAnimal));
+      dispatch(server$traitNotify(game.id, 'TraitRunning', runningAnimal, attackAnimal));
+      return true;
+    }
+    return false;
+  }
 };
 
 export const TraitMimicry = {
@@ -49,6 +60,7 @@ export const TraitMimicry = {
   ])
   , action: (game, mimicryAnimal, newTargetAnimal, attackAnimal, attackTraitData) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, TraitMimicry, mimicryAnimal));
+    dispatch(server$traitNotify(game.id, 'TraitMimicry', mimicryAnimal, attackAnimal));
     dispatch(server$traitActivate(game, attackAnimal, attackTraitData, newTargetAnimal.id));
     return true;
   }
@@ -88,8 +100,11 @@ export const TraitTailLoss = {
     ['TraitTailLoss', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
   , action: (game, sourceAnimal, traitIndex, attackAnimal, attackTraitData) => (dispatch, getState) => {
-    //dispatch lose trait
-    //dispatch(server$traitActivate(game, attackAnimal, attackTraitData, newTargetAnimal));
+    dispatch(server$traitNotify(game.id, 'TraitTailLoss', sourceAnimal, attackAnimal));
+    dispatch(server$traitAnimalDropTrait(game.id, sourceAnimal, attackAnimal));
+
+    dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, attackAnimal));
+    dispatch(server$startFeeding(game.id, attackAnimal, 1, FOOD_SOURCE_TYPE.ANIMAL_HUNT, sourceAnimal.id));
     return true;
   }
 };
