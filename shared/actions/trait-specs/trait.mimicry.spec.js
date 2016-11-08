@@ -3,7 +3,7 @@ import {
   , gameEndTurnRequest
   , traitTakeFoodRequest
   , traitActivateRequest
-  , traitMimicryAnswerRequest
+  , traitDefenceAnswerRequest
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
@@ -29,7 +29,7 @@ players:
     expect(selectAnimal(User1, 1)).undefined;
   });
 
-  it('$A > $B > $C', () => {
+  it('$A > $B m> $C', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: 2
@@ -46,7 +46,7 @@ players:
     expect(selectAnimal(User1, 1)).undefined;
   });
 
-  it('$A > $B > $C > $B', () => {
+  it('$A > $B m> $C m> $B', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: 2
@@ -75,18 +75,24 @@ players:
     const {activateTrait} = makeGameActionHelpers(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
     clientStore0.dispatch(activateTrait(User0, 0, 'TraitCarnivorous', User1, 0));
-    clientStore1.dispatch(traitMimicryAnswerRequest(
-      User0.id, selectAnimal(User0, 0).id
-      , 'TraitCarnivorous'
-      , User1.id, selectAnimal(User1, 0).id
-      , User1.id, selectAnimal(User1, 1).id));
+    clientStore1.dispatch(traitDefenceAnswerRequest({
+      sourcePid: selectAnimal(User0, 0).ownerId
+      , sourceAid: selectAnimal(User0, 0).id
+      , traitType: 'TraitCarnivorous'
+      , targetPid: selectAnimal(User1, 0).ownerId
+      , targetAid: selectAnimal(User1, 0).id
+    }, {
+      traitType: 'TraitMimicry'
+      , targetPid: selectAnimal(User1, 1).ownerId
+      , targetAid: selectAnimal(User1, 1).id
+    }));
     expect(selectAnimal(User0, 0).getFood()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$B');
     expect(selectAnimal(User1, 1).id).equal('$D');
     expect(selectAnimal(User1, 2)).undefined;
   });
 
-  it('$A > $B > $C > $B ($D)', () => {
+  it('$A > $B m> $C m> $B', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: 2
@@ -99,17 +105,29 @@ players:
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
     clientStore0.dispatch(activateTrait(User0, 0, 'TraitCarnivorous', User1, 0));
 
-    clientStore1.dispatch(traitMimicryAnswerRequest(
-      User0.id, '$A'
-      , 'TraitCarnivorous'
-      , User1.id, '$B'
-      , User1.id, '$C'));
+    clientStore1.dispatch(traitDefenceAnswerRequest({
+      sourcePid: User0.id
+      , sourceAid: '$A'
+      , traitType: 'TraitCarnivorous'
+      , targetPid: User1.id
+      , targetAid: '$B'
+    }, {
+      traitType: 'TraitMimicry'
+      , targetPid: User1.id
+      , targetAid: '$C'
+    }));
 
-    clientStore1.dispatch(traitMimicryAnswerRequest(
-      User0.id, '$A'
-      , 'TraitCarnivorous'
-      , User1.id, '$C'
-      , User1.id, '$B'));
+    clientStore1.dispatch(traitDefenceAnswerRequest({
+      sourcePid: User0.id
+      , sourceAid: '$A'
+      , traitType: 'TraitCarnivorous'
+      , targetPid: User1.id
+      , targetAid: '$C'
+    }, {
+      traitType: 'TraitMimicry'
+      , targetPid: User1.id
+      , targetAid: '$B'
+    }));
 
     expect(selectAnimal(User0, 0).getFood()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$C');
@@ -137,7 +155,7 @@ players:
 
     await new Promise(resolve => setTimeout(resolve, 1));
 
-    expect(selectAnimal(User0, 0).getFood()).equal(2);
+    expect(selectAnimal(User0, 0).getFood(), '').equal(2);
     expect(selectAnimal(User1, 0).id).equal('$B');
     expect(selectAnimal(User1, 1).id).equal('$D');
     expect(selectAnimal(User1, 2)).undefined;
