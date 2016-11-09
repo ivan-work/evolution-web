@@ -43,25 +43,21 @@ export const gameDeployTrait = (game, {cardId, traitType, animalId, linkedAnimal
   const traitData = TraitModel.new(traitType).dataModel;
 
   if (!(traitData.cardTargetType & CTT_PARAMETER.LINK)) {
-    const trait = TraitModel.new(traitType).attachTo(animal);
+    const deploy = TraitModel.new(traitType).attachTo(animal);
     return game
       .removeIn(['players', cardOwnerId, 'hand', cardIndex])
-      .updateIn(['players', animalOwnerId, 'continent', animalIndex, 'traits'], traits => traits.push(trait))
+      .updateIn(['players', animalOwnerId, 'continent', animalIndex, 'traits'], traits => traits.push(deploy))
   } else  {
-    let trait1;
-    let trait2;
-    if (!(traitData.cardTargetType & CTT_PARAMETER.ONEWAY)) {
-      trait1 = TraitModel.new(traitType).linkBetween(animal, linkedAnimal);
-      trait2 = TraitModel.new(traitType).linkBetween(linkedAnimal, animal);
-    } else {
-      trait1 = TraitModel.new(traitType).linkOneway(animal, linkedAnimal, true);
-      trait2 = TraitModel.new(traitType).linkOneway(linkedAnimal, animal, false);
-    }
+    const deploy = TraitModel.LinkBetween(
+      traitType
+      , animal
+      , linkedAnimal
+      , traitData.cardTargetType & CTT_PARAMETER.ONEWAY);
 
     return game
       .removeIn(['players', cardOwnerId, 'hand', cardIndex])
-      .updateIn(['players', animalOwnerId, 'continent', animalIndex, 'traits'], traits => traits.push(trait1))
-      .updateIn(['players', linkedAnimalOwnerId, 'continent', linkedAnimalIndex, 'traits'], traits => traits.push(trait2));
+      .updateIn(['players', animalOwnerId, 'continent', animalIndex, 'traits'], traits => traits.push(deploy[0]))
+      .updateIn(['players', linkedAnimalOwnerId, 'continent', linkedAnimalIndex, 'traits'], traits => traits.push(deploy[1]));
   }
 };
 
@@ -184,6 +180,19 @@ export const traitKillAnimal = (game, {targetAnimalId}) => {
         .filter(trait => trait.linkAnimalId !== targetAnimalId))))
 };
 
+export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitIndex}) => {
+  ensureParameter(sourcePid, 'string');
+  ensureParameter(sourceAid, 'string');
+  ensureParameter(traitIndex, 'number');
+  const {playerId, animalIndex} = game.locateAnimal(sourceAid);
+  const traitId = game.getIn(['players', sourcePid, 'continent', animalIndex, 'traits', traitIndex, 'id'])
+  return game
+    .removeIn(['players', sourcePid, 'continent', animalIndex, 'traits', traitIndex])
+    .updateIn(['players', sourcePid, 'continent'], continent => continent
+      .map(animal => animal.update('traits', traits => traits
+        .filter(trait => trait.linkId !== traitId))))
+};
+
 export const animalStarve = (game, {animalId}) => {
   const {playerId, animalIndex} = game.locateAnimal(animalId);
   return game
@@ -221,5 +230,6 @@ export const reducer = createReducer(Map(), {
   , traitMoveFood: (state, data) => state.update(data.gameId, game => traitMoveFood(game, data))
   , startCooldown: (state, data) => state.update(data.gameId, game => startCooldown(game, data))
   , traitKillAnimal: (state, data) => state.update(data.gameId, game => traitKillAnimal(game, data))
+  , traitAnimalRemoveTrait: (state, data) => state.update(data.gameId, game => traitAnimalRemoveTrait(game, data))
   , animalStarve: (state, data) => state.update(data.gameId, game => animalStarve(game, data))
 });

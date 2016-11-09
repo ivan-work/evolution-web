@@ -1,4 +1,5 @@
 import {Record} from 'immutable';
+import uuid from 'node-uuid';
 import {TraitDataModel} from './TraitDataModel';
 import * as traitData from './traitData'
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
@@ -6,15 +7,20 @@ import {CTT_PARAMETER} from './constants';
 
 export class TraitModel extends Record({
   type: null
+  , id: null
+  , linkId: null
   , ownerId: null
   , hostAnimalId: null
   , linkAnimalId: null
   , symbioticAid: null
   , dataModel: null
-  , value: null
+  , value: null // for fat
 }) {
   static new(type) {
-    return TraitModel.fromServer({type});
+    return TraitModel.fromServer({
+      id: uuid.v4().slice(0, 2)
+      , type
+    });
   }
 
   static fromServer(js) {
@@ -40,26 +46,34 @@ export class TraitModel extends Record({
       .set('hostAnimalId', animal.id);
   }
 
-  linkBetween(animal1, animal2) {
-    if (animal1.hasTrait(this.type)
-      && animal2.hasTrait(this.type)
-      && animal1.traits.some((trait) => trait.type === this.type && (trait.hostAnimalId === animal2.id || trait.linkAnimalId === animal2.id))
+  static LinkBetween(traitType, animal1, animal2, oneWay) {
+    if (animal1.hasTrait(traitType)
+      && animal2.hasTrait(traitType)
+      && animal1.traits.some((trait) => trait.type === traitType && (trait.hostAnimalId === animal2.id || trait.linkAnimalId === animal2.id))
     ) {
-      throw new ActionCheckError(`TraitModelValidation`, `Animal#%s already has LinkedTrait(%s) on Animal#%s`, animal1.id, this.type, animal2.id);
+      throw new ActionCheckError(`TraitModelValidation`, `Animal#%s already has LinkedTrait(%s) on Animal#%s`, animal1.id, traitType, animal2.id);
     }
-    return this
-      .set('ownerId', animal1.ownerId)
-      .set('hostAnimalId', animal1.id)
-      .set('linkAnimalId', animal2.id);
-  }
+    const trait1 = TraitModel.new(traitType);
+    const trait2 = TraitModel.new(traitType);
 
-  linkOneway(animal1, animal2, from1to2) {
-    return this.linkBetween(animal1, animal2)
-      .set('symbioticAid', from1to2 ? animal1.id : animal2.id);
+    return [
+      trait1
+        .set('ownerId', animal1.ownerId)
+        .set('hostAnimalId', animal1.id)
+        .set('linkAnimalId', animal2.id)
+        .set('linkId', trait2.id)
+        .set('symbioticAid', oneWay ? animal1.id : null)
+      , trait2
+        .set('linkId', trait1.id)
+        .set('ownerId', animal2.ownerId)
+        .set('hostAnimalId', animal2.id)
+        .set('linkAnimalId', animal1.id)
+        .set('symbioticAid', oneWay ? animal1.id : null)
+    ];
   }
 
   isLinked() {
-    return this.dataModel && this.dataModel.cardTargetType & CTT_PARAMETER.LINK
+    return this.linkId !== null; // && this.dataModel.cardTargetType & CTT_PARAMETER.LINK
   }
 
   toClient() {

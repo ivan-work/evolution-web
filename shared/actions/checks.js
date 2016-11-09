@@ -90,3 +90,17 @@ export const checkTraitActivation_Animal = (game, sourceAnimal, traitData, targe
   }
   return targetAnimal;
 };
+
+export const checkTraitActivation_Trait = (game, sourceAnimal, traitData, traitIndex) => {
+  const gameId = game.id;
+  if (!(traitIndex >= 0 && traitIndex < sourceAnimal.traits.size)) {
+    throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
+      , 'Animal(%s):Trait(%s) cant find Trait@%s', sourceAnimal.id, traitData.type, traitIndex)
+  }
+  const trait = sourceAnimal.traits.get(traitIndex);
+  if (traitData.checkTarget && !traitData.checkTarget(game, sourceAnimal, trait)) {
+    throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
+      , 'Animal(%s):Trait(%s) checkTarget on Trait@%s failed', sourceAnimal.id, traitData.type, traitIndex)
+  }
+  return trait;
+};

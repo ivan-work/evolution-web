@@ -28,6 +28,7 @@ import {
   , checkValidAnimalPosition
   , checkTraitActivation
   , checkTraitActivation_Animal
+  , checkTraitActivation_Trait
 } from './checks';
 
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
@@ -75,6 +76,7 @@ const server$traitActivate_Animal = (game, sourceAnimal, traitData, targetAid, .
 };
 
 const server$traitActivate_Trait = (game, sourceAnimal, traitData, traitIndex, ...params) => {
+  checkTraitActivation_Trait(game, sourceAnimal, traitData, traitIndex);
   return traitData.action(game, sourceAnimal, traitIndex, ...params);
 };
 
@@ -105,16 +107,16 @@ export const server$traitKillAnimal = (gameId, sourceAnimal, targetAnimal) => (d
     , targetAnimal.ownerId, targetAnimal.id)
     , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
 
-export const server$traitAnimalDropTrait = (gameId, sourceAnimal, traitIndex) => (dispatch, getState) => dispatch(
-  Object.assign(traitKillAnimal(gameId
+const traitAnimalRemoveTrait = (gameId, sourcePid, sourceAid, traitIndex) => ({
+  type: 'traitAnimalRemoveTrait'
+  , data: {gameId, sourcePid, sourceAid, traitIndex}
+});
+
+export const server$traitAnimalRemoveTrait = (gameId, sourceAnimal, traitIndex) => (dispatch, getState) => dispatch(
+  Object.assign(traitAnimalRemoveTrait(gameId
     , sourceAnimal.ownerId, sourceAnimal.id
     , traitIndex)
     , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
-
-const traitAnimalDropTrait = (gameId, sourcePid, sourceAid, traitIndex) => ({
-  type: 'traitAnimalDropTrait'
-  , data: {gameId, sourcePid, sourceAid, traitIndex}
-});
 
 const playerActed = (gameId, userId) => ({
   type: 'playerActed'
@@ -204,12 +206,21 @@ export const server$traitDefenceAnswer = (gameId
   const game = selectGame(getState, gameId);
   const {sourceAnimal: attackAnimal, traitData: attackTraitData} =
     checkTraitActivation(game, attack.sourcePid, attack.sourceAid, attack.traitType);
+
+  switch (attackTraitData.targetType) {
+    case TRAIT_TARGET_TYPE.ANIMAL:
+      checkTraitActivation_Animal(game, attackAnimal, attackTraitData, attack.targetAid);
+      break;
+    default:
+      throw new ActionCheckError(`server$traitDefenceAnswer@Game(${game.id})`
+        , 'Animal(%s):AttackTrait(%s) unknown target type %s', attackAnimal.id, attackTraitData.type, attackTraitData.targetType)
+  }
+
   checkPlayerTurnAndPhase(game, attack.sourcePid, PHASE.FEEDING);
   const {sourceAnimal: defenceAnimal, traitData: defenceTraitData} =
     checkTraitActivation(game, attack.targetPid, attack.targetAid, defence.traitType);
 
   let result = false;
-  dispatch(cancelTimeout('traitAnswer' + gameId));
   switch (defenceTraitData.targetType) {
     case TRAIT_TARGET_TYPE.ANIMAL:
       result = dispatch(server$traitActivate(game, defenceAnimal, defenceTraitData, defence.targetAid, attackAnimal, attackTraitData));
@@ -220,6 +231,9 @@ export const server$traitDefenceAnswer = (gameId
     default:
     //throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
     //  , 'Animal(%s):Trait(%s) unknown target type %s', sourceAnimal.id, traitData.type, traitData.targetType)
+  }
+  if (result) {
+    dispatch(cancelTimeout('traitAnswer' + gameId));
   }
   logger.silly('server$traitDefenceAnswer result:', attack.traitType, defence.traitType, result);
   return result;

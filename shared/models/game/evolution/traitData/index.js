@@ -10,7 +10,7 @@ import {
   , server$traitActivate
   , server$traitStartCooldown
   , server$traitNotify
-  , server$traitAnimalDropTrait
+  , server$traitAnimalRemoveTrait
   , server$playerActed
 } from '../../../../actions/actions';
 
@@ -44,7 +44,6 @@ export const TraitRunning = {
   type: 'TraitRunning'
   , action: (game, runningAnimal, attackAnimal) => dispatch => {
     if (getRandom(0, 1) > 0) {
-      dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, attackAnimal));
       dispatch(server$traitNotify(game.id, 'TraitRunning', runningAnimal, attackAnimal));
       return true;
     }
@@ -101,7 +100,7 @@ export const TraitTailLoss = {
   ])
   , action: (game, sourceAnimal, traitIndex, attackAnimal, attackTraitData) => (dispatch, getState) => {
     dispatch(server$traitNotify(game.id, 'TraitTailLoss', sourceAnimal, attackAnimal));
-    dispatch(server$traitAnimalDropTrait(game.id, sourceAnimal, attackAnimal));
+    dispatch(server$traitAnimalRemoveTrait(game.id, sourceAnimal, traitIndex));
 
     dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, attackAnimal));
     dispatch(server$startFeeding(game.id, attackAnimal, 1, FOOD_SOURCE_TYPE.ANIMAL_HUNT, sourceAnimal.id));
