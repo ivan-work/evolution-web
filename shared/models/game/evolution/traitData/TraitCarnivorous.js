@@ -4,8 +4,7 @@ import {TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
   , TRAIT_COOLDOWN_LINK
-  , FOOD_SOURCE_TYPE
-  , TRAIT_RESPONSE_TIMEOUT} from '../constants';
+  , FOOD_SOURCE_TYPE} from '../constants';
 import {
   server$traitKillAnimal
   , server$startFeeding
@@ -13,6 +12,7 @@ import {
   , server$traitActivate
   , server$traitStartCooldown
   , server$traitDefenceQuestion
+  , server$traitDefenceQuestionInstant
   , server$traitDefenceAnswer
 } from '../../../../actions/actions';
 import {addTimeout} from '../../../../utils/reduxTimeout';
@@ -78,24 +78,20 @@ export const TraitCarnivorous = {
         , targetAid: targetAnimal.id
       };
 
-      const defaultDefence = (dispatch) => {
+      const defaultDefence = (questionId) => (dispatch, getState) => {
+        console.log(getState().getIn(['games', game.id, 'question']))
         if (traitTailLoss) {
           dispatch(server$traitDefenceAnswer(game.id
-            , attackParameter
-            , {
-              traitType: TraitTailLoss.type
-              , targetIndex: traitTailLoss.size - 1
-            }
+            , questionId
+            , TraitTailLoss.type
+            , traitTailLoss.size - 1
           ));
           killed = false;
         } else if (traitMimicry) {
           dispatch(server$traitDefenceAnswer(game.id
-            , attackParameter
-            , {
-              traitType: TraitMimicry.type
-              , targetPid: traitMimicry.get(0).ownerId
-              , targetAid: traitMimicry.get(0).id
-            }
+            , questionId
+            , TraitMimicry.type
+            , traitMimicry.get(0).id
           ));
           acted = false;
           killed = false;
@@ -104,13 +100,12 @@ export const TraitCarnivorous = {
       };
 
       if (needToAskTargetUser) {
-        dispatch(addTimeout(TRAIT_RESPONSE_TIMEOUT, 'traitAnswer' + game.id, defaultDefence));
-        dispatch(server$traitDefenceQuestion(game.id, attackParameter));
+        dispatch(server$traitDefenceQuestion(game.id, sourceAnimal, TraitCarnivorous.type, targetAnimal, defaultDefence));
         acted = true;
         killed = false;
         cooldown = false;
       } else {
-        defaultDefence(dispatch);
+        dispatch(server$traitDefenceQuestionInstant(game.id, sourceAnimal, TraitCarnivorous.type, targetAnimal, defaultDefence));
       }
     }
 

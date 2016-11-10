@@ -20,6 +20,8 @@ import {
   , startCooldown
   , traitKillAnimal
   , traitAnimalRemoveTrait
+  , traitDefenceQuestion
+  , traitDefenceAnswerSuccess
   , animalStarve
 } from '../../server/reducers/games-rdx-server';
 
@@ -45,5 +47,7 @@ export const reducer = createReducer(null, {
   , startCooldown
   , traitKillAnimal
   , traitAnimalRemoveTrait
+  , traitDefenceQuestion
+  , traitDefenceAnswerSuccess
   , animalStarve
 });
