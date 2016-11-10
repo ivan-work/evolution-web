@@ -10,6 +10,7 @@ import {
 import {PHASE} from '../models/game/GameModel';
 
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
+import {TraitDataModel} from '~/shared/models/game/evolution/TraitDataModel';
 import {selectGame} from '../selectors';
 
 export const checkGameDefined = (game) => {
@@ -55,7 +56,7 @@ export const checkValidAnimalPosition = (game, userId, animalPosition) => {
   }
 };
 
-export const checkTraitActivation = (game, sourcePid, sourceAid, traitType) => {
+export const checkTraitActivation = (game, sourcePid, sourceAid, traitType, targetId, ...params) => {
   checkGameDefined(game);
   const gameId = game.id;
   checkGameHasUser(game, sourcePid);
@@ -69,7 +70,23 @@ export const checkTraitActivation = (game, sourcePid, sourceAid, traitType) => {
   if (!traitData.action) {
     throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s):Trait(%s) is not active', sourceAid, traitType)
   }
-  return {sourceAnimal, traitData};
+  if (!TraitDataModel.checkAction(game, traitData, sourceAnimal)) {
+    throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
+      , 'Animal(%s):Trait(%s) checkAction failed', sourceAnimal.id, traitData.type)
+  }
+  let target;
+  switch (traitData.targetType) {
+    case TRAIT_TARGET_TYPE.ANIMAL:
+      target = checkTraitActivation_Animal(game, sourceAnimal, traitData, targetId);
+      break;
+    case TRAIT_TARGET_TYPE.TRAIT:
+      target = checkTraitActivation_Trait(game, sourceAnimal, traitData, targetId);
+      break;
+    default:
+      throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
+        , 'Animal(%s):Trait(%s) unknown target type %s', sourceAnimal.id, traitData.type, traitData.targetType)
+  }
+  return {sourceAnimal, traitData, target};
 };
 
 export const checkTraitActivation_Animal = (game, sourceAnimal, traitData, targetAid) => {
@@ -102,5 +119,5 @@ export const checkTraitActivation_Trait = (game, sourceAnimal, traitData, traitI
     throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
       , 'Animal(%s):Trait(%s) checkTarget on Trait@%s failed', sourceAnimal.id, traitData.type, traitIndex)
   }
-  return trait;
+  return traitIndex;
 };
