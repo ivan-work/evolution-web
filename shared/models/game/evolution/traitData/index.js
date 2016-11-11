@@ -3,7 +3,9 @@ import {TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
   , TRAIT_COOLDOWN_LINK
-  , CARD_TARGET_TYPE} from '../constants';
+  , CARD_TARGET_TYPE
+  , TRAIT_ANIMAL_FLAG
+} from '../constants';
 
 import {
   server$startFeeding
@@ -12,6 +14,8 @@ import {
   , server$traitNotify
   , server$traitAnimalRemoveTrait
   , server$playerActed
+  , server$traitGrazeFood
+  , server$traitSetAnimalFlag
 } from '../../../../actions/actions';
 
 import {getRandom} from '../../../../utils/randomGenerator';
@@ -59,7 +63,6 @@ export const TraitMimicry = {
   ])
   , action: (game, mimicryAnimal, newTargetAnimal, attackAnimal, attackTraitData) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, TraitMimicry, mimicryAnimal));
-    dispatch(server$traitNotify(game.id, mimicryAnimal, 'TraitMimicry', attackAnimal));
     dispatch(server$traitActivate(game, attackAnimal, attackTraitData, newTargetAnimal));
     return true;
   }
@@ -99,7 +102,6 @@ export const TraitTailLoss = {
     ['TraitTailLoss', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
   , action: (game, sourceAnimal, traitIndex, attackAnimal, attackTraitData) => (dispatch, getState) => {
-    dispatch(server$traitNotify(game.id, 'TraitTailLoss', sourceAnimal, attackAnimal));
     dispatch(server$traitAnimalRemoveTrait(game.id, sourceAnimal, traitIndex));
 
     dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, attackAnimal));
@@ -123,11 +125,11 @@ export const TraitGrazing = {
   , cooldowns: fromJS([
     ['TraitGrazing', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
-  , action: (target) => (getState, dispatch) => {
-    // TODO target is animal
-    if (this.checkTarget(target)) {
-      // dispatch(traitStealFood)
-    }
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , action: (game, sourceAnimal) => (dispatch) => {
+    dispatch(server$traitStartCooldown(game.id, TraitGrazing, sourceAnimal));
+    dispatch(server$traitGrazeFood(game.id, 1, sourceAnimal));
+    return true;
   }
   , $checkAction: (game, sourceAnimal) => game.food > 0
 };
@@ -139,20 +141,32 @@ export const TraitHighBodyWeight = {
 
 export const TraitHibernation = {
   type: 'TraitHibernation'
-  , disableLastRound: true
   , cooldowns: fromJS([
     ['TraitHibernation', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TWO_TURNS]
   ])
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , action: (game, sourceAnimal) => (dispatch) => {
+    dispatch(server$traitStartCooldown(game.id, TraitHibernation, sourceAnimal));
+    dispatch(server$traitSetAnimalFlag(game, sourceAnimal, TRAIT_ANIMAL_FLAG.HIBERNATED));
+    return true;
+  }
+  , $checkAction: (game, sourceAnimal) => game.deck.size > 0
 };
 
 export const TraitPoisonous = {
   type: 'TraitPoisonous'
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , action: (game, sourceAnimal, targetAnimal) => (dispatch) => {
+    dispatch(server$traitSetAnimalFlag(game, targetAnimal, TRAIT_ANIMAL_FLAG.POISONED))
+    return true;
+  }
 };
 
 //
 
 export const TraitCooperation = {
   type: 'TraitCooperation'
+  , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
   , cooldowns: fromJS([
     ['TraitCooperation', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])

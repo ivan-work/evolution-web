@@ -1,15 +1,17 @@
-import {Record, List} from 'immutable';
+import {Record, List, Map} from 'immutable';
 import uuid from 'node-uuid';
 import {TraitModel} from './TraitModel';
 import {TraitDataModel} from './TraitDataModel';
 
 import {TraitFatTissue, TraitSymbiosis} from './traitData';
+import {TRAIT_ANIMAL_FLAG} from './constants';
 
 export class AnimalModel extends Record({
   id: null
   , ownerId: null
   , food: 0
   , traits: List()
+  , flags: Map()
 }) {
   static new(ownerId) {
     return new AnimalModel({
@@ -22,7 +24,8 @@ export class AnimalModel extends Record({
     return js == null
       ? null
       : new AnimalModel(js)
-      .set('traits', List(js.traits).map(trait => TraitModel.fromServer(trait)));
+      .set('traits', List(js.traits).map(trait => TraitModel.fromServer(trait)))
+      .set('flags', Map(js.flags));
   }
 
   toClient() {
@@ -46,6 +49,10 @@ export class AnimalModel extends Record({
     return this.traits.find(trait => trait.type === type)
   }
 
+  hasFlag(flag) {
+    return this.flags.get(flag);
+  }
+
   getFood() {
     return this.food + this.getFat();
   }
@@ -63,7 +70,9 @@ export class AnimalModel extends Record({
   }
 
   canEat(game) {
-    return this.needsFood() > 0 && !this.traits
+    return this.needsFood() > 0
+      && !this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
+      && !this.traits
         .filter(trait => trait.type === TraitSymbiosis.type && trait.symbioticAid === this.id)
         .some(trait => {
           //console.log(`${this.id} is living on ${trait.linkAnimalId}`);
@@ -78,7 +87,7 @@ export class AnimalModel extends Record({
   }
 
   canSurvive() {
-    return this.getFood() >= this.sizeOfNormalFood();
+    return this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) || this.getFood() >= this.sizeOfNormalFood();
   }
 
   updateFirstTrait(filterFn, updateFn) {

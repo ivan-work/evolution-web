@@ -110,7 +110,10 @@ export const gameStartDeploy = (game) => {
     .update('players', players => players.map(player => player
       .set('ended', false)
       .set('skipped', 0)
-      .update('continent', continent => continent.map(animal => animal.digestFood()))
+      .update('continent', continent => continent.map(animal => animal
+          .set('flags', Map())
+          .digestFood()
+      ))
     ))
     .setIn(['food'], 0)
     .setIn(['status', 'phase'], PHASE.DEPLOY)
@@ -222,6 +225,15 @@ export const traitDefenceQuestionServer = (game, {questionId, traitTuple}) => {
 export const traitDefenceAnswerSuccess = (game, {questionId}) => game
   .remove('question');
 
+export const traitGrazeFood = (game, {food}) => game
+  .set('food', Math.max(game.food - 1, 0));
+
+export const traitSetAnimalFlag = (game, {sourceAid, flag, on}) => {
+  const {playerId, animalIndex} = game.locateAnimal(sourceAid);
+  return game
+    .setIn(['players', playerId, 'continent', animalIndex, 'flags', flag], on);
+};
+
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
   , gameDestroy: (state, data) => state.remove(data.gameId)
@@ -244,5 +256,7 @@ export const reducer = createReducer(Map(), {
   , traitDefenceAnswerSuccess: (state, data) => state.update(data.gameId, game => traitDefenceAnswerSuccess(game, data))
   , traitKillAnimal: (state, data) => state.update(data.gameId, game => traitKillAnimal(game, data))
   , traitAnimalRemoveTrait: (state, data) => state.update(data.gameId, game => traitAnimalRemoveTrait(game, data))
+  , traitGrazeFood: (state, data) => state.update(data.gameId, game => traitGrazeFood(game, data))
+  , traitSetAnimalFlag: (state, data) => state.update(data.gameId, game => traitSetAnimalFlag(game, data))
   , animalStarve: (state, data) => state.update(data.gameId, game => animalStarve(game, data))
 });

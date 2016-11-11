@@ -38,6 +38,11 @@ export const CardSwimming = makeCard(traitData.TraitSwimming);
 export const CardParasiteAndCarnivorous = makeCard(traitData.TraitParasite, traitData.TraitCarnivorous);
 export const CardParasiteAndFatTissue = makeCard(traitData.TraitParasite, traitData.TraitFatTissue);
 // 4
+//симбиоз - 4,
+//взаимодействие / хищник - 4,
+//сотрудничество / жировой запас - 4,
+//сотрудничество / хищник - 4.
 export const CardSymbiosis = makeCard(traitData.TraitSymbiosis);
-//
+export const CardCooperationAndCarnivorous = makeCard(traitData.TraitCooperation, traitData.TraitCarnivorous);
+export const CardCommunicationAndFatTissue = makeCard(traitData.TraitCommunication, traitData.TraitFatTissue);
 export const CardCommunicationAndCarnivorous = makeCard(traitData.TraitCommunication, traitData.TraitCarnivorous);

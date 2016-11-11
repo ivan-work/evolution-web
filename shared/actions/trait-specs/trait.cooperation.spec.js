@@ -7,19 +7,20 @@ import {
 import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
+import {replaceGetRandom} from '../../utils/randomGenerator';
 
-describe('TraitCommunication:', () => {
+describe('TraitCooperation:', () => {
   describe('Deploy:', () => {
     it('friend > friend', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
       const gameId = ParseGame(`
 phase: 1
 players:
-  - hand: CardCommunication
+  - hand: CardCooperation
     continent: $A, $B
 `);
       const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-      expect(selectCard(User0, 0).trait1.type).equal('TraitCommunication');
+      expect(selectCard(User0, 0).trait1.type).equal('TraitCooperation');
 
       clientStore0.dispatch(gameDeployTraitRequest(
         selectCard(User0, 0).id, '$A', false, '$B'));
@@ -39,11 +40,11 @@ players:
 phase: 1
 players:
   -
-  - hand: 8 CardCommunication
+  - hand: 8 CardCooperation
     continent: $A, $B, $C
 `);
       const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-      expect(selectCard(User1, 7).trait1.type).equal('TraitCommunication');
+      expect(selectCard(User1, 7).trait1.type).equal('TraitCooperation');
       clientStore0.dispatch(gameEndTurnRequest());
 
       expectChanged('CHANGEIT', () => clientStore1.dispatch(
@@ -84,11 +85,11 @@ players:
 phase: 1
 players:
   - continent: $A, $B, $C
-  - hand: 8 CardCommunication
+  - hand: 8 CardCooperation
     continent: $D, $E, $F
 `);
       const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-      expect(selectCard(User1, 7).trait1.type).equal('TraitCommunication');
+      expect(selectCard(User1, 7).trait1.type).equal('TraitCooperation');
       clientStore0.dispatch(gameEndTurnRequest());
 
       expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameDeployTraitRequest(
@@ -112,6 +113,7 @@ players:
       )), serverStore, clientStore0, clientStore1);
     });
   });
+
   describe('Feeding:', () => {
     it('Generates food from taking', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
@@ -119,7 +121,7 @@ players:
 phase: 1
 players:
   -
-  - hand: 3 CardCommunication
+  - hand: 3 CardCooperation
     continent: $A carn, $B carn, $C carn, $D carn
 `);
       const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
@@ -154,23 +156,23 @@ players:
       expect(selectAnimal(User1, 3).getFood(), 'Animal#3.getFood()').equal(1);
     });
 
-    it('Generates food from traits', () => {
+    it('Doesnt generates food from traits', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`
 deck: 12 camo
 phase: 1
 players:
   - continent: $X + carn
-  - hand: 3 CardCommunication
-    continent: $A piracy, $Acomm, $B hiber, $Bcomm, $C carn, $Ccomm
+  - hand: 3 CardCooperation
+    continent: $A piracy, $Acoop, $B hiber, $Bcoop, $C carn, $Ccoop
 `);
       const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
       clientStore0.dispatch(gameEndTurnRequest());
-      clientStore1.dispatch(gameDeployTraitRequest(selectCard(User1, 0).id, '$A', false, '$Acomm'));
-      clientStore1.dispatch(gameDeployTraitRequest(selectCard(User1, 0).id, '$B', false, '$Bcomm'));
-      clientStore1.dispatch(gameDeployTraitRequest(selectCard(User1, 0).id, '$C', false, '$Ccomm'));
+      clientStore1.dispatch(gameDeployTraitRequest(selectCard(User1, 0).id, '$A', false, '$Acoop'));
+      clientStore1.dispatch(gameDeployTraitRequest(selectCard(User1, 0).id, '$B', false, '$Bcoop'));
+      clientStore1.dispatch(gameDeployTraitRequest(selectCard(User1, 0).id, '$C', false, '$Ccoop'));
 
-      expect(selectGame().status.phase, 'FEEDING 0').equal(PHASE.FEEDING);
+      expect(selectGame().status.phase).equal(PHASE.FEEDING);
       expect(selectAnimal(User1, 0).traits, 'Animal#0.traits').size(2);
       expect(selectAnimal(User1, 1).traits, 'Animal#1.traits').size(1);
       expect(selectAnimal(User1, 2).traits, 'Animal#2.traits').size(2);
@@ -185,11 +187,11 @@ players:
       clientStore1.dispatch(traitActivateRequest('$C', 'TraitCarnivorous', '$X'));
 
       expect(selectAnimal(User1, 0).getFood(), 'Animal $A.getFood()    ').equal(1);
-      expect(selectAnimal(User1, 1).getFood(), 'Animal $Acomm.getFood()').equal(1);
+      expect(selectAnimal(User1, 1).getFood(), 'Animal $Acoop.getFood()').equal(0);
       expect(selectAnimal(User1, 2).getFood(), 'Animal $B.getFood()    ').equal(0);
-      expect(selectAnimal(User1, 3).getFood(), 'Animal $Bcomm.getFood()').equal(0);
+      expect(selectAnimal(User1, 3).getFood(), 'Animal $Bcoop.getFood()').equal(0);
       expect(selectAnimal(User1, 4).getFood(), 'Animal $C.getFood()    ').equal(2);
-      expect(selectAnimal(User1, 5).getFood(), 'Animal $Ccomm.getFood()').equal(1);
+      expect(selectAnimal(User1, 5).getFood(), 'Animal $Ccoop.getFood()').equal(0);
     });
   });
 
@@ -200,7 +202,7 @@ players:
 phase: 1
 players:
   - continent: $D carn
-  - hand: 2 CardCommunication
+  - hand: 2 CardCooperation
     continent: $A carn, $B carn, $C carn
 `);
       const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
@@ -234,19 +236,21 @@ players:
 phase: 1
 players:
   -
-  - hand: 2 CardCommunication
+  - hand: 2 CardCooperation
     continent: $A, $B carn, $C
 `);
       const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-      clientStore0.dispatch(gameEndTurnRequest());
-      clientStore1.dispatch(gameDeployTraitRequest(
-        selectCard(User1, 0).id
-        , '$A', false, '$B'
-      ));
-      clientStore1.dispatch(gameDeployTraitRequest(
-        selectCard(User1, 0).id
-        , '$B', false, '$C'
-      ));
+      replaceGetRandom(() => 2, () => {
+        clientStore0.dispatch(gameEndTurnRequest());
+        clientStore1.dispatch(gameDeployTraitRequest(
+          selectCard(User1, 0).id
+          , '$A', false, '$B'
+        ));
+        clientStore1.dispatch(gameDeployTraitRequest(
+          selectCard(User1, 0).id
+          , '$B', false, '$C'
+        ));
+      });
 
       expect(selectGame().status.phase).equal(PHASE.FEEDING);
       expect(selectGame().food).above(1);
@@ -254,9 +258,15 @@ players:
       expect(selectAnimal(User1, 1).traits, 'Animal#1.traits').size(3);
       expect(selectAnimal(User1, 2).traits, 'Animal#2.traits').size(1);
 
-      clientStore0.dispatch(gameEndTurnRequest());
+      clientStore0.dispatch(gameEndTurnRequest())
+
+      // FEEDING 0
+      let previousFood = selectGame().food;
+      expect(selectGame().food).equal(4);
 
       clientStore1.dispatch(traitTakeFoodRequest('$A'));
+
+      expect(selectGame().food).equal(previousFood - 3);
       clientStore1.dispatch(gameEndTurnRequest());
       clientStore1.dispatch(gameEndTurnRequest());
 
