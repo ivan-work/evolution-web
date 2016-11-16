@@ -88,8 +88,4 @@ export class TraitModel extends Record({
   toString() {
     return `Trait#${this.type}`;
   }
-
-  equals(other) {
-    return this.type === other.type && this.targetId === other.targetId;
-  }
 }

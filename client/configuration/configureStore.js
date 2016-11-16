@@ -12,10 +12,6 @@ export default (reducer, initialState, middleware = [], appliedMiddleware = []) 
     applyMiddleware(
       thunk
       , reduxTimeout()
-      , (store => next => action => {
-        action.user = store.getState().get('user');
-        return next(action);
-      })
       , ...middleware
     )
     , ...appliedMiddleware

@@ -131,6 +131,10 @@ global.mockClientStore = function (initialClientState) {
   const history = createMemoryHistory('/');
   const clientStore = configureStore(combineReducers({...clientReducers, routing: routerReducer}), initialClientState, [
     appRouterMiddleware(history)
+    , store => next => action => {
+      clientStore.actions.push(action);
+      return next(action);
+    }
     , socketClientMiddleware(ioClient)
   ]);
   socketClientStore(ioClient, clientStore);

@@ -157,11 +157,10 @@ export const gameDeployTrait = (gameId, cardId, traitType, animalId, linkedAnima
 });
 
 export const server$gameDeployTrait = (gameId, cardId, traitType, animalId, linkedAnimalId) => (dispatch, getState) => {
-  logger.verbose('gameDeployTraitRequest:', gameId, cardId, traitType, animalId, linkedAnimalId);
-  dispatch(gameDeployTrait(gameId, cardId, traitType, animalId, linkedAnimalId));
+  logger.verbose('server$gameDeployTrait:', gameId, cardId, traitType, animalId, linkedAnimalId);
   dispatch(Object.assign(
     gameDeployTrait(gameId, cardId, traitType, animalId, linkedAnimalId)
-    , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId)}}
+    , {meta: {users: selectPlayers4Sockets(getState, gameId)}}
   ));
 };
 

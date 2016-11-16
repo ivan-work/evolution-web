@@ -44,7 +44,7 @@ export const socketMiddleware = io => store => next => action => {
   const nextResult = (action.meta && action.meta.clientOnly
     ? null
     : next(action));
-  logger.silly(`Server Send:`, action.type, action.meta);
+  logger.silly(`Server Send:`, action.type);
   if (action.meta) {
     let sockets = [];
     if (Array.isArray(action.meta.users)) {
@@ -61,13 +61,16 @@ export const socketMiddleware = io => store => next => action => {
     } else if (action.meta.userId) {
       sockets = [store.getState().getIn(['users', action.meta.userId, 'connectionId'])];
     } else {
-      logger.error('Meta not valid', action.type, action.meta);
+      logger.error('Meta not valid', action.type, action.meta, '|');
     }
     //console.log('Server:Send', action.type, action.meta, sockets);
     sockets
       .filter(connectionId => stateConnections.has(connectionId))
       .map(connectionId => stateConnections.get(connectionId))
-      .forEach((clientSocket) => clientSocket.emit('action', action));
+      .forEach((clientSocket) => clientSocket.emit('action', Object.assign({}, {
+        type: action.type
+        , data: action.data
+      })));
   }
   return nextResult;
 };
