@@ -86,6 +86,6 @@ export class TraitModel extends Record({
   }
 
   toString() {
-    return `Trait#${this.type}`;
+    return `Trait#${this.id}#${this.type}`;
   }
 }

@@ -4,9 +4,10 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const WebpackAutoInject = require('webpack-auto-inject-version');
 
 module.exports = (options) => ({
-  entry: options.entry,
+  entry: options.entry.concat([path.join(process.cwd(), 'client/index.jsx')]),
   output: Object.assign({ // Compile into js/build.js
     path: path.resolve(process.cwd(), 'dist'),
     publicPath: '/',
@@ -56,12 +57,12 @@ module.exports = (options) => ({
     // inside your code for any environment checks; UglifyJS will automatically
     // drop any unreachable code.
     new webpack.DefinePlugin({
+      DEFINE_VERSION: JSON.stringify(require('./package.json').version),
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-        BROWSER: 'true',
-        TEST: false,
+        BROWSER: 'true'
       },
-    }),
+    })
   ]),
   postcss: () => options.postcssPlugins,
   resolve: {
