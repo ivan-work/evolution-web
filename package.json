@@ -1,6 +1,6 @@
 {
   "name": "cards3",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "blahblah",
   "browser": {
     "jsonwebtoken": false,
@@ -9,7 +9,7 @@
     "yaml-js": false
   },
   "scripts": {
-    "start": "npm version patch --force && npm run node_modules/.bin/cross-env NODE_ENV=development node_modules/.bin/nodemon index.js",
+    "start": "npm version patch --force && node node_modules/.bin/cross-env NODE_ENV=development node_modules/.bin/nodemon index.js",
     "start:prod": "node_modules/.bin/cross-env NODE_ENV=production node index.js",
     "bs": "npm run clean && npm run build && npm run start:prod",
     "minify": "cleancss -o static/css/app.min.css static/css/app.css",
