@@ -23,6 +23,8 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import MouseBackend from './dnd/react-dnd-mouse-backend';
 import TestBackend from 'react-dnd-test-backend';
 
+import {AnimationServiceContext} from '../../services/AnimationService';
+
 export class GameWrapper extends React.Component {
   static childContextTypes = {
     game: React.PropTypes.instanceOf(GameModelClient)
@@ -62,17 +64,44 @@ export class GameWrapper extends React.Component {
     if (!user || !game || game.status.phase === 0)
       return <div>Loading</div>;
 
-    return (<div className='GameWrapper'>
+    return (<div className='GameWrapper' style={{display: 'flex'}}>
+      <GameUI/>
       <Game user={user}/>
     </div>);
   }
 }
 
+let GameWrapperHOC = GameWrapper;
+
+import * as GameAnimations from './GameAnimations';
+
+GameWrapperHOC = AnimationServiceContext({
+  animations: ({getRef}) => ({
+    gameGiveCards: (done, {game}, {cards}) => {
+      GameAnimations.gameGiveCards(done, game, cards, getRef('Deck'), getRef('Cards'));
+    }
+//, gameNextPlayer: (done, component, {cards}) => {
+    //  component.setState({
+    //    toastYourTurn: true
+    //  });
+    //  setTimeout(() => {
+    //    done();
+    //  }, 5000);
+    //}
+    //onlineUpdate: (done, component) => {
+    //  const {game} = component.props;
+    //  GameAnimations.gameGiveCards(done, game, game.getPlayer().hand, component.Deck, component.Cards);
+    //}
+    //,
+  })
+})(GameWrapperHOC);
+
 //const backend = !process.env.TEST ? HTML5Backend : TestBackend;
 const backend = !process.env.TEST ? MouseBackend : TestBackend;
-export const DnDContextGameWrapper = DragDropContext(backend)(GameWrapper);
+GameWrapperHOC = DragDropContext(backend)(GameWrapperHOC);
 
-export const GameWrapperView = connect(
+
+GameWrapperHOC = connect(
   (state) => {
     //console.log('state', state.toJS())
     const game = state.get('game');
@@ -94,4 +123,6 @@ export const GameWrapperView = connect(
     , $traitTakeFood: (...args) => dispatch(traitTakeFoodRequest(...args))
     , $traitActivate: (...args) => dispatch(traitActivateRequest(...args))
   })
-)(DnDContextGameWrapper);
+)(GameWrapperHOC);
+
+export const GameWrapperView = GameWrapperHOC

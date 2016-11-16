@@ -6,16 +6,13 @@ export const AnimationServiceRef = (WrappedComponentClass) => class AnimationSer
     animationServiceContext: React.PropTypes.object
   };
 
-  constructor(props) {
+  constructor(props, context) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
-
-  componentWillMount() {
+    if (!context || !context.animationServiceContext) throw new Error(WrappedComponentClass.displayName + ': context.animationServiceContext is undefined')
     this.connectRef = (name) => (component) => {
-      this.context.animationServiceContext.setRef(name, component);
+      context.animationServiceContext.setRef(name, component);
     };
-    this.getRef = this.context.animationServiceContext.getRef
+    this.getRef = context.animationServiceContext.getRef
   }
 
   render() {

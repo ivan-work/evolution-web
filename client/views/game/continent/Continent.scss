@@ -11,6 +11,10 @@ $VERTICAL_MARGIN: 2px;
   display: flex;
   justify-content: center;
 
+  &.EnemyContinent {
+    //transform: rotate(180deg);
+  }
+
   &.EnemyContinent,
   &.ContinentFeeding {
     padding: 0 $ANIMAL_MARGIN;
