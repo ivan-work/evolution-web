@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Component, PropTypes} from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
@@ -16,23 +16,9 @@ import {TRAIT_COOLDOWN_LINK} from '../../../../shared/models/game/evolution/cons
 //  , '&#127821;', '&#127822;', '&#127823;', '&#127824;', '&#127825;', '&#127826;', '&#127827;'];*/
 //const getGraphics = () => graphics[Math.floor(Math.random() * graphics.length)];
 
-export class Food extends React.Component {
-  static propTypes = {
-    // by DragFood
-    connectDragSource: React.PropTypes.func
-    , canDrag: React.PropTypes.bool
-    , isDragging: React.PropTypes.bool
-    // by GameProvider
-    , game: React.PropTypes.object
-    , isPlayerTurn: React.PropTypes.bool
-    , currentUserId: React.PropTypes.string
-    , isDeploy: React.PropTypes.bool
-    , isFeeding: React.PropTypes.bool
-  };
-
+class Food extends Component {
   constructor(props) {
     super(props);
-    //this.graphics = getGraphics();
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
   }
 
@@ -47,13 +33,24 @@ export class Food extends React.Component {
       , isDragging
     });
 
-    const body = <div className={className}>spa</div>;
-
-    return connectDragSource ? connectDragSource(body) : body;
+    return <div className={className}>spa</div>;
   }
 }
 
-export const DragFood = GameProvider(DragSource(DND_ITEM_TYPE.FOOD
+class DragFoodBody extends Food {
+  render() {
+    const {connectDragSource} = this.props;
+    return connectDragSource(super.render());
+  }
+}
+DragFoodBody.displayName = 'Food';
+DragFoodBody.propTypes = {
+  connectDragSource: PropTypes.func.isRequired
+  , canDrag: PropTypes.bool.isRequired
+  , isDragging: PropTypes.bool.isRequired
+};
+
+const DragFood = DragSource(DND_ITEM_TYPE.FOOD
   , {
     beginDrag: (props) => ({index: props.index})
     , canDrag: (props, monitor) =>
@@ -65,4 +62,15 @@ export const DragFood = GameProvider(DragSource(DND_ITEM_TYPE.FOOD
     , isDragging: monitor.isDragging()
     , canDrag: monitor.canDrag()
   })
-)(Food));
+)(DragFoodBody);
+
+DragFood.propTypes = {
+  // by GameProvider
+  game: PropTypes.object.isRequired
+  , isPlayerTurn: PropTypes.bool.isRequired
+  , currentUserId: PropTypes.string.isRequired
+};
+
+const GameDragFood = GameProvider(DragFood);
+
+export {Food, GameDragFood as DragFood};

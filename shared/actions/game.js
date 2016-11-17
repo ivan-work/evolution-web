@@ -158,7 +158,8 @@ export const gameDeployTrait = (gameId, cardId, traits) => ({
 });
 
 export const server$gameDeployTrait = (gameId, cardId, traits) => (dispatch, getState) => {
-  logger.verbose('server$gameDeployTrait:', gameId, cardId, traits);
+  logger.verbose('server$gameDeployTrait:', gameId, cardId
+    , ...traits.map(t => `${t.type}(${t.hostAnimalId}${t.linkAnimalId ? (`-` + t.linkAnimalId) : ''})`));
   dispatch(gameDeployTrait(gameId, cardId, traits));
   dispatch(Object.assign(
     gameDeployTrait(gameId, cardId, traits.map(trait => trait.toOthers().toClient()))

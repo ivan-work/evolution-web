@@ -11,12 +11,12 @@ import {ActionCheckError} from '~/shared/models/ActionCheckError';
 
 import { AnimalTrait, DraggableAnimalTrait, ANIMAL_TRAIT_SIZE } from './AnimalTrait.jsx';
 import { AnimalLinkedTrait } from './AnimalLinkedTrait.jsx';
-import { AnimalSelectLink } from './AnimalSelectLink.jsx'
+import { DragAnimalSelectLink } from './AnimalSelectLink.jsx'
 import {GameProvider} from './providers/GameProvider.jsx';
 import {Food} from './food/Food.jsx';
 
-export class _Animal extends React.Component {
-  static displayName = 'Animal';
+export class Animal extends React.Component {
+  //static displayName = 'Animal';
 
   static defaultProps = {
     isUserAnimal: false
@@ -49,7 +49,7 @@ export class _Animal extends React.Component {
 
   renderSelectLink() {
     if (this.state.selectLink) {
-      return <AnimalSelectLink onEndDrag={() => this.setState({selectLink: null})} {...this.state.selectLink}/>;
+      return <DragAnimalSelectLink onEndDrag={() => this.setState({selectLink: null})} {...this.state.selectLink}/>;
     }
   }
 
@@ -81,7 +81,7 @@ export class _Animal extends React.Component {
           .map((trait, index) =>{
           if (!trait.isLinked()) {
             traitHeight -= ANIMAL_TRAIT_SIZE.height;
-          }
+            }
           return <div key={index}
                       style={{
             position: 'absolute'
@@ -103,7 +103,7 @@ export class _Animal extends React.Component {
   }
 }
 
-const _DroppableAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT, DND_ITEM_TYPE.ANIMAL_LINK], {
+export const DroppableAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT, DND_ITEM_TYPE.ANIMAL_LINK], {
   drop(props, monitor, component) {
     switch (monitor.getItemType()) {
       case DND_ITEM_TYPE.CARD:
@@ -140,15 +140,7 @@ const _DroppableAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND
         const {model: targetAnimal} = props;
         const {card, animal: sourceAnimal, alternateTrait} = monitor.getItem();
         if (card && targetAnimal) {
-          try {
-            TraitModel.LinkBetween(card.getTraitDataModel(alternateTrait).type, sourceAnimal, targetAnimal)
-          } catch (e) {
-            if (e instanceof ActionCheckError) {
-              return false;
-            } else {
-              throw e;
-            }
-          }
+          return !TraitModel.LinkBetweenCheck(card.getTraitDataModel(alternateTrait).type, sourceAnimal, targetAnimal);
         }
         return targetAnimal !== sourceAnimal
           && targetAnimal.ownerId === sourceAnimal.ownerId;
@@ -160,7 +152,6 @@ const _DroppableAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND
   connectDropTarget: connect.dropTarget(),
   isOver: monitor.isOver(),
   canDrop: monitor.canDrop()
-}))(_Animal);
+}))(Animal);
 
-export const DroppableAnimal = GameProvider(_DroppableAnimal);
-export const Animal = _Animal;
+export const GameDroppableAnimal = GameProvider(DroppableAnimal);

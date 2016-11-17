@@ -5,7 +5,7 @@ import {CTT_PARAMETER} from '../../../../shared/models/game/evolution/constants'
 
 import {Continent} from './Continent.jsx'
 import {DropTargetContinentZone} from './ContinentZone.jsx'
-import {DroppableAnimal} from '../Animal.jsx';
+import {GameDroppableAnimal} from '../Animal.jsx';
 
 import * as MDL from 'react-mdl';
 import {Dialog, DialogActions} from '../../utils/Dialog.jsx';
@@ -18,6 +18,7 @@ export class ContinentDeploy extends Continent {
   componentWillMount() {
     this.$deployAnimal = (card, zoneIndex) => this.context.gameActions.$deployAnimal(card.id, zoneIndex);
     this.$deployTrait = (card, animal, alternateTrait, component) => {
+      console.log('Continent$deployTrait')
       if (card.getTraitDataModel(alternateTrait).cardTargetType & CTT_PARAMETER.LINK) {
         component.setState({selectLink: {card, animal, alternateTrait}});
       } else {
@@ -40,7 +41,7 @@ export class ContinentDeploy extends Continent {
   }
 
   renderAnimal(animal, index) {
-    return <DroppableAnimal
+    return <GameDroppableAnimal
       key={animal.id}
       model={animal}
       isUserAnimal={this.props.isUserContinent}

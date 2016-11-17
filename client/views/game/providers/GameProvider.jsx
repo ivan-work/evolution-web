@@ -7,7 +7,7 @@ export const GameProvider = (DecoratedComponent) => class GameProvider extends R
     game: React.PropTypes.instanceOf(GameModelClient).isRequired
   };
 
-  static displayName = DecoratedComponent.displayName;
+  static displayName = `GameProvider(${DecoratedComponent.displayName})`;
 
   constructor(props) {
     super(props);
