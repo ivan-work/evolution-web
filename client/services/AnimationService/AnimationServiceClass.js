@@ -57,18 +57,19 @@ export class AnimationServiceClass {
     this.completeCurrentAnimation(unmountingComponent);
   }
 
-  processAction(next, action) {
-    this.log(`processing action: ${action.type}`);
+  processAction(dispatch, next, action) {
+    this.log(`processing action: ${action.type} ${!!this.currentAnimation}`);
     if (this.currentAnimation) {
       this.log(`currently has animation: ${this.currentAnimation.action.type}. pushing to queue`);
       // If something is animating = add action to the queue
-      this.$queue.push(new QueueItem(action, next));
+      this.$queue.push(new QueueItem(action, dispatch));
     } else {
       // dispatch
       this.log(`dispatching ${action.type}`);
-      next(action);
+      const result = next(action);
       // If not - check if we should animate this action
       this.startAnimation(new QueueItem(action));
+      return result;
     }
   }
 
@@ -95,11 +96,12 @@ export class AnimationServiceClass {
         this.currentAnimation.completedBy.push(component);
         this.log(`completed ${this.currentAnimation.action.type}, ${this.currentAnimation.completedBy.length}/${subscribersForAction.length}`);
         if (this.currentAnimation.completedBy.length === subscribersForAction.length) {
-          this.log(`queue length: ${this.$queue.length}`);
+          this.log(`queue length: ${this.$queue.length}: ${this.$queue.map(QI => QI.action.type)}`);
           if (this.$queue.length > 0) {
             const nextAnimation = this.$queue[0];
             this.$queue = this.$queue.slice(1);
             this.log(`changing current animation to`, nextAnimation);
+            this.currentAnimation = null;
             nextAnimation.next(nextAnimation.action);
             this.startAnimation(nextAnimation)
           } else {

@@ -50,6 +50,7 @@ export const traitActivateRequest = (sourceAid, traitType, targetId) => (dispatc
 });
 
 export const server$traitActivate = (game, sourceAnimal, traitData, ...params) => (dispatch, getState) => {
+  dispatch(server$traitNotifyStart(game, sourceAnimal, traitData.type, ...params))
   logger.silly('server$traitActivate:', sourceAnimal.id, traitData.type, JSON.stringify(...params));
   let result = false;
   switch (traitData.targetType) {
@@ -161,6 +162,20 @@ const playerActed = (gameId, userId) => ({
 export const server$playerActed = (gameId, userId) => (dispatch, getState) => dispatch(
   Object.assign(playerActed(gameId, userId)
     , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
+
+const traitNotifyStart = (gameId, sourceAid, traitType, params) => ({
+  type: 'traitNotifyStart'
+  , data: {gameId, sourceAid, traitType, params}
+});
+
+export const server$traitNotifyStart = (game, sourceAnimal, traitType, ...params) => (dispatch, getState) => dispatch(
+  Object.assign(traitNotifyStart(game.id, sourceAnimal.id, traitType, params)
+    , {meta: {users: selectPlayers4Sockets(getState, game.id)}}));
+
+const client$traitNotifyStart = (gameId, sourceAid, traitType, params) => ({
+  type: 'traitNotifyStart_' + traitType
+  , data: {gameId, sourceAid, traitType, params}
+});
 
 const traitNotify = (gameId, traitTuple) => ({
   type: 'traitNotify'
@@ -342,8 +357,8 @@ export const traitServerToClient = {
     playerActed(gameId, userId)
   , traitDefenceQuestion: ({gameId, questionId, traitTuple}, currentUserId) => traitDefenceQuestion(gameId, questionId, traitTuple)
   , traitDefenceAnswerSuccess: ({gameId, questionId}, currentUserId) => traitDefenceAnswerSuccess(gameId, questionId)
+  , traitNotifyStart: ({gameId, sourceAid, traitType, params}, currentUserId) => client$traitNotifyStart(gameId, sourceAid, traitType, params)
   , traitNotify: ({gameId, traitTuple}, currentUserId) => traitNotify(gameId, traitTuple)
-
   , traitAnimalRemoveTrait: ({gameId, sourcePid, sourceAid, traitIndex}) => traitAnimalRemoveTrait(gameId, sourcePid, sourceAid, traitIndex)
   , traitGrazeFood: ({gameId, food, sourceAid}) => traitGrazeFood(gameId, food, sourceAid)
   , traitSetAnimalFlag: ({gameId, sourceAid, flag, on}) => traitSetAnimalFlag(gameId, sourceAid, flag, on)

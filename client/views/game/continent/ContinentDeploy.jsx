@@ -5,7 +5,7 @@ import {CTT_PARAMETER} from '../../../../shared/models/game/evolution/constants'
 
 import {Continent} from './Continent.jsx'
 import {DropTargetContinentZone} from './ContinentZone.jsx'
-import {GameDroppableAnimal} from '../Animal.jsx';
+import {DropAnimal} from '../animals/Animal.jsx';
 
 import * as MDL from 'react-mdl';
 import {Dialog, DialogActions} from '../../utils/Dialog.jsx';
@@ -41,7 +41,7 @@ export class ContinentDeploy extends Continent {
   }
 
   renderAnimal(animal, index) {
-    return <GameDroppableAnimal
+    return <DropAnimal
       key={animal.id}
       model={animal}
       isUserAnimal={this.props.isUserContinent}
