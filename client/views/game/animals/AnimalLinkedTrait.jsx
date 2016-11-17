@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
-import {Portal} from '../utils/Portal.jsx';
+import {Portal} from '../../utils/Portal.jsx';
 
 const AnimalLinkedTraits = [];
 

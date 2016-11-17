@@ -3,7 +3,7 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
 import { DropTarget } from 'react-dnd';
-import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
+import { DND_ITEM_TYPE } from './../dnd/DND_ITEM_TYPE';
 
 import { AnimalModel } from '~/shared/models/game/evolution/AnimalModel';
 import { TraitModel } from '~/shared/models/game/evolution/TraitModel';
@@ -12,8 +12,8 @@ import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import { AnimalTrait, DraggableAnimalTrait, ANIMAL_TRAIT_SIZE } from './AnimalTrait.jsx';
 import { AnimalLinkedTrait } from './AnimalLinkedTrait.jsx';
 import { DragAnimalSelectLink } from './AnimalSelectLink.jsx'
-import {GameProvider} from './providers/GameProvider.jsx';
-import {Food} from './food/Food.jsx';
+import {GameProvider} from './../providers/GameProvider.jsx';
+import {Food} from './../food/Food.jsx';
 
 export class Animal extends React.Component {
   //static displayName = 'Animal';
