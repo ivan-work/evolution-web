@@ -1,6 +1,6 @@
 {
   "name": "cards3",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "blahblah",
   "browser": {
     "jsonwebtoken": false,
@@ -116,7 +116,6 @@
     "postcss-focus": "*",
     "postcss-loader": "*",
     "postcss-reporter": "*",
-    "proxyquire": "^1.7.10",
     "react-addons-test-utils": "*",
     "react-dnd-test-backend": "*",
     "react-transform-hmr": "*",
@@ -129,7 +128,6 @@
     "source-map-support": "*",
     "style-loader": "*",
     "webpack": "*",
-    "webpack-auto-inject-version": "^0.2.11",
     "webpack-dev-middleware": "*",
     "webpack-hot-middleware": "*"
   }
