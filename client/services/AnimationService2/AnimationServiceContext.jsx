@@ -21,10 +21,8 @@ export const AnimationServiceContext = ({animations}) => (WrappedComponentClass)
     this.getRef = this.getRef.bind(this);
     this.animationRefs = {};
     this.animations = animations({
-      getRef: this.getRef
-      , subscribe: () => {
-
-      }
+      subscribe: AnimationService.subscribe.bind(AnimationService, this)
+      , getRef: this.getRef
     });
   }
 
@@ -37,17 +35,15 @@ export const AnimationServiceContext = ({animations}) => (WrappedComponentClass)
   }
 
   componentDidMount() {
-    Object.keys(this.animations).forEach((actionType) => {
-      AnimationService.componentSubscribe(this, actionType);
-    });
+    //Object.keys(this.animations).forEach((actionType) => {
+    //  AnimationService.componentSubscribe(this, actionType);
+    //});
   }
 
   componentDidUpdate() {
-    AnimationService.componentUpdated(this)
   }
 
   componentWillUnmount() {
-    AnimationService.componentUnsubscribe(this);
     this.animationRefs = {};
   }
 
