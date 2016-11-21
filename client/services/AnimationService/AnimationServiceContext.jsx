@@ -17,9 +17,23 @@ export const AnimationServiceContext = ({animations}) => (WrappedComponentClass)
   constructor(props) {
     super(props);
     //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    this.createSubscription = this.createSubscription.bind(this);
+    this.setRef = this.setRef.bind(this);
     this.getRef = this.getRef.bind(this);
-    this.state = {};
     this.animationRefs = {};
+    this.subscriptions = [];
+    this.animations = animations({
+      subscribe: this.createSubscription
+      , getRef: this.getRef
+    });
+  }
+
+  createSubscription(actionType, callback) {
+    const subscriptionData = {props: this.props, callback};
+    const subscription = new Promise((resolve, reject) => {
+      this.subscriptions.push({resolve, reject, subscriptionData});
+    });
+    AnimationService.subscribe(actionType, subscription);
   }
 
   setRef(name, component) {
@@ -30,30 +44,14 @@ export const AnimationServiceContext = ({animations}) => (WrappedComponentClass)
     return this.animationRefs[name];
   }
 
-  componentDidMount() {
-    //log(`Component ${this.displayName} initialized`);
-    this._isMounted = true;
-    this.animations = animations({
-      getRef: this.getRef
-    });
-    Object.keys(this.animations).forEach((actionType) => {
-      AnimationService.componentSubscribe(this, actionType);
-    });
-  }
-
   componentDidUpdate() {
-    AnimationService.componentUpdated(this)
+    this.subscriptions.forEach(({resolve, subscriptionData}) => resolve(subscriptionData));
+    this.subscriptions = [];
   }
 
   componentWillUnmount() {
-    this._isMounted = false;
-    AnimationService.componentUnsubscribe(this);
-    this.state = null;
-    this.animationRefs = {};
-  }
-
-  getAnimation(actionType) {
-    return this.animations[actionType];
+    this.subscriptions.forEach(({reject, subscriptionData}) => reject(subscriptionData));
+    this.subscriptions = [];
   }
 
   render() {
