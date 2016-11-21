@@ -81,7 +81,6 @@ import {createAnimationServiceConfig} from './animations';
 
 GameWrapperHOC = AnimationServiceContext(createAnimationServiceConfig())(GameWrapperHOC);
 
-
 GameWrapperHOC = connect(
   (state) => {
     //console.log('state', state.toJS())

@@ -12,7 +12,8 @@ const postcssFocus = require('postcss-focus');
 const postcssReporter = require('postcss-reporter');
 
 module.exports = require('./webpack.base.babel')({
-  devtool: 'cheap-module-eval-source-map'
+  //devtool: 'cheap-module-eval-source-map'
+  devtool: 'eval-source-map'
   //devtool: 'inline-source-map'
   // Add hot reloading in development
   , entry: [

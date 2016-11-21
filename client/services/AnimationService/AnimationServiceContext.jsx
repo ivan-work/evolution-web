@@ -22,6 +22,7 @@ export const AnimationServiceContext = ({animations}) => (WrappedComponentClass)
     this.getRef = this.getRef.bind(this);
     this.animationRefs = {};
     this.subscriptions = [];
+    this.waitForUpdate = [];
     this.animations = animations({
       subscribe: this.createSubscription
       , getRef: this.getRef
@@ -31,8 +32,9 @@ export const AnimationServiceContext = ({animations}) => (WrappedComponentClass)
   createSubscription(actionType, callback) {
     const subscriptionData = {props: this.props, callback};
     const subscription = new Promise((resolve, reject) => {
-      this.subscriptions.push({resolve, reject, subscriptionData});
+      this.waitForUpdate.push({resolve, reject, subscriptionData});
     });
+    this.subscriptions.push(subscription);
     AnimationService.subscribe(actionType, subscription);
   }
 
@@ -45,12 +47,14 @@ export const AnimationServiceContext = ({animations}) => (WrappedComponentClass)
   }
 
   componentDidUpdate() {
-    this.subscriptions.forEach(({resolve, subscriptionData}) => resolve(subscriptionData));
-    this.subscriptions = [];
+    this.waitForUpdate.forEach(({resolve, subscriptionData}) => resolve(subscriptionData));
+    this.waitForUpdate = [];
   }
 
   componentWillUnmount() {
-    this.subscriptions.forEach(({reject, subscriptionData}) => reject(subscriptionData));
+    this.waitForUpdate.forEach(({resolve}) => resolve(null));
+    this.waitForUpdate = [];
+    this.subscriptions.forEach((subscription) => AnimationService.unsubscribe(subscription));
     this.subscriptions = [];
   }
 

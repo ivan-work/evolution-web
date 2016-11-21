@@ -7,8 +7,16 @@ export class AnimationServiceClass {
   }
 
   subscribe(actionType, subscription) {
+    this.$log(`AnimationService:${actionType}`, 'subscribe');
     if (!this.$subscriptions[actionType]) this.$subscriptions[actionType] = [];
     this.$subscriptions[actionType].push(subscription)
+  }
+
+  unsubscribe(subscription) {
+    this.$log(`AnimationService:unsubscribe`);
+    Object.keys(this.$subscriptions).forEach((actionType) => {
+      this.$subscriptions[actionType] = this.$subscriptions[actionType].remove(subscription);
+    });
   }
 
   requestFromQueue(dispatch) {
@@ -20,7 +28,7 @@ export class AnimationServiceClass {
   }
 
   processAction(dispatch, next, action) {
-    this.$log(`AnimationService:PA(${action.type})`, 'Start');
+    this.$log(`AnimationService:PA(${action.type}) Startx`, this.$subscriptions);
     const subscriptionsForAction = this.$subscriptions[action.type];
     if (!!this.currentAnimation) {
       this.$log(`AnimationService:PA(${action.type})`, 'END: Push to queue');
@@ -35,10 +43,12 @@ export class AnimationServiceClass {
       // if not - then start
       this.currentAnimation = true;
       Promise.all(subscriptionsForAction.map(subscription => {
-        // subscription is a Promise of updated component after action
+          // subscription is a Promise of updated component after action
           return subscription
-            .then(({props, callback}) =>
-              new Promise((resolve) => callback(() => resolve(true), props, action.data)))
+            .then((result) => (result === null
+                ? Promise.resolve()
+                : new Promise((resolve) => result.callback(() => resolve(true), result.props, action.data))
+            ))
         }))
         .then(() => {
           this.$log(`AnimationService:PA(${action.type})`, `END: queue(${this.$queue.length})`);
