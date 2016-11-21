@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
-import {Dialog} from './utils/Dialog.jsx';
-import {GameFoodContainer} from './game/food/GameFoodContainer.jsx';
+import {Dialog} from './../views/utils/Dialog.jsx';
+import {GameFoodContainer} from './../views/game/food/GameFoodContainer.jsx';
 
 export class Test extends Component {
   constructor(props) {
