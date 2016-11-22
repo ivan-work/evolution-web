@@ -1,11 +1,12 @@
 {
   "name": "cards3",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "blahblah",
   "browser": {
     "jsonwebtoken": false,
     "node-uuid": false,
     "winston": false,
+    "colors": false,
     "yaml-js": false
   },
   "scripts": {
