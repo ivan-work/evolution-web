@@ -43,6 +43,7 @@ export const AnimationServiceContext = ({animations}) => (WrappedComponentClass)
   }
 
   getRef(name) {
+    if (!this.animationRefs[name]) console.warn(`Ref(${name}) is undefined`)
     return this.animationRefs[name];
   }
 

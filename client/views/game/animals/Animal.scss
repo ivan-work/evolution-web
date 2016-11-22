@@ -1,0 +1,18 @@
+@import '../../../styles/variables';
+
+.Animal {
+  position: relative;
+  width: $ANIMAL_WIDTH;
+
+  .inner {
+    width: 100%;
+    height: $ANIMAL_HEIGHT;
+    word-wrap: break-word;
+    outline: 1px solid black;
+    background: #9fe1e7;
+  }
+
+  &.highlight {
+    box-shadow: 0px 0px 1em 1em yellow;
+  }
+}

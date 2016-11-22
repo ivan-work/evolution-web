@@ -36,6 +36,9 @@ players:
     replaceGetRandom(() => 0, () => {
       clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$Z'));
       clientStore1.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitTailLoss', 2));
+      expect(selectGame().question).null;
+      expect(ClientGame0().question).null;
+      expect(ClientGame1().question).null;
       expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$B'])).size(2);
       expect(selectPlayer(User0).acted).true;
       expect(selectAnimal(User1, 0).id).equal('$Z');
@@ -48,7 +51,7 @@ players:
 
     clientStore0.dispatch(traitActivateRequest('$C', 'TraitCarnivorous', '$Z'));
     await new Promise(resolve => setTimeout(resolve, 0));
-    expect(selectAnimal(User1, 0).traits).size(2);
+    expect(selectAnimal(User1, 0).traits, 'selectAnimal(User1, 0).traits').size(2);
     expect(selectAnimal(User1, 0).traits.get(0).type).equal('TraitTailLoss');
     expect(selectAnimal(User1, 0).traits.get(1).type).equal('TraitMimicry');
     clientStore0.dispatch(gameEndTurnRequest());

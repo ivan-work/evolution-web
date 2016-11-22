@@ -201,11 +201,6 @@ export const gamePlayerLeft = (game, {userId}) => game
 export const traitDefenceQuestion = (game, {questionId, traitTuple}) => game
   .set('question', Map({id: questionId, ...traitTuple}));
 
-export const traitDefenceQuestionServer = (game, {questionId, traitTuple}) => {
-  if (game.getIn(['question', 'id'])) throw new Error(`Question conflict ${game.getIn(['question', 'id'])} vs ${questionId}`);
-  return traitDefenceQuestion(game, {questionId, traitTuple});
-};
-
 export const traitDefenceAnswerSuccess = (game, {questionId}) => game
   .remove('question');
 

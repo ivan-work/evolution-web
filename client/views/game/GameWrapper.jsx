@@ -12,6 +12,7 @@ import {
   , gameDeployTraitRequest
   , traitTakeFoodRequest
   , traitActivateRequest
+  , traitDefenceAnswerRequest
 } from '../../../shared/actions/actions';
 
 import {GameUI} from './ui/GameUI.jsx';
@@ -34,15 +35,7 @@ export class GameWrapper extends React.Component {
   getChildContext() {
     return {
       game: this.props.game
-      , gameActions: {
-        $endTurn: this.props.$endTurn
-        , $exit: this.props.$exit
-        , $ready: this.props.$ready
-        , $deployAnimal: this.props.$deployAnimal
-        , $deployTrait: this.props.$deployTrait
-        , $traitTakeFood: this.props.$traitTakeFood
-        , $traitActivate: this.props.$traitActivate
-      }
+      , gameActions: this.props.gameActions
     };
   }
 
@@ -91,17 +84,20 @@ GameWrapperHOC = connect(
     return {game, user, room}
   }
   , (dispatch) => ({
-    // GLOBAL
-    $endTurn: () => dispatch(gameEndTurnRequest())
-    , $exit: () => dispatch(roomExitRequest())
-    // PHASE.PREPARE
-    , $ready: () => dispatch(gameReadyRequest())
-    // PHASE.DEPLOY
-    , $deployAnimal: (...args) => dispatch(gameDeployAnimalRequest(...args))
-    , $deployTrait: (...args) => dispatch(gameDeployTraitRequest(...args))
-    // PHASE.FEEDING
-    , $traitTakeFood: (...args) => dispatch(traitTakeFoodRequest(...args))
-    , $traitActivate: (...args) => dispatch(traitActivateRequest(...args))
+    gameActions: {
+      // GLOBAL
+      $endTurn: () => dispatch(gameEndTurnRequest())
+      , $exit: () => dispatch(roomExitRequest())
+      // PHASE.PREPARE
+      , $ready: () => dispatch(gameReadyRequest())
+      // PHASE.DEPLOY
+      , $deployAnimal: (...args) => dispatch(gameDeployAnimalRequest(...args))
+      , $deployTrait: (...args) => dispatch(gameDeployTraitRequest(...args))
+      // PHASE.FEEDING
+      , $traitTakeFood: (...args) => dispatch(traitTakeFoodRequest(...args))
+      , $traitActivate: (...args) => dispatch(traitActivateRequest(...args))
+      , $traitDefenceAnswer: (...args) => dispatch(traitDefenceAnswerRequest(...args))
+    }
   })
 )(GameWrapperHOC);
 

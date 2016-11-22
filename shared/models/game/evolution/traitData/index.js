@@ -83,6 +83,7 @@ export const TraitSymbiosis = {
 export const TraitPiracy = {
   type: 'TraitPiracy'
   , targetType: TRAIT_TARGET_TYPE.ANIMAL
+  , playerControllable: true
   , cooldowns: fromJS([
     ['TraitPiracy', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
   ])
@@ -126,6 +127,7 @@ export const TraitGrazing = {
     ['TraitGrazing', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , targetType: TRAIT_TARGET_TYPE.NONE
+  , playerControllable: true
   , action: (game, sourceAnimal) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, TraitGrazing, sourceAnimal));
     dispatch(server$traitGrazeFood(game.id, 1, sourceAnimal));
@@ -145,6 +147,7 @@ export const TraitHibernation = {
     ['TraitHibernation', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TWO_TURNS]
   ])
   , targetType: TRAIT_TARGET_TYPE.NONE
+  , playerControllable: true
   , action: (game, sourceAnimal) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, TraitHibernation, sourceAnimal));
     dispatch(server$traitSetAnimalFlag(game, sourceAnimal, TRAIT_ANIMAL_FLAG.HIBERNATED));
