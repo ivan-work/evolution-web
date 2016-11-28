@@ -1,0 +1,8 @@
+Game:
+  UI:
+    TraitDefenceDialog:
+      Time: Time left:
+      Mimicry:
+        Title: Mimicry
+      TailLoss:
+        Title: Lose tail

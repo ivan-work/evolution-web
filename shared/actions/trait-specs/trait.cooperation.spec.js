@@ -115,7 +115,7 @@ players:
   });
 
   describe('Feeding:', () => {
-    it('Generates food from taking', () => {
+    it('$A-$B-$C-$D takes food', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`
 phase: 1
@@ -193,6 +193,46 @@ players:
       expect(selectAnimal(User1, 4).getFood(), 'Animal $C.getFood()    ').equal(2);
       expect(selectAnimal(User1, 5).getFood(), 'Animal $Ccoop.getFood()').equal(0);
     });
+
+    it('Cant take more food than exists', () => {
+      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+      const gameId = ParseGame(`
+phase: 1
+players:
+  -
+  - hand: 2 CardCooperation
+    continent: $A, $B, $C
+`);
+      const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+      replaceGetRandom(() => 0, () => {
+        clientStore0.dispatch(gameEndTurnRequest());
+        clientStore1.dispatch(gameDeployTraitRequest(
+          selectCard(User1, 0).id
+          , '$A', false, '$B'
+        ));
+        clientStore1.dispatch(gameDeployTraitRequest(
+          selectCard(User1, 0).id
+          , '$B', false, '$C'
+        ));
+      });
+
+      expect(selectGame().status.phase).equal(PHASE.FEEDING);
+      expect(selectAnimal(User1, 0).traits, 'Animal#0.traits').size(1);
+      expect(selectAnimal(User1, 1).traits, 'Animal#1.traits').size(2);
+      expect(selectAnimal(User1, 2).traits, 'Animal#2.traits').size(1);
+
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      // FEEDING 0
+      expect(selectGame().food).equal(2);
+
+      clientStore1.dispatch(traitTakeFoodRequest('$A'));
+
+      expect(selectGame().food).equal(0);
+      expect(selectAnimal(User1, 0).getFood(), 'Animal#0.traits').equal(1);
+      expect(selectAnimal(User1, 1).getFood(), 'Animal#0.traits').equal(1);
+      expect(selectAnimal(User1, 2).getFood(), 'Animal#0.traits').equal(0);
+    });
   });
 
   describe('Death:', () => {
@@ -253,7 +293,6 @@ players:
       });
 
       expect(selectGame().status.phase).equal(PHASE.FEEDING);
-      expect(selectGame().food).above(1);
       expect(selectAnimal(User1, 0).traits, 'Animal#0.traits').size(1);
       expect(selectAnimal(User1, 1).traits, 'Animal#1.traits').size(3);
       expect(selectAnimal(User1, 2).traits, 'Animal#2.traits').size(1);
@@ -261,12 +300,11 @@ players:
       clientStore0.dispatch(gameEndTurnRequest())
 
       // FEEDING 0
-      let previousFood = selectGame().food;
       expect(selectGame().food).equal(4);
 
       clientStore1.dispatch(traitTakeFoodRequest('$A'));
 
-      expect(selectGame().food).equal(previousFood - 3);
+      expect(selectGame().food).equal(1);
       clientStore1.dispatch(gameEndTurnRequest());
       clientStore1.dispatch(gameEndTurnRequest());
 

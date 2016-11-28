@@ -11,6 +11,8 @@ import {getRandom} from '../../utils/randomGenerator';
 
 import {parseFromRoom, parseCardList, parseAnimalList} from './GameModel.parse';
 
+import {TIME_TURN, TIME_TRAIT_RESPONSE} from './evolution/constants';
+
 export const TEST_DECK_SIZE = 24;
 export const TEST_HAND_SIZE = 6;
 
@@ -27,6 +29,21 @@ export const StatusRecord = Record({
   , currentPlayer: 0
   , roundPlayer: 0
   , phase: PHASE.PREPARE
+});
+
+export const QuestionRecord = Record({
+  id: null
+  , time: null
+  , sourcePid: null
+  , sourceAid: null
+  , traitType: null
+  , targetPid: null
+  , targetAid: null
+});
+
+export const SettingsRecord = Record({
+  timeTurn: TIME_TURN
+  , timeTraitResponse: 20 * 1000//TIME_TRAIT_RESPONSE[0]
 });
 
 const rollDice = () => getRandom(1, 6);
@@ -53,6 +70,7 @@ const GameModelData = {
   , status: new StatusRecord()
   , cooldowns: CooldownList.new()
   , question: null
+  , settings: new SettingsRecord()
   , scoreboardFinal: null
   , winnerId: null
 };

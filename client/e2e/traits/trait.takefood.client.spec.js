@@ -2,7 +2,7 @@ import React from 'react'
 import {redirectTo} from '~/shared/utils'
 import {mountClient} from '~/shared/test/test-helpers.jsx'
 
-import {selectFood, selectAnimal, selectHID} from '../test.selectors';
+import {selectFood, selectDTAnimal, selectHID} from '../test.selectors';
 
 describe('Take Food', () => {
   it('Takes food', () => {
@@ -26,15 +26,15 @@ players:
 
     dndBackend0.simulateBeginDrag([selectHID(selectFood($client0))]);
     expect(selectFood($client0).find('Food').prop('isDragging')).true;
-    dndBackend0.simulateHover([selectHID(selectAnimal($client0, '$A'))]);
+    dndBackend0.simulateHover([selectHID(selectDTAnimal($client0, '$A'))]);
     dndBackend0.simulateDrop();
     dndBackend0.simulateEndDrag();
 
-    expect(selectAnimal($client0, '$A').prop('model').getFood()).equal(1);
-    expect(selectAnimal($client1, '$A').prop('model').getFood()).equal(1);
+    expect(selectDTAnimal($client0, '$A').prop('model').getFood()).equal(1);
+    expect(selectDTAnimal($client1, '$A').prop('model').getFood()).equal(1);
 
-    expect(selectAnimal($client0, '$A').find('Food')).length(1);
-    expect(selectAnimal($client1, '$A').find('Food')).length(1);
+    expect(selectDTAnimal($client0, '$A').find('Food')).length(1);
+    expect(selectDTAnimal($client1, '$A').find('Food')).length(1);
 
     $client0.unmount();
     $client1.unmount();

@@ -1,0 +1,18 @@
+@import '../../../styles/variables';
+
+.TraitDefenceDialog {
+  .Animal {
+    cursor: pointer;
+    margin: $ANIMAL_MARGIN;
+    &:hover {
+      @include selection();
+    }
+  }
+  .TailLoss .AnimalTrait {
+    cursor: pointer;
+    margin: $ANIMAL_MARGIN;
+    &:hover {
+      @include selection();
+    }
+  }
+}

@@ -9,8 +9,7 @@ export const createAnimationServiceConfig = () => ({
     subscribe('gameGiveCards', (done, {game}, {cards}) =>
       gameGiveCards(done, game, cards, getRef));
 
-    subscribe('traitNotifyStart_TraitCarnivorous', (done, {game}, data) => {
-      debugger;
+    subscribe('traitNotify_Start_TraitCarnivorous', (done, {game}, data) => {
       const {sourceAid, targetId} = data;
       const {playerId: sourcePid, animal: sourceAnimal} = game.locateAnimal(sourceAid);
       const {playerId: targetPid, animal: targetAnimal} = game.locateAnimal(targetId);
@@ -23,16 +22,26 @@ export const createAnimationServiceConfig = () => ({
       Velocity(SourceAnimalHtml, {
         translateX: 0
         , translateY: -200
-      }, 900);
+      }, 1200)
+        .then(() => {
+          done();
+        })
+    });
 
-      Velocity(SourceAnimalHtml, {
+    subscribe('traitNotify_End_TraitCarnivorous', (done, {game}, data) => {
+      const {sourceAid, targetId} = data;
+      const {playerId: sourcePid, animal: sourceAnimal} = game.locateAnimal(sourceAid);
+      const {playerId: targetPid, animal: targetAnimal} = game.locateAnimal(targetId);
+      const SourceAnimal = getRef('Animal#' + sourceAid);
+      const TargetAnimal = getRef('Animal#' + targetId);
+
+      Velocity(ReactDOM.findDOMNode(SourceAnimal), {
         translateX: 0
         , translateY: 0
-      }, 200);
-
-      setTimeout(() => {
-        done();
-      }, 2000);
+      }, 500)
+        .then(() => {
+          done();
+        });
     });
 //, gameNextPlayer: (done, component, {cards}) => {
 //  component.setState({

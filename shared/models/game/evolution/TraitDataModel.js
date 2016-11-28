@@ -25,12 +25,12 @@ export class TraitDataModel extends Record({
       ...traitData[traitType]
     });
   }
-
-  static checkAction(game, traitData, sourceAnimal) {
-    if (traitData.cooldowns && traitData.cooldowns.some(([link, place]) =>
-        game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id))) {
-      return false;
-    }
-    return !traitData.$checkAction || traitData.$checkAction(game, sourceAnimal);
-  }
 }
+
+export const checkAction = (game, traitData, sourceAnimal) => {
+  if (traitData.cooldowns && traitData.cooldowns.some(([link, place]) =>
+      game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id))) {
+    return false;
+  }
+  return !traitData.$checkAction || traitData.$checkAction(game, sourceAnimal);
+};

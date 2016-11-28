@@ -12,7 +12,7 @@ module.exports = (options) => ({
     publicPath: '/',
   }, options.output), // Merge with env dependent settings
   module: {
-    noParse: /.*\/colors\/.*/
+    noParse: /winston/
     , loaders: [{
       test: /\.jsx?$/, // Transform all .js files required somewhere with Babel
       loader: 'babel-loader',

@@ -1,0 +1,8 @@
+Game:
+  UI:
+    TraitDefenceDialog:
+      Time: Осталось времени
+      Mimicry:
+        Title: Мимикрия
+      TailLoss:
+        Title: Отбросить хвост

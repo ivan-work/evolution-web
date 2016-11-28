@@ -11,8 +11,10 @@ export const gameGiveCards = (done, game, cards, getRef) => {
     const CardComponent = getRef('Card#'+card.id);
     const CardHtml = ReactDOM.findDOMNode(CardComponent);
 
+    //console.log(`index ${index}`, `deck pos ${game.deck.size - cards.size + index}`, cards.map(c => c.id).toArray());
+
     const sourceBbx = DeckHtml.getBoundingClientRect();
-    const deckOffset = Deck.getXYForCard(game.deck.size + index);
+    const deckOffset = Deck.getXYForCard(game.deck.size - cards.size + index);
     const targetBbx = CardHtml.getBoundingClientRect();
 
     const childNode = CardHtml.childNodes[0];

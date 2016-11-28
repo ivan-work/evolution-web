@@ -102,7 +102,7 @@ class ReactGame extends React.Component {
 
       <CardCollection
         name={isUser ? 'Hand' : player.id}
-        shift={[isUser ? 65 : 20, 0]}>
+        shift={[isUser ? 55 : 20, 0]}>
         {player.hand.toArray().map((cardModel, i) =>
         <DragCard
           key={cardModel.id}
