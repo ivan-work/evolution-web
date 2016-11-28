@@ -1,6 +1,6 @@
 {
   "name": "cards3",
-  "version": "0.0.28",
+  "version": "0.0.29",
   "description": "blahblah",
   "browser": {
     "jsonwebtoken": false,
@@ -53,7 +53,7 @@
     "react-addons-css-transition-group": "*",
     "react-addons-linked-state-mixin": "*",
     "react-addons-pure-render-mixin": "*",
-    "react-dnd": "^2.1.4",
+    "react-dnd": "*",
     "react-dnd-html5-backend": "*",
     "react-dnd-mouse-backend": "*",
     "react-dom": "*",
@@ -69,6 +69,7 @@
     "redux-devtools-log-monitor": "*",
     "redux-immutable": "*",
     "redux-logger": "*",
+    "i18n-react": "*",
     "redux-thunk": "*",
     "redux-timeout": "*",
     "sanitize-html": "*",
@@ -107,7 +108,7 @@
     "gulp-watch": "*",
     "html-loader": "*",
     "html-webpack-plugin": "*",
-    "ignore-styles": "^5.0.1",
+    "ignore-styles": "*",
     "jsdom": "*",
     "json-loader": "*",
     "mocha": "*",
