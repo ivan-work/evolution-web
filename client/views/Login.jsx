@@ -1,6 +1,6 @@
 import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
-import LinkedStateMixin from 'react-addons-linked-state-mixin';
+import T from 'i18n-react';
 import { bindActionCreators } from 'redux';
 import {connect} from 'react-redux';
 import {loginUserRequest} from '~/shared/actions/actions';
@@ -8,7 +8,7 @@ import * as MDL from 'react-mdl';
 import {VKAPILogin} from './auth/VKAPILogin.jsx';
 
 export const Login = React.createClass({
-  mixins: [PureRenderMixin, LinkedStateMixin]
+  mixins: [PureRenderMixin]
   , getInitialState: function () {
     return {
       login: '',
@@ -22,31 +22,28 @@ export const Login = React.createClass({
   }
   , render: function () {
     //console.log('Rendering login', this.props.location)
-    const loginLink = this.linkState('login');
-    var handleChange = (e) => loginLink.requestChange(e.target.value);
 
     return (
       <div>
-        <h3>Login</h3>
         <VKAPILogin/>
         {this.props.statusText ? <div className='alert alert-info'>{this.props.statusText}</div> : ''}
         <form role='form'>
           <MDL.Textfield
             type='text'
             floatingLabel
-            value={loginLink.value}
-            onChange={handleChange}
-            autoComplete="off"
-            label='Username'
+            value={this.state.login}
+            onChange={({currentTarget}) => this.setState({login: currentTarget.value})}
+            autoComplete='off'
+            label={T.translate('App.Login_Username')}
           />
           <div>
             <MDL.Button
-              id="Login"
+              id='Login'
               type='submit'
               raised colored
               disabled={this.props.isAuthenticating}
               onClick={this.login}
-            >Button
+            >{T.translate('App.Login_Login')}
             </MDL.Button>
           </div>
         </form>

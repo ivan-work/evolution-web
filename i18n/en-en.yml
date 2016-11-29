@@ -1,8 +1,16 @@
+App:
+  Login_Login: Login
+  Name: Evolution
+  Rooms: Rooms
+  Rooms$Create: Create
+  Rooms_New_room: New room
+  Rooms_New_room_name: Name
+  Room: Room
+  Room$Back: Back
+  Room$Exit: Exit
+  Room$Start: Start game
 Game:
   UI:
-    TraitDefenceDialog:
-      Time: Time left:
-      Mimicry:
-        Title: Mimicry
-      TailLoss:
-        Title: Lose tail
+    TraitDefenceDialog_Time: Time left
+    TraitDefenceDialog_Mimicry_Title: Mimicry
+    TraitDefenceDialog_TailLoss_Title: Lose tail

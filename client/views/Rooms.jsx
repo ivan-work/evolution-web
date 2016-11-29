@@ -1,4 +1,5 @@
 import React from 'react';
+import T from 'i18n-react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import {Map} from 'immutable';
@@ -7,6 +8,7 @@ import * as MDL from 'react-mdl';
 import {UsersList} from './UsersList.jsx';
 import {RoomsList} from './RoomsList.jsx';
 import {Portal} from './utils/Portal.jsx';
+import {ControlGroup} from './utils/ControlGroup.jsx';
 import {RoomCreateDialog} from './room/RoomCreateDialog.jsx';
 import {RoomControlGroupView} from './Room.jsx';
 
@@ -16,7 +18,7 @@ import {roomCreateRequest, roomJoinRequest} from '../../shared/actions/actions';
 export class Rooms extends React.Component {
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     this.onRoomClick = this.onRoomClick.bind(this);
   }
 
@@ -32,12 +34,9 @@ export class Rooms extends React.Component {
     //console.log('RENDERING Rooms', this.props.actions.roomJoinRequest)
     return <div className="loginForm">
       <Portal target='header'>
-        <div className='control-group'>
-          <div className='control-group__title'>Rooms</div>
-          <div className='control-group__body'>
-            <RoomCreateDialog onCreateRoom={this.props.$createRequest}/>
-          </div>
-        </div>
+        <ControlGroup name={T.translate('App.Rooms')}>
+          <RoomCreateDialog onCreateRoom={this.props.$createRequest}/>
+        </ControlGroup>
         {!this.props.room ? null : <RoomControlGroupView/>}
       </Portal>
       <div>Hello {this.props.username}</div>

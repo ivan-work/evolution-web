@@ -6,7 +6,10 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = (options) => ({
-  entry: options.entry.concat([path.join(process.cwd(), 'client/index.jsx')]),
+  entry: {
+    index: options.entry.concat([path.join(process.cwd(), 'client/index.jsx')])
+    , i18n: './i18n/index.js',
+  },
   output: Object.assign({ // Compile into js/build.js
     path: path.resolve(process.cwd(), 'dist'),
     publicPath: '/',
@@ -44,6 +47,9 @@ module.exports = (options) => ({
     }, {
       test: /\.json$/,
       loader: 'json-loader',
+    }, {
+      test:  /\.yml$/,
+      loader: 'file?name=i18n/[path][name].json&context=./i18n/!yaml',
     }],
   },
   plugins: options.plugins.concat([

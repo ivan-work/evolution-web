@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
+import T from 'i18n-react';
 import {connect} from 'react-redux';
 import {Map} from 'immutable';
 
@@ -17,11 +17,6 @@ export class Room extends Component {
     room: React.PropTypes.instanceOf(RoomModel)
     , userId: React.PropTypes.string.isRequired
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
 
   render() {
     const {room} = this.props;
@@ -48,13 +43,12 @@ export const RoomView = connect(
       , online: state.get('online')
     }
   }
-  , (dispatch) => ({
-  })
+  , (dispatch) => ({})
 )(Room);
 
 /*
-* RoomControlGroup
-* */
+ * RoomControlGroup
+ * */
 
 export class RoomControlGroup extends Component {
   static propTypes = {
@@ -62,11 +56,6 @@ export class RoomControlGroup extends Component {
     , userId: React.PropTypes.string.isRequired
     , inRoom: React.PropTypes.bool
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
 
   back() {
     const {room, userId, inRoom} = this.props;
@@ -78,11 +67,11 @@ export class RoomControlGroup extends Component {
 
     if (!room) return null;
 
-    return <ControlGroup name='Room'>
-      <MDL.Button id="Room$back" onClick={() => this.back()}>back</MDL.Button>
-      <MDL.Button id="Room$exit" onClick={this.props.$exit}>exit</MDL.Button>
+    return <ControlGroup name={T.translate('App.Room')}>
+      <MDL.Button id="Room$back" onClick={() => this.back()}>{T.translate('App.Room$Back')}</MDL.Button>
+      <MDL.Button id="Room$exit" onClick={this.props.$exit}>{T.translate('App.Room$Exit')}</MDL.Button>
       <MDL.Button id="Room$start" onClick={this.props.$start(room.id)}
-                  disabled={!room.checkCanStart(userId)}>start</MDL.Button>
+                  disabled={!room.checkCanStart(userId)}>{T.translate('App.Room$Start')}</MDL.Button>
     </ControlGroup>
   }
 }
@@ -93,6 +82,7 @@ export const RoomControlGroupView = connect(
     return {
       room: state.getIn(['rooms', roomId])
       , userId: state.getIn(['user', 'id'])
+      , lang: state.getIn(['app', 'lang'])
     }
   }
   , (dispatch) => ({
