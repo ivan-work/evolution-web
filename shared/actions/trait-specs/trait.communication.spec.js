@@ -153,6 +153,44 @@ players:
       expect(selectAnimal(User1, 2).getFood(), 'Animal#2.getFood()').equal(1);
       expect(selectAnimal(User1, 3).getFood(), 'Animal#3.getFood()').equal(1);
     });
+
+    it('Generates food from traits', () => {
+      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+      const gameId = ParseGame(`
+deck: 12 camo
+phase: 1
+players:
+  - continent: $X + carn
+  - hand: 3 CardCommunication
+    continent: $A piracy, $Acomm, $B hiber, $Bcomm, $C carn, $Ccomm
+`);
+      const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+      clientStore0.dispatch(gameEndTurnRequest());
+      clientStore1.dispatch(gameDeployTraitRequest(selectCard(User1, 0).id, '$A', false, '$Acomm'));
+      clientStore1.dispatch(gameDeployTraitRequest(selectCard(User1, 0).id, '$B', false, '$Bcomm'));
+      clientStore1.dispatch(gameDeployTraitRequest(selectCard(User1, 0).id, '$C', false, '$Ccomm'));
+
+      expect(selectGame().status.phase, 'FEEDING 0').equal(PHASE.FEEDING);
+      expect(selectAnimal(User1, 0).traits, 'Animal#0.traits').size(2);
+      expect(selectAnimal(User1, 1).traits, 'Animal#1.traits').size(1);
+      expect(selectAnimal(User1, 2).traits, 'Animal#2.traits').size(2);
+      expect(selectAnimal(User1, 3).traits, 'Animal#3.traits').size(1);
+      expect(selectAnimal(User1, 4).traits, 'Animal#3.traits').size(2);
+      expect(selectAnimal(User1, 5).traits, 'Animal#3.traits').size(1);
+
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      clientStore1.dispatch(traitActivateRequest('$A', 'TraitPiracy', '$X'));
+      clientStore1.dispatch(traitActivateRequest('$B', 'TraitHibernation'));
+      clientStore1.dispatch(traitActivateRequest('$C', 'TraitCarnivorous', '$X'));
+
+      expect(selectAnimal(User1, 0).getFood(), 'Animal $A.getFood()    ').equal(1);
+      expect(selectAnimal(User1, 1).getFood(), 'Animal $Acomm.getFood()').equal(1);
+      expect(selectAnimal(User1, 2).getFood(), 'Animal $B.getFood()    ').equal(0);
+      expect(selectAnimal(User1, 3).getFood(), 'Animal $Bcomm.getFood()').equal(0);
+      expect(selectAnimal(User1, 4).getFood(), 'Animal $C.getFood()    ').equal(2);
+      expect(selectAnimal(User1, 5).getFood(), 'Animal $Ccomm.getFood()').equal(1);
+    });
   });
 
   describe('Death:', () => {

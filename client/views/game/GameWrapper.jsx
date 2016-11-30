@@ -12,6 +12,7 @@ import {
   , gameDeployTraitRequest
   , traitTakeFoodRequest
   , traitActivateRequest
+  , traitDefenceAnswerRequest
 } from '../../../shared/actions/actions';
 
 import {GameUI} from './ui/GameUI.jsx';
@@ -23,6 +24,8 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import MouseBackend from './dnd/react-dnd-mouse-backend';
 import TestBackend from 'react-dnd-test-backend';
 
+import {AnimationServiceContext} from '../../services/AnimationService';
+
 export class GameWrapper extends React.Component {
   static childContextTypes = {
     game: React.PropTypes.instanceOf(GameModelClient)
@@ -32,15 +35,7 @@ export class GameWrapper extends React.Component {
   getChildContext() {
     return {
       game: this.props.game
-      , gameActions: {
-        $endTurn: this.props.$endTurn
-        , $exit: this.props.$exit
-        , $ready: this.props.$ready
-        , $deployAnimal: this.props.$deployAnimal
-        , $deployTrait: this.props.$deployTrait
-        , $traitTakeFood: this.props.$traitTakeFood
-        , $traitActivate: this.props.$traitActivate
-      }
+      , gameActions: this.props.gameActions
     };
   }
 
@@ -52,7 +47,7 @@ export class GameWrapper extends React.Component {
   componentDidMount() {
     if (!this.ready && this.props.game) {
       this.ready = true;
-      this.props.$ready();
+      this.props.gameActions.$ready();
     }
   }
 
@@ -62,19 +57,25 @@ export class GameWrapper extends React.Component {
     if (!user || !game || game.status.phase === 0)
       return <div>Loading</div>;
 
-    return (<div className='GameWrapper'>
+    return (<div className='GameWrapper' style={{display: 'flex'}}>
+      <GameUI/>
       <Game user={user}/>
     </div>);
   }
 }
 
+let GameWrapperHOC = GameWrapper;
+
 //const backend = !process.env.TEST ? HTML5Backend : TestBackend;
 const backend = !process.env.TEST ? MouseBackend : TestBackend;
-export const DnDContextGameWrapper = DragDropContext(backend)(GameWrapper);
+GameWrapperHOC = DragDropContext(backend)(GameWrapperHOC);
 
-export const GameWrapperView = connect(
+import {createAnimationServiceConfig} from './animations';
+
+GameWrapperHOC = AnimationServiceContext(createAnimationServiceConfig())(GameWrapperHOC);
+
+GameWrapperHOC = connect(
   (state) => {
-    //console.log('state', state.toJS())
     const game = state.get('game');
     const user = state.get('user');
     const roomId = state.get('room');
@@ -82,16 +83,21 @@ export const GameWrapperView = connect(
     return {game, user, room}
   }
   , (dispatch) => ({
-    // GLOBAL
-    $endTurn: () => dispatch(gameEndTurnRequest())
-    , $exit: () => dispatch(roomExitRequest())
-    // PHASE.PREPARE
-    , $ready: () => dispatch(gameReadyRequest())
-    // PHASE.DEPLOY
-    , $deployAnimal: (...args) => dispatch(gameDeployAnimalRequest(...args))
-    , $deployTrait: (...args) => dispatch(gameDeployTraitRequest(...args))
-    // PHASE.FEEDING
-    , $traitTakeFood: (...args) => dispatch(traitTakeFoodRequest(...args))
-    , $traitActivate: (...args) => dispatch(traitActivateRequest(...args))
+    gameActions: {
+      // GLOBAL
+      $endTurn: () => dispatch(gameEndTurnRequest())
+      , $exit: () => dispatch(roomExitRequest())
+      // PHASE.PREPARE
+      , $ready: () => dispatch(gameReadyRequest())
+      // PHASE.DEPLOY
+      , $deployAnimal: (...args) => dispatch(gameDeployAnimalRequest(...args))
+      , $deployTrait: (...args) => dispatch(gameDeployTraitRequest(...args))
+      // PHASE.FEEDING
+      , $traitTakeFood: (...args) => dispatch(traitTakeFoodRequest(...args))
+      , $traitActivate: (...args) => dispatch(traitActivateRequest(...args))
+      , $traitDefenceAnswer: (...args) => dispatch(traitDefenceAnswerRequest(...args))
+    }
   })
-)(DnDContextGameWrapper);
+)(GameWrapperHOC);
+
+export const GameWrapperView = GameWrapperHOC

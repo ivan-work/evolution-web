@@ -3,10 +3,11 @@ import RIP from 'react-immutable-proptypes';
 
 import {GameProvider} from '../providers/GameProvider.jsx';
 
+import {PortalTarget} from '../../utils/PortalTarget.jsx';
 import {Button} from 'react-mdl';
 import {PlayersList} from './PlayersList.jsx';
 import {GameStatusDisplay} from './GameStatusDisplay.jsx';
-import {DeckWrapper} from '../cards/DeckWrapper.jsx';
+import {TraitDefenceDialog} from './TraitDefenceDialog.jsx';
 
 class _GameUI extends React.Component {
   static displayName = 'GameUI';
@@ -24,6 +25,8 @@ class _GameUI extends React.Component {
     const {game, isPlayerTurn} = this.props;
     return (
       <div className='GameUI'>
+        <TraitDefenceDialog game={game} $traitDefenceAnswer={this.context.gameActions.$traitDefenceAnswer}/>
+
         <PlayersList game={game}/>
 
         {game.getPlayer().acted
@@ -38,7 +41,7 @@ class _GameUI extends React.Component {
 
         <GameStatusDisplay status={game.status} players={game.players}/>
 
-        <DeckWrapper deck={game.deck}/>
+        <PortalTarget name='deck'/>
       </div>);
   }
 }

@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
+//import PureRenderMixin from 'react-addons-pure-render-mixin';
 
 export const PortalsContext = (WrappedComponent) => class PortalsContext extends Component {
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     this.portalsContext = {};
   }
 
@@ -35,14 +35,14 @@ export class PortalTarget extends Component {
     container: 'span'
   };
 
-  constructor(props) {
+  constructor(props, context) {
     super(props);
     this.state = {portals: []};
+    if (context.portalsContext[this.props.name]) throw new Error('Multiple PortalTarget NYI. Conflict with name: ' + this.props.name)
+    context.portalsContext[this.props.name] = this;
   }
 
   componentDidMount() {
-    if (this.context.portalsContext[this.props.name]) throw new Error('Multiple PortalTarget NYI. Conflict with name: ' + this.props.name)
-    this.context.portalsContext[this.props.name] = this;
     this.$isMounted = true;
   }
 

@@ -21,6 +21,8 @@ export const DeckWrapper = AnimationServiceRef(({deck, connectRef}) => (
   </div>
 ));
 
+DeckWrapper.displayName = 'DeckWrapper';
+
 DeckWrapper.propTypes = {
   deck: RIP.listOf(PropTypes.instanceOf(CardModel)).isRequired
   //, connectRef: PropTypes.func.isRequired

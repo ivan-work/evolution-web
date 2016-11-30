@@ -1,6 +1,4 @@
-$ANIMAL_WIDTH: 60px;
-$ANIMAL_HEIGHT: 80px;
-$ANIMAL_MARGIN: 10px;
+@import '../../../styles/variables';
 $VERTICAL_MARGIN: 2px;
 
 .Continent {
@@ -10,6 +8,10 @@ $VERTICAL_MARGIN: 2px;
   border: 1px solid #898;
   display: flex;
   justify-content: center;
+
+  &.EnemyContinent {
+    //transform: rotate(180deg);
+  }
 
   &.EnemyContinent,
   &.ContinentFeeding {
@@ -23,11 +25,6 @@ $VERTICAL_MARGIN: 2px;
     margin: $VERTICAL_MARGIN 2px;
     z-index: 4;
     position: relative;
-    width: $ANIMAL_WIDTH;
-    height: $ANIMAL_HEIGHT;
-    &.highlight {
-      box-shadow: 0px 0px 1em 1em yellow;
-    }
   }
 
   .ContinentZone {

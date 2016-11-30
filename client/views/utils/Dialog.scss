@@ -37,6 +37,8 @@ $transition: 200ms;
   }
 
   .Dialog {
+    display: inline-block;
+    width: auto;
     @mixin visible {
       background: white;
       transition: $transition margin-top, $transition transform;

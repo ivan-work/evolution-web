@@ -1,4 +1,7 @@
-export const TRAIT_RESPONSE_TIMEOUT = 30;
+export const TIME_TURN = 60 * 1000;
+
+export const TURN_TIMEOUT_VARIANTS = [1, 2, 5];
+export const TIME_TRAIT_RESPONSE = [.5, 1];
 
 export const CTT_PARAMETER = (i => ({
   ANIMAL: 1 << i++
@@ -26,6 +29,7 @@ export const FOOD_SOURCE_TYPE = {
 export const TRAIT_TARGET_TYPE = {
   ANIMAL: 'ANIMAL'
   , TRAIT: 'TRAIT'
+  , NONE: 'NONE'
 };
 
 export const TRAIT_COOLDOWN_PLACE = {
@@ -44,6 +48,12 @@ export const TRAIT_COOLDOWN_DURATION = {
 export const TRAIT_COOLDOWN_LINK = {
   EATING: 'EATING'
 };
+
+export const TRAIT_ANIMAL_FLAG = {
+  HIBERNATED: 'HIBERNATED'
+  , POISONED: 'POISONED'
+};
+
 
 //export const TRAIT_COOLDOWN_PLACE = (i => ({
 //  ANIMAL: 'ANIMAL'

@@ -1,17 +1,25 @@
 function makeLogger() {
   if (process.env.BROWSER) {
-    const noop = () => 0;
+    const LOG_LEVELS = ['silly'
+      , 'debug'
+      , 'verbose'
+      , 'info'
+      , 'warn'
+      , 'error'
+    ];
     var Logger = function () {
-      this.silly = this.log.bind(this, 'silly');
-      this.debug = noop;
-      this.verbose = this.log.bind(this, 'verbose');
-      this.info = this.log.bind(this, 'info');
-      this.warn = this.log.bind(this, 'warn');
-      this.error = this.log.bind(this, 'error');
+      LOG_LEVELS.forEach((level, index) => {
+        this[level] = this.log.bind(this, level, index);
+      });
     };
 
-    Logger.prototype.log = function (level, msg, attributes) {
-      console.log(level + ' - ' + msg + ' (' + JSON.stringify(attributes) + ')')
+    Logger.prototype.getLogLevel = function () {
+      return window && window.LOG_LEVEL ? window.LOG_LEVEL : 3;
+    };
+
+    Logger.prototype.log = function (level, index, msg, attributes) {
+      if (index > this.getLogLevel())
+        console.log(level + ' - ' + msg + ' (' + JSON.stringify(attributes) + ')')
     };
 
     return new Logger()

@@ -1,6 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 //import {logoutAndRedirect} from 'actions';
+import T from 'i18n-react';
 
 import * as MDL from 'react-mdl';
 import {Layout, Header, Navigation, Drawer, Content} from 'react-mdl';
@@ -8,6 +9,7 @@ import {Layout, Header, Navigation, Drawer, Content} from 'react-mdl';
 import {AdminPanelView} from './AdminPanel.jsx'
 import {ServicesContext} from '../services/ServicesContext';
 import {PortalsContext, PortalTarget} from '../views/utils/PortalTarget.jsx'
+import {TranslationSwitchView} from './TranslationSwitch.jsx'
 
 //import '../styles/core.scss';
 
@@ -20,8 +22,9 @@ export const App = ServicesContext(PortalsContext(React.createClass({
         <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
           <PortalTarget name='game-svg' container='g'/>
         </svg>
-        <Header title="Evolution" hideSpacer={true}>
+        <Header title={`${T.translate('App.Name')} v${DEFINE_VERSION}`} hideSpacer={true}>
           <Navigation className='header'>
+            <TranslationSwitchView/>
             <PortalTarget name='header'/>
           </Navigation>
         </Header>

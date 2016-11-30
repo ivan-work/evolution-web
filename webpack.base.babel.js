@@ -6,13 +6,17 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = (options) => ({
-  entry: options.entry,
+  entry: {
+    index: options.entry.concat([path.join(process.cwd(), 'client/index.jsx')])
+    , i18n: './i18n/index.js',
+  },
   output: Object.assign({ // Compile into js/build.js
     path: path.resolve(process.cwd(), 'dist'),
     publicPath: '/',
   }, options.output), // Merge with env dependent settings
   module: {
-    loaders: [{
+    noParse: /winston/
+    , loaders: [{
       test: /\.jsx?$/, // Transform all .js files required somewhere with Babel
       loader: 'babel-loader',
       exclude: /node_modules/,
@@ -43,6 +47,9 @@ module.exports = (options) => ({
     }, {
       test: /\.json$/,
       loader: 'json-loader',
+    }, {
+      test:  /\.yml$/,
+      loader: 'file?name=i18n/[path][name].json&context=./i18n/!yaml',
     }],
   },
   plugins: options.plugins.concat([
@@ -56,12 +63,12 @@ module.exports = (options) => ({
     // inside your code for any environment checks; UglifyJS will automatically
     // drop any unreachable code.
     new webpack.DefinePlugin({
+      DEFINE_VERSION: JSON.stringify(require('./package.json').version),
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-        BROWSER: 'true',
-        TEST: false,
+        BROWSER: 'true'
       },
-    }),
+    })
   ]),
   postcss: () => options.postcssPlugins,
   resolve: {
@@ -76,9 +83,9 @@ module.exports = (options) => ({
     //  'jsnext:main',
     //  'main',
     //],
-  },
-  devtool: options.devtool,
-  target: 'web', // Make web variables accessible to webpack, e.g. window
-  stats: false, // Don't show stats in the console
-  progress: true,
+  }
+  , devtool: options.devtool
+  , target: 'web' // Make web variables accessible to webpack, e.g. window
+  , stats: false // Don't show stats in the console
+  , progress: true
 });

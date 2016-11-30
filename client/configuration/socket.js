@@ -10,7 +10,7 @@ export const socketMiddleware = socket => store => next => action => {
     //const clientId = store.getState().get('clientId');
     //socket.emit('action', objectAssign({}, action, {clientId}));
     action.meta.user = store.getState().get('user');
-    //console.log('Client:Send', action.type);
+    logger.silly('Client Send:', action.type);
     socket.emit('action', action);
   }
   return nextResult;
@@ -33,7 +33,7 @@ export const socketStore = (socket, store) => {
     store.dispatch(clientDisconnectSelf(reason));
   });
   socket.on('action', (action) => {
-    //console.log('Client:Receive', action.type);
+    logger.silly('Client Recv:', action.type);
     if (serverToClient[action.type]) {
       const currentUserId = store.getState().getIn(['user', 'id']);
       //console.log('user', user);

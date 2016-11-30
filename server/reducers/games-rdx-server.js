@@ -1,7 +1,7 @@
 import logger from '~/shared/utils/logger';
 import {createReducer, ensureParameter, validateParameter} from '../../shared/utils';
 import {Map, List} from 'immutable';
-import {GameModel, PHASE} from '../../shared/models/game/GameModel';
+import {GameModel, QuestionRecord, PHASE} from '../../shared/models/game/GameModel';
 import {CardModel} from '../../shared/models/game/CardModel';
 import {CooldownList} from '../../shared/models/game/CooldownList';
 import {AnimalModel} from '../../shared/models/game/evolution/AnimalModel';
@@ -35,30 +35,14 @@ export const gameDeployAnimal = (game, {userId, animal, animalPosition, cardPosi
     .updateIn(['players', userId, 'continent'], continent => continent.insert(animalPosition, animal))
 };
 
-export const gameDeployTrait = (game, {cardId, traitType, animalId, linkedAnimalId}) => {
+export const gameDeployTrait = (game, {cardId, traits}) => {
   const {playerId: cardOwnerId, cardIndex} = game.locateCard(cardId);
-  const {playerId: animalOwnerId, animalIndex, animal} = game.locateAnimal(animalId);
-  const {playerId: linkedAnimalOwnerId, animalIndex: linkedAnimalIndex, animal: linkedAnimal} = game.locateAnimal(linkedAnimalId);
-
-  const traitData = TraitModel.new(traitType).dataModel;
-
-  if (!(traitData.cardTargetType & CTT_PARAMETER.LINK)) {
-    const deploy = TraitModel.new(traitType).attachTo(animal);
-    return game
-      .removeIn(['players', cardOwnerId, 'hand', cardIndex])
-      .updateIn(['players', animalOwnerId, 'continent', animalIndex, 'traits'], traits => traits.push(deploy))
-  } else  {
-    const deploy = TraitModel.LinkBetween(
-      traitType
-      , animal
-      , linkedAnimal
-      , traitData.cardTargetType & CTT_PARAMETER.ONEWAY);
-
-    return game
-      .removeIn(['players', cardOwnerId, 'hand', cardIndex])
-      .updateIn(['players', animalOwnerId, 'continent', animalIndex, 'traits'], traits => traits.push(deploy[0]))
-      .updateIn(['players', linkedAnimalOwnerId, 'continent', linkedAnimalIndex, 'traits'], traits => traits.push(deploy[1]));
-  }
+  return game
+    .removeIn(['players', cardOwnerId, 'hand', cardIndex])
+    .update(game => traits.reduce((game, trait) => {
+      const {playerId, animalIndex} = game.locateAnimal(trait.hostAnimalId);
+      return game.updateIn(['players', playerId, 'continent', animalIndex, 'traits'], traits => traits.push(trait))
+    }, game));
 };
 
 export const playerActed = (game, {userId}) => {
@@ -110,7 +94,10 @@ export const gameStartDeploy = (game) => {
     .update('players', players => players.map(player => player
       .set('ended', false)
       .set('skipped', 0)
-      .update('continent', continent => continent.map(animal => animal.digestFood()))
+      .update('continent', continent => continent.map(animal => animal
+        .set('flags', Map())
+        .digestFood()
+      ))
     ))
     .setIn(['food'], 0)
     .setIn(['status', 'phase'], PHASE.DEPLOY)
@@ -211,6 +198,21 @@ export const gameEnd = (state, {game}) => game.end();
 export const gamePlayerLeft = (game, {userId}) => game
   .setIn(['players', userId, 'playing'], false);
 
+export const traitDefenceQuestion = (game, {questionId, traitTuple}) => game
+  .set('question', new QuestionRecord({id: questionId, ...traitTuple, time: Date.now()}));
+
+export const traitDefenceAnswerSuccess = (game, {questionId}) => game
+  .remove('question');
+
+export const traitGrazeFood = (game, {food}) => game
+  .set('food', Math.max(game.food - 1, 0));
+
+export const traitSetAnimalFlag = (game, {sourceAid, flag, on}) => {
+  const {playerId, animalIndex} = game.locateAnimal(sourceAid);
+  return game
+    .setIn(['players', playerId, 'continent', animalIndex, 'flags', flag], on);
+};
+
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
   , gameDestroy: (state, data) => state.remove(data.gameId)
@@ -229,7 +231,11 @@ export const reducer = createReducer(Map(), {
   , playerActed: (state, data) => state.update(data.gameId, game => playerActed(game, data))
   , traitMoveFood: (state, data) => state.update(data.gameId, game => traitMoveFood(game, data))
   , startCooldown: (state, data) => state.update(data.gameId, game => startCooldown(game, data))
+  , traitDefenceQuestion: (state, data) => state.update(data.gameId, game => traitDefenceQuestion(game, data))
+  , traitDefenceAnswerSuccess: (state, data) => state.update(data.gameId, game => traitDefenceAnswerSuccess(game, data))
   , traitKillAnimal: (state, data) => state.update(data.gameId, game => traitKillAnimal(game, data))
   , traitAnimalRemoveTrait: (state, data) => state.update(data.gameId, game => traitAnimalRemoveTrait(game, data))
+  , traitGrazeFood: (state, data) => state.update(data.gameId, game => traitGrazeFood(game, data))
+  , traitSetAnimalFlag: (state, data) => state.update(data.gameId, game => traitSetAnimalFlag(game, data))
   , animalStarve: (state, data) => state.update(data.gameId, game => animalStarve(game, data))
 });

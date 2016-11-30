@@ -6,7 +6,8 @@ import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
 import {CardModel} from '../models/game/CardModel';
 import {AnimalModel} from '../models/game/evolution/AnimalModel';
 import {TraitModel} from '../models/game/evolution/TraitModel';
-import {CARD_TARGET_TYPE, CTT_PARAMETER, TRAIT_TARGET_TYPE} from '../models/game/evolution/constants';
+import {TraitDataModel} from '../models/game/evolution/TraitDataModel';
+import {CARD_TARGET_TYPE, CTT_PARAMETER, TRAIT_TARGET_TYPE, TRAIT_ANIMAL_FLAG} from '../models/game/evolution/constants';
 
 import {actionError} from './generic';
 import {server$game} from './generic';
@@ -151,16 +152,17 @@ export const gameDeployTraitRequest = (cardId, animalId, alternateTrait, linkId)
   , meta: {server: true}
 });
 
-export const gameDeployTrait = (gameId, cardId, traitType, animalId, linkedAnimalId) => ({
+export const gameDeployTrait = (gameId, cardId, traits) => ({
   type: 'gameDeployTrait'
-  , data: {gameId, cardId, traitType, animalId, linkedAnimalId}
+  , data: {gameId, cardId, traits}
 });
 
-export const server$gameDeployTrait = (gameId, cardId, traitType, animalId, linkedAnimalId) => (dispatch, getState) => {
-  logger.verbose('gameDeployTraitRequest:', gameId, cardId, traitType, animalId, linkedAnimalId);
-  dispatch(gameDeployTrait(gameId, cardId, traitType, animalId, linkedAnimalId));
+export const server$gameDeployTrait = (gameId, cardId, traits) => (dispatch, getState) => {
+  logger.verbose('server$gameDeployTrait:', gameId, cardId
+    , ...traits.map(t => `${t.type}(${t.hostAnimalId}${t.linkAnimalId ? (`-` + t.linkAnimalId) : ''})`));
+  dispatch(gameDeployTrait(gameId, cardId, traits));
   dispatch(Object.assign(
-    gameDeployTrait(gameId, cardId, traitType, animalId, linkedAnimalId)
+    gameDeployTrait(gameId, cardId, traits.map(trait => trait.toOthers().toClient()))
     , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId)}}
   ));
 };
@@ -240,6 +242,11 @@ const gameStartDeploy = (gameId) => ({
   , data: {gameId}
 });
 
+const gameEventExtict = (gameId) => ({
+  type: 'gameEventExtict'
+  , data: {gameId}
+});
+
 export const server$gameExtict = (gameId) => (dispatch, getState) => {
   //console.log('server$gameExtinct')
   const game = selectGame(getState, gameId);
@@ -251,7 +258,7 @@ export const server$gameExtict = (gameId) => (dispatch, getState) => {
     cardGivePerPlayer[player.id] = 0;
     cardNeedToPlayer[player.id] = 1;
     player.continent.forEach((animal) => {
-      if (!animal.canSurvive()) {
+      if (!animal.canSurvive() || animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED)) {
         dispatch(server$game(gameId, animalStarve(gameId, animal.id)));
       } else {
         cardNeedToPlayer[player.id] += 1;
@@ -400,8 +407,18 @@ export const gameClientToServer = {
     if (cardTrait.checkTraitPlacement && !cardTrait.checkTraitPlacement(animal))
       throw new ActionCheckError(`gameDeployTraitRequest(${game.id})`, `Trait(%s) failed checkTraitPlacement on Animal(%s)`, cardTrait.type, animal.id);
 
-    const trait = !linkedAnimal ? TraitModel.new(cardTrait.type).attachTo(animal) : TraitModel.LinkBetween(cardTrait.type, animal, linkedAnimal);
-    dispatch(server$gameDeployTrait(gameId, cardId, cardTrait.type, animal.id, linkedAnimal ? linkedAnimal.id : void 0));
+    let traits = [];
+    if (!(cardTrait.cardTargetType & CTT_PARAMETER.LINK)) {
+      traits = [TraitModel.new(cardTrait.type).attachTo(animal)];
+    } else {
+      traits = TraitModel.LinkBetween(
+        cardTrait.type
+        , animal
+        , linkedAnimal
+        , cardTrait.cardTargetType & CTT_PARAMETER.ONEWAY);
+    }
+
+    dispatch(server$gameDeployTrait(gameId, cardId, traits));
     dispatch(server$gameDeployNext(gameId, userId));
   }
 };
@@ -422,8 +439,8 @@ export const gameServerToClient = {
     gameGiveCards(gameId, userId, List(cards).map(card => CardModel.fromServer(card)))
   , gameDeployAnimal: ({gameId, userId, animal, animalPosition, cardPosition}) =>
     gameDeployAnimal(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardPosition)
-  , gameDeployTrait: ({gameId, cardId, traitType, animalId, linkedAnimalId}) =>
-    gameDeployTrait(gameId, cardId, traitType, animalId, linkedAnimalId)
+  , gameDeployTrait: ({gameId, cardId, traits}) =>
+    gameDeployTrait(gameId, cardId, traits.map(trait => TraitModel.fromServer(trait)))
   , gameNextPlayer: ({gameId}) => gameNextPlayer(gameId)
   , gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
   , gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))

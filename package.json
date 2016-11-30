@@ -1,15 +1,17 @@
 {
   "name": "cards3",
-  "version": "1.0.0",
+  "version": "0.0.32",
   "description": "blahblah",
   "browser": {
     "jsonwebtoken": false,
     "node-uuid": false,
     "winston": false,
+    "colors": false,
     "yaml-js": false
   },
   "scripts": {
-    "start": "node_modules/.bin/cross-env NODE_ENV=development node_modules/.bin/nodemon index.js",
+    "start": "npm version patch --force && npm run start:dev",
+    "start:dev": "node_modules/.bin/cross-env NODE_ENV=development node_modules/.bin/nodemon index.js",
     "start:prod": "node_modules/.bin/cross-env NODE_ENV=production node index.js",
     "bs": "npm run clean && npm run build && npm run start:prod",
     "minify": "cleancss -o static/css/app.min.css static/css/app.css",
@@ -42,6 +44,7 @@
     "eventsource-polyfill": "*",
     "express": "*",
     "history": "*",
+    "i18n-react": "^0.3.0-ts1",
     "immutable": "*",
     "isomorphic-fetch": "*",
     "jsonwebtoken": "*",
@@ -50,7 +53,6 @@
     "morgan": "*",
     "react": "*",
     "react-addons-css-transition-group": "*",
-    "react-addons-linked-state-mixin": "*",
     "react-addons-pure-render-mixin": "*",
     "react-dnd": "*",
     "react-dnd-html5-backend": "*",
@@ -59,6 +61,7 @@
     "react-helmet": "*",
     "react-immutable-proptypes": "*",
     "react-mdl": "*",
+    "react-mdl-select": "^1.1.2",
     "react-redux": "*",
     "react-router": "*",
     "react-router-redux": "*",
@@ -130,6 +133,7 @@
     "style-loader": "*",
     "webpack": "*",
     "webpack-dev-middleware": "*",
-    "webpack-hot-middleware": "*"
+    "webpack-hot-middleware": "*",
+    "yaml-loader": "^0.4.0"
   }
 }

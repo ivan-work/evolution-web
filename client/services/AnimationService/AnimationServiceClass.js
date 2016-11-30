@@ -1,112 +1,59 @@
-class QueueItem {
-  constructor(action, next) {
-    this.action = action;
-    this.next = next;
-    this.processedBy = [];
-    this.completedBy = [];
-  }
-}
-
 export class AnimationServiceClass {
-  constructor(log = () => null) {
-    this.currentAnimation = null;
-    this.$subscribers = {};
+  //constructor(log = console.log) {
+  constructor(log = () => 0) {
+    this.$log = log;
     this.$queue = [];
-    this.log = log;
+    this.$subscriptions = {};
   }
 
-  componentSubscribe(component, actionType) {
-    this.log(`${component.displayName} subscribed for ${actionType}`);
-    if (!this.$subscribers[actionType]) this.$subscribers[actionType] = [];
-    this.$subscribers[actionType].push(component)
+  subscribe(actionType, subscription) {
+    this.$log(`AnimationService:${actionType}`, 'subscribe');
+    if (!this.$subscriptions[actionType]) this.$subscriptions[actionType] = [];
+    this.$subscriptions[actionType].push(subscription)
   }
 
-  componentUpdated(updatedComponent) {
-    this.log(`${updatedComponent.displayName} updated`, updatedComponent.state.animation);
-    if (updatedComponent.state.animation) {
-      const animation = this.currentAnimation;
-      const actionType = animation.action.type;
-      const subscribersForAction = this.$subscribers[actionType];
+  unsubscribe(subscription) {
+    this.$log(`AnimationService:unsubscribe`);
+    Object.keys(this.$subscriptions).forEach((actionType) => {
+      this.$subscriptions[actionType] = this.$subscriptions[actionType].remove(subscription);
+    });
+  }
 
-      this.log(`${updatedComponent.displayName} has animation ${actionType} in state`);
-
-      // reset animation;
-      updatedComponent.setState({animation: null});
-
-      if (subscribersForAction) { // have subscribers on this type of action
-        const component = subscribersForAction.find((component) =>
-          component === updatedComponent // updated component is subscriber
-          && !~animation.processedBy.indexOf(component) // is not processed yet by updated component
-        );
-        if (component) {
-          this.log(`${component.displayName} activating animation for ${actionType}`);
-          animation.processedBy.push(component); // start processing;
-          component.getAnimation(actionType)
-            .call(null, () => this.completeCurrentAnimation(component), component.props, animation.action.data)
-        }
-      }
+  requestFromQueue(dispatch) {
+    if (this.$queue.length > 0) {
+      const nextAction = this.$queue[0];
+      this.$queue = this.$queue.slice(1);
+      dispatch(nextAction);
     }
   }
 
-  componentUnsubscribe(unmountingComponent) {
-    const subscribers = this.$subscribers;
-    this.$subscribers = Object.keys(subscribers).reduce((result, actionType) => {
-      result[actionType] = subscribers[actionType].filter(component => component !== unmountingComponent);
+  processAction(dispatch, next, action) {
+    this.$log(`AnimationService:PA(${action.type}) Startx`, this.$subscriptions);
+    const subscriptionsForAction = this.$subscriptions[action.type];
+    if (!!this.currentAnimation) {
+      this.$log(`AnimationService:PA(${action.type})`, 'END: Push to queue');
+      // if already animating something - push to queue
+      //let nextAction;
+      //const actionResolvedPromise = new Promise((resolve) =>
+      //  nextAction = () => resolve(dispatch(action)));
+      this.$queue.push(action);
+      //return actionResolvedPromise;
+    } else if (subscriptionsForAction && subscriptionsForAction.length > 0) {
+      this.$log(`AnimationService:PA(${action.type})`, 'startAnimating');
+      // if not - then start
+      this.currentAnimation = true;
+      Promise.all(subscriptionsForAction.map(subscription => subscription.waitForUpdate(action.data)))
+        .then(() => {
+          this.$log(`AnimationService:PA(${action.type})`, `END: queue(${this.$queue.length})`);
+          this.currentAnimation = false;
+          this.requestFromQueue(dispatch);
+        });
+      return next(action);
+    } else {
+      this.$log(`AnimationService:PA(${action.type})`, `END: Normal action, queue(${this.$queue.length})`);
+      const result = next(action);
+      this.requestFromQueue(dispatch);
       return result;
-    }, {});
-    this.completeCurrentAnimation(unmountingComponent);
-  }
-
-  processAction(next, action) {
-    this.log(`processing action: ${action.type}`);
-    if (this.currentAnimation) {
-      this.log(`currently has animation: ${this.currentAnimation.action.type}. pushing to queue`);
-      // If something is animating = add action to the queue
-      this.$queue.push(new QueueItem(action, next));
-    } else {
-      // dispatch
-      this.log(`dispatching ${action.type}`);
-      next(action);
-      // If not - check if we should animate this action
-      this.startAnimation(new QueueItem(action));
-    }
-  }
-
-  startAnimation(animation) {
-    const subscribersForAction = this.$subscribers[animation.action.type];
-    if (subscribersForAction && subscribersForAction.length > 0) {
-      this.currentAnimation = animation;
-      subscribersForAction.forEach((component) => {
-        if (component._isMounted) {
-          component.setState({animation: this.currentAnimation})
-        } else {
-          this.completeCurrentAnimation(component);
-        }
-      })
-    } else {
-      this.currentAnimation = null;
-    }
-  }
-
-  completeCurrentAnimation(component) {
-    if (this.currentAnimation) {
-      const subscribersForAction = this.$subscribers[this.currentAnimation.action.type];
-      if (subscribersForAction.some(c => c === component) && !this.currentAnimation.completedBy.some(c => c === component)) {
-        this.currentAnimation.completedBy.push(component);
-        this.log(`completed ${this.currentAnimation.action.type}, ${this.currentAnimation.completedBy.length}/${subscribersForAction.length}`);
-        if (this.currentAnimation.completedBy.length === subscribersForAction.length) {
-          this.log(`queue length: ${this.$queue.length}`);
-          if (this.$queue.length > 0) {
-            const nextAnimation = this.$queue[0];
-            this.$queue = this.$queue.slice(1);
-            this.log(`changing current animation to`, nextAnimation);
-            nextAnimation.next(nextAnimation.action);
-            this.startAnimation(nextAnimation)
-          } else {
-            this.currentAnimation = null;
-          }
-        }
-      }
     }
   }
 }

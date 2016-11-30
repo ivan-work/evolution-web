@@ -44,7 +44,8 @@ global.window.matchMedia = window.matchMedia || (() => ({
 require('react-mdl/extra/material');
 global.Element = global.window.Element;
 global.CustomEvent = global.window.CustomEvent;
-global.Event = global.window.Event;
+global.HTMLElement = global.window.HTMLElement;
+//global.Event = global.window.Event;
 global.NodeList = global.window.NodeList;
 global.Node = global.window.Node;
 
@@ -57,6 +58,7 @@ require('fbjs/lib/ExecutionEnvironment').canUseDOM = true;
 //  }
 //});
 
+global.DEFINE_VERSION = '0.0.0';
 process.env.TEST = true;
 process.env.DEBUG = '*';
 process.env.JWT_SECRET = 'secret';
@@ -131,6 +133,10 @@ global.mockClientStore = function (initialClientState) {
   const history = createMemoryHistory('/');
   const clientStore = configureStore(combineReducers({...clientReducers, routing: routerReducer}), initialClientState, [
     appRouterMiddleware(history)
+    , store => next => action => {
+      clientStore.actions.push(action);
+      return next(action);
+    }
     , socketClientMiddleware(ioClient)
   ]);
   socketClientStore(ioClient, clientStore);

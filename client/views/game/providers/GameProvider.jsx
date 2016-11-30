@@ -7,7 +7,7 @@ export const GameProvider = (DecoratedComponent) => class GameProvider extends R
     game: React.PropTypes.instanceOf(GameModelClient).isRequired
   };
 
-  static displayName = DecoratedComponent.displayName;
+  static displayName = `GameProvider(${DecoratedComponent.displayName})`;
 
   constructor(props) {
     super(props);
@@ -17,6 +17,10 @@ export const GameProvider = (DecoratedComponent) => class GameProvider extends R
 
   render() {
     const game = this.context.game;
+    if (!game) {
+      console.error(this.constructor.name, 'game is undefined');
+      return null;
+    }
     return <DecoratedComponent {...this.props}
       game={game}
       isPlayerTurn={game.isPlayerTurn()}

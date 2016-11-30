@@ -17,15 +17,15 @@ deck: 10 camo
 food: 4
 phase: 2
 players:
-  - continent: $, $, $, $
-  - continent: $, $, $, $
+  - continent: $A, $B, $C, $D
+  - continent: $X, $Y, $Z, $W
 `);
     expect(ServerGame().getPlayer(User0.id).acted).equal(false);
     expect(ServerGame().getPlayer(User1.id).acted).equal(false);
     expect(ServerGame().getPlayer(User0.id).ended).equal(false);
     expect(ServerGame().getPlayer(User1.id).ended).equal(false);
 
-    clientStore0.dispatch(traitTakeFoodRequest(ClientGame0().getPlayerAnimal(User0, 0).id));
+    clientStore0.dispatch(traitTakeFoodRequest('$A'));
     expect(ServerGame().getPlayer(User0.id).acted).equal(true);
     expect(ServerGame().getPlayer(User1.id).acted).equal(false);
     expect(ServerGame().getPlayer(User0.id).ended).equal(false);
@@ -43,13 +43,11 @@ players:
     expect(ServerGame().getPlayer(User0.id).ended).equal(false);
     expect(ServerGame().getPlayer(User1.id).ended).equal(true);
 
-    // wrong animal!
-    clientStore0.dispatch(traitTakeFoodRequest(ClientGame0().getPlayerAnimal(User0, 0).id));
-    expect(ServerGame().getPlayer(User0.id).acted).equal(false);
-    expect(ServerGame().getPlayer(User0.id).ended).equal(false);
+    expectUnchanged('$A already ate', () =>
+        clientStore0.dispatch(traitTakeFoodRequest('$A'))
+      , serverStore, clientStore0, clientStore1)
 
-    // right animal
-    clientStore0.dispatch(traitTakeFoodRequest(ClientGame0().getPlayerAnimal(User0, 1).id));
+    clientStore0.dispatch(traitTakeFoodRequest('$B'));
     expect(ServerGame().getPlayer(User0.id).acted).equal(true);
     expect(ServerGame().getPlayer(User0.id).ended).equal(false);
 

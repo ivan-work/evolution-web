@@ -45,9 +45,19 @@ const history = syncHistoryWithStore(store, browserHistory);
 
 socketStore(socketClient, store);
 
+import {appChangeLanguage} from './actions/app';
+store.dispatch(appChangeLanguage(store.getState().getIn(['app', 'lang'])));
+
 ReactDOM.render(
   <Root store={store} history={history}>
     <DevTools />
   </Root>,
   document.getElementById('app')
 );
+
+//http://localhost:3000/i18n/ru-ru.json
+//console.log(i18n)
+
+
+
+//T.setTexts(require('./i18n/ru-ru.yml'));
