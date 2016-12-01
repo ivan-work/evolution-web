@@ -73,7 +73,7 @@ export class AnimalModel extends Record({
     return this.needsFood() > 0
       && !this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
       && !this.traits
-        .filter(trait => trait.type === TraitSymbiosis.type && trait.symbioticAid === this.id)
+        .filter(trait => trait.type === TraitSymbiosis.type && trait.linkSource && trait.hostAnimalId === this.id)
         .some(trait => {
           //console.log(`${this.id} is living on ${trait.linkAnimalId}`);
           const {animal: hostAnimal} = game.locateAnimal(trait.linkAnimalId);

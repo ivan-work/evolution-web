@@ -12,7 +12,7 @@ export class TraitModel extends Record({
   , ownerId: null
   , hostAnimalId: null
   , linkAnimalId: null
-  , symbioticAid: null
+  , linkSource: null
   , dataModel: null
   , value: null // for fat
 }) {
@@ -53,26 +53,25 @@ export class TraitModel extends Record({
     );
   }
 
-  static LinkBetween(traitType, animal1, animal2, oneWay) {
-    if (this.LinkBetweenCheck(traitType, animal1, animal2, oneWay)) {
+  static LinkBetween(traitType, animal1, animal2) {
+    if (this.LinkBetweenCheck(traitType, animal1, animal2)) {
       throw new ActionCheckError(`TraitModelValidation`, `Animal#%s already has LinkedTrait(%s) on Animal#%s`, animal1.id, traitType, animal2.id);
     }
     const trait1 = TraitModel.new(traitType);
     const trait2 = TraitModel.new(traitType);
-
     return [
       trait1
         .set('ownerId', animal1.ownerId)
+        .set('linkId', trait2.id)
+        .set('linkSource', true)
         .set('hostAnimalId', animal1.id)
         .set('linkAnimalId', animal2.id)
-        .set('linkId', trait2.id)
-        .set('symbioticAid', oneWay ? animal1.id : null)
       , trait2
-        .set('linkId', trait1.id)
         .set('ownerId', animal2.ownerId)
+        .set('linkId', trait1.id)
+        .set('linkSource', false)
         .set('hostAnimalId', animal2.id)
         .set('linkAnimalId', animal1.id)
-        .set('symbioticAid', oneWay ? animal1.id : null)
     ];
   }
 
