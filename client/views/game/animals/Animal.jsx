@@ -9,11 +9,13 @@ import { AnimalModel } from '~/shared/models/game/evolution/AnimalModel';
 import { TraitModel } from '~/shared/models/game/evolution/TraitModel';
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 
+import {Tooltip} from './../../utils/Tooltips.jsx';
 import { AnimalTrait, DragAnimalTrait, ANIMAL_TRAIT_SIZE } from './AnimalTrait.jsx';
 import { AnimalLinkedTrait } from './AnimalLinkedTrait.jsx';
 import { DragAnimalSelectLink } from './AnimalSelectLink.jsx'
 import {GameProvider} from './../providers/GameProvider.jsx';
 import {Food} from './../food/Food.jsx';
+
 
 import './Animal.scss';
 
@@ -54,7 +56,7 @@ class Animal extends React.Component {
     return (<div className={className}>
       <div className='traits'>
         {model.traits
-          .sort((t1, t2) => t1.isLinked() ? 1 : -1)
+          //.sort((t1, t2) => t1.isLinked() ? 1 : -1)
           .toArray()
           .map((trait, index) =>{
           return <div key={trait.id}
@@ -66,12 +68,14 @@ class Animal extends React.Component {
           </div>})}
       </div>
       {this.renderSelectLink()}
-      <div className='inner'>
-        {model.id}
-        <div className='AnimalFoodContainer'>
-          {Array.from({length: model.food}).map((u, index) => <Food key={index}/>)}
+      <Tooltip tip='animal'>
+        <div className='inner'>
+          {model.id}
+          <div className='AnimalFoodContainer'>
+            {Array.from({length: model.food}).map((u, index) => <Food key={index}/>)}
+          </div>
         </div>
-      </div>
+      </Tooltip>
     </div>);
   }
 }
@@ -84,11 +88,11 @@ class DropAnimal_Body extends Animal {
 
   renderTrait(trait, animal) {
     if (trait.isLinked()) {
-      return <AnimalLinkedTrait trait={trait} sourceAnimalId={animal.id}/>;
+      return <AnimalLinkedTrait trait={trait}/>;
     } else if (trait.dataModel.playerControllable) {
       return <DragAnimalTrait trait={trait} sourceAnimal={animal}/>;
     } else {
-      return <AnimalTrait trait={trait} sourceAnimal={animal}/>;
+      return <AnimalTrait trait={trait}/>;
     }
   }
 }

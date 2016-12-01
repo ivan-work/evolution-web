@@ -23,7 +23,7 @@ import {DeckWrapper} from './cards/DeckWrapper.jsx';
 
 import {GameScoreboardFinalView} from './ui/GameScoreboardFinal.jsx';
 
-import {AnimationServiceContext, AnimationServiceRef} from '../../services/AnimationService';
+import {AnimationServiceRef} from '../../services/AnimationService';
 
 class ReactGame extends React.Component {
   static displayName = 'Game';

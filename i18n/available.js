@@ -1,4 +1,6 @@
-const translations = require.context("./", true, /\.yml$/);
+const translations = require.context
+  ? require.context("./", true, /\.yml$/).keys()
+  : ['en-en'];
 
-export default translations.keys()
+export default translations
   .map(t => t.replace(/\.\/(\w+-\w+)\.yml$/, '$1'));
