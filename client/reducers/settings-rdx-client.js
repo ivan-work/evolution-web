@@ -1,6 +1,7 @@
 import {Map} from 'immutable';
 import {createReducer} from '~/shared/utils';
 import langCodes from '../../i18n/available';
+import {appChangeLanguage} from '../actions/app';
 
 import T from 'i18n-react';
 

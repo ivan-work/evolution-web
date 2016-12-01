@@ -3,16 +3,6 @@ var path = require('path');
 import oauth from './oauth';
 
 module.exports = (app, passport) => {
-// Rest API
-//require(path.join(__dirname, './', 'todos'))(router);
-//require(path.join(__dirname, './', 'users'))(router);
-
-// Homepage/Client
-  router.get('/', function (req, res, next) {
-    res.send("ok");
-  });
-
-// Homepage/Client
   router.get('/state', function (req, res, next) {
     const state = app.get('store').getState().toJS();
 
@@ -37,6 +27,11 @@ module.exports = (app, passport) => {
   router.use('/oauth', oauth);
   // set authentication routes
   //require('./authentication.js')(app, passport);
+
+
+  router.get('*', function (req, res, next) {
+    res.send('ok');
+  });
 
   // set other routes
   app.use('/api', router);

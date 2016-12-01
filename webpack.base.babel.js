@@ -8,7 +8,6 @@ const webpack = require('webpack');
 module.exports = (options) => ({
   entry: {
     index: options.entry.concat([path.join(process.cwd(), 'client/index.jsx')])
-    , i18n: './i18n/index.js',
   },
   output: Object.assign({ // Compile into js/build.js
     path: path.resolve(process.cwd(), 'dist'),
