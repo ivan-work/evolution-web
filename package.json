@@ -1,6 +1,6 @@
 {
   "name": "cards3",
-  "version": "0.0.44",
+  "version": "0.0.45",
   "description": "blahblah",
   "browser": {
     "jsonwebtoken": false,
@@ -75,6 +75,7 @@
     "sanitize-html": "*",
     "socket.io": "*",
     "socket.io-client": "*",
+    "validatorjs": "^3.9.0",
     "velocity-animate": "*",
     "winston": "*",
     "yaml-js": "*"
