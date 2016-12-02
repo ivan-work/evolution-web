@@ -4,11 +4,17 @@ App:
   Rooms: Комнаты
   Rooms$Create: Создать
   Rooms_New_room: Новая комната
-  Rooms_New_room_name: Название
-  Room: Комната
-  Room$Back: Назад
-  Room$Exit: Выйти
-  Room$Start: Начать игру
+  Room:
+    Room: Комната
+    Settings:
+      name: Название
+      maxPlayers: Количество игроков
+      timeTurn: Время хода (В минутах)
+      timeTraitResponse: Время реагирования на атаку
+    $Back: Назад
+    $Exit: Выйти
+    $Start: Начать игру
+    in_this_room: В комнате
 Game:
   UI:
     TraitDefenceDialog_Time: Осталось времени

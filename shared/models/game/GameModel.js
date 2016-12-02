@@ -3,6 +3,7 @@ import {Record, Map, OrderedMap, Range, List} from 'immutable';
 import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
 import {CooldownList} from './CooldownList';
+import {SettingsRecord} from './GameSettings';
 import * as cardData from './evolution/cardData';
 
 import uuid from 'node-uuid';
@@ -10,8 +11,6 @@ import {ensureParameter} from '../../utils';
 import {getRandom} from '../../utils/randomGenerator';
 
 import {parseFromRoom, parseCardList, parseAnimalList} from './GameModel.parse';
-
-import {TIME_TURN, TIME_TRAIT_RESPONSE} from './evolution/constants';
 
 export const TEST_DECK_SIZE = 24;
 export const TEST_HAND_SIZE = 6;
@@ -39,11 +38,6 @@ export const QuestionRecord = Record({
   , traitType: null
   , targetPid: null
   , targetAid: null
-});
-
-export const SettingsRecord = Record({
-  timeTurn: TIME_TURN
-  , timeTraitResponse: 20 * 1000//TIME_TRAIT_RESPONSE[0]
 });
 
 const rollDice = () => getRandom(1, 6);
@@ -79,7 +73,7 @@ export class GameModel extends Record(GameModelData) {
   static generateDeck(config, shuffle) {
     const result = config.reduce((result, [count, model]) => result
       .concat(Array.from({length: count})
-      .map(u => CardModel.new(model))), []);
+        .map(u => CardModel.new(model))), []);
     return List(shuffle ? doShuffle(result) : result);
   }
 

@@ -1,5 +1,7 @@
 import logger from '~/shared/utils/logger';
 import {RoomModel} from '../models/RoomModel';
+import {SettingsRules} from '../models/game/GameSettings';
+import Validator from 'validatorjs';
 
 import {server$gameLeave} from './game';
 
@@ -51,7 +53,7 @@ export const server$roomExit = (roomId, userId) => (dispatch, getState) => {
   dispatch(roomExitSuccess(roomId, userId));
   if (room && room.gameId) {
     dispatch(server$gameLeave(room.gameId, userId));
-  }  
+  }
 };
 
 const server$roomJoinRequest = ({roomId}, {user: {id: userId}}) => (dispatch, getState) => {
@@ -72,16 +74,72 @@ const server$roomJoinRequest = ({roomId}, {user: {id: userId}}) => (dispatch, ge
   }
 };
 
+// Actions
+
+export const roomEditSettingsRequest = (settings) => (dispatch, getState) => dispatch({
+  type: 'roomEditSettingsRequest'
+  , data: {roomId: getState().get('room'), settings}
+  , meta: {server: true}
+});
+
+const roomEditSettings = (roomId, settings) => ({
+  type: 'roomEditSettings'
+  , data: {roomId, settings}
+});
+
+const server$roomEditSettings = (roomId, settings) => (dispatch, getState) => dispatch(
+  Object.assign(roomEditSettings(roomId, settings)
+    , {meta: {users: true}}));
+
+export const roomKickRequest = (userId) => (dispatch, getState) => dispatch({
+  type: 'roomKickRequest'
+  , data: {roomId: getState().get('room'), userId}
+  , meta: {server: true}
+});
+
+const roomKick = (userId) => ({
+  type: 'roomKick'
+  , data: {userId}
+});
+
+export const roomBanRequest = (userId) => (dispatch, getState) => dispatch({
+  type: 'roomBanRequest'
+  , data: {roomId: getState().get('room'), userId}
+  , meta: {server: true}
+});
+
+const roomBan = (userId) => ({
+  type: 'roomBan'
+  , data: {userId}
+});
+
 export const roomsClientToServer = {
-  roomCreateRequest: (data, {user}) => (dispatch, getState) => {
-    const userId = user.id;
-    const room = RoomModel.new();
-    dispatch(roomCreateSuccess(room));
-    dispatch(server$roomJoinRequest({roomId: room.id}, {user}));
+    roomCreateRequest: (data, {user}) => (dispatch, getState) => {
+      const userId = user.id;
+      const room = RoomModel.new();
+      dispatch(roomCreateSuccess(room));
+      dispatch(server$roomJoinRequest({roomId: room.id}, {user}));
+    }
+    , roomJoinRequest: server$roomJoinRequest
+    , roomExitRequest: ({roomId}, {user}) => server$roomExit(roomId, user.id)
+    , roomEditSettingsRequest: ({roomId, settings}, {user}) => (dispatch, getState) => {
+      const userId = user.id;
+      checkUserInRoom(getState, roomId, userId);
+      checkUserIsHost(getState, roomId, userId);
+      const validation = new Validator(settings, SettingsRules);
+      if (validation.fails()) throw new ActionCheckError('roomEditSettingsRequest', 'validation failed: %s', validation);
+      dispatch(server$roomEditSettings(roomId, settings));
+    }
+    , roomKickRequest: ({roomId, userId}, {user}) => (dispatch, getState) => {
+      checkUserInRoom(getState, roomId, userId);
+      checkUserIsHost(getState, roomId, userId);
+    }
+    , roomBanRequest: ({roomId, userId}, {user}) => (dispatch, getState) => {
+    checkUserInRoom(getState, roomId, userId);
+      checkUserIsHost(getState, roomId, userId);
+    }
   }
-  , roomJoinRequest: server$roomJoinRequest
-  , roomExitRequest: ({roomId}, {user}) => server$roomExit(roomId, user.id)
-};
+  ;
 
 export const roomsServerToClient = {
   roomCreateSuccess: ({room}) => roomCreateSuccess(RoomModel.fromJS(room))
@@ -99,4 +157,17 @@ export const roomsServerToClient = {
       dispatch(redirectTo(`/`));
     }
   }
+  , roomEditSettings: ({roomId, settings}) => roomEditSettings(roomId, settings)
+};
+
+import {ActionCheckError} from '~/shared/models/ActionCheckError';
+
+const checkUserInRoom = (getState, roomId, userId) => {
+  if (!getState().getIn(['rooms', roomId, 'users']).some(roomUserId => roomUserId === userId))
+    throw new ActionCheckError('checkUserInRoom', 'Room(%s) doesnt have User(%s)', roomId, userId);
+};
+
+const checkUserIsHost = (getState, roomId, userId) => {
+  if (getState().getIn(['rooms', roomId, 'users', 0]) !== userId)
+    throw new ActionCheckError('checkUserIsHost', 'Room(%s) have User(%s) as not host', roomId, userId);
 };

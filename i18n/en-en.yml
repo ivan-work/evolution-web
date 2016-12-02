@@ -5,10 +5,12 @@ App:
   Rooms$Create: Create
   Rooms_New_room: New room
   Rooms_New_room_name: Name
-  Room: Room
-  Room$Back: Back
-  Room$Exit: Exit
-  Room$Start: Start game
+  Room:
+    Room: Room
+    $Back: Back
+    $Exit: Exit
+    $Start: Start game
+    in_this_room: In this room
 Game:
   UI:
     TraitDefenceDialog_Time: Time left
