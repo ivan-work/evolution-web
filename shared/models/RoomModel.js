@@ -1,6 +1,5 @@
 import {Record, List} from 'immutable';
 import uuid from 'node-uuid';
-import {ensureParameter} from '~/shared/utils';
 import {SettingsRecord} from './game/GameSettings';
 
 export class RoomModel extends Record({
@@ -9,6 +8,7 @@ export class RoomModel extends Record({
   , settings: new SettingsRecord()
   , users: List()
   , gameId: null
+  , banlist: List()
 }) {
   static fromJS(js) {
     return js == null
@@ -17,6 +17,7 @@ export class RoomModel extends Record({
       ...js
       , users: List(js.users)
       , settings: new SettingsRecord(js.settings)
+      , banlist: List(js.banlist)
     });
   }
 
@@ -29,24 +30,9 @@ export class RoomModel extends Record({
     })
   }
 
-  join(userId) {
-    ensureParameter(userId, 'string');
-    return this.update('users', (users) => users.push(userId))
-  }
-
   hasUser(userId) {
     ensureParameter(userId, 'string');
     return !!~this.users.indexOf(userId);
-  }
-
-  leave(userId) {
-    ensureParameter(userId, 'string');
-    let index = this.users.indexOf(userId);
-    return (this.users.size == 1
-      ? null
-      : !~index
-      ? this
-      : this.update('users', users => users.remove(index)));
   }
 
   checkCanStart(userId) {
