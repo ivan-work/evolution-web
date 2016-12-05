@@ -1,6 +1,7 @@
 const DECK_POSITION = {};
 const PLAYER_POSITION = {left: '0px', bottom: '0px'};
 const FOOD_POSITION = {position: 'absolute', left: '10px', top: '50%'};
+const CONTINENT_MAX_WIDTH = 500;
 export const GAME_POSITIONS = {
   0: null
   , 1: {
@@ -18,24 +19,25 @@ export const GAME_POSITIONS = {
     deck: DECK_POSITION
     , player: PLAYER_POSITION
     , food: FOOD_POSITION
-    , 0: {top: `0`, left: `0`, transform: 'scale(.75)'}
-    , 1: {top: `0`, left: `${500*.75}px`, transform: 'scale(.75)'}
+    , 0: {top: `0`, left: `0`, transform: 'scale(.5)'}
+    , 1: {top: `0`, left: `${500*.75}px`, transform: 'scale(.5)'}
   }
   , 4: {
     deck: DECK_POSITION
     , player: PLAYER_POSITION
     , food: FOOD_POSITION
-    , 0: {top: `0`, left: `0`}
-    , 1: {top: `0`, left: `0`}
-    , 2: {top: `0`, left: `0`}
+    , 0: { transform: 'scale(.5)'}
+    , 1: { transform: 'scale(.5)'}
+    , 2: { transform: 'scale(.5)'}
   }
   , 5: {
     deck: DECK_POSITION
     , player: PLAYER_POSITION
     , food: FOOD_POSITION
-    , 0: {top: `0`, left: `0`}
     , 1: {top: `0`, left: `0`}
     , 2: {top: `0`, left: `0`}
+    , 3: {top: `0`, left: `0`}
+    , 4: {top: `0`, left: `0`}
   }
   , 6: {
     deck: DECK_POSITION

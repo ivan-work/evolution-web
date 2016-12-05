@@ -46,10 +46,6 @@ class ReactGame extends React.Component {
     const {game} = this.props;
     const player = game.getPlayer();
 
-    const GameContinent = (game.status.phase === PHASE.DEPLOY
-      ? ContinentDeploy
-      : ContinentFeeding);
-
     return <div className='Game'>
       <Portal target='header'>
         <ControlGroup name='Game'>
@@ -67,51 +63,66 @@ class ReactGame extends React.Component {
         <GameFoodContainer food={game.food}/>}
       </div>
 
-      {this.renderPlayer(game, player, GameContinent)}
+      {this.renderPlayer(game, player)}
 
       {game.players.valueSeq()
         .filter(enemy => enemy.id !== player.id)
-        .map((enemy, index) => this.renderPlayer(game, enemy, GameContinent, index))}
+        .map((enemy, index) => this.renderPlayer(game, enemy, index))}
 
       <CustomDragLayer />
     </div>;
   }
 
-  renderPlayer(game, player, GameContinent, index) {
+  renderPlayer(game, player, index) {
     const isUser = game.getPlayer().id === player.id;
+    return (isUser ? (
+      <div className={cn({PlayerWrapper: true, UserWrapper: true})}
+           style={GAME_POSITIONS[game.players.size].player}
+           key={player.id}
+           data-player-id={player.id}>
+        {this.renderContinent(game, player.continent, isUser)}
+        {this.renderCardCollection(game, player, isUser)}
+      </div>
+    ) : (
+      <div className={cn({PlayerWrapper: true, EnemyWrapper: true})}
+           style={GAME_POSITIONS[game.players.size][index]}
+           key={player.id}
+           data-player-id={player.id}>
+        <div className='InnerWrapper'>
+          {this.renderCardCollection(game, player, isUser)}
+          {this.renderContinent(game, player.continent, isUser)}
+        </div>
+      </div>
+    ));
+  }
 
+  renderContinent(game, continent, isUser) {
+    const ContinentClass = (game.status.phase === PHASE.DEPLOY
+      ? ContinentDeploy
+      : ContinentFeeding);
+
+    return (<ContinentClass
+      isUserContinent={isUser}
+      continent={continent}
+    />)
+  }
+
+  renderCardCollection(game, player, isUser) {
     const dragEnabled = isUser
       && game.status.phase === PHASE.DEPLOY
       && game.isPlayerTurn();
 
-    const playerWrapperClassName = cn({
-      PlayerWrapper: true
-      , UserWrapper: isUser
-      , EnemyWrapper: !isUser
-    });
-
-    const playerWrapperStyle = (isUser
-      ? GAME_POSITIONS[game.players.size].player
-      : GAME_POSITIONS[game.players.size][index]);
-
-    return <div className={playerWrapperClassName} style={playerWrapperStyle} key={player.id} data-player-id={player.id}>
-      <GameContinent
-        isUserContinent={isUser}
-        continent={player.continent}
-      />
-
-      <CardCollection
-        name={isUser ? 'Hand' : player.id}
-        shift={[isUser ? 55 : 20, 0]}>
-        {player.hand.toArray().map((cardModel, i) =>
-        <DragCard
-          key={cardModel.id}
-          card={cardModel}
-          ref={this.props.connectRef('Card#'+cardModel.id)}
-          dragEnabled={dragEnabled}/>
-          )}
-      </CardCollection>
-    </div>;
+    return (<CardCollection
+      name={isUser ? 'Hand' : player.id}
+      shift={[isUser ? 55 : 20, 0]}>
+      {player.hand.toArray().map((cardModel, i) =>
+      <DragCard
+        key={cardModel.id}
+        card={cardModel}
+        ref={this.props.connectRef('Card#'+cardModel.id)}
+        dragEnabled={dragEnabled}/>
+        )}
+    </CardCollection>)
   }
 }
 
