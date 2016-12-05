@@ -22,17 +22,17 @@ players:
 
   render() {
     return <div>
+      <h6 className="pointer" onClick={() => 0}>Add bot</h6>
       {this.props.gameCanStart
-        ? <h6 className="pointer" onClick={this.props.$start(this.props.roomId, this.state.gameSeed)}>
-        Start Game ►
-      </h6>
-        : null
-        }
-      <div><textarea
-        rows={8} cols={40}
-        value={this.state.gameSeed}
-        style={{overflow: 'hidden'}}
-        onChange={(e) => this.setState({gameSeed: e.target.value})}/></div>
+        ? <h6 className="pointer" onClick={this.props.$start(this.props.roomId, this.state.gameSeed)}>Start Game ►</h6>
+        : null}
+      <div>
+        <textarea
+          rows={8} cols={40}
+          value={this.state.gameSeed}
+          style={{overflow: 'hidden'}}
+          onChange={(e) => this.setState({gameSeed: e.target.value})}/>
+      </div>
     </div>
   }
 }

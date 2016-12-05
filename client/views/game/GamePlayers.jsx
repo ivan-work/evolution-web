@@ -37,7 +37,6 @@ export default class GamePlayers extends Component {
 
     return (<Measure onMeasure={(dimensions) => this.setState({dimensions})}>
       <div className='GamePlayers'>
-        <div className='marker' style={{position: 'absolute', top: `${height/2}px`, left: `${width/2}px`}}></div>
         {GameModel.sortPlayersFromIndex(game, player.index)
           .toArray()
           .map((player, index) => {
@@ -54,16 +53,12 @@ export default class GamePlayers extends Component {
           return <div key={player.id}
                       style={{
                           position: 'absolute'
-                          , background: '#aaa'
                           , left: `${width / 2}px`
                           , top: `${height / 2}px`
                           , transform: `translate(-50%, 0) rotate(${angle}rad) translate(0, -100%) translate(0, ${length}px)`
                           , transformOrigin: `top`
                           }}>
-            <div style={{
-                          background: '#999'
-                          , transform: `rotate(${upsideDown < 0 ? Math.PI : 0}rad)`
-                          }}>
+            <div style={{transform: `rotate(${upsideDown < 0 ? Math.PI : 0}rad)`}}>
               <div className={cn({PlayerWrapper: true, UserWrapper: isUser, EnemyWrapper: !isUser})}
                    key={player.id}
                    data-player-id={player.id}>
@@ -82,6 +77,7 @@ export default class GamePlayers extends Component {
       : ContinentFeeding);
 
     return (<ContinentClass
+      key='Continent'
       isUserContinent={isUser}
       continent={continent}
     />)
@@ -93,8 +89,9 @@ export default class GamePlayers extends Component {
       && game.isPlayerTurn();
 
     return (<CardCollection
+      key='CardCollection'
       name={isUser ? 'Hand' : player.id}
-      shift={[isUser ? 55 : 20, 0]}>
+      isUser={isUser}>
       {player.hand.toArray().map((cardModel, i) =>
       <DragCard
         key={cardModel.id}

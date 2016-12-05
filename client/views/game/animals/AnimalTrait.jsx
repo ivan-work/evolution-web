@@ -42,10 +42,7 @@ class AnimalTrait extends Component {
       , draggable: connectDragSource
     });
 
-    return <div className={className} style={{
-      width: ANIMAL_TRAIT_SIZE.width + 'px'
-      , height: ANIMAL_TRAIT_SIZE.height + 'px'
-    }}>{trait.type.replace('Trait', '')}</div>;
+    return <div className={className}>{trait.type.replace('Trait', '')}</div>;
   }
 }
 
