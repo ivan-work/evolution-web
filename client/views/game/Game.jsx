@@ -1,29 +1,25 @@
 import React from 'react';
+import {GAME_POSITIONS} from './GAME_POSITIONS';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-import * as MDL from 'react-mdl';
+import {Button} from 'react-mdl';
 import cn from 'classnames';
 
 import {UserModel} from '../../../shared/models/UserModel';
 import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 
-import {GAME_POSITIONS} from './GAME_POSITIONS';
-
 import {Portal} from '../utils/Portal.jsx';
 import {ControlGroup} from '../utils/ControlGroup.jsx';
-import {GameProvider} from './providers/GameProvider.jsx';
-import {CardCollection} from './CardCollection.jsx';
-import {Card, DragCard} from './Card.jsx';
-import {ContinentDeploy} from './continent/ContinentDeploy.jsx';
-import {ContinentFeeding} from './continent/ContinentFeeding.jsx';
 import {GameFoodContainer} from './food/GameFoodContainer.jsx';
 import CustomDragLayer from './dnd/CustomDragLayer.jsx';
 import {DeckWrapper} from './cards/DeckWrapper.jsx';
+import GamePlayers from './GamePlayers.jsx';
 
 
 import {GameScoreboardFinalView} from './ui/GameScoreboardFinal.jsx';
 
 import {AnimationServiceRef} from '../../services/AnimationService';
+
+//const MaxWidth
 
 class ReactGame extends React.Component {
   static displayName = 'Game';
@@ -43,13 +39,12 @@ class ReactGame extends React.Component {
   }
 
   render() {
-    const {game} = this.props;
-    const player = game.getPlayer();
+    const {game, connectRef} = this.props;
 
     return <div className='Game'>
       <Portal target='header'>
         <ControlGroup name='Game'>
-          <MDL.Button id="Game$exit" onClick={this.context.gameActions.$exit}>Exit</MDL.Button>
+          <Button id="Game$exit" onClick={this.context.gameActions.$exit}>Exit</Button>
           <GameScoreboardFinalView/>
         </ControlGroup>
       </Portal>
@@ -63,67 +58,11 @@ class ReactGame extends React.Component {
         <GameFoodContainer food={game.food}/>}
       </div>
 
-      {this.renderPlayer(game, player)}
-
-      {game.players.valueSeq()
-        .filter(enemy => enemy.id !== player.id)
-        .map((enemy, index) => this.renderPlayer(game, enemy, index))}
+      <GamePlayers game={game} connectRef={connectRef}/>
 
       <CustomDragLayer />
     </div>;
   }
-
-  renderPlayer(game, player, index) {
-    const isUser = game.getPlayer().id === player.id;
-    return (isUser ? (
-      <div className={cn({PlayerWrapper: true, UserWrapper: true})}
-           style={GAME_POSITIONS[game.players.size].player}
-           key={player.id}
-           data-player-id={player.id}>
-        {this.renderContinent(game, player.continent, isUser)}
-        {this.renderCardCollection(game, player, isUser)}
-      </div>
-    ) : (
-      <div className={cn({PlayerWrapper: true, EnemyWrapper: true})}
-           style={GAME_POSITIONS[game.players.size][index]}
-           key={player.id}
-           data-player-id={player.id}>
-        <div className='InnerWrapper'>
-          {this.renderCardCollection(game, player, isUser)}
-          {this.renderContinent(game, player.continent, isUser)}
-        </div>
-      </div>
-    ));
-  }
-
-  renderContinent(game, continent, isUser) {
-    const ContinentClass = (game.status.phase === PHASE.DEPLOY
-      ? ContinentDeploy
-      : ContinentFeeding);
-
-    return (<ContinentClass
-      isUserContinent={isUser}
-      continent={continent}
-    />)
-  }
-
-  renderCardCollection(game, player, isUser) {
-    const dragEnabled = isUser
-      && game.status.phase === PHASE.DEPLOY
-      && game.isPlayerTurn();
-
-    return (<CardCollection
-      name={isUser ? 'Hand' : player.id}
-      shift={[isUser ? 55 : 20, 0]}>
-      {player.hand.toArray().map((cardModel, i) =>
-      <DragCard
-        key={cardModel.id}
-        card={cardModel}
-        ref={this.props.connectRef('Card#'+cardModel.id)}
-        dragEnabled={dragEnabled}/>
-        )}
-    </CardCollection>)
-  }
 }
 
-export const Game = GameProvider(AnimationServiceRef(ReactGame));
+export const Game = AnimationServiceRef(ReactGame);
