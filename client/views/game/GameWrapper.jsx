@@ -16,7 +16,7 @@ import {
 } from '../../../shared/actions/actions';
 
 import {GameUI} from './ui/GameUI.jsx';
-import {Game} from './Game.jsx';
+import Game from './Game.jsx';
 import {GameModelClient} from '../../../shared/models/game/GameModel';
 
 import {DragDropContext} from 'react-dnd';
@@ -60,7 +60,7 @@ export class GameWrapper extends React.Component {
 
     return (<div className='GameWrapper'>
       <GameUI/>
-      <Game game={game} user={user}/>
+      <Game game={game}/>
     </div>);
   }
 }

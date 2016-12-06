@@ -12,7 +12,7 @@ export class CardCollection extends React.Component {
   render() {
     const {children, name, isUser} = this.props;
     const cardsCount = React.Children.count(children);
-    const shift = isUser ? 55 : 10;
+    const shift = isUser ? CARD_SIZE.width : 15;
     const size = CARD_SIZE.width + shift * (cardsCount - 1);
     return <div style={{margin: '0 auto', width: `${size}px`}}
                 className={`CardCollection ${name}`}>

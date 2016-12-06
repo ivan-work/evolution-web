@@ -4,7 +4,6 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {Button} from 'react-mdl';
 import cn from 'classnames';
 
-import {UserModel} from '../../../shared/models/UserModel';
 import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 
 import {Portal} from '../utils/Portal.jsx';
@@ -17,20 +16,15 @@ import GamePlayers from './GamePlayers.jsx';
 
 import {GameScoreboardFinalView} from './ui/GameScoreboardFinal.jsx';
 
-import {AnimationServiceRef} from '../../services/AnimationService';
-
 //const MaxWidth
 
-class ReactGame extends React.Component {
-  static displayName = 'Game';
-
+class Game extends React.Component {
   static contextTypes = {
     gameActions: React.PropTypes.object
   };
 
   static propTypes = {
-    user: React.PropTypes.instanceOf(UserModel).isRequired
-    , game: React.PropTypes.instanceOf(GameModelClient)
+    game: React.PropTypes.instanceOf(GameModelClient).isRequired
   };
 
   constructor(props) {
@@ -53,16 +47,20 @@ class ReactGame extends React.Component {
         <DeckWrapper deck={game.deck}/>
       </Portal>
 
-      <div style={GAME_POSITIONS[game.players.size].food}>
+      <div style={{
+        position: 'absolute'
+        , left: '50%'
+        , top: '50%'
+      }}>
         {game.status.phase === PHASE.FEEDING &&
         <GameFoodContainer food={game.food}/>}
       </div>
 
-      <GamePlayers game={game} connectRef={connectRef}/>
+      <GamePlayers game={game}/>
 
       <CustomDragLayer />
     </div>;
   }
 }
 
-export const Game = AnimationServiceRef(ReactGame);
+export default Game;

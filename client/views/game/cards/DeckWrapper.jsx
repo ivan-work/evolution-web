@@ -14,7 +14,7 @@ export const DeckWrapper = AnimationServiceRef(({deck, connectRef}) => (
   <div className='DeckWrapper'>
     <h6>Deck ({deck.size}):</h6>
     <Deck ref={connectRef('Deck')}>
-      {deck.toArray().map((cardModel, i) => <Card card={cardModel} key={i}/>)}
+      {deck.map((cardModel, i) => <Card card={cardModel} key={i}/>)}
     </Deck>
   </div>
 ));

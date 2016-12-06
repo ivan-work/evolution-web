@@ -6,10 +6,11 @@ import {CardUnknown} from '../../../../shared/models/game/evolution/cardData'
 export const gameGiveCards = (done, game, cards, getRef) => {
   const Deck = getRef('Deck');
   const DeckHtml = ReactDOM.findDOMNode(Deck);
+  done()
+  return true;
 
   cards.some((card, index) => {
     const CardComponent = getRef('Card#'+card.id);
-    if (!CardComponent) return true;
     const CardHtml = ReactDOM.findDOMNode(CardComponent);
 
     //console.log(`index ${index}`, `deck pos ${game.deck.size - cards.size + index}`, cards.map(c => c.id).toArray());

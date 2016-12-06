@@ -1,22 +1,19 @@
 import React, {Component} from 'react';
 import Measure from 'react-measure';
 
-import {GAME_POSITIONS} from './GAME_POSITIONS';
+import {GameModel, GameModelClient} from '../../../shared/models/game/GameModel';
 
-import cn from 'classnames';
-
-import {GameModel, GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
-
-import {CardCollection} from './CardCollection.jsx';
-import {Card, DragCard} from './Card.jsx';
-import {ContinentDeploy} from './continent/ContinentDeploy.jsx';
-import {ContinentFeeding} from './continent/ContinentFeeding.jsx';
+import PlayerWrapper from './PlayerWrapper.jsx';
 
 import './GamePlayers.scss';
 
 const r2g = (r) => r / Math.PI * 180;
 
 export default class GamePlayers extends Component {
+  static propTypes = {
+    game: React.PropTypes.instanceOf(GameModelClient).isRequired
+  };
+
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -34,21 +31,13 @@ export default class GamePlayers extends Component {
 
     const angleInitial = 0;
     const anglePerPlayer = Math.PI * 2 / game.players.size;
-
     return (<Measure onMeasure={(dimensions) => this.setState({dimensions})}>
       <div className='GamePlayers'>
         {GameModel.sortPlayersFromIndex(game, player.index)
-          .toArray()
           .map((player, index) => {
           const angle = angleInitial + anglePerPlayer * index;
-          const length = (width > height ? height : width) / 2 - 10;
+          const length = (width * height) / (Math.sqrt(Math.pow(width*Math.cos(angle), 2) + Math.pow(height*Math.sin(angle),2))) / 2 - 10
           const upsideDown = (angle > Math.PI * .5 && angle < Math.PI * 1.5 ? -1 : +1);
-          const isUser = game.getPlayer().id === player.id;
-
-          const innerElements = [
-            this.renderContinent(game, player.continent, isUser)
-            , this.renderCardCollection(game, player, isUser)
-            ];
 
           return <div key={player.id}
                       style={{
@@ -58,47 +47,12 @@ export default class GamePlayers extends Component {
                           , transform: `translate(-50%, 0) rotate(${angle}rad) translate(0, -100%) translate(0, ${length}px)`
                           , transformOrigin: `top`
                           }}>
-            <div style={{transform: `rotate(${upsideDown < 0 ? Math.PI : 0}rad)`}}>
-              <div className={cn({PlayerWrapper: true, UserWrapper: isUser, EnemyWrapper: !isUser})}
-                   key={player.id}
-                   data-player-id={player.id}>
-                {upsideDown > 0 ? innerElements : innerElements.reverse()}
-              </div>
+            <div style={{transform: `rotate(${upsideDown > 0 ? 0 : Math.PI}rad)`}}>
+              <PlayerWrapper angle={r2g(angle)} game={game} player={player} upsideDown={upsideDown > 0}/>
             </div>
           </div>
           })}
       </div>
     </Measure>)
-  }
-
-  renderContinent(game, continent, isUser) {
-    const ContinentClass = (game.status.phase === PHASE.DEPLOY
-      ? ContinentDeploy
-      : ContinentFeeding);
-
-    return (<ContinentClass
-      key='Continent'
-      isUserContinent={isUser}
-      continent={continent}
-    />)
-  }
-
-  renderCardCollection(game, player, isUser) {
-    const dragEnabled = isUser
-      && game.status.phase === PHASE.DEPLOY
-      && game.isPlayerTurn();
-
-    return (<CardCollection
-      key='CardCollection'
-      name={isUser ? 'Hand' : player.id}
-      isUser={isUser}>
-      {player.hand.toArray().map((cardModel, i) =>
-      <DragCard
-        key={cardModel.id}
-        card={cardModel}
-        ref={this.props.connectRef('Card#'+cardModel.id)}
-        dragEnabled={dragEnabled}/>
-        )}
-    </CardCollection>)
   }
 }

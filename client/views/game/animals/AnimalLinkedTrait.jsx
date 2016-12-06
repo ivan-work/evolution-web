@@ -62,32 +62,26 @@ export class AnimalLinkedTrait extends Component {
 
   tick() {
     if (this._isMounted) {
-      const {index, trait} = this.props;
+      const {index, trait, angle} = this.props;
       if (this.targetTrait && this.targetTrait._isMounted) {
-        const bbx1 = ReactDOM.findDOMNode(this).getBoundingClientRect();
-        const bbx2 = ReactDOM.findDOMNode(this.targetTrait).getBoundingClientRect();
+        const bbx1 = this.node.getBoundingClientRect();
+        const bbx2 = this.targetTrait.node.getBoundingClientRect();
         const x1 = bbx1.left + bbx1.width / 2;
-        const y1 = bbx1.top;
+        const y1 = bbx1.top + bbx1.height / 2;
         const x2 = bbx2.left + bbx2.width / 2;
-        const y2 = bbx2.top;
-        const maxSize = 400;
+        const y2 = bbx2.top + bbx2.height / 2;
 
+        const maxSize = 1600;
         const xlen = (x2 - x1);
         const ylen = (y2 - y1);
-        const bending = Math.abs(.25 * (x2 - x1));
+        const dist = xlen * xlen + ylen * ylen;
 
-        const strokeWidth = 5 + 1 * Math.abs(xlen / maxSize);
-
-        const cx1 = xlen / 5;
-        const cy1 = -bending;
-        const cx2 = xlen / 5 * 4;
-        const cy2 = -bending;
+        const strokeWidth = 3 + .25 * Math.abs(dist / maxSize);
 
         this.setState({
-          d: `M${x1},${y1} c${cx1},${cy1} ${cx2},${cy2} ${xlen},${ylen}`
+          d: `M${x1},${y1} A 2 1 ${angle || 0} 1 1 ${x2},${y2}`
+          //d: `M${x1},${y1} ${x2},${y2}`
           , strokeWidth
-          , cx1: x1 + cx1, cy1: y1 + cy1
-          , cx2: x1 + cx2, cy2: y1 + cy2
         });
       } else {
         this.state = null;
@@ -123,8 +117,9 @@ export class AnimalLinkedTrait extends Component {
   }
 
   render() {
+    const {trait} = this.props;
     return (<div>
-      <AnimalTrait trait={this.props.trait}/>
+      <AnimalTrait trait={trait}/>
       <Portal target='game-svg'>
         {this.renderInPortal()}
       </Portal>
@@ -134,3 +129,53 @@ export class AnimalLinkedTrait extends Component {
 //<circle cx={this.state.cx1} cy={this.state.cy1} r='5' fill={color}/>
 //<circle cx={this.state.cx2} cy={this.state.cy2} r='5' fill={color}/>
 //<line  strokeWidth="5px" stroke="black" {...this.state}/>
+
+
+
+//if (this._isMounted) {
+//  const {index, trait} = this.props;
+//  if (this.targetTrait && this.targetTrait._isMounted) {
+//    const bbx1 = this.node;
+//    const bbx2 = this.targetTrait.node;
+//    const x1 = 0
+//      + bbx1.offsetLeft
+//      + bbx1.offsetParent.offsetLeft
+//      + bbx1.offsetParent.offsetParent.offsetLeft
+//      + bbx1.offsetWidth / 2;
+//    const y1 = 0
+//      + bbx1.offsetTop
+//      + bbx1.offsetParent.offsetTop
+//      + bbx1.offsetParent.offsetParent.offsetTop
+//      + bbx1.offsetHeight / 2;
+//    const x2 = 0
+//      + bbx2.offsetLeft
+//      + bbx2.offsetParent.offsetLeft
+//      + bbx2.offsetParent.offsetParent.offsetLeft
+//      + bbx2.offsetWidth / 2;
+//    const y2 = 0
+//      + bbx2.offsetTop
+//      + bbx2.offsetParent.offsetTop
+//      + bbx2.offsetParent.offsetParent.offsetTop
+//      + bbx2.offsetHeight / 2;
+//
+//    const maxSize = 1600;
+//
+//    const xlen = (x2 - x1);
+//    const ylen = (y2 - y1);
+//    //const angle = Math.atan2(xlen, ylen);
+//    const dist = xlen * xlen + ylen * ylen;
+//    const bending = .25 * 2;
+//
+//    const strokeWidth = 3 + .25 * Math.abs(dist / maxSize);
+//
+//    this.setState({
+//      d: `M${x1},${y1} A 3 2 0 1 1 ${x2},${y2}`
+//      , strokeWidth
+//    });
+//  } else {
+//    this.state = null;
+//    this.targetTrait = AnimalLinkedTraits.find((alt) => trait.id === alt.props.trait.linkId);
+//    this.forceUpdate();
+//  }
+//  window.requestAnimationFrame(this.tick);
+//}
