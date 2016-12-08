@@ -1,5 +1,5 @@
 import {Record, List, Map} from 'immutable';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import {TraitModel} from './TraitModel';
 import {TraitDataModel} from './TraitDataModel';
 
@@ -15,7 +15,7 @@ export class AnimalModel extends Record({
 }) {
   static new(ownerId) {
     return new AnimalModel({
-      id: uuid.v4().slice(0, 4)
+      id: uuid.v4().slice(0, 6)
       , ownerId
     });
   }

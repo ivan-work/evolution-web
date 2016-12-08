@@ -7,9 +7,9 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 // PostCSS plugins
-const cssnext = require('postcss-cssnext');
-const postcssFocus = require('postcss-focus');
-const postcssReporter = require('postcss-reporter');
+//const cssnext = require('postcss-cssnext');
+//const postcssFocus = require('postcss-focus');
+//const postcssReporter = require('postcss-reporter');
 
 module.exports = require('./webpack.base.babel')({
   //devtool: 'cheap-module-eval-source-map'
@@ -28,21 +28,25 @@ module.exports = require('./webpack.base.babel')({
 
   // Load the CSS in a style tag in development
   //cssLoaders: 'style!css?modules&importLoaders=2&sourceMap&localIdentName=[local]___[hash:base64:5]!sass?outputStyle=expanded&sourceMap',
-  cssLoaders: 'style!css?importLoaders=2&sourceMap!sass?outputStyle=expanded&sourceMap',
+  cssLoaders: [
+    'style-loader'
+    , 'css-loader?sourceMap'
+    , 'sass-loader?sourceMap'
+  ]
 
   // Process the CSS with PostCSS
-  postcssPlugins: [
-    postcssFocus(), // Add a :focus to every :hover
-    cssnext({ // Allow future CSS features to be used, also auto-prefixes the CSS...
-      browsers: ['last 2 versions', 'IE > 10'], // ...based on this browser list
-    }),
-    postcssReporter({ // Posts messages from plugins to the terminal
-      clearMessages: true,
-    }),
-  ],
+  //, postcssPlugins: [
+  //  postcssFocus(), // Add a :focus to every :hover
+  //  cssnext({ // Allow future CSS features to be used, also auto-prefixes the CSS...
+  //    browsers: ['last 2 versions', 'IE > 10'], // ...based on this browser list
+  //  }),
+  //  postcssReporter({ // Posts messages from plugins to the terminal
+  //    clearMessages: true,
+  //  }),
+  //]
 
   // Add hot reloading
-  plugins: [
+  , plugins: [
     new webpack.HotModuleReplacementPlugin(), // Tell webpack we want hot reloading
     new webpack.NoErrorsPlugin(),
     new HtmlWebpackPlugin({

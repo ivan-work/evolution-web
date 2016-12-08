@@ -1,5 +1,5 @@
 import {Record, List} from 'immutable';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import {SettingsRecord} from './game/GameSettings';
 
 export class RoomModel extends Record({

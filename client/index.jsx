@@ -59,5 +59,4 @@ ReactDOM.render(
 //console.log(i18n)
 
 
-
 //T.setTexts(require('./i18n/ru-ru.yml'));

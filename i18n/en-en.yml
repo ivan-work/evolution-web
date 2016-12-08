@@ -12,6 +12,26 @@ App:
     $Start: Start game
     in_this_room: In this room
 Game:
+  Trait:
+    TraitSymbiosis      : Symbiosis
+    TraitCommunication  : Communication
+    TraitCooperation    : Cooperation
+    TraitCarnivorous    : Carnivorous
+    TraitParasite       : Parasite
+    TraitFatTissue      : FatTissue
+    TraitSwimming       : Swimming
+    TraitRunning        : Running
+    TraitMimicry        : Mimicry
+    TraitScavenger      : Scavenger
+    TraitPiracy         : Piracy
+    TraitTailLoss       : TailLoss
+    TraitGrazing        : Grazing
+    TraitHighBodyWeight : HighBodyWeight
+    TraitHibernation    : Hibernation
+    TraitPoisonous      : Poisonous
+    TraitBurrowing      : Burrowing
+    TraitCamouflage     : Camouflage
+    TraitSharpVision    : SharpVision
   UI:
     TraitDefenceDialog_Time: Time left
     TraitDefenceDialog_Mimicry_Title: Mimicry

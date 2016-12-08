@@ -1,5 +1,5 @@
 import {Record, Range} from 'immutable';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 
 import {CARD_TARGET_TYPE} from './evolution/constants';
 
@@ -20,7 +20,7 @@ export class CardModel extends Record({
     const id = forcedId
       ? forcedId
       : !process.env.BROWSER
-      ? uuid.v4().slice(0, 4)
+      ? uuid.v4().slice(0, 6)
       : Math.floor(Math.random() * 0xFFFF);
     if (!cardClass) throw new Error('CardClass is null!');
     return CardModel.fromServer({

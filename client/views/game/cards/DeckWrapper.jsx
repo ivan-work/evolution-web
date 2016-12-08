@@ -7,8 +7,10 @@ import {CardModel} from '../../../../shared/models/game/CardModel';
 
 // Components
 import {AnimationServiceRef} from '../../../services/AnimationService';
-import {Card} from '../Card.jsx';
+import {Card} from './Card.jsx';
 import Deck from './Deck.jsx';
+
+import './DeckWrapper.scss';
 
 export const DeckWrapper = AnimationServiceRef(({deck, connectRef}) => (
   <div className='DeckWrapper'>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { DragLayer } from 'react-dnd';
 import { DND_ITEM_TYPE } from './DND_ITEM_TYPE';
-import { Card, DragCardPreview } from '../Card.jsx';
+import DragCardPreview from '../cards/DragCardPreview.jsx';
 import { AnimalTraitArrow } from '../animals/AnimalTraitArrow.jsx';
 import { Food } from '../food/Food.jsx';
 import { ArrowPreview } from './ArrowPreview.jsx';

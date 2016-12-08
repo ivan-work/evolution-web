@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import {normalizeNamespace} from './sync-socket-io';
 
 class SyncSocketIOClientSocket extends EventEmitter {

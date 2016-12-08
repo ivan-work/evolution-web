@@ -39,8 +39,10 @@ class Animal extends React.Component {
   renderTrait(trait, animal) {
     if (trait.isLinked()) {
       return <AnimalLinkedTrait trait={trait} angle={this.props.angle}/>;
+    } else if (trait.dataModel.playerControllable) {
+      return <DragAnimalTrait trait={trait} sourceAnimal={animal}/>;
     } else {
-      return <AnimalTrait trait={trait} sourceAnimal={animal}/>;
+      return <AnimalTrait trait={trait}/>;
     }
   }
 
@@ -55,6 +57,7 @@ class Animal extends React.Component {
     return (<div className={className}>
       <div className='traits'>
         {model.traits
+          .reverse()
           //.sort((t1, t2) => t1.isLinked() ? 1 : -1)
           .map((trait, index) =>{
           return <div key={trait.id}
@@ -77,26 +80,17 @@ class Animal extends React.Component {
 
 
 class DropAnimal_Body extends Animal {
+  static displayName = 'Animal';
+  static propTypes = {
+    connectDropTarget: PropTypes.func.isRequired
+    , isOver: PropTypes.bool.isRequired
+    , canDrop: PropTypes.bool.isRequired
+  };
+
   render() {
     return this.props.connectDropTarget(super.render());
   }
-
-  renderTrait(trait, animal) {
-    if (trait.isLinked()) {
-      return <AnimalLinkedTrait trait={trait} angle={this.props.angle}/>;
-    } else if (trait.dataModel.playerControllable) {
-      return <DragAnimalTrait trait={trait} sourceAnimal={animal}/>;
-    } else {
-      return <AnimalTrait trait={trait}/>;
-    }
-  }
 }
-DropAnimal_Body.displayName = 'Animal';
-DropAnimal_Body.propTypes = {
-  connectDropTarget: PropTypes.func.isRequired
-  , isOver: PropTypes.bool.isRequired
-  , canDrop: PropTypes.bool.isRequired
-};
 
 const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT, DND_ITEM_TYPE.ANIMAL_LINK], {
   drop(props, monitor, component) {

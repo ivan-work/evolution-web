@@ -1,0 +1,37 @@
+@import '../../../styles/variables';
+
+.Card {
+  width: $CARD_WIDTH;
+  .inner {
+    transition: transform .5s;
+    width: 100%;
+    height: $CARD_HEIGHT;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #ddd;
+    background-size: $CARD_WIDTH $CARD_HEIGHT;
+  }
+  &.alternateTrait .inner {
+    transform: rotate(180deg);
+  }
+  &.canDrag .inner {
+    background-color: #dfd;
+  }
+  &.isDragging {
+    opacity: 0;
+  }
+  .trait {
+    text-align: center;
+    font-size: 0.9em;
+    line-height: 1em;
+    padding: .3em;
+    font-family: 'Roboto';
+    word-wrap: break-word;
+  }
+  .trait1 {
+    margin-bottom: 1em;
+  }
+  .trait2 {
+    transform: rotate(.5turn);
+  }
+}

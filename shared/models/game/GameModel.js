@@ -6,7 +6,7 @@ import {CooldownList} from './CooldownList';
 import {SettingsRecord} from './GameSettings';
 import * as cardData from './evolution/cardData';
 
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import {ensureParameter} from '../../utils';
 import {getRandom} from '../../utils/randomGenerator';
 

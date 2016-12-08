@@ -16,7 +16,27 @@ App:
     $Start: Начать игру
     in_this_room: В комнате
 Game:
+  Trait:
+    TraitSymbiosis      : Симбиоз
+    TraitCommunication  : Сотрудничество
+    TraitCooperation    : Взаимодействие
+    TraitCarnivorous    : Хищник
+    TraitParasite       : Паразит
+    TraitFatTissue      : Жировой запас
+    TraitSwimming       : Водоплавающее
+    TraitRunning        : Быстрое
+    TraitMimicry        : Мимикрия
+    TraitScavenger      : Падальщик
+    TraitPiracy         : Пиратство
+    TraitTailLoss       : Отбрасывание хвоста
+    TraitGrazing        : Топотун
+    TraitHighBodyWeight : Большой
+    TraitHibernation    : Спячка
+    TraitPoisonous      : Ядовитое
+    TraitBurrowing      : Норное
+    TraitCamouflage     : Камуфляж
+    TraitSharpVision    : Острое зрение
   UI:
     TraitDefenceDialog_Time: Осталось времени
-    TraitDefenceDialog_Mimicry_Title: Мимикрия
+    TraitDefenceDialog_Mimicry_Title: Мимикрировать
     TraitDefenceDialog_TailLoss_Title: Отбросить хвост

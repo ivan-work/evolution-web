@@ -6,9 +6,9 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const OfflinePlugin = require('offline-plugin');
 
 // PostCSS plugins
-const cssnext = require('postcss-cssnext');
-const postcssFocus = require('postcss-focus');
-const postcssReporter = require('postcss-reporter');
+//const cssnext = require('postcss-cssnext');
+//const postcssFocus = require('postcss-focus');
+//const postcssReporter = require('postcss-reporter');
 
 module.exports = require('./webpack.base.babel')({
   // In production, we skip all hot-reloading stuff
@@ -21,19 +21,22 @@ module.exports = require('./webpack.base.babel')({
 
   // We use ExtractTextPlugin so we get a seperate CSS file instead
   // of the CSS being in the JS and injected as a style tag
-  cssLoaders: ExtractTextPlugin.extract('style'
-    , 'css?modules&importLoaders=2&sourceMap!sass?outputStyle=expanded&sourceMap=true&sourceMapContents=true'),
+  cssLoaders: ExtractTextPlugin.extract('style', [
+    'style-loader'
+    , 'css-loader'
+    , 'sass-loader'
+  ]),
 
   // In production, we minify our CSS with cssnano
-  postcssPlugins: [
-    postcssFocus(),
-    cssnext({
-      browsers: ['last 2 versions', 'IE > 10'],
-    }),
-    postcssReporter({
-      clearMessages: true,
-    }),
-  ],
+  //postcssPlugins: [
+  //  postcssFocus(),
+  //  cssnext({
+  //    browsers: ['last 2 versions', 'IE > 10'],
+  //  }),
+  //  postcssReporter({
+  //    clearMessages: true,
+  //  }),
+  //],
   plugins: [
     // OccurrenceOrderPlugin is needed for long-term caching to work properly.
     // See http://mxs.is/googmv

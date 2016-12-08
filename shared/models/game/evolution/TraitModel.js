@@ -1,5 +1,5 @@
 import {Record} from 'immutable';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import {TraitDataModel} from './TraitDataModel';
 import * as traitData from './traitData'
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
@@ -18,7 +18,7 @@ export class TraitModel extends Record({
 }) {
   static new(type) {
     return TraitModel.fromServer({
-      id: uuid.v4().slice(0, 2)
+      id: uuid.v4().slice(0, 6)
       , type
     });
   }

@@ -1,120 +1,56 @@
 import React from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
+import T from 'i18n-react';
 import classnames from 'classnames';
 
 import { DragSource } from 'react-dnd';
 import { DND_ITEM_TYPE } from './../dnd/DND_ITEM_TYPE';
 
 import { CardModel } from '../../../../shared/models/game/CardModel';
-import {AnimationServiceRef} from '../../services/AnimationService';
-
-export const CARD_SIZE = {
-  width: 60
-  , height: 80
-};
+import './Card.scss';
 
 export class Card extends React.Component {
   static propTypes = {
     card: React.PropTypes.instanceOf(CardModel).isRequired
-    , dragEnabled: React.PropTypes.bool
+    , alternateTrait: React.PropTypes.bool
   };
 
-  static defaultProps = {
-    dragEnabled: false
-    , isDragging: false
-  };
-
-  constructor(props) {
-    super(props);
-    this.state = {alternateTrait: false};
-    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-    this.switchTrait = this.switchTrait.bind(this);
+  constructor(props, context) {
+    super(props, context);
+    this.state = {alternateTrait: this.props.alternateTrait};
+    this.onCardClick = this.onCardClick.bind(this);
   }
 
-  switchTrait(e) {
-    if (this.cooldown) {
-      console.warn('switchTrait cooldown active', this.props.card.id);
-      return;
-    }
-    this.setState({alternateTrait: !this.state.alternateTrait});
-  }
-
-  static renderCard(card, props) {
-    props.mixClassName = props.mixClassName || {};
-    const className = classnames({
+  getClassNames() {
+    return {
       Card: true
-      , ['trait-count-' + card.traitsCount]: true
-      , ...props.mixClassName
-    });
-    delete props.mixClassName;
-    const style = {
-      ...CARD_SIZE
-    };
-    const innerStyle = {
-      backgroundSize: `${CARD_SIZE.width}px ${CARD_SIZE.height}px`
-    };
-    if (card.image) {
-      innerStyle.backgroundImage = `url(${card.image})`;
+      , ['trait-count-' + this.props.card.traitsCount]: true
+      , alternateTrait: this.state.alternateTrait
     }
+  }
 
-    return <div className={className} style={style} {...props} id={card.id}>
-      <div className='inner' style={innerStyle}>
+  onCardClick(e) {
+  }
+
+  render() {
+    const {card} = this.props;
+
+    const classNames = classnames(this.getClassNames());
+
+    return <div className={classNames} onClick={this.onCardClick}>
+      <div className='inner' style={{backgroundImage: `url('${card.image}')`}}>
         {card.traitsCount === 1
-          ? (<div className='trait trait-single'>{card.trait1.type.replace('Trait', '')}</div>)
+          ? (<div className='trait trait-single'>{T.translate('Game.Trait.' + card.trait1.type)}</div>)
           : null}
-
         {card.traitsCount === 2
-          ? (<div className='trait trait1'>{card.trait1.type.replace('Trait', '')}</div>)
+          ? (<div className='trait trait1'>{T.translate('Game.Trait.' + card.trait1.type)}</div>)
           : null}
-
         {card.traitsCount === 2
-          ? (<div className='trait trait2'>{card.trait2.type.replace('Trait', '')}</div>)
+          ? (<div className='trait trait2'>{T.translate('Game.Trait.' + card.trait2.type)}</div>)
           : null}
       </div>
     </div>
   }
-
-  render() {
-    const {card, canDrag, connectDragSource, isDragging} = this.props;
-
-    const onClick = (card.traitsCount === 2
-    && canDrag
-      ? this.switchTrait
-      : null);
-
-    const body = Card.renderCard(card, {
-      mixClassName: {
-        canDrag
-        , isDragging
-        , draggable: connectDragSource
-        , alternateTrait: this.state.alternateTrait
-      }
-      , onClick
-    });
-    return connectDragSource ? connectDragSource(body) : body;
-  }
 }
-
-export const DragCardPreview = ({offset, initialOffset, velocity, afterStart, card, animationCounter, alternateTrait}) => {
-  if (!offset) return null;
-  const {x, y} = offset;
-  const translate = afterStart
-    ? `translate(${-CARD_SIZE.width / 2}px, ${-CARD_SIZE.height / 2}px)`
-    : `translate(${initialOffset.x - offset.x}px,${initialOffset.y - offset.y}px)`;
-  return <div className='CardPreview' style={{
-    ...CARD_SIZE
-    //, transform: `translate(${x}px, ${y}px) perspective(400px) rotateY(${velocity.x * VELOCITY}deg) rotateX(${-velocity.y * VELOCITY}deg)`
-    , left: x + 'px'
-    , top: y + 'px'
-    , position: 'absolute'
-    , transform: `${translate} perspective(400px) rotateY(${velocity.x}deg) rotateX(${-velocity.y}deg)`
-    , transition: 'box-shadow .5s, transform .2s'
-    , boxShadow: afterStart ? '5px 5px 5px black' : ''
-    , pointerEvents: 'none'
-    }}>
-    {Card.renderCard(card, {mixClassName: {alternateTrait}})}
-  </div>
-};
 
 export const DragCard = DragSource(DND_ITEM_TYPE.CARD
   , {
@@ -134,7 +70,36 @@ export const DragCard = DragSource(DND_ITEM_TYPE.CARD
     , isDragging: monitor.isDragging()
     , canDrag: monitor.canDrag()
   })
-)(Card);
+)(class extends Card {
+  static propTypes = {
+    ...Card.propTypes
+    , dragEnabled: React.PropTypes.bool
+  };
 
+  onCardClick() {
+    const {card, canDrag} = this.props;
+    if (card.traitsCount === 2 && canDrag) {
+      if (this.cooldown) {
+        console.warn('switchTrait cooldown active', this.props.card.id);
+        return;
+      }
+      this.setState({alternateTrait: !this.state.alternateTrait});
+    }
+  }
+
+  getClassNames() {
+    const {canDrag, isDragging} = this.props;
+    return {
+      ...super.getClassNames()
+      , draggable: true
+      , canDrag
+      , isDragging
+    }
+  }
+
+  render() {
+    return this.props.connectDragSource(super.render())
+  }
+});
 
 export default DragCard;

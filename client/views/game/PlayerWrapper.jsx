@@ -4,16 +4,17 @@ import RIP from 'react-immutable-proptypes';
 import cn from 'classnames';
 
 import {CardCollection} from './CardCollection.jsx';
-import {Card, DragCard} from './Card.jsx';
+import DragCard from './cards/Card.jsx';
 import {DropAnimal} from './animals/Animal.jsx';
 import Continent from './continent/Continent.jsx';
 import {PortalTarget} from '../utils/PortalTarget.jsx'
+import { AnimationServiceRef } from '../../services/AnimationService';
 
 import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 import {PlayerModel} from '../../../shared/models/game/PlayerModel';
 import {CTT_PARAMETER} from '../../../shared/models/game/evolution/constants';
 
-export default class PlayerWrapper extends Component {
+export class PlayerWrapper extends Component {
   static contextTypes = {
     gameActions: React.PropTypes.object.isRequired
   };
@@ -22,6 +23,7 @@ export default class PlayerWrapper extends Component {
     game: React.PropTypes.instanceOf(GameModelClient).isRequired
     , player: React.PropTypes.instanceOf(PlayerModel).isRequired
     , upsideDown: React.PropTypes.bool.isRequired
+    , connectRef: React.PropTypes.func.isRequired
   };
 
   constructor(props, context) {
@@ -30,7 +32,6 @@ export default class PlayerWrapper extends Component {
     this.$traitTakeFood = (animal) => context.gameActions.$traitTakeFood(animal.id);
     this.$traitActivate = context.gameActions.$traitActivate;
     this.$deployTrait = (card, animal, alternateTrait, component) => {
-      console.log('$deployTrait')
       if (card.getTraitDataModel(alternateTrait).cardTargetType & CTT_PARAMETER.LINK) {
         component.setState({selectLink: {card, animal, alternateTrait}});
       } else {
@@ -38,7 +39,6 @@ export default class PlayerWrapper extends Component {
       }
     };
     this.$deployLinkedTrait = (card, animal, alternateTrait, linkedAnimal) => {
-      console.log('$deployLinkedTrait')
       this.context.gameActions.$deployTrait(card.id, animal.id, alternateTrait, linkedAnimal.id);
     }
   }
@@ -77,6 +77,7 @@ export default class PlayerWrapper extends Component {
   renderCard(cardModel, dragEnabled) {
     return (<DragCard
       key={cardModel.id}
+      ref={this.props.connectRef('Card#' + cardModel.id)}
       card={cardModel}
       dragEnabled={dragEnabled}/>);
   }
@@ -107,3 +108,5 @@ export default class PlayerWrapper extends Component {
       onAnimalLink={onAnimalLink}/>
   }
 }
+
+export default AnimationServiceRef(PlayerWrapper);

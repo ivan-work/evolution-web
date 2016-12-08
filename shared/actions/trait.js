@@ -1,5 +1,5 @@
 import logger from '~/shared/utils/logger';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import {List} from 'immutable';
 

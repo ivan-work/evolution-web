@@ -3,7 +3,8 @@ import React from 'react';
 import cn from 'classnames';
 import {AnimalTraitArrowMarker} from './AnimalTraitArrowMarker.jsx';
 
-import {ANIMAL_TRAIT_SIZE} from './AnimalTrait.jsx'
+import styles from '../../../styles.json'
+const {ANIMAL_TRAIT_WIDTH, ANIMAL_TRAIT_HEIGHT} = styles;
 
 export class AnimalTraitArrow extends React.Component {
   constructor(props) {
@@ -15,8 +16,8 @@ export class AnimalTraitArrow extends React.Component {
     if (!offset) return null;
     const { x, y } = offset;
 
-    const x1 = initialOffset.x + ANIMAL_TRAIT_SIZE.width / 2;
-    const y1 = initialOffset.y + ANIMAL_TRAIT_SIZE.height / 2;
+    const x1 = initialOffset.x + ANIMAL_TRAIT_WIDTH / 2;
+    const y1 = initialOffset.y + ANIMAL_TRAIT_HEIGHT / 2;
     const length = Math.sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1));
     const lineWidth = length / 20;
     const angle = Math.atan2(y - y1, x - x1);
