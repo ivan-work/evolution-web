@@ -35,3 +35,20 @@ export class RoomsList extends React.Component {
     </MDL.List>;
   }
 }
+
+export default connect(
+  (state) => {
+    //console.log(state.toJS());
+    return {
+      username: state.getIn(['user', 'login'], '%USERNAME%')
+      , online: state.getIn(['online'], [])
+      , room: state.get('room')
+      , roomsList: state.getIn(['rooms'], Map()).filter(room => !room.gameId)
+    }
+  }
+  , (dispatch) => ({
+    $createRequest: () => dispatch(roomCreateRequest())
+    , $joinRequest: (roomId) => dispatch(roomJoinRequest(roomId))
+    , $redirectTo: (roomId) => dispatch(redirectTo(`/room/${roomId}`))
+  })
+)(RoomsList);
