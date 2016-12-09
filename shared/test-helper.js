@@ -143,13 +143,13 @@ global.mockClientStore = function (initialClientState) {
 
   clientStore.getHistory = () => history;
   clientStore.getClient = () => ioClient;
-  clientStore.getSocket = () => ioClient.socket;
-  clientStore.getConnectionId = () => ioClient.socket.id;
+  //clientStore.getSocket = () => ioClient.socket;
+  clientStore.getSocketId = () => ioClient.socket.id;
 
-  clientStore.getConnection = () => ({
-    connectionId: clientStore.getConnectionId()
-    , socket: clientStore.getSocket()
-  });
+  //clientStore.getConnection = () => ({
+  //  connectionId: clientStore.getConnectionId()
+  //  , socket: clientStore.getSocket()
+  //});
 
   clientStore.connect = (serverStore) => {
     ioClient.connect(serverStore.getSocket());

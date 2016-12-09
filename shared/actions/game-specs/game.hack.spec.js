@@ -2,7 +2,6 @@ import {
   roomCreateRequest,
   roomJoinRequest,
   gameCreateRequest,
-  gameCreateSuccess,
   gameReadyRequest,
   gameDeployAnimalRequest,
   gameDeployTraitRequest,
@@ -30,7 +29,6 @@ describe('Hacking Game:', function () {
     const ServerGame = () => serverStore.getState().get('games').first();
     const ClientGame0 = () => clientStore0.getState().get('game');
     const ClientGame1 = () => clientStore1.getState().get('game');
-    clientStore2.dispatch(gameCreateSuccess(ServerGame()));
 
     // gameReadyRequest, wrong gameId
     expectUnchanged('CHANGEIT', () => clientStore0.dispatch({
@@ -40,7 +38,11 @@ describe('Hacking Game:', function () {
     }), serverStore, clientStore0);
 
     // gameReadyRequest, wrong user
-    expectUnchanged('CHANGEIT', () => clientStore2.dispatch(gameReadyRequest())
+    expectUnchanged('CHANGEIT', () => clientStore2.dispatch({
+        type: 'gameReadyRequest'
+        , data: {gameId: ServerGame().id, ready: true}
+        , meta: {server: true}
+      })
       , serverStore, clientStore2);
 
     // gameReadyRequest, double user

@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import T from 'i18n-react';
 import {connect} from 'react-redux';
 
-import * as MDL from 'react-mdl';
+import {Content, Button, Textfield, Card, CardTitle, CardText} from 'react-mdl';
 import {UsersList} from './../UsersList.jsx';
 import {Portal} from './../utils/Portal.jsx';
 import RoomControlGroup from './RoomControlGroup.jsx';
@@ -50,53 +50,60 @@ export class Room extends Component {
 
     if (!room) return null;
 
-    return <div className="Room">
+    return (<div className='Room'>
       <Portal target='header'>
         <RoomControlGroup inRoom={true}/>
       </Portal>
       <h1>{T.translate('App.Room.Room')} «{room.name}»</h1>
-      <div className="Room-online">
-        {T.translate('App.Room.in_this_room')} ({room.users.size}/{room.settings.maxPlayers}):
-        <UsersList list={room.users.map(userId => this.props.online.get(userId))}/>
-        <div>
-          <MDL.Textfield floatingLabel
+      <div className='flex-row'>
+        <Card className='RoomSettings'>
+          <CardText>
+            <div>
+              <Textfield floatingLabel
                          label={T.translate('App.Room.Settings.name')}
                          value={form.name}
                          error={validation.errors.errors.name}
                          onChange={({target}) => this.formOnChange('name', target)}/>
-        </div>
-        <div>
-          <MDL.Textfield floatingLabel
+            </div>
+            <div>
+              <Textfield floatingLabel
                          label={T.translate('App.Room.Settings.maxPlayers')}
                          value={form.maxPlayers}
                          error={validation.errors.errors.maxPlayers}
                          onChange={({target}) => this.formOnChange('maxPlayers', target)}/>
-        </div>
-        <div>
-          <MDL.Textfield floatingLabel
+            </div>
+            <div>
+              <Textfield floatingLabel
                          label={T.translate('App.Room.Settings.timeTurn')}
                          value={form.timeTurn}
                          error={validation.errors.errors.timeTurn}
                          onChange={({target}) => this.formOnChange('timeTurn', target)}/>
-        </div>
-        <div>
-          <MDL.Textfield floatingLabel
+            </div>
+            <div>
+              <Textfield floatingLabel
                          label={T.translate('App.Room.Settings.timeTraitResponse')}
                          value={form.timeTraitResponse}
                          error={validation.errors.errors.timeTraitResponse}
                          onChange={({target}) => this.formOnChange('timeTraitResponse', target)}/>
-        </div>
-        <div>
-          <MDL.Button id="Room$Edit"
+            </div>
+            <div>
+              <Button id='Room$Edit'
                       primary raised
                       disabled={!(this.isHost() && validation.passes())}
                       onClick={() => this.props.$roomEditSettings(this.state.form)}>
-            {T.translate('App.Room.$Edit')}
-          </MDL.Button>
-        </div>
+                {T.translate('App.Room.$Edit')}
+              </Button>
+            </div>
+          </CardText>
+        </Card>
+        <Card>
+          <CardTitle>{T.translate('App.Room.in_this_room')} ({room.users.size}/{room.settings.maxPlayers}):</CardTitle>
+          <CardText>
+            <UsersList list={room.users.map(userId => this.props.online.get(userId))}/>
+          </CardText>
+        </Card>
       </div>
-    </div>
-      ;
+    </div>);
   }
 }
 

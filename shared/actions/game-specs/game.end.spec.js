@@ -183,9 +183,9 @@ players:
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     ParseGame(``);
     clientStore0.dispatch(roomExitRequest());
-    expect(ServerGame().status.phase).equal(PHASE.FINAL);
+    expect(ServerGame().status.phase, 'PHASE.FINAL').equal(PHASE.FINAL);
     expect(ServerGame().winnerId).equal(User1.id);
-    expect(ClientGame1().status.phase).equal(PHASE.FINAL);
+    expect(ClientGame1().status.phase, 'PHASE.FINAL').equal(PHASE.FINAL);
     expect(ClientGame1().winnerId).equal(User1.id);
   });
 
@@ -193,9 +193,9 @@ players:
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     ParseGame(``);
     clientStore0.disconnect(SOCKET_DISCONNECT_NOW);
-    expect(ServerGame().status.phase).equal(PHASE.FINAL);
+    expect(ServerGame().status.phase, 'PHASE.FINAL').equal(PHASE.FINAL);
     expect(ServerGame().winnerId).equal(User1.id);
-    expect(ClientGame1().status.phase).equal(PHASE.FINAL);
+    expect(ClientGame1().status.phase, 'PHASE.FINAL').equal(PHASE.FINAL);
     expect(ClientGame1().winnerId).equal(User1.id);
   });
 });

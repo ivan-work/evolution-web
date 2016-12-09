@@ -5,7 +5,7 @@ import {loginUserRequest} from '~/shared/actions/actions';
 import {
   roomCreateRequest
 , roomJoinRequest
-, gameCreateSuccess
+, gameCreateRequest
 , gameReadyRequest
 } from './actions/actions';
 
@@ -53,10 +53,8 @@ import {
       })
     }
 
-    const room = result[0].serverStore.getState().get('rooms').last();
-
-    result[0].ParseGame = (string) => {
-      result[0].serverStore.dispatch(gameCreateSuccess(GameModel.parse(room, string)));
+    result[0].ParseGame = (seed) => {
+      mockedStores[1].clientStore0.dispatch(gameCreateRequest(roomId, seed));
       const game = result[0].serverStore.getState().get('games').last();
       const gameId = game.id;
 

@@ -15,6 +15,13 @@ export const checkRoomSize = (getState, roomId) => {
     throw new ActionCheckError('checkRoomSize', `Room(%s) already have max`, roomId);
 };
 
+
+export const checkRoomIsValid = (getState, roomId) => {
+  const room = getState().getIn(['rooms', roomId]);
+  if (room.gameId !== null)
+    throw new ActionCheckError('checkRoomIsValid', `Room(%s) is not valid`, roomId);
+};
+
 export const checkUserInRoom = (getState, roomId, userId) => {
   if (!getState().getIn(['rooms', roomId, 'users']).some(roomUserId => roomUserId === userId))
     throw new ActionCheckError('checkUserInRoom', 'Room(%s) doesnt have User(%s)', roomId, userId);

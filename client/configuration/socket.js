@@ -1,6 +1,6 @@
 import logger from '~/shared/utils/logger';
 import io from 'socket.io-client';
-import {serverToClient, loginUserRequest, clientDisconnectSelf} from '../../shared/actions/actions'
+import {serverToClient, socketDisconnect, loginUserRequest} from '../../shared/actions/actions'
 
 export const makeSocketClient = (url, options) => io(url, options);
 
@@ -30,7 +30,7 @@ export const socketStore = (socket, store) => {
   //});
   socket.on('disconnect', (reason) => {
     //console.log('client:disconnect');
-    store.dispatch(clientDisconnectSelf(reason));
+    store.dispatch(socketDisconnect(socket.id, reason));
   });
   socket.on('action', (action) => {
     logger.silly('Client Recv:', action.type);

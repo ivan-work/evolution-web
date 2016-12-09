@@ -4,46 +4,46 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import {Map} from 'immutable';
 
-import * as MDL from 'react-mdl';
+import {Button, Card, CardTitle, CardText} from 'react-mdl';
 import {UsersList} from './../UsersList.jsx';
-import {RoomsList} from './../RoomsList.jsx';
+import RoomsList from './RoomsList.jsx';
 import {Portal} from './../utils/Portal.jsx';
 import {ControlGroup} from './../utils/ControlGroup.jsx';
-import {RoomCreateDialog} from 'RoomCreateDialog.jsx';
-import RoomControlGroup from 'RoomControlGroup.jsx';
+import {RoomCreateDialog} from './RoomCreateDialog.jsx';
+import RoomControlGroup from './RoomControlGroup.jsx';
 
-import {redirectTo} from '../../shared/utils';
-import {roomCreateRequest, roomJoinRequest} from '../../../shared/actions/actions';
+import {roomCreateRequest} from '../../../shared/actions/actions';
+import './Rooms.scss';
 
 export class Rooms extends React.Component {
   constructor(props) {
     super(props);
-    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-    this.onRoomClick = this.onRoomClick.bind(this);
-  }
-
-  onRoomClick(roomId) {
-    if (this.props.room === roomId) {
-      this.props.$redirectTo(roomId);
-    } else {
-      this.props.$joinRequest(roomId);
-    }
   }
 
   render() {
-    //console.log('RENDERING Rooms', this.props.actions.roomJoinRequest)
     return <div className="Rooms">
       <Portal target='header'>
         <ControlGroup name={T.translate('App.Rooms.Rooms')}>
-          <MDL.Button id="App.Rooms.$Create" onClick={this.props.$createRequest}>{T.translate('App.Rooms.$Create')}</MDL.Button>
+          <Button id="App.Rooms.$Create" onClick={this.props.$createRequest}>{T.translate('App.Rooms.$Create')}</Button>
         </ControlGroup>
         {!this.props.room ? null : <RoomControlGroup/>}
       </Portal>
-      <div>Hello {this.props.username}</div>
-      <div>Online: <UsersList list={this.props.online}/></div>
-      <div>
-        <h4>{T.translate('App.Rooms.Rooms')}:</h4>
-        <RoomsList rooms={this.props.roomsList} onRoomClick={this.onRoomClick}/>
+      <h1 className='greeting'>
+        {T.translate('App.Rooms.Greeting')}, {this.props.username}
+      </h1>
+      <div className='flex-row'>
+        <Card shadow={0} className='list-rooms'>
+          <CardTitle><h4>{T.translate('App.Rooms.Rooms')}:</h4></CardTitle>
+          <CardText>
+            <RoomsList/>
+          </CardText>
+        </Card>
+        <Card shadow={0} className='list-online'>
+          <CardTitle><h4>{T.translate('App.Online')}:</h4></CardTitle>
+          <CardText>
+            <UsersList list={this.props.online}/>
+          </CardText>
+        </Card>
       </div>
     </div>;
   }
@@ -55,13 +55,9 @@ export const RoomsView = connect(
     return {
       username: state.getIn(['user', 'login'], '%USERNAME%')
       , online: state.getIn(['online'], [])
-      , room: state.get('room')
-      , roomsList: state.getIn(['rooms'], Map()).filter(room => !room.gameId)
     }
   }
   , (dispatch) => ({
     $createRequest: () => dispatch(roomCreateRequest())
-    , $joinRequest: (roomId) => dispatch(roomJoinRequest(roomId))
-    , $redirectTo: (roomId) => dispatch(redirectTo(`/room/${roomId}`))
   })
 )(Rooms);

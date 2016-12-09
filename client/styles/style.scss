@@ -5,9 +5,9 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0;
 }
 
-h1 {font-size: 2.0em;}
-h2 {font-size: 1.8em;}
-h3 {font-size: 1.6em;}
+h1 {font-size: 2.0em; padding: .5em;}
+h2 {font-size: 1.8em; padding: .5em;}
+h3 {font-size: 1.6em; padding: .5em;}
 h4 {font-size: 1.4em;}
 h5 {font-size: 1.2em;}
 h6 {font-size: 1.2em;}
@@ -24,6 +24,11 @@ h6 {font-size: 1.2em;}
   padding: 2em;
 }
 
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
 .mdl-layout__inner-container {
   min-width: 1400px;
 }
@@ -35,4 +40,19 @@ h6 {font-size: 1.2em;}
       color: gray;
     }
   }
+}
+
+.mdl-list__item[disabled] {
+  pointer-events: none;
+  a {
+    color: gray;
+    text-decoration: none;
+  }
+}
+
+.mdl-card__title {
+  padding-bottom: 0px;
+}
+.mdl-card__supporting-text {
+  padding-top: 0px;
 }

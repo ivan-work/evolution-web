@@ -9,7 +9,6 @@ import {TraitModel} from '../models/game/evolution/TraitModel';
 import {TraitDataModel} from '../models/game/evolution/TraitDataModel';
 import {CARD_TARGET_TYPE, CTT_PARAMETER, TRAIT_TARGET_TYPE, TRAIT_ANIMAL_FLAG} from '../models/game/evolution/constants';
 
-import {actionError} from './generic';
 import {server$game} from './generic';
 import {redirectTo} from '../utils';
 import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
@@ -29,17 +28,21 @@ export const gameCreateRequest = (roomId, seed) => ({
   , data: {roomId, seed}
   , meta: {server: true}
 });
-export const gameCreateSuccess = (game) => ({
+const gameCreateSuccess = (game) => ({
   type: 'gameCreateSuccess'
   , data: {game}
 });
+const gameCreateNotify = (roomId, gameId) => ({
+  type: 'gameCreateNotify'
+  , data: {roomId, gameId}
+});
 export const server$gameCreateSuccess = (game) => (dispatch, getState) => {
   dispatch(gameCreateSuccess(game));
+  dispatch(Object.assign(gameCreateNotify(game.roomId, game.id)
+    , {meta: {users: true}}));
   selectPlayers4Sockets(getState, game.id).forEach(userId => {
-    dispatch(Object.assign(
-      gameCreateSuccess(game.toOthers(userId).toClient())
-      , {meta: {userId, clientOnly: true}}
-    ));
+    dispatch(Object.assign(gameCreateSuccess(game.toOthers(userId).toClient())
+      , {meta: {userId, clientOnly: true}}));
   });
 };
 
@@ -423,14 +426,14 @@ export const gameClientToServer = {
   }
 };
 
-/*
- * gameServerToClient
- * */
+// gameServerToClient
+
 export const gameServerToClient = {
   gameCreateSuccess: (({game}, currentUserId) => (dispatch) => {
     dispatch(gameCreateSuccess(GameModelClient.fromServer(game, currentUserId)));
     dispatch(redirectTo('/game'));
   })
+  , gameCreateNotify: ({roomId, gameId}) => gameCreateNotify(roomId, gameId)
   , gameStart: ({gameId}) => gameStart(gameId)
   , gameStartDeploy: ({gameId}) => gameStartDeploy(gameId)
   , gameStartEat: ({gameId, food}) => gameStartEat(gameId, food)
