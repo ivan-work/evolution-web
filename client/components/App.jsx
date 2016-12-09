@@ -10,9 +10,12 @@ import {AdminPanelView} from './AdminPanel.jsx'
 import {ServicesContext} from '../services/ServicesContext';
 import {PortalsContext, PortalTarget} from '../views/utils/PortalTarget.jsx'
 import {TranslationSwitchView} from './TranslationSwitch.jsx'
+import ErrorReporter from './ErrorReporter.jsx';
 
 //import '../styles/core.scss';
 import {TooltipsContext} from '../views/utils/Tooltips.jsx';
+
+
 
 export const App = ServicesContext(PortalsContext(TooltipsContext(React.createClass({
   render: function () {
@@ -26,6 +29,7 @@ export const App = ServicesContext(PortalsContext(TooltipsContext(React.createCl
             <PortalTarget name='header'/>
           </Navigation>
         </Header>
+        <ErrorReporter/>
         <Content>
           {this.props.children}
         </Content>

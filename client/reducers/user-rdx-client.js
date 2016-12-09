@@ -24,4 +24,5 @@ const getInitialUser = () => {
 //console.log('Storage User:', getInitialUser());
 export const reducer = createReducer(getInitialUser(), {
   loginUser: (state, data) => data.user
+  , loginUserFailure: (state, data) => null
 });
