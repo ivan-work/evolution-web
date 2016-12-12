@@ -16,7 +16,7 @@ import {
 import {ActionCheckError} from '../models/ActionCheckError';
 
 export const SOCKET_DISCONNECT_NOW = 'SOCKET_DISCONNECT_NOW';
-export const TIMEOUT = 2 * 60 * 1000;
+export const TIMEOUT = 30 * 1000;
 
 export const socketConnect = (connectionId, sendToClient) => ({
   type: 'socketConnect'
