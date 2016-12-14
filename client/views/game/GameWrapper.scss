@@ -1,10 +1,10 @@
+@import '../../styles/variables';
+
 .GameWrapper {
   display: flex;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  min-width: $FULL_SCREEN_MIN_WIDTH + 149px;
+  min-height: $FULL_SCREEN_MIN_HEIGHT;
+  flex: 1;
   #game {
     height: 100%;
     display: flex;

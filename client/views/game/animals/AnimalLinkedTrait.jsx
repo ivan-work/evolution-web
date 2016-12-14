@@ -65,12 +65,13 @@ export class AnimalLinkedTrait extends Component {
     if (this._isMounted) {
       const {trait, angle} = this.props;
       if (this.targetTrait && this.targetTrait._isMounted) {
+        // http://stackoverflow.com/questions/25630035/javascript-getboundingclientrect-changes-while-scrolling
         const bbx1 = this.node.getBoundingClientRect();
         const bbx2 = this.targetTrait.node.getBoundingClientRect();
-        const x1 = bbx1.left + bbx1.width / 2;
-        const y1 = bbx1.top + bbx1.height / 2;
-        const x2 = bbx2.left + bbx2.width / 2;
-        const y2 = bbx2.top + bbx2.height / 2;
+        const x1 = bbx1.left + bbx1.width / 2 + (window.scrollX || 0);
+        const y1 = bbx1.top + bbx1.height / 2 + (window.scrollY || 0);
+        const x2 = bbx2.left + bbx2.width / 2 + (window.scrollX || 0);
+        const y2 = bbx2.top + bbx2.height / 2 + (window.scrollY || 0);
 
         const [px1, py1, px2, py2] = x1 < x2 || y1 > y2 ? [x1, y1, x2, y2] : [x2, y2, x1, y1];
 
