@@ -38,3 +38,5 @@ gulp.task('test:client', ['test:client:single'], () =>  gulp.watch(TEST_PATH_WAT
 
 gulp.task('test:all:single', ['test:setup'], () =>  testWatch([].concat(TEST_PATH_SERVER, TEST_PATH_SHARED, TEST_PATH_CLIENT)));
 gulp.task('test:all', ['test:all:single'], () =>  gulp.watch(TEST_PATH_WATCH, ['test:all:single']));
+
+gulp.task('');
