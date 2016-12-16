@@ -6,21 +6,32 @@ import webpack from "webpack";
 import configClient from './webpack.client.babel';
 import configServer from './webpack.server.babel';
 
-console.log('Webpack Dev Server launching: NODE_ENV=', GLOBAL_NODE_ENV)
+console.log('Webpack Dev Server launching: NODE_ENV =', process.env.NODE_ENV)
 
-if (GLOBAL_NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development') {
   //server(PORT);
   const client = new WebpackDevServer(webpack(configClient), {
     hot: true
     , contentBase: configClient.output.path
     , publicPath: configClient.output.publicPath
-    , proxy: {"*": 'http://localhost:' + GLOBAL_SERVER_PORT}
+    , proxy: {
+      "/api/*": {
+        target: 'http://localhost:' + process.env.PORT
+        , changeOrigin: true
+        , xfwd: true
+        , ws: true
+      }
+      , "/socket.io": {
+        target: 'http://localhost:' + process.env.PORT
+        , ws: true
+      }
+    }
     , historyApiFallback: true
     , stats: {colors: true}
     , quiet: false
     , noInfo: true
   });
-  client.listen(GLOBAL_SERVER_PORT - 1, (error) => {
+  client.listen(process.env.PORT - 1, (error) => {
     if (error) console.error(error);
   });
 } else {

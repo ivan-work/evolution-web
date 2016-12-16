@@ -1,40 +1,35 @@
 import globals from '../globals';
 import path from 'path';
+import http from 'http';
 import express from 'express';
-import text from './test';
+import compression from 'compression';
+
+console.log('NODE_ENV =', process.env.NODE_ENV);
 
 import webpackClientConfig from '../webpack.client.babel';
-
-console.log('NODE_ENV =', GLOBAL_NODE_ENV);
-
+import configureStore from './configureStore';
 const app = express();
-
+const server = http.createServer(app);
 app.set('port', process.env.PORT || 2000);
 
-app.listen(app.get('port'), () => {
-  console.log('App is running at http://localhost:%d in %s mode', app.get('port'), app.get('env'));
-  console.log('Press CTRL-C to stop\n');
-});
+configureStore(server, app);
+
+require('./routes/index')(app);
 
 //app.use('/assets', proxy(url.parse('http://localhost:8081/assets')));
-
 //app.use('/*', express.static('dist'))
 
-if (GLOBAL_NODE_ENV === 'production') {
+
+if (process.env.NODE_ENV === 'production') {
   const clientPath = path.join(process.cwd(), webpackClientConfig.output.path);
 
-  console.log('publicPath', webpackClientConfig.output.publicPath);
-  console.log('clientPath', clientPath);
-
-  app.use(webpackClientConfig.output.publicPath, express.static(clientPath));
-  app.get('*', (req, res) => res.sendFile(path.join(clientPath, 'index.html')));
-
-  //app.use('*', express.static(webpackClientConfig.output.path));
-
-  //app.get('*', (req, res) => res.sendFile(path.join(process.cwd(), webpackClientConfig.output.path, 'index.html')));
-} else {
-  const clientPath = path.join(process.cwd(), webpackClientConfig.output.path);
+  app.use(compression());
 
   app.use(webpackClientConfig.output.publicPath, express.static(clientPath));
   app.get('*', (req, res) => res.sendFile(path.join(clientPath, 'index.html')));
 }
+
+server.listen(app.get('port'), () => {
+  console.log('App is running at http://localhost:%d in %s mode', app.get('port'), app.get('env'));
+  console.log('Press CTRL-C to stop\n');
+});
