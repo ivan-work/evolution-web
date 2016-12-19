@@ -7,7 +7,6 @@ import {
 
 import {PHASE} from '../../models/game/GameModel';
 import {getRandom} from '../../utils/RandomGenerator';
-import {TraitRunning} from '../../models/game/evolution/traitData';
 
 import {makeGameSelectors} from '../../selectors';
 
@@ -21,8 +20,8 @@ players:
     continent: $A carn, $B scavenger
 `);
     const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    expect(selectCard(User0, 0).trait1.type).equal('TraitCarnivorous');
-    expect(selectCard(User0, 1).trait1.type).equal('TraitScavenger');
+    expect(selectCard(User0, 0).trait1).equal('TraitCarnivorous');
+    expect(selectCard(User0, 1).trait1).equal('TraitScavenger');
     expectUnchanged('CHANGEIT', () => clientStore0.dispatch(
       gameDeployTraitRequest(selectCard(User0, 0).id, '$A')
     ), serverStore, clientStore0, clientStore1);

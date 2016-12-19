@@ -1,7 +1,7 @@
 import {Record} from 'immutable';
 import uuid from 'uuid';
 import {TraitDataModel} from './TraitDataModel';
-import * as traitData from './traitData'
+import * as traitTypes from './traitTypes/index'
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import {CTT_PARAMETER} from './constants';
 
@@ -13,7 +13,6 @@ export class TraitModel extends Record({
   , hostAnimalId: null
   , linkAnimalId: null
   , linkSource: null
-  , dataModel: null
   , value: null // for fat
 }) {
   static new(type) {
@@ -27,30 +26,13 @@ export class TraitModel extends Record({
     return js == null
       ? null
       : new TraitModel(js)
-      .set('dataModel', TraitDataModel.new(js.type));
+      //.set('dataModel', TraitDataModel.new(js.type));
   }
 
   static parse(type) {
-    const traitKey = Object.keys(traitData)
-      .find(traitKey => ~traitData[traitKey].type
-        .toLowerCase().indexOf(type.toLowerCase()));
-    return TraitModel.new(traitKey);
-  }
-
-  attachTo(animal) {
-    if (!this.dataModel.multiple && animal.hasTrait(this.type)) {
-      throw new ActionCheckError(`TraitModelValidation`, `Animal#%s already has Trait(%s)`, animal.id, this.type);
-    }
-    return this
-      .set('ownerId', animal.ownerId)
-      .set('hostAnimalId', animal.id);
-  }
-
-  static LinkBetweenCheck(traitType, animal1, animal2) {
-    return (animal1.hasTrait(traitType)
-      && animal2.hasTrait(traitType)
-      && animal1.traits.some((trait) => trait.type === traitType && (trait.hostAnimalId === animal2.id || trait.linkAnimalId === animal2.id))
-    );
+    const traitType = Object.keys(traitTypes)
+      .find(traitType => ~traitType.toLowerCase().indexOf(type.toLowerCase()));
+    return TraitModel.new(traitType);
   }
 
   static LinkBetween(traitType, animal1, animal2) {
@@ -75,13 +57,33 @@ export class TraitModel extends Record({
     ];
   }
 
+  attachTo(animal) {
+    if (!this.getDataModel().multiple && animal.hasTrait(this.type)) {
+      throw new ActionCheckError(`TraitModelValidation`, `Animal#%s already has Trait(%s)`, animal.id, this.type);
+    }
+    return this
+      .set('ownerId', animal.ownerId)
+      .set('hostAnimalId', animal.id);
+  }
+
+  static LinkBetweenCheck(traitType, animal1, animal2) {
+    return (animal1.hasTrait(traitType)
+      && animal2.hasTrait(traitType)
+      && animal1.traits.some((trait) => trait.type === traitType && (trait.hostAnimalId === animal2.id || trait.linkAnimalId === animal2.id))
+    );
+  }
+
+  getDataModel() {
+    return TraitDataModel.new(this.type);
+  }
+
   isLinked() {
     return this.linkId !== null; // && this.dataModel.cardTargetType & CTT_PARAMETER.LINK
   }
 
   toClient() {
     return this
-      .set('dataModel', null);
+      //.set('dataModel', null);
   }
 
   toOthers() {

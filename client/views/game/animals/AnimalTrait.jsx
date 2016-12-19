@@ -10,7 +10,6 @@ import { DND_ITEM_TYPE } from './../dnd/DND_ITEM_TYPE';
 
 import { AnimalModel } from '../../../../shared/models/game/evolution/AnimalModel';
 import { TraitModel } from '../../../../shared/models/game/evolution/TraitModel';
-import { checkAction } from '../../../../shared/models/game/evolution/TraitDataModel';
 
 import './AnimalTrait.scss';
 
@@ -61,7 +60,7 @@ const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
       game.isPlayerTurn()
       && game.isFeeding()
       && sourceAnimal.ownerId === game.getPlayer().id
-      && checkAction(game, trait.dataModel, sourceAnimal)
+      && trait.getDataModel().checkAction(game, sourceAnimal)
     )
   }
   , (connect, monitor) => ({

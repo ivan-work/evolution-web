@@ -13,7 +13,7 @@ players:
     continent: $
   - continent: $
 `);
-    expect(ServerGame().getPlayer(User0).getCard(0).trait1.type).equal('TraitParasite');
+    expect(ServerGame().getPlayer(User0).getCard(0).trait1).equal('TraitParasite');
     clientStore0.dispatch(gameDeployTraitRequest(
       ServerGame().getPlayer(User0).getCard(0).id
       , ServerGame().getPlayer(User1).getAnimal(0).id

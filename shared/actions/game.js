@@ -302,13 +302,13 @@ const gameEnd = (gameId, game) => ({
 });
 
 export const gameClientToServer = {
-  gameCreateRequest: ({roomId, seed}, meta) => (dispatch, getState) => {
+  gameCreateRequest: ({roomId, seed = null}, meta) => (dispatch, getState) => {
     if (process.env.NODE_ENV === 'production') seed = null;
     const userId = meta.user.id;
     const room = getState().getIn(['rooms', roomId]);
     checkComboRoomCanStart(room, userId);
 
-    const game = !seed
+    const game = seed === null
       ? GameModel.new(room)
       : GameModel.parse(room, seed);
 
@@ -373,12 +373,12 @@ export const gameClientToServer = {
 
     const cardIndex = checkPlayerHasCard(game, userId, cardId);
     const card = game.players.get(userId).hand.get(cardIndex);
-    const cardTrait = !alternateTrait ? card.trait1 : card.trait2;
-    if (!cardTrait) {
+    const traitData = TraitDataModel.new(!alternateTrait ? card.trait1 : card.trait2);
+    if (!traitData) {
       throw new ActionCheckError(`checkCardHasTrait@Game(${game.id})`, 'Card(%s;%s) doesn\'t have trait (%s)'
-        , card.trait1 && card.trait1.type
-        , card.trait2 && card.trait2.type
-        , cardTrait);
+        , card.trait1
+        , card.trait2
+        , traitData);
     }
 
     const {playerId, animal} = game.locateAnimal(animalId);
@@ -388,37 +388,37 @@ export const gameClientToServer = {
 
     const {playerId: linkedPlayerId, animal: linkedAnimal} = game.locateAnimal(linkId);
 
-    if (cardTrait.cardTargetType & CTT_PARAMETER.SELF)
+    if (traitData.cardTargetType & CTT_PARAMETER.SELF)
       if (playerId !== userId)
         throw new ActionCheckError(`checkCardTargetType(${game.id})`, `CardType(ANIMAL_SELF) User#%s doesn't have Animal#%s`, userId, animalId);
-    if (cardTrait.cardTargetType & CTT_PARAMETER.ENEMY)
+    if (traitData.cardTargetType & CTT_PARAMETER.ENEMY)
       if (playerId === userId)
         throw new ActionCheckError(`checkCardTargetType(${game.id})`, `CardType(ANIMAL_ENEMY) User#%s applies to self`, userId);
-    if (cardTrait.cardTargetType & CTT_PARAMETER.LINK) {
+    if (traitData.cardTargetType & CTT_PARAMETER.LINK) {
       if (animal === linkedAnimal)
         throw new ActionCheckError(`CheckCardTargetType(${game.id})`, 'Player#%s want to link Animal#%s to itself', playerId, linkedAnimal);
       if (!linkedAnimal)
         throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Player#%s doesn\'t have linked Animal#%s', playerId, linkedAnimal);
-      if (cardTrait.cardTargetType & CTT_PARAMETER.SELF)
+      if (traitData.cardTargetType & CTT_PARAMETER.SELF)
         if (linkedPlayerId !== userId)
           throw new ActionCheckError(`checkCardTargetType(${game.id})`, `CardType(LINK_SELF) Player(%s) linking to Player(%s)`, playerId, linkedPlayerId);
-      if (cardTrait.cardTargetType & CTT_PARAMETER.ENEMY)
+      if (traitData.cardTargetType & CTT_PARAMETER.ENEMY)
         if (linkedPlayerId !== playerId)
           throw new ActionCheckError(`checkCardTargetType(${game.id})`, `CardType(LINK_ENEMY) Player(%s) linking to Player(%s)`, playerId, linkedPlayerId);
     }
 
-    if (cardTrait.checkTraitPlacement && !cardTrait.checkTraitPlacement(animal))
-      throw new ActionCheckError(`gameDeployTraitRequest(${game.id})`, `Trait(%s) failed checkTraitPlacement on Animal(%s)`, cardTrait.type, animal.id);
+    if (traitData.checkTraitPlacement && !traitData.checkTraitPlacement(animal))
+      throw new ActionCheckError(`gameDeployTraitRequest(${game.id})`, `Trait(%s) failed checkTraitPlacement on Animal(%s)`, traitData.type, animal.id);
 
     let traits = [];
-    if (!(cardTrait.cardTargetType & CTT_PARAMETER.LINK)) {
-      traits = [TraitModel.new(cardTrait.type).attachTo(animal)];
+    if (!(traitData.cardTargetType & CTT_PARAMETER.LINK)) {
+      traits = [TraitModel.new(traitData.type).attachTo(animal)];
     } else {
       traits = TraitModel.LinkBetween(
-        cardTrait.type
+        traitData.type
         , animal
         , linkedAnimal
-        , cardTrait.cardTargetType & CTT_PARAMETER.ONEWAY);
+        , traitData.cardTargetType & CTT_PARAMETER.ONEWAY);
     }
 
     dispatch(server$gameDeployTrait(gameId, cardId, traits));

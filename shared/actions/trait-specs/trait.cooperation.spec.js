@@ -20,7 +20,7 @@ players:
     continent: $A, $B
 `);
       const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-      expect(selectCard(User0, 0).trait1.type).equal('TraitCooperation');
+      expect(selectCard(User0, 0).trait1).equal('TraitCooperation');
 
       clientStore0.dispatch(gameDeployTraitRequest(
         selectCard(User0, 0).id, '$A', false, '$B'));
@@ -44,7 +44,7 @@ players:
     continent: $A, $B, $C
 `);
       const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-      expect(selectCard(User1, 7).trait1.type).equal('TraitCooperation');
+      expect(selectCard(User1, 7).trait1).equal('TraitCooperation');
       clientStore0.dispatch(gameEndTurnRequest());
 
       expectChanged('CHANGEIT', () => clientStore1.dispatch(
@@ -89,7 +89,7 @@ players:
     continent: $D, $E, $F
 `);
       const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-      expect(selectCard(User1, 7).trait1.type).equal('TraitCooperation');
+      expect(selectCard(User1, 7).trait1).equal('TraitCooperation');
       clientStore0.dispatch(gameEndTurnRequest());
 
       expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameDeployTraitRequest(

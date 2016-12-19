@@ -70,9 +70,9 @@ const GameModelData = {
 
 export class GameModel extends Record(GameModelData) {
   static generateDeck(config, shuffle) {
-    const result = config.reduce((result, [count, model]) => result
+    const result = config.reduce((result, [count, type]) => result
       .concat(Array.from({length: count})
-        .map(u => CardModel.new(model))), []);
+        .map(u => CardModel.new(type))), []);
     return List(shuffle ? doShuffle(result) : result);
   }
 
@@ -83,7 +83,6 @@ export class GameModel extends Record(GameModelData) {
   static new(room) {
     const deck = room.settings.decks.reduce((result, deckName) => result.concat(Decks[deckName]), List());
 
-    //[24, cardData.CardCommunicationAndCarnivorous]
     return new GameModel({
       id: uuid.v4().slice(0, 4)
       , roomId: room.id

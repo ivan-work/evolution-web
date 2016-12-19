@@ -1,9 +1,8 @@
 import {Record, List, Map} from 'immutable';
 import uuid from 'uuid';
 import {TraitModel} from './TraitModel';
-import {TraitDataModel} from './TraitDataModel';
 
-import {TraitFatTissue, TraitSymbiosis} from './traitData';
+import {TraitFatTissue, TraitSymbiosis} from './traitTypes/index';
 import {TRAIT_ANIMAL_FLAG} from './constants';
 
 export class AnimalModel extends Record({
@@ -58,22 +57,22 @@ export class AnimalModel extends Record({
   }
 
   getFat() {
-    return this.traits.filter(trait => trait.type === TraitFatTissue.type && trait.value).size
+    return this.traits.filter(trait => trait.type === TraitFatTissue && trait.value).size
   }
 
   sizeOfNormalFood() {
-    return 1 + this.traits.reduce((result, trait) => result + trait.dataModel.food, 0);
+    return 1 + this.traits.reduce((result, trait) => result + trait.getDataModel().food, 0);
   }
 
   sizeOfFat() {
-    return this.traits.filter(trait => trait.type === TraitFatTissue.type).size
+    return this.traits.filter(trait => trait.type === TraitFatTissue).size
   }
 
   canEat(game) {
     return this.needsFood() > 0
       && !this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
       && !this.traits
-        .filter(trait => trait.type === TraitSymbiosis.type && trait.linkSource && trait.hostAnimalId === this.id)
+        .filter(trait => trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === this.id)
         .some(trait => {
           //console.log(`${this.id} is living on ${trait.linkAnimalId}`);
           const {animal: hostAnimal} = game.locateAnimal(trait.linkAnimalId);
@@ -110,7 +109,7 @@ export class AnimalModel extends Record({
       amount--;
       needOfFat--;
       self = self.updateFirstTrait(
-        trait => trait.type === TraitFatTissue.type && !trait.value
+        trait => trait.type === TraitFatTissue && !trait.value
         , trait => trait.set('value', true)
       );
     }
@@ -125,7 +124,7 @@ export class AnimalModel extends Record({
     while (foodBalance < 0 && self.getFat().size > 0) {
       foodBalance++;
       self = self.updateFirstTrait(
-        trait => trait.type === TraitFatTissue.type && trait.value
+        trait => trait.type === TraitFatTissue && trait.value
         , trait => trait.set('value', false)
       );
     }
@@ -134,6 +133,6 @@ export class AnimalModel extends Record({
   }
 
   countScore() {
-    return 2 + this.traits.reduce((result, trait) => result + 1 + trait.dataModel.food, 0);
+    return 2 + this.traits.reduce((result, trait) => result + 1 + trait.getDataModel().food, 0);
   }
 }

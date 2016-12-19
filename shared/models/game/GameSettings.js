@@ -1,5 +1,5 @@
 import {List, Map, Record} from 'immutable';
-import * as cardData from './evolution/cardData';
+import * as cardsData from './evolution/cards/index';
 
 export const SETTINGS_PLAYERS = [2, 8];
 export const SETTINGS_TIME_VALUES = [0, 60 * 24 * 6000];
@@ -35,39 +35,39 @@ export class SettingsRecord extends Record({
 }
 
 const TestDecks = {
-  //TEST: [[24, cardData.CardCamouflage]]
-  //, CommunicationCarnivorous: [
-  //  [24, cardData.CardCommunicationAndCarnivorous]
-  //]
+  TEST: [[24, cardsData.CardCamouflage.type]]
+  , CommunicationCarnivorous: [
+    [24, cardsData.CardCommunicationAndCarnivorous.type]
+  ]
 };
 
 const NormalDecks = {
   Base: [
     // 0
-    //[4, cardData.CardPiracy]
-    //, [4, cardData.CardPoisonousAndCarnivorous]
-    //, [4, cardData.CardGrazingAndFatTissue]
-    //, [4, cardData.CardMimicry]
-    //// 1
-    //, [4, cardData.CardScavenger]
-    //, [8, cardData.CardSwimming]
-    //, [4, cardData.CardHibernationAndCarnivorous]
-    //, [4, cardData.CardRunning]
-    //// 2
-    //, [4, cardData.CardTailLoss]
-    //, [4, cardData.CardCamouflageAndFatTissue]
-    //, [4, cardData.CardHighBodyWeightAndCarnivorous]
-    //, [4, cardData.CardHighBodyWeightAndFatTissue]
-    //// 3
-    //, [4, cardData.CardParasiteAndCarnivorous]
-    //, [4, cardData.CardParasiteAndFatTissue]
-    //, [4, cardData.CardBurrowingAndFatTissue]
-    //, [4, cardData.CardSharpVisionAndFatTissue]
-    //// 4
-    //, [4, cardData.CardSymbiosis]
-    //, [4, cardData.CardCooperationAndCarnivorous]
-    //, [4, cardData.CardCommunicationAndFatTissue]
-    //, [4, cardData.CardCommunicationAndCarnivorous]
+    [4, cardsData.CardPiracy.type]
+    , [4, cardsData.CardPoisonousAndCarnivorous.type]
+    , [4, cardsData.CardGrazingAndFatTissue.type]
+    , [4, cardsData.CardMimicry.type]
+    // 1
+    , [4, cardsData.CardScavenger.type]
+    , [8, cardsData.CardSwimming.type]
+    , [4, cardsData.CardHibernationAndCarnivorous.type]
+    , [4, cardsData.CardRunning.type]
+    // 2
+    , [4, cardsData.CardTailLoss.type]
+    , [4, cardsData.CardCamouflageAndFatTissue.type]
+    , [4, cardsData.CardHighBodyWeightAndCarnivorous.type]
+    , [4, cardsData.CardHighBodyWeightAndFatTissue.type]
+    // 3
+    , [4, cardsData.CardParasiteAndCarnivorous.type]
+    , [4, cardsData.CardParasiteAndFatTissue.type]
+    , [4, cardsData.CardBurrowingAndFatTissue.type]
+    , [4, cardsData.CardSharpVisionAndFatTissue.type]
+    // 4
+    , [4, cardsData.CardSymbiosis.type]
+    , [4, cardsData.CardCooperationAndCarnivorous.type]
+    , [4, cardsData.CardCommunicationAndFatTissue.type]
+    , [4, cardsData.CardCommunicationAndCarnivorous.type]
   ]
 };
 

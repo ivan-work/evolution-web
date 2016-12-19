@@ -4,7 +4,7 @@ import uuid from 'uuid';
 import {CARD_TARGET_TYPE} from './evolution/constants';
 
 import {TraitDataModel} from './evolution/TraitDataModel'
-import {CardUnknown} from './evolution/cardData'
+import * as cardsData from './evolution/cards/index'
 
 
 export class CardModel extends Record({
@@ -13,49 +13,38 @@ export class CardModel extends Record({
   , image: null
   , trait1: null
   , trait2: null
-  , trait1type: null
-  , trait2type: null
 }) {
-  static new(cardClass, forcedId) {
-    const id = forcedId
-      ? forcedId
-      : !process.env.BROWSER
-      ? uuid.v4().slice(0, 6)
-      : Math.floor(Math.random() * 0xFFFF);
-    if (!cardClass) throw new Error('CardClass is null!');
+  static new(cardType, forcedId) {
+    if (!(cardType in cardsData)) throw Error(`card#${JSON.stringify(cardType)} not found`);
+    const cardData = cardsData[cardType];
+    const id = forcedId ? forcedId // if Forced, then ok, forced
+      : GLOBAL_BROWSER ? Math.floor(Math.random() * 0xFFFF) // else if browser (for testing)
+      : uuid.v4().slice(0, 6); // else: make normal id
     return CardModel.fromServer({
       id
-      , ...cardClass
+      , ...cardData
     });
   }
 
-  static generate(count, cardClass = CardUnknown) {
-    return Range(0, count).map(i => CardModel.new(cardClass)).toList();
+  static generate(count, cardType = 'CardUnknown') {
+    return Range(0, count).map(i => CardModel.new(cardType)).toList();
   }
 
   static fromServer(js) {
-    if (js !== null && js.type !== 'CardUnknown' && js.trait1type === null) {
+    if (js !== null && js.type !== 'CardUnknown' && js.trait1 == null) {
       throw new Error(`Card ${js.type} doesn't have trait #1`)
     }
     return js == null
       ? null
       : new CardModel(js)
-      .set('trait1', js.trait1type ? TraitDataModel.new(js.trait1type) : null)
-      .set('trait2', js.trait2type ? TraitDataModel.new(js.trait2type) : null)
-      .remove('trait1type')
-      .remove('trait2type');
   }
 
   toClient() {
     return this
-      .set('trait1type', this.trait1 && this.trait1.type)
-      .set('trait2type', this.trait2 && this.trait2.type)
-      .set('trait1', null)
-      .set('trait2', null);
   }
 
   toOthers() {
-    return CardModel.new(CardUnknown, this.id)
+    return CardModel.new(cardsData.CardUnknown.type, this.id)
   }
 
   get traitsCount() {
@@ -67,7 +56,7 @@ export class CardModel extends Record({
   }
 
   getTraitDataModel(alternateTrait) {
-    return !alternateTrait ? this.trait1 : this.trait2;
+    return !alternateTrait ? TraitDataModel.new(this.trait1) : TraitDataModel.new(this.trait2);
   }
 
   toString() {

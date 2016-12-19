@@ -10,7 +10,6 @@ import {
 import {PHASE} from '../models/game/GameModel';
 
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
-import {checkAction} from '~/shared/models/game/evolution/TraitDataModel';
 import {selectGame} from '../selectors';
 
 export const catchChecks = (checks) => {
@@ -82,11 +81,11 @@ export const checkTraitActivation = (game, sourcePid, sourceAid, traitType, targ
   if (!trait) {
     throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s) doesnt have Trait(%s)', sourceAid, traitType)
   }
-  const traitData = trait.dataModel;
+  const traitData = trait.getDataModel();
   if (!traitData.action) {
     throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s):Trait(%s) is not active', sourceAid, traitType)
   }
-  if (!checkAction(game, traitData, sourceAnimal)) {
+  if (!traitData.checkAction(game, sourceAnimal)) {
     throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
       , 'Animal(%s):Trait(%s) checkAction failed', sourceAnimal.id, traitData.type)
   }

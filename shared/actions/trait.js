@@ -18,7 +18,7 @@ import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
 import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
 import {checkAction} from '../models/game/evolution/TraitDataModel';
 import {CooldownList} from '../models/game/CooldownList';
-import {TraitCommunication, TraitCooperation, TraitCarnivorous} from '../models/game/evolution/traitData';
+import {TraitCommunication, TraitCooperation, TraitCarnivorous} from '../models/game/evolution/traitsData/index';
 
 import {
   checkGameDefined
