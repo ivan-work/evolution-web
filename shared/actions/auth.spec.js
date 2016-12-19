@@ -48,8 +48,6 @@ describe('Auth:', function () {
 
       clientStore0.dispatch(loginUserRequest('/test'));
 
-      console.log(clientStore0.getActions())
-
       expect(clientStore0.getState().get('user')).null;
     });
 

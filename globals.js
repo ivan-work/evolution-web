@@ -10,7 +10,7 @@ export default {
   , process: {
     env: {
       NODE_ENV: JSON.stringify(process.env.NODE_ENV)
-      , PORT: JSON.stringify(process.env.PORt)
+      , PORT: JSON.stringify(process.env.PORT)
     }
   }
 };

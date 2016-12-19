@@ -13,6 +13,22 @@ import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import {checkAction} from '~/shared/models/game/evolution/TraitDataModel';
 import {selectGame} from '../selectors';
 
+export const catchChecks = (checks) => {
+  try {
+    checks();
+  } catch (e) {
+    if (e instanceof ActionCheckError) {
+      return false;
+    } else throw e;
+  }
+  return true;
+};
+
+export const checkGameCanStart = (room) => {
+  if (room.validateCanStart() === void 0)
+    throw new ActionCheckError(`checkGameDefined`, 'Cannot find game');
+};
+
 export const checkGameDefined = (game) => {
   if (game === void 0)
     throw new ActionCheckError(`checkGameDefined`, 'Cannot find game');

@@ -57,12 +57,6 @@ require('fbjs/lib/ExecutionEnvironment').canUseDOM = true;
 //    global[key] = window[key];
 //  }
 //});
-process.env.TEST = true;
-process.env.DEBUG = '*';
-process.env.JWT_SECRET = 'secret';
-
-const TEST_PORT = 5000;
-const TEST_URL = 'http://localhost:' + TEST_PORT;
 
 import { createStore, compose, applyMiddleware } from 'redux'
 import configureStore from '../client/configuration/configureStore'
