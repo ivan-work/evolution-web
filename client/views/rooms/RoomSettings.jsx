@@ -1,11 +1,10 @@
 import React, {Component} from 'react';
 import T from 'i18n-react';
-import {Button, Textfield} from 'react-mdl';
+import {Button, Textfield, Checkbox} from 'react-mdl';
 
 import {RoomModel} from '../../../shared/models/RoomModel';
 import Validator from 'validatorjs';
 import {SettingsRules} from '../../../shared/models/game/GameSettings';
-
 
 export default class RoomSettings extends Component {
   static propTypes = {
@@ -16,6 +15,7 @@ export default class RoomSettings extends Component {
 
   constructor(props) {
     super(props);
+    this.formSubmit = this.formSubmit.bind(this);
     this.state = {};
     this.state.form = {};
     this.state.form.name = props.room.name;
@@ -32,6 +32,7 @@ export default class RoomSettings extends Component {
   formOnChange(key, target) {
     if (this.isHost()) {
       const form = this.state.form;
+      form.dirty = true;
       form[key] = target.value;
       const validation = new Validator(form, SettingsRules);
       validation.passes();
@@ -39,8 +40,15 @@ export default class RoomSettings extends Component {
     }
   }
 
-  render() {
+  formSubmit() {
     const {$roomEditSettings} = this.props;
+    const form = this.state.form;
+    delete form.dirty;
+    this.setState({form});
+    $roomEditSettings(form);
+  }
+
+  render() {
     const {form, validation} = this.state;
     return (<div>
       <div>
@@ -74,8 +82,8 @@ export default class RoomSettings extends Component {
       <div>
         <Button id='Room$Edit'
                 primary raised
-                disabled={!(this.isHost() && validation.passes())}
-                onClick={() => $roomEditSettings(form)}>
+                disabled={!(this.isHost() && validation.passes() && form.dirty)}
+                onClick={this.formSubmit}>
           {T.translate('App.Room.$Edit')}
         </Button>
       </div>

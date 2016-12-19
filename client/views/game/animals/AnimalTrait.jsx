@@ -35,9 +35,14 @@ class AnimalTrait extends Component {
       , canDrag
       , isDragging
       , draggable: connectDragSource
+      , [trait.type]: true
     });
 
-    return <div className={className}>{T.translate('Game.Trait.' + trait.type)}</div>;
+    return <div className={className}>
+      <div className='inner'>
+        {T.translate('Game.Trait.' + trait.type)}
+      </div>
+    </div>;
   }
 }
 

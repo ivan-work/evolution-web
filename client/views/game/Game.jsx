@@ -13,7 +13,6 @@ import CustomDragLayer from './dnd/CustomDragLayer.jsx';
 import {DeckWrapper} from './cards/DeckWrapper.jsx';
 import GamePlayers from './GamePlayers.jsx';
 
-
 import {GameScoreboardFinalView} from './ui/GameScoreboardFinal.jsx';
 
 //const MaxWidth
@@ -33,7 +32,7 @@ class Game extends React.Component {
   }
 
   render() {
-    const {game, connectRef} = this.props;
+    const {game} = this.props;
 
     return <div className='Game'>
       <Portal target='header'>

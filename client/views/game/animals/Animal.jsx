@@ -61,7 +61,7 @@ class Animal extends React.Component {
           //.sort((t1, t2) => t1.isLinked() ? 1 : -1)
           .map((trait, index) =>{
           return <div key={trait.id}
-                      style={{marginBottom: 1 + 'px'}}>
+                      style={{marginBottom: '-5px'}}>
             {this.renderTrait(trait, model)}
           </div>})}
       </div>
