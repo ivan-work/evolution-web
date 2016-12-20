@@ -15,7 +15,6 @@ import {
   , server$traitDefenceAnswer
   , server$traitNotify_End
 } from '../../../../actions/actions';
-import {addTimeout} from '../../../../utils/reduxTimeout';
 
 import {checkAction} from '../TraitDataModel';
 import {TraitMimicry

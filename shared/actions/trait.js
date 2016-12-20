@@ -256,6 +256,8 @@ export const server$traitDefenceQuestionInstant = (gameId, attackAnimal, traitTy
   dispatch(server$traitDefenceAnswerSuccess(gameId, questionId));
 };
 
+const makeTraitDefenceQuestionTimeout = (gameId, questionId) => `traitDefenceQuestion#${gameId}#${questionId}`;
+
 export const server$traitDefenceQuestion = (gameId, attackAnimal, traitType, defenceAnimal, defaultDefence) => (dispatch, getState) => {
   const questionId = uuid.v4();
   const game = selectGame(getState, gameId);
@@ -263,7 +265,9 @@ export const server$traitDefenceQuestion = (gameId, attackAnimal, traitType, def
   dispatch(
     Object.assign(traitDefenceQuestion(gameId, null, makeTraitTuple(attackAnimal, traitType, defenceAnimal))
       , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId)}}));
-  dispatch(addTimeout(game.settings.timeTraitResponse, 'traitAnswer' + questionId, defaultDefence(questionId)));
+  dispatch(addTimeout(game.settings.timeTraitResponse
+    , makeTraitDefenceQuestionTimeout(game.id, questionId)
+    , defaultDefence(questionId)));
   dispatch(
     Object.assign(traitDefenceQuestion(gameId, questionId, makeTraitTuple(attackAnimal, traitType, defenceAnimal))
       , {meta: {userId: defenceAnimal.ownerId}}));
@@ -281,7 +285,7 @@ export const traitDefenceAnswerSuccess = (gameId, questionId) => ({
 });
 
 export const server$traitDefenceAnswerSuccess = (gameId, questionId) => (dispatch, getState) => {
-  dispatch(cancelTimeout('traitAnswer' + questionId));
+  dispatch(cancelTimeout(makeTraitDefenceQuestionTimeout(gameId, questionId)));
   dispatch(Object.assign(traitDefenceAnswerSuccess(gameId, questionId)
     , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
 };
