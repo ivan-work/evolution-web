@@ -5,8 +5,9 @@ import classnames from 'classnames';
 import { DropTarget } from 'react-dnd';
 import { DND_ITEM_TYPE } from './../dnd/DND_ITEM_TYPE';
 
-import { AnimalModel } from '~/shared/models/game/evolution/AnimalModel';
-import { TraitModel } from '~/shared/models/game/evolution/TraitModel';
+import { AnimalModel } from '../../../../shared/models/game/evolution/AnimalModel';
+import { TraitModel } from '../../../../shared/models/game/evolution/TraitModel';
+import { TRAIT_ANIMAL_FLAG } from '../../../../shared/models/game/evolution/constants';
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 
 import {Tooltip} from './../../utils/Tooltips.jsx';
@@ -39,8 +40,6 @@ class Animal extends React.Component {
   renderTrait(trait, animal) {
     if (trait.isLinked()) {
       return <AnimalLinkedTrait trait={trait} angle={this.props.angle}/>;
-    } else if (trait.getDataModel().playerControllable) {
-      return <DragAnimalTrait trait={trait} sourceAnimal={animal}/>;
     } else {
       return <AnimalTrait trait={trait}/>;
     }
@@ -68,6 +67,8 @@ class Animal extends React.Component {
       {this.renderSelectLink()}
       <Tooltip tip='animal'>
         <div className='inner'>
+          {model.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) ? <span className='material-icons Flag Poisoned'>smoking_rooms</span>: null}
+          {model.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) ? <span className='material-icons Flag Hibernated'>snooze</span>: null}
           <div className='AnimalFoodContainer'>
             {Array.from({length: model.food}).map((u, index) => <Food key={index}/>)}
           </div>
@@ -85,6 +86,16 @@ class DropAnimal_Body extends Animal {
     , isOver: PropTypes.bool.isRequired
     , canDrop: PropTypes.bool.isRequired
   };
+
+  renderTrait(trait, animal) {
+    if (trait.isLinked()) {
+      return <AnimalLinkedTrait trait={trait} angle={this.props.angle}/>;
+    } else if (trait.getDataModel().playerControllable) {
+      return <DragAnimalTrait trait={trait} sourceAnimal={animal}/>;
+    } else {
+      return <AnimalTrait trait={trait}/>;
+    }
+  }
 
   render() {
     return this.props.connectDropTarget(super.render());
