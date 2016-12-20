@@ -38,13 +38,24 @@ Game:
     TraitPiracy         : Piracy
     TraitTailLoss       : TailLoss
     TraitGrazing        : Grazing
-    TraitHighBodyWeight : HighBodyWeight
+    TraitMassive        : Massive
     TraitHibernation    : Hibernation
     TraitPoisonous      : Poisonous
     TraitBurrowing      : Burrowing
     TraitCamouflage     : Camouflage
     TraitSharpVision    : SharpVision
+  Phase:
+    1: Deploy
+    2: Feeding
   UI:
-    TraitDefenceDialog_Time: Time left
-    TraitDefenceDialog_Mimicry_Title: Mimicry
-    TraitDefenceDialog_TailLoss_Title: Lose tail
+    Status:
+      Turn: Turn
+      Phase: Phase
+      Round: Round
+      Player: Player
+      Time: Time
+    TraitDefenceDialog:
+      Title: Defend!
+      Time: Time left
+      Mimicry_Title: Mimicry
+      TailLoss_Title: Lose tail

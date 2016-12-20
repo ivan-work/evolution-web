@@ -13,7 +13,7 @@ export class TraitModel extends Record({
   , hostAnimalId: null
   , linkAnimalId: null
   , linkSource: null
-  , value: null // for fat
+  , value: false // for fat
 }) {
   static new(type) {
     return TraitModel.fromServer({

@@ -1,21 +1,27 @@
 @mixin traits() {
   .TraitFatTissue {
-    color: #930;
-    background: #ff9;
+    //color: #930;
+    //background: #ff9;
+    color: #d60;
+
+    &.value {
+      background: #ff0;
+    }
   }
 
   .TraitCarnivorous {
-    color: #fcc;
-    background: #900;
+    //color: #fcc;
+    //background: #900;
+    color: #900;
   }
 
   .TraitParasite {
     color: #60c;
-    background: #ccf;
+    //background: #ccf;
   }
 
   .TraitSwimming {
     color: #00f;
-    background: #ccf;
+    //background: #ccf;
   }
 }

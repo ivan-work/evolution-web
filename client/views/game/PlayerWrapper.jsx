@@ -98,6 +98,7 @@ export class PlayerWrapper extends Component {
     const onCardDropped = isDeploy ? this.$deployTrait : this.$noop;
     const onAnimalLink = isDeploy ? this.$deployLinkedTrait : this.$noop;
     return <DropAnimal
+      ref={this.props.connectRef('Animal#' + animal.id)}
       key={animal.id}
       model={animal}
       angle={this.props.angle}

@@ -36,6 +36,7 @@ class AnimalTrait extends Component {
       , isDragging
       , draggable: connectDragSource
       , [trait.type]: true
+      , value: trait.value
     });
 
     return <div className={className}>
@@ -46,17 +47,17 @@ class AnimalTrait extends Component {
   }
 }
 
-class DragAnimalTrait_Body extends AnimalTrait {
+class DragAnimalTraitBody extends AnimalTrait {
+  static displayName = 'AnimalTrait';
+  static propTypes = {
+    connectDragSource: PropTypes.func.isRequired
+    , canDrag: PropTypes.bool.isRequired
+    , isDragging: PropTypes.bool.isRequired
+  };
   render() {
     return this.props.connectDragSource(super.render());
   }
 }
-DragAnimalTrait_Body.displayName = 'AnimalTrait';
-DragAnimalTrait_Body.propTypes = {
-  connectDragSource: PropTypes.func.isRequired
-  , canDrag: PropTypes.bool.isRequired
-  , isDragging: PropTypes.bool.isRequired
-};
 
 const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
   , {
@@ -73,7 +74,7 @@ const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
     , isDragging: monitor.isDragging()
     , canDrag: monitor.canDrag()
   })
-)(DragAnimalTrait_Body);
+)(DragAnimalTraitBody);
 
 DragAnimalTrait.propTypes = {
   // by GameProvider

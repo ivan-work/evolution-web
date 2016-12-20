@@ -30,8 +30,8 @@ export const CardRunning = makeCard(traits.TraitRunning);
 //большой / жировой запас - 4,
 export const CardTailLoss = makeCard(traits.TraitTailLoss);
 export const CardCamouflageAndFatTissue = makeCard(traits.TraitCamouflage, traits.TraitFatTissue);
-export const CardHighBodyWeightAndCarnivorous = makeCard(traits.TraitHighBodyWeight, traits.TraitCarnivorous);
-export const CardHighBodyWeightAndFatTissue = makeCard(traits.TraitHighBodyWeight, traits.TraitFatTissue);
+export const CardMassiveAndCarnivorous = makeCard(traits.TraitMassive, traits.TraitCarnivorous);
+export const CardMassiveAndFatTissue = makeCard(traits.TraitMassive, traits.TraitFatTissue);
 
 // 3
 //паразит / хищник - 4,

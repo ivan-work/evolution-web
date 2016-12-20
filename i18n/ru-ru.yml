@@ -38,13 +38,24 @@ Game:
     TraitPiracy         : Пиратство
     TraitTailLoss       : Отбрасывание хвоста
     TraitGrazing        : Топотун
-    TraitHighBodyWeight : Большой
+    TraitMassive        : Большой
     TraitHibernation    : Спячка
     TraitPoisonous      : Ядовитое
     TraitBurrowing      : Норное
     TraitCamouflage     : Камуфляж
     TraitSharpVision    : Острое зрение
+  Phase:
+    1: Развитие
+    2: Кормление
   UI:
-    TraitDefenceDialog_Time: Осталось времени
-    TraitDefenceDialog_Mimicry_Title: Мимикрировать
-    TraitDefenceDialog_TailLoss_Title: Отбросить хвост
+    Status:
+      Turn: Ход
+      Phase: Фаза
+      Round: Раунд
+      Player: Игрок
+      Time: Время
+    TraitDefenceDialog:
+      Title: Защищайтесь!
+      Time: Осталось времени
+      Mimicry_Title: Мимикрировать
+      TailLoss_Title: Отбросить хвост

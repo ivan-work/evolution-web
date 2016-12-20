@@ -20,8 +20,8 @@ export default class RoomSettings extends Component {
     this.state.form = {};
     this.state.form.name = props.room.name;
     this.state.form.maxPlayers = props.room.settings.maxPlayers;
-    this.state.form.timeTurn = props.room.settings.timeTurn / 6000;
-    this.state.form.timeTraitResponse = props.room.settings.timeTraitResponse / 6000;
+    this.state.form.timeTurn = props.room.settings.timeTurn / 60000;
+    this.state.form.timeTraitResponse = props.room.settings.timeTraitResponse / 60000;
     this.state.validation = new Validator(this.state.form, SettingsRules);
   }
 

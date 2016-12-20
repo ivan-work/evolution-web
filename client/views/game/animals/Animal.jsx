@@ -68,7 +68,6 @@ class Animal extends React.Component {
       {this.renderSelectLink()}
       <Tooltip tip='animal'>
         <div className='inner'>
-          {model.id}
           <div className='AnimalFoodContainer'>
             {Array.from({length: model.food}).map((u, index) => <Food key={index}/>)}
           </div>
@@ -129,7 +128,7 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
       case DND_ITEM_TYPE.TRAIT:
       {
         const {trait, sourceAnimal} = monitor.getItem();
-        const targetCheck = !trait.getDataModel().checkTarget || ttrait.getDataModel().checkTarget(props.game, sourceAnimal, props.model);
+        const targetCheck = !trait.getDataModel().checkTarget || trait.getDataModel().checkTarget(props.game, sourceAnimal, props.model);
         return sourceAnimal.id !== props.model.id && targetCheck;
       }
       case DND_ITEM_TYPE.ANIMAL_LINK:
