@@ -4,7 +4,7 @@ import {Button, Textfield, Checkbox} from 'react-mdl';
 
 import {RoomModel} from '../../../shared/models/RoomModel';
 import Validator from 'validatorjs';
-import {SettingsRules} from '../../../shared/models/game/GameSettings';
+import {SettingsRules, SETTINGS_TIME_MODIFIER} from '../../../shared/models/game/GameSettings';
 
 export default class RoomSettings extends Component {
   static propTypes = {
@@ -20,8 +20,8 @@ export default class RoomSettings extends Component {
     this.state.form = {};
     this.state.form.name = props.room.name;
     this.state.form.maxPlayers = props.room.settings.maxPlayers;
-    this.state.form.timeTurn = props.room.settings.timeTurn / 60000;
-    this.state.form.timeTraitResponse = props.room.settings.timeTraitResponse / 60000;
+    this.state.form.timeTurn = props.room.settings.timeTurn / SETTINGS_TIME_MODIFIER;
+    this.state.form.timeTraitResponse = props.room.settings.timeTraitResponse / SETTINGS_TIME_MODIFIER;
     this.state.validation = new Validator(this.state.form, SettingsRules);
   }
 

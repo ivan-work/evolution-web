@@ -56,7 +56,7 @@ export class GameStatusDisplay extends Component {
       </li>
       <li>
         <span className='key'>{T.translate('Game.UI.Status.Time')}:</span>
-        <span className='value'><Timer start={0} end={0 + settings.timeTurn}/></span>
+        <span className='value'><Timer start={status.turnTime} end={status.turnTime + settings.timeTurn}/></span>
       </li>
     </ul>
   }

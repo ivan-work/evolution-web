@@ -213,8 +213,8 @@ export const roomsClientToServer = {
     checkRoomIsNotInGame(room);
     checkUserIsHost(room, userId);
     checkValidate(settings, SettingsRules);
-    settings.timeTurn *= 6000;
-    settings.timeTraitResponse *= 6000;
+    settings.timeTurn *= 60000;
+    settings.timeTraitResponse *= 60000;
     dispatch(server$roomEditSettings(roomId, settings));
   }
   , roomKickRequest: ({roomId, userId}, {user}) => (dispatch, getState) => {

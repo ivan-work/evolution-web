@@ -94,6 +94,7 @@ global.mockServerStore = function (initialServerState) {
     console.log('intercepted')
   };
   const ioServer = syncSocketIOServer();
+  const timeouts = {};
   const serverStore = createStore(
     combineReducers({...serverReducers})
     , initialServerState
@@ -101,7 +102,7 @@ global.mockServerStore = function (initialServerState) {
       serverErrorMiddleware(errorInterceptor)
       , thunk
       , reduxQuestion()
-      , reduxTimeout()
+      , reduxTimeout(timeouts)
       , store => next => action => {
         serverStore.actions.push(action);
         return next(action);
@@ -112,6 +113,8 @@ global.mockServerStore = function (initialServerState) {
   socketServerStore(ioServer, serverStore);
 
   serverStore.getSocket = () => ioServer;
+
+  serverStore.getTimeouts = () => timeouts;
 
   serverStore.errorInterceptor = errorInterceptor;
 

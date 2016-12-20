@@ -87,7 +87,7 @@ players:
   - hand: 8 CardCommunication
     continent: $D, $E, $F
 `);
-      const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+      const {selectGame, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
       expect(selectCard(User1, 7).trait1).equal('TraitCommunication');
       clientStore0.dispatch(gameEndTurnRequest());
 
