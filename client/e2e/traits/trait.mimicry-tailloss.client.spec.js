@@ -12,7 +12,7 @@ import {selectTrait, selectDTAnimal, selectHID} from '../test.selectors';
  - continent: $X carn mimicry tailloss piracy fat, $Y
  */
 
-describe.only('Mimicry And Tailloss', () => {
+describe('Mimicry And Tailloss', () => {
   it('Singleplayer', async () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
@@ -36,12 +36,15 @@ players:
     dndBackend0.simulateEndDrag();
 
     const $TraitDefenceDialog = $client0.find('TraitDefenceDialog');
+
     expect($TraitDefenceDialog, 'TraitDefenceDialog exists').length(1);
 
-    expect($TraitDefenceDialog.find('Animal')).length(2);
+    //$TraitDefenceDialog.find('Animal').forEach(a => console.log(a.props().model.id));
+    expect($TraitDefenceDialog.find('Animal')).length(3);
     //expect($TraitDefenceDialog.find('Animal')).length(2);
+    //console.log($TraitDefenceDialog.debug());
 
-    console.log($TraitDefenceDialog.debug());
+    //console.log($TraitDefenceDialog.debug());
 
     //expect(selectAnimal($client0, '$A').prop('model').getFood()).equal(2);
     ////expect(selectAnimal($client1, '$A').prop('model').getFood()).equal(2);

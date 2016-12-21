@@ -3,20 +3,21 @@ import React, {Component, PropTypes} from 'react';
 export class Timer extends Component {
   static propTypes = {
     start: PropTypes.number.isRequired
-    , end: PropTypes.number.isRequired
+    , duration: PropTypes.number.isRequired
   };
 
-  constructor(...args) {
-    super(...args);
+  constructor(props) {
+    super(props);
     this.state = {};
-    this.state.time = args[0].start;
+    this.state.time = props.start;
     this.updateTime = this.updateTime.bind(this);
   }
 
-  updateTime() {
+  updateTime(nextProps) {
+    const {start, duration} = nextProps || this.props;
     if (this.$isMounted) {
       //this.setState(Date.now() + this.props.end - this.props.start);
-      const time = this.props.end - Date.now();
+      const time = start + duration - Date.now();
       if (time > 0) {
         this.setState({time});
         window.setTimeout(this.updateTime, 100)
@@ -24,6 +25,10 @@ export class Timer extends Component {
         this.setState({time: 0});
       }
     }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.updateTime(nextProps);
   }
 
   componentDidMount() {

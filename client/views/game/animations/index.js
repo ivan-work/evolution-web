@@ -21,7 +21,7 @@ export const createAnimationServiceConfig = () => ({
 
       Velocity(SourceAnimalHtml, {
         translateX: 0
-        , translateY: -200
+        , translateY: -25
       }, 1200)
         .then(() => {
           done();

@@ -32,7 +32,7 @@ export const checkComboRoomCanStart = (room, userId) => {
  * */
 
 export const checkRoomMinSize = (room) => {
-  if (room.users.size < (process.env.NODE_ENV === 'development' ? 1 : 2))
+  if (room.users.size < (process.env.NODE_ENV === 'production' ? 2 : 1))
     throw new ActionCheckError('checkRoomMinSize', `Room(%s) doesn't have min players`, room.id);
 };
 

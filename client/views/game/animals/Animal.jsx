@@ -78,30 +78,6 @@ class Animal extends React.Component {
   }
 }
 
-
-class DropAnimal_Body extends Animal {
-  static displayName = 'Animal';
-  static propTypes = {
-    connectDropTarget: PropTypes.func.isRequired
-    , isOver: PropTypes.bool.isRequired
-    , canDrop: PropTypes.bool.isRequired
-  };
-
-  renderTrait(trait, animal) {
-    if (trait.isLinked()) {
-      return <AnimalLinkedTrait trait={trait} angle={this.props.angle}/>;
-    } else if (trait.getDataModel().playerControllable) {
-      return <DragAnimalTrait trait={trait} sourceAnimal={animal}/>;
-    } else {
-      return <AnimalTrait trait={trait}/>;
-    }
-  }
-
-  render() {
-    return this.props.connectDropTarget(super.render());
-  }
-}
-
 const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT, DND_ITEM_TYPE.ANIMAL_LINK], {
   drop(props, monitor, component) {
     switch (monitor.getItemType()) {
@@ -160,11 +136,29 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
   connectDropTarget: connect.dropTarget(),
   isOver: monitor.isOver(),
   canDrop: monitor.canDrop()
-}))(DropAnimal_Body);
+}))(class Animal extends Animal {
+    static propTypes = {
+      connectDropTarget: PropTypes.func.isRequired
+      , isOver: PropTypes.bool.isRequired
+      , canDrop: PropTypes.bool.isRequired
+    };
 
-DropAnimal.defaultProps = {
-  isUserAnimal: false
-};
+    renderTrait(trait, animal) {
+      if (trait.isLinked()) {
+        return <AnimalLinkedTrait trait={trait} angle={this.props.angle}/>;
+      } else if (trait.getDataModel().playerControllable) {
+        return <DragAnimalTrait trait={trait} sourceAnimal={animal}/>;
+      } else {
+        return <AnimalTrait trait={trait}/>;
+      }
+    }
+
+    render() {
+      return this.props.connectDropTarget(super.render());
+    }
+  }
+);
+
 DropAnimal.propTypes = {
   // by GameProvider
   game: PropTypes.object.isRequired

@@ -67,7 +67,7 @@ export const gameDestroy = (gameId) => ({
 });
 
 export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
-  logger.info('server$gameLeave')
+  logger.info(`server$gameLeave: ${gameId}, ${userId}`)
   dispatch(server$game(gameId, gamePlayerLeft(gameId, userId)));
   const game = selectGame(getState, gameId);
   const leaver = game.getPlayer(userId);
@@ -77,6 +77,7 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
       dispatch(server$game(gameId, gameDestroy(gameId)));
       break;
     case 1:
+      dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
       if (game.status.phase !== PHASE.FINAL) {
         dispatch(server$game(gameId, gameEnd(gameId, selectGame(getState, gameId).toClient())));
       }

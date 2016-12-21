@@ -48,6 +48,11 @@ global.HTMLElement = global.window.HTMLElement;
 //global.Event = global.window.Event;
 global.NodeList = global.window.NodeList;
 global.Node = global.window.Node;
+// for react-measure
+global.ResizeObserver = function () {
+  this.observe = () => {};
+  this.disconnect = () => {};
+};
 
 // https://stackoverflow.com/questions/26867535/calling-setstate-in-jsdom-based-tests-causing-cannot-render-markup-in-a-worker
 require('fbjs/lib/ExecutionEnvironment').canUseDOM = true;

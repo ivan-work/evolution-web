@@ -1,6 +1,7 @@
 import React, {Component, PropTypes} from 'react';
 import T from 'i18n-react';
 import {Dialog} from '../../utils/Dialog.jsx';
+import {TooltipsContextElement} from '../../utils/Tooltips.jsx';
 import {Timer} from '../../utils/Timer.jsx';
 import {DialogTitle, DialogContent} from 'react-mdl';
 import {Animal} from '../animals/Animal.jsx';
@@ -30,15 +31,20 @@ export class TraitDefenceDialog extends Component {
     const targetsMimicry = TraitMimicry.getTargets(game, attackAnimal, TraitCarnivorous, targetAnimal);
     const targetsTailLoss = targetAnimal.traits;
     return (<DialogContent>
-      <div className='TraitDefenceDialog'>
-        {targetAnimal.hasTrait(TraitTailLoss.type) && targetsTailLoss.size > 0
-          ? this.renderTailLoss(targetsTailLoss, $traitDefenceAnswer.bind(null, id, TraitTailLoss.type))
-          : null}
-        {targetAnimal.hasTrait(TraitMimicry.type) && targetsMimicry.size > 0
-          ? this.renderMimicry(targetsMimicry, $traitDefenceAnswer.bind(null, id, TraitMimicry.type))
-          : null}
-        <h1><T.span text='Game.UI.TraitDefenceDialog.Time'/>: <Timer start={time} end={time + game.settings.timeTraitResponse}/></h1>
-      </div>
+      <TooltipsContextElement>
+        <div className='TraitDefenceDialog'>
+          {targetAnimal.hasTrait(TraitTailLoss.type) && targetsTailLoss.size > 0
+            ? this.renderTailLoss(targetsTailLoss, $traitDefenceAnswer.bind(null, id, TraitTailLoss.type))
+            : null}
+          {targetAnimal.hasTrait(TraitMimicry.type) && targetsMimicry.size > 0
+            ? this.renderMimicry(targetsMimicry, $traitDefenceAnswer.bind(null, id, TraitMimicry.type))
+            : null}
+          <h1>
+            <T.span text='Game.UI.TraitDefenceDialog.Time'/>:
+            <Timer start={time} duration={game.settings.timeTraitResponse}/>
+          </h1>
+        </div>
+      </TooltipsContextElement>
     </DialogContent>);
   }
 
@@ -72,3 +78,5 @@ export class TraitDefenceDialog extends Component {
     </div>);
   }
 }
+
+export default TraitDefenceDialog;

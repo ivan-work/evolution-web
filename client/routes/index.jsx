@@ -19,7 +19,6 @@ const MakeLoginCheck = (getState) => (nextState, replace) => {
   //console.log('getState', getState().toJS());
   //console.log('Auth check');
   const userExists = getState().get('user') != null;
-  console.log(getState().get('user'));
   if (userExists) replace('/')
 };
 
