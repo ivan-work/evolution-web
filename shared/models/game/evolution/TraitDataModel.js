@@ -30,9 +30,11 @@ export class TraitDataModel extends Record({
 }
 
 export const checkAction = (game, traitData, sourceAnimal) => {
+  if (!traitData.action) return false;
   if (traitData.cooldowns && traitData.cooldowns.some(([link, place]) =>
       game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id))) {
     return false;
   }
+  // Either no $checkAction or it is passing
   return !traitData.$checkAction || traitData.$checkAction(game, sourceAnimal);
 };

@@ -1,15 +1,9 @@
 import logger from '~/shared/utils/logger';
-import {
-  FOOD_SOURCE_TYPE
-  , TRAIT_TARGET_TYPE
-  , TRAIT_COOLDOWN_DURATION
-  , TRAIT_COOLDOWN_PLACE
-  , TRAIT_COOLDOWN_LINK
-} from '../models/game/evolution/constants';
+//import {} from '../models/game/evolution/constants';
 
 import {PHASE} from '../models/game/GameModel';
 
-import {ActionCheckError} from '~/shared/models/ActionCheckError';
+import {ActionCheckError} from '../models/ActionCheckError';
 import {selectGame} from '../selectors';
 
 export const catchChecks = (checks) => {
@@ -69,72 +63,4 @@ export const checkValidAnimalPosition = (game, userId, animalPosition) => {
   if (isNaN(parseInt(animalPosition)) || animalPosition < 0 || animalPosition > game.players.get(userId).continent.size) {
     throw new ActionCheckError(`checkValidAnimalPosition@Game(${game.id})`, 'Wrong animal position (%s)', animalPosition);
   }
-};
-
-export const checkTraitActivation = (game, sourcePid, sourceAid, traitType, targetId, ...params) => {
-  checkGameDefined(game);
-  const gameId = game.id;
-  checkGameHasUser(game, sourcePid);
-  //checkPlayerTurnAndPhase(game, sourcePid, PHASE.FEEDING); defence traits
-  const sourceAnimal = checkPlayerHasAnimal(game, sourcePid, sourceAid);
-  const trait = sourceAnimal.traits.find(trait => trait.type === traitType);
-  if (!trait) {
-    throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s) doesnt have Trait(%s)', sourceAid, traitType)
-  }
-  const traitData = trait.getDataModel();
-  if (!traitData.action) {
-    throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s):Trait(%s) is not active', sourceAid, traitType)
-  }
-  if (!traitData.checkAction(game, sourceAnimal)) {
-    throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
-      , 'Animal(%s):Trait(%s) checkAction failed', sourceAnimal.id, traitData.type)
-  }
-  let target = null;
-  switch (traitData.targetType) {
-    case TRAIT_TARGET_TYPE.ANIMAL:
-      target = checkTraitActivation_Animal(game, sourceAnimal, traitData, targetId);
-      break;
-    case TRAIT_TARGET_TYPE.TRAIT:
-      target = checkTraitActivation_Trait(game, sourceAnimal, traitData, targetId);
-      break;
-    case TRAIT_TARGET_TYPE.NONE:
-      break;
-    default:
-      throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
-        , 'Animal(%s):Trait(%s) unknown target type %s', sourceAnimal.id, traitData.type, traitData.targetType)
-  }
-  return {sourceAnimal, traitData, target};
-};
-
-export const checkTraitActivation_Animal = (game, sourceAnimal, traitData, targetAid) => {
-  const gameId = game.id;
-  if (sourceAnimal.id === targetAid) {
-    throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
-      , 'Animal(%s):Trait(%s) cant target self', sourceAnimal.id, traitData.type)
-  }
-
-  const {animal: targetAnimal} = game.locateAnimal(targetAid);
-  if (!targetAnimal) {
-    throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
-      , 'Animal(%s):Trait(%s) cant locate Animal(%s)', sourceAnimal.id, traitData.type, targetAid)
-  }
-  if (traitData.checkTarget && !traitData.checkTarget(game, sourceAnimal, targetAnimal)) {
-    throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
-      , 'Animal(%s):Trait(%s) checkTarget on Animal(%s) failed', sourceAnimal.id, traitData.type, targetAnimal.id)
-  }
-  return targetAnimal;
-};
-
-export const checkTraitActivation_Trait = (game, sourceAnimal, traitData, traitIndex) => {
-  const gameId = game.id;
-  if (!(traitIndex >= 0 && traitIndex < sourceAnimal.traits.size)) {
-    throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
-      , 'Animal(%s):Trait(%s) cant find Trait@%s', sourceAnimal.id, traitData.type, traitIndex)
-  }
-  const trait = sourceAnimal.traits.get(traitIndex);
-  if (traitData.checkTarget && !traitData.checkTarget(game, sourceAnimal, trait)) {
-    throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
-      , 'Animal(%s):Trait(%s) checkTarget on Trait@%s failed', sourceAnimal.id, traitData.type, traitIndex)
-  }
-  return traitIndex;
 };

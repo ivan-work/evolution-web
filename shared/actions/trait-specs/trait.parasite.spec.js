@@ -21,6 +21,7 @@ players:
     expect(ServerGame().getPlayer(User1).getAnimal(0).traits, 'User1.Animal0 has trait Parasite').size(1);
     expect(ServerGame().getPlayer(User1).getAnimal(0).traits.get(0).type).equal('TraitParasite');
   });
+
   it('Cannot be casted to self', () => {
 
   });

@@ -26,11 +26,9 @@ import {
   , checkPlayerHasCard
   , checkPlayerHasAnimal
   , checkPlayerTurnAndPhase
-  , checkValidAnimalPosition
-  , checkTraitActivation
-  , checkTraitActivation_Animal
-  , checkTraitActivation_Trait
 } from './checks';
+
+import {checkAnimalCanEat, checkTraitActivation} from './trait.checks';
 
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 
@@ -327,15 +325,7 @@ export const traitClientToServer = {
     checkGameHasUser(game, userId);
     checkPlayerTurnAndPhase(game, userId, PHASE.FEEDING);
     const animal = checkPlayerHasAnimal(game, userId, animalId);
-    if (game.food < 1) {
-      throw new ActionCheckError(`traitTakeFoodRequest@Game(${gameId})`, 'Not enough food (%s)', game.food)
-    }
-    if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, userId, animalId)) {
-      throw new ActionCheckError(`traitTakeFoodRequest@Game(${gameId})`, 'Cooldown active')
-    }
-    if (!animal.canEat(game)) {
-      throw new ActionCheckError(`traitTakeFoodRequest@Game(${gameId})`, `Animal(%s) can't eat`, animal)
-    }
+    checkAnimalCanEat(game, animal);
 
     dispatch(server$startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId));
     dispatch(server$startCooldown(gameId, 'TraitCarnivorous', TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId));

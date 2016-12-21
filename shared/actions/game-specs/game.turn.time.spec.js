@@ -16,7 +16,7 @@ import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
 
-describe.only('Game (TURNS TIME):', function () {
+describe('Game (TURNS TIME):', function () {
   it('Deploy, basic', async () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
