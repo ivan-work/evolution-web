@@ -1,16 +1,11 @@
 .GameFoodContainer {
-  width: 100px;
+  transform: translate(-50%, -50%);
+  width: 300px;
   .Food {
     display: inline-block;
   }
 }
 
-.AnimalFoodContainer {
-  .Food {
-    display: inline-block;
-    color: #ff0;
-  }
-}
 .Food {
   //cursor: pointer;
   -webkit-user-select: none;

@@ -1,18 +1,45 @@
 @import '../../../styles/variables';
+@import '../../../styles/traits';
 
 .Animal {
   position: relative;
   width: $ANIMAL_WIDTH;
 
-  .inner {
+  @include traits();
+
+  & > .inner {
     width: 100%;
     height: $ANIMAL_HEIGHT;
+    text-align: center;
     word-wrap: break-word;
-    outline: 1px solid black;
-    background: #9fe1e7;
+
+    border: 1px solid #bbb;
+    border-radius: 2px;
+
+    background: #fff;
   }
 
   &.highlight {
     box-shadow: 0px 0px 1em 1em yellow;
+  }
+
+  .material-icons {
+    width: 1em;
+    height: 1em;
+  }
+
+  .Flag {
+    font-size: 1.5em;
+    &.Poisoned {
+      color: #f00;
+    }
+    &.Hibernated {
+      color: #66f;
+    }
+  }
+
+  .Food {
+    color: #966;
+    font-size: 1.1em;
   }
 }

@@ -1,6 +1,9 @@
 import {Map, List} from 'immutable';
 
 import {PHASE} from '../../models/game/GameModel';
+import {TraitModel} from '../../models/game/evolution/TraitModel';
+import {TraitDataModel} from '../../models/game/evolution/TraitDataModel';
+import * as traits from '../../models/game/evolution/traitsData/index';
 
 import {
   traitTakeFoodRequest
@@ -72,12 +75,12 @@ deck: 32 carn
 food: 4
 phase: 2
 players:
-  - continent: $, $, $, $ carn +, $
-  - continent: $ +, $, $ carn ++, $, $
+  - continent: $A, $B, $C, $D carn +, $E
+  - continent: $Z +, $X, $C carn ++, $V, $N
   - continent:
 `);
-    // User0: $ +, $, $, $ carn +, $
-    clientStore0.dispatch(traitTakeFoodRequest(ClientGame0().getPlayerAnimal(User0, 0).id));
+    // User0: $A +, $B, $C, $D carn +, $E
+    clientStore0.dispatch(traitTakeFoodRequest('$A'));
     clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore1.dispatch(gameEndTurnRequest());
@@ -87,12 +90,12 @@ players:
     expect(ServerGame().getPlayer(User1.id).ended).equal(true);
     expect(ServerGame().getPlayer(User2.id).ended).equal(true);
 
-    // User0: $ +, $ +, $, $ carn +, $
-    clientStore0.dispatch(traitTakeFoodRequest(ClientGame0().getPlayerAnimal(User0, 1).id));
+    // User0: $A +, $B +, $C, $D carn +, $E
+    clientStore0.dispatch(traitTakeFoodRequest('$B'));
     clientStore0.dispatch(gameEndTurnRequest());
 
-    // User0: $ +, $ +, $ +, $ carn +, $
-    clientStore0.dispatch(traitTakeFoodRequest(ClientGame0().getPlayerAnimal(User0, 2).id));
+    // User0: $A +, $B +, $C +, $D carn +, $E
+    clientStore0.dispatch(traitTakeFoodRequest('$C'));
     clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(gameEndTurnRequest());

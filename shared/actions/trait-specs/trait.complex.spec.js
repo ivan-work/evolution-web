@@ -1,5 +1,6 @@
 import {
   gameDeployTraitRequest
+  , roomEditSettingsRequest
   , gameEndTurnRequest
   , traitTakeFoodRequest
   , traitActivateRequest
@@ -14,11 +15,14 @@ import {makeGameSelectors} from '../../selectors';
 describe('Complex traits:', () => {
   it('Hunt on Mimicry + TailLoss + Running', async () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+
     const gameId = ParseGame(`
 phase: 2
 players:
   - continent: $A carn, $B carn, $C carn, $D carn, $E carn, $F carn
   - continent: $Z tailloss mimicry running fat, $X, $Y
+settings:
+  timeTraitResponse: 10
 `);
     const {selectGame, selectQuestionId, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
@@ -53,7 +57,10 @@ players:
     });
 
     clientStore0.dispatch(traitActivateRequest('$C', 'TraitCarnivorous', '$Z'));
-    await new Promise(resolve => setTimeout(resolve, 0));
+
+
+    await new Promise(resolve => setTimeout(resolve, 12));
+
     expect(selectAnimal(User1, 0).traits, 'selectAnimal(User1, 0).traits').size(2);
     expect(selectAnimal(User1, 0).traits.get(0).type).equal('TraitTailLoss');
     expect(selectAnimal(User1, 0).traits.get(1).type).equal('TraitMimicry');

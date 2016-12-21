@@ -12,18 +12,21 @@ describe('e2e (game): ', () => {
     const $client1 = mountClient(clientStore1);
 
 
-    expect($client0.find('#Rooms$create')).length(1);
-    $client0.find('#Rooms$create').simulate('click');
-    expect($client0.find('#RoomCreateDialog$ok'), 'RoomCreateDialog$ok').length(1);
-    $client0.find('#RoomCreateDialog$ok').simulate('click');
+    expect($client0.find('#Rooms$Create'), '#Rooms$Create').length(1);
+    $client0.find('#Rooms$Create').simulate('click');
 
+    expect(clientStore0.getState().get('room'), 'client0 in room').ok;
+    expect(clientStore1.getState().get('room'), 'client1 not in room').null;
     const roomId = serverStore.getState().get('rooms').first().id;
 
+    expect($client1.find(`RoomsList a`), `RoomsList a`).length(1);
     $client1.find(`RoomsList a`).simulate('click');
-    $client0.find('#Room$start').simulate('click');
 
-    expect($client0.find('DragDropContext(GameWrapper)')).length(1);
-    expect($client1.find('DragDropContext(GameWrapper)')).length(1);
+    expect($client0.find('#Room$Start'), '#Room$Start').length(1);
+    $client0.find('#Room$Start').simulate('click');
+
+    expect($client0.find('DragDropContext(GameWrapper)'), 'DragDropContext(GameWrapper)').length(1);
+    expect($client1.find('DragDropContext(GameWrapper)'), 'DragDropContext(GameWrapper)').length(1);
 
     const $Game0 = $client0.find('DragDropContext(GameWrapper)');
     const $Game1 = $client1.find('DragDropContext(GameWrapper)');

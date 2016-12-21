@@ -15,23 +15,28 @@ import {
   , server$traitDefenceAnswer
   , server$traitNotify_End
 } from '../../../../actions/actions';
-import {addTimeout} from '../../../../utils/reduxTimeout';
 
-import {GameModel} from '../../GameModel';
 import {checkAction} from '../TraitDataModel';
 import {TraitMimicry
   , TraitRunning
-  , TraitScavenger
-  , TraitSymbiosis
   , TraitPoisonous
   , TraitTailLoss} from './index';
+
+import {TraitScavenger
+  , TraitSymbiosis
+  , TraitSharpVision
+  , TraitCamouflage
+  , TraitMassive
+  , TraitBurrowing
+  , TraitSwimming
+} from '../traitTypes/index';
 
 export const TraitCarnivorous = {
   type: 'TraitCarnivorous'
   , food: 1
   , targetType: TRAIT_TARGET_TYPE.ANIMAL
   , playerControllable: true
-  , checkTraitPlacement: (animal) => !animal.hasTrait('TraitScavenger')
+  , checkTraitPlacement: (animal) => !animal.hasTrait(TraitScavenger)
   , cooldowns: fromJS([
     ['TraitCarnivorous', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
@@ -106,8 +111,8 @@ export const TraitCarnivorous = {
       dispatch(server$startFeeding(game.id, sourceAnimal, 2, FOOD_SOURCE_TYPE.ANIMAL_HUNT, targetAnimal.id));
 
       const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
-      GameModel.sortPlayersFromIndex(game, currentPlayerIndex).some(player => player.continent.some(animal => {
-        const traitScavenger = animal.hasTrait(TraitScavenger.type);
+      game.constructor.sortPlayersFromIndex(game, currentPlayerIndex).some(player => player.continent.some(animal => {
+        const traitScavenger = animal.hasTrait(TraitScavenger);
         if (traitScavenger && animal.canEat(game) > 0) {
           dispatch(server$startFeeding(game.id, animal, 1));
           return true;
@@ -121,13 +126,13 @@ export const TraitCarnivorous = {
     return sourceAnimal.canEat(game)
   }
   , checkTarget: (game, sourceAnimal, targetAnimal) => (
-    (sourceAnimal.hasTrait('TraitSharpVision') || !targetAnimal.hasTrait('TraitCamouflage'))
-    && (!targetAnimal.traits.some(trait => trait.type === 'TraitSymbiosis' && trait.linkSource && trait.hostAnimalId === targetAnimal.id))
-    && (sourceAnimal.hasTrait('TraitMassive') || !targetAnimal.hasTrait('TraitMassive'))
-    && !(targetAnimal.canSurvive() && targetAnimal.hasTrait('TraitBurrowing'))
+    (sourceAnimal.hasTrait(TraitSharpVision) || !targetAnimal.hasTrait(TraitCamouflage))
+    && (!targetAnimal.traits.some(trait => trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === targetAnimal.id))
+    && (sourceAnimal.hasTrait(TraitMassive) || !targetAnimal.hasTrait(TraitMassive))
+    && !(targetAnimal.canSurvive() && targetAnimal.hasTrait(TraitBurrowing))
     && (
-      (sourceAnimal.hasTrait('TraitSwimming') && targetAnimal.hasTrait('TraitSwimming'))
-      || (!sourceAnimal.hasTrait('TraitSwimming') && !targetAnimal.hasTrait('TraitSwimming'))
+      (sourceAnimal.hasTrait(TraitSwimming) && targetAnimal.hasTrait(TraitSwimming))
+      || (!sourceAnimal.hasTrait(TraitSwimming) && !targetAnimal.hasTrait(TraitSwimming))
     )
   )
 };

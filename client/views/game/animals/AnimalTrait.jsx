@@ -10,15 +10,10 @@ import { DND_ITEM_TYPE } from './../dnd/DND_ITEM_TYPE';
 
 import { AnimalModel } from '../../../../shared/models/game/evolution/AnimalModel';
 import { TraitModel } from '../../../../shared/models/game/evolution/TraitModel';
-import { checkAction } from '../../../../shared/models/game/evolution/TraitDataModel';
 
 import './AnimalTrait.scss';
 
 class AnimalTrait extends Component {
-  static defaultProps = {
-    isPlayerTurn: false
-  };
-
   static propTypes = {
     trait: React.PropTypes.instanceOf(TraitModel).isRequired
   };
@@ -36,23 +31,30 @@ class AnimalTrait extends Component {
       , canDrag
       , isDragging
       , draggable: connectDragSource
+      , [trait.type]: true
+      , value: trait.value
     });
 
-    return <div className={className}>{T.translate('Game.Trait.' + trait.type)}</div>;
+    return <div className={className}>
+      <div className='inner'>
+        {T.translate('Game.Trait.' + trait.type)} {trait.getDataModel().food > 0 ? '+'+trait.getDataModel().food : null}
+      </div>
+    </div>;
   }
 }
 
-class DragAnimalTrait_Body extends AnimalTrait {
+class DragAnimalTraitBody extends AnimalTrait {
+  static displayName = 'AnimalTrait';
+  static propTypes = {
+    connectDragSource: PropTypes.func.isRequired
+    , canDrag: PropTypes.bool.isRequired
+    , isDragging: PropTypes.bool.isRequired
+  };
+
   render() {
     return this.props.connectDragSource(super.render());
   }
 }
-DragAnimalTrait_Body.displayName = 'AnimalTrait';
-DragAnimalTrait_Body.propTypes = {
-  connectDragSource: PropTypes.func.isRequired
-  , canDrag: PropTypes.bool.isRequired
-  , isDragging: PropTypes.bool.isRequired
-};
 
 const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
   , {
@@ -61,7 +63,7 @@ const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
       game.isPlayerTurn()
       && game.isFeeding()
       && sourceAnimal.ownerId === game.getPlayer().id
-      && checkAction(game, trait.dataModel, sourceAnimal)
+      && trait.getDataModel().checkAction(game, sourceAnimal)
     )
   }
   , (connect, monitor) => ({
@@ -69,7 +71,7 @@ const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
     , isDragging: monitor.isDragging()
     , canDrag: monitor.canDrag()
   })
-)(DragAnimalTrait_Body);
+)(DragAnimalTraitBody);
 
 DragAnimalTrait.propTypes = {
   // by GameProvider

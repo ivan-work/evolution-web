@@ -4,7 +4,7 @@ $VERTICAL_MARGIN: 2px;
 .Continent {
   position: relative;
   min-width: 200px;
-  min-height: $ANIMAL_HEIGHT;
+  height: $ANIMAL_HEIGHT + $ANIMAL_MARGIN;
   background: #dfd;
   border: 1px solid #898;
   display: flex;
@@ -33,6 +33,7 @@ $VERTICAL_MARGIN: 2px;
     padding: $VERTICAL_MARGIN $ANIMAL_MARGIN;
     z-index: 1;
     position: relative;
+    align-self: flex-end;
     //background: #77f;
 
     &:first-child,

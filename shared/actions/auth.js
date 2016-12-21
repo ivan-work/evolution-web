@@ -34,7 +34,7 @@ export const server$socketDisconnect = (connectionId, reason) => (dispatch, getS
   if (!!user) {
     if (reason !== SOCKET_DISCONNECT_NOW) {
       dispatch(addTimeout(
-        TIMEOUT
+        (process.env.TEST ? 1 : TIMEOUT)
         , 'logoutUser' + user.id
         , server$logoutUser(user.id)));
     } else {
@@ -130,7 +130,7 @@ export const authClientToServer = {
       }
       if (!(newUser instanceof UserModel)) {
         const validation = new Validator({login, password}, RulesLoginPassword);
-        if (validation.fails()) throw new ActionCheckError('loginUserRequest', 'validation failed: %s', validation);
+        if (validation.fails()) throw new ActionCheckError('loginUserRequest', 'validation failed: %s', JSON.stringify(validation.errors.all()));
 
         if (getState().get('users').find(user => user.login === login))
           throw new ActionCheckError('loginUserRequest', 'User already exists');

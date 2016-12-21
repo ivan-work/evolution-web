@@ -1,11 +1,13 @@
 @import '../styles.json';
 
+$FULL_SCREEN_MIN_WIDTH: $FULL_SCREEN_MIN_WIDTH * 1px;
+$FULL_SCREEN_MIN_HEIGHT: $FULL_SCREEN_MIN_HEIGHT * 1px;
+
 $CARD_WIDTH: $CARD_WIDTH                   * 1px;
 $CARD_HEIGHT: $CARD_HEIGHT                 * 1px;
 $ANIMAL_WIDTH: $ANIMAL_WIDTH               * 1px;
 $ANIMAL_HEIGHT: $ANIMAL_HEIGHT             * 1px;
 $ANIMAL_MARGIN: $ANIMAL_MARGIN             * 1px;
-$ANIMAL_TRAIT_WIDTH: $ANIMAL_TRAIT_WIDTH   * 1px;
 $ANIMAL_TRAIT_HEIGHT: $ANIMAL_TRAIT_HEIGHT * 1px;
 
 @mixin selection() {

@@ -1,5 +1,7 @@
 'use strict';
 
+import './globals';
+
 const gulp = require('gulp');
 const gutil = require('gulp-util');
 const mocha = require('gulp-mocha');
@@ -24,7 +26,10 @@ const testWatch = (paths) => gulp.src(paths)
 
 gulp.task('test:setup', () => {
   watching = true;
+  process.env.TEST = true;
   process.env.NODE_ENV = 'test';
+  process.env.JWT_SECRET = 'secret';
+  process.env.DEBUG = '*';
 });
 
 gulp.task('test:shared:single', ['test:setup'], () =>  testWatch(TEST_PATH_SHARED));

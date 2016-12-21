@@ -115,6 +115,8 @@ phase: 2
 players:
   - continent: $A carn
   - continent: $B mimicry, $C, $D
+settings:
+  timeTraitResponse: 1
 `);
     const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');

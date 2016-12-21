@@ -13,7 +13,8 @@ import {
   gameReadyRequest,
   gameDeployAnimalRequest,
   gameDeployTraitRequest,
-  gameEndTurnRequest
+  gameEndTurnRequest,
+  roomEditSettingsRequest
 } from '../actions';
 import {makeGameSelectors} from '../../selectors';
 
@@ -21,6 +22,7 @@ describe('Game:', function () {
   it('Game start', () => {
     const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
     clientStore0.dispatch(roomCreateRequest());
+    clientStore0.dispatch(roomEditSettingsRequest({decks: ['TEST']}));
     const roomId = serverStore.getState().get('rooms').first().id;
     clientStore1.dispatch(roomJoinRequest(roomId));
     clientStore0.dispatch(gameCreateRequest(roomId));
@@ -63,7 +65,8 @@ describe('Game:', function () {
     expect(ClientGame0().roomId).equal(roomId);
     expect(ClientGame0().deck.size, 'ClientGame0().deck').equal(TEST_DECK_SIZE - TEST_HAND_SIZE - TEST_HAND_SIZE);
     expect(ClientGame0().getIn(['players']).size).equal(2);
-    expect(ClientGame0().getIn(['players', User0.id, 'hand'])).equal(ServerGame().getIn(['players', User0.id, 'hand']));
+    expect(ClientGame0().getIn(['players', User0.id, 'hand']).toJS()).eql(ServerGame().getIn(['players', User0.id, 'hand']).toJS())
+    expect(ClientGame0().getIn(['players', User0.id, 'hand']), 'User0 hands equals with Server').equal(ServerGame().getIn(['players', User0.id, 'hand']));
     expect(ClientGame0().getIn(['players', User1.id, 'hand'])).not.equal(ServerGame().getIn(['players', User1.id, 'hand']));
     expect(ClientGame0().getPlayer()).equal(ServerGame().getIn(['players', User0.id]));
 
@@ -231,7 +234,7 @@ players:
 
     const traitCamouflage = selectTrait(User0, 0, 0);
     expect(ServerGame().getPlayer(User0).getAnimal(0).getIn(['traits', 0, 'type'])).equal('TraitCamouflage');
-    expect(ServerGame().getPlayer(User0).getAnimal(0).getIn(['traits', 0, 'dataModel'])).ok;
+    //expect(ServerGame().getPlayer(User0).getAnimal(0).getIn(['traits', 0, 'dataModel'])).ok;
     expect(ServerGame().getPlayer(User0).getAnimal(0).getIn(['traits', 0])).equal(traitCamouflage);
     expect(ClientGame0().getPlayer(User0).getAnimal(0).getIn(['traits', 0])).equal(traitCamouflage);
     expect(ClientGame1().getPlayer(User0).getAnimal(0).getIn(['traits', 0])).equal(traitCamouflage);

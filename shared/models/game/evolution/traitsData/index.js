@@ -26,7 +26,8 @@ import {FOOD_SOURCE_TYPE} from '../constants';
 //
 
 import {TraitCarnivorous} from './TraitCarnivorous';
-export {TraitCarnivorous} from './TraitCarnivorous';
+
+export {TraitCarnivorous};
 
 export const TraitParasite = {
   type: 'TraitParasite'
@@ -127,6 +128,7 @@ export const TraitCommunication = {
   , cooldowns: fromJS([
     ['TraitCommunication', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
+  , action: () => true
 };
 
 //
@@ -146,8 +148,8 @@ export const TraitGrazing = {
   , $checkAction: (game, sourceAnimal) => game.food > 0
 };
 
-export const TraitHighBodyWeight = {
-  type: 'TraitHighBodyWeight'
+export const TraitMassive = {
+  type: 'TraitMassive'
   , food: 1
 };
 
@@ -183,6 +185,7 @@ export const TraitCooperation = {
   , cooldowns: fromJS([
     ['TraitCooperation', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
+  , action: () => true
 };
 
 export const TraitBurrowing = {

@@ -23,7 +23,7 @@ export const App = ServicesContext(PortalsContext(TooltipsContext(React.createCl
     const {socket} = this.props;
     return (
       <Layout fixedHeader>
-        <Header title={`${T.translate('App.Name')} v${DEFINE_VERSION}`} hideSpacer={true}>
+        <Header title={`${T.translate('App.Name')} v${GLOBAL_VERSION}`} hideSpacer={true}>
           <Navigation className='header'>
             <TranslationSwitchView/>
             <PortalTarget name='header'/>

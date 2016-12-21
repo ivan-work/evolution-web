@@ -1,5 +1,5 @@
 function makeLogger() {
-  if (process.env.BROWSER) {
+  if (GLOBAL_BROWSER) {
     const LOG_LEVELS = ['silly'
       , 'debug'
       , 'verbose'

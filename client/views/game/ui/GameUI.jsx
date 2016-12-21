@@ -7,7 +7,7 @@ import {PortalTarget} from '../../utils/PortalTarget.jsx';
 import {Button} from 'react-mdl';
 import {PlayersList} from './PlayersList.jsx';
 import {GameStatusDisplay} from './GameStatusDisplay.jsx';
-import {TraitDefenceDialog} from './TraitDefenceDialog.jsx';
+import TraitDefenceDialog from './TraitDefenceDialog.jsx';
 
 class _GameUI extends React.Component {
   static displayName = 'GameUI';
@@ -39,7 +39,7 @@ class _GameUI extends React.Component {
                     style={{width: '100%'}}
                     onClick={this.context.gameActions.$endTurn}>End Phase</Button>}
 
-        <GameStatusDisplay status={game.status} players={game.players}/>
+        <GameStatusDisplay game={game}/>
 
         <PortalTarget name='deck'/>
       </div>);

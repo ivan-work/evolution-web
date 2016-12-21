@@ -14,7 +14,7 @@ export const roomDestroy = (state, {roomId, userId}) => state.remove(roomId);
 
 export const roomEditSettings = (state, {roomId, settings}) => state.update(roomId, room => room
   .set('name', settings.name)
-  .set('settings', new SettingsRecord(settings)));
+  .update('settings', s => s.applySettings(settings)));
 
 export const roomBan = (state, {roomId, userId}) => state.update(roomId, room => room
   .update('banlist', banlist => banlist.push(userId)));

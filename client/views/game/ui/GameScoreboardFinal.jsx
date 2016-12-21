@@ -7,7 +7,9 @@ import cn from 'classnames';
 import {GameModelClient, PHASE} from '../../../../shared/models/game/GameModel';
 import {Dialog, DialogActions} from '../../utils/Dialog.jsx';
 
-export class GameScoreboardFinal extends Component {
+import {UserServicePropType} from '../../../services/UserService'
+
+export default class GameScoreboardFinal extends Component {
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
@@ -19,6 +21,10 @@ export class GameScoreboardFinal extends Component {
     game: React.PropTypes.instanceOf(GameModelClient).isRequired
   };
 
+  static contextTypes = {
+    userService: UserServicePropType
+  };
+
   componentDidUpdate() {
     if (!this.showedOnce && this.props.game.status.phase === PHASE.FINAL) {
       this.showedOnce = true;
@@ -27,7 +33,8 @@ export class GameScoreboardFinal extends Component {
   }
 
   render() {
-    const {game, online} = this.props;
+    const {game} = this.props;
+    const {userService} = this.context;
 
     return <span>
       {game.status.phase === PHASE.FINAL
@@ -46,7 +53,7 @@ export class GameScoreboardFinal extends Component {
             {game.scoreboardFinal && game.scoreboardFinal.map(({playerId, score}) =>
             <tr key={playerId}
                 className={cn({'bold': game.getPlayer().id === playerId})}>
-              <td>{online.get(playerId).login}</td>
+              <td>{userService.get(playerId) ? userService.get(playerId).login : '---'}</td>
               <td>{score}</td>
             </tr>)}
             </tbody>
@@ -59,16 +66,3 @@ export class GameScoreboardFinal extends Component {
     </span>
   }
 }
-
-export const GameScoreboardFinalView = connect(
-  (state) => {
-    return {
-      userId: state.getIn(['user', 'id'])
-      , game: state.getIn(['game'])
-      , online: state.getIn(['online'])
-    }
-  }
-  , (dispatch) => ({})
-  , null
-  , {withRef: true}
-)(GameScoreboardFinal);

@@ -2,6 +2,9 @@ import {Record, List} from 'immutable';
 import uuid from 'uuid';
 import {SettingsRecord} from './game/GameSettings';
 
+import {catchChecks} from '../actions/checks';
+import {checkComboRoomCanStart} from '../actions/rooms.checks';
+
 export class RoomModel extends Record({
   id: null
   , name: null
@@ -16,7 +19,7 @@ export class RoomModel extends Record({
       : new RoomModel({
       ...js
       , users: List(js.users)
-      , settings: new SettingsRecord(js.settings)
+      , settings: SettingsRecord.fromJS(js.settings)
       , banlist: List(js.banlist)
     });
   }
@@ -30,29 +33,9 @@ export class RoomModel extends Record({
     })
   }
 
-  hasUser(userId) {
-    ensureParameter(userId, 'string');
-    return !!~this.users.indexOf(userId);
-  }
-
   checkCanStart(userId) {
-    return this.validateCanStart(userId) === true;
-  }
-
-  validateCanStart(userId) {
-    if (!~this.users.indexOf(userId)) return RoomModel.ERRORS.room_error_user_not_in_room;
-    if (this.users.get(0) !== userId) return RoomModel.ERRORS.room_error_user_not_host;
-    if (process.env.NODE_ENV !== 'development')
-      if (this.users.size <= 1) return RoomModel.ERRORS.room_error_size_min;
-    if (this.gameId !== null) return RoomModel.ERRORS.room_error_has_game;
-    return true;
+    return catchChecks(() => {
+      checkComboRoomCanStart(this, userId);
+    });
   }
 }
-
-RoomModel.ERRORS = {
-  room_error_size_max: 'room_error_size_max'
-  , room_error_size_min: 'room_error_size_min'
-  , room_error_user_not_in_room: 'room_error_user_not_in_room'
-  , room_error_user_not_host: 'room_error_user_not_host'
-  , room_error_has_game: 'room_error_has_game'
-};

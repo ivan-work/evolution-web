@@ -20,7 +20,7 @@ players:
     continent: $A fat fat, $B fat fat
 `);
       const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-      expect(selectCard(User0, 0).trait1.type).equal('TraitSymbiosis');
+      expect(selectCard(User0, 0).trait1).equal('TraitSymbiosis');
 
       clientStore0.dispatch(gameDeployTraitRequest(
         selectCard(User0, 0).id, '$A', false, '$B'));
@@ -44,7 +44,7 @@ players:
     continent: $A, $B, $C, $D
 `);
       const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-      expect(selectCard(User1, 7).trait1.type).equal('TraitSymbiosis');
+      expect(selectCard(User1, 7).trait1).equal('TraitSymbiosis');
       clientStore0.dispatch(gameEndTurnRequest());
       // A > B
       expectChanged('A > B', () => clientStore1.dispatch(
@@ -126,7 +126,7 @@ players:
   - continent: $A1
 `);
       const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-      expect(selectCard(User0, 7).trait1.type).equal('TraitSymbiosis');
+      expect(selectCard(User0, 7).trait1).equal('TraitSymbiosis');
 
       expectUnchanged('A > A1', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User0, 0).id
