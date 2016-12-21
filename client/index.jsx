@@ -28,6 +28,9 @@ import './styles/style.scss';
 // Services
 import {animationMiddleware} from './services/AnimationService';
 
+const isDevelopment = process.env.NODE_ENV === 'development';
+const DevToolsArray = (isDevelopment ? [DevTools.instrument()] : []);
+
 const reducer = combineReducers({
   ...reducers,
   routing: routerReducer
@@ -39,7 +42,7 @@ const store = configureStore(reducer, void 0, [
   appRouterMiddleware(browserHistory)
   , socketMiddleware(socketClient)
   , animationMiddleware()
-], [DevTools.instrument()]);
+], DevToolsArray);
 
 const history = syncHistoryWithStore(store, browserHistory);
 
@@ -50,7 +53,7 @@ store.dispatch(appChangeLanguage(store.getState().getIn(['app', 'lang'])));
 
 ReactDOM.render(
   <Root store={store} history={history}>
-    <DevTools />
+    {isDevelopment ? <DevTools /> : null}
   </Root>,
   document.getElementById('app')
 );
