@@ -10,6 +10,7 @@
     "yaml-js": false
   },
   "scripts": {
+    "postinstall": "npm run build",
     "start:version": "npm version patch --force && npm start",
     "start": "nodemon server/index.js",
     "clean": "rimraf dist",
