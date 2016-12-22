@@ -3,8 +3,6 @@ import T from 'i18n-react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
-import {GameProvider} from './../providers/GameProvider.jsx';
-
 import { DragSource } from 'react-dnd';
 import { DND_ITEM_TYPE } from './../dnd/DND_ITEM_TYPE';
 
@@ -18,6 +16,8 @@ class AnimalTrait extends Component {
     trait: React.PropTypes.instanceOf(TraitModel).isRequired
   };
 
+  static defaultProps = {classNames: {}};
+
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
@@ -26,33 +26,18 @@ class AnimalTrait extends Component {
   render() {
     const {trait, connectDragSource, isDragging, canDrag} = this.props;
 
-    const className = classnames({
+
+    const className = classnames(Object.assign(this.classNames || {}, {
       AnimalTrait: true
-      , canDrag
-      , isDragging
-      , draggable: connectDragSource
       , [trait.type]: true
       , value: trait.value
-    });
+    }));
 
     return <div className={className}>
       <div className='inner'>
         {T.translate('Game.Trait.' + trait.type)} {trait.getDataModel().food > 0 ? '+'+trait.getDataModel().food : null}
       </div>
     </div>;
-  }
-}
-
-class DragAnimalTraitBody extends AnimalTrait {
-  static displayName = 'AnimalTrait';
-  static propTypes = {
-    connectDragSource: PropTypes.func.isRequired
-    , canDrag: PropTypes.bool.isRequired
-    , isDragging: PropTypes.bool.isRequired
-  };
-
-  render() {
-    return this.props.connectDragSource(super.render());
   }
 }
 
@@ -71,18 +56,58 @@ const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
     , isDragging: monitor.isDragging()
     , canDrag: monitor.canDrag()
   })
-)(DragAnimalTraitBody);
+)(class AnimalTrait extends AnimalTrait {
+  static propTypes = {
+    // by parent
+    trait: React.PropTypes.instanceOf(TraitModel).isRequired
+    // by life
+    , game: PropTypes.object.isRequired
+    , sourceAnimal: React.PropTypes.instanceOf(AnimalModel).isRequired
+    // by DnD
+    , connectDragSource: PropTypes.func.isRequired
+    , canDrag: PropTypes.bool.isRequired
+    , isDragging: PropTypes.bool.isRequired
+  };
 
-DragAnimalTrait.propTypes = {
-  // by GameProvider
-  game: PropTypes.object.isRequired
-  // by life
-  , sourceAnimal: React.PropTypes.instanceOf(AnimalModel).isRequired
-};
+  render() {
+    const {connectDragSource, canDrag, isDragging} = this.props;
+    this.classNames = {
+      draggable: true
+      , active: canDrag
+      , isDragging
+    };
+    return connectDragSource(super.render());
+  }
+});
 
-const GameDragAnimalTrait = GameProvider(DragAnimalTrait);
+class ClickAnimalTrait extends AnimalTrait {
+  static propTypes = {
+    // by parent
+    trait: React.PropTypes.instanceOf(TraitModel).isRequired
+    // by life
+    , game: PropTypes.object.isRequired
+    , sourceAnimal: React.PropTypes.instanceOf(AnimalModel).isRequired
+    , onClick: React.PropTypes.func.isRequired
+  };
+
+  render() {
+    const {trait, game, sourceAnimal, onClick} = this.props;
+    const active = game.isPlayerTurn()
+      && game.isFeeding()
+      && sourceAnimal.ownerId === game.getPlayer().id
+      && trait.getDataModel().checkAction(game, sourceAnimal);
+    this.classNames = {
+      pointer: active
+      , active
+    };
+    return (active
+      ? React.cloneElement(super.render(), {onClick})
+      : super.render());
+  };
+}
 
 export {
   AnimalTrait
-  , DragAnimalTrait as _DragAnimalTrait
-  , GameDragAnimalTrait as DragAnimalTrait}
+  , DragAnimalTrait
+  , ClickAnimalTrait
+}

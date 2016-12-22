@@ -31,7 +31,6 @@ players:
     clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore1.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(gameEndTurnRequest());
 
     // DEPLOY 1
     expect(selectGame().status.phase, 'DEPLOY 1').equal(PHASE.DEPLOY);
@@ -73,7 +72,6 @@ players:
     }, serverStore, clientStore0, clientStore1);
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore1.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(gameEndTurnRequest());
 
     // DEPLOY 3
     expect(selectGame().status.phase, 'DEPLOY 3').equal(PHASE.DEPLOY);
@@ -112,6 +110,43 @@ players:
       clientStore0.dispatch(traitActivateRequest('$A', 'TraitHibernation'));
       clientStore0.dispatch(traitActivateRequest('$C', 'TraitHibernation'));
     }, serverStore, clientStore0, clientStore1);
+  });
+
+  it(`Doesnt affect stored fat`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 50 camo
+food: 3
+phase: 2
+players:
+  - continent: $A hiber fat fat
+`);
+    const {selectGame, selectAnimal, selectPlayer, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    expect(selectTrait(User0, 0, 0).type).equal('TraitHibernation');
+    clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    clientStore0.dispatch(gameEndTurnRequest());
+    expect(selectAnimal(User0, 0).getFood(), '1: Animal stored food').equal(3);
+    expect(selectTrait(User0, 0, 1).value).true;
+    expect(selectTrait(User0, 0, 2).value).true;
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expect(selectGame().status.phase, 'DEPLOY 2').equal(PHASE.DEPLOY);
+    clientStore0.dispatch(gameEndTurnRequest());
+    expect(selectGame().status.phase, 'FEEDING 2').equal(PHASE.FEEDING);
+    expect(selectAnimal(User0, 0).getFood(), '2: Animal stored food').equal(2);
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitHibernation'));
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expect(selectGame().status.phase, 'DEPLOY 3').equal(PHASE.DEPLOY);
+    clientStore0.dispatch(gameEndTurnRequest());
+    expect(selectGame().status.phase, 'FEEDING 3').equal(PHASE.FEEDING);
+    expect(selectAnimal(User0, 0).getFood(), '2: Animal stored food').equal(2);
+    expect(selectTrait(User0, 0, 1).value).true;
+    expect(selectTrait(User0, 0, 2).value).true;
   });
 });
 

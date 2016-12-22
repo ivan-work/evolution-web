@@ -48,6 +48,8 @@ Game:
     1: Deploy
     2: Feeding
   UI:
+    EndTurn: End turn
+    EndPhase: End phase
     Status:
       Turn: Turn
       Phase: Phase

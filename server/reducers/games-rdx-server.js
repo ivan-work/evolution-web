@@ -92,8 +92,8 @@ export const gameStartDeploy = (game) => {
       .set('ended', !player.playing)
       .set('skipped', 0)
       .update('continent', continent => continent.map(animal => animal
-        .set('flags', Map())
         .digestFood()
+        .set('flags', Map())
       ))
     ))
     .setIn(['food'], 0)

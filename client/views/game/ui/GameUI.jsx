@@ -1,4 +1,5 @@
 import React, {PropTypes} from 'react';
+import T from 'i18n-react';
 import RIP from 'react-immutable-proptypes';
 
 import {GameProvider} from '../providers/GameProvider.jsx';
@@ -29,15 +30,14 @@ class _GameUI extends React.Component {
 
         <PlayersList game={game}/>
 
-        {game.getPlayer().acted
-          ? <Button id="Game$endTurn" colored raised
+        <Button id="Game$endTurn" colored={game.getPlayer().acted} accent={!game.getPlayer().acted} raised
                     disabled={!isPlayerTurn}
                     style={{width: '100%'}}
-                    onClick={this.context.gameActions.$endTurn}>End Turn</Button>
-          : <Button id="Game$endTurn" accent raised
-                    disabled={!isPlayerTurn}
-                    style={{width: '100%'}}
-                    onClick={this.context.gameActions.$endTurn}>End Phase</Button>}
+                    onClick={this.context.gameActions.$endTurn}>
+          {T.translate(game.getPlayer().acted
+            ? 'Game.UI.EndTurn':
+            'Game.UI.EndPhase')}
+        </Button>
 
         <GameStatusDisplay game={game}/>
 

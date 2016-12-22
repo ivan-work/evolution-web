@@ -92,7 +92,7 @@ export class PlayerWrapper extends Component {
     </Continent>)
   }
 
-  renderAnimal(animal, isUserContinent, isDeploy, angle) {
+  renderAnimal(animal, isUserContinent, isDeploy) {
     const onTraitDropped = !isDeploy ? this.$traitActivate : this.$noop;
     const onFoodDropped = !isDeploy ? this.$traitTakeFood : this.$noop;
     const onCardDropped = isDeploy ? this.$deployTrait : this.$noop;
@@ -101,7 +101,6 @@ export class PlayerWrapper extends Component {
       ref={this.props.connectRef('Animal#' + animal.id)}
       key={animal.id}
       model={animal}
-      angle={this.props.angle}
       isUserAnimal={isUserContinent}
       onTraitDropped={onTraitDropped}
       onFoodDropped={onFoodDropped}

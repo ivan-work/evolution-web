@@ -48,6 +48,8 @@ Game:
     1: Развитие
     2: Кормление
   UI:
+    EndTurn: Закончить ход
+    EndPhase: Закончить фазу
     Status:
       Turn: Ход
       Phase: Фаза

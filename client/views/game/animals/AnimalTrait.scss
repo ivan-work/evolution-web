@@ -28,7 +28,10 @@
     overflow: hidden;
   }
 
-  &.draggable.canDrag {
+  &.draggable.active {
+    background: #f90;
+  }
+  &.pointer.active {
     background: #f90;
   }
 }

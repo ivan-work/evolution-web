@@ -1,5 +1,9 @@
 import React, {Component, PropTypes} from 'react';
 
+// function for testing wrong client time;
+const getDate = () => Date.now() - 10 * 60 * 1000;
+import TimeService from '../../services/TimeService';
+
 export class Timer extends Component {
   static propTypes = {
     start: PropTypes.number.isRequired
@@ -15,16 +19,18 @@ export class Timer extends Component {
 
   updateTime(nextProps) {
     const {start, duration} = nextProps || this.props;
-    if (this.$isMounted) {
-      //this.setState(Date.now() + this.props.end - this.props.start);
-      const time = start + duration - Date.now();
-      if (time > 0) {
-        this.setState({time});
-        window.setTimeout(this.updateTime, 100)
-      } else {
-        this.setState({time: 0});
-      }
-    }
+    TimeService.getTime()
+      .then((timestamp) => {
+        if (this.$isMounted) {
+          const time = start + duration - timestamp;
+          if (time > 0) {
+            this.setState({time});
+            window.setTimeout(this.updateTime, 100)
+          } else {
+            this.setState({time: 0});
+          }
+        }
+      });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -45,6 +51,16 @@ export class Timer extends Component {
   }
 
   renderTime(time) {
-    return (time / 1000).toFixed(1);
+    let ms = time % 1000;
+    time = (time - ms) / 1000;
+    let s = time % 60;
+    time = (time - s) / 60;
+    let m = time % 60;
+    time = (time - m) / 60;
+    let h = time % 60;
+    if (h < 10) h = '0' + h;
+    if (m < 10) m = '0' + m;
+    if (s < 10) s = '0' + s;
+    return (h != '00' ? h + ':' : '') + m + ':' + s;
   }
 }
