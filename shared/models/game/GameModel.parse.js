@@ -82,7 +82,7 @@ export const parseFromRoom = (room, string = '') => {
   }, {});
 
   return GameModel.fromServer({
-    id: uuid.v4().slice(0, 4)
+    id: uuid.v4()
     , roomId: room.id
     , food: seed.food || 0
     , started: seed.phase !== 0
@@ -100,5 +100,5 @@ export const parseFromRoom = (room, string = '') => {
 
 export const parseRaw = (string) => parseFromRoom({
   id: 'test'
-  , users
+  // , users
 }, string);

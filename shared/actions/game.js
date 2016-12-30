@@ -390,6 +390,7 @@ export const gameClientToServer = {
     dispatch(server$gameCreateSuccess(game));
   }
   , gameReadyRequest: ({gameId, ready}, {user: {id: userId}}) => (dispatch, getState) => {
+    console.log(gameId, ready, userId);
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);

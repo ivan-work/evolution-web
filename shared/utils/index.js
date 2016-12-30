@@ -14,6 +14,7 @@ export function createConstants(...constants) {
 
 export function createReducer(initialState, reducerMap) {
   return (state = initialState, action) => {
+    // console.log(Object.keys(reducerMap), state, initialState)
     const reducer = reducerMap[action.type];
 
     return reducer
@@ -31,6 +32,9 @@ export function checkHttpStatus(response) {
     throw error
   }
 }
+
+export const promisify = (fn) => (...args) => new Promise((resolve, reject) =>
+  fn(...args, (error, ...data) => (error ? reject(error) : resolve(...data))));
 
 export function ensureParameter(data, type, optional) {
   if (!optional && data === void 0) throw new Error('Required data is undefined');

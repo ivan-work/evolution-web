@@ -9,6 +9,7 @@ export const socketStore = (serverSocket, store) => {
   serverSocket.on('connect', (socket) => {
     logger.silly('server:connect');
     store.dispatch(socketConnect(socket.id, (action) => socket.emit('action', action)));
+    socket.emit('action', socketConnect(socket.id));
 
     socket.on('disconnect', (reason) => {
       logger.silly('Server DISCONNECT:', reason);

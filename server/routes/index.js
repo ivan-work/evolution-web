@@ -6,7 +6,7 @@ import fs from 'fs';
 import yamlParser from 'yaml-js';
 
 module.exports = (app, passport) => {
-   /**
+  /**
    * Translations
    * */
   const translations = glob.sync('i18n/*.yml')
@@ -31,17 +31,19 @@ module.exports = (app, passport) => {
     res.status(200).json(Date.now());
   });
 
-  router.get('/state', function (req, res, next) {
-    const state = app.get('store').getState().toJS();
+  if (process.env.NODE_ENV !== 'production') {
+    router.get('/state', function (req, res, next) {
+      const state = app.get('store').getState().toJS();
 
-    state.connections = Object.keys(state.connections).reduce((result, key) => {
-      result[key] = '#socket#';
-      return result;
-    }, {});
+      state.connections = Object.keys(state.connections).reduce((result, key) => {
+        result[key] = '#socket#';
+        return result;
+      }, {});
 
-    const format = (str) => `<pre>${str}</pre>`;
-    res.send(format(JSON.stringify(state, null, '  ')));
-  });
+      const format = (str) => `<pre>${str}</pre>`;
+      res.send(format(JSON.stringify(state, null, '  ')));
+    });
+  }
 
   router.get('/timeouts', function (req, res, next) {
     const timeouts = app.get('timeouts');

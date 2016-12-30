@@ -85,7 +85,7 @@ export class GameModel extends Record(GameModelData) {
     const deck = room.settings.decks.reduce((result, deckName) => result.concat(DeckVariants[deckName]), List());
 
     return new GameModel({
-      id: uuid.v4().slice(0, 4)
+      id: uuid.v4()
       , roomId: room.id
       , deck: GameModel.generateDeck(deck, true)
       , players: room.users.reduce((result, userId, index) => result.set(userId, PlayerModel.new(userId, index)), Map())

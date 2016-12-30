@@ -29,4 +29,5 @@ const saveState = (state) => {
 
 export const reducer = createReducer(getInitialState(), {
   appChangeLanguage: (state, data) => saveState(state.set('lang', data))
+  , socketConnect: (state, {connectionId}) => state.set('connectionId', connectionId)
 });

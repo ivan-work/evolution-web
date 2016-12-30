@@ -50,8 +50,10 @@ global.NodeList = global.window.NodeList;
 global.Node = global.window.Node;
 // for react-measure
 global.ResizeObserver = function () {
-  this.observe = () => {};
-  this.disconnect = () => {};
+  this.observe = () => {
+  };
+  this.disconnect = () => {
+  };
 };
 
 // https://stackoverflow.com/questions/26867535/calling-setstate-in-jsdom-based-tests-causing-cannot-render-markup-in-a-worker
@@ -63,15 +65,16 @@ require('fbjs/lib/ExecutionEnvironment').canUseDOM = true;
 //  }
 //});
 
-import { createStore, compose, applyMiddleware } from 'redux'
+import {ServerRecord} from '../server/configureStore';
+import {createStore, compose, applyMiddleware} from 'redux'
 import configureStore from '../client/configuration/configureStore'
 import thunk from 'redux-thunk';
-import { reduxTimeout } from './utils/reduxTimeout';
-import { reduxQuestion } from './utils/reduxQuestion';
+import {reduxTimeout} from './utils/reduxTimeout';
+import {reduxQuestion} from './utils/reduxQuestion';
 //import { reduxTimeout } from 'redux-timeout';
-import { combineReducers } from 'redux-immutable';
+import {combineReducers} from 'redux-immutable';
 import * as actions from './actions/actions';
-import { createMemoryHistory } from 'react-router';
+import {createMemoryHistory} from 'react-router';
 import {routerReducer, appRouterMiddleware, syncHistoryWithStore} from '../client/configuration/routing';
 
 const clientReducers = require('../client/reducers/index');
@@ -79,7 +82,10 @@ const serverReducers = require('../server/reducers/index');
 
 import syncSocketIOServer from './test/sync-socket-io'
 import syncSocketIOClient from './test/sync-socket-io-client'
-import {socketStore as socketClientStore, socketMiddleware as socketClientMiddleware} from '../client/configuration/socket';
+import {
+  socketStore as socketClientStore,
+  socketMiddleware as socketClientMiddleware
+} from '../client/configuration/socket';
 import {socketStore as socketServerStore, socketMiddleware as socketServerMiddleware} from '../server/socket';
 import {errorMiddleware as serverErrorMiddleware} from '../server/middleware/error';
 
@@ -102,7 +108,7 @@ global.mockServerStore = function (initialServerState) {
   const timeouts = {};
   const serverStore = createStore(
     combineReducers({...serverReducers})
-    , initialServerState
+    , new ServerRecord(initialServerState)
     , applyMiddleware(
       serverErrorMiddleware(errorInterceptor)
       , thunk

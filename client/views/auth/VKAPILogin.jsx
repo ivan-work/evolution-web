@@ -1,32 +1,25 @@
 import React, {Component} from 'react';
+// import {connect} from 'react-redux';
+import T from 'i18n-react';
+import {Button} from 'react-mdl';
 
-export class VKAPILogin extends Component {
-  componentWillMount() {
-    //const script = document.createElement("script");
-    //
-    //script.src = "//vk.com/js/api/openapi.js?136";
-    //
-    //document.body.appendChild(script);
-    //
-    //console.log('hey componentWillMount 3');
-    //console.log(window.VK);
-    //
-    //// VK.init({apiId: process.env.VK_API_SECRET});
-  }
+// export const VKAPILogin = ({}) => {
+export default () => {
+  const VK_API_REQUEST = {
+    client_id: process.env.VK_API_ID
+    , redirect_uri: window.location.origin + '/api/oauth/vk'
+    , display: 'page'
+    , response_type: 'code'
+    , v: '5.60'
+    // , revoke: process.env.NODE_ENV === 'production' ? 0 : 1
+    // , state: connectionId
+  };
 
-  componentDidUpdate() {
+  const VK_API_REQUEST_STRING = 'https://oauth.vk.com/authorize?' + Object.keys(VK_API_REQUEST).map((k) => k + '=' + VK_API_REQUEST[k]).join('&');
 
-    //console.log('hey componentDidUpdate 4');
-    //console.log(window.VK);
-    //// VK.Widgets.Auth("VKAPIAuth", {
-    //   width: "200px", onAuth: function (data) {
-    //     alert('user ' + data['uid'] + ' authorized');
-    //     console.log(VK);
-    //   }
-    // });
-  }
-
-  render() {
-    return <div id="VKAPIAuth"></div>;
-  }
-}
+  return (
+    <div id="VKAPIAuth">
+      <Button primary raised href={VK_API_REQUEST_STRING}>{T.translate('App.Login.VK')}</Button>
+    </div>
+  );
+};

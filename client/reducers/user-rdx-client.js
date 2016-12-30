@@ -7,7 +7,7 @@ import {UserModel} from '../../shared/models/UserModel';
 const getInitialUser = () => {
   let user = null;
   if (typeof (window) != 'undefined') {
-    user = window.sessionStorage.getItem('user');
+    user = window.localStorage.getItem('user');
   }
   if (user != null) {
     user = JSON.parse(user);
@@ -23,6 +23,9 @@ const getInitialUser = () => {
 
 //console.log('Storage User:', getInitialUser());
 export const reducer = createReducer(getInitialUser(), {
-  loginUser: (state, data) => data.user
+  loginUser: (state, {user}) => {
+    window.localStorage.setItem('user', JSON.stringify(user));
+    return user;
+  }
   , loginUserFailure: (state, data) => null
 });

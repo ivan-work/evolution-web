@@ -1,4 +1,8 @@
 import fs from 'fs';
+import uuid from 'uuid';
+
+const originalV4 = uuid.v4;
+uuid.v4 = () => originalV4().slice(0, 4);
 
 if (fs.existsSync('.env')) require('dotenv').config();
 
@@ -13,6 +17,7 @@ export default {
     env: {
       NODE_ENV: JSON.stringify(process.env.NODE_ENV)
       , PORT: JSON.stringify(process.env.PORT)
+      , VK_API_ID: JSON.stringify(process.env.VK_API_ID)
     }
   }
 };
