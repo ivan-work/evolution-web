@@ -7,7 +7,8 @@
     "node-uuid": false,
     "winston": false,
     "colors": false,
-    "yaml-js": false
+    "yaml-js": false,
+    "./shared/utils/logger/index.js": "./shared/utils/logger/logger-browser.js"
   },
   "scripts": {
     "postinstall": "npm run build",

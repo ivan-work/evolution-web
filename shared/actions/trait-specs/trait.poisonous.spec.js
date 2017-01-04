@@ -15,8 +15,9 @@ describe('TraitPoisonous:', () => {
     const gameId = ParseGame(`
 deck: 12 camo
 phase: 2
+food: 1
 players:
-  - continent: $A carn, $B carn, $C carn
+  - continent: $A carn graz, $B carn, $C carn
   - continent: $X pois, $Y pois
 `);
     const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);

@@ -79,13 +79,13 @@ settings:
     expect(selectGame().getIn(['status', 'currentPlayer'])).equal(0);
     expect(selectGame().getIn(['status', 'roundPlayer'])).equal(0);
 
-    console.log(serverStore.getTimeouts()['turnTimeTimeout#' + gameId].getRemaining())
+    // console.log(serverStore.getTimeouts()['turnTimeTimeout#' + gameId].getRemaining())
 
     //console.log(selectGame().status, Date.now());
     await new Promise(resolve => setTimeout(resolve, 50));
     //console.log(selectGame().status, Date.now());
 
-    console.log(serverStore.getTimeouts()['turnTimeTimeout#' + gameId].getRemaining())
+    // console.log(serverStore.getTimeouts()['turnTimeTimeout#' + gameId].getRemaining())
 
     expect(selectGame().getIn(['status', 'turn'])).equal(0);
     expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.DEPLOY);
@@ -101,13 +101,13 @@ settings:
     expect(selectGame().getIn(['status', 'currentPlayer']), 'Player changed by turn time').equal(1);
     expect(selectGame().getIn(['status', 'roundPlayer'])).equal(0);
 
-    console.log(serverStore.getTimeouts()['turnTimeTimeout#' + gameId].getRemaining())
+    // console.log(serverStore.getTimeouts()['turnTimeTimeout#' + gameId].getRemaining())
 
     clientStore1.dispatch(gameEndTurnRequest());
 
     //await new Promise(resolve => setTimeout(resolve, 100)); // 250 total time
 
-    console.log(serverStore.getTimeouts()['turnTimeTimeout#' + gameId].getRemaining())
+    // console.log(serverStore.getTimeouts()['turnTimeTimeout#' + gameId].getRemaining())
 
     expect(selectGame().getIn(['status', 'turn'])).equal(0);
     expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.FEEDING);

@@ -48,10 +48,8 @@ export class CardModel extends Record({
   }
 
   get traitsCount() {
-    return (this.trait1 === null
-      ? 0
-      : this.trait2 === null
-      ? 1
+    return (this.trait1 === null ? 0
+      : this.trait2 === null ? 1
       : 2)
   }
 

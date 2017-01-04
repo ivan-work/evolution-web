@@ -1,4 +1,4 @@
-import logger from '~/shared/utils/logger';
+import logger, {fileLogger} from '~/shared/utils/logger';
 import {UserModel, RulesLoginPassword} from '../models/UserModel';
 import {RoomModel} from '../models/RoomModel';
 import {GameModelClient} from '../models/game/GameModel';
@@ -72,6 +72,7 @@ export const onlineUpdate = (user) => ({
 
 export const server$loginUser = (user, redirect) => (dispatch, getState) => {
   if (!user.id) throw new Error('User has no ID');
+  fileLogger.info(`User ${user.login} joined`);
   const online = getState().get('users').map(u => u.toOthers());
   const rooms = getState().get('rooms');
   const games = getState().get('games');
@@ -97,10 +98,12 @@ const logoutUser = (userId) => ({
 
 export const server$logoutUser = (userId) => (dispatch, getState) => {
   logger.debug('server$logoutUser', userId);
+  const userLogin = getState().getIn(['users', userId, 'login']);
   const room = getState().get('rooms').find(room => ~room.get('users').indexOf(userId));
   if (room) {
     dispatch(server$roomExit(room.id, userId));
   }
+  fileLogger.info(`User ${userLogin} left`);
   dispatch(Object.assign(logoutUser(userId)
     , {meta: {users: true}}));
 };

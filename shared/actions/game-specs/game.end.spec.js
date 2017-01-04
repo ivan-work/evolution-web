@@ -20,7 +20,7 @@ deck: 10 camo
 food: 4
 phase: 2
 players:
-  - continent: $A, $B, $C, $D
+  - continent: $A, $B, $C, $D graz
   - continent: $X, $Y, $Z, $W
 `);
     expect(ServerGame().getPlayer(User0.id).acted).equal(false);
@@ -45,10 +45,6 @@ players:
     expect(ServerGame().getPlayer(User1.id).acted).equal(false);
     expect(ServerGame().getPlayer(User0.id).ended).equal(false);
     expect(ServerGame().getPlayer(User1.id).ended).equal(true);
-
-    expectUnchanged('$A already ate', () =>
-        clientStore0.dispatch(traitTakeFoodRequest('$A'))
-      , serverStore, clientStore0, clientStore1)
 
     clientStore0.dispatch(traitTakeFoodRequest('$B'));
     expect(ServerGame().getPlayer(User0.id).acted).equal(true);
@@ -75,7 +71,7 @@ deck: 32 carn
 food: 4
 phase: 2
 players:
-  - continent: $A, $B, $C, $D carn +, $E
+  - continent: $A graz, $B, $C, $D carn +, $E
   - continent: $Z +, $X, $C carn ++, $V, $N
   - continent:
 `);

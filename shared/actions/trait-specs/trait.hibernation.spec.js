@@ -28,11 +28,12 @@ players:
     expectUnchanged('Hibernation disables food intake', () => {
       clientStore0.dispatch(traitTakeFoodRequest('$A'));
     }, serverStore, clientStore0, clientStore1);
-    clientStore0.dispatch(gameEndTurnRequest());
 
+    clientStore0.dispatch(gameEndTurnRequest());
     clientStore1.dispatch(gameEndTurnRequest());
 
     // DEPLOY 1
+    expect(selectGame().status.turn, 'DEPLOY 1').equal(1);
     expect(selectGame().status.phase, 'DEPLOY 1').equal(PHASE.DEPLOY);
     expect(selectGame().deck.size, 'Deck remaining').equal(12);
     expect(selectPlayer(User0).continent).size(2);
@@ -43,6 +44,7 @@ players:
     expect(selectAnimal(User0, 0).hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED), 'Hibernation false after turn').not.true;
 
     // FEEDING
+    expect(selectGame().status.turn, 'FEEDING 1').equal(1);
     expect(selectGame().status.phase, 'FEEDING 1').equal(PHASE.FEEDING);
     clientStore1.dispatch(gameEndTurnRequest());
     expectUnchanged('Cooldowns', () => {
@@ -50,15 +52,15 @@ players:
       clientStore0.dispatch(traitActivateRequest('$C', 'TraitHibernation'));
     }, serverStore, clientStore0, clientStore1);
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
-    clientStore0.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(traitTakeFoodRequest('$C'));
     clientStore0.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(gameEndTurnRequest());
+
 
     // DEPLOY 2
+    expect(selectGame().status.turn, 'DEPLOY 2').equal(2);
     expect(selectGame().status.phase, 'DEPLOY 2').equal(PHASE.DEPLOY);
-    expect(selectGame().deck.size, 'Deck remaining').equal(8);
     expect(selectPlayer(User0).continent).size(2);
+    expect(selectGame().deck.size, 'Deck remaining').equal(8);
     expect(selectAnimal(User0, 0).id).equal('$A');
     expect(selectAnimal(User0, 1).id).equal('$C');
     clientStore0.dispatch(gameEndTurnRequest());
@@ -75,8 +77,8 @@ players:
 
     // DEPLOY 3
     expect(selectGame().status.phase, 'DEPLOY 3').equal(PHASE.DEPLOY);
-    expect(selectGame().deck.size, 'Deck remaining').equal(4);
     expect(selectPlayer(User0).continent).size(2);
+    expect(selectGame().deck.size, 'Deck remaining').equal(4);
     expect(selectAnimal(User0, 0).id).equal('$A');
     expect(selectAnimal(User0, 1).id).equal('$C');
     clientStore1.dispatch(gameEndTurnRequest());
@@ -90,15 +92,13 @@ players:
       clientStore0.dispatch(traitActivateRequest('$C', 'TraitHibernation'));
     }, serverStore, clientStore0, clientStore1);
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
-    clientStore0.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(traitTakeFoodRequest('$C'));
-    clientStore0.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(gameEndTurnRequest());
 
     // DEPLOY 4
     expect(selectGame().status.phase, 'DEPLOY 4').equal(PHASE.DEPLOY);
-    expect(selectGame().deck.size, 'Deck remaining').equal(0)
     expect(selectPlayer(User0).continent).size(2);
+    expect(selectGame().deck.size, 'Deck remaining').equal(0);
     expect(selectAnimal(User0, 0).id).equal('$A');
     expect(selectAnimal(User0, 1).id).equal('$C');
     clientStore0.dispatch(gameEndTurnRequest());

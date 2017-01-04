@@ -1,4 +1,4 @@
-import logger from '~/shared/utils/logger';
+import logger, {fileLogger} from '~/shared/utils/logger';
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import {List} from 'immutable';
 
@@ -7,9 +7,15 @@ import {CardModel} from '../models/game/CardModel';
 import {AnimalModel} from '../models/game/evolution/AnimalModel';
 import {TraitModel} from '../models/game/evolution/TraitModel';
 import {TraitDataModel} from '../models/game/evolution/TraitDataModel';
-import {CARD_TARGET_TYPE, CTT_PARAMETER, TRAIT_TARGET_TYPE, TRAIT_ANIMAL_FLAG} from '../models/game/evolution/constants';
+import {
+  CARD_TARGET_TYPE,
+  CTT_PARAMETER,
+  TRAIT_TARGET_TYPE,
+  TRAIT_ANIMAL_FLAG
+} from '../models/game/evolution/constants';
 
 import {server$game} from './generic';
+import {endTurnIfNoOptions} from './ai';
 import {redirectTo} from '../utils';
 import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
 
@@ -17,7 +23,6 @@ import {
   checkGameDefined
   , checkGameHasUser
   , checkPlayerHasCard
-  , checkPlayerHasAnimal
   , checkPlayerTurnAndPhase
   , checkValidAnimalPosition
 } from './checks';
@@ -79,6 +84,7 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
     case 1:
       dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
       if (game.status.phase !== PHASE.FINAL) {
+        fileLogger.info(`Game left ${game.players.map(p => getState().getIn(['users', p.id, 'login'])).join(', ')}`);
         dispatch(server$game(gameId, gameEnd(gameId, selectGame(getState, gameId).toClient())));
       }
       break;
@@ -252,8 +258,9 @@ export const server$gamePlayerStart = (gameId) => (dispatch, getState) => {
   const {nextPlayer, roundChanged} = choosePlayer(game, roundPlayer);
 
   dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
-  dispatch(server$game(gameId, gameNextPlayer(gameId, nextPlayer.index, false, Date.now())));
   dispatch(server$addTurnTimeout(gameId, nextPlayer.id));
+  // dispatch(server$game(gameId, gameNextPlayer(gameId, nextPlayer.index, false, Date.now())));
+  dispatch(server$gameNextPlayer(gameId, nextPlayer, false));
 };
 
 export const server$gamePlayerContinue = (gameId) => (dispatch, getState) => {
@@ -263,8 +270,14 @@ export const server$gamePlayerContinue = (gameId) => (dispatch, getState) => {
   const {nextPlayer, roundChanged} = choosePlayer(game, (currentPlayer + 1));
 
   dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
-  dispatch(server$game(gameId, gameNextPlayer(gameId, nextPlayer.index, roundChanged, Date.now())));
   dispatch(server$addTurnTimeout(gameId, nextPlayer.id));
+  // dispatch(server$game(gameId, gameNextPlayer(gameId, nextPlayer.index, roundChanged, Date.now())));
+  dispatch(server$gameNextPlayer(gameId, nextPlayer, roundChanged));
+};
+
+const server$gameNextPlayer = (gameId, nextPlayer, roundChanged) => (dispatch, getState) => {
+  dispatch(server$game(gameId, gameNextPlayer(gameId, nextPlayer.index, roundChanged, Date.now())));
+  dispatch(endTurnIfNoOptions(gameId, nextPlayer.id));
 };
 
 const choosePlayer = (game, startIndex) => {
@@ -365,6 +378,7 @@ export const server$gameExtict = (gameId) => (dispatch, getState) => {
       });
     }
   } else {
+    fileLogger.info(`Game finished ${game.players.map(p => getState().getIn(['users', p.id, 'login'])).join(', ')}`);
     dispatch(server$game(gameId, gameEnd(gameId, selectGame(getState, gameId))));
   }
 };
@@ -390,7 +404,6 @@ export const gameClientToServer = {
     dispatch(server$gameCreateSuccess(game));
   }
   , gameReadyRequest: ({gameId, ready}, {user: {id: userId}}) => (dispatch, getState) => {
-    console.log(gameId, ready, userId);
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
@@ -516,7 +529,8 @@ export const gameServerToClient = {
     gameDeployAnimal(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardPosition)
   , gameDeployTrait: ({gameId, cardId, traits}) =>
     gameDeployTrait(gameId, cardId, traits.map(trait => TraitModel.fromServer(trait)))
-  , gameNextPlayer: ({gameId, nextPlayerIndex, roundChanged, turnTime}) => gameNextPlayer(gameId, nextPlayerIndex, roundChanged, turnTime)
+  , gameNextPlayer: ({gameId, nextPlayerIndex, roundChanged, turnTime}) =>
+    gameNextPlayer(gameId, nextPlayerIndex, roundChanged, turnTime)
   , gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
   , gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
   , gamePlayerLeft: ({gameId, userId}, currentUserId) => (dispatch, getState) => {

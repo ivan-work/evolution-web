@@ -7,7 +7,6 @@ import {
 
 import {PHASE} from '../../models/game/GameModel';
 
-import {makeGameActionHelpers} from '../generic';
 import {makeGameSelectors} from '../../selectors';
 
 describe('TraitFatTissue:', () => {
@@ -50,7 +49,7 @@ phase: 2
 food: 12
 players:
   - continent: $A fat carn, $B fat fat fat
-    hand: 2 CardGrazingAndFatTissue
+    hand: 1 CardGrazingAndFatTissue
   - continent: $C, $D
 `);
       const {selectGame, selectCard, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
@@ -58,28 +57,21 @@ players:
       expect(selectTrait(User0, 0, 0).type).equal('TraitFatTissue');
 
       clientStore0.dispatch(traitTakeFoodRequest('$A'));
-      clientStore0.dispatch(gameEndTurnRequest());
       clientStore1.dispatch(gameEndTurnRequest());
       //$A+ fat carn, $B fat fat
 
       clientStore0.dispatch(traitTakeFoodRequest('$A'));
-      clientStore0.dispatch(gameEndTurnRequest());
       //$A++ fat carn, $B fat fat
 
       clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$C'));
-      clientStore0.dispatch(gameEndTurnRequest());
       expect(selectPlayer(User1).continent).size(1);
 
       // selectAnimal(User0, 1)
 
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
-      clientStore0.dispatch(gameEndTurnRequest());
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
-      clientStore0.dispatch(gameEndTurnRequest());
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
-      clientStore0.dispatch(gameEndTurnRequest());
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
-      clientStore0.dispatch(gameEndTurnRequest());
       expect(selectAnimal(User0, 1).getFood()).equal(4);
 
       clientStore0.dispatch(gameEndTurnRequest());
@@ -87,18 +79,18 @@ players:
       expect(selectAnimal(User0, 0).getFood()).equal(1);
       expect(selectAnimal(User0, 1).getFood()).equal(3);
 
-      expect(selectGame().status.phase, 'Turn 2, deploy').equal(1);
+      expect(selectGame().status.phase, 'Turn 2, deploy').equal(PHASE.DEPLOY);
       clientStore1.dispatch(gameEndTurnRequest());
 
       clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$B', true));
       clientStore0.dispatch(gameEndTurnRequest());
 
-      expect(selectGame().status.phase, 'Turn 2, feed').equal(2);
+      expect(selectGame().status.phase, 'Turn 2, feed').equal(PHASE.FEEDING);
       clientStore1.dispatch(gameEndTurnRequest());
       clientStore0.dispatch(gameEndTurnRequest());
 
-      expect(selectGame().status.phase, 'Turn 3, deploy').equal(1);
-      expect(selectGame().status.turn, 'Turn 3, deploy').equal(2);
+      expect(selectGame().status.phase, 'Turn 3, deploy').equal(PHASE.DEPLOY);
+      expect(selectGame().status.turn, 'Turn 3, deploy turn').equal(2);
 
       expect(selectPlayer(User0).continent).size(1);
       expect(selectAnimal(User0, 0).traits).size(4);

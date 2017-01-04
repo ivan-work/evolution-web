@@ -157,6 +157,7 @@ settings:
     expect(ServerGame().settings).equal(new SettingsRecord({
       timeTurn: 20
       , timeTraitResponse: 10
+      , decks: List(['Base2'])
     }))
   });
 

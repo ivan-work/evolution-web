@@ -6,7 +6,6 @@ import {
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
-import {getRandom} from '../../utils/RandomGenerator';
 
 import {makeGameSelectors} from '../../selectors';
 
@@ -40,8 +39,9 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0}, {User1, clientStore1}, {User2, clientStore2}] = mockGame(3);
     const gameId = ParseGame(`
 phase: 2
+food: 1
 players:
-  - continent: $A carn, $B carn, $C carn, $D scavenger, $E
+  - continent: $A carn graz, $B carn, $C carn, $D scavenger, $E
   - continent: $A1 scavenger, $B1
   - continent: $A2 scavenger, $B2
 `);

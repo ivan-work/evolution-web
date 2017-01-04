@@ -12,7 +12,6 @@ import {
   , server$traitActivate
   , server$traitStartCooldown
   , server$traitAnimalRemoveTrait
-  , server$playerActed
   , server$traitGrazeFood
   , server$traitSetAnimalFlag
   , server$traitNotify_End

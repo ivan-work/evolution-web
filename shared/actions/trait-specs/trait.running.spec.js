@@ -16,8 +16,9 @@ describe('TraitRunning:', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0}, {User1, clientStore1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: 2
+food: 1
 players:
-  - continent: carn, carn, carn, carn, carn, carn
+  - continent: carn graz, carn, carn, carn, carn, carn
   - continent: running
 `);
     const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);

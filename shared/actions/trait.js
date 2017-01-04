@@ -1,7 +1,6 @@
 import logger from '~/shared/utils/logger';
 import uuid from 'uuid';
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
-import {List} from 'immutable';
 
 import {
   FOOD_SOURCE_TYPE
@@ -12,18 +11,18 @@ import {
 } from '../models/game/evolution/constants';
 
 import {server$game} from './generic';
+import {endTurnIfNoOptions} from './ai';
+import {server$gameEndTurn} from './actions';
 
 import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
 
-import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
+import {PHASE} from '../models/game/GameModel';
 import {checkAction} from '../models/game/evolution/TraitDataModel';
-import {CooldownList} from '../models/game/CooldownList';
 import {TraitCommunication, TraitCooperation, TraitCarnivorous} from '../models/game/evolution/traitsData/index';
 
 import {
   checkGameDefined
   , checkGameHasUser
-  , checkPlayerHasCard
   , checkPlayerHasAnimal
   , checkPlayerTurnAndPhase
 } from './checks';
@@ -90,6 +89,7 @@ const local$traitStartCooldown = (gameId, traitData, sourceAnimal) => (dispatch)
 };
 
 export const server$traitStartCooldown = (gameId, traitData, sourceAnimal) => (dispatch) => {
+  logger.debug('server$traitStartCooldown');
   traitData.cooldowns.forEach(([link, place, duration]) => {
     const placeId = (place === TRAIT_COOLDOWN_PLACE.PLAYER
       ? sourceAnimal.ownerId
@@ -155,9 +155,10 @@ const playerActed = (gameId, userId) => ({
   , data: {gameId, userId}
 });
 
-export const server$playerActed = (gameId, userId) => (dispatch, getState) => dispatch(
-  Object.assign(playerActed(gameId, userId)
+export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
+  dispatch(Object.assign(playerActed(gameId, userId)
     , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
+};
 
 // Notification
 
@@ -175,9 +176,10 @@ export const server$traitNotify_Start = (game, sourceAnimal, traitType, targetId
   Object.assign(traitNotify_Start(game.id, sourceAnimal.id, traitType, targetId)
     , {meta: {users: selectPlayers4Sockets(getState, game.id)}}));
 
-export const server$traitNotify_End = (game, sourceAnimal, traitType, targetId) => (dispatch, getState) => dispatch(
-  Object.assign(traitNotify_End(game.id, sourceAnimal.id, traitType, targetId)
-    , {meta: {users: selectPlayers4Sockets(getState, game.id)}}));
+export const server$traitNotify_End = (game, sourceAnimal, traitType, targetId) => (dispatch, getState) => {
+  logger.debug('server$traitNotify_End');
+  dispatch(server$game(game.id, traitNotify_End(game.id, sourceAnimal.id, traitType, targetId)));
+};
 
 const client$traitNotify_End = (gameId, sourceAid, traitType, targetId) => ({
   type: 'traitNotify_End_' + traitType
@@ -330,10 +332,14 @@ export const traitClientToServer = {
     dispatch(server$startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId));
     dispatch(server$startCooldown(gameId, 'TraitCarnivorous', TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId));
 
-    dispatch(server$playerActed(gameId, userId));
     dispatch(server$startFeeding(gameId, animal, 1, FOOD_SOURCE_TYPE.GAME));
+    dispatch(server$playerActed(gameId, userId));
+
+    dispatch(endTurnIfNoOptions(gameId, userId));
+    logger.debug('traitTakeFoodRequest');
   }
-  , traitActivateRequest: ({gameId, sourceAid, traitType, targetId}, {user: {id: userId}}) => (dispatch, getState) => {
+  ,
+  traitActivateRequest: ({gameId, sourceAid, traitType, targetId}, {user: {id: userId}}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
     const {sourceAnimal, traitData, target} = checkTraitActivation(game, userId, sourceAid, traitType, targetId);
     checkPlayerTurnAndPhase(game, userId, PHASE.FEEDING);
@@ -342,26 +348,35 @@ export const traitClientToServer = {
     if (result === void 0) {
       throw new Error(`traitActivateRequest@Game(${gameId}): Animal(${sourceAid})-${traitType}-Animal(${targetId}) result undefined`);
     }
+    logger.debug('traitActivateRequest', result);
     if (result) {
       dispatch(server$playerActed(gameId, userId));
     }
   }
-  , traitDefenceAnswerRequest: ({gameId, questionId, traitType, targetId}) => server$traitDefenceAnswer(gameId, questionId, traitType, targetId)
+  , traitDefenceAnswerRequest: ({gameId, questionId, traitType, targetId}) =>
+    server$traitDefenceAnswer(gameId, questionId, traitType, targetId)
 };
 
 export const traitServerToClient = {
-  traitMoveFood: ({gameId, animalId, amount, sourceType, sourceId}) => traitMoveFood(gameId, animalId, amount, sourceType, sourceId)
-  , startCooldown: ({gameId, link, duration, place, placeId}) => startCooldown(gameId, link, duration, place, placeId)
+  traitMoveFood: ({gameId, animalId, amount, sourceType, sourceId}) =>
+    traitMoveFood(gameId, animalId, amount, sourceType, sourceId)
+  , startCooldown: ({gameId, link, duration, place, placeId}) =>
+    startCooldown(gameId, link, duration, place, placeId)
   , traitKillAnimal: ({gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId}) =>
     traitKillAnimal(gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId)
   , playerActed: ({gameId, userId}) =>
     playerActed(gameId, userId)
-  , traitDefenceQuestion: ({gameId, questionId, traitTuple}, currentUserId) => traitDefenceQuestion(gameId, questionId, traitTuple)
-  , traitDefenceAnswerSuccess: ({gameId, questionId}, currentUserId) => traitDefenceAnswerSuccess(gameId, questionId)
-  , traitNotify_Start: ({gameId, sourceAid, traitType, targetId}, currentUserId) => client$traitNotify_Start(gameId, sourceAid, traitType, targetId)
-  , traitNotify_End: ({gameId, sourceAid, traitType, targetId}, currentUserId) => client$traitNotify_End(gameId, sourceAid, traitType, targetId)
-  , traitNotify: ({gameId, traitTuple}, currentUserId) => traitNotify(gameId, traitTuple)
-  , traitAnimalRemoveTrait: ({gameId, sourcePid, sourceAid, traitIndex}) => traitAnimalRemoveTrait(gameId, sourcePid, sourceAid, traitIndex)
+  , traitDefenceQuestion: ({gameId, questionId, traitTuple}, currentUserId) =>
+    traitDefenceQuestion(gameId, questionId, traitTuple)
+  , traitDefenceAnswerSuccess: ({gameId, questionId}, currentUserId) =>
+    traitDefenceAnswerSuccess(gameId, questionId)
+  , traitNotify_Start: ({gameId, sourceAid, traitType, targetId}, currentUserId) =>
+    client$traitNotify_Start(gameId, sourceAid, traitType, targetId)
+  , traitNotify_End: ({gameId, sourceAid, traitType, targetId}, currentUserId) =>
+    client$traitNotify_End(gameId, sourceAid, traitType, targetId)
+  , traitAnimalRemoveTrait: ({gameId, sourcePid, sourceAid, traitIndex}) =>
+    traitAnimalRemoveTrait(gameId, sourcePid, sourceAid, traitIndex)
   , traitGrazeFood: ({gameId, food, sourceAid}) => traitGrazeFood(gameId, food, sourceAid)
-  , traitSetAnimalFlag: ({gameId, sourceAid, flag, on}) => traitSetAnimalFlag(gameId, sourceAid, flag, on)
+  , traitSetAnimalFlag: ({gameId, sourceAid, flag, on}) =>
+    traitSetAnimalFlag(gameId, sourceAid, flag, on)
 };

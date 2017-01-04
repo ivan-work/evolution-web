@@ -2,7 +2,7 @@ import {Record, List} from 'immutable';
 import uuid from 'uuid';
 import {SettingsRecord} from './game/GameSettings';
 
-import {catchChecks} from '../actions/checks';
+import {passesChecks} from '../actions/checks';
 import {checkComboRoomCanStart} from '../actions/rooms.checks';
 
 export class RoomModel extends Record({
@@ -34,7 +34,7 @@ export class RoomModel extends Record({
   }
 
   checkCanStart(userId) {
-    return catchChecks(() => {
+    return passesChecks(() => {
       checkComboRoomCanStart(this, userId);
     });
   }
