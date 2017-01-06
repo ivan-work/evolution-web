@@ -150,12 +150,12 @@ describe('Rooms:', function () {
 
       expect(serverStore.getState().getIn(['rooms', RoomId, 'name']), 'Room Test');
       expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'maxPlayers']), 3);
-      expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'timeTurn']), 3 * 6000);
-      expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'timeTraitResponse']), 1 * 6000);
+      expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'timeTurn']), 3 * 60000);
+      expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'timeTraitResponse']), 1 * 60000);
       expect(clientStore0.getState().getIn(['rooms', RoomId, 'name']), 'Room Test');
       expect(clientStore0.getState().getIn(['rooms', RoomId, 'settings', 'maxPlayers']), 3);
-      expect(clientStore0.getState().getIn(['rooms', RoomId, 'settings', 'timeTurn']), 3 * 6000);
-      expect(clientStore0.getState().getIn(['rooms', RoomId, 'settings', 'timeTraitResponse']), 1 * 6000);
+      expect(clientStore0.getState().getIn(['rooms', RoomId, 'settings', 'timeTurn']), 3 * 60000);
+      expect(clientStore0.getState().getIn(['rooms', RoomId, 'settings', 'timeTraitResponse']), 1 * 60000);
     });
 
     it('Can kick', () => {

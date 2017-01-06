@@ -1,6 +1,5 @@
 import logger from '~/shared/utils/logger';
 import io from 'socket.io';
-import {ObjectID} from 'mongodb';
 import {socketConnect, server$socketDisconnect, clientToServer, actionError} from '../shared/actions/actions'
 
 export const socketServer = (server, options) => io(server, {});

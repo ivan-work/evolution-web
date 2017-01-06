@@ -64,6 +64,7 @@ players:
       //$A++ fat carn, $B fat fat
 
       clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$C'));
+      clientStore0.dispatch(gameEndTurnRequest());
       expect(selectPlayer(User1).continent).size(1);
 
       // selectAnimal(User0, 1)
@@ -72,9 +73,9 @@ players:
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
-      expect(selectAnimal(User0, 1).getFood()).equal(4);
+      // expect(selectAnimal(User0, 1).getFood(), 'food 4').equal(4);
 
-      clientStore0.dispatch(gameEndTurnRequest());
+      // clientStore0.dispatch(gameEndTurnRequest());
 
       expect(selectAnimal(User0, 0).getFood()).equal(1);
       expect(selectAnimal(User0, 1).getFood()).equal(3);

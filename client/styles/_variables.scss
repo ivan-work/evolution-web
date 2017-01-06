@@ -13,3 +13,9 @@ $ANIMAL_TRAIT_HEIGHT: $ANIMAL_TRAIT_HEIGHT * 1px;
 @mixin selection() {
   box-shadow: 0px 0px .5em .5em yellow;
 }
+
+@mixin ellipsis() {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

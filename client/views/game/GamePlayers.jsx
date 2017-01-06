@@ -44,7 +44,7 @@ export default class GamePlayers extends Component {
                       style={{
                           position: 'absolute'
                           , left: `${width / 2}px`
-                          , top: `${height / 2}px`
+                          , top: `${height / 2 + 40}px`
                           , transform: `translate(-50%, 0) rotate(${angle}rad) translate(0, -100%) translate(0, ${length}px)`
                           , transformOrigin: `top`
                           }}>

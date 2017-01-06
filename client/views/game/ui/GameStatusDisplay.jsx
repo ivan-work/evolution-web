@@ -36,28 +36,28 @@ export class GameStatusDisplay extends Component {
   render() {
     const {game} = this.props;
     const {status, players, settings} = game;
-    return <ul className="GameStatus">
+    return (<ul className="GameStatus">
       <h6>Game Status:</h6>
-      <li>
+      <li className='line'>
         <span className='key'>{T.translate('Game.UI.Status.Turn')}:</span>
         <span className='value'>{status.turn}</span>
       </li>
-      <li>
+      <li className='line'>
         <span className='key'>{T.translate('Game.UI.Status.Phase')}:</span>
         <span className='value'>{T.translate('Game.Phase.' + status.phase)}</span>
       </li>
-      <li>
+      <li className='line'>
         <span className='key'>{T.translate('Game.UI.Status.Round')}:</span>
         <span className='value'>{status.round}</span>
       </li>
-      <li>
+      <li className='line'>
         <span className='key'>{T.translate('Game.UI.Status.Player')}:</span>
         <span className='value'>{this.getPlayerNameByIndex(players, status.currentPlayer)}</span>
       </li>
-      <li>
+      <li className='line'>
         <span className='key'>{T.translate('Game.UI.Status.Time')}:</span>
         <span className='value'>{status.turnTime != null ? <Timer start={status.turnTime} duration={settings.timeTurn}/> : '-'}</span>
       </li>
-    </ul>
+    </ul>);
   }
 }

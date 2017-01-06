@@ -1,8 +1,9 @@
+import logger from '~/shared/utils/logger';
 import {Record} from 'immutable';
 import {PHASE} from '../models/game/GameModel';
 import {TraitDataModel} from '../models/game/evolution/TraitDataModel';
 import {TRAIT_TARGET_TYPE} from '../models/game/evolution/constants';
-import {passesChecks, checkPlayerTurnAndPhase} from './checks';
+import {passesChecks, failsChecks, checkPlayerTurnAndPhase} from './checks';
 import {checkAnimalCanEat, checkTraitActivation_Animal} from './trait.checks';
 import {selectGame} from '../selectors';
 import {server$gameEndTurn} from './actions';
@@ -24,16 +25,22 @@ export class Option extends Record({
 }
 
 export const endTurnIfNoOptions = (gameId, playerId) => (dispatch, getState) => {
-  if (!doesOptionExist(selectGame(getState, gameId), playerId)) {
+  // console.log('endTurnIfNoOptions');
+  const game = selectGame(getState, gameId);
+  const hasError = failsChecks(() => checkPlayerTurnAndPhase(game, playerId, PHASE.FEEDING));
+  if (hasError) {
+    // logger.warn(hasError.name + hasError.message, ...hasError.data);
+  } else if (!doesOptionExist(game, playerId)) {
+    // logger.debug('AutoTurn for ', playerId);
     dispatch(server$gameEndTurn(gameId, playerId));
   } else {
-    console.log(getOptions(selectGame(getState, gameId), playerId))
+    // const options = getOptions(selectGame(getState, gameId), playerId);
+    // if (options.length === 0) throw new Error('Options length = 0');
+    // console.log(options)
   }
 };
 
 export const doesOptionExist = (game, playerId) => {
-  if (!passesChecks(() => checkPlayerTurnAndPhase(game, playerId, PHASE.FEEDING))) return true;
-
   const allAnimals = game.players.reduce((result, player) => result.concat(player.continent.map(animal => animal.id).toArray()), []);
   return game.getPlayer(playerId).continent.some((animal) => {
     if (passesChecks(() => checkAnimalCanEat(game, animal))) return true;

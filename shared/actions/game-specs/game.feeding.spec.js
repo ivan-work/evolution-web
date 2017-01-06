@@ -18,7 +18,6 @@ players:
   - continent: $A1,$B1
 `);
     const {selectGame, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
-
     expectUnchanged(`User1 can't take food $A when it's User0's turn`, () =>
         clientStore1.dispatch(traitTakeFoodRequest('$A'))
       , serverStore, clientStore1);
@@ -34,8 +33,6 @@ players:
     expectUnchanged(`User0 can't take food twice`, () =>
       clientStore0.dispatch(traitTakeFoodRequest('$B'))
       , serverStore, clientStore0);
-
-    clientStore0.dispatch(gameEndTurnRequest());
 
     expect(selectGame().food, 'ServerGame().food').equal(1);
     expect(ClientGame0().food, 'ClientGame0().food').equal(1);
@@ -70,7 +67,6 @@ players:
     const {selectGame, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
-    clientStore0.dispatch(gameEndTurnRequest());
     clientStore1.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
     clientStore0.dispatch(gameEndTurnRequest());

@@ -15,7 +15,7 @@ const getInitialState = () => {
       window.localStorage.removeItem('appSettings')
     }
     if (!appSettings.get('lang')) {
-      const userLang = langCodes.hasOwnProperty(window.navigator.language) ? window.navigator.language : 'en-en';
+      const userLang = langCodes.hasOwnProperty(window.navigator.language) ? window.navigator.language : 'ru-ru';
       appSettings = appSettings.set('lang', userLang);
     }
   }
