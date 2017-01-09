@@ -47,7 +47,10 @@ settings:
       expect(selectGame().question).null;
       expect(ClientGame0().question).null;
       expect(ClientGame1().question).null;
-      expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$B'])).size(2);
+
+      expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$A'])).size(1);
+      expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$B'])).size(1);
+      expect(selectGame().getIn(['cooldowns', 'PLAYER', User0.id])).size(1);
       expect(selectPlayer(User0).acted).true;
       expect(selectAnimal(User1, 0).id).equal('$Z');
       expect(selectAnimal(User1, 0).traits).size(3);
@@ -59,8 +62,9 @@ settings:
 
     clientStore0.dispatch(traitActivateRequest('$C', 'TraitCarnivorous', '$Z'));
 
-
     await new Promise(resolve => setTimeout(resolve, 12));
+
+    //console.log(selectAnimal(User1, 0).traits)
 
     expect(selectAnimal(User1, 0).traits, 'selectAnimal(User1, 0).traits').size(2);
     expect(selectAnimal(User1, 0).traits.get(0).type).equal('TraitTailLoss');

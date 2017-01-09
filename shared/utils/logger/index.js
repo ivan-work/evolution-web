@@ -1,5 +1,5 @@
 import winston from 'winston';
-import {consoleTransport, fileTransport} from './transports';
+import {consoleTransport} from './transports';
 
 export default new winston.Logger({
   colors: {
@@ -16,8 +16,20 @@ export default new winston.Logger({
   exitOnError: false
 });
 
-var NullTransport = require('winston-null');
-require('winston-loggly-bulk');
+const NullTransport = () => ({
+  name: 'NullTransport'
+  , log: (level, msg, meta, callback) => callback(null)
+});
+
+require('winston-google-spreadsheet').GoogleSpreadSheet;
+const SSTransport = () => new (winston.transports.GoogleSpreadsheet)({
+  'fileId': process.env.GOOGLE_LOGS_FILE
+  , 'level': 'info'
+  , 'refreshToken': process.env.GOOGLE_REFRESH_TOKEN
+  , 'clientId': process.env.GOOGLE_CLIENT_ID
+  , 'clientSecret': process.env.GOOGLE_CLIENT_SECRET
+});
+
 export const fileLogger = new winston.Logger({
   colors: {
     error: 'red',
@@ -28,12 +40,7 @@ export const fileLogger = new winston.Logger({
     silly: 'gray'
   }
   , transports: [
-    (!process.env.LOGGLY_TOKEN ? NullTransport : new winston.transports.Loggly({
-      token: process.env.LOGGLY_TOKEN
-      , subdomain: "fen1kz"
-      , tags: ["Winston-NodeJS"]
-      , json: true
-    }))
+    (process.env.GOOGLE_LOGS_FILE ? SSTransport() : NullTransport())
   ],
   exitOnError: false
 });

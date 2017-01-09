@@ -81,7 +81,7 @@
     "validatorjs": "*",
     "velocity-animate": "*",
     "winston": "*",
-    "winston-loggly-bulk": "^1.3.4",
+    "winston-google-spreadsheet": "0.0.5",
     "winston-null": "^1.0.2",
     "yaml-js": "*"
   },

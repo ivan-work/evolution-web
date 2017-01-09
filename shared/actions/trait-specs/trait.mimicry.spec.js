@@ -15,6 +15,7 @@ describe('TraitMimicry:', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: 2
+food: 10
 players:
   - continent: $A carn
   - continent: $B mimicry, $C camo
@@ -31,6 +32,7 @@ players:
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: 2
+food: 10
 players:
   - continent: $A carn
   - continent: $B mimicry, $C
@@ -47,6 +49,7 @@ players:
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: 2
+food: 10
 players:
   - continent: $A carn
   - continent: $B mimicry, $C mimicry
@@ -63,6 +66,7 @@ players:
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: 2
+food: 10
 players:
   - continent: $A carn
   - continent: $B mimicry, $C, $D
@@ -90,6 +94,7 @@ players:
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: 2
+food: 10
 players:
   - continent: $A carn
   - continent: $B mimicry, $C mimicry, $D
@@ -99,6 +104,9 @@ players:
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
 
     clientStore1.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitMimicry', '$C'));
+
+    //console.log(selectGame().status)
+    //console.log(selectGame().cooldowns)
 
     clientStore1.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitMimicry', '$B'));
 
@@ -112,6 +120,7 @@ players:
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: 2
+food: 10
 players:
   - continent: $A carn
   - continent: $B mimicry, $C, $D
@@ -133,5 +142,27 @@ settings:
     expect(selectAnimal(User1, 0).id).equal('$B');
     expect(selectAnimal(User1, 1).id).equal('$D');
     expect(selectAnimal(User1, 2)).undefined;
+  });
+
+  it('$A > $B (mimi)> end', async () => {
+    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: 2
+food: 10
+deck: 20 camo
+players:
+  - continent: $A carn, $B mimi carn, $C, $D
+`);
+    const {selectGame, selectQuestionId, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
+    clientStore0.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitMimicry', '$C'));
+
+    expect(selectPlayer(User0).continent).size(3);
+    expect(selectAnimal(User0, 0).id).equal('$A');
+    expect(selectAnimal(User0, 0).getFood()).equal(2);
+    expect(selectAnimal(User0, 1).id).equal('$B');
+    expect(selectAnimal(User0, 2).id).equal('$D');
+
+    expect(selectGame().status.round, 'round changed').equal(1);
   });
 });

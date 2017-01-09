@@ -263,7 +263,7 @@ phase: 1
 players:
   - hand: 2 CardSymbiosis
     continent: $A, $B, $C
-  - continent: $H carn
+  - continent: $H carn fat
 `);
       const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
       clientStore0.dispatch(gameDeployTraitRequest(

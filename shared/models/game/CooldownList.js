@@ -107,4 +107,8 @@ class CooldownModel extends Record({
       ? null
       : new CooldownModel(js)
   }
+
+  toString() {
+    return `CD(${this.link};${this.duration})`
+  }
 }

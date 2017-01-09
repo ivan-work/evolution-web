@@ -63,8 +63,7 @@ export const TraitMimicry = {
   ])
   , action: (game, mimicryAnimal, newTargetAnimal, attackAnimal, attackTraitData) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, TraitMimicry, mimicryAnimal));
-    dispatch(server$traitActivate(game, attackAnimal, attackTraitData, newTargetAnimal));
-    return true;
+    return dispatch(server$traitActivate(game, attackAnimal, attackTraitData, newTargetAnimal));
   }
   , getTargets: (game, attackAnimal, attackTraitData, mimicryAnimal) => {
     return game.getPlayer(mimicryAnimal.ownerId).continent.filter((animal) =>
