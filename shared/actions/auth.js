@@ -1,15 +1,17 @@
 import logger, {fileLogger} from '~/shared/utils/logger';
-import {UserModel, RulesLoginPassword} from '../models/UserModel';
-import {RoomModel} from '../models/RoomModel';
-import {GameModelClient} from '../models/game/GameModel';
 import {Map} from 'immutable';
+import {UserModel, RulesLoginPassword} from '../models/UserModel';
+import {GameModelClient} from '../models/game/GameModel';
 import {redirectTo} from '../utils';
-import {server$roomExit} from './rooms';
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 import jwt from 'jsonwebtoken';
 import Validator from 'validatorjs';
 
 import {ActionCheckError} from '../models/ActionCheckError';
+
+import {toUser$Client} from './generic';
+import {chatInit} from './chat';
+import {server$roomsInit, server$roomExit} from './rooms';
 
 export const SOCKET_DISCONNECT_NOW = 'SOCKET_DISCONNECT_NOW';
 export const TIMEOUT = 120 * 1000;
@@ -76,13 +78,16 @@ export const server$loginUser = (user, redirect) => (dispatch, getState) => {
   const online = getState().get('users').map(u => u.toOthers());
   const rooms = getState().get('rooms');
   const games = getState().get('games');
-  const room = rooms.find(room => ~room.users.indexOf(user.id)) || {id: null};
-  const roomId = room.id;
-  const game = games.find(game => game.roomId === roomId) || null;
-  const clientGame = game !== null ? game.toOthers(user.id).toClient() : null;
+  const room = rooms.find(room => ~room.users.indexOf(user.id));
+  const roomId = !!room && room.id || null;
+  const game = !!roomId && games.find(game => game.roomId === roomId) || null;
+  const clientGame = !!game && game.toOthers(user.id).toClient() || null;
   dispatch(loginUser({user}));
-  dispatch(Object.assign(loginUser({user: user.toClient(), redirect, online, rooms, roomId, game: clientGame}),
-    {meta: {clientOnly: true, socketId: user.connectionId}}));
+
+  dispatch(server$roomsInit(user.id));
+  dispatch(toUser$Client(user.id, chatInit(getState().get('chat'))));
+
+  dispatch(toUser$Client(user.id, loginUser({user: user.toClient(), redirect, online, game: clientGame})));
   dispatch(Object.assign(onlineUpdate(user.toOthers().toClient()),
     {meta: {clientOnly: true, users: true}}));
 };
@@ -176,8 +181,6 @@ export const authServerToClient = {
     dispatch(loginUser({
       user: user
       , online: Map(online).map(u => new UserModel(u).toOthers())
-      , rooms: Map(rooms).map(r => RoomModel.fromJS(r))
-      , roomId
       , game: GameModelClient.fromServer(game, user.id)
     }));
     dispatch(redirectTo(redirect || '/'));

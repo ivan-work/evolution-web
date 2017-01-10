@@ -391,9 +391,8 @@ const gameEnd = (gameId, game) => ({
 });
 
 export const gameClientToServer = {
-  gameCreateRequest: ({roomId, seed = null}, meta) => (dispatch, getState) => {
+  gameCreateRequest: ({roomId, seed = null}, {userId}) => (dispatch, getState) => {
     if (process.env.NODE_ENV === 'production') seed = null;
-    const userId = meta.user.id;
     const room = getState().getIn(['rooms', roomId]);
     checkComboRoomCanStart(room, userId);
 
@@ -403,7 +402,7 @@ export const gameClientToServer = {
 
     dispatch(server$gameCreateSuccess(game));
   }
-  , gameReadyRequest: ({gameId, ready}, {user: {id: userId}}) => (dispatch, getState) => {
+  , gameReadyRequest: ({gameId, ready}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
@@ -423,14 +422,14 @@ export const gameClientToServer = {
       });
     }
   }
-  , gameEndTurnRequest: ({gameId}, {user: {id: userId}}) => (dispatch, getState) => {
+  , gameEndTurnRequest: ({gameId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
     checkPlayerTurnAndPhase(game, userId);
     dispatch(server$gameEndTurn(gameId, userId));
   }
-  , gameDeployAnimalRequest: ({gameId, cardId, animalPosition = 0}, {user: {id: userId}}) => (dispatch, getState) => {
+  , gameDeployAnimalRequest: ({gameId, cardId, animalPosition = 0}, {userId}) => (dispatch, getState) => {
     // console.time('gameDeployAnimalRequest body');
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
@@ -449,8 +448,7 @@ export const gameClientToServer = {
     dispatch(server$gameDeployNext(gameId, userId));
     // console.timeEnd('server$gameDeployNext');
   }
-  , gameDeployTraitRequest: ({gameId, cardId, animalId, alternateTrait, linkId}, {user}) => (dispatch, getState) => {
-    const userId = user.id;
+  , gameDeployTraitRequest: ({gameId, cardId, animalId, alternateTrait, linkId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);

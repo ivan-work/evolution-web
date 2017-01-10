@@ -12,7 +12,7 @@ import {gameGiveCards} from '../../shared/actions/actions';
 
 export const DevTools = createDevTools(
   <DockMonitor toggleVisibilityKey="ctrl-h" changePositionKey="ctrl-q" changeMonitorKey="ctrl-m">
-    <Dispatcher initEmpty={true} actionCreators={{
+    {/*<Dispatcher initEmpty={true} actionCreators={{
       gameGiveCards: (count) => (dispatch, getState) => {
         const gameId = getState().getIn(['game', 'id']);
         const userId = getState().getIn(['user', 'id']);
@@ -24,7 +24,7 @@ export const DevTools = createDevTools(
         const userId = players.toList().get(Math.floor(Math.random() * players.size)).id;
         dispatch(gameGiveCards(gameId, userId, CardModel.generate(count, CardCamouflage.type)));
       }
-    }}/>
+    }}/>*/}
     <LogMonitor/>
   </DockMonitor>
 );

@@ -1,4 +1,5 @@
 @import "variables";
+
 $CURRENT_TURN_BACKGROUND: #dfd;
 
 .draggable.canDrag {
@@ -37,9 +38,21 @@ $CURRENT_TURN_BACKGROUND: #dfd;
 }
 
 .GameUI {
-  width: 120px;
+  max-width: 160px;
+  display: flex;
+  flex: 1;
+  flex-flow: column nowrap;
   padding: .5em 1em 0;
   border-right: 1px solid #ccc;
+  .Chat {
+    display: flex;
+    flex: 1;
+    flex-flow: column nowrap;
+    .ChatWindow {
+      flex: 1;
+      max-height: none;
+    }
+  }
 }
 
 .Game {

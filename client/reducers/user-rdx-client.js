@@ -1,6 +1,4 @@
 import {createReducer} from '~/shared/utils';
-//import {pushState} from 'redux-router';
-//import jwtDecode from 'jwt-decode';
 import {Map, fromJS} from 'immutable';
 import {UserModel} from '../../shared/models/UserModel';
 
@@ -29,7 +27,8 @@ export const reducer = createReducer(getInitialUser(), {
     (process.env.NODE_ENV === 'production'
       ? window.localStorage
       : window.sessionStorage).setItem('user', JSON.stringify(user));
-    return user;
+    return UserModel.fromJS(user);
   }
-  , loginUserFailure: (state, data) => null
+  , loginUserFailure: (user, data) => null
+  , chatMessageUser: (user, {message}) => user.update('chat', chat => chat.receiveMessage(message))
 });

@@ -4,6 +4,7 @@ export * from './game';
 export * from './trait';
 export * from './debug';
 export * from './generic';
+export * from './chat';
 export {rqActionAsk} from '../utils/reduxQuestion';
 
 import {rqClientToServer} from '../utils/reduxQuestion';
@@ -20,6 +21,8 @@ import {traitClientToServer} from './trait';
 import {traitServerToClient} from './trait';
 import {debugClientToServer} from './debug';
 import {debugServerToClient} from './debug';
+import {chatClientToServer} from './chat';
+import {chatServerToClient} from './chat';
 
 export const clientToServer = Object.assign({}
   , genericServerToClient
@@ -29,6 +32,7 @@ export const clientToServer = Object.assign({}
   , gameClientToServer
   , traitClientToServer
   , debugClientToServer
+  , chatClientToServer
   , {$unprotected: []}
 );
 
@@ -40,4 +44,5 @@ export const serverToClient = Object.assign({}
   , gameServerToClient
   , traitServerToClient
   , debugServerToClient
+  , chatServerToClient
 );

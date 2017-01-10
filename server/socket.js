@@ -1,8 +1,11 @@
 import logger from '~/shared/utils/logger';
 import io from 'socket.io';
+import jwt from 'jsonwebtoken';
 import {socketConnect, server$socketDisconnect, clientToServer, actionError} from '../shared/actions/actions'
 
 export const socketServer = (server, options) => io(server, {});
+
+const UNPROTECTED = ['loginUserFormRequest', 'loginUserTokenRequest'];
 
 export const socketStore = (serverSocket, store) => {
   serverSocket.on('connect', (socket) => {
@@ -17,15 +20,20 @@ export const socketStore = (serverSocket, store) => {
 
     socket.on('action', (action) => {
       logger.silly('Server Recv:', action.type, action.data);
-      if (!clientToServer.$unprotected) {
-
-      }
       if (clientToServer[action.type]) {
-        //console.log('action.meta', action.meta)
-        const result = store.dispatch(clientToServer[action.type](action.data, {
-          connectionId: socket.id
-          , ...action.meta
-        }));
+        const meta = {connectionId: socket.id}
+        if (!~UNPROTECTED.indexOf(action.type)) {
+          try {
+            const decodedUser = jwt.decode(action.meta.token, process.env.JWT_SECRET);
+            if (!decodedUser.id) throw new Error(action.meta.token);
+            meta.userId = decodedUser.id;
+          } catch (err) {
+            logger.warn('token is not valid', err);
+            // TODO unlogin user
+            return;
+          }
+        }
+        const result = store.dispatch(clientToServer[action.type](action.data, meta));
         if (result instanceof Error) {
           socket.emit('action', actionError({
             name: result.name
@@ -61,12 +69,12 @@ export const socketMiddleware = io => store => next => action => {
       sockets = state.get('users').map(user => user.connectionId).toArray();
     } else if (action.meta.socketId) {
       sockets = [action.meta.socketId];
-    //} else if (action.meta.clients === true) {
-    //  sockets = stateConnections.toArray();
+      //} else if (action.meta.clients === true) {
+      //  sockets = stateConnections.toArray();
     } else if (action.meta.userId) {
       sockets = [store.getState().getIn(['users', action.meta.userId, 'connectionId'])];
     } else {
-      logger.error('Meta not valid', action.type, action.meta, '|');
+      logger.error('Meta not valid:', action.type, action.meta, '|');
     }
     //console.log('Server:Send', action.type, action.meta, sockets);
     sockets

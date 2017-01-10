@@ -10,7 +10,7 @@ export const socketMiddleware = socket => store => next => action => {
   if (action.meta && action.meta.server) {
     //const clientId = store.getState().get('clientId');
     //socket.emit('action', objectAssign({}, action, {clientId}));
-    action.meta.user = store.getState().get('user');
+    action.meta.token = store.getState().getIn(['user', 'token']);
     logger.silly('Client Send:', action.type);
     socket.emit('action', action);
   }

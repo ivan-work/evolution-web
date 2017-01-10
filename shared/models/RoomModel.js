@@ -1,6 +1,7 @@
 import {Record, List} from 'immutable';
 import uuid from 'uuid';
 import {SettingsRecord} from './game/GameSettings';
+import {ChatModel} from './ChatModel';
 
 import {passesChecks} from '../actions/checks';
 import {checkComboRoomCanStart} from '../actions/rooms.checks';
@@ -12,6 +13,7 @@ export class RoomModel extends Record({
   , users: List()
   , gameId: null
   , banlist: List()
+  , chat: ChatModel.new()
 }) {
   static fromJS(js) {
     return js == null
@@ -21,6 +23,7 @@ export class RoomModel extends Record({
       , users: List(js.users)
       , settings: SettingsRecord.fromJS(js.settings)
       , banlist: List(js.banlist)
+      , chat: ChatModel.fromJS(js.chat)
     });
   }
 
@@ -28,14 +31,20 @@ export class RoomModel extends Record({
     const id = uuid.v4()
     return new RoomModel({
       id: id
-      , name: "Room " + id
+      , name: 'Room ' + id
       , users: List()
     })
   }
 
+  toClient() {
+    return this;
+  }
+
+  toOthers() {
+    return this.remove('chat');
+  }
+
   checkCanStart(userId) {
-    return passesChecks(() => {
-      checkComboRoomCanStart(this, userId);
-    });
+    return passesChecks(() => checkComboRoomCanStart(this, userId));
   }
 }
