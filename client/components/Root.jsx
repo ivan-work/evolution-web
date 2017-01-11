@@ -9,7 +9,7 @@ import makeRoutes from '../routes/index.jsx';
 export class Root extends React.Component {
   constructor(props) {
     super(props);
-    this.routes = makeRoutes(props.store.getState);
+    this.routes = makeRoutes(props.store);
   }
 
   render() {

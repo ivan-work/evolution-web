@@ -1,5 +1,4 @@
 import React from 'react';
-import {GAME_POSITIONS} from './GAME_POSITIONS';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {Button} from 'react-mdl';
 import cn from 'classnames';

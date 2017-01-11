@@ -28,6 +28,7 @@ export const StatusRecord = Record({
   , roundPlayer: 0
   , phase: PHASE.PREPARE
   , turnTime: null
+  , started: false
 });
 
 export const QuestionRecord = Record({
@@ -59,8 +60,8 @@ const GameModelData = {
   , roomId: null
   , deck: null
   , players: OrderedMap()
+  , observers: List()
   , food: -1
-  , started: false
   , status: new StatusRecord()
   , cooldowns: CooldownList.new()
   , question: null

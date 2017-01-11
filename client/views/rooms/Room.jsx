@@ -11,6 +11,7 @@ import {Portal} from './../utils/Portal.jsx';
 import RoomControlGroup from './RoomControlGroup.jsx';
 import RoomSettings from './RoomSettings.jsx';
 
+import {redirectTo} from '~/shared/utils'
 import {roomEditSettingsRequest} from '../../../shared/actions/actions';
 
 export class Room extends Component {
@@ -25,9 +26,9 @@ export class Room extends Component {
   }
 
   render() {
-    const {room, userId} = this.props;
+    const {room, roomId, userId} = this.props;
 
-    if (!room) return null;
+    if (!room) return <div>Error! <a onClick={this.props.$goHome}>go back</a></div>;
 
     return (<div className='Room'>
       <Portal target='header'>
@@ -58,17 +59,20 @@ export class Room extends Component {
 }
 
 export const RoomView = connect(
-  (state) => {
+  (state, props) => {
     const roomId = state.get('room');
+    //if (!roomId) throw new Error('Room ID is invalid');
     return {
-      room: state.getIn(['rooms', roomId])
+      roomId
+      , room: state.getIn(['rooms', roomId])
       , userId: state.getIn(['user', 'id'])
       , online: state.get('online')
     }
   }
   , (dispatch) => ({
     $roomEditSettings: (settings) => dispatch(roomEditSettingsRequest(settings))
+    , $goHome: () => dispatch(redirectTo('/'))
   })
-)((props) => !props.room ? null : <Room {...props}/>);
+)(Room);
 
 export default RoomView;
