@@ -29,6 +29,11 @@ export const reducer = createReducer(getInitialUser(), {
       : window.sessionStorage).setItem('user', JSON.stringify(user));
     return UserModel.fromJS(user);
   }
-  , loginUserFailure: (user, data) => null
+  , loginUserFailure: (user, data) => {
+    (process.env.NODE_ENV === 'production'
+      ? window.localStorage
+      : window.sessionStorage).removeItem('user');
+    return null;
+  }
   , chatMessageUser: (user, {message}) => user.update('chat', chat => chat.receiveMessage(message))
 });

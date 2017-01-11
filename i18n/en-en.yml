@@ -14,6 +14,7 @@ App:
     Greeting: Hello
     Rooms: Rooms
     $Create: Create
+    $Watch: watch
   Room:
     Room: Room
     Settings:
@@ -21,6 +22,9 @@ App:
       maxPlayers: Max players
       timeTurn: Turn time
       timeTraitResponse: Attack response time
+    Spectators: Spectators
+    $Spectate: To spectators
+    $Play: To players
     $Edit: Edit
     $Back: Back
     $Exit: Exit

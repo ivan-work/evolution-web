@@ -5,8 +5,13 @@ export const selectRoom = (getState, roomId) => getState().getIn(['rooms', roomI
 export const selectGame = (getState, gameId) =>
   getState().getIn(['games', gameId]);
 
-export const selectPlayers4Sockets = (getState, gameId) =>
-  getState().getIn(['games', gameId, 'players']).filter(p => p.playing).keySeq().toArray();
+export const selectPlayers4Sockets = (getState, gameId) => {
+  const roomId = getState().getIn(['games', gameId, 'roomId']);
+  return [].concat(
+    getState().getIn(['rooms', roomId, 'users']).valueSeq().toArray()
+    , getState().getIn(['rooms', roomId, 'spectators']).valueSeq().toArray()
+  );
+};
 
 export const selectPlayer = (getState, gameId, user) =>
   selectGame(getState, gameId).getPlayer(user);

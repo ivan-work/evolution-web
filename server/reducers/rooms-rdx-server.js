@@ -7,8 +7,13 @@ export const roomCreate = (state, {room}) => state.set(room.id, room);
 export const roomJoin = (state, {roomId, userId}) => state.update(roomId, (room) =>
   room.update('users', (users) => users.push(userId)));
 
-export const roomExit = (state, {roomId, userId}) => state.update(roomId, (room) =>
-  room.update('users', (users) => users.remove(users.indexOf(userId))));
+export const roomSpectate = (state, {roomId, userId}) => state.update(roomId, (room) =>
+  room.update('spectators', (spectators) => spectators.push(userId)));
+
+export const roomExit = (state, {roomId, userId}) => state.update(roomId, (room) => room
+  .update('users', users => users.filterNot(u => u === userId))
+  .update('spectators', spectators => spectators.filterNot(u => u === userId))
+);
 
 export const roomDestroy = (state, {roomId, userId}) => state.remove(roomId);
 
@@ -30,6 +35,7 @@ export const chatMessageRoom = (rooms, {message}) => rooms.updateIn([message.to,
 export const reducer = createReducer(Map(), {
   roomCreate
   , roomJoin
+  , roomSpectate
   , roomExit
   , roomDestroy
   , roomBan

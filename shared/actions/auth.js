@@ -67,13 +67,6 @@ export const loginUserFailure = (error) => ({
   , data: {error}
 });
 
-export const client$loginUserFailure = (error) => (dispatch, getState) => {
-  dispatch(loginUserFailure(error));
-  let previousLocation = getState().getIn(['routing', 'locationBeforeTransitions', 'pathname'], '/');
-  if (previousLocation === '/login') previousLocation = '/';
-  dispatch(redirectTo('/login?redirect=' + previousLocation));
-};
-
 export const onlineUpdate = (user) => ({
   type: 'onlineUpdate'
   , data: {user}
@@ -192,8 +185,17 @@ export const authServerToClient = {
     }));
     dispatch(redirectTo(redirect || '/'));
   }
-  , loginUserFailure: ({error}) => client$loginUserFailure(error)
+  , loginUserFailure: ({error}) => (dispatch, getState) => {
+    dispatch(loginUserFailure(error));
+    redirectToLogin(getState, (location) => dispatch(redirectTo(location)));
+  }
   , onlineUpdate: ({user}) => onlineUpdate(UserModel.fromJS(user).toOthers())
   , logoutUser: ({userId}) => logoutUser(userId)
   , socketConnect: ({connectionId}) => socketConnect(connectionId)
+};
+
+export const redirectToLogin = (getState, redirectTo) => {
+  let previousLocation = getState().getIn(['routing', 'locationBeforeTransitions', 'pathname'], '/');
+  if (previousLocation !== '/login')
+    redirectTo('/login?redirect=' + previousLocation);
 };

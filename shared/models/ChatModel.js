@@ -30,7 +30,7 @@ export class ChatModel extends Record({
     return !js
       ? null
       : new ChatModel({
-      messages: List(js.messages).map(m => MessageModel.fromJS(m))
+      messages: List(js.messages).map(MessageModel.fromJS)
     })
   }
 

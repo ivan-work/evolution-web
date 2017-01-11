@@ -3,6 +3,7 @@ import {Map} from 'immutable';
 
 import {RoomModel} from '../models/RoomModel';
 import {SettingsRules} from '../models/game/GameSettings';
+import {ActionCheckError} from '../models/ActionCheckError';
 
 import {server$gameLeave} from './game';
 import {toUser$Client} from './generic';
@@ -14,20 +15,23 @@ const selectClientRoomId = (getState) => getState().get('room');
 
 import {
   checkSelectRoom
-  , checkComboRoomCanStart
   , checkRoomMaxSize
   , checkRoomIsNotInGame
   , checkUserInRoom
   , checkUserNotInRoom
+  , checkUserNotSpectatingRoom
   , checkUserIsHost
   , checkValidate
   , checkUserBanned
   , checkUserNotBanned
 } from './rooms.checks';
 
+const findRoomByUser = (getState, userId) => getState().get('rooms').find(room => !!~room.users.indexOf(userId) || !!~room.spectators.indexOf(userId));
+
 /**
  * Init
  * */
+
 const roomsInit = (roomId, rooms) => ({
   type: 'roomsInit'
   , data: {roomId, rooms}
@@ -35,13 +39,15 @@ const roomsInit = (roomId, rooms) => ({
 
 export const server$roomsInit = (userId) => (dispatch, getState) => {
   const rooms = getState().get('rooms');
-  const room = rooms.find(room => ~room.users.indexOf(userId));
+  const room = findRoomByUser(getState, userId);
   const roomId = !!room && room.id || null;
   const roomsClient = rooms.map(r => r.id === roomId ? r.toClient() : r.toOthers().toClient());
   dispatch(toUser$Client(userId, roomsInit(roomId, roomsClient)))
 };
 
-// Create
+/**
+ * Create
+ */
 
 export const roomCreateRequest = () => ({
   type: 'roomCreateRequest'
@@ -57,17 +63,21 @@ const roomCreate = (room) => ({
 export const server$roomCreate = (room) => (dispatch, getState) => dispatch(Object.assign(roomCreate(room.toClient().toOthers())
   , {meta: {users: true}}));
 
-// Join
+/**
+ * Join
+ */
 
-export const roomJoinRequest = (roomId) => (dispatch, getState) => {
-  (getState().get('room') === roomId
+export const roomJoinRequestSoft = (roomId) => (dispatch, getState) => (
+  getState().get('room') === roomId
     ? dispatch(redirectTo(`/room/${roomId}`))
-    : dispatch({
-    type: 'roomJoinRequest'
-    , data: {roomId}
-    , meta: {server: true}
-  }));
-};
+    : dispatch(roomJoinRequest(roomId))
+);
+
+export const roomJoinRequest = (roomId) => ({
+  type: 'roomJoinRequest'
+  , data: {roomId}
+  , meta: {server: true}
+});
 
 const roomJoin = (roomId, userId) => ({
   type: 'roomJoin'
@@ -83,14 +93,43 @@ export const server$roomJoin = (roomId, userId) => (dispatch, getState) => {
   const room = checkSelectRoom(getState, roomId);
   checkUserNotInRoom(room, userId);
   checkRoomMaxSize(room, true);
-  const previousRoom = getState().get('rooms').find(room => room.users.some(uid => uid === userId));
-  if (previousRoom) {
-    dispatch(server$roomExit(previousRoom.id, userId));
-  }
+  const previousRoom = findRoomByUser(getState, userId);
+  if (previousRoom)
+  // If user has previous room and it's not the same:
+    if (previousRoom.id !== roomId) dispatch(server$roomExit(previousRoom.id, userId));
+    // If user has same previous room, but not in spectators:
+    else if (!~previousRoom.users.indexOf(userId)) dispatch(server$roomExit(previousRoom.id, userId, false));
+    else throw new ActionCheckError('User already in users');
   dispatch(roomJoin(roomId, userId));
-  dispatch(Object.assign(roomJoinSelf(roomId, userId, room.toClient()), {clientOnly: true, meta: {userId}}));
   dispatch(Object.assign(roomJoin(roomId, userId), {meta: {clientOnly: true, users: true}}));
+  dispatch(Object.assign(roomJoinSelf(roomId, userId, selectRoom(getState, roomId).toClient()), {clientOnly: true, meta: {userId}}));
 };
+
+/**
+ * Spectate
+ */
+
+export const roomSpectateRequestSoft = (roomId) => (dispatch, getState) => (
+  getState().get('room') === roomId
+    ? dispatch(redirectTo(`/room/${roomId}`))
+    : dispatch(roomSpectateRequest(roomId))
+);
+
+export const roomSpectateRequest = (roomId) => ({
+  type: 'roomSpectateRequest'
+  , data: {roomId}
+  , meta: {server: true}
+});
+
+const roomSpectate = (roomId, userId) => ({
+  type: 'roomSpectate'
+  , data: {roomId, userId}
+});
+
+const roomSpectateSelf = (roomId, userId, room) => ({
+  type: 'roomSpectateSelf'
+  , data: {roomId, userId, room}
+});
 
 // Exit
 
@@ -110,16 +149,14 @@ const roomExitSelf = (roomId, userId) => ({
   , data: {roomId, userId}
 });
 
-export const server$roomExit = (roomId, userId) => (dispatch, getState) => {
+export const server$roomExit = (roomId, userId, checkForDestroy = true) => (dispatch, getState) => {
   //logger.debug('server$roomExit:', roomId, userId);
   const room = selectRoom(getState, roomId);
   dispatch(Object.assign(roomExit(roomId, userId), {meta: {users: true}}));
-  if (room && room.gameId) {
+  if (room && room.gameId)
     dispatch(server$gameLeave(room.gameId, userId));
-  }
-  if (selectRoom(getState, roomId).users.size === 0) {
+  if (checkForDestroy && selectRoom(getState, roomId).users.size + selectRoom(getState, roomId).spectators.size === 0)
     dispatch(server$roomDestroy(roomId));
-  }
 };
 
 // Destroy
@@ -221,16 +258,33 @@ export const roomsClientToServer = {
     checkUserNotBanned(room, userId);
     dispatch(server$roomJoin(roomId, userId));
   }
+  , roomSpectateRequest: ({roomId}, {userId}) => (dispatch, getState) => {
+    const room = checkSelectRoom(getState, roomId);
+    checkUserNotSpectatingRoom(room, userId);
+    checkUserNotBanned(room, userId);
+    const previousRoom = findRoomByUser(getState, userId);
+
+    if (previousRoom)
+    // If user has previous room and it's not the same:
+      if (previousRoom.id !== roomId) dispatch(server$roomExit(previousRoom.id, userId));
+      // If user has same previous room, but not in spectators:
+      else if (!~previousRoom.spectators.indexOf(userId)) dispatch(server$roomExit(previousRoom.id, userId, false));
+      else throw new ActionCheckError('User already in spectators');
+
+    dispatch(roomSpectate(roomId, userId));
+    dispatch(Object.assign(roomSpectate(roomId, userId), {meta: {clientOnly: true, users: true}}));
+    dispatch(Object.assign(roomSpectateSelf(roomId, userId, selectRoom(getState, roomId).toClient()), {clientOnly: true, meta: {userId}}));
+  }
   , roomExitRequest: ({roomId}, {userId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
-    checkUserInRoom(room, userId);
+    if (!~room.users.indexOf(userId) && !~room.spectators.indexOf(userId))
+      throw new ActionCheckError('checkUserInRoom', 'Room(%s) doesnt have User(%s)', room.id, userId);
     dispatch(server$roomExit(roomId, userId));
   }
   , roomEditSettingsRequest: ({roomId, settings}, {userId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
-    checkUserInRoom(room, userId);
-    checkRoomIsNotInGame(room);
     checkUserIsHost(room, userId);
+    checkRoomIsNotInGame(room);
     checkValidate(settings, SettingsRules);
     settings.timeTurn *= 60000;
     settings.timeTraitResponse *= 60000;
@@ -238,16 +292,16 @@ export const roomsClientToServer = {
   }
   , roomKickRequest: ({roomId, userId}, {userId: hostId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
+    checkUserIsHost(room, hostId);
     checkUserInRoom(room, userId);
     checkRoomIsNotInGame(room);
-    checkUserIsHost(room, hostId);
     dispatch(server$roomKick(roomId, userId));
   }
   , roomBanRequest: ({roomId, userId}, {userId: hostId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
+    checkUserIsHost(room, hostId);
     checkUserInRoom(room, userId);
     checkRoomIsNotInGame(room);
-    checkUserIsHost(room, hostId);
     checkUserNotBanned(room, userId);
     dispatch(server$roomBan(roomId, userId));
   }
@@ -267,6 +321,11 @@ export const roomsServerToClient = {
   , roomJoin: ({roomId, userId}) => roomJoin(roomId, userId)
   , roomJoinSelf: ({roomId, userId, room}, currentUserId) => (dispatch, getState) => {
     dispatch(roomJoinSelf(roomId, userId, RoomModel.fromJS(room)));
+    dispatch(redirectTo(`/room/${roomId}`));
+  }
+  , roomSpectate: ({roomId, userId}) => roomSpectate(roomId, userId)
+  , roomSpectateSelf: ({roomId, userId, room}, currentUserId) => (dispatch, getState) => {
+    dispatch(roomSpectateSelf(roomId, userId, RoomModel.fromJS(room)));
     dispatch(redirectTo(`/room/${roomId}`));
   }
   , roomExit: ({roomId, userId}, currentUserId) => (dispatch, getState) => {

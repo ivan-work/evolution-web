@@ -1,4 +1,4 @@
-import {Record, List} from 'immutable';
+import {Record, List, Map} from 'immutable';
 import uuid from 'uuid';
 import {SettingsRecord} from './game/GameSettings';
 import {ChatModel} from './ChatModel';
@@ -6,27 +6,12 @@ import {ChatModel} from './ChatModel';
 import {passesChecks} from '../actions/checks';
 import {checkComboRoomCanStart} from '../actions/rooms.checks';
 
-export class RoomUser extends Record({
-  id: null
-  , name: null
-  , isObserver: false
-}) {
-  static new(user) {
-    return new RoomUser({id: user.id, name: user.login})
-  }
-
-  static fromJS(js) {
-    return js == null
-      ? null
-      : new RoomUser(js);
-  }
-}
-
 export class RoomModel extends Record({
   id: null
   , name: null
   , settings: new SettingsRecord()
   , users: List()
+  , spectators: List()
   , gameId: null
   , banlist: List()
   , chat: ChatModel.new()
@@ -37,6 +22,7 @@ export class RoomModel extends Record({
       : new RoomModel({
       ...js
       , users: List(js.users)
+      , spectators: List(js.spectators)
       , settings: SettingsRecord.fromJS(js.settings)
       , banlist: List(js.banlist)
       , chat: ChatModel.fromJS(js.chat)
