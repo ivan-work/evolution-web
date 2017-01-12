@@ -520,7 +520,11 @@ export const gameClientToServer = {
 // gameServerToClient
 
 export const gameServerToClient = {
-  gameInit: ({game, userId}, currentUserId) => gameInit(GameModelClient.fromServer(game, userId))
+  gameInit: ({game, userId}, currentUserId) => (dispatch) => {
+    dispatch(gameInit(GameModelClient.fromServer(game, userId)));
+    dispatch(redirectTo('/game'));
+  }
+  
   , gameCreateSuccess: (({game}, currentUserId) => (dispatch) => {
     dispatch(gameCreateSuccess(GameModelClient.fromServer(game, currentUserId)));
     dispatch(redirectTo('/game'));
@@ -539,6 +543,7 @@ export const gameServerToClient = {
   , gameNextPlayer: ({gameId, nextPlayerIndex, roundChanged, turnTime}) =>
     gameNextPlayer(gameId, nextPlayerIndex, roundChanged, turnTime)
   , gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
+  , gameDestroy: ({gameId}) => gameDestroy(gameId)
   , gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
   , gamePlayerLeft: ({gameId, userId}, currentUserId) => (dispatch, getState) => {
     dispatch(gamePlayerLeftNotification(gameId, userId));

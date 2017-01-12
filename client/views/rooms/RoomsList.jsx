@@ -33,7 +33,7 @@ export class RoomsList extends React.Component {
         <span>
           <a disabled={room.gameId !== null} href="#" onClick={() => $roomJoin(room.id)}>{room.name}</a>
           (<a href="#" onClick={() => $roomSpectate(room.id)}>{T.translate('App.Rooms.$Watch')}</a>)
-          &nbsp;({room.users.size}/{room.settings.maxPlayers})
+          &nbsp;({room.users.size}/{room.settings.maxPlayers}) {room.spectators.size > 0 && '+' + room.spectators.size}
         </span>
       </ListItem>)}
     </List>;
