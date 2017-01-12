@@ -213,7 +213,7 @@ export class GameModelClient extends Record({
   }
 
   isPlayerTurn(userId) {
-    return this.getPlayer(userId).index === this.status.currentPlayer
+    return (userId || this.userId) && this.getPlayer(userId).index === this.status.currentPlayer
       && (this.status.phase === PHASE.DEPLOY || this.status.phase === PHASE.FEEDING);
   }
 

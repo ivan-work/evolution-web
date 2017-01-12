@@ -26,7 +26,7 @@ export default class GamePlayers extends Component {
 
   render() {
     const {game} = this.props;
-    const player = game.getPlayer();
+    const playerIndex = game.getPlayer() && game.getPlayer().index;
     const {width, height} = this.state.dimensions;
 
     const angleInitial = 0;
@@ -34,7 +34,7 @@ export default class GamePlayers extends Component {
     return (<Measure onMeasure={(dimensions) => this.setState({dimensions})}>
       <div className='GamePlayers'>
         {/*JSON.stringify({width, height})*/}
-        {GameModel.sortPlayersFromIndex(game, player.index)
+        {GameModel.sortPlayersFromIndex(game, playerIndex)
           .map((player, index) => {
           const angle = angleInitial + anglePerPlayer * index;
           const length = (width * height) / (Math.sqrt(Math.pow(width*Math.cos(angle), 2) + Math.pow(height*Math.sin(angle),2))) / 2 - 60;

@@ -47,7 +47,7 @@ export class Chat extends React.Component {
   }
 
   onMessageSend(e) {
-    if (e.keyCode === 13) {
+    if (e.keyCode === 13 && this.state.message.trim().length > 0) {
       const {chatTargetType, roomId} = this.props;
       this.props.$chatMessage(roomId, chatTargetType, this.state.message);
       this.setState({message: ''})
@@ -81,6 +81,7 @@ export class Chat extends React.Component {
           label={T.translate('App.Chat.EnterMessage')}
           placeholder={T.translate('App.Chat.EnterMessage')}
           value={this.state.message}
+          maxLength={127}
           onChange={({target}) => this.onMessageChange(target.value)}
           onKeyUp={this.onMessageSend}/>
       </div>

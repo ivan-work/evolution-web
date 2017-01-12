@@ -1,3 +1,4 @@
+import {loggerChat} from '~/shared/utils/logger';
 import {to$} from './generic';
 
 import {ChatModel, MessageModel, CHAT_TARGET_TYPE} from '../models/ChatModel';
@@ -46,8 +47,8 @@ export const chatClientToServer = {
   chatMessageRequest: ({to, toType, text}, {userId}) => (dispatch, getState) => {
     const validText = text
       .trim()
-      .replace(CHAT_WHITELIST_REGEX, '')
-      .slice(0, 100);
+      // .replace(CHAT_WHITELIST_REGEX, '')
+      .slice(0, 127);
     if (validText.length === 0) {
       throw new ActionCheckError('chatMessageRequest not valid');
     }
@@ -55,6 +56,7 @@ export const chatClientToServer = {
       timestamp: Date.now(), to, toType, from: userId, text: validText
       , fromLogin: getState().getIn(['users', userId, 'login'], 'unknown')
     });
+    loggerChat.info(`${message.fromLogin}: ${message.text}`, {type: toType, toString: () => toType});
     switch (toType) {
       case CHAT_TARGET_TYPE.GLOBAL:
         dispatch(to$({users: true}, chatMessageGlobal(message)));

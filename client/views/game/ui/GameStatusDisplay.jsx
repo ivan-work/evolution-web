@@ -1,12 +1,10 @@
 import React, {Component, PropTypes} from 'react';
 import T from 'i18n-react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
-import IPT from 'react-immutable-proptypes';
 
 import {GameModelClient, PHASE} from '../../../../shared/models/game/GameModel';
-import {PlayerModel} from '../../../../shared/models/game/PlayerModel';
 
-import {UserServicePropType} from '../../../services/UserService'
+import UserView from '../../utils/User.jsx'
 
 import {Timer} from '../../utils/Timer.jsx';
 
@@ -15,22 +13,14 @@ export class GameStatusDisplay extends Component {
     game: PropTypes.instanceOf(GameModelClient).isRequired
   };
 
-  static contextTypes = {
-    userService: UserServicePropType
-  };
-
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
   }
 
   getPlayerNameByIndex(players, index) {
-    const {userService} = this.context;
-    const player = players.find(player => player.index === index);
-    return (player && player.id && userService.get(player.id) && userService.get(player.id).login
-      ? userService.get(player.id).login
-      : '---'
-    );
+    const playerId = players.findKey(player => player.index === index);
+    return <UserView id={playerId} output='name'/>;
   }
 
   render() {

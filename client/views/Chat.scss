@@ -1,15 +1,19 @@
-.ChatWindow {
-  min-height: 10em;
-  max-height: 40em;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-.ChatTime {
-  font-size: .7em;
-  vertical-align: top;
-  color: #999;
-  line-height: .8em;
-}
-.ChatMessage {
-  margin-bottom: .3em;
+.Chat {
+  font-size: 0.85em;
+  //line-height: 1.3em;
+  .ChatWindow {
+    min-height: 10em;
+    max-height: 40em;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .ChatTime {
+    font-size: 8px;
+    vertical-align: top;
+    color: #999;
+    line-height: .8em;
+  }
+  .ChatMessage {
+    margin-bottom: .3em;
+  }
 }

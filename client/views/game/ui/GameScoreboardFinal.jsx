@@ -1,13 +1,14 @@
 import React, {Component} from 'react';
+import T from 'i18n-react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import * as MDL from 'react-mdl';
-import {connect} from 'react-redux';
+
 import cn from 'classnames';
 
 import {GameModelClient, PHASE} from '../../../../shared/models/game/GameModel';
 import {Dialog, DialogActions} from '../../utils/Dialog.jsx';
 
-import {UserServicePropType} from '../../../services/UserService'
+import UserView from '../../utils/User.jsx'
 
 export default class GameScoreboardFinal extends Component {
   constructor(props) {
@@ -22,7 +23,7 @@ export default class GameScoreboardFinal extends Component {
   };
 
   static contextTypes = {
-    userService: UserServicePropType
+    store: React.PropTypes.object.isRequired
   };
 
   componentDidUpdate() {
@@ -33,31 +34,38 @@ export default class GameScoreboardFinal extends Component {
   }
 
   render() {
+    const {store} = this.context;
     const {game} = this.props;
-    const {userService} = this.context;
 
     return <span>
       {game.status.phase === PHASE.FINAL
-        ? <MDL.Button className="ShowScoreboardFinal"
-                      onClick={() => this.setState({show: true})}>Scores</MDL.Button>
-        : null}
+      && <MDL.Button className="ShowScoreboardFinal"
+                     onClick={() => this.setState({show: true})}>
+        {T.translate('Game.UI.Scores.Label')}
+      </MDL.Button>
+      }
       <Dialog show={this.state.show}>
-        <MDL.DialogTitle>{game.winnerId === game.getPlayer().id ? 'You won :)' : 'You lost :('}</MDL.DialogTitle>
+        <MDL.DialogTitle>
+          {T.translate('Game.UI.Scores.Winner')}: <strong><UserView store={store} id={game.winnerId} output='name'/></strong>
+        </MDL.DialogTitle>
         <MDL.DialogContent>
-          <table>
+          {game.scoreboardFinal && <table className='mdl-data-table'>
             <tbody>
             <tr>
-              <th>Player</th>
-              <th>Score</th>
+              <th className='mdl-data-table__cell--non-numeric'>{T.translate('Game.UI.Scores.TablePlayer')}</th>
+              <th>{T.translate('Game.UI.Scores.TableScoreNormal')}</th>
+              <th>{T.translate('Game.UI.Scores.TableScoreDead')}</th>
             </tr>
-            {game.scoreboardFinal && game.scoreboardFinal.map(({playerId, score}) =>
-            <tr key={playerId}
-                className={cn({'bold': game.getPlayer().id === playerId})}>
-              <td>{userService.get(playerId) ? userService.get(playerId).login : '---'}</td>
-              <td>{score}</td>
-            </tr>)}
+            {game.scoreboardFinal.map(({playerId, score, scoreDead}) =>
+              <tr key={playerId}
+                  className={cn({'bold': game.winnerId === playerId})}>
+                <td className='mdl-data-table__cell--non-numeric'><UserView store={store} id={playerId} output='name'/></td>
+                <td>{score}</td>
+                <td>{scoreDead || T.translate('App.TBD')}</td>
+              </tr>)}
             </tbody>
           </table>
+          }
         </MDL.DialogContent>
         <DialogActions>
           <MDL.Button type='button' raised primary onClick={() => this.setState({show: false})}>OK</MDL.Button>

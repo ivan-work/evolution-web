@@ -1,5 +1,4 @@
 import React, {Component} from 'react'
-import {UserServiceClass, UserServicePropType} from './UserService'
 
 export const ServicesContext = (WrappedComponentClass) => class ServicesContext extends Component {
   static contextTypes = {
@@ -7,12 +6,10 @@ export const ServicesContext = (WrappedComponentClass) => class ServicesContext 
   };
 
   static childContextTypes = {
-    userService: UserServicePropType
   };
 
   getChildContext() {
     return {
-      userService: this.userService
     }
   }
 
@@ -21,7 +18,6 @@ export const ServicesContext = (WrappedComponentClass) => class ServicesContext 
   }
 
   componentWillMount() {
-    this.userService = new UserServiceClass(this.context.store.getState);
   }
 
   render() {

@@ -48,12 +48,15 @@ export class GameWrapper extends React.Component {
   componentDidMount() {
     if (!this.ready && this.props.game) {
       this.ready = true;
-      this.props.gameActions.$ready();
+      console.log(this.props.game.userId);
+      if (this.props.game.userId) {
+        this.props.gameActions.$ready();
+      }
     }
   }
 
   render() {
-    const {game, user, room} = this.props;
+    const {game, user} = this.props;
 
     if (!user || !game || game.status.phase === 0)
       return <div>Loading</div>;
@@ -101,4 +104,4 @@ GameWrapperHOC = connect(
   })
 )(GameWrapperHOC);
 
-export const GameWrapperView = GameWrapperHOC
+export const GameWrapperView = GameWrapperHOC;

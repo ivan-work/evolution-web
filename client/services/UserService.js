@@ -9,6 +9,11 @@ export class UserServiceClass {
   get(userId) {
     return this.getState().getIn(['online', userId]);
   }
-};
+
+  getPlayerName(id) {
+    console.log(id, this.getState().getIn(['online', id, 'login']))
+    return this.getState().getIn(['online', id, 'login'], '---');
+  }
+}
 
 export const UserServicePropType = PropTypes.instanceOf(UserServiceClass).isRequired;
