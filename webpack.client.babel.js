@@ -87,7 +87,7 @@ export default {
       test: /\.(eot|svg|ttf|woff|woff2)$/,
       loader: 'file-loader'
     }, {
-      test: /\.(jpg|png|gif)$/,
+      test: /\.(jpg|png|gif|mp3)$/,
       loader: 'file-loader'
     }, {
       test: /\.html$/,

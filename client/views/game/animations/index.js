@@ -3,9 +3,20 @@ import Velocity from 'velocity-animate'
 
 import {gameGiveCards} from './gameGiveCards';
 
+import notification02 from '../../../assets/sound/notification-02.mp3';
+
 // [actionName]: (done, componentProps, actionData)
 export const createAnimationServiceConfig = () => ({
   animations: ({subscribe, getRef}) => {
+    const audio = new Audio(notification02);
+
+    subscribe('gameNextPlayer', (done, {game}, {nextPlayerIndex, playerHasOptions}) => {
+      if (playerHasOptions && game.getPlayer() && game.getPlayer().index === nextPlayerIndex) {
+        audio.play();
+      }
+      done();
+    });
+
     subscribe('gameGiveCards', (done, {game}, {cards}) =>
       gameGiveCards(done, game, cards, getRef));
 
