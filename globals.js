@@ -2,7 +2,8 @@ import fs from 'fs';
 import uuid from 'uuid';
 
 const originalV4 = uuid.v4;
-uuid.v4 = () => originalV4().slice(0, 4);
+if (process.env.NODE_ENV !== 'production')
+  uuid.v4 = () => originalV4().slice(0, 4);
 
 if (fs.existsSync('.env')) require('dotenv').config();
 
