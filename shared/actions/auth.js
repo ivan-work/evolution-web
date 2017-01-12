@@ -11,7 +11,7 @@ import {ActionCheckError} from '../models/ActionCheckError';
 
 import {to$, toUser$Client} from './generic';
 import {chatInit} from './chat';
-import {server$roomsInit, server$roomExit} from './rooms';
+import {server$roomsInit, server$roomExit, findRoomByUser} from './rooms';
 
 export const SOCKET_DISCONNECT_NOW = 'SOCKET_DISCONNECT_NOW';
 export const TIMEOUT = 120 * 1000;
@@ -96,10 +96,8 @@ const logoutUser = (userId) => ({
 export const server$logoutUser = (userId) => (dispatch, getState) => {
   logger.debug('server$logoutUser', userId);
   const userLogin = getState().getIn(['users', userId, 'login']);
-  const room = getState().get('rooms').find(room => ~room.get('users').indexOf(userId));
-  if (room) {
-    dispatch(server$roomExit(room.id, userId));
-  }
+  const room = findRoomByUser(getState, userId);
+  if (room) dispatch(server$roomExit(room.id, userId));
   loggerOnline.info(`User ${userLogin} left`);
   dispatch(Object.assign(logoutUser(userId)
     , {meta: {users: true}}));
