@@ -164,6 +164,7 @@ export const startCooldown = (game, {link, duration, place, placeId}) =>
 export const gameEnd = (state, {game}) => game.end();
 
 export const gamePlayerLeft = (game, {userId}) => game
+  .setIn(['players', userId, 'hand'], List())
   .setIn(['players', userId, 'playing'], false)
   .setIn(['players', userId, 'ended'], true);
 

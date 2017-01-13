@@ -14,7 +14,7 @@ import {chatInit} from './chat';
 import {server$roomsInit, server$roomExit, findRoomByUser} from './rooms';
 
 export const SOCKET_DISCONNECT_NOW = 'SOCKET_DISCONNECT_NOW';
-export const TIMEOUT = 120 * 1000;
+export const TIMEOUT = 30 * 1000;
 
 export const socketConnect = (connectionId, sendToClient) => ({
   type: 'socketConnect'

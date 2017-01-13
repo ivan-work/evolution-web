@@ -26,10 +26,10 @@ export const App = ServicesContext(PortalsContext(TooltipsContext(
       </Navigation>
     </Header>
     <ErrorReporter/>
+    {process.env.NODE_ENV === 'development' && <AdminPanelView location={location}/>}
     <Content>
       {children}
     </Content>
-    {process.env.NODE_ENV === 'development' && <AdminPanelView location={location}/>}
     <svg width="100%" height="100%"
          style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
       <PortalTarget name='game-svg' container='g'/>

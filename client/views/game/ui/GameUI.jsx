@@ -31,18 +31,22 @@ class _GameUI extends React.Component {
 
         <PlayersList game={game}/>
 
-        {game.getPlayer() &&
-        <Button id="Game$endTurn" colored={game.getPlayer().acted} accent={!game.getPlayer().acted} raised
-                disabled={!game.isPlayerTurn()}
-                style={{width: '100%'}}
-                onClick={this.context.gameActions.$endTurn}>
-          {T.translate(game.getPlayer().acted ? 'Game.UI.EndTurn' : 'Game.UI.EndPhase')}
-        </Button>}
+        <div> {/*Firefox fix =/*/}
+          {game.getPlayer() &&
+          <Button id="Game$endTurn" colored={game.getPlayer().acted} accent={!game.getPlayer().acted} raised
+                  disabled={!game.isPlayerTurn()}
+                  style={{width: '100%'}}
+                  onClick={this.context.gameActions.$endTurn}>
+            {T.translate(game.getPlayer().acted ? 'Game.UI.EndTurn' : 'Game.UI.EndPhase')}
+          </Button>}
+        </div>
 
         <GameStatusDisplay game={game}/>
 
-        <div style={{height: '140px'}}>
-          <PortalTarget name='deck'/>
+        <div> {/*Firefox fix =/*/}
+          <div style={{height: '140px'}}>
+            <PortalTarget name='deck'/>
+          </div>
         </div>
 
         <Chat chatTargetType='ROOM' roomId={game.roomId}/>

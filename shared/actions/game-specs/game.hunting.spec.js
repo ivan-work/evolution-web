@@ -39,7 +39,6 @@ players:
     expect(selectGame().food).equal(10);
     expect(selectAnimal(User0, 0).getFood()).equal(2);
 
-    clientStore0.dispatch(gameEndTurnRequest());
 
     expectChanged('$1C can take food', () =>
       clientStore1.dispatch(traitTakeFoodRequest('$1C'))
@@ -49,7 +48,6 @@ players:
         clientStore1.dispatch(traitActivateRequest('$1D', 'TraitCarnivorous', '$0A'))
       , serverStore, clientStore0, clientStore1);
 
-    clientStore1.dispatch(gameEndTurnRequest());
 
     expectUnchanged('$0A is on cooldown', () =>
         clientStore0.dispatch(traitActivateRequest('$0A', 'TraitCarnivorous', '$1B'))
@@ -62,13 +60,11 @@ players:
     expect(getAnimalIds(User0)).eql(['$0A', '$0B', '$0C']);
     expect(getAnimalIds(User1)).eql(['$1C', '$1D']);
 
-    clientStore0.dispatch(gameEndTurnRequest());
 
     expectChanged('$1C can take food', () =>
         clientStore1.dispatch(traitTakeFoodRequest('$1C'))
       , serverStore, clientStore0, clientStore1);
 
-    clientStore1.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(gameEndTurnRequest());
 
     expectUnchanged('$1C is full and can\' hunt $0C', () =>
