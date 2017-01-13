@@ -48,7 +48,6 @@ export const gameDeployTrait = (game, {cardId, traits}) => {
 export const playerActed = (game, {userId}) => {
   return game
     .setIn(['players', userId, 'acted'], true)
-    .setIn(['players', userId, 'skipped'], 0)
     .update('cooldowns', cooldowns => cooldowns.eventNextAction());
 };
 
@@ -57,10 +56,6 @@ export const gameEndTurn = (game, {userId}) => {
   ensureParameter(userId, 'string');
   return game
     .updateIn(['players', userId], player => {
-      //console.log(`skipped: ${player.skipped}, acted: ${player.acted}`);
-      //const ended = game.status.phase === PHASE.FEEDING
-      //  ? player.skipped > 0
-      //  : true;
       const ended = !player.acted;
       if (ended) {
         logger.silly(`Player#${player.id} ended by skipping.`);
@@ -68,7 +63,6 @@ export const gameEndTurn = (game, {userId}) => {
       return player
         .set('acted', false)
         .set('ended', ended)
-        .set('skipped', ended || player.acted ? 0 : 1 + player.skipped)
     });
 };
 
@@ -77,7 +71,6 @@ export const gameStartEat = (game, {food}) => {
   return game
     .update('players', players => players.map(player => player
       .set('ended', !player.playing)
-      .set('skipped', 0)
     ))
     .setIn(['food'], food)
     .setIn(['status', 'phase'], PHASE.FEEDING)
@@ -90,7 +83,6 @@ export const gameStartDeploy = (game) => {
   return game
     .update('players', players => players.map(player => player
       .set('ended', !player.playing)
-      .set('skipped', 0)
       .update('continent', continent => continent.map(animal => animal
         .digestFood()
         .set('flags', Map())
@@ -133,8 +125,9 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
 
 export const traitKillAnimal = (game, {targetAnimalId}) => {
   ensureParameter(targetAnimalId, 'string');
-  const {playerId, animalIndex} = game.locateAnimal(targetAnimalId);
+  const {playerId, animal, animalIndex} = game.locateAnimal(targetAnimalId);
   return game
+    .updateIn(['players', playerId, 'scoreDead'], scoreDead => scoreDead + animal.countScore())
     .removeIn(['players', playerId, 'continent', animalIndex])
     .updateIn(['players', playerId, 'continent'], continent => continent
       .map(animal => animal.update('traits', traits => traits
@@ -155,8 +148,9 @@ export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitIndex})
 };
 
 export const animalStarve = (game, {animalId}) => {
-  const {playerId, animalIndex} = game.locateAnimal(animalId);
+  const {playerId, animal, animalIndex} = game.locateAnimal(animalId);
   return game
+    .updateIn(['players', playerId, 'scoreDead'], scoreDead => scoreDead + animal.countScore())
     .removeIn(['players', playerId, 'continent', animalIndex])
     .updateIn(['players', playerId, 'continent'], continent => continent
       .map(animal => animal.update('traits', traits => traits

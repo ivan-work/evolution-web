@@ -56,12 +56,12 @@ export default class GameScoreboardFinal extends Component {
               <th>{T.translate('Game.UI.Scores.TableScoreNormal')}</th>
               <th>{T.translate('Game.UI.Scores.TableScoreDead')}</th>
             </tr>
-            {game.scoreboardFinal.map(({playerId, score, scoreDead}) =>
+            {game.scoreboardFinal.map(({playerId, playing, scoreNormal, scoreDead}) =>
               <tr key={playerId}
                   className={cn({'bold': game.winnerId === playerId})}>
                 <td className='mdl-data-table__cell--non-numeric'><UserView store={store} id={playerId} output='name'/></td>
-                <td>{score}</td>
-                <td>{scoreDead || T.translate('App.TBD')}</td>
+                <td>{scoreNormal}</td>
+                <td>{scoreDead}</td>
               </tr>)}
             </tbody>
           </table>

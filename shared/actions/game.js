@@ -264,9 +264,6 @@ export const server$gamePlayerStart = (gameId) => (dispatch, getState) => {
 
   const {nextPlayer, roundChanged} = choosePlayer(game, roundPlayer);
 
-  dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
-  dispatch(server$addTurnTimeout(gameId, nextPlayer.id));
-  // dispatch(server$game(gameId, gameNextPlayer(gameId, nextPlayer.index, false, Date.now())));
   dispatch(server$gameNextPlayer(gameId, nextPlayer, false));
 };
 
@@ -276,13 +273,13 @@ export const server$gamePlayerContinue = (gameId) => (dispatch, getState) => {
 
   const {nextPlayer, roundChanged} = choosePlayer(game, (currentPlayer + 1));
 
-  dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
-  dispatch(server$addTurnTimeout(gameId, nextPlayer.id));
-  // dispatch(server$game(gameId, gameNextPlayer(gameId, nextPlayer.index, roundChanged, Date.now())));
   dispatch(server$gameNextPlayer(gameId, nextPlayer, roundChanged));
 };
 
 const server$gameNextPlayer = (gameId, nextPlayer, roundChanged) => (dispatch, getState) => {
+  dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
+  dispatch(server$addTurnTimeout(gameId, nextPlayer.id));
+
   const turnTime = Date.now();
   const currentPlayerIndex = selectGame(getState, gameId).getIn(['status', 'currentPlayer']);
   dispatch(gameNextPlayer(gameId, nextPlayer.index, roundChanged, turnTime));
@@ -312,6 +309,10 @@ const choosePlayer = (game, startIndex) => {
       return player.playing && !player.ended;
     });
 
+  if (!nextPlayer) logger.error('nextPlayer not found', {
+    players: game.get('players')
+    , status: game.get('status')
+  });
   //logger.info('choosePlayer:', `${game.id} ${nextPlayer.index} ${roundChanged === true}`);
 
   return {nextPlayer, roundChanged};
