@@ -1,6 +1,6 @@
 import React from 'react';
 import {Route, IndexRoute} from 'react-router';
-import {App} from '../components/App.jsx';
+import App from '../components/App.jsx';
 import {LoginView, RoomsView, Room, GameWrapperView} from '../views/index';
 import {Test} from '../components/Test.jsx';
 import {redirectToLogin} from '../../shared/actions/actions';

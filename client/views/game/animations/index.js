@@ -10,18 +10,20 @@ export const createAnimationServiceConfig = () => ({
   animations: ({subscribe, getRef}) => {
     const audio = new Audio(notification02);
 
-    subscribe('gameNextPlayer', (done, {game}, {nextPlayerIndex, playerHasOptions}) => {
-      if (playerHasOptions && game.getPlayer() && game.getPlayer().index === nextPlayerIndex) {
+    subscribe('gameNextPlayer', (done, {nextPlayerIndex, playerHasOptions}, getState) => {
+      const game = getState().get('game');
+      const soundsOn = getState().getIn(['app', 'soundsOn']);
+      if (soundsOn && playerHasOptions && game.getPlayer() && game.getPlayer().index === nextPlayerIndex) {
         audio.play();
       }
       done();
     });
 
-    subscribe('gameGiveCards', (done, {game}, {cards}) =>
-      gameGiveCards(done, game, cards, getRef));
+    subscribe('gameGiveCards', (done, {cards}, getState) =>
+      gameGiveCards(done, getState().get('game'), cards, getRef));
 
-    subscribe('traitNotify_Start_TraitCarnivorous', (done, {game}, data) => {
-      const {sourceAid, targetId} = data;
+    subscribe('traitNotify_Start_TraitCarnivorous', (done, {sourceAid, targetId}, getState) => {
+      const game = getState().get('game');
       const {playerId: sourcePid, animal: sourceAnimal} = game.locateAnimal(sourceAid);
       const {playerId: targetPid, animal: targetAnimal} = game.locateAnimal(targetId);
       const SourceAnimal = getRef('Animal#' + sourceAid);
@@ -39,8 +41,8 @@ export const createAnimationServiceConfig = () => ({
         })
     });
 
-    subscribe('traitNotify_End_TraitCarnivorous', (done, {game}, data) => {
-      const {sourceAid, targetId} = data;
+    subscribe('traitNotify_End_TraitCarnivorous', (done, {sourceAid, targetId}, getState) => {
+      const game = getState().get('game');
       const {playerId: sourcePid, animal: sourceAnimal} = game.locateAnimal(sourceAid);
       const {playerId: targetPid, animal: targetAnimal} = game.locateAnimal(targetId);
       const SourceAnimal = getRef('Animal#' + sourceAid);

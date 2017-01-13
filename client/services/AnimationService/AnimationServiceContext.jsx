@@ -22,11 +22,11 @@ class Subscription {
     }
   }
 
-  waitForUpdate(actionData) {
+  waitForUpdate(actionData, getState) {
     return new Promise((resolve, reject) => this.$resolveUpdate = resolve)
       .then(props => (props === null
           ? Promise.resolve()
-          : new Promise((resolve) => this.callback(() => resolve(true), props, actionData))))
+          : new Promise((resolve) => this.callback(() => resolve(true), actionData, getState, props))))
   }
 
   componentUpdated(props) {

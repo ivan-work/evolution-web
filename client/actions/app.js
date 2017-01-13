@@ -16,3 +16,8 @@ export const appChangeLanguage = (langCode) => (dispatch) => {
       if (RootService.root) deepForceUpdate(RootService.root);
     });
 };
+
+export const appChangeSound = (value) => ({
+  type: 'appChangeSound'
+  , data: value
+});
