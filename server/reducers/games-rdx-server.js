@@ -96,13 +96,14 @@ export const gameStartDeploy = (game) => {
     .update('cooldowns', cooldowns => cooldowns.eventNextTurn());
 };
 
-export const gameNextPlayer = (game, {round, nextPlayerIndex, roundChanged, turnTime}) => {
-  return game
+export const gameNextPlayer = (game, {round, nextPlayerIndex, roundChanged, turnTime}) => game
     .updateIn(['status', 'round'], round => roundChanged ? round + 1 : round)
     .setIn(['status', 'currentPlayer'], nextPlayerIndex)
-    .setIn(['status', 'turnTime'], turnTime)
     .update('cooldowns', cooldowns => cooldowns.eventNextPlayer(roundChanged));
-};
+
+export const gameAddTurnTimeout = (game, {turnStartTime, turnDuration}) => game
+  .setIn(['status', 'turnStartTime'], turnStartTime)
+  .setIn(['status', 'turnDuration'], turnDuration);
 
 export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) => {
   ensureParameter(animalId, 'string');
@@ -168,8 +169,8 @@ export const gamePlayerLeft = (game, {userId}) => game
   .setIn(['players', userId, 'playing'], false)
   .setIn(['players', userId, 'ended'], true);
 
-export const traitDefenceQuestion = (game, {questionId, traitTuple}) => game
-  .set('question', new QuestionRecord({id: questionId, ...traitTuple, time: Date.now()}));
+export const traitDefenceQuestion = (game, {question}) => game
+  .set('question', question);
 
 export const traitDefenceAnswerSuccess = (game, {questionId}) => game
   .remove('question');
@@ -190,6 +191,7 @@ export const reducer = createReducer(Map(), {
   , gamePlayerReadyChange: (state, data) => state.update(data.gameId, game => gamePlayerReadyChange(game, data))
   , gameGiveCards: (state, data) => state.update(data.gameId, game => gameGiveCards(game, data))
   , gameNextPlayer: (state, data) => state.update(data.gameId, game => gameNextPlayer(game, data))
+  , gameAddTurnTimeout: (state, data) => state.update(data.gameId, game => gameAddTurnTimeout(game, data))
   , gameDeployAnimal: (state, data) => state.update(data.gameId, game => gameDeployAnimal(game, data))
   , gameDeployTrait: (state, data) => state.update(data.gameId, game => gameDeployTrait(game, data))
   , gameEndTurn: (state, data) => state.update(data.gameId, game => gameEndTurn(game, data))

@@ -21,7 +21,7 @@ import * as reducers from './reducers'
 
 // Styles
 import './styles/reset.scss';
-import 'react-mdl/extra/material.min.css'
+// import 'react-mdl/extra/material.min.css'
 import 'react-mdl/extra/css/material.teal-indigo.min.css'
 import 'react-mdl/extra/material.min.js'
 import './styles/style.scss';

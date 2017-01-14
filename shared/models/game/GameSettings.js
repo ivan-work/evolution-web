@@ -3,12 +3,12 @@ import * as cardsData from './evolution/cards/index';
 
 export const SETTINGS_PLAYERS = [2, 8];
 
-export const SETTINGS_TIME_VALUES = [0, 20];
+export const SETTINGS_TIME_VALUES = [.5, 20];
 
 export const SETTINGS_TIME_MODIFIER = 60000; // by 1 minute
 
 export const SettingsRules = {
-  name: 'string|between:6,12|regex:/^[a-zA-Zа-яА-Я\\d\\s]*$/'
+  name: 'string|between:4,20|regex:/^[a-zA-Zа-яА-Я\\d\\s]*$/'
   , maxPlayers: `integer|between:${SETTINGS_PLAYERS[0]},${SETTINGS_PLAYERS[1]}`
   , timeTurn: `numeric|between:${SETTINGS_TIME_VALUES[0]},${SETTINGS_TIME_VALUES[1]}`
   , timeTraitResponse: `numeric|between:${SETTINGS_TIME_VALUES[0]},${SETTINGS_TIME_VALUES[1]}`

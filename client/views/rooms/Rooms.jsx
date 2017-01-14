@@ -26,7 +26,7 @@ export class Rooms extends React.Component {
         <ControlGroup name={T.translate('App.Rooms.Rooms')}>
           <Button id="Rooms$Create" onClick={this.props.$createRequest}>{T.translate('App.Rooms.$Create')}</Button>
         </ControlGroup>
-        {!this.props.room ? null : <RoomControlGroup/>}
+        {this.props.room && <RoomControlGroup/>}
       </Portal>
       <h1 className='greeting'>
         {T.translate('App.Rooms.Greeting')}, {this.props.username}

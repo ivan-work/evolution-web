@@ -7,6 +7,8 @@ import {RoomModel} from '../../../shared/models/RoomModel';
 
 import {redirectTo} from '../../../shared/utils';
 import {roomExitRequest, gameCreateRequest, roomJoinRequest, roomSpectateRequest} from '../../../shared/actions/actions';
+import {failsChecks} from '../../../shared/actions/checks';
+import {checkCanJoinRoomToPlay} from '../../../shared/actions/rooms.checks';
 
 /*
  * RoomControlGroup
@@ -40,11 +42,15 @@ export class RoomControlGroup extends Component {
       <Button id="Room$Back" onClick={() => this.back()}>{T.translate('App.Room.$Back')}</Button>
       <Button id="Room$Exit" onClick={this.props.$exit}>{T.translate('App.Room.$Exit')}</Button>
       {inRoom && !!~room.spectators.indexOf(userId)
-        && <Button id="Room$Exit" onClick={this.$roomJoin}>{T.translate('App.Room.$Play')}</Button>}
+        && <Button id="Room$Play"
+                   disabled={failsChecks(() => checkCanJoinRoomToPlay(room, userId))}
+                   onClick={this.$roomJoin}>{T.translate('App.Room.$Play')}</Button>}
       {inRoom && !!~room.users.indexOf(userId)
-        && <Button id="Room$Exit" onClick={this.$roomSpectate}>{T.translate('App.Room.$Spectate')}</Button>}
-      <Button id="Room$Start" onClick={this.$start}
-              disabled={!room.checkCanStart(userId)}>{T.translate('App.Room.$Start')}</Button>
+        && <Button id="Room$Spectate"
+                   onClick={this.$roomSpectate}>{T.translate('App.Room.$Spectate')}</Button>}
+      <Button id="Room$Start"
+              disabled={!room.checkCanStart(userId)}
+              onClick={this.$start}>{T.translate('App.Room.$Start')}</Button>
     </ControlGroup>
   }
 }

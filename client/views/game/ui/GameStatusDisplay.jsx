@@ -25,7 +25,7 @@ export class GameStatusDisplay extends Component {
 
   render() {
     const {game} = this.props;
-    const {status, players, settings} = game;
+    const {status, players, settings, question} = game;
     return (<ul className="GameStatus">
       <h6>Game Status:</h6>
       <li className='line'>
@@ -42,11 +42,18 @@ export class GameStatusDisplay extends Component {
       </li>
       <li className='line'>
         <span className='key'>{T.translate('Game.UI.Status.Player')}:</span>
-        <span className='value'>{this.getPlayerNameByIndex(players, status.currentPlayer)}</span>
+        <span className='value'>
+          {question ? <span>(<UserView id={question.targetPid} output='name'/>)</span>
+            : this.getPlayerNameByIndex(players, status.currentPlayer)}
+        </span>
       </li>
       <li className='line'>
         <span className='key'>{T.translate('Game.UI.Status.Time')}:</span>
-        <span className='value'>{status.turnTime != null ? <Timer start={status.turnTime} duration={settings.timeTurn}/> : '-'}</span>
+        <span className='value'>
+          {(question ? <Timer start={question.time} duration={settings.timeTraitResponse}/>
+            : status.turnStartTime != null ? <Timer start={status.turnStartTime} duration={status.turnDuration}/>
+            : '-')}
+          </span>
       </li>
     </ul>);
   }

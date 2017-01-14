@@ -32,17 +32,18 @@ module.exports = (app, passport) => {
   });
 
   //if (process.env.NODE_ENV !== 'production') {
-    router.get('/state', function (req, res, next) {
-      const state = app.get('store').getState().toJS();
+  router.get('/state', function (req, res, next) {
+    const state = app.get('store').getState()
+      .update('connections', c => c.keySeq().toArray());
 
-      state.connections = Object.keys(state.connections).reduce((result, key) => {
-        result[key] = '#socket#';
-        return result;
-      }, {});
+    const replacer = (key, value) => (
+      key === 'connections' ? void 0
+        : key === 'chat' ? void 0
+        : value);
 
-      const format = (str) => `<pre>${str}</pre>`;
-      res.send(format(JSON.stringify(state, null, '  ')));
-    });
+    const format = (str) => `<pre>${str}</pre>`;
+    res.send(format(JSON.stringify(state.toJS(), replacer, '  ')));
+  });
   //}
 
   router.get('/timeouts', function (req, res, next) {

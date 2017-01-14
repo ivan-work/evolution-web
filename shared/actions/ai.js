@@ -24,8 +24,8 @@ export class Option extends Record({
   }
 }
 
-export const doesPlayerHaveOptions = (game, playerId) => {
-  logger.silly('doesPlayerHaveOptions:' + playerId);
+export const doesPlayerHasOptions = (game, playerId) => {
+  logger.debug('?doesPlayerHasOptions:', playerId);
   const hasError = failsChecks(() => checkPlayerTurnAndPhase(game, playerId, PHASE.FEEDING));
   if (hasError) {
     // logger.warn(hasError.name + hasError.message, ...hasError.data);

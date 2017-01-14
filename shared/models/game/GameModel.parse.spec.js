@@ -215,10 +215,12 @@ players:
     expect(ServerGame().status.currentPlayer, 'currentPlayer').equal(0);
     expect(ServerGame().status.roundPlayer, 'roundPlayer').equal(0);
     expect(ServerGame().status.phase, 'phase').equal(1);
-    expect(ServerGame().status.turnTime, 'turnTime').above(0);
-    expect(ServerGame().deck.size).equal(6);
+    expect(ServerGame().status.turnStartTime, 'turnTime').above(0);
+    // console.log(ServerGame().getIn(['players', User1.id, 'hand']).size)
+    // console.log(ServerGame().getIn(['players', User0.id, 'hand']).size)
+    expect(ServerGame().deck.size, 'deck.size').equal(9);
     expect(ServerGame().getIn(['players', User0.id, 'ready'])).true;
-    expect(ServerGame().getIn(['players', User0.id, 'hand'])).size(8);
+    expect(ServerGame().getIn(['players', User0.id, 'hand'])).size(5);
     expect(ServerGame().getIn(['players', User0.id, 'continent'])).size(2);
     expect(ServerGame().getIn(['players', User1.id, 'ready'])).true;
     expect(ServerGame().getIn(['players', User1.id, 'hand'])).size(6);

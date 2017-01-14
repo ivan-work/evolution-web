@@ -81,7 +81,7 @@ players:
     const questionId = selectQuestionId();
     expect(ClientGame0().question, 'ClientGame0().question').ok;
     expect(ClientGame1().question, 'ClientGame1().question').ok;
-    expect(ClientGame0().question.get('id')).equal(null);
+    expect(ClientGame0().question.get('id'), 'User0 shouldnt know questionId').equal(null);
     expect(ClientGame1().question.get('id')).equal(questionId);
     clientStore1.dispatch(traitDefenceAnswerRequest(questionId, 'TraitMimicry', '$C'));
     expect(selectAnimal(User0, 0).getFood()).equal(2);
