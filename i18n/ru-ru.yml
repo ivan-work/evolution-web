@@ -25,14 +25,20 @@ App:
       timeTraitResponse: Время реагирования на атаку
       baseType1: Базовый набор
       baseType2: Двойной базовый набор
+    Players: Игроки
     Spectators: Зрители
+    Banned: Забаненные
     $Spectate: Стать зрителем
     $Play: Стать игроком
     $Edit: Применить
     $Back: Назад
     $Exit: Выйти
     $Start: Начать игру
-    in_this_room: В комнате
+    $Kick: Кикнуть
+    $Ban: Забанить
+    $Unban: Разбанить
+    ErrorKick: Вас кикнули
+    ErrorBan: Вас забанили
 Game:
   Game: Игра
   Trait:

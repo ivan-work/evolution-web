@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import T from 'i18n-react';
 import {connect} from 'react-redux';
-import {Button, Card, CardTitle, CardText} from 'react-mdl';
+import {IconButton, Card, CardTitle, CardText, Tooltip} from 'react-mdl';
 
 import {RoomModel} from '../../../shared/models/RoomModel';
 
@@ -23,6 +23,23 @@ export class Room extends Component {
 
   constructor(props) {
     super(props);
+    const {room, userId} = this.props;
+    const isHost = room && room.users.get(0) === userId;
+    this.renderUser = (user => <li key={user.id}>
+      {user.login}
+      {isHost && <Tooltip label={T.translate('App.Room.$Kick')}>
+        <IconButton name='clear'/>
+      </Tooltip>}
+      {isHost && <Tooltip label={T.translate('App.Room.$Ban')}>
+        <IconButton name='block'/>
+      </Tooltip>}
+    </li>)
+    this.renderBannedUser = (user => <li key={user.id}>
+      {user.login}
+      {isHost && <Tooltip label={T.translate('App.Room.$Unban')}>
+        <IconButton name='remove_circle_outline' raised/>
+      </Tooltip>}
+    </li>)
   }
 
   render() {
@@ -48,15 +65,15 @@ export class Room extends Component {
           </CardText>
         </Card>
         <Card>
-          <CardTitle>{T.translate('App.Room.in_this_room')} ({room.users.size}/{room.settings.maxPlayers}):</CardTitle>
           <CardText>
-            <UsersList list={room.users}/>
-          </CardText>
-        </Card>
-        <Card>
-          <CardTitle>{T.translate('App.Room.Spectators')}:</CardTitle>
-          <CardText>
-            <UsersList list={room.spectators}/>
+            <h3>{T.translate('App.Room.Players')} ({room.users.size}/{room.settings.maxPlayers}):</h3>
+            <UsersList list={room.users}>{this.renderUser}</UsersList>
+            <h3>{T.translate('App.Room.Spectators')}:</h3>
+            <UsersList list={room.spectators}>{this.renderUser}</UsersList>
+            {room.banlist.size > 0 && (<div>
+              <h3>{T.translate('App.Room.Banned')}:</h3>
+              <UsersList list={room.spectators}>{this.renderBannedUser}</UsersList>
+            </div>)}
           </CardText>
         </Card>
       </div>

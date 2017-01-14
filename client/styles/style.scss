@@ -1,47 +1,29 @@
 @import 'evolution';
-//@import 'traits';
 
-h1, h2, h3, h4, h5, h6 {
-  margin: 0;
-}
+// @formatter:off
 
-h1 {
-  font-size: 2.0em;
-  padding: .5em;
-}
+h1, h2, h3, h4, h5, h6 {margin: 0;}
 
-h2 {
-  font-size: 1.8em;
-  padding: .5em;
-}
-
-h3 {
-  font-size: 1.6em;
-  padding: .5em;
-}
-
-h4 {
-  font-size: 1.4em;
-}
-
-h5 {
-  font-size: 1.2em;
-}
-
-h6 {
-  font-size: 1.2em;
-}
-
-a, .pointer {
-  cursor: pointer;
-}
+h1 {font-size: 2.0em; padding: .5em;}
+h2 {font-size: 1.8em; padding: .5em;}
+h3 {font-size: 1.6em; padding: .5em;}
+h4 {font-size: 1.4em;}
+h5 {font-size: 1.2em;}
+h6 {font-size: 1.2em;}
+a, .pointer {cursor: pointer;}
 
 a {
   text-decoration: underline;
-  &:hover {
-    text-decoration: none;
-  }
+  &:hover {text-decoration: none;}
 }
+
+a[disabled] {
+  pointer-events: none;
+  color: gray;
+  text-decoration: none;
+}
+
+// @formatter:on
 
 .bold, strong {
   font-weight: bold;
@@ -55,6 +37,8 @@ a {
   display: flex;
   flex-direction: row;
 }
+
+// MDL
 
 .mdl-layout__content {
   overflow-x: auto;
@@ -70,12 +54,6 @@ a {
       color: gray;
     }
   }
-}
-
-a[disabled] {
-  pointer-events: none;
-  color: gray;
-  text-decoration: none;
 }
 
 .mdl-card__title {

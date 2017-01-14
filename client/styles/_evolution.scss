@@ -14,62 +14,6 @@ $CURRENT_TURN_BACKGROUND: #dfd;
   cursor: grabbing; /* W3C standards syntax, should come least */
 }
 
-.GameToast {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  z-index: 99999;
-  .inner {
-    margin: 0 auto;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    padding: .25em;
-    height: 1em;
-    box-shadow: 0 0 1em .5em rgba(255, 255, 255, 0.75);
-    font-size: 10em;
-    background: rgba(255, 255, 255, 0.75);
-  }
-}
-
-.GameUI {
-  max-width: 160px;
-  display: flex;
-  flex: 1;
-  flex-flow: column nowrap;
-  padding: .5em 1em 0;
-  border-right: 1px solid #ccc;
-  .Chat {
-    display: flex;
-    flex: 1;
-    flex-flow: column nowrap;
-    .ChatWindow {
-      flex-grow: 1;
-      flex-basis: 0;
-      max-height: none;
-    }
-  }
-}
-
-.Game {
-  position: relative;
-  flex: 1;
-  background: #eee;
-  &.isPlayerTurn {
-    background: #fff;
-  }
-  .PlayerWrapper {
-    .CardCollection {
-      height: 80px;
-    }
-  }
-}
-
 .PlayersList {
   .Player {
     @include ellipsis();
@@ -77,21 +21,5 @@ $CURRENT_TURN_BACKGROUND: #dfd;
   .isPlayerTurn {
     background: $CURRENT_TURN_BACKGROUND;
     font-weight: bold;
-  }
-}
-
-.GameStatus {
-  margin-top: .5em;
-  .line {
-    white-space: nowrap;
-  }
-  .key {
-    display: inline-block;
-    width: 4em;
-    font-weight: bold;
-  }
-  .value {
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }

@@ -23,14 +23,20 @@ App:
       maxPlayers: Max players
       timeTurn: Turn time
       timeTraitResponse: Attack response time
+    Players: Players
     Spectators: Spectators
+    Banned: Banned
     $Spectate: To spectators
     $Play: To players
     $Edit: Edit
     $Back: Back
     $Exit: Exit
     $Start: Start game
-    in_this_room: In this room
+    $Kick: Kick
+    $Ban: Ban
+    $Unban: Unban
+    ErrorKick: You were kicked
+    ErrorBan: You were banned
 Game:
   Game: Game
   Trait:
