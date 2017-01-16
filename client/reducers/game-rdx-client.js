@@ -31,7 +31,7 @@ import {
 export const reducer = createReducer(null, {
   gameInit: (state, {game}) => game
   , gameCreateSuccess: (state, {game}) => game
-  //, roomExitSuccess: (state, {userId}, currentUserId) => userId === currentUserId ? state : null //TODO do something
+  , roomExitSelf: (state) => null
   , gameStart
   , gamePlayerReadyChange
   , gameGiveCards

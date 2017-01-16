@@ -58,7 +58,6 @@ describe('Chat:', () => {
     expect(clientStore1.getState().getIn(['rooms', roomId, 'chat', 'messages', 0, 'text'])).equal('test1');
 
     clientStore1.dispatch(chatMessageRequest(roomId, 'ROOM', 'test2'));
-    console.log(clientStore0.getState().getIn(['rooms', roomId, 'chat', 'messages']))
     expect(serverStore.getState().getIn(['rooms', roomId, 'chat', 'messages', 1, 'text'])).equal('test2');
     expect(clientStore0.getState().getIn(['rooms', roomId, 'chat', 'messages', 1, 'text'])).equal('test2');
     expect(clientStore1.getState().getIn(['rooms', roomId, 'chat', 'messages', 1, 'text'])).equal('test2');

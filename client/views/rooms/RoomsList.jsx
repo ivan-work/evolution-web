@@ -4,7 +4,7 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import RIP from 'react-immutable-proptypes';
 import {connect} from 'react-redux';
 
-import {List, ListItem} from 'react-mdl';
+import {List, ListItem, IconButton} from 'react-mdl';
 
 import {roomJoinRequestSoft, roomSpectateRequestSoft} from '../../../shared/actions/actions';
 
@@ -33,20 +33,17 @@ export class RoomsList extends React.Component {
     return <List className="RoomsList">
       {rooms.map(room =>
         <ListItem key={room.id}>
-        <span>
-          <a href="#"
-             disabled={failsChecks(() => checkCanJoinRoomToPlay(room, userId))}
-             onClick={() => $roomJoin(room.id)}>
-            {room.name}
-          </a>
-          &nbsp;(
-          <a href="#"
-             disabled={failsChecks(() => checkCanJoinRoomToSpectate(room, userId))}
-             onClick={() => $roomSpectate(room.id)}>
-            {T.translate('App.Rooms.$Watch')}
-          </a>)
-          &nbsp;({room.users.size}/{room.settings.maxPlayers}) {room.spectators.size > 0 && '+' + room.spectators.size}
-        </span>
+          <span>
+            <a href="#"
+               disabled={failsChecks(() => checkCanJoinRoomToPlay(room, userId))}
+               onClick={() => $roomJoin(room.id)}>
+              {room.name}
+            </a>
+            &nbsp;({room.users.size}/{room.settings.maxPlayers}) {room.spectators.size > 0 && '+' + room.spectators.size}
+            &nbsp;<IconButton name='visibility' colored
+                              disabled={failsChecks(() => checkCanJoinRoomToSpectate(room, userId))}
+                              onClick={() => $roomSpectate(room.id)}/>
+          </span>
         </ListItem>)}
     </List>;
   }

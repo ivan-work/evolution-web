@@ -11,7 +11,7 @@ export class UserServiceClass {
   }
 
   getPlayerName(id) {
-    console.log(id, this.getState().getIn(['online', id, 'login']))
+    // console.log(id, this.getState().getIn(['online', id, 'login']))
     return this.getState().getIn(['online', id, 'login'], '---');
   }
 }

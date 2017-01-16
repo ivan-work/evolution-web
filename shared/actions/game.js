@@ -87,7 +87,6 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
   switch (game.players.filter(p => p.playing).size) {
     case 0:
       dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
-      dispatch(server$game(gameId, gameDestroy(gameId)));
       break;
     case 1:
       dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
@@ -529,38 +528,37 @@ export const gameServerToClient = {
     dispatch(gameInit(GameModelClient.fromServer(game, userId)));
     dispatch(redirectTo('/game'));
   }
-  , gameCreateSuccess: (({game}, currentUserId) => (dispatch) => {
+  ,  gameCreateSuccess: (({game}, currentUserId) => (dispatch) => {
     dispatch(gameCreateSuccess(GameModelClient.fromServer(game, currentUserId)));
     dispatch(redirectTo('/game'));
   })
-  , gameCreateNotify: ({roomId, gameId}) => gameCreateNotify(roomId, gameId)
-  , gameStart: ({gameId}) => gameStart(gameId)
-  , gameStartDeploy: ({gameId}) => gameStartDeploy(gameId)
-  , gameStartEat: ({gameId, food}) => gameStartEat(gameId, food)
-  , gamePlayerReadyChange: ({gameId, userId, ready}) => gamePlayerReadyChange(gameId, userId, ready)
-  , gameGiveCards: ({gameId, userId, cards}) =>
-    gameGiveCards(gameId, userId, List(cards).map(card => CardModel.fromServer(card)))
-  , gameDeployAnimal: ({gameId, userId, animal, animalPosition, cardPosition}) =>
+  ,  gameCreateNotify: ({roomId, gameId}) => gameCreateNotify(roomId, gameId)
+  ,  gameStart: ({gameId}) => gameStart(gameId)
+  ,  gameStartDeploy: ({gameId}) => gameStartDeploy(gameId)
+  ,  gameStartEat: ({gameId, food}) => gameStartEat(gameId, food)
+  ,  gamePlayerReadyChange: ({gameId, userId, ready}) => gamePlayerReadyChange(gameId, userId, ready)
+  ,  gameGiveCards: ({gameId, userId, cards}) =>
+   gameGiveCards(gameId, userId, List(cards).map(card => CardModel.fromServer(card)))
+  ,  gameDeployAnimal: ({gameId, userId, animal, animalPosition, cardPosition}) =>
     gameDeployAnimal(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardPosition)
-  , gameDeployTrait: ({gameId, cardId, traits}) =>
+  ,  gameDeployTrait: ({gameId, cardId, traits}) =>
     gameDeployTrait(gameId, cardId, traits.map(trait => TraitModel.fromServer(trait)))
-  , gameAddTurnTimeout: ({gameId, turnStartTime, turnDuration}) =>
+  ,  gameAddTurnTimeout: ({gameId, turnStartTime, turnDuration}) =>
     gameAddTurnTimeout(gameId, turnStartTime, turnDuration)
-  , gameNextPlayer: ({gameId, nextPlayerIndex, roundChanged}) =>
+  ,  gameNextPlayer: ({gameId, nextPlayerIndex, roundChanged}) =>
     gameNextPlayer(gameId, nextPlayerIndex, roundChanged)
-  , gameNextPlayerNotify: ({gameId, userId}, currentUserId) => (dispatch) =>
+  ,  gameNextPlayerNotify: ({gameId, userId}, currentUserId) => (dispatch) =>
     (userId === currentUserId && dispatch(gameNextPlayerNotify(gameId, userId)))
-  , gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
-  , gameDestroy: ({gameId}) => gameDestroy(gameId)
-  , gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
-  , gamePlayerLeft: ({gameId, userId}, currentUserId) => (dispatch, getState) => {
+  ,  gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
+  ,  gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
+  ,  gamePlayerLeft: ({gameId, userId}, currentUserId) => (dispatch, getState) => {
     dispatch(gamePlayerLeftNotification(gameId, userId));
     if (currentUserId === userId) {
       dispatch(gamePlayerLeft(gameId, userId));
       dispatch(redirectTo(`/`));
     }
   }
-  , animalStarve: ({gameId, animalId}) => animalStarve(gameId, animalId)
+  ,  animalStarve: ({gameId, animalId}) => animalStarve(gameId, animalId)
 };
 
 

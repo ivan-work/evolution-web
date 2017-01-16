@@ -1,7 +1,8 @@
 export class AnimationServiceClass {
   //constructor(log = console.log) {
   constructor(log = () => 0) {
-    this.$log = log;
+    const debug = false;
+    this.$log = debug ? console.log : () => null;
     this.$queue = [];
     this.$subscriptions = {};
   }

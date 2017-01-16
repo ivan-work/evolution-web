@@ -2,24 +2,23 @@ import React, {Component, PropTypes} from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
-import { DropTarget } from 'react-dnd';
-import { DND_ITEM_TYPE } from './../dnd/DND_ITEM_TYPE';
+import {DropTarget} from 'react-dnd';
+import {DND_ITEM_TYPE} from './../dnd/DND_ITEM_TYPE';
 
-import { AnimalModel } from '../../../../shared/models/game/evolution/AnimalModel';
-import { TraitModel } from '../../../../shared/models/game/evolution/TraitModel';
-import { TRAIT_ANIMAL_FLAG, TRAIT_TARGET_TYPE } from '../../../../shared/models/game/evolution/constants';
+import {AnimalModel} from '../../../../shared/models/game/evolution/AnimalModel';
+import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
+import {TRAIT_ANIMAL_FLAG, TRAIT_TARGET_TYPE} from '../../../../shared/models/game/evolution/constants';
 
 import {Tooltip} from './../../utils/Tooltips.jsx';
-import { AnimalTrait, DragAnimalTrait, ClickAnimalTrait } from './AnimalTrait.jsx';
-import { AnimalLinkedTrait } from './AnimalLinkedTrait.jsx';
-import { DragAnimalSelectLink } from './AnimalSelectLink.jsx'
+import {AnimalTrait, DragAnimalTrait, ClickAnimalTrait} from './AnimalTrait.jsx';
+import {AnimalLinkedTrait} from './AnimalLinkedTrait.jsx';
+import {DragAnimalSelectLink} from './AnimalSelectLink.jsx'
 import {GameProvider} from './../providers/GameProvider.jsx';
 import {Food} from './../food/Food.jsx';
 
 import './Animal.scss';
 
 class Animal extends React.Component {
-  //static displayName = 'Animal';
   static propTypes = {
     model: React.PropTypes.instanceOf(AnimalModel).isRequired
   };
@@ -37,11 +36,7 @@ class Animal extends React.Component {
   }
 
   renderTrait(trait, animal) {
-    if (trait.isLinked()) {
-      return <AnimalLinkedTrait trait={trait}/>;
-    } else {
-      return <AnimalTrait trait={trait}/>;
-    }
+    return <AnimalTrait trait={trait}/>;
   }
 
   render() {
@@ -57,17 +52,20 @@ class Animal extends React.Component {
         {model.traits
           .reverse()
           //.sort((t1, t2) => t1.isLinked() ? 1 : -1)
-          .map((trait, index) =>{
-          return <div key={trait.id}
-                      style={{marginBottom: '-5px'}}>
-            {this.renderTrait(trait, model)}
-          </div>})}
+          .map((trait, index) => {
+            return <div key={trait.id}
+                        style={{marginBottom: '-5px'}}>
+              {this.renderTrait(trait, model)}
+            </div>
+          })}
       </div>
       {this.renderSelectLink()}
       <Tooltip tip='animal'>
         <div className='inner'>
-          {model.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) ? <span className='material-icons Flag Poisoned'>smoking_rooms</span>: null}
-          {model.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) ? <span className='material-icons Flag Hibernated'>snooze</span>: null}
+          {model.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) ?
+            <span className='material-icons Flag Poisoned'>smoking_rooms</span> : null}
+          {model.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) ?
+            <span className='material-icons Flag Hibernated'>snooze</span> : null}
           <div className='AnimalFoodContainer'>
             {Array.from({length: model.food}).map((u, index) => <Food key={index}/>)}
           </div>
@@ -88,14 +86,12 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
         const {index} = monitor.getItem();
         props.onFoodDropped(props.model, index);
         break;
-      case DND_ITEM_TYPE.TRAIT:
-      {
+      case DND_ITEM_TYPE.TRAIT: {
         const {trait, sourceAnimal} = monitor.getItem();
         props.onTraitDropped(sourceAnimal.id, trait.type, props.model.id);
         break;
       }
-      case DND_ITEM_TYPE.ANIMAL_LINK:
-      {
+      case DND_ITEM_TYPE.ANIMAL_LINK: {
         const {model: targetAnimal} = props;
         const {animal: sourceAnimal} = monitor.getItem();
         props.onAnimalLink(monitor.getItem().card, sourceAnimal, monitor.getItem().alternateTrait, targetAnimal);
@@ -110,14 +106,12 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
       case DND_ITEM_TYPE.FOOD:
         const {index} = monitor.getItem();
         return props.isUserAnimal && props.model.canEat(props.game);
-      case DND_ITEM_TYPE.TRAIT:
-      {
+      case DND_ITEM_TYPE.TRAIT: {
         const {trait, sourceAnimal} = monitor.getItem();
         const targetCheck = !trait.getDataModel().checkTarget || trait.getDataModel().checkTarget(props.game, sourceAnimal, props.model);
         return sourceAnimal.id !== props.model.id && targetCheck;
       }
-      case DND_ITEM_TYPE.ANIMAL_LINK:
-      {
+      case DND_ITEM_TYPE.ANIMAL_LINK: {
         const {model: targetAnimal} = props;
         const {card, animal: sourceAnimal, alternateTrait} = monitor.getItem();
         if (card && targetAnimal) {
@@ -134,7 +128,8 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
   connectDropTarget: connect.dropTarget(),
   isOver: monitor.isOver(),
   canDrop: monitor.canDrop()
-}))(class Animal extends Animal {
+}))(class extends Animal {
+    static displayName = 'Animal';
     static propTypes = {
       // by GameProvider
       game: PropTypes.object.isRequired
@@ -172,6 +167,8 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
 
 const GameDropAnimal = GameProvider(DropAnimal);
 
-export {Animal
+export {
+  Animal
   , DropAnimal as _DropAnimal
-  , GameDropAnimal as DropAnimal};
+  , GameDropAnimal as DropAnimal
+};

@@ -34,11 +34,11 @@ export class TraitDefenceDialog extends Component {
       <TooltipsContextElement>
         <div className='TraitDefenceDialog'>
           {targetAnimal.hasTrait(TraitTailLoss.type) && targetsTailLoss.size > 0
-            ? this.renderTailLoss(targetsTailLoss, $traitDefenceAnswer.bind(null, id, TraitTailLoss.type))
-            : null}
+            && this.renderTailLoss(targetsTailLoss, $traitDefenceAnswer.bind(null, id, TraitTailLoss.type))
+          }
           {targetAnimal.hasTrait(TraitMimicry.type) && targetsMimicry.size > 0
-            ? this.renderMimicry(targetsMimicry, $traitDefenceAnswer.bind(null, id, TraitMimicry.type))
-            : null}
+            && this.renderMimicry(targetsMimicry, $traitDefenceAnswer.bind(null, id, TraitMimicry.type))
+          }
           <h1>
             <T.span text='Game.UI.TraitDefenceDialog.Time'/>:
             <Timer start={time} duration={game.settings.timeTraitResponse}/>

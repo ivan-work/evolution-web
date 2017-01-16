@@ -8,6 +8,8 @@ import {
   , roomExitRequest
   , roomEditSettingsRequest
   , roomKickRequest
+  , roomSpectateRequest
+  , gameCreateRequest
   , roomBanRequest
 } from '../actions/actions';
 import {selectRoom} from '../selectors';
@@ -208,7 +210,6 @@ describe('Rooms:', function () {
         , serverStore, clientStore0, clientStore1, clientStore2, clientStore3)
     });
   });
-
 
   describe('Errors:', () => {
     it('User0 joins into same room', () => {

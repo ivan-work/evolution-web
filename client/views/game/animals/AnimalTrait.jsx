@@ -56,7 +56,8 @@ const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
     , isDragging: monitor.isDragging()
     , canDrag: monitor.canDrag()
   })
-)(class AnimalTrait extends AnimalTrait {
+)(class extends AnimalTrait {
+  static displayName = 'AnimalTrait';
   static propTypes = {
     // by parent
     trait: React.PropTypes.instanceOf(TraitModel).isRequired

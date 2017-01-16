@@ -34,7 +34,7 @@ export const doesPlayerHasOptions = (game, playerId) => {
     return false;
   } else {
     if (process.env.LOG_LEVEL === 'silly') {
-      const options = getOptions(selectGame(getState, gameId), playerId);
+      const options = getOptions(game, playerId);
       if (options.length === 0) throw new Error('Options length = 0');
       console.log(options)
     }

@@ -1,10 +1,14 @@
+import {List} from 'immutable'
 import React, {Component} from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
+import T from 'i18n-react';
 import cn from 'classnames';
+import {connect} from 'react-redux';
 
 import {GameModel, GameModelClient} from '../../../../shared/models/game/GameModel';
 
-import UserView from '../../utils/User.jsx'
+import {Icon, Badge, Tooltip as MDLTooltip} from 'react-mdl';
+import User from '../../utils/User';
 
 export class PlayersList extends Component {
   static propTypes = {
@@ -22,16 +26,33 @@ export class PlayersList extends Component {
       , isPlayerTurn: game.isPlayerTurn(player.id)
     });
     return <li key={player.id} className={className}>
-      <UserView id={player.id} output='name'/>
+      <User id={player.id}/>
     </li>
   }
 
   render() {
     const {game} = this.props;
     return <ul className='PlayersList'>
-      <h6>Players:</h6>
+      <h6 style={{display: 'inline-block'}}>{T.translate('App.Room.Players')}: </h6>{this.renderSpectators()}
       {GameModel.sortPlayersFromIndex(game)
         .map(player => this.renderPlayer(game, player))}
     </ul>
   }
+
+  renderSpectators() {
+    const spectatorsList = this.props.spectatorsList;
+    return (spectatorsList.size > 0 && <MDLTooltip label={T.translate('App.Room.Spectators') + ': ' + spectatorsList.join(', ')}>
+      <span>
+        <Badge text={spectatorsList.size}>&nbsp;</Badge>
+      </span>
+    </MDLTooltip>)
+  }
 }
+
+const PlayersListView = connect((state, {game}) => ({
+  spectatorsList: state.getIn(['rooms', game.roomId, 'spectators'], List())
+    .map(id => state.getIn(['online', id, 'login'], '---'))
+}))(PlayersList);
+
+
+export default PlayersListView;

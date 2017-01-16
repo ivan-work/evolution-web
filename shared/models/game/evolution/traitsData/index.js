@@ -1,5 +1,6 @@
 import {fromJS} from 'immutable';
-import {TRAIT_TARGET_TYPE
+import {
+  TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
   , TRAIT_COOLDOWN_LINK
@@ -69,7 +70,7 @@ export const TraitMimicry = {
     return game.getPlayer(mimicryAnimal.ownerId).continent.filter((animal) =>
       mimicryAnimal.id !== animal.id
       && attackAnimal.id !== animal.id
-        //&& !animal.hasTrait('TraitMimicry')
+      //&& !animal.hasTrait('TraitMimicry')
       && (!animal.hasTrait('TraitMimicry') || animal.hasTrait('TraitMimicry') && checkAction(game, TraitMimicry, animal))
       && attackTraitData.checkTarget(game, attackAnimal, animal)
     );
@@ -101,7 +102,8 @@ export const TraitPiracy = {
     return true;
   }
   , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game)
-  , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.food > 0 && !targetAnimal.canSurvive()
+  , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.food > 0
+  && !(targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) || targetAnimal.food >= targetAnimal.sizeOfNormalFood())
 };
 
 export const TraitTailLoss = {
