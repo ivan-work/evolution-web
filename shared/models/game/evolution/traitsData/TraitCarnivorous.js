@@ -15,6 +15,7 @@ import {
   , server$traitDefenceQuestion
   , server$traitDefenceQuestionInstant
   , server$traitDefenceAnswer
+  , server$traitNotify_Start
   , server$traitNotify_End
 } from '../../../../actions/actions';
 
@@ -55,18 +56,18 @@ export const TraitCarnivorous = {
     logger.debug(`TraitCarnivorous: ${sourceAnimal.id} > ${targetAnimal.id}`);
     let needToAskTargetUser;
     let traitMimicry, traitTailLoss;
-
-    let ended = targetAnimal.traits.some((trait) => {
-      if (trait.type === TraitRunning.type) {
+    let ended = targetAnimal.traits.some((defenseTrait) => {
+      if (defenseTrait.type === TraitRunning.type) {
         if (dispatch(TraitRunning.action(game, targetAnimal, sourceAnimal))) {
+          dispatch(server$traitNotify_Start(game, targetAnimal, defenseTrait, sourceAnimal));
           dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
           return true;
         }
-      } else if (trait.type === TraitMimicry.type && checkAction(game, TraitMimicry, targetAnimal)) {
+      } else if (defenseTrait.type === TraitMimicry.type && checkAction(game, TraitMimicry, targetAnimal)) {
         traitMimicry = TraitMimicry.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
         if (traitMimicry.size > 1) needToAskTargetUser = true;
         if (traitMimicry.size === 0) traitMimicry = void 0;
-      } else if (trait.type === TraitTailLoss.type && checkAction(game, TraitTailLoss, targetAnimal)) {
+      } else if (defenseTrait.type === TraitTailLoss.type && checkAction(game, TraitTailLoss, targetAnimal)) {
         traitTailLoss = targetAnimal.traits;
         if (traitTailLoss.size > 1) needToAskTargetUser = true;
         if (traitTailLoss.size === 0) traitTailLoss = void 0;
