@@ -13,6 +13,8 @@
 
   text-align: center;
 
+  transition: background .3s;
+
   & > .inner {
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -33,5 +35,9 @@
   }
   &.pointer.active {
     background: #f90;
+  }
+
+  &.Animate {
+    background-color: green !important;
   }
 }

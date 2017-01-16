@@ -5,7 +5,9 @@ import {gameGiveCards} from './gameGiveCards';
 
 import notification02 from '../../../assets/sound/notification-02.mp3';
 
-// [actionName]: (done, componentProps, actionData)
+import * as localTraits from './traits';
+
+// [actionName]: (done, actionData, getState, componentProps)
 export const createAnimationServiceConfig = () => ({
   animations: ({subscribe, getRef}) => {
     const audio = new Audio(notification02);
@@ -19,39 +21,24 @@ export const createAnimationServiceConfig = () => ({
     subscribe('gameGiveCards', (done, {cards}, getState) =>
       gameGiveCards(done, getState().get('game'), cards, getRef));
 
-    subscribe('traitNotify_Start_TraitCarnivorous', (done, {sourceAid, targetId}, getState) => {
-      const game = getState().get('game');
-      const {playerId: sourcePid, animal: sourceAnimal} = game.locateAnimal(sourceAid);
-      const {playerId: targetPid, animal: targetAnimal} = game.locateAnimal(targetId);
-      const SourceAnimal = getRef('Animal#' + sourceAid);
-      const SourceAnimalHtml = ReactDOM.findDOMNode(SourceAnimal);
-      const TargetAnimal = getRef('Animal#' + targetId);
-      const TargetAnimalHtml = ReactDOM.findDOMNode(TargetAnimal);
-      //const TargetPlayerWrapper = getRef('PlayerWrapper#' + targetPid);
-
-      Velocity(SourceAnimalHtml, {
-        translateX: 0
-        , translateY: -25
-      }, 1200)
-        .then(() => {
+    subscribe('traitNotify_Start', (done, actionData, getState) => {
+      const {sourceAid, traitId, traitType, targetId} = actionData;
+      if (localTraits[traitType + '_Start']) {
+        localTraits[traitType + '_Start'](done, actionData);
+      } else {
+        const TraitHtml = document.getElementById('AnimalTrait' + traitId);
+        TraitHtml.classList.add('Animate');
+        setTimeout(() => {
+          const TraitHtml = document.getElementById('AnimalTrait' + traitId);
+          if (TraitHtml) TraitHtml.classList.remove('Animate');
           done();
-        })
+        }, 500);
+      }
     });
 
-    subscribe('traitNotify_End_TraitCarnivorous', (done, {sourceAid, targetId}, getState) => {
-      const game = getState().get('game');
-      const {playerId: sourcePid, animal: sourceAnimal} = game.locateAnimal(sourceAid);
-      const {playerId: targetPid, animal: targetAnimal} = game.locateAnimal(targetId);
-      const SourceAnimal = getRef('Animal#' + sourceAid);
-      const TargetAnimal = getRef('Animal#' + targetId);
-
-      Velocity(ReactDOM.findDOMNode(SourceAnimal), {
-        translateX: 0
-        , translateY: 0
-      }, 500)
-        .then(() => {
-          done();
-        });
+    subscribe('traitNotify_End', (done, actionData, getState) => {
+      const {sourceAid, traitId, traitType, targetId} = actionData;
+      if (localTraits[traitType + '_End']) localTraits[traitType + '_End'](done, actionData);
     });
 //, gameNextPlayer: (done, component, {cards}) => {
 //  component.setState({

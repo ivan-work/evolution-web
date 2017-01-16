@@ -37,18 +37,18 @@ export class QuestionRecord extends Record({
   , time: null
   , sourcePid: null
   , sourceAid: null
-  , traitType: null
+  , traitId: null
   , targetPid: null
   , targetAid: null
   , turnUserId: null
   , turnRemainingTime: null
 }) {
-  static new(questionId, sourceAnimal, traitType, targetAnimal, turnUserId, turnRemainingTime) {
+  static new(questionId, sourceAnimal, traitId, targetAnimal, turnUserId, turnRemainingTime) {
     return new QuestionRecord({
       id: questionId
       , sourcePid: sourceAnimal.ownerId
       , sourceAid: sourceAnimal.id
-      , traitType
+      , traitId
       , targetPid: targetAnimal.ownerId
       , targetAid: targetAnimal.id
       , time: Date.now()

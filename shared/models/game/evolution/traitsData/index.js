@@ -48,12 +48,7 @@ export const TraitSwimming = {
 
 export const TraitRunning = {
   type: 'TraitRunning'
-  , action: (game, runningAnimal, attackAnimal) => dispatch => {
-    if (getRandom(0, 1) > 0) {
-      return true;
-    }
-    return false;
-  }
+  , action: (game, runningAnimal, trait, attackAnimal) => (dispatch) => getRandom(0, 1) > 0
 };
 
 export const TraitMimicry = {
@@ -62,9 +57,9 @@ export const TraitMimicry = {
   , cooldowns: fromJS([
     ['TraitMimicry', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
-  , action: (game, mimicryAnimal, newTargetAnimal, attackAnimal, attackTraitData) => (dispatch, getState) => {
+  , action: (game, mimicryAnimal, trait, newTargetAnimal, attackAnimal, attackTrait) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, TraitMimicry, mimicryAnimal));
-    return dispatch(server$traitActivate(game, attackAnimal, attackTraitData, newTargetAnimal));
+    return dispatch(server$traitActivate(game, attackAnimal, attackTrait, newTargetAnimal));
   }
   , getTargets: (game, attackAnimal, attackTraitData, mimicryAnimal) => {
     return game.getPlayer(mimicryAnimal.ownerId).continent.filter((animal) =>
@@ -96,7 +91,7 @@ export const TraitPiracy = {
   , cooldowns: fromJS([
     ['TraitPiracy', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
   ])
-  , action: (game, sourceAnimal, targetAnimal) => dispatch => {
+  , action: (game, sourceAnimal, trait, targetAnimal) => dispatch => {
     dispatch(server$traitStartCooldown(game.id, TraitPiracy, sourceAnimal));
     dispatch(server$startFeeding(game.id, sourceAnimal, 1, FOOD_SOURCE_TYPE.ANIMAL_TAKE, targetAnimal.id));
     return true;
@@ -112,12 +107,12 @@ export const TraitTailLoss = {
   , cooldowns: fromJS([
     ['TraitTailLoss', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
-  , action: (game, targetAnimal, traitIndex, attackAnimal, attackTraitData) => (dispatch, getState) => {
-    dispatch(server$traitAnimalRemoveTrait(game.id, targetAnimal, traitIndex));
+  , action: (game, targetAnimal, trait, targetTrait, attackAnimal, attackTrait) => (dispatch, getState) => {
+    dispatch(server$traitAnimalRemoveTrait(game.id, targetAnimal, targetTrait.id));
 
     dispatch(server$startFeeding(game.id, attackAnimal, 1, FOOD_SOURCE_TYPE.ANIMAL_HUNT, targetAnimal.id));
     dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, attackAnimal));
-    dispatch(server$traitNotify_End(game.id, attackAnimal.id, TraitCarnivorous.type, targetAnimal.id));
+    dispatch(server$traitNotify_End(game.id, attackAnimal.id, attackTrait, targetAnimal.id));
     return true;
   }
 };
@@ -171,7 +166,7 @@ export const TraitHibernation = {
 export const TraitPoisonous = {
   type: 'TraitPoisonous'
   , targetType: TRAIT_TARGET_TYPE.NONE
-  , action: (game, sourceAnimal, targetAnimal) => (dispatch) => {
+  , action: (game, sourceAnimal, trait, targetAnimal) => (dispatch) => {
     dispatch(server$traitSetAnimalFlag(game, targetAnimal, TRAIT_ANIMAL_FLAG.POISONED))
     return true;
   }

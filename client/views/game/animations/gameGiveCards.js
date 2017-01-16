@@ -4,12 +4,13 @@ import Velocity from 'velocity-animate'
 import {CardUnknown} from '../../../../shared/models/game/evolution/cards/index'
 
 export const gameGiveCards = (done, game, cards, getRef) => {
+  const DELAY = 300;
+
   const Deck = getRef('Deck');
   const DeckHtml = ReactDOM.findDOMNode(Deck);
 
   cards.some((card, index) => {
-    const CardComponent = getRef('Card#'+card.id);
-    const CardHtml = ReactDOM.findDOMNode(CardComponent);
+    const CardHtml = document.getElementById('Card'+card.id);
 
     //console.log(`index ${index}`, `deck pos ${game.deck.size - cards.size + index}`, cards.map(c => c.id).toArray());
 
@@ -34,7 +35,7 @@ export const gameGiveCards = (done, game, cards, getRef) => {
     Velocity(CardHtml, {translateX: -targetBbx.left + 200, translateY: -targetBbx.top + 200, rotateY: 90}
       , {
         duration: 800
-        , delay: (cards.size - index) * 200
+        , delay: (cards.size - index + 1) * DELAY
         , easing: 'easeOutCubic'
         , complete: () => {
           childNode.innerHTML = style.innerHTML;
@@ -48,5 +49,5 @@ export const gameGiveCards = (done, game, cards, getRef) => {
         , easing: 'easeInOutCubic'
       });
   });
-  setTimeout(() => done(), cards.size * 200);
+  setTimeout(() => done(), (cards.size + 1) * DELAY);
 };

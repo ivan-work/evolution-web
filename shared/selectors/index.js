@@ -31,5 +31,5 @@ export const makeGameSelectors = (getState, gameId) => ({
   , selectCard: (user, cardIndex) => selectCard(getState, gameId, user, cardIndex)
   , selectAnimal: (user, animalIndex) => selectAnimal(getState, gameId, user, animalIndex)
   , selectTrait: (user, animalIndex, traitIndex) => selectTrait(getState, gameId, user, animalIndex, traitIndex)
-  , selectQuestionId: (user, animalIndex, traitIndex) => getState().getIn(['games', gameId, 'question', 'id'])
+  , selectQuestionId: () => getState().getIn(['games', gameId, 'question', 'id'])
 });

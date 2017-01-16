@@ -30,14 +30,17 @@ export class TraitDefenceDialog extends Component {
     const {animal: targetAnimal} = game.locateAnimal(targetAid);
     const targetsMimicry = TraitMimicry.getTargets(game, attackAnimal, TraitCarnivorous, targetAnimal);
     const targetsTailLoss = targetAnimal.traits;
+
+    const traitTailLoss = targetAnimal.hasTrait(TraitTailLoss.type);
+    const traitMimicry = targetAnimal.hasTrait(TraitMimicry.type);
     return (<DialogContent>
       <TooltipsContextElement>
         <div className='TraitDefenceDialog'>
-          {targetAnimal.hasTrait(TraitTailLoss.type) && targetsTailLoss.size > 0
-            && this.renderTailLoss(targetsTailLoss, $traitDefenceAnswer.bind(null, id, TraitTailLoss.type))
+          {traitTailLoss && targetsTailLoss.size > 0
+            && this.renderTailLoss(targetsTailLoss, $traitDefenceAnswer.bind(null, id, traitTailLoss.id))
           }
-          {targetAnimal.hasTrait(TraitMimicry.type) && targetsMimicry.size > 0
-            && this.renderMimicry(targetsMimicry, $traitDefenceAnswer.bind(null, id, TraitMimicry.type))
+          {traitMimicry && targetsMimicry.size > 0
+            && this.renderMimicry(targetsMimicry, $traitDefenceAnswer.bind(null, id, traitMimicry.id))
           }
           <h1>
             <T.span text='Game.UI.TraitDefenceDialog.Time'/>:
@@ -70,7 +73,7 @@ export class TraitDefenceDialog extends Component {
         {targets.map((trait, index) =>
         <div key={trait.id}
              style={{display: 'inline-block'}}
-             onClick={() => onClick(index)}>
+             onClick={() => onClick(trait.id)}>
           <AnimalTrait trait={trait}/>
         </div>
           )}

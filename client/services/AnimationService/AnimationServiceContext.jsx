@@ -25,8 +25,8 @@ class Subscription {
   waitForUpdate(actionData, getState) {
     return new Promise((resolve, reject) => this.$resolveUpdate = resolve)
       .then(props => (props === null
-          ? Promise.resolve()
-          : new Promise((resolve) => this.callback(() => resolve(true), actionData, getState, props))))
+        ? Promise.resolve()
+        : new Promise((resolve) => this.callback(() => resolve(true), actionData, getState, props))))
   }
 
   componentUpdated(props) {
@@ -65,7 +65,8 @@ export const AnimationServiceContext = ({animations}) => (WrappedComponentClass)
   }
 
   setRef(name, component) {
-    this.animationRefs[name] = component;
+    if (component) this.animationRefs[name] = component;
+    else delete this.animationRefs[name];
   }
 
   getRef(name) {

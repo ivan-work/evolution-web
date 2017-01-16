@@ -26,14 +26,13 @@ class AnimalTrait extends Component {
   render() {
     const {trait, connectDragSource, isDragging, canDrag} = this.props;
 
-
     const className = classnames(Object.assign(this.classNames || {}, {
       AnimalTrait: true
       , [trait.type]: true
       , value: trait.value
     }));
 
-    return <div className={className}>
+    return <div id={'AnimalTrait'+trait.id} className={className}>
       <div className='inner'>
         {T.translate('Game.Trait.' + trait.type)} {trait.getDataModel().food > 0 ? '+'+trait.getDataModel().food : null}
       </div>

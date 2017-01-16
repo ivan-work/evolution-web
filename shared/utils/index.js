@@ -40,10 +40,10 @@ export function ensureParameter(data, type, optional) {
   if (!optional && data === void 0) throw new Error('Required data is undefined');
   if (typeof type === 'string') {
     if (typeof data !== type) {
-      throw new Error(`Data [${data}] is not typeof ${type}`);
+      throw new Error(`Data <${data}> is not typeof ${type}`);
     }
   } else if (!(data instanceof type)) {
-    throw new Error(`Data [${data}] is not instanceof of ${type}`);
+    throw new Error(`Data <${data}> is not instanceof of ${type}`);
   }
 }
 
