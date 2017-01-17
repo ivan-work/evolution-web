@@ -41,8 +41,7 @@ export const reducer = createReducer(null, {
   , gameDeployTrait
   , gameEndTurn
   , gameEnd
-  , gamePlayerLeft: (game) => null
-  , gamePlayerLeftNotification: gamePlayerLeft
+  , gamePlayerLeft
   , gameStartEat
   , gameStartDeploy
   , playerActed

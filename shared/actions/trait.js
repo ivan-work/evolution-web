@@ -49,6 +49,7 @@ export const server$traitActivate = (game, sourceAnimal, trait, ...params) => (d
   dispatch(server$traitNotify_Start(game, sourceAnimal, trait, ...params));
   const traitData = trait.getDataModel();
   logger.verbose('server$traitActivate:', sourceAnimal.id, trait.type);
+  //dispatch()
   const result = dispatch(traitData.action(game, sourceAnimal, trait, ...params));
   logger.silly('server$traitActivate finish:', trait.type, result);
   return result;
@@ -243,9 +244,9 @@ export const server$traitDefenceQuestion = (gameId, attackAnimal, trait, defence
     , {meta: {userId: defenceAnimal.ownerId}}));
 };
 
-export const traitDefenceAnswerRequest = (questionId, traitId, targetId) => (dispatch, getState) => dispatch({
+export const traitDefenceAnswerRequest = (traitId, targetId) => (dispatch, getState) => dispatch({
   type: 'traitDefenceAnswerRequest'
-  , data: {gameId: getState().get('game').id, questionId, traitId, targetId}
+  , data: {gameId: getState().get('game').id, questionId: getState().getIn(['game', 'question', 'id']), traitId, targetId}
   , meta: {server: true}
 });
 

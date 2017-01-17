@@ -25,7 +25,7 @@ export class TraitDefenceDialog extends Component {
 
   renderDialogContent() {
     const {game, $traitDefenceAnswer} = this.props;
-    const {id, sourceAid, targetAid, time} = game.question;
+    const {sourceAid, targetAid, time} = game.question;
     const {animal: attackAnimal} = game.locateAnimal(sourceAid);
     const {animal: targetAnimal} = game.locateAnimal(targetAid);
     const targetsMimicry = TraitMimicry.getTargets(game, attackAnimal, TraitCarnivorous, targetAnimal);
@@ -37,10 +37,10 @@ export class TraitDefenceDialog extends Component {
       <TooltipsContextElement>
         <div className='TraitDefenceDialog'>
           {traitTailLoss && targetsTailLoss.size > 0
-            && this.renderTailLoss(targetsTailLoss, $traitDefenceAnswer.bind(null, id, traitTailLoss.id))
+            && this.renderTailLoss(targetsTailLoss, $traitDefenceAnswer.bind(null, traitTailLoss.id))
           }
           {traitMimicry && targetsMimicry.size > 0
-            && this.renderMimicry(targetsMimicry, $traitDefenceAnswer.bind(null, id, traitMimicry.id))
+            && this.renderMimicry(targetsMimicry, $traitDefenceAnswer.bind(null, traitMimicry.id))
           }
           <h1>
             <T.span text='Game.UI.TraitDefenceDialog.Time'/>:

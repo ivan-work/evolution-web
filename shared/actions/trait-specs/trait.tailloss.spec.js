@@ -20,21 +20,21 @@ players:
   - continent: $A carn graz, $B carn
   - continent: $C tailloss carn
 `);
-    const {selectGame, selectQuestionId, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitTailLoss');
     expect(selectTrait(User1, 0, 1).type).equal('TraitCarnivorous');
 
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$C'));
 
     expectUnchanged(`User1 can't drop trait 2`, () =>
-        clientStore1.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitTailLoss', 2))
+        clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 2))
       , serverStore, clientStore0, clientStore1);
 
     expectUnchanged(`User1 can't drop trait -1`, () =>
-        clientStore1.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitTailLoss', -1))
+        clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', -1))
       , serverStore, clientStore0, clientStore1);
 
-    clientStore1.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitTailLoss', 1))
+    clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 1))
 
     expectUnchanged(`User0 has cooldown`, () =>
         clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$C'))
@@ -69,7 +69,7 @@ players:
 settings:
   timeTraitResponse: 1
 `);
-    const {selectGame, selectQuestionId, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore1.dispatch(gameDeployTraitRequest(selectCard(User1, 0).id, '$X', false, '$Z'));
     clientStore1.dispatch(gameDeployTraitRequest(selectCard(User1, 0).id, '$X', false, '$Z'));
@@ -89,7 +89,7 @@ settings:
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$Z'))
 
     expectUnchanged(`User1 wrong answer`, () =>
-      clientStore1.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitTailLoss', -1))
+        clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', -1))
       , serverStore, clientStore0, clientStore1);
 
     await new Promise(resolve => setTimeout(resolve, 0));
