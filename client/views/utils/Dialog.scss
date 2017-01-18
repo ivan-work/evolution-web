@@ -37,6 +37,8 @@ $transition: 200ms;
   }
 
   .Dialog {
+    max-height: 70%;
+    overflow: auto;
     display: inline-block;
     width: auto;
     @mixin visible {

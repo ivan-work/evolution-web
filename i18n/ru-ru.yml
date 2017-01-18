@@ -71,15 +71,20 @@ Game:
       Mimicry_Title: Мимикрировать
       TailLoss_Title: Отбросить хвост
   Log:
-    gameGiveCards     : Игрок $Player{0} получил карты ({1})
-    gameDeployAnimal  : Игрок $Player{0} выложил $A
-    gameDeployTrait   : Игрок $Player{0} выложил {1} на ${2}
-    gameEndTurn       :
-    gameStartEat      :
-    PhaseDeploy       :
-    gameNextPlayer    :
-    traitMoveFood     :
-    traitNotify_Start :
+    gameGiveCards:
+      0: $Player@{0} получил {1} карту
+      1: $Player@{0} получил {1} карты
+      2: $Player@{0} получил {1} карт
+      3: $Player@{0} не получил карт =(
+    gameDeployAnimal  : $Player@{0} выложил $A
+    gameDeployTrait   : $Player@{0} выложил ${1} на {2}
+    gameDeployTrait_LINKED : $Player@{0} выложил ${1} на {2} и {3}
+    gameEndTurn       : $Player@{0} закончил ход
+    gameNextPlayer    : $Player@{0} начал ход
+    PhaseDeploy       : Фаза развития
+    gameStartEat      : Фаза питания. Еда: {0}
+    traitMoveFood     : $Animal{0} взяло {1}
+    traitNotify_Start : $Animal{0} использует свойство {1}
   Trait:
     TraitSymbiosis      : Симбиоз
     TraitCommunication  : Сотрудничество

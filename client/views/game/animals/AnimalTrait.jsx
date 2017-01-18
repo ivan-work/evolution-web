@@ -10,7 +10,7 @@ import {AnimalModel} from '../../../../shared/models/game/evolution/AnimalModel'
 import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 
 import AnimalTraitDetails from './AnimalTraitDetails.jsx';
-import {Tooltip} from '../../utils/Tooltips';
+import {Tooltip} from '../../utils/Tooltips.jsx';
 // import {Tooltip} from 'react-mdl';
 // import {Tooltip2 as Tooltip} from '../../utils/Tooltips';
 // import Tooltip from 'reactjs-mappletooltip';

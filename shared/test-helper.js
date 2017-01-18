@@ -133,6 +133,10 @@ global.mockServerStore = function (initialServerState) {
   return serverStore
 };
 
+import T from 'i18n-react';
+import ruru from '../i18n/ru-ru.yml';
+T.setTexts(ruru[0]);
+
 global.mockClientStore = function (initialClientState) {
   const ioClient = syncSocketIOClient();
   const history = createMemoryHistory('/');

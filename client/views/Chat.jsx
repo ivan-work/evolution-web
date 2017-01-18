@@ -91,7 +91,7 @@ export class Chat extends React.Component {
   renderMessage({timestamp, from, fromLogin, to, toType, text}) {
     return (<div key={timestamp + from}>
       <div className='ChatTime'>
-        <span>[{TimeService.formatTime((timestamp + this.state.offset) %(24*60*60*1000))}]</span>
+        <span>[{TimeService.formatTimeOfDay(timestamp, this.state.offset)}]</span>
       </div>
       <div className='ChatMessage'>
         <strong>{fromLogin}: </strong>

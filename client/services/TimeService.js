@@ -1,8 +1,12 @@
 export class TimeService {
   constructor() {
-    this.offset = window.fetch('/api/time')
-      .then(r => r.json())
-      .then((serverTime) => serverTime - this.getRawTime())
+    if (window && window.fetch) {
+      this.offset = window.fetch('/api/time')
+        .then(r => r.json())
+        .then((serverTime) => serverTime - this.getRawTime())
+    } else {
+      this.offset = Promise.resolve(0);
+    }
   }
 
   getRawTime() {
@@ -27,6 +31,10 @@ export class TimeService {
     if (m < 10) m = '0' + m;
     if (s < 10) s = '0' + s;
     return (h != '00' ? h + ':' : '') + m + ':' + s;
+  }
+
+  formatTimeOfDay(timestamp, offset) {
+    return (timestamp + offset) % (24 * 60 * 60 * 1000);
   }
 }
 

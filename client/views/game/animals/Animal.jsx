@@ -53,23 +53,22 @@ class Animal extends React.Component {
         {model.traits
           .reverse()
           //.sort((t1, t2) => t1.isLinked() ? 1 : -1)
-          .map((trait, index) => {
-          return <div key={trait.id}
-                      style={{marginBottom: '-5px'}}>
+          .map((trait, index) =>
+          (<div key={trait.id}
+                style={{marginBottom: '-5px'}}>
             {this.renderTrait(trait, model)}
-          </div>
-          })}
+          </div>))}
       </div>
       {this.renderSelectLink()}
-        <div id={'AnimalBody'+model.id} className='inner'>
-          {model.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) ?
-          <span className='material-icons Flag Poisoned'>smoking_rooms</span> : null}
-          {model.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) ?
-          <span className='material-icons Flag Hibernated'>snooze</span> : null}
-          <div className='AnimalFoodContainer'>
-            {Array.from({length: model.food}).map((u, index) => <Food key={index}/>)}
-          </div>
+      <div id={'AnimalBody'+model.id} className='inner'>
+        {model.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) ?
+        <span className='material-icons Flag Poisoned'>smoking_rooms</span> : null}
+        {model.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) ?
+        <span className='material-icons Flag Hibernated'>snooze</span> : null}
+        <div className='AnimalFoodContainer'>
+          {Array.from({length: model.food}).map((u, index) => <Food key={index}/>)}
         </div>
+      </div>
     </div>);
   }
 }
