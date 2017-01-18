@@ -19,12 +19,9 @@ export const gameGiveCards = (done, game, cards, getRef) => {
     const targetBbx = CardHtml.getBoundingClientRect();
 
     const childNode = CardHtml.childNodes[0];
-    const style = {
-      innerHTML: childNode.innerHTML
-      , backgroundImage: childNode.style.backgroundImage
-    };
+    CardHtml.classList.add('cover');
+    const innerHTML = childNode.innerHTML;
     childNode.innerHTML = '';
-    childNode.style.backgroundImage = `url('${CardUnknown.image}')`;
 
     Velocity(CardHtml, {
       translateX: -targetBbx.left + sourceBbx.left + deckOffset.x
@@ -38,8 +35,8 @@ export const gameGiveCards = (done, game, cards, getRef) => {
         , delay: (cards.size - index + 1) * DELAY
         , easing: 'easeOutCubic'
         , complete: () => {
-          childNode.innerHTML = style.innerHTML;
-          childNode.style.backgroundImage = style.backgroundImage;
+          childNode.innerHTML = innerHTML;
+          if (CardHtml.classList.contains('isUser')) CardHtml.classList.remove('cover');
         }
       });
 

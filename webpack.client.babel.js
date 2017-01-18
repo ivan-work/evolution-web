@@ -71,7 +71,8 @@ export default {
       exclude: /node_modules/,
       loaders: [
         'style-loader'
-        , isDevelopment ? 'css-loader?sourceMap' : 'css-loader'
+        , isDevelopment ? 'css-loader' : 'css-loader'
+        // , isDevelopment ? 'css-loader?sourceMap' : 'css-loader' // https://github.com/webpack/css-loader/issues/296
         , isDevelopment ? 'sass-loader?sourceMap' : 'sass-loader'
       ]
     }, {

@@ -3,11 +3,18 @@ import T from 'i18n-react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
-import { DragSource } from 'react-dnd';
-import { DND_ITEM_TYPE } from './../dnd/DND_ITEM_TYPE';
+import {DragSource} from 'react-dnd';
+import {DND_ITEM_TYPE} from './../dnd/DND_ITEM_TYPE';
 
-import { AnimalModel } from '../../../../shared/models/game/evolution/AnimalModel';
-import { TraitModel } from '../../../../shared/models/game/evolution/TraitModel';
+import {AnimalModel} from '../../../../shared/models/game/evolution/AnimalModel';
+import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
+
+import AnimalTraitDetails from './AnimalTraitDetails.jsx';
+import {Tooltip} from '../../utils/Tooltips';
+// import {Tooltip} from 'react-mdl';
+// import {Tooltip2 as Tooltip} from '../../utils/Tooltips';
+// import Tooltip from 'reactjs-mappletooltip';
+
 
 import './AnimalTrait.scss';
 
@@ -32,11 +39,13 @@ class AnimalTrait extends Component {
       , value: trait.value
     }));
 
-    return <div id={'AnimalTrait'+trait.id} className={className}>
-      <div className='inner'>
-        {T.translate('Game.Trait.' + trait.type)} {trait.getDataModel().food > 0 ? '+'+trait.getDataModel().food : null}
-      </div>
-    </div>;
+    return (<div id={'AnimalTrait' + trait.id} className={className}>
+      <Tooltip label={<AnimalTraitDetails trait={trait}/>}>
+        <div className='inner'>
+          {T.translate('Game.Trait.' + trait.type)} {trait.getDataModel().food > 0 ? '+' + trait.getDataModel().food : null}
+        </div>
+      </Tooltip>
+    </div>);
   }
 }
 

@@ -19,7 +19,7 @@ export class TraitDefenceDialog extends Component {
     const {game} = this.props;
     return (<Dialog show={game.question && game.question.targetPid === game.userId}>
       <DialogTitle>{T.translate('Game.UI.TraitDefenceDialog.Title')}</DialogTitle>
-      {game.question ? this.renderDialogContent() : null}
+      {game.question && this.renderDialogContent()}
     </Dialog>);
   }
 

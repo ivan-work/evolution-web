@@ -1,6 +1,7 @@
 import React, {Component, PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 import {Portal} from './Portal.jsx';
+import Measure from 'react-measure';
 
 export const TooltipsContext = (WrappedComponent) => class TooltipsContext extends Component {
   constructor(props) {
@@ -18,8 +19,10 @@ export const TooltipsContext = (WrappedComponent) => class TooltipsContext exten
   }
 
   showTooltip(component) {
-    const bbx = ReactDOM.findDOMNode(component).getBoundingClientRect();
-    this.setState({component, bbx})
+    if (component.label !== null) {
+      const bbx = ReactDOM.findDOMNode(component).getBoundingClientRect();
+      this.setState({component, bbx})
+    }
   }
 
   hideTooltip() {
@@ -29,7 +32,7 @@ export const TooltipsContext = (WrappedComponent) => class TooltipsContext exten
   render() {
     return <div className='TooltipsContext'>
       <Portal target='tooltips'>
-        {this.state.component ? this.renderTooltip() : null}
+        {this.state.component && this.renderTooltip()}
       </Portal>
       <WrappedComponent {...this.props}/>
     </div>;
@@ -37,17 +40,22 @@ export const TooltipsContext = (WrappedComponent) => class TooltipsContext exten
 
   renderTooltip() {
     const {component, bbx} = this.state;
-    return <div style={{
-      position: 'absolute'
-      , left: bbx.left + bbx.width + 'px'
-      , top: bbx.top - 40 + 'px'
-    }}>
-      {component.renderTooltip()}
-    </div>
+    const {offseth, offsetv} = component.props;
+    return <Measure>
+      {({width, height}) => (
+        <div style={{
+          position: 'absolute'
+          , left: bbx.left + 'px'
+          , top: bbx.top - offsetv - (height || 200) + 'px'
+        }}>
+          {component.renderTooltip()}
+        </div>
+      )}
+    </Measure>
   }
 };
 
-export const TooltipsContextElement = class TooltipsContextElement extends TooltipsContext(({children}) => children) {
+export class TooltipsContextElement extends TooltipsContext(({children}) => children) {
   static propTypes = {
     children: React.PropTypes.node.isRequired
   };
@@ -62,8 +70,15 @@ export const TooltipsContextElement = class TooltipsContextElement extends Toolt
 
 export class Tooltip extends Component {
   static propTypes = {
-    tip: React.PropTypes.string.isRequired
+    label: React.PropTypes.any
     , children: React.PropTypes.node.isRequired
+    , offseth: React.PropTypes.number
+    , offsetv: React.PropTypes.number
+  };
+
+  static defaultProps = {
+    offseth: 40
+    , offsetv: 40
   };
 
   static contextTypes = {
@@ -78,8 +93,9 @@ export class Tooltip extends Component {
   }
 
   renderTooltip() {
-    const {tip} = this.props;
-    return <div>{tip}</div>
+    const {label} = this.props;
+    return (typeof label === 'string' ? <span>{label}</span>
+      : label);
   }
 
   render() {

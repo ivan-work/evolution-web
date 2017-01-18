@@ -9,8 +9,8 @@ export default class Deck extends Component {
 
   getXYForCard(index) {
     return {
-      x: .5 * index
-      , y: .25 * index
+      x: .25 * index
+      , y: .1 * index
     }
   }
 

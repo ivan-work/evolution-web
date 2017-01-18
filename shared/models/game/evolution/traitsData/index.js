@@ -21,8 +21,6 @@ import {
 import {getRandom} from '../../../../utils/randomGenerator';
 import {checkAction} from '../TraitDataModel';
 
-import {FOOD_SOURCE_TYPE} from '../constants';
-
 //
 
 import {TraitCarnivorous} from './TraitCarnivorous';
@@ -93,7 +91,7 @@ export const TraitPiracy = {
   ])
   , action: (game, sourceAnimal, trait, targetAnimal) => dispatch => {
     dispatch(server$traitStartCooldown(game.id, TraitPiracy, sourceAnimal));
-    dispatch(server$startFeeding(game.id, sourceAnimal, 1, FOOD_SOURCE_TYPE.ANIMAL_TAKE, targetAnimal.id));
+    dispatch(server$startFeeding(game.id, sourceAnimal, 1, 'TraitPiracy', targetAnimal.id));
     return true;
   }
   , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game)
@@ -110,7 +108,7 @@ export const TraitTailLoss = {
   , action: (game, targetAnimal, trait, targetTrait, attackAnimal, attackTrait) => (dispatch, getState) => {
     dispatch(server$traitAnimalRemoveTrait(game.id, targetAnimal, targetTrait.id));
 
-    dispatch(server$startFeeding(game.id, attackAnimal, 1, FOOD_SOURCE_TYPE.ANIMAL_HUNT, targetAnimal.id));
+    dispatch(server$startFeeding(game.id, attackAnimal, 1, 'TraitTailLoss', targetAnimal.id));
     dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, attackAnimal));
     dispatch(server$traitNotify_End(game.id, attackAnimal.id, attackTrait, targetAnimal.id));
     return true;

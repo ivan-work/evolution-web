@@ -3,8 +3,7 @@ import uuid from 'uuid';
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 
 import {
-  FOOD_SOURCE_TYPE
-  , TRAIT_TARGET_TYPE
+  TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
   , TRAIT_COOLDOWN_LINK
@@ -159,7 +158,7 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
   dispatch(server$game(gameId, traitMoveFood(gameId, animal.id, Math.min(amount, neededFood), sourceType, sourceId)));
 
   // Cooperation
-  if (sourceType === FOOD_SOURCE_TYPE.GAME && selectGame(getState, gameId).food > 0) {
+  if (sourceType === 'GAME' && selectGame(getState, gameId).food > 0) {
     dispatch(local$traitStartCooldown(gameId, TraitCooperation, animal));
     animal.traits.filter(trait => trait.type === TraitCooperation.type)
       .forEach(trait => {
@@ -168,7 +167,7 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
         if (linkedAnimal && checkAction(game, TraitCooperation, linkedAnimal)) {
           const linkedTrait = linkedAnimal.hasTrait(TraitCooperation.type);
           dispatch(server$traitNotify_Start(game, animal, trait, linkedTrait));
-          dispatch(server$startFeeding(gameId, linkedAnimal, 1, FOOD_SOURCE_TYPE.GAME, animal.id));
+          dispatch(server$startFeeding(gameId, linkedAnimal, 1, 'GAME', animal.id));
         }
       });
   }
@@ -182,7 +181,7 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
       if (linkedAnimal && checkAction(game, TraitCommunication, linkedAnimal)) {
         const linkedTrait = linkedAnimal.hasTrait(TraitCommunication.type);
         dispatch(server$traitNotify_Start(game, animal, trait, linkedTrait));
-        dispatch(server$startFeeding(gameId, linkedAnimal, 1, FOOD_SOURCE_TYPE.ANIMAL_COPY, animal.id));
+        dispatch(server$startFeeding(gameId, linkedAnimal, 1, 'TraitCommunication', animal.id));
       }
     });
   return true;
@@ -308,7 +307,7 @@ export const traitClientToServer = {
     dispatch(server$startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId));
     dispatch(server$startCooldown(gameId, 'TraitCarnivorous', TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId));
 
-    dispatch(server$startFeeding(gameId, animal, 1, FOOD_SOURCE_TYPE.GAME));
+    dispatch(server$startFeeding(gameId, animal, 1, 'GAME'));
     dispatch(server$playerActed(gameId, userId));
   }
   , traitActivateRequest: ({gameId, sourceAid, traitId, targetId}, {userId}) => (dispatch, getState) => {

@@ -6,7 +6,7 @@ import {CardModel} from '../../shared/models/game/CardModel';
 import {CooldownList} from '../../shared/models/game/CooldownList';
 import {AnimalModel} from '../../shared/models/game/evolution/AnimalModel';
 import {TraitModel} from '../../shared/models/game/evolution/TraitModel';
-import {FOOD_SOURCE_TYPE, CTT_PARAMETER} from '../../shared/models/game/evolution/constants';
+import {CTT_PARAMETER} from '../../shared/models/game/evolution/constants';
 //
 //const gameLog = (actionType, data) => (state => state.updateIn([data.gameId, 'log'], log => log.push(gameLogsMap[actionType](data))));
 //
@@ -128,18 +128,18 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
     .updateIn(['players', playerId, 'continent', animalIndex], animal => animal.receiveFood(amount));
 
   switch (sourceType) {
-    case FOOD_SOURCE_TYPE.GAME:
+    case 'GAME':
       return updatedGame
         .update('food', food => food - amount)
-        .update(addToGameLog(['traitMoveFood' + sourceType, animalId, amount, sourceType, sourceId]))   ;
-    case FOOD_SOURCE_TYPE.ANIMAL_TAKE:
+        .update(addToGameLog(['traitMoveFood', animalId, amount, sourceType, sourceId]))   ;
+    case 'TraitPiracy':
       const {playerId: takenFromPid, animalIndex: takenFromAix} = game.locateAnimal(sourceId);
       return updatedGame
         .updateIn(['players', takenFromPid, 'continent', takenFromAix, 'food'], food => Math.max(food - amount, 0))
-        .update(addToGameLog(['traitMoveFood' + sourceType, animalId, amount, sourceType, sourceId]));
+        .update(addToGameLog(['traitMoveFood', animalId, amount, sourceType, sourceId]));
     default:
       return updatedGame
-        .update(addToGameLog(['traitMoveFood' + sourceType, animalId, amount, sourceType, sourceId]));
+        .update(addToGameLog(['traitMoveFood', animalId, amount, sourceType, sourceId]));
   }
 };
 

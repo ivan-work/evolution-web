@@ -2,11 +2,17 @@ import React from 'react';
 import T from 'i18n-react';
 import classnames from 'classnames';
 
-import { DragSource } from 'react-dnd';
-import { DND_ITEM_TYPE } from './../dnd/DND_ITEM_TYPE';
+import {DragSource} from 'react-dnd';
+import {DND_ITEM_TYPE} from './../dnd/DND_ITEM_TYPE';
 
-import { CardModel } from '../../../../shared/models/game/CardModel';
+import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
+import {CardModel} from '../../../../shared/models/game/CardModel';
 import './Card.scss';
+
+import {Tooltip} from './../../utils/Tooltips.jsx';
+import AnimalTraitDetails from '../animals/AnimalTraitDetails.jsx';
+
+import gecko from '../../../assets/gfx/gecko-080.svg';
 
 export class Card extends React.Component {
   static propTypes = {
@@ -25,6 +31,7 @@ export class Card extends React.Component {
       Card: true
       , ['trait-count-' + this.props.card.traitsCount]: true
       , alternateTrait: this.state.alternateTrait
+      , cover: this.props.card.traitsCount === 0
     }
   }
 
@@ -36,18 +43,25 @@ export class Card extends React.Component {
 
     const classNames = classnames(this.getClassNames());
 
-    return <div id={'Card'+card.id} className={classNames} onClick={this.onCardClick}>
-      <div className='inner' style={{backgroundImage: `url('${card.image}')`}}>
-        {card.traitsCount === 1
-          ? (<div className={'trait trait-single ' + card.trait1}>{T.translate('Game.Trait.' + card.trait1)}</div>)
-          : null}
-        {card.traitsCount === 2
-          ? (<div className={'trait trait1 ' + card.trait1}>{T.translate('Game.Trait.' + card.trait1)}</div>)
-          : null}
-        {card.traitsCount === 2
-          ? (<div className={'trait trait2 ' + card.trait2}>{T.translate('Game.Trait.' + card.trait2)}</div>)
-          : null}
-      </div>
+    return <div id={'Card' + card.id} className={classNames} onClick={this.onCardClick}>
+      <Tooltip label={
+        card.traitsCount === 1 ? <AnimalTraitDetails trait={TraitModel.new(card.trait1)}/>
+          : card.traitsCount === 2 ? <div style={{display: 'flex'}}>
+          <AnimalTraitDetails trait={TraitModel.new(card.trait1)}/>
+          <AnimalTraitDetails trait={TraitModel.new(card.trait2)}/>
+        </div>
+          : null
+      }>
+        <div className='inner'>
+          {card.traitsCount === 1
+            ? (<div className={'trait trait-single ' + card.trait1}>{T.translate('Game.Trait.' + card.trait1)}</div>)
+            : null}
+          {card.traitsCount === 2
+            && <div className={'trait trait1 ' + card.trait1}>{T.translate('Game.Trait.' + card.trait1)}</div>}
+          {card.traitsCount === 2
+          && <div className={'trait trait2 ' + card.trait2}>{T.translate('Game.Trait.' + card.trait2)}</div>}
+        </div>
+      </Tooltip>
     </div>
   }
 }
@@ -74,6 +88,7 @@ export const DragCard = DragSource(DND_ITEM_TYPE.CARD
   static propTypes = {
     ...Card.propTypes
     , dragEnabled: React.PropTypes.bool
+    , isUser: React.PropTypes.bool
   };
 
   onCardClick() {
@@ -88,9 +103,10 @@ export const DragCard = DragSource(DND_ITEM_TYPE.CARD
   }
 
   getClassNames() {
-    const {canDrag, isDragging} = this.props;
+    const {canDrag, isDragging, isUser} = this.props;
     return {
       ...super.getClassNames()
+      , isUser
       , draggable: true
       , canDrag
       , isDragging
