@@ -1,0 +1,12 @@
+.DeckWrapper {
+  margin: 0 0 15px;
+  display: flex;
+  .Deck {
+    position: relative;
+    display: inline-block;
+    flex-grow: 1;
+    .CardPlace {
+      display: inline-block;
+    }
+  }
+}
