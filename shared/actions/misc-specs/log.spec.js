@@ -12,7 +12,7 @@ import {replaceGetRandom} from '../../utils/randomGenerator';
 
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
 
-describe.only('Logging test:', () => {
+describe('Logging test:', () => {
   it('Typical game', async() => {
     const [{ParseGame, serverStore}, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockGame(3);
     const gameId = ParseGame(`
@@ -67,6 +67,23 @@ players:
     });
 
     clientStore1.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$H'));
+    clientStore2.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore1.dispatch(gameEndTurnRequest());
+    clientStore2.dispatch(gameEndTurnRequest());
+
+    const $Q = ['$Animal', 'TraitCarnivorous'];
+    const $W = $Q;
+    const $Z = $Q;
+    const $X = $Q;
+
+    const $A = ['$Animal', 'TraitCamouflage', 'TraitScavenger', 'TraitCommunication'];
+    const $S = ['$Animal', 'TraitTailLoss', 'TraitGrazing', 'TraitCommunication'];
+    const $S1 = ['$Animal', 'TraitGrazing', 'TraitCommunication'];
+    const $D = ['$Animal', 'TraitCarnivorous', 'TraitFatTissue', 'TraitPiracy'];
+    const $F = ['$Animal', 'TraitSymbiosis', 'TraitCooperation'];
+    const $G = ['$Animal', 'TraitMimicry', 'TraitRunning', 'TraitSymbiosis', 'TraitCooperation'];
+    const $H = ['$Animal', 'TraitPoisonous', 'TraitHibernation'];
 
     const checkLog = (selectGame) => {
       let i = 0;
@@ -81,7 +98,7 @@ players:
       expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User2.id]);
       expect(selectGame().log.get(i++)).eql(['gameDeployAnimal', User2.id]);
       expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User0.id]);
-      expect(selectGame().log.get(i++)).eql(['gameDeployTrait', User0.id, 'TraitFatTissue', selectAnimal(User0, 0).id]);
+      expect(selectGame().log.get(i++)).eql(['gameDeployTrait', User0.id, 'TraitFatTissue', ['$Animal']]);
       expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User2.id]);
       expect(selectGame().log.get(i++)).eql(['gameEndTurn', User2.id, true, false]);
 
@@ -91,46 +108,64 @@ players:
       expect(selectGame().log.get(i++)).eql(['gameStartEat', 12]);
       expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User0.id]);
 
-      expect(selectGame().log.get(i++)).eql(['traitMoveFood', '$Q', 1, 'GAME', void 0]);
+      expect(selectGame().log.get(i++)).eql(['traitMoveFood', 1, 'GAME', $Q, null]);
       expect(selectGame().log.get(i++)).eql(['gameEndTurn', User0.id, false, false]);
 
       expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User1.id]);
-      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', '$S', 'TraitGrazing', null]);
-      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', '$H', 'TraitHibernation', null]);
-      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', '$D', 'TraitPiracy', '$Q']);
-      expect(selectGame().log.get(i++)).eql(['traitMoveFood', '$D', 1, 'TraitPiracy', '$Q']);
-      expect(selectGame().log.get(i++)).eql(['traitMoveFood', '$G', 1, 'GAME', void 0]);
-      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', '$G', 'TraitCooperation', selectTrait1(3, 1).id]);
-      expect(selectGame().log.get(i++)).eql(['traitMoveFood', '$F', 1, 'GAME', '$G']);
+      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $S, 'TraitGrazing', void 0]);
+      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $H, 'TraitHibernation', void 0]);
+      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $D, 'TraitPiracy', $Q]);
+      expect(selectGame().log.get(i++)).eql(['traitMoveFood', 1, 'TraitPiracy', $D, $Q]);
+      expect(selectGame().log.get(i++)).eql(['traitMoveFood', 1, 'GAME', $G, null]);
+      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $G, 'TraitCooperation', $F]);
+      expect(selectGame().log.get(i++)).eql(['traitMoveFood', 1, 'GAME', $F, $G]);
       expect(selectGame().log.get(i++)).eql(['gameEndTurn', User1.id, false, false]);
 
       expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User2.id]);
-      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', '$Z', 'TraitCarnivorous', '$G']);
-      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', '$G', 'TraitRunning', '$Z']);
+      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $Z, 'TraitCarnivorous', $G]);
+      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $G, 'TraitRunning', void 0]);
       expect(selectGame().log.get(i++)).eql(['gameEndTurn', User2.id, false, false]);
 
       expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User0.id]);
-      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', '$Q', 'TraitCarnivorous', '$S']);
-      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', '$S', 'TraitTailLoss', traitTailLossId]);
-      expect(selectGame().log.get(i++)).eql(['traitMoveFood', '$Q', 1, 'TraitTailLoss', '$S']);
+      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $Q, 'TraitCarnivorous', $S]);
+      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $S, 'TraitTailLoss', ['$Trait', 0].concat($S.slice(1))]);
+      expect(selectGame().log.get(i++)).eql(['traitMoveFood', 1, 'TraitTailLoss', $Q, $S1]);
       expect(selectGame().log.get(i++)).eql(['gameEndTurn', User0.id, false, false]);
 
       expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User1.id]);
-      expect(selectGame().log.get(i++)).eql(['traitMoveFood', '$D', 1, 'GAME', void 0]);
+      expect(selectGame().log.get(i++)).eql(['traitMoveFood', 1, 'GAME', $D, null]);
       expect(selectGame().log.get(i++)).eql(['gameEndTurn', User1.id, false, false]);
 
       expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User2.id]);
-      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', '$X', 'TraitCarnivorous', '$G']);
-      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', '$G', 'TraitMimicry', '$H']);
-      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', '$X', 'TraitCarnivorous', '$H']);
-      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', '$H', 'TraitPoisonous', '$X']);
-      expect(selectGame().log.get(i++)).eql(['traitMoveFood', '$X', 2, 'TraitCarnivorous', '$H']);
-      expect(selectGame().log.get(i++)).eql(['traitMoveFood', '$A', 1, 'TraitScavenger', '$X']);
-      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', '$A', 'TraitCommunication', selectTrait1(1, 1).id]);
-      expect(selectGame().log.get(i++)).eql(['traitMoveFood', '$S', 1, 'TraitCommunication', '$A']);
+      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $X, 'TraitCarnivorous', $G]);
+      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $G, 'TraitMimicry', $H]);
+      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $X, 'TraitCarnivorous', $H]);
+      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $H, 'TraitPoisonous', $X]);
+      expect(selectGame().log.get(i++)).eql(['traitMoveFood', 2, 'TraitCarnivorous', $X, $H]);
+      expect(selectGame().log.get(i++)).eql(['traitMoveFood', 1, 'TraitScavenger', $A, $X]);
+      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $A, 'TraitCommunication', $S1]);
+      expect(selectGame().log.get(i++)).eql(['traitMoveFood', 1, 'TraitCommunication', $S1, $A]);
+      expect(selectGame().log.get(i++)).eql(['traitKillAnimal', $H]);
       expect(selectGame().log.get(i++)).eql(['gameEndTurn', User2.id, false, false]);
       expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User0.id]);
+      expect(selectGame().log.get(i++)).eql(['gameEndTurn', User0.id, true, false]);
+      expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User1.id]);
+      expect(selectGame().log.get(i++)).eql(['gameEndTurn', User1.id, true, false]);
+      expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User2.id]);
+      expect(selectGame().log.get(i++)).eql(['gameEndTurn', User2.id, true, false]);
+
+      expect(selectGame().log.get(i++)).eql(['gameAnimalStarve', ['$Animal', 'TraitFatTissue']]);
+      expect(selectGame().log.get(i++)).eql(['gameAnimalStarve', ['$Animal']]);
+      expect(selectGame().log.get(i++)).eql(['gameAnimalStarve', ['$Animal', 'TraitCarnivorous']]);
+      expect(selectGame().log.get(i++)).eql(['gameAnimalStarve', ['$Animal', 'TraitCarnivorous']]);
+      expect(selectGame().log.get(i++)).eql(['gameAnimalStarve', ['$Animal']]);
+      expect(selectGame().log.get(i++)).eql(['gameAnimalStarve', ['$Animal', 'TraitCarnivorous']]);
+      expect(selectGame().log.get(i++)).eql(['traitAnimalPoisoned', $X]);
+      expect(selectGame().log.get(i++)).eql(['gameAnimalStarve', ['$Animal', 'TraitCarnivorous']]);
+
+      expect(selectGame().log.get(i++)).eql(['PhaseDeploy']);
     };
+    // console.log(selectGame().log.toJS())
     checkLog(selectGame);
     checkLog(selectGame0);
   });

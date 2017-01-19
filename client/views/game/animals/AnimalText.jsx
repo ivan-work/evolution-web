@@ -12,10 +12,18 @@ const style = {
   , height: '1em'
 };
 
-export const AnimalText = ({animal}) =>(
+export const AnimalText = ({animal, select}) =>(
   <span>
     <img style={style} className='AnimalText' src={gecko}/>
-    {!!animal && <span>({animal.traits.reverse().map((trait) => T.translate('Game.Trait.'+trait.type)).join(', ')})</span>}
+    {!!animal && <span>
+      ({animal.slice(1)
+        .map((trait, index) => (
+          <span className={index === select ? '' : ''}>
+            {T.translate('Game.Trait.' + trait)}
+          </span>))
+        .map((item, index) => [index > 0 && ', ', item])
+      })
+    </span>}
   </span>
 );
 
