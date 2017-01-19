@@ -4,11 +4,7 @@ import {Map, List, fromJS} from 'immutable';
 
 import {gameCreateRequest} from '~/shared/actions/actions';
 
-export class RoomSection extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      gameSeed: `deck: 12 carnivorous, 6 sharp
+const defaultGameSeed = `deck: 12 carnivorous, 6 sharp
 phase: 2
 food: 2
 players:
@@ -16,8 +12,19 @@ players:
     continent: carn sharp, carn camo
   - hand: 1 sharp, 1 camo
     continent: carn sharp, carn camo
-`
+`;
+
+export class RoomSection extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      gameSeed: window.localStorage.getItem('gameSeed') || defaultGameSeed
     }
+  }
+
+  setGameSeed(gameSeed) {
+    window.localStorage.setItem('gameSeed', gameSeed);
+    this.setState({gameSeed})
   }
 
   render() {
@@ -31,7 +38,7 @@ players:
           rows={8} cols={40}
           value={this.state.gameSeed}
           style={{overflow: 'hidden'}}
-          onChange={(e) => this.setState({gameSeed: e.target.value})}/>
+          onChange={(e) => this.setGameSeed(e.target.value)}/>
       </div>
     </div>
   }

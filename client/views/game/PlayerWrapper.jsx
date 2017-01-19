@@ -14,6 +14,8 @@ import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 import {PlayerModel} from '../../../shared/models/game/PlayerModel';
 import {CTT_PARAMETER} from '../../../shared/models/game/evolution/constants';
 
+import {TraitMetamorphose} from '../../../shared/models/game/evolution/traitTypes';
+
 export class PlayerWrapper extends Component {
   static contextTypes = {
     gameActions: React.PropTypes.object.isRequired
@@ -30,7 +32,13 @@ export class PlayerWrapper extends Component {
     super(props, context);
     this.$noop = () => null;
     this.$traitTakeFood = (animal) => context.gameActions.$traitTakeFood(animal.id);
-    this.$traitActivate = context.gameActions.$traitActivate;
+    this.$traitActivate = (animal, trait) => {
+      const traitData = trait.getDataModel();
+      if (trait.type === TraitMetamorphose) {
+
+      }
+      this.context.gameActions.$traitActivate(animal.id, trait.id);
+    };
     this.$deployTrait = (card, animal, alternateTrait, component) => {
       if (card.getTraitDataModel(alternateTrait).cardTargetType & CTT_PARAMETER.LINK) {
         component.setState({selectLink: {card, animal, alternateTrait}});

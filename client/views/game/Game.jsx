@@ -29,6 +29,8 @@ class Game extends React.Component {
   render() {
     const {game} = this.props;
 
+    //<TraitSelectDialog game={game} $traitDefenceAnswer={this.context.gameActions.$traitDefenceAnswer}/>
+
     return <div className='Game'>
       <Portal target='header'>
         <ControlGroup name={T.translate('Game.Game')}>

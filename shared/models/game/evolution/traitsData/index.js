@@ -26,6 +26,7 @@ import {checkAction} from '../TraitDataModel';
 import {TraitCarnivorous} from './TraitCarnivorous';
 
 export {TraitCarnivorous};
+export * from './tft';
 
 export const TraitParasite = {
   type: 'TraitParasite'
@@ -128,10 +129,10 @@ export const TraitCommunication = {
 
 export const TraitGrazing = {
   type: 'TraitGrazing'
+  , targetType: TRAIT_TARGET_TYPE.NONE
   , cooldowns: fromJS([
     ['TraitGrazing', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
-  , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
   , action: (game, sourceAnimal) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, TraitGrazing, sourceAnimal));
