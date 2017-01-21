@@ -138,12 +138,14 @@ const traitNotify_End = (gameId, sourceAid, traitId, traitType, targetId) => ({
   , data: {gameId, sourceAid, traitId, traitType, targetId}
 });
 
-export const server$traitNotify_Start = (game, sourceAnimal, trait, target) =>
-  server$game(game.id, traitNotify_Start(game.id, sourceAnimal.id, trait.id, trait.type, target && target.id || target));
+export const server$traitNotify_Start = (game, sourceAnimal, trait, target) => {
+  logger.debug('server$traitNotify_Start:', trait.type);
+  return server$game(game.id, traitNotify_Start(game.id, sourceAnimal.id, trait.id, trait.type, target && target.id || target));
+}
 
 //TODO TRAIT
 export const server$traitNotify_End = (gameId, sourceAid, trait, targetId) => {
-  logger.debug('server$traitNotify_End');
+  logger.debug('server$traitNotify_End:', trait.type);
   return server$game(gameId, traitNotify_End(gameId, sourceAid, trait.id, trait.type, targetId));
 };
 

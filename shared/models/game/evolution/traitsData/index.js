@@ -23,7 +23,7 @@ import {checkAction} from '../TraitDataModel';
 
 //
 
-import {TraitCarnivorous} from './TraitCarnivorous';
+import {TraitCarnivorous, endHunt} from './TraitCarnivorous';
 
 export {TraitCarnivorous};
 export * from './tft';
@@ -110,8 +110,8 @@ export const TraitTailLoss = {
     dispatch(server$traitAnimalRemoveTrait(game.id, targetAnimal, targetTrait.id));
 
     dispatch(server$startFeeding(game.id, attackAnimal, 1, 'TraitTailLoss', targetAnimal.id));
-    dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, attackAnimal));
-    dispatch(server$traitNotify_End(game.id, attackAnimal.id, attackTrait, targetAnimal.id));
+
+    dispatch(endHunt(game, attackAnimal, attackTrait, targetAnimal));
     return true;
   }
 };

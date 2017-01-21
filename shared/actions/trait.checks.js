@@ -70,7 +70,7 @@ export const checkTraitActivation_Trait = (game, sourceAnimal, traitData, traitI
   }
   if (traitData.checkTarget && !traitData.checkTarget(game, sourceAnimal, trait)) {
     throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
-      , 'Animal(%s):Trait(%s) checkTarget on Trait@%s failed', sourceAnimal.id, traitData.type, traitId)
+      , 'Animal(%s):Trait(%s) checkTarget on Trait@%s failed', sourceAnimal.id, traitData.type, trait.type)
   }
   return trait;
 };

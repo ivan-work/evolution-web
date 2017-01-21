@@ -9,6 +9,8 @@ export class AnimalModel extends Record({
   id: null
   , ownerId: null
   , food: 0
+  , maxFat: 0
+  , maxFood: 1
   , traits: List()
   , flags: Map()
 }) {
@@ -52,6 +54,16 @@ export class AnimalModel extends Record({
     return this.flags.get(flag);
   }
 
+
+
+
+
+
+
+
+
+
+
   getFood() {
     return this.food + this.getFat();
   }
@@ -71,12 +83,11 @@ export class AnimalModel extends Record({
   canEat(game) {
     return this.needsFood() > 0
       && !this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
-      && !this.traits
+      && !this.hasFlag(TRAIT_ANIMAL_FLAG.SHELL)
+      && !this.traits // TODO replace by flag
         .filter(trait => trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === this.id)
         .some(trait => {
-          //console.log(`${this.id} is living on ${trait.linkAnimalId}`);
           const {animal: hostAnimal} = game.locateAnimal(trait.linkAnimalId);
-          //console.log(`And ${trait.linkAnimalId} ${hostAnimal.canSurvive() ? `can` : `can't`} survive`)
           return !hostAnimal.canSurvive();
         });
   }
