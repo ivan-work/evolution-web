@@ -32,12 +32,12 @@ export class PlayerWrapper extends Component {
     super(props, context);
     this.$noop = () => null;
     this.$traitTakeFood = (animal) => context.gameActions.$traitTakeFood(animal.id);
-    this.$traitActivate = (animal, trait) => {
-      const traitData = trait.getDataModel();
-      if (trait.type === TraitMetamorphose) {
-
-      }
-      this.context.gameActions.$traitActivate(animal.id, trait.id);
+    this.$traitActivate = (animal, trait, targetId) => {
+      //const traitData = trait.getDataModel();
+      //if (trait.type === TraitMetamorphose) {
+      //
+      //}
+      this.context.gameActions.$traitActivate(animal.id, trait.id, targetId);
     };
     this.$deployTrait = (card, animal, alternateTrait, component) => {
       if (card.getTraitDataModel(alternateTrait).cardTargetType & CTT_PARAMETER.LINK) {

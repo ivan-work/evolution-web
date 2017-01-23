@@ -87,7 +87,7 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
       case DND_ITEM_TYPE.TRAIT:
       {
         const {trait, sourceAnimal} = monitor.getItem();
-        props.onTraitDropped(sourceAnimal.id, trait.id, props.model.id);
+        props.onTraitDropped(sourceAnimal, trait, props.model.id);
         break;
       }
       case DND_ITEM_TYPE.ANIMAL_LINK:
@@ -154,7 +154,7 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
         return <DragAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}/>;
       } else if (trait.getDataModel().playerControllable) {
         return <ClickAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}
-                                 onClick={() => this.props.onTraitDropped(animal.id, trait.id)}/>;
+                                 onClick={() => this.props.onTraitDropped(animal, trait)}/>;
       } else {
         return <AnimalTrait trait={trait}/>;
       }
