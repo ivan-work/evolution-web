@@ -30,15 +30,19 @@ export default class AnimalTraitDetails extends Component {
       .replace(/\$CDTurn/g, T.translate('Game.TraitDesc.$CDTurn'))
       .replace(/\$Trait\w+/g, x => '"' + T.translate('Game.Trait.' + x.slice(1)) + '"')
 
-    const className = classnames(Object.assign(this.classNames || {}, {
+    const className = classnames({
       AnimalTraitDetails: true
       , [trait.type]: true
       , value: trait.value
-    }));
+    });
 
     return <MDL.Card className={className} shadow={2}>
-      <MDL.CardTitle>{T.translate('Game.Trait.' + trait.type)}&nbsp;{trait.getDataModel().food > 0 && ('+' + trait.getDataModel().food)}</MDL.CardTitle>
-      <MDL.CardText><span dangerouslySetInnerHTML={{__html: text}}/></MDL.CardText>
+      <MDL.CardTitle className='Title'>
+        <span>
+          {T.translate('Game.Trait.' + trait.type)}&nbsp;{trait.getDataModel().food > 0 && ('+' + trait.getDataModel().food)}
+        </span>
+      </MDL.CardTitle>
+      <MDL.CardText className='Text'><span dangerouslySetInnerHTML={{__html: text}}/></MDL.CardText>
     </MDL.Card>;
   }
 }

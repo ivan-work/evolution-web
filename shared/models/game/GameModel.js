@@ -58,7 +58,7 @@ export class QuestionRecord extends Record({
   }
 
   static fromJS(js) {
-    return js === null ? null : new QuestionRecord(js);
+    return js == null ? null : new QuestionRecord(js);
   }
 }
 
@@ -139,6 +139,7 @@ export class GameModel extends Record(GameModelData) {
       , deck: List(js.deck).map(c => CardModel.fromServer(c))
       , players: OrderedMap(js.players).map(PlayerModel.fromServer).sort((p1, p2) => p1.index > p2.index)
       , status: new StatusRecord(js.status)
+      , question: QuestionRecord.fromJS(js.question)
       , cooldowns: CooldownList.fromServer(js.cooldowns)
       , settings: SettingsRecord.fromJS(js.settings)
       , log: List(js.log)
