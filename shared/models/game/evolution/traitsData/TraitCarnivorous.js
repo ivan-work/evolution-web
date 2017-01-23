@@ -5,6 +5,7 @@ import {
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
   , TRAIT_COOLDOWN_LINK
+  , TRAIT_ANIMAL_FLAG
 } from '../constants';
 import {
   server$traitKillAnimal
@@ -17,6 +18,7 @@ import {
   , server$traitNotify_Start
   , server$traitNotify_End
 } from '../../../../actions/actions';
+import {selectGame} from '../../../../selectors';
 
 import {checkAction} from '../TraitDataModel';
 import {
@@ -99,18 +101,19 @@ export const TraitCarnivorous = {
         // Scavenge
         dispatch(server$startFeeding(game.id, sourceAnimal, 2, 'TraitCarnivorous', targetAnimal.id));
 
+        dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
+
+        dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
+
         const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
-        game.constructor.sortPlayersFromIndex(game, currentPlayerIndex).some(player => player.continent.some(animal => {
+        // Selecing new game to not touch killed animal
+        game.constructor.sortPlayersFromIndex(selectGame(getState, game.id), currentPlayerIndex).some(player => player.continent.some(animal => {
           const traitScavenger = animal.hasTrait(TraitScavenger);
           if (traitScavenger && animal.canEat(game) > 0) {
             dispatch(server$startFeeding(game.id, animal, 1, 'TraitScavenger', sourceAnimal.id));
             return true;
           }
         }));
-
-        dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
-
-        dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
         return true;
       }
     };
@@ -129,7 +132,7 @@ export const TraitCarnivorous = {
     (sourceAnimal.hasTrait(TraitSharpVision) || !targetAnimal.hasTrait(TraitCamouflage))
     && (!targetAnimal.traits.some(trait => trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === targetAnimal.id))
     && (sourceAnimal.hasTrait(TraitMassive) || !targetAnimal.hasTrait(TraitMassive))
-    && !(targetAnimal.canSurvive() && targetAnimal.hasTrait(TraitBurrowing))
+    && !(targetAnimal.hasTrait(TraitBurrowing) && (targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) || (targetAnimal.food >= targetAnimal.sizeOfNormalFood())))
     && (
       (sourceAnimal.hasTrait(TraitSwimming) && targetAnimal.hasTrait(TraitSwimming))
       || (!sourceAnimal.hasTrait(TraitSwimming) && !targetAnimal.hasTrait(TraitSwimming))

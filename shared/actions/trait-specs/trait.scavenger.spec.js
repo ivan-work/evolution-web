@@ -82,6 +82,23 @@ players:
     expect(selectAnimal(User1, 0).getFood(), '$A1 gets food').equal(1);
     expect(selectAnimal(User2, 0).getFood(), '$A2 gets food').equal(1);
   });
+
+  it('killing scavenger', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {User1, clientStore1}, {User2, clientStore2}] = mockGame(3);
+    const gameId = ParseGame(`
+phase: 2
+food: 1
+players:
+  - continent: $A carn, $B scavenger
+  - continent: $C scavenger fat
+`);
+    const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
+
+    expect(selectAnimal(User0, 0).getFood()).equal(2);
+    expect(selectAnimal(User1, 0).getFood(), 'Scavenger should receive food').equal(1);
+  });
 });
 
 
