@@ -152,7 +152,7 @@ export const server$traitNotify_End = (gameId, sourceAid, trait, targetId) => {
 // complexActions
 
 export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId) => (dispatch, getState) => {
-  const neededFood = animal.needsFood();
+  const neededFood = animal.getCapacity() - animal.getFood();
 
   if (!animal.canEat(selectGame(getState, gameId)) || neededFood === 0) return false;
 
