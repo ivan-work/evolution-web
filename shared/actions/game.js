@@ -352,7 +352,7 @@ const server$gameExtict = (gameId) => (dispatch, getState) => {
 
   game.players.forEach((player) =>
     player.continent.forEach((animal) => {
-      if (!animal.canSurvive()) {
+      if (!animal.isFull()) {
         dispatch(server$game(gameId, gameAnimalStarve(gameId, animal.id)));
       }
       if (animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED)) {
