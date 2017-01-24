@@ -106,18 +106,18 @@ export const TraitCarnivorous = {
         ));
         return true;
       } else {
+        dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
+
         const poisonous = targetAnimal.hasTrait(TraitPoisonous.type);
         if (poisonous) {
           dispatch(server$traitActivate(game, targetAnimal, poisonous, sourceAnimal));
         }
 
-        // Scavenge
-        dispatch(server$startFeeding(game.id, sourceAnimal, 2, 'TraitCarnivorous', targetAnimal.id));
-
-        dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
-
         dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
 
+        dispatch(server$startFeeding(game.id, sourceAnimal, 2, 'TraitCarnivorous'));
+
+        // Scavenge
         const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
         // Selecing new game to not touch killed animal
         game.constructor.sortPlayersFromIndex(selectGame(getState, game.id), currentPlayerIndex).some(player => player.continent.some(animal => {

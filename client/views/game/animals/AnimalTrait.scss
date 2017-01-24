@@ -41,16 +41,38 @@
 }
 
 .AnimalTraitDetails {
-  max-width: $ANIMAL_TRAIT_DETAILS_WIDTH;
-  & .icon {
-    width: 1.5em;
-    height: 1.5em;
+  max-width: $ANIMAL_TRAIT_DETAILS_WIDTH + 16px * 2; // + card padding
+  //&.mdl-card {
+  //  font-size: 1em;
+  //}
+
+  .Title {
+    //padding: 1em 1em 0;
+    text-align: center;
+    span {
+      margin: 0 auto;
+    }
   }
-  & .icon.material-icons {
-    font-size: 18px;
-    vertical-align: middle;
+  .Text {
+    //padding: 0 1.3em 1.3em;
+    max-width: $ANIMAL_TRAIT_DETAILS_WIDTH;
+    font-size: .75em;
+    & .icon {
+      width: 1.0em;
+      height: 1.0em;
+    }
+    & .icon.material-icons {
+      font-size: 16px;
+      vertical-align: text-bottom;
+    }
+    & .mdl-card__supporting-text {
+      width: 80%;
+    }
   }
-  & .mdl-card__supporting-text {
-    width: 80%;
-  }
+}
+
+.AnimalTraitIcon {
+  padding: .3em;
+  font-weight: bold;
+  text-align: center;
 }

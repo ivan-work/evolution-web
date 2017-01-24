@@ -6,6 +6,7 @@ import {Timer} from '../../utils/Timer.jsx';
 import {DialogTitle, DialogContent} from 'react-mdl';
 import {Animal} from '../animals/Animal.jsx';
 import {AnimalTrait} from '../animals/AnimalTrait.jsx';
+import AnimalTraitIcon from '../animals/AnimalTraitIcon.jsx';
 import {TraitCarnivorous, TraitMimicry, TraitTailLoss} from '../../../../shared/models/game/evolution/traitsData/index';
 import './TraitDefenceDialog.scss';
 
@@ -51,30 +52,30 @@ export class TraitDefenceDialog extends Component {
     </DialogContent>);
   }
 
-  renderMimicry(targets, onClick) {
-    return (<div className='Mimicry' style={{minWidth: (80 * targets.size)+'px'}}>
-      <h1><T.span text='Game.UI.TraitDefenceDialog.Mimicry_Title'/></h1>
-      <div>
-        {targets.map(animal =>
-        <div key={animal.id}
-             style={{display: 'inline-block'}}
-             onClick={() => onClick(animal.id)}>
-          <Animal model={animal}/>
+  renderTailLoss(targets, onClick) {
+    return (<div className='TailLoss'>
+      <h1><T.span text='Game.UI.TraitDefenceDialog.TailLoss_Title'/></h1>
+      <div className='Row'>
+        {targets.map((trait, index) =>
+        <div key={trait.id}
+             className='Item'
+             onClick={() => onClick(trait.id)}>
+          <AnimalTraitIcon trait={trait}/>
         </div>
           )}
       </div>
     </div>);
   }
 
-  renderTailLoss(targets, onClick) {
-    return (<div className='TailLoss' style={{minWidth: (80 * targets.size)+'px'}}>
-      <h1><T.span text='Game.UI.TraitDefenceDialog.TailLoss_Title'/></h1>
-      <div>
-        {targets.map((trait, index) =>
-        <div key={trait.id}
-             style={{display: 'inline-block'}}
-             onClick={() => onClick(trait.id)}>
-          <AnimalTrait trait={trait}/>
+  renderMimicry(targets, onClick) {
+    return (<div className='Mimicry' style={{minWidth: (80 * targets.size)+'px'}}>
+      <h1><T.span text='Game.UI.TraitDefenceDialog.Mimicry_Title'/></h1>
+      <div className='Row'>
+        {targets.map(animal =>
+        <div key={animal.id}
+             className='Item'
+             onClick={() => onClick(animal.id)}>
+          <Animal model={animal}/>
         </div>
           )}
       </div>
