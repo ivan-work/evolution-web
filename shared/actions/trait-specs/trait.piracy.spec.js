@@ -23,19 +23,19 @@ players:
 
     // 0-0-0
 
-    expect(selectAnimal(User0, 0).getFood(), 'User0, 0 food initial').equal(1);
-    expect(selectAnimal(User0, 1).getFood(), 'User0, 1 food initial').equal(0);
-    expect(selectAnimal(User0, 2).getFood(), 'User0, 2 food initial').equal(1);
-    expect(selectAnimal(User1, 0).getFood(), 'User1, 0 food initial').equal(1);
-    expect(selectAnimal(User1, 1).getFood(), 'User1, 1 food initial').equal(1);
+    expect(selectAnimal(User0, 0).getFoodAndFat(), 'User0, 0 food initial').equal(1);
+    expect(selectAnimal(User0, 1).getFoodAndFat(), 'User0, 1 food initial').equal(0);
+    expect(selectAnimal(User0, 2).getFoodAndFat(), 'User0, 2 food initial').equal(1);
+    expect(selectAnimal(User1, 0).getFoodAndFat(), 'User1, 0 food initial').equal(1);
+    expect(selectAnimal(User1, 1).getFoodAndFat(), 'User1, 1 food initial').equal(1);
 
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitPiracy', '$A1'));
 
-    expect(selectAnimal(User0, 0).getFood(), 'User0, 0 food').equal(2);
-    expect(selectAnimal(User0, 1).getFood(), 'User0, 1 food').equal(0);
-    expect(selectAnimal(User0, 2).getFood(), 'User0, 2 food').equal(1);
-    expect(selectAnimal(User1, 0).getFood(), 'User1, 0 food').equal(0);
-    expect(selectAnimal(User1, 1).getFood(), 'User1, 1 food').equal(1);
+    expect(selectAnimal(User0, 0).getFoodAndFat(), 'User0, 0 food').equal(2);
+    expect(selectAnimal(User0, 1).getFoodAndFat(), 'User0, 1 food').equal(0);
+    expect(selectAnimal(User0, 2).getFoodAndFat(), 'User0, 2 food').equal(1);
+    expect(selectAnimal(User1, 0).getFoodAndFat(), 'User1, 0 food').equal(0);
+    expect(selectAnimal(User1, 1).getFoodAndFat(), 'User1, 1 food').equal(1);
     clientStore0.dispatch(gameEndTurnRequest());
 
     // 0-0-1
@@ -52,22 +52,22 @@ players:
 
     clientStore1.dispatch(traitTakeFoodRequest('$A1'));
 
-    expect(selectAnimal(User0, 0).getFood(), '2 (User0, 0) food').equal(2);
-    expect(selectAnimal(User0, 1).getFood(), '2 (User0, 1) food').equal(0);
-    expect(selectAnimal(User0, 2).getFood(), '2 (User0, 2) food').equal(1);
-    expect(selectAnimal(User1, 0).getFood(), '2 (User1, 0) food').equal(1);
-    expect(selectAnimal(User1, 1).getFood(), '2 (User1, 1) food').equal(1);
+    expect(selectAnimal(User0, 0).getFoodAndFat(), '2 (User0, 0) food').equal(2);
+    expect(selectAnimal(User0, 1).getFoodAndFat(), '2 (User0, 1) food').equal(0);
+    expect(selectAnimal(User0, 2).getFoodAndFat(), '2 (User0, 2) food').equal(1);
+    expect(selectAnimal(User1, 0).getFoodAndFat(), '2 (User1, 0) food').equal(1);
+    expect(selectAnimal(User1, 1).getFoodAndFat(), '2 (User1, 1) food').equal(1);
 
     clientStore1.dispatch(gameEndTurnRequest());
 
     // 0-1-0
 
     clientStore0.dispatch(traitActivateRequest('$B', 'TraitPiracy', '$C'));
-    expect(selectAnimal(User0, 0).getFood(), '3 (User0, 0) food').equal(2);
-    expect(selectAnimal(User0, 1).getFood(), '3 (User0, 1) food').equal(1);
-    expect(selectAnimal(User0, 2).getFood(), '3 (User0, 2) food').equal(0);
-    expect(selectAnimal(User1, 0).getFood(), '3 (User1, 0) food').equal(1);
-    expect(selectAnimal(User1, 1).getFood(), '3 (User1, 1) food').equal(1);
+    expect(selectAnimal(User0, 0).getFoodAndFat(), '3 (User0, 0) food').equal(2);
+    expect(selectAnimal(User0, 1).getFoodAndFat(), '3 (User0, 1) food').equal(1);
+    expect(selectAnimal(User0, 2).getFoodAndFat(), '3 (User0, 2) food').equal(0);
+    expect(selectAnimal(User1, 0).getFoodAndFat(), '3 (User1, 0) food').equal(1);
+    expect(selectAnimal(User1, 1).getFoodAndFat(), '3 (User1, 1) food').equal(1);
     clientStore0.dispatch(gameEndTurnRequest());
 
     // 0-1-1
@@ -100,25 +100,25 @@ players:
 
     // 1-0-1
 
-    expect(selectAnimal(User0, 0).getFood(), '4 (User0, 0) food').equal(0);
-    expect(selectAnimal(User1, 0).getFood(), '4 (User1, 0) food').equal(0);
-    expect(selectAnimal(User1, 1).getFood(), '4 (User1, 1) food').equal(1);
+    expect(selectAnimal(User0, 0).getFoodAndFat(), '4 (User0, 0) food').equal(0);
+    expect(selectAnimal(User1, 0).getFoodAndFat(), '4 (User1, 0) food').equal(0);
+    expect(selectAnimal(User1, 1).getFoodAndFat(), '4 (User1, 1) food').equal(1);
 
     clientStore1.dispatch(traitTakeFoodRequest('$A1'));
     clientStore1.dispatch(gameEndTurnRequest());
 
     // 1-1-0
 
-    expect(selectAnimal(User0, 0).getFood()).equal(0);
-    expect(selectAnimal(User1, 0).getFood()).equal(1);
+    expect(selectAnimal(User0, 0).getFoodAndFat()).equal(0);
+    expect(selectAnimal(User1, 0).getFoodAndFat()).equal(1);
 
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitPiracy', '$A1'));
     clientStore0.dispatch(gameEndTurnRequest());
 
     // 1-1-1
 
-    expect(selectAnimal(User0, 0).getFood()).equal(1);
-    expect(selectAnimal(User1, 0).getFood()).equal(0);
+    expect(selectAnimal(User0, 0).getFoodAndFat()).equal(1);
+    expect(selectAnimal(User1, 0).getFoodAndFat()).equal(0);
 
     clientStore1.dispatch(traitTakeFoodRequest('$A1'));
     clientStore1.dispatch(gameEndTurnRequest());
@@ -164,6 +164,6 @@ players:
     clientStore1.dispatch(traitTakeFoodRequest('$A'));
     clientStore0.dispatch(traitActivateRequest('$Q', 'TraitPiracy', '$A'));
 
-    expect(selectAnimal(User0, 0).getFood(), 'Can steal from fat massive').equal(1);
+    expect(selectAnimal(User0, 0).getFoodAndFat(), 'Can steal from fat massive').equal(1);
   });
 });

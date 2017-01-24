@@ -76,7 +76,7 @@ players:
       , {clientStore0, User0, ClientGame0}
       , {clientStore1, User1, ClientGame1}
       , {clientStore2, User2, ClientGame2}] = mockGame(3);
-    ParseGame(`
+    const gameId = ParseGame(`
 deck: 32 carn
 food: 4
 phase: 2
@@ -85,12 +85,13 @@ players:
   - continent: $Z +, $X, $C carn ++, $V, $N
   - continent:
 `);
+    const {selectGame, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
     // User0: $A +, $B, $C, $D carn +, $E
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    expect(selectAnimal(User0, 0).getFood()).equal(1);
     clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore1.dispatch(gameEndTurnRequest());
-    clientStore2.dispatch(gameEndTurnRequest());
 
     expect(ServerGame().getPlayer(User0.id).ended).equal(false);
     expect(ServerGame().getPlayer(User1.id).ended).equal(true);
@@ -110,7 +111,7 @@ players:
     expect(ServerGame().status.turn, 'ServerGame().status.phase').equal(PHASE.DEPLOY);
     expect(ClientGame0().status.turn, 'ClientGame0().status.turn').equal(1);
     expect(ClientGame0().status.turn, 'ClientGame0().status.phase').equal(PHASE.DEPLOY);
-    expect(ServerGame().getPlayer(User0).continent).size(3);
+    expect(ServerGame().getPlayer(User0).continent, '$D and $E dies').size(3);
     expect(ServerGame().getPlayerAnimal(User0, 0).getFood()).equal(0);
     expect(ServerGame().getPlayerAnimal(User0, 1).getFood()).equal(0);
     expect(ServerGame().getPlayerAnimal(User0, 2).getFood()).equal(0);

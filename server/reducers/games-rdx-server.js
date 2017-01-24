@@ -73,7 +73,7 @@ export const gameDeployTrait = (game, {cardId, traits}) => {
     .update(game => traits.reduce((game, trait) => {
       const {playerId, animalIndex, animal} = game.locateAnimal(trait.hostAnimalId);
       animals.push(logAnimal(animal));
-      return game.updateIn(['players', playerId, 'continent', animalIndex], a => a.traitAdd(trait))
+      return game.updateIn(['players', playerId, 'continent', animalIndex], a => a.traitAttach(trait))
     }, game))
     .update(addToGameLog(['gameDeployTrait', cardOwnerId, traits[0].type].concat(animals)));
 };
@@ -165,14 +165,14 @@ export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) =>
   ensureParameter(traitId, 'string');
   return game
     .updateIn(['players', sourcePid, 'continent'], continent => continent
-      .map(a => a.traitRemove(trait => trait.id === traitId || trait.linkId === traitId)))
+      .map(a => a.traitDetach(trait => trait.id === traitId || trait.linkId === traitId)))
 };
 
 const killAnimal = (playerId, animalIndex, animal) => (game) => game
   .updateIn(['players', playerId, 'scoreDead'], scoreDead => scoreDead + animal.countScore())
   .removeIn(['players', playerId, 'continent', animalIndex])
   .updateIn(['players', playerId, 'continent'], continent => continent
-    .map(a => a.traitRemove(trait => trait.linkAnimalId === animal.id)))
+    .map(a => a.traitDetach(trait => trait.linkAnimalId === animal.id)))
 
 export const traitKillAnimal = (game, {targetAnimalId}) => {
   const {playerId, animalIndex, animal} = game.locateAnimal(targetAnimalId);

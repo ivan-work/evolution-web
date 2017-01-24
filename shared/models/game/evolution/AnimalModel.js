@@ -43,21 +43,24 @@ export class AnimalModel extends Record({
   }
 
   toString() {
-    return `Animal#${this.id}`;
+    return `Animal#${this.id} (${this.getFood()}/${this.foodSize}+${this.getFat()}/${this.fatSize})`;
   }
 
   hasTrait(type) {
     return this.traits.find(trait => trait.type === type)
   }
 
-  traitAdd(trait) {
+  traitAttach(trait) {
+    const attachedTrait = trait
+      .set('ownerId', this.ownerId)
+      .set('hostAnimalId', this.id);
     return this
-      .update('traits', traits => traits.push(trait))
+      .update('traits', traits => traits.push(attachedTrait))
       .update('foodSize', foodSize => foodSize + trait.getDataModel().food)
       .update('fatSize', fatSize => fatSize + (trait.type === TraitFatTissue ? 1 : 0));
   }
 
-  traitRemove(lookup) {
+  traitDetach(lookup) {
     const traits = this.traits.filterNot(lookup);
     let foodSize = 1;
     let fatSize = 0;
@@ -66,9 +69,9 @@ export class AnimalModel extends Record({
       foodSize += trait.getDataModel().food;
     });
     return (this
-      .set('traits', traits)
-      .set('foodSize', foodSize)
-      .set('fatSize', fatSize)
+        .set('traits', traits)
+        .set('foodSize', foodSize)
+        .set('fatSize', fatSize)
     );
   }
 
@@ -99,13 +102,22 @@ export class AnimalModel extends Record({
     return this.getFood() + this.getFat();
   }
 
+  getWantedFood() {
+    return (this.foodSize + this.fatSize) - (this.getFood() + this.getFat())
+  }
+
   isFull() {
-    return this.food >= this.foodSize
-      || this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
+    return this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
+      || this.food >= this.foodSize
+  }
+
+  canSurvive() {
+    return this.isFull()
+      || this.getFoodAndFat() >= this.foodSize
   }
 
   canEat(game) {
-    return (this.getFood() + this.getFat() < this.foodSize + this.fatSize)
+    return this.getWantedFood() > 0
       && !this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
       && !this.hasFlag(TRAIT_ANIMAL_FLAG.SHELL)
       && !this.traits // TODO replace by flag
@@ -117,38 +129,25 @@ export class AnimalModel extends Record({
   }
 
   receiveFood(amount) {
-    let self = this;
-    const needOfFood = self.foodSize - self.getFood();
+    const needOfFood = Math.max(0, this.foodSize - this.getFood());
 
-    self = self.set('food', self.food + Math.min(self.foodSize, self.food + amount));
-    amount -= needOfFood;
-    if (amount > 0) self = self.set('fat', self.fat + Math.min(self.fatSize, self.fat + amount));
+    const amountForFood = Math.min(needOfFood, amount);
+    let amountForFat = amount - amountForFood;
 
-
-    return self;
+    return this
+      .set('food', this.getFood() + amountForFood)
+      .update('traits', traits => traits.map(trait =>
+        (trait.type === TraitFatTissue && !trait.value) ? trait.set('value', amountForFat-- > 0)
+          : trait));
   }
 
   digestFood() {
-    let self = this;
-    if (!this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)) {
-      const needOfFood = self.foodSize - self.getFood();
-      while (needOfFood > 0 && self.fat > 0) {
-        needOfFood--;
-        self = self.updateTrait(
-          trait => trait.type === TraitFatTissue && trait.value
-          , trait => trait.set('value', false)
-          , false
-        );
-      }
-    }
-    return self.set('food', 0)
-  }
-
-  recalculateFat() {
-    let fatCounter = this.fat;
-    return this.update('traits', traits => traits.map(trait =>
-      trait.type !== TraitFatTissue ? trait : trait.set('value', fatCounter-- > 0)
-    ));
+    let fatToSpend = Math.max(0, this.foodSize - this.getFood());
+    return this
+      .set('food', 0)
+      .update('traits', traits => traits.map(trait =>
+        (trait.type === TraitFatTissue && trait.value && fatToSpend-- > 0) ? trait.set('value', false)
+          : trait));
   }
 
   countScore() {

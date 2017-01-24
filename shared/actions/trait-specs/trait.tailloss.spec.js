@@ -40,7 +40,7 @@ players:
         clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$C'))
       , serverStore, clientStore0, clientStore1);
 
-    expect(selectAnimal(User0, 0).getFood(), '$A food').equal(1);
+    expect(selectAnimal(User0, 0).getFoodAndFat(), '$A food').equal(1);
     expect(selectPlayer(User0).acted, 'User0 acted').true;
 
     expect(selectAnimal(User1, 0)).ok;

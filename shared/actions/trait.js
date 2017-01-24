@@ -152,12 +152,10 @@ export const server$traitNotify_End = (gameId, sourceAid, trait, targetId) => {
 // complexActions
 
 export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId) => (dispatch, getState) => {
-  const neededFood = animal.getCapacity() - animal.getFood();
-
-  if (!animal.canEat(selectGame(getState, gameId)) || neededFood === 0) return false;
+  if (!animal.canEat(selectGame(getState, gameId))) return false;
 
   // TODO bug with 2 amount on animal 2/3
-  dispatch(server$game(gameId, traitMoveFood(gameId, animal.id, Math.min(amount, neededFood), sourceType, sourceId)));
+  dispatch(server$game(gameId, traitMoveFood(gameId, animal.id, amount, sourceType, sourceId)));
 
   // Cooperation
   if (sourceType === 'GAME' && selectGame(getState, gameId).food > 0) {

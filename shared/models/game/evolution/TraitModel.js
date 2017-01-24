@@ -43,15 +43,15 @@ export class TraitModel extends Record({
     return [
       trait1
         .set('ownerId', animal1.ownerId)
+        .set('hostAnimalId', animal1.id)
         .set('linkId', trait2.id)
         .set('linkSource', true)
-        .set('hostAnimalId', animal1.id)
         .set('linkAnimalId', animal2.id)
       , trait2
         .set('ownerId', animal2.ownerId)
+        .set('hostAnimalId', animal2.id)
         .set('linkId', trait1.id)
         .set('linkSource', false)
-        .set('hostAnimalId', animal2.id)
         .set('linkAnimalId', animal1.id)
     ];
   }

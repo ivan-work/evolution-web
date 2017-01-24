@@ -150,10 +150,10 @@ players:
 
       clientStore1.dispatch(traitTakeFoodRequest('$A'));
 
-      expect(selectAnimal(User1, 0).getFood(), 'Animal#0.getFood()').equal(1);
-      expect(selectAnimal(User1, 1).getFood(), 'Animal#1.getFood()').equal(1);
-      expect(selectAnimal(User1, 2).getFood(), 'Animal#2.getFood()').equal(1);
-      expect(selectAnimal(User1, 3).getFood(), 'Animal#3.getFood()').equal(1);
+      expect(selectAnimal(User1, 0).getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(1);
+      expect(selectAnimal(User1, 1).getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(1);
+      expect(selectAnimal(User1, 2).getFoodAndFat(), 'Animal#2.getFoodAndFat()').equal(1);
+      expect(selectAnimal(User1, 3).getFoodAndFat(), 'Animal#3.getFoodAndFat()').equal(1);
     });
 
     it('Doesnt generates food from traits', () => {
@@ -186,12 +186,12 @@ players:
       clientStore1.dispatch(traitActivateRequest('$B', 'TraitHibernation'));
       clientStore1.dispatch(traitActivateRequest('$C', 'TraitCarnivorous', '$X'));
 
-      expect(selectAnimal(User1, 0).getFood(), 'Animal $A.getFood()    ').equal(1);
-      expect(selectAnimal(User1, 1).getFood(), 'Animal $Acoop.getFood()').equal(0);
-      expect(selectAnimal(User1, 2).getFood(), 'Animal $B.getFood()    ').equal(0);
-      expect(selectAnimal(User1, 3).getFood(), 'Animal $Bcoop.getFood()').equal(0);
-      expect(selectAnimal(User1, 4).getFood(), 'Animal $C.getFood()    ').equal(2);
-      expect(selectAnimal(User1, 5).getFood(), 'Animal $Ccoop.getFood()').equal(0);
+      expect(selectAnimal(User1, 0).getFoodAndFat(), 'Animal $A.getFoodAndFat()    ').equal(1);
+      expect(selectAnimal(User1, 1).getFoodAndFat(), 'Animal $Acoop.getFoodAndFat()').equal(0);
+      expect(selectAnimal(User1, 2).getFoodAndFat(), 'Animal $B.getFoodAndFat()    ').equal(0);
+      expect(selectAnimal(User1, 3).getFoodAndFat(), 'Animal $Bcoop.getFoodAndFat()').equal(0);
+      expect(selectAnimal(User1, 4).getFoodAndFat(), 'Animal $C.getFoodAndFat()    ').equal(2);
+      expect(selectAnimal(User1, 5).getFoodAndFat(), 'Animal $Ccoop.getFoodAndFat()').equal(0);
     });
 
     it('Cant take more food than exists', () => {
@@ -227,8 +227,8 @@ players:
       clientStore0.dispatch(traitTakeFoodRequest('$A'));
 
       expect(selectGame().food).equal(0);
-      expect(selectAnimal(User0, 0).getFood(), 'Animal#0.traits').equal(1);
-      expect(selectAnimal(User0, 1).getFood(), 'Animal#0.traits').equal(1);
+      expect(selectAnimal(User0, 0).getFoodAndFat(), 'Animal#0.traits').equal(1);
+      expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal#0.traits').equal(1);
       expect(selectAnimal(User0, 2)).undefined;
     });
 
@@ -254,8 +254,8 @@ players:
 
       // FEEDING 0
       expect(selectGame().food, 'food').equal(10);
-      expect(selectAnimal(User0, 0).getFood(), 'Animal#0.traits').equal(1);
-      expect(selectAnimal(User0, 1).getFood(), 'Animal#0.traits').equal(0);
+      expect(selectAnimal(User0, 0).getFoodAndFat(), 'Animal#0.traits').equal(1);
+      expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal#0.traits').equal(0);
 
       expectUnchanged(`$A can't take food`, () =>
           clientStore0.dispatch(traitTakeFoodRequest('$A'))

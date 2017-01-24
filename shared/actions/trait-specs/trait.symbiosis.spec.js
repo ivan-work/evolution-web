@@ -186,9 +186,9 @@ players:
         traitTakeFoodRequest('$C')
       ), serverStore);
 
-      expect(selectAnimal(User0, 0).getFood(), 'Animal#0.getFood()').equal(0);
-      expect(selectAnimal(User0, 1).getFood(), 'Animal#1.getFood()').equal(0);
-      expect(selectAnimal(User0, 2).getFood(), 'Animal#2.getFood()').equal(1);
+      expect(selectAnimal(User0, 0).getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(0);
+      expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(0);
+      expect(selectAnimal(User0, 2).getFoodAndFat(), 'Animal#2.getFoodAndFat()').equal(1);
       clientStore0.dispatch(gameEndTurnRequest());
       clientStore1.dispatch(gameEndTurnRequest());
 
@@ -204,9 +204,9 @@ players:
         traitTakeFoodRequest('$C')
       ), serverStore);
 
-      expect(selectAnimal(User0, 0).getFood(), 'Animal#0.getFood()').equal(0);
-      expect(selectAnimal(User0, 1).getFood(), 'Animal#1.getFood()').equal(0);
-      expect(selectAnimal(User0, 2).getFood(), 'Animal#2.getFood()').equal(2);
+      expect(selectAnimal(User0, 0).getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(0);
+      expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(0);
+      expect(selectAnimal(User0, 2).getFoodAndFat(), 'Animal#2.getFoodAndFat()').equal(2);
       clientStore0.dispatch(gameEndTurnRequest());
 
       expectUnchanged(`$A can't take food`, () => clientStore0.dispatch(
@@ -217,9 +217,9 @@ players:
         traitTakeFoodRequest('$B')
       ), serverStore);
 
-      expect(selectAnimal(User0, 0).getFood(), 'Animal#0.getFood()').equal(0);
-      expect(selectAnimal(User0, 1).getFood(), 'Animal#1.getFood()').equal(1);
-      expect(selectAnimal(User0, 2).getFood(), 'Animal#2.getFood()').equal(2);
+      expect(selectAnimal(User0, 0).getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(0);
+      expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(1);
+      expect(selectAnimal(User0, 2).getFoodAndFat(), 'Animal#2.getFoodAndFat()').equal(2);
       clientStore0.dispatch(gameEndTurnRequest());
 
       expectUnchanged(`$A can't hunt`, () => clientStore0.dispatch(
@@ -230,27 +230,27 @@ players:
         traitTakeFoodRequest('$B')
       ), serverStore);
 
-      expect(selectAnimal(User0, 0).getFood(), 'Animal#0.getFood()').equal(0);
-      expect(selectAnimal(User0, 1).getFood(), 'Animal#1.getFood()').equal(2);
-      expect(selectAnimal(User0, 2).getFood(), 'Animal#2.getFood()').equal(2);
+      expect(selectAnimal(User0, 0).getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(0);
+      expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(2);
+      expect(selectAnimal(User0, 2).getFoodAndFat(), 'Animal#2.getFoodAndFat()').equal(2);
       clientStore0.dispatch(gameEndTurnRequest());
 
       expectChanged(`$A can take food`, () => clientStore0.dispatch(
         traitTakeFoodRequest('$A')
       ), serverStore);
 
-      expect(selectAnimal(User0, 0).getFood(), 'Animal#0.getFood()').equal(1);
-      expect(selectAnimal(User0, 1).getFood(), 'Animal#1.getFood()').equal(2);
-      expect(selectAnimal(User0, 2).getFood(), 'Animal#2.getFood()').equal(2);
+      expect(selectAnimal(User0, 0).getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(1);
+      expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(2);
+      expect(selectAnimal(User0, 2).getFoodAndFat(), 'Animal#2.getFoodAndFat()').equal(2);
       clientStore0.dispatch(gameEndTurnRequest());
 
       expectChanged(`$B can hunt`, () => clientStore0.dispatch(
         traitActivateRequest('$B', 'TraitCarnivorous', '$D')
       ), serverStore);
 
-      expect(selectAnimal(User0, 0).getFood(), 'Animal $A.getFood()').equal(1);
-      expect(selectAnimal(User0, 1).getFood(), 'Animal $B.getFood()').equal(4);
-      expect(selectAnimal(User0, 2).getFood(), 'Animal $C.getFood()').equal(2);
+      expect(selectAnimal(User0, 0).getFoodAndFat(), 'Animal $A.getFoodAndFat()').equal(1);
+      expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal $B.getFoodAndFat()').equal(4);
+      expect(selectAnimal(User0, 2).getFoodAndFat(), 'Animal $C.getFoodAndFat()').equal(2);
       expect(selectAnimal(User0, 3)).undefined;
     });
   });
@@ -298,7 +298,7 @@ players:
       expect(selectAnimal(User0, 1).traits, 'Animal#1.traits').size(1);
       expect(selectAnimal(User0, 2)).undefined;
 
-      expect(selectAnimal(User1, 0).getFood(), 'Animal#0.getFood()').equal(2);
+      expect(selectAnimal(User1, 0).getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(2);
     });
 //    it('Dies from carnivore', () => {
 //      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
