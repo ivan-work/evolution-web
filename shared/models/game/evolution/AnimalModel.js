@@ -143,11 +143,16 @@ export class AnimalModel extends Record({
 
   digestFood() {
     let fatToSpend = Math.max(0, this.foodSize - this.getFood());
-    return this
-      .set('food', 0)
-      .update('traits', traits => traits.map(trait =>
-        (trait.type === TraitFatTissue && trait.value && fatToSpend-- > 0) ? trait.set('value', false)
-          : trait));
+    if (this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)) {
+      return this
+        .set('food', 0)
+    } else {
+      return this
+        .set('food', 0)
+        .update('traits', traits => traits.map(trait =>
+          (trait.type === TraitFatTissue && trait.value && fatToSpend-- > 0) ? trait.set('value', false)
+            : trait));
+    }
   }
 
   countScore() {

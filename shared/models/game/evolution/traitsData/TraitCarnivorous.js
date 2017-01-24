@@ -145,7 +145,7 @@ export const TraitCarnivorous = {
     (sourceAnimal.hasTrait(TraitSharpVision) || !targetAnimal.hasTrait(TraitCamouflage))
     && (!targetAnimal.traits.some(trait => trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === targetAnimal.id))
     && (sourceAnimal.hasTrait(TraitMassive) || !targetAnimal.hasTrait(TraitMassive))
-    && !(targetAnimal.hasTrait(TraitBurrowing) && (targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) || (targetAnimal.food >= targetAnimal.sizeOfNormalFood())))
+    && !(targetAnimal.hasTrait(TraitBurrowing) && targetAnimal.isFull())
     && (
       (sourceAnimal.hasTrait(TraitSwimming) && targetAnimal.hasTrait(TraitSwimming))
       || (!sourceAnimal.hasTrait(TraitSwimming) && !targetAnimal.hasTrait(TraitSwimming))

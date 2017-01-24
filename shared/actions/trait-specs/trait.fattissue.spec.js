@@ -40,7 +40,7 @@ players:
       expect(selectTrait(User0, 0, 1).type).equal('TraitFatTissue');
     });
   });
-  describe.only('Feeding:', () => {
+  describe('Feeding:', () => {
     it('FatTissue test', () => {
       const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`
@@ -68,9 +68,6 @@ players:
 
       // selectAnimal(User0, 1)
 
-      console.log('Turn 1 User0 start', selectPlayer(User0).continent);
-      console.log('Turn 1 User1 start', selectPlayer(User1).continent);
-
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
@@ -83,20 +80,16 @@ players:
 
       expect(selectGame().status.phase, 'Turn 2, deploy').equal(PHASE.DEPLOY);
       clientStore1.dispatch(gameEndTurnRequest());
-      console.log('Turn 2 start', selectPlayer(User0).continent);
 
       clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$B', true));
       clientStore0.dispatch(gameEndTurnRequest());
 
       expect(selectGame().status.phase, 'Turn 2, feed').equal(PHASE.FEEDING);
-      console.log('Turn 2 end', selectPlayer(User0).continent);
       clientStore0.dispatch(gameEndTurnRequest());
 
 
       expect(selectGame().status.phase, 'Turn 3, deploy').equal(PHASE.DEPLOY);
       expect(selectGame().status.turn, 'Turn 3, deploy turn').equal(2);
-
-      console.log('Turn 3 start', selectPlayer(User0).continent);
 
       expect(selectPlayer(User0).continent).size(1);
       expect(selectAnimal(User0, 0).traits).size(4);

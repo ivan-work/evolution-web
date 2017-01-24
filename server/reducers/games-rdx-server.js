@@ -215,6 +215,16 @@ export const traitDefenceAnswerSuccess = (game, {questionId}) => game
 export const traitGrazeFood = (game, {food}) => game
   .set('food', Math.max(game.food - 1, 0));
 
+export const traitConvertFat = (game, {sourceAid, traitId}) => {
+  const {playerId, animalIndex} = game.locateAnimal(sourceAid);
+  return game.updateIn(['players', playerId, 'continent', animalIndex], animal => {
+    const traitIndex = animal.traits.findIndex(t => t.id === traitId);
+    return animal
+      .set('food', animal.getFood() + 1)
+      .setIn(['traits', traitIndex, 'value'], false)
+  });
+};
+
 export const traitSetAnimalFlag = (game, {sourceAid, flag, on}) => {
   const {playerId, animalIndex} = game.locateAnimal(sourceAid);
   return game
@@ -261,6 +271,7 @@ export const reducer = createReducer(Map(), {
   , traitDefenceAnswerSuccess: (state, data) => state.update(data.gameId, game => traitDefenceAnswerSuccess(game, data))
   , traitKillAnimal: (state, data) => state.update(data.gameId, game => traitKillAnimal(game, data))
   , traitAnimalRemoveTrait: (state, data) => state.update(data.gameId, game => traitAnimalRemoveTrait(game, data))
+  , traitConvertFat: (state, data) => state.update(data.gameId, game => traitConvertFat(game, data))
   , traitGrazeFood: (state, data) => state.update(data.gameId, game => traitGrazeFood(game, data))
   , traitSetAnimalFlag: (state, data) => state.update(data.gameId, game => traitSetAnimalFlag(game, data))
   , gameAnimalStarve: (state, data) => state.update(data.gameId, game => gameAnimalStarve(game, data))
