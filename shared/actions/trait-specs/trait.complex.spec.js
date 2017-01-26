@@ -97,6 +97,20 @@ settings:
     expect(selectAnimal(User1, 1)).undefined;
     clientStore0.dispatch(gameEndTurnRequest());
   });
+
+  it('$A carn, $B Mimicry $C TailLoss fat', async () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+
+    const gameId = ParseGame(`
+phase: 2
+food: 1
+players:
+  - continent: $A carn graz, $B mimi, $C tail fat
+`);
+    const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
+    expect(clientStore0.getState().getIn(['game', 'question', 'id']), 'Game has question').ok
+  });
 });
 
 
