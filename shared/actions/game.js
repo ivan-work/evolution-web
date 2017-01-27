@@ -422,7 +422,7 @@ const server$gameEnd = (gameId) => (dispatch, getState) => {
 
 export const gameClientToServer = {
   gameCreateRequest: ({roomId, seed = null}, {userId}) => (dispatch, getState) => {
-    if (process.env.NODE_ENV === 'production') seed = null;
+    //if (process.env.NODE_ENV === 'production') seed = null;
     const room = getState().getIn(['rooms', roomId]);
     checkComboRoomCanStart(room, userId);
 
