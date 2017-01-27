@@ -217,20 +217,10 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
 
 // Defence
 
-const traitDefenceQuestion = (gameId, question) => ({
+export const traitDefenceQuestion = (gameId, question) => ({
   type: 'traitDefenceQuestion'
   , data: {gameId, question}
 });
-
-export const server$traitDefenceQuestionInstant = (gameId, attackAnimal, trait, defenceAnimal, defaultDefence) => (dispatch) => {
-  const questionId = uuid.v4();
-  logger.debug('server$traitDefenceQuestionInstant', questionId, attackAnimal.id, trait.id, defenceAnimal.id);
-  const question = QuestionRecord.new(questionId, attackAnimal, trait.id, defenceAnimal);
-  dispatch(traitDefenceQuestion(gameId, question));
-  const result = dispatch(defaultDefence(questionId));
-  dispatch(server$traitDefenceAnswerSuccess(gameId, questionId));
-  return result;
-};
 
 const makeTraitDefenceQuestionTimeout = (gameId, questionId) => `traitDefenceQuestion#${gameId}#${questionId}`;
 

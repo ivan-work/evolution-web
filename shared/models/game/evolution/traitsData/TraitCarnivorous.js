@@ -1,4 +1,5 @@
 import logger from '~/shared/utils/logger';
+import uuid from 'uuid';
 import {fromJS} from 'immutable';
 import {
   TRAIT_TARGET_TYPE
@@ -12,14 +13,16 @@ import {
   , server$startFeeding
   , server$traitStartCooldown
   , server$traitActivate
+  , traitDefenceQuestion
   , server$traitDefenceQuestion
-  , server$traitDefenceQuestionInstant
   , server$traitDefenceAnswer
+  , server$traitDefenceAnswerSuccess
   , server$traitNotify_Start
   , server$traitNotify_End
 } from '../../../../actions/actions';
 import {selectGame} from '../../../../selectors';
 
+import {QuestionRecord} from '../../GameModel';
 import {checkAction} from '../TraitDataModel';
 import {
   TraitMimicry
@@ -106,6 +109,7 @@ export const TraitCarnivorous = {
         ));
         return true;
       } else {
+        dispatch(server$traitDefenceAnswerSuccess(game.id, questionId));
         dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
 
         const poisonous = targetAnimal.hasTrait(TraitPoisonous.type);
@@ -135,7 +139,11 @@ export const TraitCarnivorous = {
       dispatch(server$traitDefenceQuestion(game.id, sourceAnimal, trait, targetAnimal, defaultDefence));
       return false;
     } else {
-      return dispatch(server$traitDefenceQuestionInstant(game.id, sourceAnimal, trait, targetAnimal, defaultDefence));
+      const questionId = uuid.v4();
+      logger.debug('server$traitDefenceQuestionInstant', questionId, sourceAnimal.id, trait.id, targetAnimal.id);
+      const question = QuestionRecord.new(questionId, sourceAnimal, trait.id, targetAnimal);
+      dispatch(traitDefenceQuestion(game.id, question));
+      return dispatch(defaultDefence(questionId));
     }
   }
   , $checkAction: (game, sourceAnimal) => {
