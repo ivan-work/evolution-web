@@ -89,7 +89,7 @@ export class TraitModel extends Record({
       return false;
     }
     // Either no $checkAction or it is passing
-    return !traitData.$checkAction || traitData.$checkAction(game, sourceAnimal);
+    return !traitData.$checkAction || traitData.$checkAction(game, sourceAnimal, this);
   };
 
   toClient() {

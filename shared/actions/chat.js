@@ -18,11 +18,17 @@ export const chatInit = (globalChat) => ({
  * Message
  * */
 
-export const chatMessageRequest = (to, toType, text) => ({
-  type: 'chatMessageRequest'
-  , data: {to, toType, text}
-  , meta: {server: true}
-});
+export const chatMessageRequest = (to, toType, text) => (dispatch) => {
+  if (text === '/admin') {
+    dispatch({type: 'appShowAdminPanel', data: null});
+  } else {
+    dispatch({
+      type: 'chatMessageRequest'
+      , data: {to, toType, text}
+      , meta: {server: true}
+    });
+  }
+};
 
 const chatMessageGlobal = (message) => ({
   type: 'chatMessageGlobal'

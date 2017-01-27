@@ -1,11 +1,16 @@
+@import './variables';
+
 @mixin traits() {
   .TraitFatTissue {
     //color: #930;
     //background: #ff9;
     color: #d60;
-
     &.value {
       background: #ff0;
+    }
+    &.value.active {
+      background: $TRAIT_ACTIVE_BACK;
+      color: $TRAIT_ACTIVE_TEXT;
     }
   }
 
