@@ -14,6 +14,7 @@ export class TraitModel extends Record({
   , linkAnimalId: null
   , linkSource: null
   , value: false // for fat
+  , cooldown: null
 }) {
   static new(type) {
     return TraitModel.fromServer({
@@ -79,6 +80,17 @@ export class TraitModel extends Record({
   isLinked() {
     return this.linkId !== null; // && this.dataModel.cardTargetType & CTT_PARAMETER.LINK
   }
+
+  checkAction(game, sourceAnimal) {
+    const traitData = this.getDataModel();
+    if (!traitData.action) return false;
+    if (traitData.cooldowns && traitData.cooldowns.some(([link, place]) =>
+        game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id, this.id))) {
+      return false;
+    }
+    // Either no $checkAction or it is passing
+    return !traitData.$checkAction || traitData.$checkAction(game, sourceAnimal);
+  };
 
   toClient() {
     return this

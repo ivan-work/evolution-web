@@ -20,12 +20,12 @@ export const checkTraitActivation = (game, sourcePid, sourceAid, traitId, target
   if (!trait) {
     throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s) doesnt have Trait(%s)', sourceAid, traitId)
   }
-  const traitData = trait.getDataModel();
-  if (!traitData.checkAction(game, sourceAnimal)) {
+  if (!trait.checkAction(game, sourceAnimal)) {
     throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
-      , 'Animal(%s):Trait(%s) checkAction failed', sourceAnimal.id, traitData.type)
+      , 'Animal(%s):Trait(%s) checkAction failed', sourceAnimal.id, trait.type)
   }
   let target = null;
+  const traitData = trait.getDataModel();
   switch (traitData.targetType) {
     case TRAIT_TARGET_TYPE.ANIMAL:
       target = checkTraitActivation_Animal(game, sourceAnimal, traitData, targetId);

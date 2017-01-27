@@ -53,7 +53,7 @@ export const doesOptionExist = (game, playerId) => {
     return animal.traits.some((trait) => {
       const traitData = TraitDataModel.new(trait.type);
 
-      if (!(traitData.playerControllable && traitData.checkAction(game, animal))) return false;
+      if (!(traitData.playerControllable && trait.checkAction(game, animal))) return false;
 
       switch (traitData.targetType) {
         case TRAIT_TARGET_TYPE.ANIMAL:
@@ -79,7 +79,7 @@ export const getOptions = (game, playerId) => {
     animal.traits.forEach((trait) => {
       const traitData = TraitDataModel.new(trait.type);
 
-      if (!(traitData.playerControllable && traitData.checkAction(game, animal))) return;
+      if (!(traitData.playerControllable && trait.checkAction(game, animal))) return;
 
       switch (traitData.targetType) {
         case TRAIT_TARGET_TYPE.ANIMAL:

@@ -12,7 +12,7 @@ import {replaceGetRandom} from '../../utils/randomGenerator';
 
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
 
-describe('Logging test:', () => {
+describe.skip('Logging test:', () => {
   it('Typical game', async() => {
     const [{ParseGame, serverStore}, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockGame(3);
     const gameId = ParseGame(`

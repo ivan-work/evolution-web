@@ -9,7 +9,7 @@ import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
 
-describe('TraitFatTissue:', () => {
+describe.skip('TraitFatTissue:', () => {
   describe('Deploy:', () => {
     it('Can deploy multiple', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
@@ -102,7 +102,7 @@ players:
       expect(selectPlayer(User1).continent).size(0);
     });
 
-    it.only('FatTissue activation', () => {
+    it.skip('FatTissue activation', () => {
       const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
 deck: 12 camo
@@ -140,6 +140,11 @@ players:
       expectUnchanged('Animal $A cant take food now', () =>
           clientStore0.dispatch(traitTakeFoodRequest('$A'))
         , serverStore, clientStore0);
+
+      expectUnchanged('Animal $A cant reactivate', () =>
+        clientStore0.dispatch(traitActivateRequest('$A', selectTraitId(User0, 0, 2)))
+        , serverStore, clientStore0);
+
 
     });
   });
