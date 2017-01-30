@@ -3,7 +3,7 @@ import {Record} from 'immutable';
 import {PHASE} from '../models/game/GameModel';
 import {TraitDataModel} from '../models/game/evolution/TraitDataModel';
 import {TRAIT_TARGET_TYPE} from '../models/game/evolution/constants';
-import {passesChecks, failsChecks, checkPlayerTurnAndPhase} from './checks';
+import {passesChecks, failsChecks, checkGamePhase, checkPlayerCanAct} from './checks';
 import {checkAnimalCanEat, checkTraitActivation_Animal} from './trait.checks';
 import {selectGame} from '../selectors';
 import {server$gameEndTurn} from './actions';
@@ -26,7 +26,10 @@ export class Option extends Record({
 
 export const doesPlayerHasOptions = (game, playerId) => {
   logger.debug('?doesPlayerHasOptions:', playerId);
-  const hasError = failsChecks(() => checkPlayerTurnAndPhase(game, playerId, PHASE.FEEDING));
+  const hasError = failsChecks(() => {
+    checkGamePhase(game, PHASE.FEEDING);
+    checkPlayerCanAct(game, playerId);
+  });
   if (hasError) {
     // logger.warn(hasError.name + hasError.message, ...hasError.data);
   } else if (!doesOptionExist(game, playerId)) {

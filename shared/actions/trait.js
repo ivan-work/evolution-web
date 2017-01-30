@@ -22,8 +22,10 @@ import {TraitCommunication, TraitCooperation} from '../models/game/evolution/tra
 import {
   checkGameDefined
   , checkGameHasUser
+  , checkGamePhase
   , checkPlayerHasAnimal
-  , checkPlayerTurnAndPhase
+  , checkPlayerCanAct
+  , checkPlayerTurn
 } from './checks';
 
 import {checkAnimalCanEat, checkTraitActivation} from './trait.checks';
@@ -275,15 +277,13 @@ export const server$traitDefenceAnswer = (gameId, questionId, traitId, targetId)
     throw new ActionCheckError(`server$traitDefenceAnswer@Game(${game.id})`
       , 'Game doesnt have Question(%s)', questionId)
   }
-  const question = game.get('question').toJS();
+  const question = game.get('question');
   if (question.id !== questionId) {
     throw new ActionCheckError(`server$traitDefenceAnswer@Game(${game.id})`
       , 'QuesionID is incorrect (%s)', questionId)
   }
   const {sourceAnimal: attackAnimal, trait: attackTrait} =
     checkTraitActivation(game, question.sourcePid, question.sourceAid, question.traitId, question.targetAid);
-
-  checkPlayerTurnAndPhase(game, attackAnimal.ownerId, PHASE.FEEDING);
 
   const {sourceAnimal: defenceAnimal, trait: defenceTrait, target} =
     checkTraitActivation(game, question.targetPid, question.targetAid, traitId, targetId);
@@ -302,7 +302,8 @@ export const traitClientToServer = {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
-    checkPlayerTurnAndPhase(game, userId, PHASE.FEEDING);
+    checkGamePhase(game, PHASE.FEEDING);
+    checkPlayerCanAct(game, userId);
     const animal = checkPlayerHasAnimal(game, userId, animalId);
     checkAnimalCanEat(game, animal);
 
@@ -316,9 +317,10 @@ export const traitClientToServer = {
   }
   , traitActivateRequest: ({gameId, sourceAid, traitId, targetId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
+    checkGameDefined(game);
+    checkGamePhase(game, PHASE.FEEDING);
+    checkPlayerCanAct(game, userId);
     const {sourceAnimal, trait, target} = checkTraitActivation(game, userId, sourceAid, traitId, targetId);
-
-    checkPlayerTurnAndPhase(game, userId, PHASE.FEEDING);
     const result = dispatch(server$traitActivate(game, sourceAnimal, trait, target));
     if (result === void 0) {
       throw new Error(`traitActivateRequest@Game(${gameId}): Animal(${sourceAid})-${trait.type}-Animal(${targetId}) result undefined`);
@@ -328,8 +330,21 @@ export const traitClientToServer = {
       dispatch(server$playerActed(gameId, userId));
     }
   }
-  , traitDefenceAnswerRequest: ({gameId, questionId, traitId, targetId}) =>
-    server$traitDefenceAnswer(gameId, questionId, traitId, targetId)
+  , traitDefenceAnswerRequest: ({gameId, questionId, traitId, targetId}, {userId}) => (dispatch, getState) => {
+    const game = selectGame(getState, gameId);
+    checkGameDefined(game);
+    checkGamePhase(game, PHASE.FEEDING);
+
+    const {sourcePid, targetPid} = game.question;
+    checkPlayerTurn(game, sourcePid);
+    if (userId !== targetPid) {
+      throw new ActionCheckError(`checkPlayerCanAct@Game(${game.id})`
+        , `Player(%s) acting on Target(%s) answering`
+        , userId, targetPid);
+    }
+
+    dispatch(server$traitDefenceAnswer(gameId, questionId, traitId, targetId));
+  }
 };
 
 export const traitServerToClient = {
