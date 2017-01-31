@@ -5,10 +5,13 @@ $VERTICAL_MARGIN: 2px;
   position: relative;
   min-width: 200px;
   height: $ANIMAL_HEIGHT + $ANIMAL_MARGIN;
-  background: #dfd;
   border: 1px solid #898;
   display: flex;
   justify-content: center;
+
+  &.isActive {
+    background: $CURRENT_TURN_BACKGROUND;
+  }
 
   &.EnemyContinent {
     //transform: rotate(180deg);

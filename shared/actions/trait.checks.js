@@ -60,10 +60,10 @@ export const checkTraitActivation_Animal = (game, sourceAnimal, traitData, targe
 
 export const checkTraitActivation_Trait = (game, sourceAnimal, traitData, traitId) => {
   const gameId = game.id;
-  const trait = sourceAnimal.traits.find((t, i) => t.id === traitId || i === traitId);
+  const trait = sourceAnimal.traits.find((t, i) => t.id === traitId || i === traitId || t.type === traitId);
   if (!trait) {
     throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
-      , 'Animal(%s):Trait(%s) cant find Trait@%s', sourceAnimal.id, traitData.type, traitId)
+      , 'Animal(%s):Trait#%s cant find Trait#%s', sourceAnimal.id, traitData.type, traitId)
   }
   if (traitData.checkTarget && !traitData.checkTarget(game, sourceAnimal, trait)) {
     throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`

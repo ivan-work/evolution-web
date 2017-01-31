@@ -27,7 +27,7 @@ export const TraitMetamorphose = {
   , targetType: TRAIT_TARGET_TYPE.TRAIT
   , playerControllable: true
   , cooldowns: fromJS([
-    ['TraitCarnivorous', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
+    ['TraitMetamorphose', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: (game, sourceAnimal, traitMetamorphose, targetTrait) => (dispatch, getState) => {
@@ -38,7 +38,11 @@ export const TraitMetamorphose = {
     dispatch(server$startFeeding(game.id, animal, 1, 'TraitMetamorphose'));
     return true;
   }
+  , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game)
   , checkTarget: (game, sourceAnimal, targetTrait) => targetTrait.getDataModel().food === 0
+  , getTargets: (game, sourceAnimal, traitMetamorphose) => {
+    return sourceAnimal.traits.filter(trait => trait !== traitMetamorphose && trait.getDataModel().food === 0)
+  }
 };
 
 export const TraitShell = {

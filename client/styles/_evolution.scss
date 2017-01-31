@@ -1,7 +1,5 @@
 @import "variables";
 
-$CURRENT_TURN_BACKGROUND: #dfd;
-
 .draggable.canDrag, .draggable.active {
   cursor: -webkit-grab; /* Chrome 1-21, Safari 4+ */
   cursor: -moz-grab; /* Firefox 1.5-26 */
@@ -12,14 +10,4 @@ $CURRENT_TURN_BACKGROUND: #dfd;
   cursor: -webkit-grabbing; /* Chrome 1-21, Safari 4+ */
   cursor: -moz-grabbing; /* Firefox 1.5-26 */
   cursor: grabbing; /* W3C standards syntax, should come least */
-}
-
-.PlayersList {
-  .Player {
-    @include ellipsis();
-  }
-  .isPlayerTurn {
-    background: $CURRENT_TURN_BACKGROUND;
-    font-weight: bold;
-  }
 }

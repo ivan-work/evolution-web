@@ -16,6 +16,7 @@ export class TraitDataModel extends Record({
   // (game, sourceAnimal, trait:TraitModel, targetAnimal/targetTrait/none, attackTrait/none, attackAnimal/none) => should return (dispatch, getState)
   , $checkAction: null // if trait is allowed to be clicked? (game, sourceAnimal) => boolean
   , checkTarget: null // if target is valid? (game, sourceAnimal, targetAnimal) => boolean
+  , getTargets: null // get list of available target for an active trait (game, sourceAnimal) => list of targets
 }) {
   static new(traitType) {
     if (!(traitType in traitsData)) throw Error(`traitData[${traitType}] not found`);
