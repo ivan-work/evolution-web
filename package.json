@@ -33,6 +33,10 @@
   "homepage": "null",
   "author": "null",
   "license": "MIT",
+  "engines": {
+    "node": "6.9.4",
+    "npm": "3.10.9"
+  },
   "dependencies": {
     "body-parser": "*",
     "classnames": "*",
