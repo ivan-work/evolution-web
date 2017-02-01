@@ -175,12 +175,10 @@ players:
 settings:
   timeTraitResponse: 10
   timeTurn: 20
-  decks: TEST
 `);
     expect(ServerGame().settings).equal(new SettingsRecord({
       timeTurn: 20
       , timeTraitResponse: 10
-      , decks: List(['TEST'])
     }))
   });
 
@@ -194,7 +192,6 @@ settings:
     expect(ServerGame().settings).equal(new SettingsRecord({
       timeTurn: 20
       , timeTraitResponse: 10
-      , decks: List(['Base2'])
     }))
   });
 
