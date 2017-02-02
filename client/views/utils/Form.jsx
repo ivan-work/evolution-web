@@ -67,11 +67,12 @@ export class Textfield extends React.Component {
   render() {
     const {name} = this.props;
     const onChange = this.context.form.onChange;
-    const {i18nPath} = this.context.form.props;
+    const {i18nPath, disabled} = this.context.form.props;
     const {model, validation} = this.context.form.state;
     return (<MDL.Textfield floatingLabel
                            label={T.translate(i18nPath + '.' + name)}
                            value={model[name]}
+                           disabled={disabled}
                            error={validation.errors.errors[name]}
                            onChange={({target}) => onChange(name, target.value)}/>)
   }
@@ -101,14 +102,15 @@ export class Checkbox extends React.Component {
   static contextTypes = {form: React.PropTypes.object.isRequired};
 
   render() {
-    const {name, disabled} = this.props;
+    const {name} = this.props;
     const onChange = this.context.form.onChange;
-    const {i18nPath} = this.context.form.props;
+    const {i18nPath, disabled} = this.context.form.props;
     const {model, validation} = this.context.form.state;
     return (<MDL.Checkbox ripple
-                          disabled={disabled}
+                          checked={model[name]}
                           label={T.translate(i18nPath + '.' + name)}
-                          value={model[name]}
+                          value={name}
+                          disabled={disabled}
                           onChange={({target}) => onChange(name, target.checked)}/>)
   }
 }
