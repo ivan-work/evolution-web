@@ -72,7 +72,8 @@ export default {
       loaders: [
         'style-loader'
         , isDevelopment ? 'css-loader' : 'css-loader'
-        // , isDevelopment ? 'css-loader?sourceMap' : 'css-loader' // https://github.com/webpack/css-loader/issues/296
+        // it was: , isDevelopment ? 'css-loader?sourceMap' : 'css-loader'
+        // but check this: https://github.com/webpack/css-loader/issues/296
         , isDevelopment ? 'sass-loader?sourceMap' : 'sass-loader'
       ]
     }, {
@@ -83,7 +84,7 @@ export default {
       // So, no need for ExtractTextPlugin here.
       test: /\.css$/,
       include: /node_modules/,
-      loaders: ['style-loader', 'css-loader']
+      loaders: ['style-loader', 'css-loader?minimize=false']
     }, {
       test: /\.(eot|svg|ttf|woff|woff2)$/,
       loader: 'file-loader'
