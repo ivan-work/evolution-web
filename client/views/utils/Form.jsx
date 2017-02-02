@@ -106,8 +106,7 @@ export class Checkbox extends React.Component {
     const onChange = this.context.form.onChange;
     const {i18nPath, disabled} = this.context.form.props;
     const {model, validation} = this.context.form.state;
-    return (<MDL.Checkbox ripple
-                          checked={model[name]}
+    return (<MDL.Checkbox checked={model[name]}
                           label={T.translate(i18nPath + '.' + name)}
                           value={name}
                           disabled={disabled}
