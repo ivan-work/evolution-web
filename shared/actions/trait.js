@@ -70,12 +70,13 @@ const startCooldown = (gameId, link, duration, place, placeId) => ({
 
 const traitMakeCooldownActions = (gameId, trait, sourceAnimal) => {
   const traitData = trait.getDataModel();
+  if (!traitData.cooldowns) return []; //Protection against symbiosis
   return traitData.cooldowns.map(([link, place, duration]) => {
     const placeId = (place === TRAIT_COOLDOWN_PLACE.PLAYER ? sourceAnimal.ownerId
       : place === TRAIT_COOLDOWN_PLACE.TRAIT ? trait.id
       : sourceAnimal.id);
     return startCooldown(gameId, link, duration, place, placeId);
-  });
+  }).toArray();
 };
 
 export const server$traitStartCooldown = (gameId, trait, sourceAnimal) => (dispatch) => {
@@ -168,7 +169,7 @@ const traitNotify_End = (gameId, sourceAid, traitId, traitType, targetId) => ({
 export const server$traitNotify_Start = (game, sourceAnimal, trait, target) => {
   logger.debug('server$traitNotify_Start:', trait.type);
   return server$game(game.id, traitNotify_Start(game.id, sourceAnimal.id, trait.id, trait.type, target && target.id || target));
-}
+};
 
 //TODO TRAIT
 export const server$traitNotify_End = (gameId, sourceAid, trait, targetId) => {
@@ -179,6 +180,7 @@ export const server$traitNotify_End = (gameId, sourceAid, trait, targetId) => {
 // complexActions
 
 export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId) => (dispatch, getState) => {
+  logger.debug(`server$startFeeding: ${sourceId} feeds ${animal.id} through ${sourceType}`);
   if (!animal.canEat(selectGame(getState, gameId))) return false;
 
   // TODO bug with 2 amount on animal 2/3
@@ -190,11 +192,14 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
     animal.traits.filter(trait => trait.type === TraitCooperation && trait.checkAction(game, animal))
       .forEach(traitCooperation => {
         const {animal: linkedAnimal} = game.locateAnimal(traitCooperation.linkAnimalId);
-        const linkedTrait = linkedAnimal.hasTrait(TraitCooperation);
 
-        traitMakeCooldownActions(gameId, traitCooperation, animal)
-          .concat(traitMakeCooldownActions(gameId, linkedTrait, linkedAnimal))
-          .map(cooldownAction => dispatch(cooldownAction));
+        if (selectGame(getState, gameId).food <= 0) return; // Re-check food after each cooperation
+
+        animal.traits.filter(t => t.linkAnimalId === linkedAnimal.id) // Get all paired traits that link to Linked Animal
+          .concat(linkedAnimal.traits.filter(t => t.linkAnimalId === animal.id)) // And get all paired traits that link from Linked Animal to this
+          .map(trait => traitMakeCooldownActions(gameId, trait)) // A-a-and...
+          .reduce((result, arrayOfCooldownActions) => result.concat(arrayOfCooldownActions), [])
+          .forEach(cooldownAction => dispatch(cooldownAction)); // Put them all in a cooldown.
 
         dispatch(server$traitNotify_Start(game, animal, traitCooperation, linkedAnimal));
         dispatch(server$startFeeding(gameId, linkedAnimal, 1, 'GAME', animal.id));
@@ -202,10 +207,11 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
   }
 
   // Communication
-  animal.traits.filter(trait => trait.type === TraitCommunication && trait.checkAction(game, animal))
-    .forEach(traitCommunication => {
+  animal.traits.filter(traitCommunication => traitCommunication.type === TraitCommunication
+    && traitCommunication.checkAction(selectGame(getState, gameId), animal))
+    .map(traitCommunication => {
       const {animal: linkedAnimal} = game.locateAnimal(traitCommunication.linkAnimalId);
-      const linkedTrait = linkedAnimal.hasTrait(TraitCommunication);
+      const linkedTrait = linkedAnimal.traits.find(trait => trait.id === traitCommunication.linkId);
 
       traitMakeCooldownActions(gameId, traitCommunication, animal)
         .concat(traitMakeCooldownActions(gameId, linkedTrait, linkedAnimal))

@@ -192,6 +192,21 @@ players:
       expect(selectAnimal(User0, 0).getFoodAndFat(), 'Animal $A.getFoodAndFat()').equal(1);
       expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal $B.getFoodAndFat()').equal(1);
     });
+
+    it(`Works with symbiosis`, () => {
+      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+      const gameId = ParseGame(`
+phase: 2
+food: 10
+players:
+  - continent: $A comm$B symb$B, $B, $Waiter graz
+`);
+      const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+      clientStore0.dispatch(traitTakeFoodRequest('$B'));
+
+      expect(selectAnimal(User0, 0).getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(1);
+      expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(1);
+    });
   });
 
   describe('Death:', () => {
