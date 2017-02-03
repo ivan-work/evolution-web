@@ -48,7 +48,7 @@ export const TraitFatTissue = {
     dispatch(server$traitStartCooldown(game.id, traitFatTissue, sourceAnimal));
     return true;
   }
-  , $checkAction: (game, sourceAnimal, trait) => trait.value && !sourceAnimal.isFull()
+  , $checkAction: (game, sourceAnimal, trait) => trait.value && !sourceAnimal.isSaturated()
 };
 
 //
@@ -108,7 +108,7 @@ export const TraitPiracy = {
     return true;
   }
   , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game)
-  , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.food > 0  && !targetAnimal.isFull()
+  , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.food > 0  && !targetAnimal.isSaturated()
 };
 
 export const TraitTailLoss = {
