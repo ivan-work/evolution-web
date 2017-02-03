@@ -170,14 +170,14 @@ export const TraitHibernation = {
     dispatch(server$traitSetAnimalFlag(game, sourceAnimal, TRAIT_ANIMAL_FLAG.HIBERNATED));
     return false;
   }
-  , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game) && game.deck.size > 0
+  , $checkAction: (game, sourceAnimal) => !sourceAnimal.isFull() && game.deck.size > 0
 };
 
 export const TraitPoisonous = {
   type: 'TraitPoisonous'
   , targetType: TRAIT_TARGET_TYPE.NONE
   , action: (game, sourceAnimal, trait, targetAnimal) => (dispatch) => {
-    dispatch(server$traitSetAnimalFlag(game, targetAnimal, TRAIT_ANIMAL_FLAG.POISONED))
+    dispatch(server$traitSetAnimalFlag(game, targetAnimal, TRAIT_ANIMAL_FLAG.POISONED));
     return true;
   }
 };
