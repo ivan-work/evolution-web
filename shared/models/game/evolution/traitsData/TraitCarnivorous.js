@@ -29,6 +29,7 @@ import {
   , TraitPoisonous
   , TraitTailLoss
   , TraitShell
+  , TraitInkCloud
 } from './index';
 
 import {
@@ -59,7 +60,7 @@ export const TraitCarnivorous = {
   , action: (game, sourceAnimal, trait, targetAnimal) => (dispatch, getState) => {
     logger.debug(`TraitCarnivorous: ${sourceAnimal.id} > ${targetAnimal.id}`);
     let possibleDefences = 0;
-    let traitMimicry, traitTailLoss, traitShell;
+    let traitMimicry, traitTailLoss, traitShell, traitInkCloud;
 
     const ended = targetAnimal.traits.some((defenseTrait) => {
       if (defenseTrait.type === TraitRunning.type) {
@@ -79,7 +80,10 @@ export const TraitCarnivorous = {
         else if (traitTailLoss.size === 1) possibleDefences += 1;
         else if (traitTailLoss.size > 1) possibleDefences += traitTailLoss.size;
       } else if (defenseTrait.type === TraitShell.type && defenseTrait.checkAction(game, targetAnimal)) {
-        traitShell = true;
+        traitShell = defenseTrait;
+        possibleDefences += 1;
+      } else if (defenseTrait.type === TraitInkCloud.type && defenseTrait.checkAction(game, targetAnimal)) {
+        traitInkCloud = defenseTrait;
         possibleDefences += 1;
       }
     });
@@ -104,7 +108,13 @@ export const TraitCarnivorous = {
       } else if (traitShell) {
         dispatch(server$traitDefenceAnswer(game.id
           , questionId
-          , targetAnimal.hasTrait(TraitShell.type).id
+          , traitShell.id
+        ));
+        return true;
+      } else if (traitInkCloud) {
+        dispatch(server$traitDefenceAnswer(game.id
+          , questionId
+          , traitInkCloud.id
         ));
         return true;
       } else {

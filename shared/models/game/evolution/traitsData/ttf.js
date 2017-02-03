@@ -49,9 +49,10 @@ export const TraitShell = {
   type: 'TraitShell'
   , targetType: TRAIT_TARGET_TYPE.NONE
   , cooldowns: fromJS([
-    ['TraitShell', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
+    ['TraitShell', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
   ])
   , action: (game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait) => (dispatch) => {
+    dispatch(server$traitStartCooldown(game.id, defenceTrait, defenceAnimal));
     dispatch(server$traitSetAnimalFlag(game, defenceAnimal, TRAIT_ANIMAL_FLAG.SHELL, true));
     dispatch(endHunt(game, attackAnimal, attackTrait, defenceAnimal));
     return true;
@@ -61,7 +62,18 @@ export const TraitShell = {
 export const TraitIntellect = {type: 'TraitIntellect'};
 export const TraitAnglerfish = {type: 'TraitAnglerfish'};
 export const TraitTrematode = {type: 'TraitTrematode'};
-export const TraitInkCloud = {type: 'TraitInkCloud'};
+export const TraitInkCloud = {
+  type: 'TraitInkCloud'
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , cooldowns: fromJS([
+    ['TraitInkCloud', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+  ])
+  , action: (game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait) => (dispatch) => {
+    dispatch(server$traitStartCooldown(game.id, defenceTrait, defenceAnimal));
+    dispatch(server$traitNotify_End(game.id, attackAnimal.id, attackTrait, defenceAnimal.id));
+    return true;
+  }
+};
 export const TraitViviparous = {type: 'TraitViviparous'};
 export const TraitAmbush = {type: 'TraitAmbush'};
 export const TraitFlight = {type: 'TraitFlight'};
