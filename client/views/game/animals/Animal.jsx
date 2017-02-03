@@ -1,9 +1,11 @@
 import React, {Component, PropTypes} from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
+import {Icon} from 'react-mdl';
 
 import {DropTarget} from 'react-dnd';
 import {DND_ITEM_TYPE} from './../dnd/DND_ITEM_TYPE';
+
 
 import {AnimalModel} from '../../../../shared/models/game/evolution/AnimalModel';
 import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
@@ -40,6 +42,12 @@ class Animal extends React.Component {
     return <AnimalTrait trait={trait}/>;
   }
 
+  renderFoodStatus(animal) {
+    return (animal.isFull() ? <Icon name='sentiment_very_satisfied'/>
+      : !animal.canSurvive() ? <Icon name='sentiment_very_dissatisfied'/>
+      : <Icon name='sentiment_neutral'/>);
+  }
+
   render() {
     const {model, isOver, canDrop} = this.props;
 
@@ -61,6 +69,7 @@ class Animal extends React.Component {
       </div>
       {this.renderSelectLink()}
       <div id={'AnimalBody'+model.id} className='inner'>
+        {this.renderFoodStatus(model)}
         {model.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) ?
         <span className='material-icons Flag Poisoned'>smoking_rooms</span> : null}
         {model.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) ?
