@@ -1,32 +1,41 @@
 @import './variables';
 
-@mixin traits() {
-  .TraitFatTissue {
-    //color: #930;
-    //background: #ff9;
-    color: #d60;
-    &.value {
-      background: #ff0;
-    }
-    &.value.active {
-      background: $TRAIT_ACTIVE_BACK;
-      color: $TRAIT_ACTIVE_TEXT;
-    }
-  }
-
-  .TraitCarnivorous {
-    //color: #fcc;
-    //background: #900;
-    color: #900;
-  }
-
-  .TraitParasite {
-    color: #60c;
-    //background: #ccf;
-  }
-
-  .TraitSwimming {
-    color: #00f;
-    //background: #ccf;
+.TraitFatTissue {
+  color: #d60;
+  &.value {background: #ff0;}
+  &.value.active {
+    background: $TRAIT_ACTIVE_BACK;
+    color: $TRAIT_ACTIVE_TEXT;
   }
 }
+
+.TraitCarnivorous {color: #900;}
+
+.TraitSwimming {color: #00F;}
+
+.TraitCommunication {
+  color: #99F;
+  &.Link {stroke: #99F;}
+}
+
+.TraitCooperation {
+  color: #090;
+  &.Link {stroke: #090;}
+}
+
+.TraitSymbiosis {
+  $color: #F03;
+  color: $color;
+  &.Link {stroke: $color;}
+  &.Marker {fill: $color;}
+  &.MarkerStart {marker-start: url(#symbioticArrow);}
+  &.MarkerEnd {marker-end: url(#symbioticArrow);}
+}
+
+.TraitTrematode {
+  $color: #909;
+  color: $color;
+  &.Link {stroke: $color;}
+}
+
+.TraitParasite {color: #60c;}
