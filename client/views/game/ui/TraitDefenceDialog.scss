@@ -1,9 +1,6 @@
 @import '../../../styles/variables';
-@import '../../../styles/traits';
 
 .TraitDefenceDialog {
-  @include traits();
-
   .Row {
     display: flex;
     flex-wrap: wrap;

@@ -5,6 +5,7 @@ import {
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
   , TRAIT_COOLDOWN_LINK
+  , CARD_TARGET_TYPE
   , TRAIT_ANIMAL_FLAG
 } from '../constants';
 
@@ -61,7 +62,11 @@ export const TraitShell = {
 
 export const TraitIntellect = {type: 'TraitIntellect'};
 export const TraitAnglerfish = {type: 'TraitAnglerfish'};
-export const TraitTrematode = {type: 'TraitTrematode'};
+export const TraitTrematode = {
+  type: 'TraitTrematode'
+  , cardTargetType: CARD_TARGET_TYPE.LINK_ENEMY
+  , food: 1
+};
 export const TraitInkCloud = {
   type: 'TraitInkCloud'
   , targetType: TRAIT_TARGET_TYPE.NONE

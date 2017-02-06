@@ -1,11 +1,8 @@
 @import '../../../styles/variables';
-@import '../../../styles/traits';
 
 .Animal {
   position: relative;
   width: $ANIMAL_WIDTH;
-
-  @include traits();
 
   & > .inner {
     width: 100%;

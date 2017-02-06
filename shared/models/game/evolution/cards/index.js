@@ -2,6 +2,7 @@ import makeCard from './makeCard';
 import * as traits from '../traitTypes/index';
 
 export * from './base';
+export * from './ttf';
 
 export const CardUnknown = {
   type: 'CardUnknown'
