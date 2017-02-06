@@ -20,6 +20,7 @@ database.ready.then(() => {
   configureStore(server, app);
 
   require('./routes/index')(app);
+  app.use('/public', express.static('server/public'));
 
   (process.env.NODE_ENV === 'development' ? frontendDevelopment : frontendProduction)(webpackConfig, app);
 
