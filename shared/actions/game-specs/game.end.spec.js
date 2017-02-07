@@ -2,7 +2,6 @@ import {Map, List} from 'immutable';
 
 import {PHASE} from '../../models/game/GameModel';
 import {TraitModel} from '../../models/game/evolution/TraitModel';
-import {TraitDataModel} from '../../models/game/evolution/TraitDataModel';
 import * as traits from '../../models/game/evolution/traitsData/index';
 
 import {

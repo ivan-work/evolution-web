@@ -171,6 +171,9 @@ export const TraitHibernation = {
     return false;
   }
   , $checkAction: (game, sourceAnimal) => !sourceAnimal.isFull() && game.deck.size > 0
+  , onRemove: (game, animal) => {
+    dispatch(server$traitSetAnimalFlag(game, animal, TRAIT_ANIMAL_FLAG.HIBERNATED, false));
+  }
 };
 
 export const TraitPoisonous = {

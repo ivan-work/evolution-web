@@ -25,7 +25,7 @@
 
 .TraitSymbiosis {
   $color: #F06;
-  color: $color;git c
+  color: $color;
   &.Link {stroke: $color;}
   &.Marker {fill: $color;}
   &.MarkerStart {marker-start: url(#symbioticArrow);}
