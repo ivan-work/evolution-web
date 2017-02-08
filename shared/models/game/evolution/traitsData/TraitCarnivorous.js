@@ -97,7 +97,7 @@ export const TraitCarnivorous = {
           , targetAnimal.hasTrait(TraitTailLoss.type).id
           , traitTailLoss.last().id
         ));
-        return true;
+        return false;
       } else if (traitMimicry) {
         dispatch(server$traitDefenceAnswer(game.id
           , questionId
@@ -110,13 +110,13 @@ export const TraitCarnivorous = {
           , questionId
           , traitShell.id
         ));
-        return true;
+        return false;
       } else if (traitInkCloud) {
         dispatch(server$traitDefenceAnswer(game.id
           , questionId
           , traitInkCloud.id
         ));
-        return true;
+        return false;
       } else {
         dispatch(server$traitDefenceAnswerSuccess(game.id, questionId));
         dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));

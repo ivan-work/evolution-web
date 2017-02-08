@@ -2,6 +2,7 @@ import {Record, Map, OrderedMap, Range, List} from 'immutable';
 
 import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
+import {TraitModel} from './evolution/TraitModel';
 import {CooldownList} from './CooldownList';
 import {SettingsRecord, Deck_Base, Deck_TimeToFly} from './GameSettings';
 
@@ -62,6 +63,24 @@ export class QuestionRecord extends Record({
   }
 }
 
+export class ContinentRecord extends Record({
+  id: null
+  , shells: Map()
+  , food: Map()
+}) {
+  static fromJS(js) {
+    return js == null
+      ? null
+      : new ContinentRecord({
+      ...js
+      , shells: Map(js.shells).map(shell => TraitModel.fromServer(shell))
+    });
+  }
+}
+
+const ContinentsStandard = Map({standard: new ContinentRecord({id: 'standard'})});
+const ContinentsAddon = Map({});
+
 const rollDice = () => getRandom(1, 6);
 
 const FOOD_TABLE = [
@@ -81,6 +100,7 @@ const GameModelData = {
   , roomId: null
   , deck: null
   , players: OrderedMap()
+  , continents: ContinentsStandard
   , observers: List()
   , log: List()
   , food: -1
@@ -140,6 +160,7 @@ export class GameModel extends Record(GameModelData) {
       ...js
       , deck: List(js.deck).map(c => CardModel.fromServer(c))
       , players: OrderedMap(js.players).map(PlayerModel.fromServer).sort((p1, p2) => p1.index > p2.index)
+      , continents: Map(js.continents).map(ContinentRecord.fromJS)
       , status: new StatusRecord(js.status)
       , question: QuestionRecord.fromJS(js.question)
       , cooldowns: CooldownList.fromServer(js.cooldowns)
@@ -169,19 +190,22 @@ export class GameModel extends Record(GameModelData) {
       .setIn(['status', 'phase'], PHASE.FINAL);
   }
 
-  makeScoreboard() {
-  }
-
   getPlayer(pid) {
     return pid.id
       ? this.players.get(pid.id)
       : this.players.get(pid);
   }
 
+  getContinent() {
+    return this.continents.get('standard');
+  }
+
+  // TODO remove
   getPlayerCard(pid, index) {
     return this.getPlayer(pid).hand.get(index);
   }
 
+  // TODO remove
   getPlayerAnimal(pid, index) {
     return this.getPlayer(pid).continent.get(index);
   }

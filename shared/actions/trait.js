@@ -1,6 +1,7 @@
 import logger from '~/shared/utils/logger';
 import uuid from 'uuid';
-import {ActionCheckError} from '~/shared/models/ActionCheckError';
+import {ActionCheckError} from '../models/ActionCheckError';
+import {TraitModel} from '../models/game/evolution/TraitModel';
 
 import {
   TRAIT_TARGET_TYPE
@@ -57,6 +58,12 @@ export const server$traitActivate = (game, sourceAnimal, trait, ...params) => (d
   logger.silly('server$traitActivate finish:', trait.type, result);
   return result;
 };
+
+export const traitTakeShellRequest = (animalId, traitId) => (dispatch, getState) => dispatch({
+  type: 'traitTakeShellRequest'
+  , data: {gameId: getState().get('game').id, animalId, traitId}
+  , meta: {server: true}
+});
 
 /**
  * Cooldowns
@@ -134,11 +141,18 @@ const traitAnimalRemoveTrait = (gameId, sourcePid, sourceAid, traitId) => ({
   , data: {gameId, sourcePid, sourceAid, traitId}
 });
 
-export const server$traitAnimalRemoveTrait = (gameId, sourceAnimal, traitId) =>
-  server$game(gameId, traitAnimalRemoveTrait(gameId, sourceAnimal.ownerId, sourceAnimal.id, traitId));
+export const server$traitAnimalRemoveTrait = (game, animal, trait) => (dispatch) => {
+  trait.getDataModel().onRemove && dispatch(trait.getDataModel().onRemove(game, animal, trait));
+  dispatch(server$game(game.id, traitAnimalRemoveTrait(game.id, animal.ownerId, animal.id, trait.id)));
+};
+
+const traitTakeShell = (gameId, continentId, animalId, trait) => ({
+  type: 'traitTakeShell'
+  , data: {gameId, continentId, animalId, trait}
+});
 
 /**
- *
+ * Acted
  * */
 
 const playerActed = (gameId, userId) => ({
@@ -309,6 +323,7 @@ export const traitClientToServer = {
     checkGameHasUser(game, userId);
     checkGamePhase(game, PHASE.FEEDING);
     checkPlayerCanAct(game, userId);
+
     const animal = checkPlayerHasAnimal(game, userId, animalId);
     checkAnimalCanEat(game, animal);
 
@@ -320,9 +335,32 @@ export const traitClientToServer = {
     dispatch(server$startFeeding(gameId, animal, 1, 'GAME'));
     dispatch(server$playerActed(gameId, userId));
   }
+  , traitTakeShellRequest: ({gameId, animalId, traitId}, {userId}) => (dispatch, getState) => {
+    const game = selectGame(getState, gameId);
+    checkGameDefined(game);
+    checkGameHasUser(game, userId);
+    checkGamePhase(game, PHASE.FEEDING);
+    checkPlayerCanAct(game, userId);
+
+    const animal = checkPlayerHasAnimal(game, userId, animalId);
+
+    const trait = game.getContinent().shells.get(traitId);
+    if (!trait)
+      throw new ActionCheckError(`server$traitDefenceAnswer@Game(${game.id})`, 'Game doesnt have Trait(%s)', traitId);
+
+    if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, animal.ownerId, animal.id))
+      throw new ActionCheckError(`traitTakeFoodRequest@Game(${game.id})`, 'Cooldown active');
+
+    const attachedTrait = trait.attachTo(animal);
+
+    dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
+    dispatch(server$game(gameId, traitTakeShell(gameId, 'standard', animalId, attachedTrait)));
+    dispatch(server$playerActed(gameId, userId));
+  }
   , traitActivateRequest: ({gameId, sourceAid, traitId, targetId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
+    checkGameHasUser(game, userId);
     checkGamePhase(game, PHASE.FEEDING);
     checkPlayerCanAct(game, userId);
     const {sourceAnimal, trait, target} = checkTraitActivation(game, userId, sourceAid, traitId, targetId);
@@ -375,4 +413,6 @@ export const traitServerToClient = {
   , traitConvertFat: ({gameId, sourceAid, traitId}) => traitConvertFat(gameId, sourceAid, traitId)
   , traitSetAnimalFlag: ({gameId, sourceAid, flag, on}) =>
     traitSetAnimalFlag(gameId, sourceAid, flag, on)
+  , traitTakeShell: ({gameId, continentId, animalId, trait}) =>
+    traitTakeShell(gameId, continentId, animalId, TraitModel.fromServer(trait))
 };

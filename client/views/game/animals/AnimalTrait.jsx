@@ -31,7 +31,7 @@ class AnimalTrait extends Component {
   }
 
   render() {
-    const {trait, connectDragSource, isDragging, canDrag} = this.props;
+    const {trait} = this.props;
 
     const className = classnames(Object.assign(this.classNames || {}, {
       AnimalTrait: true

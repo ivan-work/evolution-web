@@ -98,7 +98,7 @@ export const parseFromRoom = (room, string = '') => {
     return result;
   }, {});
 
-  return GameModel.fromServer({
+  return GameModel.fromServer(new GameModel({
     id: uuid.v4()
     , roomId: room.id
     , food: seed.food || 0
@@ -111,7 +111,7 @@ export const parseFromRoom = (room, string = '') => {
     , settings: {
       ...seed.settings
     }
-  });
+  }).toJS());
 };
 
 export const parseRaw = (string) => parseFromRoom({

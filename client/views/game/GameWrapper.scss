@@ -18,7 +18,11 @@
   }
   .PlayerWrapper {
     .CardCollection {
-      height: 80px;
+      height: $CARD_HEIGHT;
     }
+  }
+
+  .GameShellContainer {
+    display: flex;
   }
 }

@@ -32,7 +32,7 @@ export const TraitMetamorphose = {
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: (game, sourceAnimal, traitMetamorphose, targetTrait) => (dispatch, getState) => {
-    dispatch(server$traitAnimalRemoveTrait(game.id, sourceAnimal, targetTrait.id));
+    dispatch(server$traitAnimalRemoveTrait(game, sourceAnimal, targetTrait));
     dispatch(server$traitStartCooldown(game.id, traitMetamorphose, sourceAnimal));
 
     const {animal} = selectGame(getState, game.id).locateAnimal(sourceAnimal.id, sourceAnimal.ownerId);
@@ -48,7 +48,7 @@ export const TraitShell = {
   type: 'TraitShell'
   , targetType: TRAIT_TARGET_TYPE.NONE
   , cooldowns: fromJS([
-    ['TraitShell', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+    ['TraitShell', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
   ])
   , action: (game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, defenceTrait, defenceAnimal));
