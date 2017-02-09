@@ -39,3 +39,10 @@
 }
 
 .TraitParasite {color: #60c;}
+
+.TraitAmbush {
+  &.value.pointer.active {
+    font-weight: bold;
+    background: #f96;
+  }
+}

@@ -16,6 +16,7 @@ import {
   , server$traitAnimalRemoveTrait
   , server$traitGrazeFood
   , server$traitSetAnimalFlag
+  , server$traitSetValue
   , server$traitNotify_End
   , server$game
   , traitGiveBirth
@@ -24,6 +25,7 @@ import {
 import {selectGame} from '../../../../selectors';
 
 import {endHunt} from './TraitCarnivorous';
+import {TraitCarnivorous} from '../traitTypes';
 
 export const TraitMetamorphose = {
   type: 'TraitMetamorphose'
@@ -134,6 +136,19 @@ export const TraitViviparous = {
   }
   , $checkAction: (game, animal, traitSpec) => animal.isSaturated(game) && game.deck.size > 0
 };
-export const TraitAmbush = {type: 'TraitAmbush'};
+
+export const TraitAmbush = {
+  type: 'TraitAmbush'
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , playerControllable: true
+  , transient: true
+  , cooldowns: fromJS([])
+  , $checkAction: (game, animal, traitSpec) => animal.hasTrait(TraitCarnivorous)
+    //&& !game.cooldowns.checkFor(TraitCarnivorous, animal.ownerId, animal.id)
+  , action: (game, sourceAnimal, trait) => (dispatch) => {
+    dispatch(server$traitSetValue(game, sourceAnimal, trait, !trait.value));
+    return false;
+  }
+};
 export const TraitIntellect = {type: 'TraitIntellect'};
 export const TraitAnglerfish = {type: 'TraitAnglerfish'};

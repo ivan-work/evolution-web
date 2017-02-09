@@ -495,12 +495,14 @@ export const gameClientToServer = {
         , traitData);
     }
 
-    const {playerId, animal} = game.locateAnimal(animalId);
+    const {animal} = game.locateAnimal(animalId);
     if (!animal) {
       throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Player#%s doesn\'t have Animal#%s', playerId, animalId);
     }
+    const playerId = animal.ownerId;
 
-    const {playerId: linkedPlayerId, animal: linkedAnimal} = game.locateAnimal(linkId);
+    const {animal: linkedAnimal} = game.locateAnimal(linkId);
+    const linkedPlayerId = linkedAnimal && linkedAnimal.ownerId;
 
     if (traitData.cardTargetType & CTT_PARAMETER.SELF)
       if (playerId !== userId)

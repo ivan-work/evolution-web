@@ -29,6 +29,7 @@ import {
   , traitGrazeFood
   , traitConvertFat
   , traitSetAnimalFlag
+  , traitSetValue
   , traitNotify_Start
   , traitTakeShell
   , traitGiveBirth
@@ -63,6 +64,7 @@ export const reducer = createReducer(null, {
   , traitGrazeFood
   , traitConvertFat
   , traitSetAnimalFlag
+  , traitSetValue
   , traitNotify_Start
   , traitTakeShell
   , traitGiveBirth

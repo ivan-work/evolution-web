@@ -102,7 +102,7 @@ class ClickAnimalTrait extends AnimalTrait {
 
   render() {
     const {trait, game, sourceAnimal, onClick} = this.props;
-    const active = game.isPlayerTurn()
+    const active = (game.isPlayerTurn() || trait.getDataModel().transient)
       && game.isFeeding()
       && sourceAnimal.ownerId === game.userId
       && trait.checkAction(game, sourceAnimal);
@@ -110,6 +110,7 @@ class ClickAnimalTrait extends AnimalTrait {
       pointer: active
       , active
       , ClickAnimalTrait
+      , value: trait.value
     };
     return (active
       ? React.cloneElement(super.render(), {onClick})
