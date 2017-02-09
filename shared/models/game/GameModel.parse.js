@@ -62,7 +62,9 @@ export const parseAnimalList = (userId, string) => {
         }
         else {
           invariant(!!prop, `GameModel.parseAnimalList prop undefined: (${userId})`);
-          return animal.traitAttach(TraitModel.new(TraitModel.parse(prop)));
+          const type = prop.split('=')[0];
+          const value = prop.split('=')[1];
+          return animal.traitAttach(TraitModel.new(TraitModel.parse(type)).set('value', value));
         }
       }, AnimalModel.new(userId)))
     .reduce((result, animal) => result.set(animal.id, animal), Map());

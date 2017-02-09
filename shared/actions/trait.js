@@ -17,8 +17,7 @@ import {server$gameEndTurn, server$addTurnTimeout, makeTurnTimeoutId} from './ac
 import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
 
 import {PHASE, QuestionRecord} from '../models/game/GameModel';
-import {TraitCarnivorous} from '../models/game/evolution/traitsData/index';
-import {TraitCommunication, TraitCooperation} from '../models/game/evolution/traitTypes';
+import {TraitCommunication, TraitCooperation, TraitViviparous, TraitCarnivorous} from '../models/game/evolution/traitTypes';
 
 import {
   checkGameDefined
@@ -27,6 +26,7 @@ import {
   , checkPlayerHasAnimal
   , checkPlayerCanAct
   , checkPlayerTurn
+  , passesChecks
 } from './checks';
 
 import {checkAnimalCanEat, checkTraitActivation} from './trait.checks';
@@ -51,9 +51,8 @@ export const traitActivateRequest = (sourceAid, traitId, targetId) => (dispatch,
 
 export const server$traitActivate = (game, sourceAnimal, trait, ...params) => (dispatch, getState) => {
   dispatch(server$traitNotify_Start(game, sourceAnimal, trait, ...params));
-  const traitData = trait.getDataModel();
   logger.verbose('server$traitActivate:', sourceAnimal.id, trait.type);
-  //dispatch()
+  const traitData = trait.getDataModel();
   const result = dispatch(traitData.action(game, sourceAnimal, trait, ...params));
   logger.silly('server$traitActivate finish:', trait.type, result);
   return result;
@@ -101,8 +100,10 @@ const traitConvertFat = (gameId, sourceAid, traitId) => ({
   , data: {gameId, sourceAid, traitId}
 });
 
-export const server$traitConvertFat = (gameId, sourceAnimal, trait) =>
-  server$game(gameId, traitConvertFat(gameId, sourceAnimal.id, trait.id));
+export const server$traitConvertFat = (gameId, sourceAnimal, trait) => (dispatch) => {
+  dispatch(server$game(gameId, traitConvertFat(gameId, sourceAnimal.id, trait.id)));
+  dispatch(server$tryViviparous(gameId, sourceAnimal));
+};
 
 const traitMoveFood = (gameId, animalId, amount, sourceType, sourceId) => ({
   type: 'traitMoveFood'
@@ -150,6 +151,22 @@ const traitTakeShell = (gameId, continentId, animalId, trait) => ({
   type: 'traitTakeShell'
   , data: {gameId, continentId, animalId, trait}
 });
+
+export const traitGiveBirth = (gameId, sourceAid) => ({
+  type: 'traitGiveBirth'
+  , data: {gameId, sourceAid}
+});
+
+export const server$tryViviparous = (gameId, animal) => (dispatch, getState) => {
+  // Viviparous
+  const game = selectGame(getState, gameId);
+  const {sourceAnimal, trait} = checkTraitActivation(game, animal.ownerId, animal.id, TraitViviparous);
+  return passesChecks(() => {
+    const game = selectGame(getState, gameId);
+    const {sourceAnimal, trait} = checkTraitActivation(game, animal.ownerId, animal.id, TraitViviparous);
+    return dispatch(server$traitActivate(game, sourceAnimal, trait));
+  })
+};
 
 /**
  * Acted
@@ -233,6 +250,9 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
       dispatch(server$traitNotify_Start(game, animal, traitCommunication, linkedAnimal));
       dispatch(server$startFeeding(gameId, linkedAnimal, 1, 'TraitCommunication', animal.id));
     });
+
+  dispatch(server$tryViviparous(game.id, animal));
+
   return true;
 };
 
@@ -330,7 +350,7 @@ export const traitClientToServer = {
     logger.debug('traitTakeFoodRequest:', userId, animalId);
 
     dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
-    dispatch(server$game(gameId, startCooldown(gameId, 'TraitCarnivorous', TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
+    dispatch(server$game(gameId, startCooldown(gameId, TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
 
     dispatch(server$startFeeding(gameId, animal, 1, 'GAME'));
     dispatch(server$playerActed(gameId, userId));
@@ -415,4 +435,6 @@ export const traitServerToClient = {
     traitSetAnimalFlag(gameId, sourceAid, flag, on)
   , traitTakeShell: ({gameId, continentId, animalId, trait}) =>
     traitTakeShell(gameId, continentId, animalId, TraitModel.fromServer(trait))
+  , traitGiveBirth: ({gameId, sourceAid}) =>
+    traitGiveBirth(gameId, sourceAid)
 };

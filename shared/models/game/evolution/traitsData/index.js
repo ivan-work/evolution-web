@@ -17,6 +17,7 @@ import {
   , server$traitSetAnimalFlag
   , server$traitNotify_End
   , server$traitConvertFat
+  , server$tryViviparous
 } from '../../../../actions/actions';
 
 import {getRandom} from '../../../../utils/randomGenerator';
@@ -108,7 +109,7 @@ export const TraitPiracy = {
     return true;
   }
   , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game)
-  , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.food > 0  && !targetAnimal.isSaturated()
+  , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.food > 0 && !targetAnimal.isSaturated()
 };
 
 export const TraitTailLoss = {
@@ -168,12 +169,11 @@ export const TraitHibernation = {
   , action: (game, sourceAnimal, traitHibernation) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, traitHibernation, sourceAnimal));
     dispatch(server$traitSetAnimalFlag(game, sourceAnimal, TRAIT_ANIMAL_FLAG.HIBERNATED));
+    dispatch(server$tryViviparous(game.id, sourceAnimal));
     return false;
   }
   , $checkAction: (game, sourceAnimal) => !sourceAnimal.isFull() && game.deck.size > 0
-  , onRemove: (game, animal) => {
-    dispatch(server$traitSetAnimalFlag(game, animal, TRAIT_ANIMAL_FLAG.HIBERNATED, false));
-  }
+  , onRemove: (game, animal) => dispatch(server$traitSetAnimalFlag(game, animal, TRAIT_ANIMAL_FLAG.HIBERNATED, false))
 };
 
 export const TraitPoisonous = {

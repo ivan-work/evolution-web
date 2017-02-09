@@ -17,6 +17,8 @@ import {
   , server$traitGrazeFood
   , server$traitSetAnimalFlag
   , server$traitNotify_End
+  , server$game
+  , traitGiveBirth
 } from '../../../../actions/actions';
 
 import {selectGame} from '../../../../selectors';
@@ -119,7 +121,19 @@ export const TraitSpecB = {
 
 export const TraitFlight = {type: 'TraitFlight'};
 
-export const TraitViviparous = {type: 'TraitViviparous'};
+export const TraitViviparous = {
+  type: 'TraitViviparous'
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , food: 1
+  , cooldowns: fromJS([
+    ['TraitViviparous', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+  ])
+  , action: (game, sourceAnimal, trait) => (dispatch) => {
+    dispatch(server$traitStartCooldown(game.id, trait, sourceAnimal));
+    dispatch(server$game(game.id, traitGiveBirth(game.id, sourceAnimal.id)));
+  }
+  , $checkAction: (game, animal, traitSpec) => animal.isSaturated(game) && game.deck.size > 0
+};
 export const TraitAmbush = {type: 'TraitAmbush'};
 export const TraitIntellect = {type: 'TraitIntellect'};
 export const TraitAnglerfish = {type: 'TraitAnglerfish'};
