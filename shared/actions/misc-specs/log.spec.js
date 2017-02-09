@@ -153,6 +153,7 @@ players:
       expect(selectGame().log.get(i++)).eql(['gameEndTurn', User1.id, true, false]);
       expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User2.id]);
       expect(selectGame().log.get(i++)).eql(['gameEndTurn', User2.id, true, false]);
+      expect(selectGame().log.get(i++)).eql(['PhaseExtinct']);
 
       expect(selectGame().log.get(i++)).eql(['gameAnimalStarve', ['$Animal', 'TraitFatTissue']]);
       expect(selectGame().log.get(i++)).eql(['gameAnimalStarve', ['$Animal']]);
@@ -165,7 +166,6 @@ players:
 
       expect(selectGame().log.get(i++)).eql(['PhaseDeploy']);
     };
-    // console.log(selectGame().log.toJS())
     checkLog(selectGame);
     checkLog(selectGame0);
   });

@@ -170,7 +170,7 @@ export const TraitHibernation = {
     dispatch(server$traitStartCooldown(game.id, traitHibernation, sourceAnimal));
     dispatch(server$traitSetAnimalFlag(game, sourceAnimal, TRAIT_ANIMAL_FLAG.HIBERNATED));
     dispatch(server$tryViviparous(game.id, sourceAnimal));
-    return false;
+    return true;
   }
   , $checkAction: (game, sourceAnimal) => !sourceAnimal.isFull() && game.deck.size > 0
   , onRemove: (game, animal) => dispatch(server$traitSetAnimalFlag(game, animal, TRAIT_ANIMAL_FLAG.HIBERNATED, false))
