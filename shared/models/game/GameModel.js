@@ -114,7 +114,10 @@ const GameModelData = {
 
 global.locateAnimalTime = 0;
 
-export class GameModel extends Record(GameModelData) {
+export class GameModel extends Record({
+  ...GameModelData
+  , ambush: void 0
+}) {
   static generateDeck(config, shuffle) {
     const result = config.reduce((result, [count, type]) => result
       .concat(Array.from({length: count})

@@ -19,6 +19,7 @@ import {
   , server$traitDefenceAnswerSuccess
   , server$traitNotify_Start
   , server$traitNotify_End
+  , traitAmbushEnd
 } from '../../../../actions/actions';
 import {selectGame} from '../../../../selectors';
 
@@ -45,6 +46,17 @@ import {
 
 export const endHunt = (game, sourceAnimal, traitCarnivorous, targetAnimal) => (dispatch) => {
   dispatch(server$traitStartCooldown(game.id, traitCarnivorous, sourceAnimal));
+  dispatch(endHuntNoCd(game, sourceAnimal, traitCarnivorous, targetAnimal));
+};
+
+export const endHuntNoCd = (game, sourceAnimal, traitCarnivorous, targetAnimal) => (dispatch) => {
+  if (game.ambush) {
+    const {animal} = game.locateAnimal(game.ambush);
+    if (animal) {
+      dispatch(traitAmbushEnd(game.id, animal));
+      dispatch(server$startFeeding(game.id, animal, 1, 'GAME'));
+    }
+  }
   dispatch(server$traitNotify_End(game.id, sourceAnimal.id, traitCarnivorous, targetAnimal.id));
 };
 

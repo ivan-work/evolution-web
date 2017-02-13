@@ -89,13 +89,13 @@ players:
     expect(selectAnimal(User1, 2)).undefined;
   });
 
-  it('$A > $B m> $C m> $B', () => {
+  it.only('$A > $B m> $C m> $B', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: 2
 food: 10
 players:
-  - continent: $A carn
+  - continent: $A carn graz
   - continent: $B mimicry, $C mimicry, $D
 `);
     const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
@@ -109,6 +109,8 @@ players:
 
     clientStore1.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$B'));
 
+    console.log(selectPlayer(User1).continent)
+    expect(selectPlayer(User1).continent).size(2);
     expect(selectAnimal(User0, 0).getFoodAndFat()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$C');
     expect(selectAnimal(User1, 1).id).equal('$D');
