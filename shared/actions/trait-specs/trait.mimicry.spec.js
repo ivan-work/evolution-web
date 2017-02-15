@@ -89,7 +89,7 @@ players:
     expect(selectAnimal(User1, 2)).undefined;
   });
 
-  it.only('$A > $B m> $C m> $B', () => {
+  it('$A > $B m> $C m> $B', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: 2

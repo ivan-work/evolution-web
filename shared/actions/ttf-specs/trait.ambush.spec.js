@@ -9,7 +9,7 @@ import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
 
-describe.skip('TraitAmbush:', () => {
+describe('TraitAmbush:', () => {
   it('Simple attack', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1}] = mockGame(2);
     const gameId = ParseGame(`
@@ -89,6 +89,35 @@ players:
 
     expect(selectAnimal(User1, 0).getFood(), '$C should get $A tail').equal(2);
     expect(selectAnimal(User0, 0).id, '$A should be alive').equal('$A');
+    expect(selectAnimal(User0, 1).id, '$B should be alive').equal('$B');
+    expect(selectAnimal(User0, 2), '$D should be alive').undefined;
     expect(selectAnimal(User0, 0).getFood(), '$A should get food').equal(1);
+  });
+
+  it.only('Cooldowns', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: 2
+food: 4
+players:
+  - continent: $A ambush=true carn hiber tail fat fat
+  - continent: $B ambush=true carn hiber tail fat fat
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    expect(selectGame().question, 'Game asks question').ok;
+    clientStore0.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitTailLoss'));
+
+    clientStore1.dispatch(traitTakeFoodRequest('$B'));
+    expect(selectGame().question, 'Game asks question').ok;
+    clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitTailLoss'));
+
+    //expect(selectAnimal(User1, 0).getFood(), '$C should get $A tail').equal(2);
+    //expect(selectAnimal(User0, 0).id, '$A should be alive').equal('$A');
+    //expect(selectAnimal(User0, 1).id, '$B should be alive').equal('$B');
+    //expect(selectAnimal(User0, 2), '$D should be alive').undefined;
+    //expect(selectAnimal(User0, 0).getFood(), '$A should get food').equal(1);
   });
 });

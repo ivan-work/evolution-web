@@ -11,6 +11,7 @@ import {
 import {
   server$traitKillAnimal
   , server$startFeeding
+  , server$startFeedingFromGame
   , server$traitStartCooldown
   , server$traitActivate
   , traitDefenceQuestion
@@ -54,7 +55,7 @@ export const endHuntNoCd = (game, sourceAnimal, traitCarnivorous, targetAnimal) 
     const {animal} = game.locateAnimal(game.ambush);
     if (animal) {
       dispatch(traitAmbushEnd(game.id, animal));
-      dispatch(server$startFeeding(game.id, animal, 1, 'GAME'));
+      dispatch(server$startFeedingFromGame(game.id, animal, 1));
     }
   }
   dispatch(server$traitNotify_End(game.id, sourceAnimal.id, traitCarnivorous, targetAnimal.id));
@@ -157,6 +158,7 @@ export const TraitCarnivorous = {
       }
     };
 
+    logger.debug(`possibleDefences: ${+possibleDefences}`)
     if (possibleDefences > 1) {
       dispatch(server$traitDefenceQuestion(game.id, sourceAnimal, trait, targetAnimal, defaultDefence));
       return false;

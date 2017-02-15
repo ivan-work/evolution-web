@@ -273,6 +273,25 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
   return true;
 };
 
+export const server$startFeedingFromGame = (gameId, animal, amount) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  const ambushed = game.someAnimalOnContinent('standard', (attackAnimal) => {
+    if (attackAnimal.ownerId === animal.ownerId) return;
+    const ambush = attackAnimal.hasTrait(TraitAmbush);
+    const carnivorous = attackAnimal.hasTrait(TraitCarnivorous);
+    if (!ambush || !ambush.value || !carnivorous) return;
+    const carnivorousData = carnivorous.getDataModel();
+    if (!carnivorous.checkAction(game, attackAnimal) || !carnivorousData.checkTarget(game, attackAnimal, animal)) return;
+    dispatch(traitAmbushStart(gameId, animal));
+    dispatch(server$traitActivate(game, attackAnimal, carnivorous, animal));
+    return true;
+  });
+  if (!ambushed) {
+    dispatch(server$startFeeding(gameId, animal, amount, 'GAME'));
+    dispatch(server$playerActed(gameId, animal.ownerId));
+  }
+};
+
 // Defence
 
 export const traitDefenceQuestion = (gameId, question) => ({
@@ -368,22 +387,7 @@ export const traitClientToServer = {
 
     dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
     dispatch(server$game(gameId, startCooldown(gameId, TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
-
-    const ambushed = game.someAnimalOnContinent('standard', (attackAnimal) => {
-      const ambush = attackAnimal.hasTrait(TraitAmbush);
-      const carnivorous = attackAnimal.hasTrait(TraitCarnivorous);
-      if (!ambush || !carnivorous) return;
-      const carnivorousData = carnivorous.getDataModel();
-      if (!carnivorous.checkAction(game, attackAnimal) || !carnivorousData.checkTarget(game, attackAnimal, animal)) return;
-      dispatch(traitAmbushStart(gameId, animal));
-      dispatch(server$traitActivate(game, attackAnimal, carnivorous, animal));
-      return true;
-    });
-    if (ambushed) {
-    } else {
-      dispatch(server$startFeeding(gameId, animal, 1, 'GAME'));
-      dispatch(server$playerActed(gameId, userId));
-    }
+    dispatch(server$startFeedingFromGame(game.id, animal, 1));
   }
   , traitTakeShellRequest: ({gameId, animalId, traitId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
@@ -435,10 +439,10 @@ export const traitClientToServer = {
     }
 
     const {sourcePid, targetPid} = game.question;
-    checkPlayerTurn(game, sourcePid);
+    //checkPlayerTurn(game, sourcePid);
     if (userId !== targetPid) {
       throw new ActionCheckError(`checkPlayerCanAct@Game(${game.id})`
-        , `Player(%s) acting on Target(%s) answering`
+        , `Player(%s) answering Target(%s)`
         , userId, targetPid);
     }
 
