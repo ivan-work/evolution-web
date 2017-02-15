@@ -53,13 +53,14 @@ export class CooldownList extends Record(
     });
   }
 
-  eventNextPlayer(nextRound) {
+  eventNextPlayer() {
+    console.log('eventNextPlayer')
     return this.updateDuration(duration => {
       switch (duration) {
         case TRAIT_COOLDOWN_DURATION.ACTIVATION:
           return null;
         case TRAIT_COOLDOWN_DURATION.ROUND:
-          return nextRound ? null : duration;
+          return null;
         case TRAIT_COOLDOWN_DURATION.TURN:
           return duration;
         case TRAIT_COOLDOWN_DURATION.TWO_TURNS:
