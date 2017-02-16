@@ -54,7 +54,6 @@ export class CooldownList extends Record(
   }
 
   eventNextPlayer() {
-    console.log('eventNextPlayer')
     return this.updateDuration(duration => {
       switch (duration) {
         case TRAIT_COOLDOWN_DURATION.ACTIVATION:
