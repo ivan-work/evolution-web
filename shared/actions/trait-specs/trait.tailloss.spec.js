@@ -3,7 +3,7 @@ import {
   , gameEndTurnRequest
   , traitTakeFoodRequest
   , traitActivateRequest
-  , traitDefenceAnswerRequest
+  , traitAnswerRequest
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
@@ -27,14 +27,14 @@ players:
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$C'));
 
     expectUnchanged(`User1 can't drop trait 2`, () =>
-        clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 2))
+        clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', 2))
       , serverStore, clientStore0, clientStore1);
 
     expectUnchanged(`User1 can't drop trait -1`, () =>
-        clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', -1))
+        clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', -1))
       , serverStore, clientStore0, clientStore1);
 
-    clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 1))
+    clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', 1))
 
     expectUnchanged(`User0 has cooldown`, () =>
         clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$C'))
@@ -89,7 +89,7 @@ settings:
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$Z'))
 
     expectUnchanged(`User1 wrong answer`, () =>
-        clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', -1))
+        clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', -1))
       , serverStore, clientStore0, clientStore1);
 
     await new Promise(resolve => setTimeout(resolve, 0));

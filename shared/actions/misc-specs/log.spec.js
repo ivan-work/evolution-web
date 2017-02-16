@@ -4,7 +4,7 @@ import {
   , gameDeployAnimalRequest
   , traitTakeFoodRequest
   , traitActivateRequest
-  , traitDefenceAnswerRequest
+  , traitAnswerRequest
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
@@ -57,7 +57,7 @@ players:
     });
     clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$S'));
     const traitTailLossId = selectTrait1(1, 0).id;
-    clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', traitTailLossId));
+    clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', traitTailLossId));
 
     clientStore1.dispatch(traitTakeFoodRequest('$D'));
     clientStore1.dispatch(gameEndTurnRequest());
@@ -66,7 +66,7 @@ players:
       clientStore2.dispatch(traitActivateRequest('$X', 'TraitCarnivorous', '$G'));
     });
 
-    clientStore1.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$H'));
+    clientStore1.dispatch(traitAnswerRequest('TraitMimicry', '$H'));
     clientStore2.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore1.dispatch(gameEndTurnRequest());

@@ -2,7 +2,7 @@ import {
   gameEndTurnRequest
   , traitTakeFoodRequest
   , traitActivateRequest
-  , traitDefenceAnswerRequest
+  , traitAnswerRequest
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';

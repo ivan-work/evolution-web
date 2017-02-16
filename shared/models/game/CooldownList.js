@@ -11,20 +11,22 @@ export class CooldownList extends Record(
   static fromServer(js) {
     return new CooldownList({...js})
       .map(place => Map(place)
-        .map(placeIds => List(placeIds)
-          .map(cooldown => CooldownModel.fromServer(cooldown))))
+        .map(placeIds => Map(placeIds)));
   }
 
   startCooldown(link, duration, place, placeId) {
-    return this.updateIn([place, placeId], List(), (cooldowns) =>
-      cooldowns.push(CooldownModel.new(link, duration)))
+    return this.setIn([place, placeId, link], duration);
+  }
+
+  clearCooldown(link, place, placeId) {
+    return this.removeIn([place, placeId, link]);
   }
 
   checkFor(link, playerId, animalId, traitId) {
-    const global = this.getIn([TRAIT_COOLDOWN_PLACE.GAME, 'default'], List()).find(cd => cd.link === link);
-    const player = this.getIn([TRAIT_COOLDOWN_PLACE.PLAYER, playerId], List()).find(cd => cd.link === link);
-    const animal = this.getIn([TRAIT_COOLDOWN_PLACE.ANIMAL, animalId], List()).find(cd => cd.link === link);
-    const trait = this.getIn([TRAIT_COOLDOWN_PLACE.TRAIT, traitId], List()).find(cd => cd.link === link);
+    const global = this.getIn([TRAIT_COOLDOWN_PLACE.GAME, 'default', link]);
+    const player = this.getIn([TRAIT_COOLDOWN_PLACE.PLAYER, playerId, link]);
+    const animal = this.getIn([TRAIT_COOLDOWN_PLACE.ANIMAL, animalId, link]);
+    const trait = this.getIn([TRAIT_COOLDOWN_PLACE.TRAIT, traitId, link]);
     return !!global || !!player || !!animal || !!trait;
   }
 
@@ -32,10 +34,8 @@ export class CooldownList extends Record(
     return this
       .map(placeType => placeType
         .map(placeIdsList => placeIdsList
-          .map(cooldown =>
-            cooldown.update('duration', durationUpdateFn)
-          )
-          .filter(cooldown => cooldown.duration !== null)))
+          .map(durationUpdateFn)
+          .filter(duration => duration !== null)))
   }
 
   eventNextAction() {
@@ -81,24 +81,5 @@ export class CooldownList extends Record(
           return TRAIT_COOLDOWN_DURATION.TURN;
       }
     });
-  }
-}
-
-class CooldownModel extends Record({
-  link: null
-  , duration: null
-}) {
-  static new(link, duration) {
-    return new CooldownModel({link, duration})
-  }
-
-  static fromServer(js) {
-    return js === List()
-      ? null
-      : new CooldownModel(js)
-  }
-
-  toString() {
-    return `CD(${this.link};${this.duration})`
   }
 }

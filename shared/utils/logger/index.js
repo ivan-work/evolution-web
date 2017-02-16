@@ -10,7 +10,7 @@ const colors = {
   silly: 'gray'
 };
 
-require('winston-google-spreadsheet').GoogleSpreadSheet;
+if (!process.env.TEST) require('winston-google-spreadsheet').GoogleSpreadSheet;
 const SSTransport = (sheetIdx = 1, level = 'info') => new (winston.transports.GoogleSpreadsheet)({
   'fileId': process.env.GOOGLE_LOGS_FILE
   , level

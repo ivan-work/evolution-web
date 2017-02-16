@@ -35,6 +35,7 @@ export const StatusRecord = Record({
 
 export class QuestionRecord extends Record({
   id: null
+  , type: null
   , time: null
   , sourcePid: null
   , sourceAid: null
@@ -44,9 +45,10 @@ export class QuestionRecord extends Record({
   , turnUserId: null
   , turnRemainingTime: null
 }) {
-  static new(questionId, sourceAnimal, traitId, targetAnimal, turnUserId, turnRemainingTime) {
+  static new(type, sourceAnimal, traitId, targetAnimal, turnUserId, turnRemainingTime) {
     return new QuestionRecord({
-      id: questionId
+      id: uuid.v4()
+      , type
       , sourcePid: sourceAnimal.ownerId
       , sourceAid: sourceAnimal.id
       , traitId
@@ -57,6 +59,9 @@ export class QuestionRecord extends Record({
       , turnRemainingTime
     });
   }
+
+  static DEFENSE = 'DEFENSE';
+  static INTELLECT = 'INTELLECT';
 
   static fromJS(js) {
     return js == null ? null : new QuestionRecord(js);

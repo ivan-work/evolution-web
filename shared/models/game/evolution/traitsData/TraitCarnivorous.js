@@ -14,13 +14,16 @@ import {
   , server$startFeedingFromGame
   , server$traitStartCooldown
   , server$traitActivate
-  , traitDefenceQuestion
+  , traitQuestion
   , server$traitDefenceQuestion
   , server$traitDefenceAnswer
-  , server$traitDefenceAnswerSuccess
+  , server$traitIntellectQuestion
+  , server$traitIntellectAnswer
+  , server$traitAnswerSuccess
   , server$traitNotify_Start
   , server$traitNotify_End
   , traitAmbushEnd
+  , server$traitSetValue
 } from '../../../../actions/actions';
 import {selectGame} from '../../../../selectors';
 
@@ -43,6 +46,7 @@ import {
   , TraitBurrowing
   , TraitSwimming
   , TraitFlight
+  , TraitIntellect
 } from '../traitTypes/index';
 
 export const endHunt = (game, sourceAnimal, traitCarnivorous, targetAnimal) => (dispatch) => {
@@ -55,10 +59,37 @@ export const endHuntNoCd = (game, sourceAnimal, traitCarnivorous, targetAnimal) 
     const {animal} = game.locateAnimal(game.ambush);
     if (animal) {
       dispatch(traitAmbushEnd(game.id, animal));
-      dispatch(server$startFeedingFromGame(game.id, animal, 1));
+      dispatch(server$startFeedingFromGame(game.id, animal.id, 1));
     }
   }
   dispatch(server$traitNotify_End(game.id, sourceAnimal.id, traitCarnivorous, targetAnimal.id));
+};
+
+const countStaticDefenses = (game, sourceAnimal, targetAnimal) => {
+  let defenses = 0;
+  if (targetAnimal.hasTrait(TraitCamouflage) && !sourceAnimal.hasTrait(TraitSharpVision))
+    defenses++;
+  if (targetAnimal.traits.some(trait => trait.type === TraitSymbiosis && trait.linkSource))
+    defenses++;
+  if (targetAnimal.hasTrait(TraitMassive) && !sourceAnimal.hasTrait(TraitMassive))
+    defenses++;
+  if (targetAnimal.hasTrait(TraitBurrowing) && targetAnimal.isSaturated())
+    defenses++;
+  if (sourceAnimal.hasTrait(TraitSwimming) && !targetAnimal.hasTrait(TraitSwimming)
+    || (!sourceAnimal.hasTrait(TraitSwimming) && targetAnimal.hasTrait(TraitSwimming)))
+    defenses++;
+  if (targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL))
+    defenses++;
+  if (targetAnimal.hasTrait(TraitFlight) && (sourceAnimal.traits.size >= targetAnimal.traits.size))
+    defenses++;
+
+  return defenses;
+};
+
+const countAffectiveDefenses = (game, sourceAnimal, targetAnimal) => {
+  return [
+    targetAnimal.hasTrait(TraitPoisonous)
+  ].filter(trait => !!trait);
 };
 
 export const TraitCarnivorous = {
@@ -73,66 +104,95 @@ export const TraitCarnivorous = {
   ])
   , action: (game, sourceAnimal, trait, targetAnimal) => (dispatch, getState) => {
     logger.debug(`TraitCarnivorous: ${sourceAnimal.id} > ${targetAnimal.id}`);
-    let possibleDefences = 0;
-    let traitMimicry, traitTailLoss, traitShell, traitInkCloud;
+    const possibleDefenses = [];
+    let possibleDefenseTargets = 0;
+    let traitMimicry, traitMimicryTargets, traitTailLoss, traitTailLossTargets, traitRunning, traitShell, traitInkCloud;
 
-    const ended = targetAnimal.traits.some((defenseTrait) => {
+    const traitIntellect = sourceAnimal.hasTrait(TraitIntellect);
+    let disabledTid = traitIntellect && traitIntellect.value;
+
+    targetAnimal.traits.find((defenseTrait) => {
+      if (defenseTrait.id === disabledTid) return;
+
       if (defenseTrait.type === TraitRunning.type) {
-        if (dispatch(TraitRunning.action(game, targetAnimal, sourceAnimal))) {
-          dispatch(server$traitNotify_Start(game, targetAnimal, defenseTrait, sourceAnimal));
-          dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
-          return true;
-        }
+        traitRunning = defenseTrait;
+        possibleDefenses.push(defenseTrait);
       } else if (defenseTrait.type === TraitMimicry.type && defenseTrait.checkAction(game, targetAnimal)) {
-        traitMimicry = TraitMimicry.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
-        if (traitMimicry.size === 0) traitMimicry = void 0;
-        else if (traitMimicry.size === 1) possibleDefences += 1;
-        else if (traitMimicry.size > 1) possibleDefences += traitMimicry.size;
+        traitMimicry = defenseTrait;
+        traitMimicryTargets = TraitMimicry.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
+        possibleDefenseTargets += traitMimicryTargets.size;
+        if (traitMimicryTargets.size > 0) possibleDefenses.push(defenseTrait);
       } else if (defenseTrait.type === TraitTailLoss.type && defenseTrait.checkAction(game, targetAnimal)) {
-        traitTailLoss = targetAnimal.traits;
-        if (traitTailLoss.size === 0) traitTailLoss = void 0;
-        else if (traitTailLoss.size === 1) possibleDefences += 1;
-        else if (traitTailLoss.size > 1) possibleDefences += traitTailLoss.size;
+        traitTailLoss = defenseTrait;
+        traitTailLossTargets = targetAnimal.traits;
+        possibleDefenseTargets += traitTailLossTargets.size;
+        if (traitTailLossTargets.size > 0) possibleDefenses.push(defenseTrait);
       } else if (defenseTrait.type === TraitShell.type && defenseTrait.checkAction(game, targetAnimal)) {
         traitShell = defenseTrait;
-        possibleDefences += 1;
+        possibleDefenses.push(defenseTrait);
       } else if (defenseTrait.type === TraitInkCloud.type && defenseTrait.checkAction(game, targetAnimal)) {
         traitInkCloud = defenseTrait;
-        possibleDefences += 1;
+        possibleDefenses.push(defenseTrait);
       }
     });
 
-    if (ended) return true;
+    if (traitIntellect && !disabledTid) {
+      // default intellect found, need to ask
+      const staticDefenses = countStaticDefenses(game, sourceAnimal, targetAnimal);
+      if (staticDefenses === 0) {
+        const affectiveDefenses = countAffectiveDefenses(game, sourceAnimal, targetAnimal);
+
+        if (possibleDefenses.length === 0 && affectiveDefenses.length === 0) {} //do nothing
+        else if (possibleDefenses.length === 1 && affectiveDefenses.length === 0) disabledTid = possibleDefenses[0].id;
+        else if (possibleDefenses.length === 0 && affectiveDefenses.length === 1) disabledTid = affectiveDefenses[0].id;
+        else {
+          const defaultIntellect = (questionId) => {
+            const targetId = (possibleDefenses.length > 0 ? possibleDefenses[0].id
+              : affectiveDefenses.length > 0 ? affectiveDefenses[0].id
+              : true);
+            return server$traitIntellectAnswer(game.id, questionId, traitIntellect.id, targetId);
+          };
+          dispatch(server$traitIntellectQuestion(game, sourceAnimal, trait, targetAnimal, defaultIntellect));
+          return false;
+        }
+      }
+    }
+
+    if (traitRunning && !!TraitRunning.action()) {
+      dispatch(server$traitNotify_Start(game, targetAnimal, traitRunning, sourceAnimal));
+      dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
+      return true;
+    }
 
     const defaultDefence = (questionId) => (dispatch, getState) => {
-      if (traitTailLoss) {
+      if (traitTailLoss && traitTailLossTargets.size > 0 && traitTailLoss.id !== disabledTid && disabledTid !== true) {
         dispatch(server$traitDefenceAnswer(game.id
           , questionId
-          , targetAnimal.hasTrait(TraitTailLoss.type).id
-          , traitTailLoss.last().id
+          , TraitTailLoss.type
+          , traitTailLossTargets.last().id
         ));
         return false;
-      } else if (traitMimicry) {
+      } else if (traitMimicry && traitMimicryTargets.size > 0 && traitMimicry.id !== disabledTid && disabledTid !== true) {
         dispatch(server$traitDefenceAnswer(game.id
           , questionId
-          , targetAnimal.hasTrait(TraitMimicry.type).id
-          , traitMimicry.get(0).id
+          , TraitMimicry.type
+          , traitMimicryTargets.get(0).id
         ));
         return false;
-      } else if (traitShell) {
+      } else if (traitShell && traitShell.id !== disabledTid && disabledTid !== true) {
         dispatch(server$traitDefenceAnswer(game.id
           , questionId
           , traitShell.id
         ));
         return false;
-      } else if (traitInkCloud) {
+      } else if (traitInkCloud && traitInkCloud.id !== disabledTid && disabledTid !== true) {
         dispatch(server$traitDefenceAnswer(game.id
           , questionId
           , traitInkCloud.id
         ));
         return false;
       } else {
-        dispatch(server$traitDefenceAnswerSuccess(game.id, questionId));
+        dispatch(server$traitAnswerSuccess(game.id, questionId));
         dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
 
         const poisonous = targetAnimal.hasTrait(TraitPoisonous);
@@ -158,32 +218,27 @@ export const TraitCarnivorous = {
       }
     };
 
-    logger.debug(`possibleDefences: ${+possibleDefences}`)
-    if (possibleDefences > 1) {
+    logger.debug(`possibleDefences: ${possibleDefenses.length}/${possibleDefenseTargets}`)
+    if (possibleDefenseTargets > 1) {
       dispatch(server$traitDefenceQuestion(game.id, sourceAnimal, trait, targetAnimal, defaultDefence));
       return false;
     } else {
-      const questionId = uuid.v4();
-      logger.debug('server$traitDefenceQuestionInstant', questionId, sourceAnimal.id, trait.id, targetAnimal.id);
-      const question = QuestionRecord.new(questionId, sourceAnimal, trait.id, targetAnimal);
-      dispatch(traitDefenceQuestion(game.id, question));
-      return dispatch(defaultDefence(questionId));
+      const question = QuestionRecord.new(QuestionRecord.DEFENSE, sourceAnimal, trait.id, targetAnimal);
+      logger.debug('server$traitDefenceQuestionInstant', question.id, sourceAnimal.id, trait.id, targetAnimal.id);
+      dispatch(traitQuestion(game.id, question));
+      return dispatch(defaultDefence(question.id));
     }
   }
   , $checkAction: (game, sourceAnimal) => {
     return sourceAnimal.canEat(game)
   }
-  , checkTarget: (game, sourceAnimal, targetAnimal) => (
-    (sourceAnimal.hasTrait(TraitSharpVision) || !targetAnimal.hasTrait(TraitCamouflage))
-    && (!targetAnimal.traits.some(trait => trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === targetAnimal.id))
-    && (sourceAnimal.hasTrait(TraitMassive) || !targetAnimal.hasTrait(TraitMassive))
-    && !(targetAnimal.hasTrait(TraitBurrowing) && targetAnimal.isSaturated())
-    && (
-      (sourceAnimal.hasTrait(TraitSwimming) && targetAnimal.hasTrait(TraitSwimming))
-      || (!sourceAnimal.hasTrait(TraitSwimming) && !targetAnimal.hasTrait(TraitSwimming))
-    )
-      // TFT
-    && !targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL)
-    && !(targetAnimal.hasTrait(TraitFlight) && (sourceAnimal.traits.size >= targetAnimal.traits.size))
-  )
+  , checkTarget: (game, sourceAnimal, targetAnimal) => {
+    const defenses = countStaticDefenses(game, sourceAnimal, targetAnimal);
+
+    if (sourceAnimal.hasTrait(TraitIntellect)) {
+      return defenses < 2;
+    } else {
+      return defenses < 1;
+    }
+  }
 };

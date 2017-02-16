@@ -3,7 +3,7 @@ import {
   , gameEndTurnRequest
   , traitTakeFoodRequest
   , traitActivateRequest
-  , traitDefenceAnswerRequest
+  , traitAnswerRequest
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
@@ -82,7 +82,7 @@ players:
     expect(ClientGame1().question, 'ClientGame1().question').ok;
     expect(ClientGame0().question.get('id'), 'User0 shouldnt know questionId').equal(null);
     expect(ClientGame1().question.get('id')).equal(questionId);
-    clientStore1.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$C'));
+    clientStore1.dispatch(traitAnswerRequest('TraitMimicry', '$C'));
     expect(selectAnimal(User0, 0).getFoodAndFat()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$B');
     expect(selectAnimal(User1, 1).id).equal('$D');
@@ -102,14 +102,13 @@ players:
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
 
-    clientStore1.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$C'));
+    clientStore1.dispatch(traitAnswerRequest('TraitMimicry', '$C'));
 
     //console.log(selectGame().status)
     //console.log(selectGame().cooldowns)
 
-    clientStore1.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$B'));
+    clientStore1.dispatch(traitAnswerRequest('TraitMimicry', '$B'));
 
-    console.log(selectPlayer(User1).continent)
     expect(selectPlayer(User1).continent).size(2);
     expect(selectAnimal(User0, 0).getFoodAndFat()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$C');
@@ -156,7 +155,7 @@ players:
 `);
     const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
-    clientStore0.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$C'));
+    clientStore0.dispatch(traitAnswerRequest('TraitMimicry', '$C'));
 
     expect(selectPlayer(User0).continent).size(3);
     expect(selectAnimal(User0, 0).id).equal('$A');

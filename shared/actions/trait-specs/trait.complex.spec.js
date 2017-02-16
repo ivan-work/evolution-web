@@ -4,7 +4,7 @@ import {
   , gameEndTurnRequest
   , traitTakeFoodRequest
   , traitActivateRequest
-  , traitDefenceAnswerRequest
+  , traitAnswerRequest
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
@@ -46,7 +46,7 @@ settings:
       expect(selectGame().question).ok;
       expect(ClientGame0().question).ok;
       expect(ClientGame1().question).ok;
-      clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 2));
+      clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', 2));
       expect(selectGame().question).null;
       expect(ClientGame0().question).null;
       expect(ClientGame1().question).null;
@@ -78,7 +78,7 @@ settings:
     expect(selectGame().question).ok;
     expect(ClientGame0().question).ok;
     expect(ClientGame1().question).ok;
-    clientStore1.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$X'));
+    clientStore1.dispatch(traitAnswerRequest('TraitMimicry', '$X'));
     expect(selectGame().question).null;
     expect(ClientGame0().question).null;
     expect(ClientGame1().question).null;
@@ -89,7 +89,7 @@ settings:
     clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$E', 'TraitCarnivorous', '$Z'));
-    clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 0));
+    clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', 0));
     expect(selectAnimal(User1, 0).traits).size(1);
     expect(selectAnimal(User1, 0).traits.get(0).type).equal('TraitMimicry');
     clientStore0.dispatch(gameEndTurnRequest());
@@ -161,7 +161,7 @@ players:
     }, serverStore, clientStore0, clientStore1);
 
     expectChanged('User1 can only answer', () => {
-      clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', selectTraitId(User1, 0, 1)));
+      clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', selectTraitId(User1, 0, 1)));
     }, serverStore, clientStore0, clientStore1);
   });
 });

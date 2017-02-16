@@ -2,7 +2,7 @@ import {
   gameEndTurnRequest
   , traitTakeFoodRequest
   , traitActivateRequest
-  , traitDefenceAnswerRequest
+  , traitAnswerRequest
   , traitTakeShellRequest
 } from '../actions';
 
@@ -23,7 +23,7 @@ players:
 
     expect(selectGame().status.round).equal(0);
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$C'));
-    clientStore0.dispatch(traitDefenceAnswerRequest('TraitShell'));
+    clientStore0.dispatch(traitAnswerRequest('TraitShell'));
     expect(selectAnimal(User0, 0).getFood(), 'Animal#A.getFood()').equal(0);
     expect(selectAnimal(User0, 2).id, 'Animal#C.id').equal('$C');
     clientStore0.dispatch(gameEndTurnRequest());

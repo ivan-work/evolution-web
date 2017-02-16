@@ -60,7 +60,7 @@ export const TraitSwimming = {
 
 export const TraitRunning = {
   type: 'TraitRunning'
-  , action: (game, runningAnimal, trait, attackAnimal) => (dispatch) => getRandom(0, 1) > 0
+  , action: () => getRandom(0, 1) > 0
 };
 
 export const TraitMimicry = {
