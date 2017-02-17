@@ -3,12 +3,15 @@ import T from 'i18n-react';
 import RIP from 'react-immutable-proptypes';
 
 import {GameProvider} from '../providers/GameProvider.jsx';
-
 import {PortalTarget} from '../../utils/PortalTarget.jsx';
 import {Button} from 'react-mdl';
 import PlayersList from './PlayersList.jsx';
 import {GameStatusDisplay} from './GameStatusDisplay.jsx';
 import TraitDefenceDialog from './TraitDefenceDialog.jsx';
+import TraitActivateDialog from './TraitActivateDialog.jsx';
+
+import {TraitIntellect} from '../../../../shared/models/game/evolution/traitsData';
+import {QuestionRecord} from '../../../../shared/models/game/GameModel.js';
 
 import Deck from '../cards/Deck.jsx';
 import GameLog from './GameLog.jsx';
@@ -31,9 +34,18 @@ class _GameUI extends React.Component {
 
   render() {
     const {game} = this.props;
+    let intellectQuestion = {};
+    if (game.question && game.question.id && game.question.type === QuestionRecord.INTELLECT) {
+      intellectQuestion.traits = TraitIntellect.getTargets(game, game.question.sourceAid, game.question.targetAid);
+      intellectQuestion.onSelectTrait = (targetId) => {
+        this.context.gameActions.$traitAnswer(game.question.traitId, targetId)
+      }
+    }
     return (
       <div className='GameUI'>
-        <TraitDefenceDialog game={game} $traitDefenceAnswer={this.context.gameActions.$traitDefenceAnswer}/>
+        <TraitDefenceDialog game={game} $traitAnswer={this.context.gameActions.$traitAnswer}/>
+
+        <TraitActivateDialog game={game} {...intellectQuestion}/>
 
         <PlayersList game={game}/>
 

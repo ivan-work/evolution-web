@@ -99,7 +99,7 @@ GameWrapperHOC = connect(
       // PHASE.FEEDING
       , $traitTakeFood: (...args) => dispatch(traitTakeFoodRequest(...args))
       , $traitActivate: (...args) => dispatch(traitActivateRequest(...args))
-      , $traitDefenceAnswer: (...args) => dispatch(traitAnswerRequest(...args))
+      , $traitAnswer: (...args) => dispatch(traitAnswerRequest(...args))
       , $traitTakeShell: (...args) => dispatch(traitTakeShellRequest(...args))
     }
   })

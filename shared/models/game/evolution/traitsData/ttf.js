@@ -24,7 +24,7 @@ import {
 
 import {selectGame} from '../../../../selectors';
 
-import {endHunt, endHuntNoCd} from './TraitCarnivorous';
+import {endHunt, endHuntNoCd, getStaticDefenses, getActiveDefenses, getAffectiveDefenses} from './TraitCarnivorous';
 import {TraitCarnivorous} from '../traitTypes';
 
 export const TraitMetamorphose = {
@@ -144,11 +144,22 @@ export const TraitAmbush = {
   , transient: true
   , cooldowns: fromJS([])
   , $checkAction: (game, animal, traitSpec) => animal.hasTrait(TraitCarnivorous)
-    //&& !game.cooldowns.checkFor(TraitCarnivorous, animal.ownerId, animal.id)
+  //&& !game.cooldowns.checkFor(TraitCarnivorous, animal.ownerId, animal.id)
   , action: (game, sourceAnimal, trait) => (dispatch) => {
     dispatch(server$traitSetValue(game, sourceAnimal, trait, !trait.value));
     return false;
   }
 };
-export const TraitIntellect = {type: 'TraitIntellect'};
+export const TraitIntellect = {
+  type: 'TraitIntellect'
+  , food: 1
+  , getTargets: (game) => {
+    const {animal: sourceAnimal} = game.locateAnimal(game.question.sourceAid);
+    const {animal: targetAnimal} = game.locateAnimal(game.question.targetAid);
+    return [].concat(
+      getStaticDefenses(game, sourceAnimal, targetAnimal)
+      , getActiveDefenses(game, sourceAnimal, targetAnimal)
+      , getAffectiveDefenses(game, sourceAnimal, targetAnimal));
+  }
+};
 export const TraitAnglerfish = {type: 'TraitAnglerfish'};

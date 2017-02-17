@@ -44,8 +44,7 @@ export class PlayerWrapper extends Component {
       if (trait.type === TraitMetamorphose) {
         this.setState({
           traitActivateQuestion: {
-            animal
-            , trait
+            traits: trait.getDataModel().getTargets(null, animal, trait)
             , onSelectTrait: (targetTraitId) => {
               !!targetTraitId && this.context.gameActions.$traitActivate(animal.id, trait.id, targetTraitId);
               this.setState(INITIAL_STATE)
@@ -81,7 +80,7 @@ export class PlayerWrapper extends Component {
     return (
       <div className={cn({PlayerWrapper: true, UserWrapper: isUser, EnemyWrapper: !isUser})}
            data-player-id={player.id}>
-        <TraitActivateDialog question={this.state.traitActivateQuestion}/>
+        <TraitActivateDialog {...this.state.traitActivateQuestion}/>
         {upsideDown ? innerElements : innerElements.reverse()}
         <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
           <PortalTarget name={`svg-player-wrapper-${player.id}`} container='g'/>
