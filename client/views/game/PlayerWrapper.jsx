@@ -40,7 +40,6 @@ export class PlayerWrapper extends Component {
     this.$noop = () => null;
     this.$traitTakeFood = (animal) => context.gameActions.$traitTakeFood(animal.id);
     this.$traitActivate = (animal, trait, targetId) => {
-      const traitData = trait.getDataModel();
       if (trait.type === TraitMetamorphose) {
         this.setState({
           traitActivateQuestion: {

@@ -70,6 +70,7 @@ export class TraitModel extends Record({
     return (this.getDataModel().multiple || !animal.hasTrait(this.type));
   }
 
+  // TODO remove
   attachTo(animal) {
     if (!this.checkAttach(animal)) {
       throw new ActionCheckError(`TraitModelValidation`, `Animal#%s already has Trait(%s)`, animal.id, this.type);
@@ -104,8 +105,11 @@ export class TraitModel extends Record({
   }
 
   toOthers() {
-    if (this.type === traitTypes.TraitAmbush) return this.set('value', false);
-    return this;
+    const traitData = this.getDataModel();
+    let result = this;
+    if (traitData.transient) result = result.set('value', false);
+    if (traitData.hidden) result = null;
+    return result;
   }
 
   toString() {

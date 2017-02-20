@@ -1,11 +1,13 @@
 import logger from '~/shared/utils/logger';
 import {fromJS} from 'immutable';
+import {AnimalModel} from '../AnimalModel';
 import {
   TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
   , TRAIT_COOLDOWN_LINK
   , CARD_TARGET_TYPE
+  , CARD_SOURCE
   , TRAIT_ANIMAL_FLAG
 } from '../constants';
 
@@ -19,7 +21,7 @@ import {
   , server$traitSetValue
   , server$traitNotify_End
   , server$game
-  , traitGiveBirth
+  , gameDeployAnimalFromDeck
 } from '../../../../actions/actions';
 
 import {selectGame} from '../../../../selectors';
@@ -132,7 +134,8 @@ export const TraitViviparous = {
   ])
   , action: (game, sourceAnimal, trait) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, trait, sourceAnimal));
-    dispatch(server$game(game.id, traitGiveBirth(game.id, sourceAnimal.id)));
+    const newborn = AnimalModel.new(sourceAnimal.ownerId).set('food', 1);
+    dispatch(server$game(game.id, gameDeployAnimalFromDeck(game.id, newborn, sourceAnimal.id)));
   }
   , $checkAction: (game, animal, traitSpec) => animal.isSaturated(game) && game.deck.size > 0
 };
@@ -142,9 +145,7 @@ export const TraitAmbush = {
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
   , transient: true
-  , cooldowns: fromJS([])
   , $checkAction: (game, animal, traitSpec) => animal.hasTrait(TraitCarnivorous)
-  //&& !game.cooldowns.checkFor(TraitCarnivorous, animal.ownerId, animal.id)
   , action: (game, sourceAnimal, trait) => (dispatch) => {
     dispatch(server$traitSetValue(game, sourceAnimal, trait, !trait.value));
     return false;
@@ -162,4 +163,15 @@ export const TraitIntellect = {
       , getAffectiveDefenses(game, sourceAnimal, targetAnimal));
   }
 };
-export const TraitAnglerfish = {type: 'TraitAnglerfish'};
+export const TraitAnglerfish = {
+  type: 'TraitAnglerfish'
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , playerControllable: true
+  , transient: true
+  , hidden: true
+  , $checkAction: (game, animal, traitSpec) => animal.traits.size === 1
+  , action: (game, sourceAnimal, trait) => (dispatch) => {
+    dispatch(server$traitSetValue(game, sourceAnimal, trait, !trait.value));
+    return false;
+  }
+};

@@ -13,8 +13,8 @@ import './TraitActivateDialog.scss';
 
 export default class TraitActivateDialog extends React.Component {
   static propTypes = {
-    traits: RIP.listOf(React.PropTypes.instanceOf(TraitModel)).isRequired
-    , onSelectTrait: React.PropTypes.func.isRequired
+    traits: RIP.listOf(React.PropTypes.instanceOf(TraitModel))
+    , onSelectTrait: React.PropTypes.func
   };
 
   render() {
