@@ -80,3 +80,8 @@ export const checkAnimalCanEat = (game, animal) => {
   if (!animal.canEat(game))
     throw new ActionCheckError(`traitTakeFoodRequest@Game(${game.id})`, `Animal(%s) can't eat`, animal)
 };
+
+export const checkIfTraitDisabledByIntellect = (attackAnimal, defenseTrait) => {
+  const traitIntellect = attackAnimal.hasTrait('TraitIntellect');
+  return traitIntellect && (traitIntellect.value === defenseTrait.id || traitIntellect.value === defenseTrait.type);
+};
