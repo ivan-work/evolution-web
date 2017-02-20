@@ -10,19 +10,19 @@ import * as traits from '../traitTypes/index';
 //интеллект / жировой запас - 2,
 
 export const CardFlightAndCarnivorous = makeCard(traits.TraitFlight, traits.TraitCarnivorous);
-export const CardFlightAndTraitSpecA = makeCard(traits.TraitFlight, traits.TraitSpecA);
-export const CardFlightAndTraitSpecB = makeCard(traits.TraitFlight, traits.TraitSpecB);
+export const CardFlightAndSpecA = makeCard(traits.TraitFlight, traits.TraitSpecA);
+export const CardFlightAndSpecB = makeCard(traits.TraitFlight, traits.TraitSpecB);
 export const CardIntellectAndFatTissue = makeCard(traits.TraitIntellect, traits.TraitFatTissue);
 
 //1
 //интеллект / специализация А - 2,
 //засада / специализация В - 2,
 //засада / водоплавающее - 2,
-//удильщик / хищник - 4,
+//удильщик - 4,
 export const CardIntellectAndSpecA = makeCard(traits.TraitIntellect, traits.TraitSpecA);
 export const CardAmbushAndSpecB = makeCard(traits.TraitAmbush, traits.TraitSpecB);
 export const CardAmbushAndSwimming = makeCard(traits.TraitAmbush, traits.TraitSwimming);
-export const CardAnglerfishAndCarnivorous = makeCard(traits.TraitAnglerfish, traits.TraitCarnivorous);
+export const CardAnglerfish = makeCard(traits.TraitAnglerfish);
 
 //2
 //чернильное облако - 4,
