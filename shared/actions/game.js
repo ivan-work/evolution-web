@@ -502,6 +502,10 @@ export const gameClientToServer = {
         , traitData);
     }
 
+    if (traitData.hidden) {
+      throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Cannot deploy hidden trait to an Animal#(%s)', animalId);
+    }
+
     const {animal} = game.locateAnimal(animalId);
     if (!animal) {
       throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Player#%s doesn\'t have Animal#%s', playerId, animalId);
@@ -533,6 +537,8 @@ export const gameClientToServer = {
     if (traitData.checkTraitPlacement && !traitData.checkTraitPlacement(animal))
       throw new ActionCheckError(`gameDeployTraitRequest(${game.id})`, `Trait(%s) failed checkTraitPlacement on Animal(%s)`, traitData.type, animal.id);
 
+    // TODO: refactor.
+    // This one is bad because it attaches and links traits only for reducer to find their hosts.
     let traits = [];
     if (!(traitData.cardTargetType & CTT_PARAMETER.LINK)) {
       traits = [TraitModel.new(traitData.type).attachTo(animal)];

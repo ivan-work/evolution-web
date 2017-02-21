@@ -99,6 +99,16 @@ export const gameDeployTrait = (game, {cardId, traits}) => {
     .update(addToGameLog(['gameDeployTrait', cardOwnerId, traits[0].type].concat(animals)));
 };
 
+export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) => game
+  .updateIn(['players', sourcePid, 'continent'], continent => continent
+    .map(a => a.traitDetach(trait => trait.id === traitId || trait.linkId === traitId)));
+
+export const traitAnimalAttachTrait = (game, {sourcePid, sourceAid, trait}) => {
+  const {animalIndex} = game.locateAnimal(sourceAid, sourcePid);
+  return game
+    .updateIn(['players', sourcePid, 'continent', animalIndex], animal => animal.traitAttach(trait));
+};
+
 export const playerActed = (game, {userId}) => {
   return game
     .setIn(['players', userId, 'acted'], true)
@@ -186,16 +196,6 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
     : sourceType === 'TraitPiracy' ? updatedGame.updateIn(['players', another.ownerId, 'continent', takenFromAix, 'food'], food => Math.max(food - amount, 0))
     : updatedGame;
 };
-
-export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) => game
-  .updateIn(['players', sourcePid, 'continent'], continent => continent
-    .map(a => a.traitDetach(trait => trait.id === traitId || trait.linkId === traitId)));
-
-export const traitAnimalAttachTrait = (game, {sourcePid, sourceAid, trait}) => {
-  const {animalIndex} = game.locateAnimal(sourceAid, sourcePid);
-  return game
-    .updateIn(['players', sourcePid, 'continent', animalIndex], animal => animal.traitAttach(trait));
-}
 
 const animalDies = (playerId, animalIndex, animal) => (game) => {
   const animal = game.getIn(['players', playerId, 'continent', animalIndex]);
@@ -298,7 +298,7 @@ export const traitNotify_Start = (game, {sourceAid, traitId, traitType, targetId
 };
 
 export const traitTakeShell = (game, {continentId, animalId, trait}) => {
-  const {animalIndex, animal} = game.locateAnimal(trait.hostAnimalId);
+  const {animalIndex, animal} = game.locateAnimal(animalId);
   return game
     .removeIn(['continents', continentId, 'shells', trait.id])
     .updateIn(['players', animal.ownerId, 'continent', animalIndex], a => a.traitAttach(trait))
