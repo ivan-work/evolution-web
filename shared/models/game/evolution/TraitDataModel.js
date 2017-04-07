@@ -2,6 +2,8 @@ import {Record} from 'immutable';
 import * as traitData from './traitData'
 import {CARD_TARGET_TYPE} from './constants';
 
+//import {selectGame} from '../../../selectors'
+
 export class TraitDataModel extends Record({
   type: null
   , food: 0

@@ -16,7 +16,8 @@ export const CARD_TARGET_TYPE = {
 
 export const FOOD_SOURCE_TYPE = {
   GAME: 'GAME'
-  , ANIMAL: 'ANIMAL'
+  , ANIMAL_TAKE: 'ANIMAL_TAKE'
+  , ANIMAL_COPY: 'ANIMAL_COPY'
 };
 
 export const TRAIT_TARGET_TYPE = {

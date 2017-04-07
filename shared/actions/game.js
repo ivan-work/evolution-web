@@ -59,6 +59,7 @@ export const gameDestroy = (gameId) => ({
 });
 
 export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
+  logger.info('server$gameLeave')
   const game = selectGame(getState, gameId);
   dispatch(server$game(gameId, gamePlayerLeft(gameId, userId)));
   switch (game.players.size) {
@@ -152,7 +153,7 @@ export const gameDeployTrait = (gameId, cardId, traitType, animalId, linkedAnima
 });
 
 export const server$gameDeployTrait = (gameId, cardId, traitType, animalId, linkedAnimalId) => (dispatch, getState) => {
-  logger.verbose('gameDeployTraitRequest:', {gameId, cardId, traitType, animalId, linkedAnimalId});
+  logger.verbose('gameDeployTraitRequest:', gameId, cardId, traitType, animalId, linkedAnimalId);
   dispatch(gameDeployTrait(gameId, cardId, traitType, animalId, linkedAnimalId));
   dispatch(Object.assign(
     gameDeployTrait(gameId, cardId, traitType, animalId, linkedAnimalId)

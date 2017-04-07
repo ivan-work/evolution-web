@@ -4,7 +4,12 @@ import {TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_LINK
   , CARD_TARGET_TYPE} from '../constants';
 
+import {
+  server$startFeeding
+} from '../../../../actions/actions';
+
 export {TraitCarnivorous} from './TraitCarnivorous';
+
 
 export const TraitParasite = {
   type: 'TraitParasite'
@@ -67,9 +72,15 @@ export const TraitTailLoss = {
 export const TraitCommunication = {
   type: 'TraitCommunication'
   , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
-  , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
-  , cooldownDuration: TRAIT_COOLDOWN_DURATION.ACTIVATION
   , cooldownLink: 'TraitCommunication'
+  , cooldownDuration: TRAIT_COOLDOWN_DURATION.ACTIVATION
+  , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
+  //, action: ({gameId, sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}) => (dispatch, getState) => {
+  //  animal.traits.filter(trait => trait.type === 'TraitCommunication')
+  //    .forEach(trait => {
+  //      dispatch(server$startFeeding(gameId, trait.linkAnimalId, 1, FOOD_SOURCE_TYPE.ANIMAL_COPY, animal.id));
+  //    })
+  //}
 };
 
 //

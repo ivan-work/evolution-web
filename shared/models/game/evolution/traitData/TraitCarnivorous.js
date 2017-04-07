@@ -3,7 +3,6 @@ import {TRAIT_TARGET_TYPE, TRAIT_COOLDOWN_DURATION, TRAIT_COOLDOWN_PLACE, TRAIT_
 import {
   server$traitKillAnimal
   , server$startFeeding
-  , server$startCooldown
 } from '../../../../actions/actions';
 
 export const TraitCarnivorous = {

@@ -12,9 +12,11 @@ import {
   , TRAIT_COOLDOWN_LINK
 } from '../models/game/evolution/constants';
 
-import {server$actionsChain} from './generic';
+import {server$actionsChain, server$game} from './generic';
 
 import {selectRoom, selectGame, selectPlayers} from '../selectors';
+
+import {TraitCommunication} from '../models/game/evolution/traitData';
 
 import {
   checkGameDefined
@@ -67,11 +69,22 @@ export const server$playerActed = (gameId, userId) => (dispatch, getState) => di
 // complexActions
 
 export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId) => (dispatch, getState) => {
-  const game = selectGame(getState, gameId);
-  const actionsList = [];
   const requiredAmount = (animal.getMaxFood() + animal.getMaxFat()) - (animal.getFood() + animal.getFat());
-  actionsList.push(traitMoveFood(gameId, animal.id, Math.min(amount, requiredAmount), sourceType, sourceId)); // TODO bug with 2 amount on animal 2/3
-  dispatch(server$actionsChain(gameId, actionsList));
+  // TODO bug with 2 amount on animal 2/3
+  dispatch(server$game(gameId, traitMoveFood(gameId, animal.id, Math.min(amount, requiredAmount), sourceType, sourceId)));
+
+  // TODO mb move to traitData?
+  if (requiredAmount > 0) {
+    dispatch(startCooldown(gameId, 'TraitCommunication', TRAIT_COOLDOWN_DURATION.ACTIVATION, TRAIT_COOLDOWN_PLACE.ANIMAL, animal.id));
+    animal.traits.filter(trait => trait.type === 'TraitCommunication')
+      .forEach(trait => {
+        const game = selectGame(getState, gameId);
+        const {animal: linkedAnimal} = game.locateAnimal(trait.linkAnimalId);
+        if (!game.cooldowns.checkFor(TraitCommunication.cooldownLink, linkedAnimal.ownerId, linkedAnimal.id)) {
+          dispatch(server$startFeeding(gameId, linkedAnimal, 1, FOOD_SOURCE_TYPE.ANIMAL_COPY, animal.id));
+        }
+      });
+  }
 };
 
 // Cooldowns
@@ -86,7 +99,28 @@ export const server$startCooldown = (gameId, link, duration, place, placeId) => 
     meta: {users: selectPlayers(getState, gameId)}
   }));
 
+//export const cancelCooldown = (gameId, link, playerId, animalId) => ({
+//  type: 'cancelCooldown'
+//  , data: {gameId, link, playerId, animalId}
+//});
+
+export const server$cancelCooldown = (gameId, link, place, placeId) => (dispatch, getState) => {
+  throw 'NYI';
+  //dispatch(
+  //  Object.assign(cancelCooldown(gameId, link, duration, place, placeId), {
+  //    meta: {users: selectPlayers(getState, gameId)}
+  //  }));
+}
+
 // traitClientToServer
+//const server$traitActivate = () => {
+//    const game = selectGame(getState, gameId);
+//    const {animal} = game.locateAnimal(animalId);
+//    if (!animal) {
+//      throw 'no animal'
+//    }
+//
+//}
 
 export const traitClientToServer = {
   traitTakeFoodRequest: ({gameId, animalId}, {user: {id: userId}}) => (dispatch, getState) => {
