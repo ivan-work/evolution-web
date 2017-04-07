@@ -1,5 +1,8 @@
 @import '../styles.json';
 
+$FULL_SCREEN_MIN_WIDTH: $FULL_SCREEN_MIN_WIDTH * 1px;
+$FULL_SCREEN_MIN_HEIGHT: $FULL_SCREEN_MIN_HEIGHT * 1px;
+
 $CARD_WIDTH: $CARD_WIDTH                   * 1px;
 $CARD_HEIGHT: $CARD_HEIGHT                 * 1px;
 $ANIMAL_WIDTH: $ANIMAL_WIDTH               * 1px;
