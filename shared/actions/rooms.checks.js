@@ -64,7 +64,7 @@ export const checkUserIsHost = (room, userId) => {
 
 export const checkValidate = (data, rules) => {
   const validation = new Validator(data, rules);
-  if (validation.fails()) throw new ActionCheckError('roomEditSettingsRequest', 'validation failed: %s', validation);
+  if (validation.fails()) throw new ActionCheckError('roomEditSettingsRequest', 'validation failed: %s', JSON.stringify(validation.errors.all()));
 };
 
 export const checkUserNotBanned = (room, userId) => {

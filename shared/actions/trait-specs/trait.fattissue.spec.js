@@ -22,7 +22,7 @@ players:
 `);
       const {selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
-      expect(selectCard(User0, 0).trait2.type).equal('TraitFatTissue');
+      expect(selectCard(User0, 0).trait2).equal('TraitFatTissue');
 
       clientStore0.dispatch(gameDeployTraitRequest(
         selectCard(User0, 0).id

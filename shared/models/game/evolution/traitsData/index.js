@@ -7,8 +7,6 @@ import {TRAIT_TARGET_TYPE
   , TRAIT_ANIMAL_FLAG
 } from '../constants';
 
-console.log('TRAIT DATA LOADED')
-
 import {
   server$startFeeding
   , server$traitActivate
@@ -28,7 +26,8 @@ import {FOOD_SOURCE_TYPE} from '../constants';
 //
 
 import {TraitCarnivorous} from './TraitCarnivorous';
-export {TraitCarnivorous} from './TraitCarnivorous';
+
+export {TraitCarnivorous};
 
 export const TraitParasite = {
   type: 'TraitParasite'

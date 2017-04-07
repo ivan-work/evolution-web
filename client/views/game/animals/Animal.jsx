@@ -39,7 +39,7 @@ class Animal extends React.Component {
   renderTrait(trait, animal) {
     if (trait.isLinked()) {
       return <AnimalLinkedTrait trait={trait} angle={this.props.angle}/>;
-    } else if (trait.dataModel.playerControllable) {
+    } else if (trait.getDataModel().playerControllable) {
       return <DragAnimalTrait trait={trait} sourceAnimal={animal}/>;
     } else {
       return <AnimalTrait trait={trait}/>;
@@ -129,7 +129,7 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
       case DND_ITEM_TYPE.TRAIT:
       {
         const {trait, sourceAnimal} = monitor.getItem();
-        const targetCheck = !trait.dataModel.checkTarget || trait.dataModel.checkTarget(props.game, sourceAnimal, props.model);
+        const targetCheck = !trait.getDataModel().checkTarget || ttrait.getDataModel().checkTarget(props.game, sourceAnimal, props.model);
         return sourceAnimal.id !== props.model.id && targetCheck;
       }
       case DND_ITEM_TYPE.ANIMAL_LINK:
@@ -137,7 +137,7 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
         const {model: targetAnimal} = props;
         const {card, animal: sourceAnimal, alternateTrait} = monitor.getItem();
         if (card && targetAnimal) {
-          return !TraitModel.LinkBetweenCheck(card.getTraitDataModel(alternateTrait).type, sourceAnimal, targetAnimal);
+          return !TraitModel.LinkBetweenCheck(!alternateTrait ? card.trait1 : card.trait2, sourceAnimal, targetAnimal);
         }
         return targetAnimal !== sourceAnimal
           && targetAnimal.ownerId === sourceAnimal.ownerId;

@@ -5,7 +5,7 @@ import {Timer} from '../../utils/Timer.jsx';
 import {DialogTitle, DialogContent} from 'react-mdl';
 import {Animal} from '../animals/Animal.jsx';
 import {AnimalTrait} from '../animals/AnimalTrait.jsx';
-import {TraitCarnivorous, TraitMimicry, TraitTailLoss} from '../../../../shared/models/game/evolution/traitData';
+import {TraitCarnivorous, TraitMimicry, TraitTailLoss} from '../../../../shared/models/game/evolution/traitsData/index';
 import './TraitDefenceDialog.scss';
 
 export class TraitDefenceDialog extends Component {

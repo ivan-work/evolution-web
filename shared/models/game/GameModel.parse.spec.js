@@ -2,19 +2,20 @@ import {List, Map} from 'immutable';
 import {GameModel, PHASE, StatusRecord} from './GameModel';
 import {AnimalModel} from './evolution/AnimalModel';
 import {TraitModel} from './evolution/TraitModel';
-import * as cardData from './evolution/cardData';
-import * as traitData from './evolution/traitData';
+import * as cardsData from './evolution/cards/index';
+import * as traitTypes from './evolution/traitTypes/index';
 
 describe('GameModel.parse', () => {
   it('parseCardList', () => {
     const list = GameModel.parseCardList('  1 carn, 1 sharp, Parasite  ');
     expect(list.size).equal(3);
-    expect(list.get(0).type).equal(cardData.CardCarnivorous.type);
-    expect(list.get(0).trait1.type).equal(traitData.TraitCarnivorous.type);
-    expect(list.get(1).type).equal(cardData.CardSharpVision.type);
-    expect(list.get(1).trait1.type).equal(traitData.TraitSharpVision.type);
-    expect(list.get(2).type).equal(cardData.CardParasiteAndCarnivorous.type);
-    expect(list.get(2).trait1.type).equal(traitData.TraitParasite.type);
+    expect(list.get(0).type).equal(cardsData.CardCarnivorous.type);
+    expect(list.get(0).trait1).equal(traitTypes.TraitCarnivorous);
+    expect(list.get(1).type).equal(cardsData.CardSharpVision.type);
+    expect(list.get(1).trait1).equal(traitTypes.TraitSharpVision);
+    expect(list.get(2).type).equal(cardsData.CardParasiteAndCarnivorous.type);
+    expect(list.get(2).trait1).equal(traitTypes.TraitParasite);
+    expect(list.get(2).trait2).equal(traitTypes.TraitCarnivorous);
 
     expect(GameModel.parseCardList(''), 'parseCardList(empty)').equal(List());
   });
@@ -81,8 +82,7 @@ players:
     }));
     expect(parsed.deck.size).equal(18);
     expect(parsed.deck.first().type).equal('CardCarnivorous');
-    expect(parsed.deck.first().trait1, 'CardCarnivorous has TraitCarnivorous').ok;
-    expect(parsed.deck.first().trait1.type).equal('TraitCarnivorous');
+    expect(parsed.deck.first().trait1).equal('TraitCarnivorous');
     expect(parsed.deck.last().type).equal('CardSharpVision');
     expect(parsed.getIn(['players', 'u0', 'ready'])).equal(true);
     expect(parsed.getIn(['players', 'u0', 'hand']).size).equal(2);

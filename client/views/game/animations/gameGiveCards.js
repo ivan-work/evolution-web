@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 import Velocity from 'velocity-animate'
 
-import {CardUnknown} from '../../../../shared/models/game/evolution/cardData'
+import {CardUnknown} from '../../../../shared/models/game/evolution/cards/index'
 
 export const gameGiveCards = (done, game, cards, getRef) => {
   const Deck = getRef('Deck');
