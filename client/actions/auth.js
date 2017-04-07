@@ -1,6 +1,7 @@
 import { checkHttpStatus, parseJSON } from '../utils';
 import {LOGIN_USER_REQUEST, LOGIN_USER_FAILURE, LOGIN_USER_SUCCESS, LOGOUT_USER} from '../constants';
-//import { pushState } from 'redux-router';
+import { Map } from 'immutable';
+import { push, replace } from 'react-router-redux';
 //import jwtDecode from 'jwt-decode';
 
 export function loginUserRequest() {
@@ -40,7 +41,7 @@ export function logout() {
 export function logoutAndRedirect() {
   return (dispatch, state) => {
     dispatch(logout());
-    //dispatch(pushState(null, '/'));
+    dispatch(push(null, '/'));
   }
 }
 
@@ -48,6 +49,7 @@ export function loginUser(username, password, redirect="/") {
   return function(dispatch) {
     //dispatch(loginUserRequest());
     dispatch(loginUserSuccess(username));
+    dispatch(push('lobbies'));
     //return fetch('http://localhost:3000/auth/getToken/', {
     //  method: 'post',
     //  credentials: 'include',
