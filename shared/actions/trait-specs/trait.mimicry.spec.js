@@ -23,7 +23,7 @@ players:
     const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
-    expect(selectAnimal(User0, 0).getFood()).equal(2);
+    expect(selectAnimal(User0, 0).getFoodAndFat()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$C');
     expect(selectAnimal(User1, 1)).undefined;
   });
@@ -40,7 +40,7 @@ players:
     const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
-    expect(selectAnimal(User0, 0).getFood()).equal(2);
+    expect(selectAnimal(User0, 0).getFoodAndFat()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$B');
     expect(selectAnimal(User1, 1)).undefined;
   });
@@ -57,7 +57,7 @@ players:
     const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
-    expect(selectAnimal(User0, 0).getFood()).equal(2);
+    expect(selectAnimal(User0, 0).getFoodAndFat()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$C');
     expect(selectAnimal(User1, 1)).undefined;
   });
@@ -83,7 +83,7 @@ players:
     expect(ClientGame0().question.get('id'), 'User0 shouldnt know questionId').equal(null);
     expect(ClientGame1().question.get('id')).equal(questionId);
     clientStore1.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$C'));
-    expect(selectAnimal(User0, 0).getFood()).equal(2);
+    expect(selectAnimal(User0, 0).getFoodAndFat()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$B');
     expect(selectAnimal(User1, 1).id).equal('$D');
     expect(selectAnimal(User1, 2)).undefined;
@@ -109,7 +109,7 @@ players:
 
     clientStore1.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$B'));
 
-    expect(selectAnimal(User0, 0).getFood()).equal(2);
+    expect(selectAnimal(User0, 0).getFoodAndFat()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$C');
     expect(selectAnimal(User1, 1).id).equal('$D');
     expect(selectAnimal(User1, 2)).undefined;
@@ -130,14 +130,14 @@ settings:
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
 
-    expect(selectAnimal(User0, 0).getFood()).equal(0);
+    expect(selectAnimal(User0, 0).getFoodAndFat()).equal(0);
     expect(selectAnimal(User1, 0).id).equal('$B');
     expect(selectAnimal(User1, 1).id).equal('$C');
     expect(selectAnimal(User1, 2).id).equal('$D');
 
     await new Promise(resolve => setTimeout(resolve, 1));
 
-    expect(selectAnimal(User0, 0).getFood(), '').equal(2);
+    expect(selectAnimal(User0, 0).getFoodAndFat(), '').equal(2);
     expect(selectAnimal(User1, 0).id).equal('$B');
     expect(selectAnimal(User1, 1).id).equal('$D');
     expect(selectAnimal(User1, 2)).undefined;
@@ -158,7 +158,7 @@ players:
 
     expect(selectPlayer(User0).continent).size(3);
     expect(selectAnimal(User0, 0).id).equal('$A');
-    expect(selectAnimal(User0, 0).getFood()).equal(2);
+    expect(selectAnimal(User0, 0).getFoodAndFat()).equal(2);
     expect(selectAnimal(User0, 1).id).equal('$B');
     expect(selectAnimal(User0, 2).id).equal('$D');
 

@@ -62,9 +62,7 @@ export const parseAnimalList = (userId, string) => {
         }
         else {
           invariant(!!prop, `GameModel.parseAnimalList prop undefined: (${userId})`);
-          return animal.update('traits', traits => traits.push(
-            TraitModel.new(TraitModel.parse(prop)).attachTo(animal)
-          ))
+          return animal.traitAttach(TraitModel.new(TraitModel.parse(prop)));
         }
       }, AnimalModel.new(userId)))
     .reduce((result, animal) => result.set(animal.id, animal), Map());
@@ -75,8 +73,8 @@ export const parseAnimalList = (userId, string) => {
     const a2 = animalsMap.get(a2id);
     const [trait1, trait2] = TraitModel.LinkBetween(TraitModel.parse(prop), a1, a2);
     animalsMap = animalsMap
-      .updateIn([a1.id, 'traits'], traits => traits.push(trait1))
-      .updateIn([a2.id, 'traits'], traits => traits.push(trait2))
+      .set(a1.id, a1.traitAttach(trait1))
+      .set(a2.id, a2.traitAttach(trait2));
   });
   return animalsMap.toList();
 };
@@ -89,7 +87,7 @@ export const parseFromRoom = (room, string = '') => {
   if (seed.phase === void 0) seed.phase = 1;
 
   const players = room.users.reduce((result, id, index) => {
-    const player = new PlayerModel({
+    result[id] = new PlayerModel({
       id
       , hand: parseCardList(seed.players && seed.players[index] && seed.players[index].hand || '')
       , continent: parseAnimalList(id, seed.players && seed.players[index] && seed.players[index].continent || '')
@@ -97,7 +95,6 @@ export const parseFromRoom = (room, string = '') => {
       , index
       , ended: false
     }).toClient();
-    result[id] = player;
     return result;
   }, {});
 

@@ -55,7 +55,7 @@ players:
         clientStore0.dispatch(traitActivateRequest(selectAnimal(User0, 1).id, 'TraitCarnivorous', selectAnimal(User1, 0).id))
         , serverStore, clientStore0);
       clientStore0.dispatch(traitActivateRequest(selectAnimal(User0, 0).id, 'TraitCarnivorous', selectAnimal(User1, 0).id));
-      expect(selectAnimal(User0, 0).getFood(), 'User0, 0 gets food').equal(2);
+      expect(selectAnimal(User0, 0).getFoodAndFat(), 'User0, 0 gets food').equal(2);
       expect(selectAnimal(User1, 0)).undefined;
     });
   });

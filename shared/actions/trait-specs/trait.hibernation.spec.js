@@ -126,7 +126,7 @@ players:
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
     clientStore0.dispatch(gameEndTurnRequest());
-    expect(selectAnimal(User0, 0).getFood(), '1: Animal stored food').equal(3);
+    expect(selectAnimal(User0, 0).getFoodAndFat(), '1: Animal stored food').equal(3);
     expect(selectTrait(User0, 0, 1).value).true;
     expect(selectTrait(User0, 0, 2).value).true;
     clientStore0.dispatch(gameEndTurnRequest());
@@ -134,14 +134,14 @@ players:
     expect(selectGame().status.phase, 'DEPLOY 2').equal(PHASE.DEPLOY);
     clientStore0.dispatch(gameEndTurnRequest());
     expect(selectGame().status.phase, 'FEEDING 2').equal(PHASE.FEEDING);
-    expect(selectAnimal(User0, 0).getFood(), '2: Animal stored food').equal(2);
+    expect(selectAnimal(User0, 0).getFoodAndFat(), '2: Animal stored food').equal(2);
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitHibernation'));
     clientStore0.dispatch(gameEndTurnRequest());
 
     expect(selectGame().status.phase, 'DEPLOY 3').equal(PHASE.DEPLOY);
     clientStore0.dispatch(gameEndTurnRequest());
     expect(selectGame().status.phase, 'FEEDING 3').equal(PHASE.FEEDING);
-    expect(selectAnimal(User0, 0).getFood(), '2: Animal stored food').equal(2);
+    expect(selectAnimal(User0, 0).getFoodAndFat(), '2: Animal stored food').equal(2);
     expect(selectTrait(User0, 0, 1).value).true;
     expect(selectTrait(User0, 0, 2).value).true;
   });

@@ -35,7 +35,7 @@ players:
 
     clientStore0.dispatch(traitActivateRequest('$C', 'TraitCarnivorous', '$B'));
     expect(selectAnimal(User0, 1).hasFlag(TRAIT_ANIMAL_FLAG.POISONED)).not.true;
-    expect(selectAnimal(User0, 1).getFood()).equal(2);
+    expect(selectAnimal(User0, 1).getFoodAndFat()).equal(2);
     clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(gameEndTurnRequest());
