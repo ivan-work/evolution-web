@@ -130,7 +130,9 @@ export const authClientToServer = {
 export const authServerToClient = {
   loginUserSuccess: (data) => (dispatch) => {
     //console.log('authServerToClient', data);
-    window.sessionStorage.setItem('user', JSON.stringify(data.user));
+    if (typeof (window) != 'undefined') {
+      window.sessionStorage.setItem('user', JSON.stringify(data.user));
+    }
     dispatch(loginUserSuccess(new UserModel(data.user)));
     dispatch(push(data.redirect || '/'));
   }
