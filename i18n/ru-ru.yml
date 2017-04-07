@@ -1,8 +1,16 @@
+App:
+  Login_Login: Вход
+  Name: Эволюция
+  Rooms: Комнаты
+  Rooms$Create: Создать
+  Rooms_New_room: Новая комната
+  Rooms_New_room_name: Название
+  Room: Комната
+  Room$Back: Назад
+  Room$Exit: Выйти
+  Room$Start: Начать игру
 Game:
   UI:
-    TraitDefenceDialog:
-      Time: Осталось времени
-      Mimicry:
-        Title: Мимикрия
-      TailLoss:
-        Title: Отбросить хвост
+    TraitDefenceDialog_Time: Осталось времени
+    TraitDefenceDialog_Mimicry_Title: Мимикрия
+    TraitDefenceDialog_TailLoss_Title: Отбросить хвост

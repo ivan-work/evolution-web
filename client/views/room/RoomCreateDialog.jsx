@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import T from 'i18n-react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import * as MDL from 'react-mdl';
 import {connect} from 'react-redux';
@@ -14,7 +15,7 @@ const INITIAL_STATE = {
 export class RoomCreateDialog extends Component {
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     this.state = INITIAL_STATE;
     this.close = this.close.bind(this);
   }
@@ -29,22 +30,25 @@ export class RoomCreateDialog extends Component {
 
   render() {
     return <span>
-      <MDL.Button id="Rooms$create" onClick={() => this.setState({show: true})}>Create room</MDL.Button>
-        <Dialog show={this.state.show} onBackdropClick={this.close}>
-          <MDL.DialogTitle>New room</MDL.DialogTitle>
-          <MDL.DialogContent>
-            <MDL.Textfield floatingLabel label='Name' value={this.state.name} onChange={(e) => this.setState({name: e.target.value})}/>
-          </MDL.DialogContent>
-          <DialogActions>
-            <MDL.Button id='RoomCreateDialog$ok' type='button' raised primary onClick={() => {
-              this.props.onCreateRoom({
-                name: this.state.name
-              });
-              this.close();
-            }}>Create</MDL.Button>
-            {/*<MDL.Button id='RoomCreateDialog$cancel' type='button' raised onClick={this.close}>Cancel</MDL.Button>*/}
-          </DialogActions>
-        </Dialog>
+
+      <MDL.Button id="Rooms$create" onClick={() => this.setState({show: true})}>{T.translate('App.Rooms$Create')}</MDL.Button>
+
+      <Dialog show={this.state.show} onBackdropClick={this.close}>
+        <MDL.DialogTitle>{T.translate('App.Rooms_New_room')}</MDL.DialogTitle>
+        <MDL.DialogContent>
+          <MDL.Textfield floatingLabel label={T.translate('App.Rooms_New_room_name')} value={this.state.name}
+                         onChange={(e) => this.setState({name: e.target.value})}/>
+        </MDL.DialogContent>
+        <DialogActions>
+          <MDL.Button id='RoomCreateDialog$ok' type='button' raised primary onClick={() => {
+            this.props.onCreateRoom({
+              name: this.state.name
+            });
+            this.close();
+          }}>{T.translate('App.Rooms$Create')}</MDL.Button>
+          {/*<MDL.Button id='RoomCreateDialog$cancel' type='button' raised onClick={this.close}>Cancel</MDL.Button>*/}
+        </DialogActions>
+      </Dialog>
       </span>;
   }
 }

@@ -51,21 +51,14 @@ class Animal extends React.Component {
       , highlight: isOver && canDrop
     });
 
-    let traitHeight = 0;
-
     return (<div className={className}>
       <div className='traits'>
         {model.traits
           .sort((t1, t2) => t1.isLinked() ? 1 : -1)
           .toArray()
           .map((trait, index) =>{
-          if (!trait.isLinked()) {
-            traitHeight -= ANIMAL_TRAIT_SIZE.height;
-            }
-          return <div key={index}
+          return <div key={trait.id}
                       style={{
-            //position: 'absolute'
-            //, top: traitHeight + 'px'
             marginBottom: 1 + 'px'
             , width: ANIMAL_TRAIT_SIZE.width + 'px'
             }}>

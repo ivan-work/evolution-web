@@ -15,7 +15,7 @@ export class AnimalLinkedTrait extends Component {
   }
 
   static propTypes = {
-    trait: PropTypes.node.isRequired
+    trait: PropTypes.object.isRequired
     , sourceAnimalId: PropTypes.string.isRequired
   };
 
@@ -73,13 +73,8 @@ export class AnimalLinkedTrait extends Component {
         //this.setState({d: `M${x1},${y1} q${cx},${cy} ${xlen},${ylen}`, cx: x1 + cx, cy: y1 + cy});
       } else {
         this.state = null;
+        this.targetTrait = AnimalLinkedTraits.find((alt) => trait.id === alt.props.trait.linkId);
         this.forceUpdate();
-        this.targetTrait = AnimalLinkedTraits.find((alt) => {
-          return alt !== this
-            && !alt.targetTrait
-            && sourceAnimalId === alt.props.trait.linkAnimalId
-            && trait.linkAnimalId === alt.props.sourceAnimalId
-        })
       }
       window.requestAnimationFrame(this.tick);
     }
