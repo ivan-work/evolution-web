@@ -4,6 +4,7 @@ import {
   , traitActivateRequest
   , traitAnswerRequest
   , gameDeployAnimalRequest
+  , gameDeployTraitRequest
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
@@ -12,7 +13,7 @@ import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
 
 describe('TraitAnglerfish:', () => {
   it('Deploy', () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
 phase: 1
@@ -27,6 +28,22 @@ players:
     expect(selectAnimal(User0, 0).traits, `Server can see anglerfish`).size(1);
     expect(selectAnimal0(0).traits, `User0 can see anglerfish`).size(1);
     expect(selectAnimal1(0, User0).traits, `User1 can't see anglerfish`).size(0);
+  });
+
+  it('Cannot deploy as a trait', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: 1
+players:
+  - hand: angler
+    continent: $A
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    expectUnchanged('Cannot deploy as a trait', () => {
+      clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A'));
+    }, serverStore, clientStore0)
   });
 
   it('Defend itself', () => {

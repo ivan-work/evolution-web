@@ -117,7 +117,10 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
   , canDrop(props, monitor) {
     switch (monitor.getItemType()) {
       case DND_ITEM_TYPE.CARD:
-        return true;
+      {
+        const {card} = monitor.getItem();
+        return !card.getTraitDataModel().hidden;
+      }
       case DND_ITEM_TYPE.FOOD:
         const {index} = monitor.getItem();
         return props.isUserAnimal && props.model.canEat(props.game);

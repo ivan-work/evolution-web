@@ -479,10 +479,8 @@ export const traitClientToServer = {
     if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, animal.ownerId, animal.id))
       throw new ActionCheckError(`traitTakeFoodRequest@Game(${game.id})`, 'Cooldown active');
 
-    const attachedTrait = trait.attachTo(animal);
-
     dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
-    dispatch(server$game(gameId, traitTakeShell(gameId, 'standard', animalId, attachedTrait)));
+    dispatch(server$game(gameId, traitTakeShell(gameId, 'standard', animalId, trait)));
     dispatch(server$playerActed(gameId, userId));
   }
   , traitActivateRequest: ({gameId, sourceAid, traitId, targetId}, {userId}) => (dispatch, getState) => {

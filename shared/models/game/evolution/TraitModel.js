@@ -66,6 +66,7 @@ export class TraitModel extends Record({
     ];
   }
 
+  //TODO move to AnimalModel
   checkAttach(animal) {
     return (this.getDataModel().multiple || !animal.hasTrait(this.type));
   }
