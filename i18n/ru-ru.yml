@@ -18,6 +18,8 @@ App:
       maxPlayers: Количество игроков
       timeTurn: Время хода (В минутах)
       timeTraitResponse: Время реагирования на атаку
+      baseType1: Базовый набор
+      baseType2: Двойной базовый набор
     $Edit: Применить
     $Back: Назад
     $Exit: Выйти

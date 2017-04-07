@@ -16,7 +16,7 @@ deck: 12 camo
 phase: 2
 food: 7
 players:
-  - continent: $A grazing, $B + grazing, $C + grazing
+  - continent: $A grazing carn, $B + grazing, $C + grazing
 `); // full to survive 1 turn
     const {selectGame, selectPlayer, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
@@ -24,7 +24,7 @@ players:
 
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitGrazing'));
     expect(selectGame().food).equal(6);
-    expect(selectPlayer(User0).acted).equal(true);
+    expect(selectPlayer(User0).acted, 'User acted').equal(true);
     expectUnchanged('Grazing on cooldown', () =>
         clientStore0.dispatch(traitActivateRequest('$A', 'TraitGrazing'))
       , serverStore, clientStore0, clientStore1);
@@ -36,14 +36,15 @@ players:
     expect(selectGame().food).equal(4);
 
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
-    expect(selectPlayer(User0).acted).equal(true);
-
-    clientStore0.dispatch(gameEndTurnRequest());
     clientStore1.dispatch(gameEndTurnRequest());
+
+    clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    clientStore0.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(gameEndTurnRequest());
 
     // Turn1, deploy
-    expect(selectGame().status.phase).equal(PHASE.DEPLOY);
+    expect(selectGame().status.turn, 'PHASE.DEPLOY').equal(1);
+    expect(selectGame().status.phase, 'PHASE.DEPLOY').equal(PHASE.DEPLOY);
     clientStore1.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(gameEndTurnRequest());
 

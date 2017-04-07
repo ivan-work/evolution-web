@@ -84,7 +84,7 @@ export const TraitCarnivorous = {
           killed = false;
           cooldown = false;
         }
-        dispatch(server$traitNotify_End(game, sourceAnimal, TraitCarnivorous.type, targetAnimal.id));
+        dispatch(server$traitNotify_End(game, sourceAnimal, TraitCarnivorous.type, targetAnimal.id)); //TODO ПОЧЕМУ
       };
 
       if (needToAskTargetUser) {

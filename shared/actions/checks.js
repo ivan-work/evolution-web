@@ -6,7 +6,7 @@ import {PHASE} from '../models/game/GameModel';
 import {ActionCheckError} from '../models/ActionCheckError';
 import {selectGame} from '../selectors';
 
-export const catchChecks = (checks) => {
+export const passesChecks = (checks) => {
   try {
     checks();
   } catch (e) {

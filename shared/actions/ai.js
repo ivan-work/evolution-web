@@ -1,33 +1,78 @@
 import {Record} from 'immutable';
+import {PHASE} from '../models/game/GameModel';
 import {TraitDataModel} from '../models/game/evolution/TraitDataModel';
 import {TRAIT_TARGET_TYPE} from '../models/game/evolution/constants';
-import {catchChecks} from './checks';
+import {passesChecks, checkPlayerTurnAndPhase} from './checks';
 import {checkAnimalCanEat, checkTraitActivation_Animal} from './trait.checks';
+import {selectGame} from '../selectors';
+import {server$gameEndTurn} from './actions';
 
-export class Option extends Record({}) {
+export class Option extends Record({
+  request: null
+  , params: null
+}) {
   static new(request, ...params) {
     return new Option({
       request
       , params
     })
   }
+
+  toString() {
+    return 'Option(' + [this.request].concat(this.params).join(', ') + ')';
+  }
 }
 
-export const getAvailableOptions = (game, playerId) => {
-  const allAnimals = game.players.reduce((result, player) => result.concat(player.continent.map(animal => animal.id).toArray()), []);
-  return game.getPlayer(playerId).continent.reduce((result, animal) => {
-    if (catchChecks(() => checkAnimalCanEat(game, animal)))
-      result.push(Option.new('traitTakeFoodRequest', animal.id));
+export const endTurnIfNoOptions = (gameId, playerId) => (dispatch, getState) => {
+  if (!doesOptionExist(selectGame(getState, gameId), playerId)) {
+    dispatch(server$gameEndTurn(gameId, playerId));
+  } else {
+    console.log(getOptions(selectGame(getState, gameId), playerId))
+  }
+};
 
-    animal.forEach((trait) => {
+export const doesOptionExist = (game, playerId) => {
+  if (!passesChecks(() => checkPlayerTurnAndPhase(game, playerId, PHASE.FEEDING))) return true;
+
+  const allAnimals = game.players.reduce((result, player) => result.concat(player.continent.map(animal => animal.id).toArray()), []);
+  return game.getPlayer(playerId).continent.some((animal) => {
+    if (passesChecks(() => checkAnimalCanEat(game, animal))) return true;
+
+    return animal.traits.some((trait) => {
       const traitData = TraitDataModel.new(trait.type);
 
-      if (!traitData.checkAction(game, animal)) return;
+      if (!(traitData.playerControllable && traitData.checkAction(game, animal))) return false;
+
+      switch (traitData.targetType) {
+        case TRAIT_TARGET_TYPE.ANIMAL:
+          return allAnimals.some((targetAid) => {
+            if (passesChecks(() => checkTraitActivation_Animal(game, animal, traitData, targetAid))) return true;
+          });
+        case TRAIT_TARGET_TYPE.TRAIT:
+          return false;
+        case TRAIT_TARGET_TYPE.NONE:
+          return true;
+      }
+    });
+  });
+};
+
+// takes too long time
+export const getOptions = (game, playerId) => {
+  const allAnimals = game.players.reduce((result, player) => result.concat(player.continent.map(animal => animal.id).toArray()), []);
+  return game.getPlayer(playerId).continent.reduce((result, animal) => {
+    if (passesChecks(() => checkAnimalCanEat(game, animal)))
+      result.push(Option.new('traitTakeFoodRequest', animal.id));
+
+    animal.traits.forEach((trait) => {
+      const traitData = TraitDataModel.new(trait.type);
+
+      if (!(traitData.playerControllable && traitData.checkAction(game, animal))) return;
 
       switch (traitData.targetType) {
         case TRAIT_TARGET_TYPE.ANIMAL:
           allAnimals.forEach((targetAid) => {
-            if (catchChecks(() => checkTraitActivation_Animal(game, animal, traitData, targetAid))) {
+            if (passesChecks(() => checkTraitActivation_Animal(game, animal, traitData, targetAid))) {
               result.push(Option.new('traitActivateRequest', animal.id, trait.type, targetAid))
             }
           });
@@ -40,5 +85,7 @@ export const getAvailableOptions = (game, playerId) => {
           break;
       }
     });
+
+    return result;
   }, []);
 };

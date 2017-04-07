@@ -93,7 +93,7 @@ export const parseFromRoom = (room, string = '') => {
     , players
     , settings: {
       ...seed.settings
-      , decks: seed.settings && seed.settings.decks && seed.settings.decks.split(' ') || ['Base']
+      , decks: List(seed.settings && seed.settings.decks && seed.settings.decks.split(' ') || ['Base2'])
     }
   });
 };

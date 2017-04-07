@@ -55,8 +55,7 @@ export default {
     })
   ].filter(p => p != null)
   , module: {
-    noParse: /winston/
-    , loaders: [{
+    loaders: [{
       test: /\.jsx?$/, // Transform all .js files required somewhere with Babel
       loader: 'babel-loader',
       exclude: /node_modules/,

@@ -54,6 +54,10 @@ module.exports = (app, passport) => {
     }, {}));
   });
 
+  router.get('/logs', function (req, res, next) {
+    res.sendFile(path.resolve('./logs/production.log'));
+  });
+
   router.use('/oauth', oauth);
   // set authentication routes
   //require('./authentication.js')(app, passport);

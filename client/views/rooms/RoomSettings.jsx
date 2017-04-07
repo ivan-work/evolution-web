@@ -1,19 +1,23 @@
 import React, {Component} from 'react';
 import T from 'i18n-react';
-import {Button, Textfield, Checkbox} from 'react-mdl';
+import {Button, Textfield, RadioGroup, Radio, Checkbox} from 'react-mdl';
 
 import {RoomModel} from '../../../shared/models/RoomModel';
 import Validator from 'validatorjs';
 import {SettingsRules, SETTINGS_TIME_MODIFIER} from '../../../shared/models/game/GameSettings';
 
-const INITIAL_STATE = (props) => ({
-  form: {
-    name: props.room.name
-    , maxPlayers: props.room.settings.maxPlayers
-    , timeTurn: props.room.settings.timeTurn / SETTINGS_TIME_MODIFIER
-    , timeTraitResponse: props.room.settings.timeTraitResponse / SETTINGS_TIME_MODIFIER
-  }
-});
+const INITIAL_STATE = (props) => {
+  console.log(props)
+  return ({
+    form: {
+      name: props.room.name
+      , maxPlayers: props.room.settings.maxPlayers
+      , timeTurn: props.room.settings.timeTurn / SETTINGS_TIME_MODIFIER
+      , timeTraitResponse: props.room.settings.timeTraitResponse / SETTINGS_TIME_MODIFIER
+      , baseType: props.room.settings.baseType
+    }
+  });
+}
 
 export default class RoomSettings extends Component {
   static propTypes = {
@@ -86,6 +90,12 @@ export default class RoomSettings extends Component {
                    value={form.timeTraitResponse}
                    error={validation.errors.errors.timeTraitResponse}
                    onChange={({target}) => this.formOnChange('timeTraitResponse', target)}/>
+      </div>
+      <div>
+        <RadioGroup name="demo" value={form.baseType} onChange={({target}) => this.formOnChange('baseType', target)}>
+          <Radio value="Base" ripple>{T.translate('App.Room.Settings.baseType1')}</Radio>
+          <Radio value="Base2">{T.translate('App.Room.Settings.baseType2')}</Radio>
+        </RadioGroup>
       </div>
       <div>
         <Button id='Room$Edit'

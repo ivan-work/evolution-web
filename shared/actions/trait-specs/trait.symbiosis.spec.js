@@ -147,7 +147,7 @@ players:
 phase: 1
 players:
   - hand: 3 CardSymbiosis
-    continent: $A carn, $B carn fat fat, $C carn, $D
+    continent: $A carn graz, $B carn fat fat, $C carn, $D
 `);
       const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
       clientStore0.dispatch(gameDeployTraitRequest(
@@ -170,7 +170,7 @@ players:
       expect(selectGame().food).equal(8);
 
       expect(selectGame().status.phase).equal(PHASE.FEEDING);
-      expect(selectAnimal(User0, 0).traits, 'Animal $A.traits').size(3);
+      expect(selectAnimal(User0, 0).traits, 'Animal $A.traits').size(4);
       expect(selectAnimal(User0, 1).traits, 'Animal $B.traits').size(5);
       expect(selectAnimal(User0, 2).traits, 'Animal $C.traits').size(3);
 

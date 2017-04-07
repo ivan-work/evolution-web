@@ -18,8 +18,9 @@ describe('Complex traits:', () => {
 
     const gameId = ParseGame(`
 phase: 2
+food: 1
 players:
-  - continent: $A carn, $B carn, $C carn, $D carn, $E carn, $F carn
+  - continent: $A carn graz, $B carn, $C carn, $D carn, $E carn, $F carn
   - continent: $Z tailloss mimicry running fat, $X, $Y
 settings:
   timeTraitResponse: 10
