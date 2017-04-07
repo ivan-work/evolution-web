@@ -1,3 +1,11 @@
+export const CARD_TARGET_TYPE = (i => ({
+  DROP_AS_ANIMAL: 1 << i++
+  , ANIMAL_SELF: 1 << i++
+  , ANIMAL_ENEMY: 1 << i++
+  , LINK_SELF: 1 << i++
+  , LINK_ENEMY: 1 << i++
+}))(0);
+
 export const FOOD_SOURCE_TYPE = {
   GAME: 'GAME'
   , ANIMAL: 'ANIMAL'
@@ -16,8 +24,8 @@ export const TRAIT_COOLDOWN_PLACE = {
 export const TRAIT_COOLDOWN_DURATION = {
   ACTIVATION: 'ACTIVATION'
   , ROUND: 'ROUND'
-  , TWO_ROUNDS: 'TWO_ROUNDS'
-  , PHASE: 'PHASE'
+  , TWO_TURNS: 'TWO_ROUNDS'
+  , TURN: 'PHASE'
 };
 
 export const TRAIT_COOLDOWN_LINK = {

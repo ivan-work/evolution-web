@@ -49,10 +49,31 @@ export class CooldownList extends Record(
                   return null;
                 case TRAIT_COOLDOWN_DURATION.ROUND:
                   return nextRound ? null : duration;
-                case TRAIT_COOLDOWN_DURATION.TWO_ROUNDS:
-                  return nextRound ? TRAIT_COOLDOWN_DURATION.ROUND : duration;
-                case TRAIT_COOLDOWN_DURATION.PHASE:
+                case TRAIT_COOLDOWN_DURATION.TURN:
                   return duration;
+                case TRAIT_COOLDOWN_DURATION.TWO_TURNS:
+                  return duration;
+              }
+            })
+          )
+          .filter(cooldown => cooldown.duration !== null)))
+  }
+
+  eventNextTurn() {
+    return this
+      .map(placeType => placeType
+        .map(placeIdsList => placeIdsList
+          .map(cooldown =>
+            cooldown.update('duration', duration => {
+              switch (duration) {
+                case TRAIT_COOLDOWN_DURATION.ACTIVATION:
+                  return null;
+                case TRAIT_COOLDOWN_DURATION.ROUND:
+                  return null;
+                case TRAIT_COOLDOWN_DURATION.TURN:
+                  return null;
+                case TRAIT_COOLDOWN_DURATION.TWO_TURNS:
+                  return TRAIT_COOLDOWN_DURATION.TURN;
               }
             })
           )

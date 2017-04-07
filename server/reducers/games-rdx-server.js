@@ -11,8 +11,8 @@ import {FOOD_SOURCE_TYPE} from '../../shared/models/game/evolution/constants';
 export const gameStart = game => game
   .setIn(['started'], true)
   .setIn(['status', 'phase'], PHASE.DEPLOY)
-  .setIn(['status', 'round'], 0)
-  .setIn(['status', 'player'], 0);
+  .setIn(['status', 'round'], 0);
+  //.setIn(['status', 'currentPlayer'], 0); // TODO RANDOMIZE
 
 export const gamePlayerStatusChange = (game, {userId, status}) => game
   .setIn(['players', userId, 'status'], status);
@@ -45,33 +45,6 @@ export const gameDeployTrait = (game, {userId, cardId, animalId, trait}) => {
   return game
     .removeIn(['players', userId, 'hand', cardIndex])
     .updateIn(['players', userId, 'continent', animalIndex, 'traits'], traits => traits.push(trait))
-};
-
-export const gameNextPlayer = (game) => {
-  //console.log('gameNextPlayer', game.players.toJS());
-  let playerIndex = game.getIn(['status', 'player']);
-  let emergencyCount = game.players.size;
-  let totalPlayers = game.players.size;
-  let round = game.getIn(['status', 'round']);
-  let roundChanged = false;
-  do {
-    --emergencyCount;
-    ++playerIndex;
-    if (playerIndex >= totalPlayers) {
-      ++round;
-      roundChanged = true;
-      playerIndex = 0;
-    }
-    const player = game.players.find(player => player.index === playerIndex);
-    if (player && !player.ended) {
-      break;
-    }
-  } while (emergencyCount >= 0);
-  if (emergencyCount < 0) throw new Error('emergency count');
-  return game
-    .setIn(['status', 'round'], round)
-    .setIn(['status', 'player'], playerIndex)
-    .update('cooldowns', cooldowns => cooldowns.eventNextPlayer(roundChanged));
 };
 
 export const playerActed = (game, {userId}) => {
@@ -110,10 +83,14 @@ export const gameStartEat = (game, {food}) => {
     .setIn(['food'], food)
     .setIn(['status', 'phase'], PHASE.FEEDING)
     .setIn(['status', 'round'], 0)
-    .setIn(['status', 'player'], 0);
+    .setIn(['status', 'currentPlayer'], game.getIn(['status', 'roundPlayer']));
 };
 
 export const gameStartDeploy = (game) => {
+  const roundPlayer = game.status.roundPlayer;
+  const nextRoundPlayer = roundPlayer + 1 >= game.players.size
+    ? 0
+    : roundPlayer + 1;
   return game
     .update('players', players => players.map(player => player
       .set('ended', false)
@@ -126,7 +103,39 @@ export const gameStartDeploy = (game) => {
     .setIn(['status', 'phase'], PHASE.DEPLOY)
     .updateIn(['status', 'turn'], turn => ++turn)
     .setIn(['status', 'round'], 0)
-    .setIn(['status', 'player'], 0);
+    .setIn(['status', 'roundPlayer'], nextRoundPlayer)
+    .setIn(['status', 'currentPlayer'], nextRoundPlayer)
+    .update('cooldowns', cooldowns => cooldowns.eventNextTurn());
+};
+
+export const gameNextPlayer = (game) => {
+  //console.log('gameNextPlayer', game.players.toJS());
+  const roundPlayer = game.getIn(['status', 'roundPlayer']);
+  let currentPlayer = game.getIn(['status', 'currentPlayer']);
+  const totalPlayers = game.players.size;
+  let emergencyCount = game.players.size;
+  let round = game.getIn(['status', 'round']);
+  let roundChanged = false;
+  do {
+    --emergencyCount;
+    ++currentPlayer;
+    if (currentPlayer >= totalPlayers) {
+      currentPlayer = 0;
+    }
+    if (currentPlayer === roundPlayer) {
+      ++round;
+      roundChanged = true;
+    }
+    const player = game.players.find(player => player.index === currentPlayer);
+    if (player && !player.ended) {
+      break;
+    }
+  } while (emergencyCount >= 0);
+  if (emergencyCount < 0) throw new Error('emergency count');
+  return game
+    .setIn(['status', 'round'], round)
+    .setIn(['status', 'currentPlayer'], currentPlayer)
+    .update('cooldowns', cooldowns => cooldowns.eventNextPlayer(roundChanged));
 };
 
 export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) => {

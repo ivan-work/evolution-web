@@ -1,10 +1,10 @@
-import {CARD_TARGET_TYPE} from '../../CardModel'
+import {CARD_TARGET_TYPE} from '../constants'
 import * as traitData from '../traitData';
 
-const ExampleCard = {
-  type: 'string'
-  , name: 'string'
-  , target: CARD_TARGET_TYPE.DROP_AS_ANIMAL | CARD_TARGET_TYPE.DROP_AS_ANIMAL
+export const CardUnknown = {
+  type: 'CardUnknown'
+  , name: ''
+  , image: 'http://evolive.ru/images/def.png'
 };
 
 export const CardCamouflage = {

@@ -6,6 +6,8 @@ import {UserModel} from '~/shared/models/UserModel';
 import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 
 import {GAME_POSITIONS} from './GAME_POSITIONS';
+import {Portal} from '../utils/Portal.jsx';
+import {ControlGroup} from '../utils/ControlGroup.jsx';
 import {GameProvider} from './providers/GameProvider.jsx';
 import {CardCollection} from './CardCollection.jsx';
 import {Card, DragCard} from './Card.jsx';
@@ -44,19 +46,24 @@ class _Game extends React.Component {
       ? DragCard
       : Card);
 
-    return <div className="Game">
+    return <div className="Game" style={{
+      background: isUserTurn ? '#dfd' : '#fdd'
+    }}>
+      <Portal target='header'>
+        <ControlGroup name='Game'>
+          <MDL.Button id="Game$exit" onClick={this.context.gameActions.$exit}>Exit</MDL.Button>
+          <MDL.Button id="Game$endTurn" disabled={!isUserTurn}
+                      onClick={this.context.gameActions.$endTurn}>EndTurn</MDL.Button>
+        </ControlGroup>
+      </Portal>
       {/* DECK */}
       <div className='DeckWrapper' style={GAME_POSITIONS[game.players.size].deck}>
         <div className="GameStatus">
           Turn: {game.status.turn}
           <br/> Phase: {game.status.phase}
           <br/> Round: {game.status.round}
-          <br/> Player: {game.status.player}
+          <br/> Player: {game.status.currentPlayer}
         </div>
-
-        <MDL.Button className="EndTurn"
-                    raised disabled={!isUserTurn}
-                    onClick={this.context.gameActions.$endTurn}>EndTurn</MDL.Button>
 
         <GameScoreboardFinalView/>
 

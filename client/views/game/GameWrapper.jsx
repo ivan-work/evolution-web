@@ -32,6 +32,7 @@ export class GameWrapper extends React.Component {
       game: this.props.game
       , gameActions: {
         $endTurn: this.props.$endTurn
+        , $exit: this.props.$exit
         , $ready: this.props.$ready
         , $deployAnimal: this.props.$deployAnimal
         , $deployTrait: this.props.$deployTrait
@@ -62,8 +63,6 @@ export class GameWrapper extends React.Component {
       : <Game user={user}/>;
 
     return <div>
-      <MDL.Button className="ExitGame" raised
-                  onClick={this.props.$exit}>Exit Game</MDL.Button>
       {gameView}
     </div>;
   }

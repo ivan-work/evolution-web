@@ -34,4 +34,8 @@ export class PlayerModel extends Record({
   countScore() {
     return this.continent.reduce((score, animal) => score + animal.countScore(), 0);
   }
+
+  getAnimal(index) {
+    return this.continent.get(index);
+  }
 }

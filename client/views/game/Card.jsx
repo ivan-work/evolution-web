@@ -6,7 +6,7 @@ import { DragSource } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
 
-import { CardModel } from '~/shared/models/game/CardModel';
+import { CardModel } from '../../../shared/models/game/CardModel';
 
 export const CARD_SIZE = {
   width: 60
@@ -35,11 +35,7 @@ export class Card extends React.Component {
   }
 
   render() {
-    const {disabled, connectDragSource, isDragging} = this.props;
-    let card = this.props.card;
-    if (!card) {
-      card = {name: 'UNKNOWN'}
-    }
+    const {card, disabled, connectDragSource, isDragging} = this.props;
 
     const className = classnames({
       Card: true
@@ -48,7 +44,14 @@ export class Card extends React.Component {
       , isDragging: isDragging
     });
 
-    const body = <div className={className} style={CARD_SIZE}>
+    const style = {
+      ...CARD_SIZE
+      , backgroundSize: `${CARD_SIZE.width}px ${CARD_SIZE.height}px`
+    };
+    if (card.image)
+      style.backgroundImage = `url(${card.image})`;
+
+    const body = <div className={className} style={style}>
       <div className='inner'>
         {card.name} {isDragging}
       </div>
