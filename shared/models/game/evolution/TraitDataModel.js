@@ -12,6 +12,7 @@ export class TraitDataModel extends Record({
   , checkTarget: null
 }) {
   static new(traitType) {
+    if (!(traitType in traitData)) throw Error(`traitData[${traitType}] not found`);
     return new TraitDataModel({
       ...traitData[traitType]
     });

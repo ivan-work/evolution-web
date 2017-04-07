@@ -77,7 +77,6 @@ describe('Game: Deploying:', () => {
     //console.log($Game.find('.PlayerWrapper').debug())
 
     expect($Game.find('.ContinentZone'), '.ContinentZone').length(1);
-    expect($Game.find('DragSource(Card)').at(0).prop('disabled'), 'Card(0) is enabled').false;
     expect($Game.find('.Animal')).length(0);
 
     dndBackend.simulateBeginDrag([clientCardHID($Game, 0)]);
@@ -106,8 +105,8 @@ describe('Game: Deploying:', () => {
   it('0-0, board with 2 animals', () => {
     const props = makeClientState()
       .setIn(['game', 'players', 'User0', 'continent'], List([
-        AnimalModel.new(CardModel.new(cardTypes.CardCamouflage)).set('id', 'animal0')
-        , AnimalModel.new(CardModel.new(cardTypes.CardCamouflage)).set('id', 'animal1')
+        AnimalModel.new('User0').set('id', 'animal0')
+        , AnimalModel.new('User0').set('id', 'animal1')
       ]))
       .toObject();
     let deployAnimal = {};
@@ -162,8 +161,8 @@ describe('Game: Deploying:', () => {
   it('0-1, board with 2 animals', () => {
     const props = makeClientState()
       .setIn(['game', 'players', 'User0', 'continent'], List([
-        AnimalModel.new(CardModel.new(cardTypes.CardCamouflage)).set('id', 'animal0')
-        , AnimalModel.new(CardModel.new(cardTypes.CardCamouflage)).set('id', 'animal1')
+        AnimalModel.new('User0').set('id', 'animal0')
+        , AnimalModel.new('User0').set('id', 'animal1')
       ]))
       .setIn(['game', 'status', 'player'], 1)
       .toObject();
@@ -175,21 +174,11 @@ describe('Game: Deploying:', () => {
     const $endTurn = () => endTurn = true;
     const $Game = mount(<DnDContextGameWrapper {...props} $deployAnimal={$deployAnimal} $deployTrait={$deployTrait} $endTurn={$endTurn}/>);
     const dndBackend = $Game.instance().getManager().getBackend();
-
-    expect($Game.find('DragSource(Card)').at(0).props().disabled, '.CardCollection.Hand').true;
-
-    //// Deploy Animal
-    //dndBackend.simulateBeginDrag([clientCardHID($Game, 2)]);
-    //dndBackend.simulateHover([clientContinentZoneHID($Game, 1)]);
-    //dndBackend.simulateDrop();
-    //dndBackend.simulateEndDrag();
-    //expect(deployAnimal).false;
-    //
-    //// Deploy Trait
-    //dndBackend.simulateBeginDrag([clientCardHID($Game, 2)]);
-    //dndBackend.simulateHover([clientAnimalHID($Game, 1)]);
-    //dndBackend.simulateDrop();
-    //dndBackend.simulateEndDrag();
-    //expect(deployTrait).false;
+    expect(() => {
+      dndBackend.simulateBeginDrag([clientCardHID($Game, 0)]);
+      dndBackend.simulateHover([clientContinentZoneHID($Game, 0)]);
+      dndBackend.simulateDrop();
+      dndBackend.simulateEndDrag();
+    }).throw('Cannot call hover')
   });
 });

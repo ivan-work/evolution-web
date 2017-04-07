@@ -2,18 +2,21 @@ import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
+import {GameProvider} from './GameProvider.jsx';
+
 import { DragSource } from 'react-dnd';
 import { DND_ITEM_TYPE } from './DND_ITEM_TYPE';
 
 import { TraitModel } from '~/shared/models/game/evolution/TraitModel';
 
-export class AnimalTrait extends React.Component {
+export class AnimalTraitRaw extends React.Component {
   static defaultProps = {
     disabled: false
   };
 
   static propTypes = {
     trait: React.PropTypes.instanceOf(TraitModel).isRequired
+    , owner: React.PropTypes.object
     , index: React.PropTypes.number.isRequired
     , disabled: React.PropTypes.bool.isRequired
   };
@@ -41,11 +44,13 @@ export class AnimalTrait extends React.Component {
 
 export const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
   , {
-    beginDrag: (props) => ({item: props.trait})
-    , canDrag: (props, monitor) => !props.disabled
+    beginDrag: (props) => ({trait: props.trait, owner: props.owner})
+    , canDrag: (props, monitor) => !props.disabled && props.trait.dataModel.checkAction(props.game, props.owner)
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource()
     , isDragging: monitor.isDragging()
   })
-)(AnimalTrait);
+)(AnimalTraitRaw);
+
+export const AnimalTrait = GameProvider(DragAnimalTrait);

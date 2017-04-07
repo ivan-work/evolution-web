@@ -25,6 +25,7 @@ export class ContinentDeploy extends Continent {
       key={animal.id}
       index={index}
       model={animal}
+      isUserAnimal={this.props.isUserContinent}
       onCardDropped={this.$deployTrait}/>
   }
 }

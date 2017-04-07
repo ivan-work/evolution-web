@@ -22,14 +22,14 @@ describe('Game Hacking (EAT PHASE):', function () {
         [User0.id]: {
           hand: GameModel.generateDeck([[6, cardTypes.CardCamouflage]])
           , continent: [
-            AnimalModel.new(CardModel.new(cardTypes.CardCamouflage))
-            , AnimalModel.new(CardModel.new(cardTypes.CardCamouflage))
+            AnimalModel.new(User0.id)
+            , AnimalModel.new(User0.id)
           ]
         }
         , [User1.id]: {
           continent: [
-            AnimalModel.new(CardModel.new(cardTypes.CardCamouflage))
-            , AnimalModel.new(CardModel.new(cardTypes.CardCamouflage))
+            AnimalModel.new(User1.id)
+            , AnimalModel.new(User1.id)
           ]
         }
       }

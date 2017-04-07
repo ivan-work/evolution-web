@@ -15,7 +15,7 @@ describe('Animal', () => {
     //expect($Animal.find('.AnimalFood')).length(2)
   });
   it('Displays Simple', () => {
-    const $Animal = shallow(<Animal model={AnimalModel.new(CardModel.new(cardTypes.CardCamouflage))}/>);
+    const $Animal = shallow(<Animal model={AnimalModel.new()}/>);
     //expect($Animal.find('.AnimalFood')).length(2)
   });
   it('Displays Food', () => {

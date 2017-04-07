@@ -18,12 +18,12 @@ export class Game extends React.Component {
   };
 
   static childContextTypes = {
-    phase: React.PropTypes.number
+    game: React.PropTypes.instanceOf(GameModelClient)
   };
 
   getChildContext() {
     return {
-      phase: this.props.game.status.phase
+      game: this.props.game
     };
   }
 
@@ -43,7 +43,7 @@ export class Game extends React.Component {
     const game = this.props.game;
 
     if (!user || !game) return <div>Loading</div>;
-    const disabled = game.status.player != game.getPlayer().index;
+    const userTurn = game.status.player === game.getPlayer().index
     const player = game.getPlayer();
 
     const GameContinent = (game.status.phase === PHASE.DEPLOY
@@ -51,6 +51,10 @@ export class Game extends React.Component {
       : game.status.phase === PHASE.FEEDING
       ? ContinentFeeding
       : React.DOM.div);
+
+    const GameCard = (game.status.phase === PHASE.DEPLOY
+      ? DragCard
+      : Card);
 
     return <div className="Game">
 
@@ -64,7 +68,7 @@ export class Game extends React.Component {
         </div>
 
         <MDL.Button className="EndTurn"
-                    raised disabled={disabled}
+                    raised disabled={!userTurn}
                     onClick={this.context.gameActions.$endTurn}>EndTurn</MDL.Button>
 
         <CardCollection
@@ -75,7 +79,7 @@ export class Game extends React.Component {
       </div>
 
       {game.status.phase === PHASE.FEEDING ? <div className='GameFoodContainer'>
-        {Array.from({length: game.food}).map((u, index) => <DragFood key={index} disabled={false} index={index}/>)}
+        {Array.from({length: game.food}).map((u, index) => <DragFood key={index} index={index} disabled={!userTurn}/>)}
       </div>: null}
 
       {/* USER */}
@@ -89,7 +93,7 @@ export class Game extends React.Component {
           ref="Hand" name="Hand"
           shift={[55, 0]}>
           {player.hand.toArray().map((cardModel, i) =>
-          <DragCard model={cardModel} key={cardModel} index={i} disabled={disabled}/>)}
+          <GameCard model={cardModel} key={cardModel} index={i} disabled={!userTurn}/>)}
         </CardCollection>
       </div>
 

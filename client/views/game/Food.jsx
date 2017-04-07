@@ -11,6 +11,10 @@ export class Food extends React.Component {
     , disabled: React.PropTypes.bool.isRequired
   };
 
+  static defaultProps = {
+    disabled: false
+  };
+
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);

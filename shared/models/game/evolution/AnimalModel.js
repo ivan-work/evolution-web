@@ -1,19 +1,18 @@
 import {Record, List} from 'immutable';
 import uuid from 'node-uuid';
-import {CardModel} from '../CardModel';
 import {TraitModel} from './TraitModel';
 import {TraitDataModel} from './TraitDataModel';
 
 export class AnimalModel extends Record({
   id: null
-  , base: null
+  , ownerId: null
   , food: 0
   , traits: List()
 }) {
-  static new(card) {
+  static new(ownerId) {
     return new AnimalModel({
       id: uuid.v4().slice(0, 4)
-      , base: card
+      , ownerId
     });
   }
 
@@ -21,17 +20,20 @@ export class AnimalModel extends Record({
     return js == null
       ? null
       : new AnimalModel(js)
-      .set('base', CardModel.fromServer(js.base))
       .set('traits', List(js.traits).map(trait => TraitModel.fromServer(trait)));
   }
 
   toClient() {
     return this
-      .update('traits', traits => traits.map(trait => trait.toClient()))
+      .update('traits', traits => traits
+        .map(trait => trait.toClient()))
   }
 
   toOthers() {
-    return this.set('base', null);
+    return this
+      .update('traits', traits => traits
+        .map(trait => trait.toOthers())
+        .filter(trait => trait != null))
   }
 
   toString() {

@@ -103,7 +103,7 @@ export const server$gameDeployAnimal = (gameId, userId, animal, animalPosition, 
     , {meta: {clientOnly: true, userId}}
   ));
   dispatch(Object.assign(
-    gameDeployAnimal(gameId, userId, animal.toClient().toOthers(), animalPosition, cardPosition)
+    gameDeployAnimal(gameId, userId, animal.toOthers().toClient(), animalPosition, cardPosition)
     , {meta: {clientOnly: true, users: selectPlayers(getState, gameId).filter(uid => uid !== userId)}}
   ));
 };
@@ -259,7 +259,7 @@ export const gameClientToServer = {
     checkValidAnimalPosition(game, userId, animalPosition);
     const cardIndex = checkPlayerHasCard(game, userId, cardId);
     const card = game.getPlayer(userId).hand.get(cardIndex);
-    const animal = AnimalModel.new(card);
+    const animal = AnimalModel.new(userId);
     logger.verbose('selectGame > gameDeployAnimalRequest:', card);
     // console.timeEnd('gameDeployAnimalRequest body');
     // console.time('server$gameDeployAnimal');

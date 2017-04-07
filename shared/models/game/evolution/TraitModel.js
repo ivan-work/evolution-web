@@ -25,6 +25,10 @@ export class TraitModel extends Record({
       .set('dataModel', null);
   }
 
+  toOthers() {
+    return this;
+  }
+
   toString() {
     return `Trait#${this.type}`;
   }
