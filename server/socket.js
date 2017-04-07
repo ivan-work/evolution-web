@@ -8,7 +8,7 @@ export const socketServer = (server, options) => io(server, {
 });
 
 export const socketStore = (serverSocket, store) => {
-  serverSocket.sockets.on('connect', (socket) => {
+  serverSocket.on('connect', (socket) => {
     console.log('server:connect');
     store.dispatch(socketConnect(socket.id, socket));
 
