@@ -7,6 +7,12 @@ import yamlParser from 'yaml-js';
 
 module.exports = (app, passport) => {
   /**
+   * Static
+   * */
+
+  app.get('/changelog', (req, res) => res.sendFile(path.join(NODE_ROOT, 'changelog.txt')));
+
+  /**
    * Translations
    * */
   const translations = glob.sync('i18n/*.yml')
@@ -31,20 +37,20 @@ module.exports = (app, passport) => {
     res.status(200).json(Date.now());
   });
 
-  //if (process.env.NODE_ENV !== 'production') {
-  router.get('/state', function (req, res, next) {
-    const state = app.get('store').getState()
-      .update('connections', c => c.keySeq().toArray());
+  if (process.env.NODE_ENV !== 'production') {
+    router.get('/state', function (req, res, next) {
+      const state = app.get('store').getState()
+        .update('connections', c => c.keySeq().toArray());
 
-    const replacer = (key, value) => (
-      key === 'connections' ? void 0
-        : key === 'chat' ? void 0
-        : value);
+      const replacer = (key, value) => (
+        key === 'connections' ? void 0
+          : key === 'chat' ? void 0
+          : value);
 
-    const format = (str) => `<pre>${str}</pre>`;
-    res.send(format(JSON.stringify(state.toJS(), replacer, '  ')));
-  });
-  //}
+      const format = (str) => `<pre>${str}</pre>`;
+      res.send(format(JSON.stringify(state.toJS(), replacer, '  ')));
+    });
+  }
 
   router.get('/timeouts', function (req, res, next) {
     const timeouts = app.get('timeouts');

@@ -20,7 +20,6 @@ database.ready.then(() => {
   configureStore(server, app);
 
   require('./routes/index')(app);
-  app.use('/public', express.static('server/public'));
 
   (process.env.NODE_ENV === 'development' ? frontendDevelopment : frontendProduction)(webpackConfig, app);
 
@@ -36,24 +35,27 @@ database.ready.then(() => {
   if (app.get('env') === 'development') {
     app.use(function (err, req, res, next) {
       console.log(err.stack);
+      console.log('err.status', err.status);
 
-      res.status(err.status || 500);
-      res.json('error in development', {
-        message: err.stack,
-        error: err
-      });
+      res
+        .status(err.status >= 100 && err.status < 600 ? err.status : 500)
+        .json({
+          message: err.stack,
+          error: err
+        });
+    });
+  } else {
+    // production error handler
+    // no stacktraces leaked to user
+    app.use(function (err, req, res, next) {
+      res
+        .status(err.status >= 100 && err.status < 600 ? err.status : 500)
+        .json({
+          message: err.message,
+          error: {}
+        });
     });
   }
-
-// production error handler
-// no stacktraces leaked to user
-  app.use(function (err, req, res, next) {
-    res.status(err.status || 500);
-    res.json('error in production', {
-      message: err.message,
-      error: {}
-    });
-  });
 
   function onError(error) {
     if (error.syscall !== 'listen') {
