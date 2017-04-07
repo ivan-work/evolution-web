@@ -65,7 +65,7 @@ export class Chat extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.atBottom && prevProps.messages != this.props.messages && this.chatWindow) {
+    if (this.state.atBottom && this.chatWindow) {
       this.chatWindow.scrollTop = this.chatWindow.scrollHeight - this.chatWindow.offsetHeight;
     }
   }

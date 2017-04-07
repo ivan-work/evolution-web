@@ -3,6 +3,7 @@ import {to$} from './generic';
 import {ChatModel, MessageModel, CHAT_TARGET_TYPE} from '../models/ChatModel';
 import {ActionCheckError} from '../models/ActionCheckError';
 
+const CHAT_WHITELIST_REGEX = /[^\wа-яА-ЯёЁ\d\s\?!\.,\(\):]/gmi;
 /**
  * Init
  * */
@@ -45,7 +46,7 @@ export const chatClientToServer = {
   chatMessageRequest: ({to, toType, text}, {userId}) => (dispatch, getState) => {
     const validText = text
       .trim()
-      .replace(/[^\wа-яА-ЯёЁ\d\s]/gmi, '')
+      .replace(CHAT_WHITELIST_REGEX, '')
       .slice(0, 100);
     if (validText.length === 0) {
       throw new ActionCheckError('chatMessageRequest not valid');
@@ -61,7 +62,7 @@ export const chatClientToServer = {
       case CHAT_TARGET_TYPE.ROOM:
         const room = getState().getIn(['rooms', to]);
         if (!room) throw new ActionCheckError('chatMessageRequest', 'Invalid parameters');
-        dispatch(to$({users: room.users.toArray()}, chatMessageRoom(message)));
+        dispatch(to$({users: room.users.concat(room.spectators).toArray()}, chatMessageRoom(message)));
         break;
       case CHAT_TARGET_TYPE.USER:
         const user = getState().getIn(['users', to]);

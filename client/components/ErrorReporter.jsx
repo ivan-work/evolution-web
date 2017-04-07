@@ -6,11 +6,7 @@ import {actionError} from '../../shared/actions/actions';
 export class ErrorReporter extends React.Component {
   constructor(props) {
     super(props);
-    this.clearError = this.clearError.bind(this);
-  }
-
-  clearError() {
-    this.props.clearError();
+    this.clearError = this.props.clearError.bind(this);
   }
 
   render() {

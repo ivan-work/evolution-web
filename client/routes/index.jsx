@@ -3,11 +3,11 @@ import {Route, IndexRoute} from 'react-router';
 import {App} from '../components/App.jsx';
 import {LoginView, RoomsView, Room, GameWrapperView} from '../views/index';
 import {Test} from '../components/Test.jsx';
-import {client$loginUserFailure} from '../../shared/actions/actions';
+import {redirectToLogin} from '../../shared/actions/actions';
 
 const MakeAuthCheck = (store) => (nextState, replace) => {
   if (!store.getState().get('user')) {
-    dispatch(client$loginUserFailure('nouser'))
+    redirectToLogin(store.getState, replace);
   }
 };
 

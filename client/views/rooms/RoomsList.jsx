@@ -1,16 +1,18 @@
 import React from 'react';
+import T from 'i18n-react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import RIP from 'react-immutable-proptypes';
 import {connect} from 'react-redux';
 
 import {List, ListItem} from 'react-mdl';
 
-import {roomJoinRequest} from '../../../shared/actions/actions';
+import {roomJoinRequestSoft, roomSpectateRequestSoft} from '../../../shared/actions/actions';
 
 export class RoomsList extends React.Component {
   static propTypes = {
     rooms: RIP.listOf(RIP.record).isRequired
-    , $joinRequest: React.PropTypes.func.isRequired
+    , $roomJoin: React.PropTypes.func.isRequired
+    , $roomSpectate: React.PropTypes.func.isRequired
   };
 
   static defaultProps = {
@@ -23,15 +25,14 @@ export class RoomsList extends React.Component {
   }
 
   render() {
-    const {rooms, $joinRequest} = this.props;
+    const {rooms, $roomJoin, $roomSpectate} = this.props;
     //console.log(this.props.rooms.map((room, roomId) => roomId).valueSeq().toArray())
     return <List className="RoomsList">
       {rooms.map(room =>
-      <ListItem key={room.id} disabled={room.gameId !== null}>
+      <ListItem key={room.id}>
         <span>
-          <a href="#" onClick={() => $joinRequest(room.id)}>
-            {room.name}
-          </a>
+          <a disabled={room.gameId !== null} href="#" onClick={() => $roomJoin(room.id)}>{room.name}</a>
+          (<a href="#" onClick={() => $roomSpectate(room.id)}>{T.translate('App.Rooms.$Watch')}</a>)
           &nbsp;({room.users.size}/{room.settings.maxPlayers})
         </span>
       </ListItem>)}
@@ -50,6 +51,7 @@ export default connect(
     }
   }
   , (dispatch) => ({
-    $joinRequest: (roomId) => dispatch(roomJoinRequest(roomId))
+    $roomJoin: (roomId) => dispatch(roomJoinRequestSoft(roomId))
+    , $roomSpectate: (roomId) => dispatch(roomSpectateRequestSoft(roomId))
   })
 )(RoomsList);

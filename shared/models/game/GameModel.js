@@ -113,7 +113,7 @@ export class GameModel extends Record(GameModelData) {
       : new GameModel({
       ...js
       , deck: List(js.deck).map(c => CardModel.fromServer(c))
-      , players: OrderedMap(js.players).map(p => PlayerModel.fromServer(p)).sort((p1, p2) => p1.index > p2.index)
+      , players: OrderedMap(js.players).map(PlayerModel.fromServer).sort((p1, p2) => p1.index > p2.index)
       , status: new StatusRecord(js.status)
       , cooldowns: CooldownList.fromServer(js.cooldowns)
       , settings: SettingsRecord.fromJS(js.settings)

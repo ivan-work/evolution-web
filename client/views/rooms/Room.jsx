@@ -6,7 +6,7 @@ import {Button, Card, CardTitle, CardText} from 'react-mdl';
 import {RoomModel} from '../../../shared/models/RoomModel';
 
 import Chat from './../Chat.jsx';
-import {UsersList} from './../UsersList.jsx';
+import UsersList from './../UsersList.jsx';
 import {Portal} from './../utils/Portal.jsx';
 import RoomControlGroup from './RoomControlGroup.jsx';
 import RoomSettings from './RoomSettings.jsx';
@@ -50,7 +50,13 @@ export class Room extends Component {
         <Card>
           <CardTitle>{T.translate('App.Room.in_this_room')} ({room.users.size}/{room.settings.maxPlayers}):</CardTitle>
           <CardText>
-            <UsersList list={room.users.map(userId => this.props.online.get(userId))}/>
+            <UsersList list={room.users}/>
+          </CardText>
+        </Card>
+        <Card>
+          <CardTitle>{T.translate('App.Room.Spectators')}:</CardTitle>
+          <CardText>
+            <UsersList list={room.spectators}/>
           </CardText>
         </Card>
       </div>
@@ -66,7 +72,6 @@ export const RoomView = connect(
       roomId
       , room: state.getIn(['rooms', roomId])
       , userId: state.getIn(['user', 'id'])
-      , online: state.get('online')
     }
   }
   , (dispatch) => ({

@@ -63,8 +63,7 @@ export const socketMiddleware = io => store => next => action => {
     let sockets = [];
     if (Array.isArray(action.meta.users)) {
       sockets = action.meta.users
-        .map(userId =>  state.get('users').get(userId))
-        .map(user => user.connectionId);
+        .map(userId => state.getIn(['users', userId, 'connectionId']))
     } else if (action.meta.users === true) {
       sockets = state.get('users').map(user => user.connectionId).toArray();
     } else if (action.meta.socketId) {

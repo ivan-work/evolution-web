@@ -10,8 +10,7 @@ import {ActionCheckError} from '../models/ActionCheckError';
 
 export const checkSelectRoom = (getState, roomId) => {
   const room = getState().getIn(['rooms', roomId]);
-  if (room == void 0)
-    throw new ActionCheckError('checkRoomExists', `Room(%s) doesn't exist`, roomId);
+  if (!room) throw new ActionCheckError('checkRoomExists', `Room(%s) doesn't exist`, roomId);
   return room;
 };
 
@@ -20,6 +19,7 @@ export const checkSelectRoom = (getState, roomId) => {
  * */
 
 export const checkComboRoomCanStart = (room, userId) => {
+  if (!room) throw new ActionCheckError('checkRoomExists', `Room(%s) doesn't exist`, room);
   checkUserInRoom(room, userId);
   checkUserIsHost(room, userId);
   checkRoomMinSize(room);
@@ -55,6 +55,11 @@ export const checkUserInRoom = (room, userId) => {
 export const checkUserNotInRoom = (room, userId) => {
   if (~room.users.indexOf(userId))
     throw new ActionCheckError('checkUserNotInRoom', 'Room(%s) has User(%s)', room.id, userId);
+};
+
+export const checkUserNotSpectatingRoom = (room, userId) => {
+  if (~room.spectators.indexOf(userId))
+    throw new ActionCheckError('checkUserNotSpectatingRoom', 'Room(%s) has User(%s)', room.id, userId);
 };
 
 export const checkUserIsHost = (room, userId) => {
