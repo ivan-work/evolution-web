@@ -16,7 +16,6 @@ import ErrorReporter from './ErrorReporter.jsx';
 import {TooltipsContext} from '../views/utils/Tooltips.jsx';
 
 
-
 export const App = ServicesContext(PortalsContext(TooltipsContext(React.createClass({
   render: function () {
     const {dispatch} = this.props;
@@ -33,11 +32,13 @@ export const App = ServicesContext(PortalsContext(TooltipsContext(React.createCl
         <Content>
           {this.props.children}
         </Content>
-        <AdminPanelView location={this.props.location}/>
-        <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
+        {process.env.NODE_ENV === 'development' ? <AdminPanelView location={this.props.location}/> : null}
+        <svg width="100%" height="100%"
+             style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
           <PortalTarget name='game-svg' container='g'/>
         </svg>
-        <div width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
+        <div width="100%" height="100%"
+             style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
           <PortalTarget name='tooltips'/>
         </div>
       </Layout>
