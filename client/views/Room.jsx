@@ -6,12 +6,16 @@ import {Map} from 'immutable';
 import * as MDL from 'react-mdl';
 import {UsersList} from './UsersList.jsx';
 
-//import {roomCreateRequest} from '~/shared/actions/actions';
+import {roomExit} from '~/shared/actions/actions';
 
 export const Room = React.createClass({
   mixins: [PureRenderMixin]
+  , back: function(e) {
+    this.actions.back()
+  }
   , render: function () {
     return <div className="Room">
+      <MDL.Button raised onClick={this.back}>Back</MDL.Button>
       <div>Room {this.props.room.name}</div>
       <div>Online users: <UsersList list={this.props.online}/></div>
       <div>In this room: <UsersList list={this.props.room.users}/></div>
@@ -30,12 +34,11 @@ export const RoomView = connect(
       , online: state.get('online')
     }
   }
-  //, (dispatch) => ({
-  //  actions: {
-  //    roomCreateRequest: function () {
-  //      console.log('this', this);
-  //      dispatch(roomCreateRequest())
-  //    }
-  //  }
-  //})
+  , (dispatch) => ({
+    actions: {
+      roomExit: function () {
+        dispatch(roomExit())
+      }
+    }
+  })
 )(Room);

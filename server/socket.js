@@ -39,10 +39,24 @@ export const socketMiddleware = io => store => next => action => {
   const nextResult = next(action);
   if (action.meta) {
     if (action.meta.clients === true) {
+      // Clients == true => to all
+      io.emit('action', action);
+    } else if (action.meta.users === true) {
+      // Users == true => to all users
       action.meta.clients = store.getState().get('users')
-        .map((user) => user.connectionId);
+        .map((user) => user.connectionId)
+        .toArray();
+      //if (action.type === 'onlineJoin') {
+      //  console.log(` `);
+      //  console.log(`START Server:${action.type}`);
+      //  console.log(`Current state: `, store.getState().get('users').map(u => ([u.login, u.id, u.connectionId])));
+      //  console.log(`Sending to: `, action.meta.clients);
+      //  console.log(`ENDOF Server:${action.type}`);
+      //  console.log(` `);
+      //}
+    } else if (action.meta.user) {
+      action.meta.clients = [action.meta.user.connectionId];
     }
-
     if (Array.isArray(action.meta.clients)) {
       action.meta.clients
         .filter(connectionId => state.has(connectionId))

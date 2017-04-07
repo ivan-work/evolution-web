@@ -119,6 +119,8 @@ describe('Rooms:', function () {
         , users: List([User0.id])
       });
 
+      console.log('all good')
+
       clientStore1.dispatch(loginUserRequest('/test', 'User1', 'testPassword'));
       const User1 = UserSpy.lastCall.returnValue;
 

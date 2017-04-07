@@ -3,7 +3,7 @@ import {List, Map, fromJS} from 'immutable';
 import {UserModel} from '~/shared/models/UserModel';
 
 export const reducer = createReducer(List(), {
-  onlineSet: (state, data) => data.users
+  loginState: (state, data) => data.online
   , onlineJoin: (state, data) => state.push(data.user)
   , logoutUser: (state, data) => state.remove(state.findIndex(u => u.id == data))
 });

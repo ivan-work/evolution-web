@@ -12,7 +12,7 @@ export const roomCreateSuccess = (room) => ({
   type: 'roomCreateSuccess'
   , data: {room}
   , meta: {
-    clients: true
+    users: true
   }
 });
 export const roomJoinRequest = (roomId) => ({
@@ -26,7 +26,7 @@ export const roomJoinSuccess = (userId, roomId) => ({
   type: 'roomJoinSuccess'
   , data: {userId, roomId}
   , meta: {
-    clients: true
+    users: true
   }
 });
 //export const roomLeaveRequest = () => ({
