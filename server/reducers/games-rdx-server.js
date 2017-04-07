@@ -295,6 +295,10 @@ export const traitGiveBirth = (game, {sourceAid}) => {
     .update(addToGameLog(['traitGiveBirth', logAnimal(animal)]));
 };
 
+// No need to exports, serverside-only
+const traitAmbushStart = (game, {sourceAid}) => game.set('ambush', sourceAid);
+const traitAmbushEnd = (game, {sourceAid}) => game.remove('ambush');
+
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
   , gameDestroy: (state, data) => state.remove(data.gameId)
@@ -327,4 +331,6 @@ export const reducer = createReducer(Map(), {
   , traitNotify_Start: (state, data) => state.update(data.gameId, game => traitNotify_Start(game, data))
   , traitTakeShell: (state, data) => state.update(data.gameId, game => traitTakeShell(game, data))
   , traitGiveBirth: (state, data) => state.update(data.gameId, game => traitGiveBirth(game, data))
+  , traitAmbushStart: (state, data) => state.update(data.gameId, game => traitAmbushStart(game, data))
+  , traitAmbushEnd: (state, data) => state.update(data.gameId, game => traitAmbushEnd(game, data))
 });

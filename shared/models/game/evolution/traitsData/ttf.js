@@ -24,7 +24,7 @@ import {
 
 import {selectGame} from '../../../../selectors';
 
-import {endHunt} from './TraitCarnivorous';
+import {endHunt, endHuntNoCd} from './TraitCarnivorous';
 import {TraitCarnivorous} from '../traitTypes';
 
 export const TraitMetamorphose = {
@@ -78,7 +78,7 @@ export const TraitInkCloud = {
   ])
   , action: (game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, defenceTrait, defenceAnimal));
-    dispatch(server$traitNotify_End(game.id, attackAnimal.id, attackTrait, defenceAnimal.id));
+    dispatch(endHuntNoCd(game, attackAnimal, attackTrait, defenceAnimal));
     return true;
   }
 };

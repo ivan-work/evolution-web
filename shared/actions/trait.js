@@ -55,7 +55,7 @@ export const server$traitActivate = (game, sourceAnimal, trait, ...params) => (d
   }
   logger.verbose('server$traitActivate:', sourceAnimal.id, trait.type);
   const traitData = trait.getDataModel();
-  const result = dispatch(traitData.action(game, sourceAnimal, trait, ...params));
+  const result = dispatch(traitData.action(selectGame(getState, game.id), sourceAnimal, trait, ...params));
   logger.silly('server$traitActivate finish:', trait.type, result);
   return result;
 };
@@ -174,6 +174,16 @@ export const server$tryViviparous = (gameId, animal) => (dispatch, getState) => 
     return dispatch(server$traitActivate(game, sourceAnimal, trait));
   })
 };
+
+const traitAmbushStart = (gameId, animal) => ({
+  type: 'traitAmbushStart'
+  , data: {gameId, sourceAid: animal.id}
+});
+
+export const traitAmbushEnd = (gameId, animal) => ({
+  type: 'traitAmbushEnd'
+  , data: {gameId, sourceAid: animal.id}
+});
 
 /**
  * Acted
@@ -365,10 +375,12 @@ export const traitClientToServer = {
       if (!ambush || !carnivorous) return;
       const carnivorousData = carnivorous.getDataModel();
       if (!carnivorous.checkAction(game, attackAnimal) || !carnivorousData.checkTarget(game, attackAnimal, animal)) return;
+      dispatch(traitAmbushStart(gameId, animal));
       dispatch(server$traitActivate(game, attackAnimal, carnivorous, animal));
       return true;
     });
-    if (!ambushed) {
+    if (ambushed) {
+    } else {
       dispatch(server$startFeeding(gameId, animal, 1, 'GAME'));
       dispatch(server$playerActed(gameId, userId));
     }
@@ -416,6 +428,11 @@ export const traitClientToServer = {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGamePhase(game, PHASE.FEEDING);
+
+    if (!game.get('question')) {
+      throw new ActionCheckError(`traitDefenceAnswerRequest@Game(${game.id})`
+        , 'Game doesnt have Question(%s)', questionId)
+    }
 
     const {sourcePid, targetPid} = game.question;
     checkPlayerTurn(game, sourcePid);
