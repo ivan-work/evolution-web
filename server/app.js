@@ -16,14 +16,6 @@ var frontend = require('./frontend');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-//app.use(cookieParser(config.sessionOptions.secret));
-
-// Sessions/PassportJS/Authentication
-//require('./config/passport.js')(passport);
-//var sessionOptions = config.sessionOptions;
-//app.use(session(sessionOptions));
-//app.use(passport.initialize());
-//app.use(passport.session());
 
 // set routes
 require('./routes/index')(app, passport);

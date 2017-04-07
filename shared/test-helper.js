@@ -57,8 +57,6 @@ require('fbjs/lib/ExecutionEnvironment').canUseDOM = true;
 //    global[key] = window[key];
 //  }
 //});
-
-global.DEFINE_VERSION = '0.0.0';
 process.env.TEST = true;
 process.env.DEBUG = '*';
 process.env.JWT_SECRET = 'secret';
