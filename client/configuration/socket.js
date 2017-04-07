@@ -20,7 +20,8 @@ export const socketStore = (socket, store) => {
     //console.log('Client store:',store.getState());
     const user = store.getState().get('user');
     if (user != null) {
-      store.dispatch(loginUserRequest('/'));
+      console.log('DISPATCHING REQUEST!')
+      //store.dispatch(loginUserRequest('/'));
     }
   });
   //socket.on('connect_error', function(error) {

@@ -1,6 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {Provider} from 'react-redux';
+import {push} from 'react-router-redux';
+
+export function redirectTo(...args) {
+  return push(...args);
+}
 
 export function createConstants(...constants) {
   return constants.reduce((acc, constant) => {
@@ -29,7 +34,7 @@ export function checkHttpStatus(response) {
   }
 }
 
-export function ensureParameter (data, type, optional) {
+export function ensureParameter(data, type, optional) {
   if (!data && !optional) throw new Error('Required data is undefined');
   if (typeof type === 'string') {
     if (typeof data !== type) {
@@ -38,10 +43,4 @@ export function ensureParameter (data, type, optional) {
   } else if (!(data instanceof type)) {
     throw new Error(`Data [${data}] is not instanceof of ${type}`);
   }
-}
-
-
-
-export function parseJSON(response) {
-  return response.json()
 }

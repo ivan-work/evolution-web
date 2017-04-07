@@ -3,15 +3,15 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {CardModel} from '~/shared/models/game/CardModel';
 
 export class Card extends React.Component {
+  static propTypes = {
+    model: React.PropTypes.instanceOf(CardModel).isRequired
+    , index: React.PropTypes.number.isRequired
+  };
+
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
   }
-
-  static propTypes = {
-    model: React.PropTypes.instanceOf().isRequired
-    , index: React.PropTypes.number.isRequired
-  };
 
   render() {
     const model = this.props.model;

@@ -14,7 +14,7 @@ export const routerReducer = (state = routerReducerState, action) => {
   });
 };
 
-export const syncHistoryWithStore = (store, history = browserHistory) => $syncHistoryWithStore(history, store, {
+export const syncHistoryWithStore = (store, history) => $syncHistoryWithStore(history, store, {
   selectLocationState: (state) => state.get('routing').toJS()
 });
 

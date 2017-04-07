@@ -1,5 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import polyfills from '../shared/utils/polyfills'
 
 import { combineReducers } from 'redux-immutable';
 import configureStore from './configuration/configureStore'
@@ -8,11 +9,10 @@ import configureStore from './configuration/configureStore'
 import {makeSocketClient, socketStore, socketMiddleware} from './configuration/socket';
 
 // Routing
-import {routerReducer, appRouterMiddleware} from './configuration/routing';
+import {routerReducer, appRouterMiddleware, syncHistoryWithStore} from './configuration/routing';
 
 // History
 import { browserHistory } from 'react-router';
-import { syncHistoryWithStore } from 'react-router-redux'
 
 // Components
 import { Root } from './components/Root.jsx';
@@ -37,9 +37,7 @@ const store = configureStore({
   , socket: socketMiddleware(socketClient)
 });
 
-const history = syncHistoryWithStore(browserHistory, store, {
-  selectLocationState: (state) => state.get('routing').toJS()
-});
+const history = syncHistoryWithStore(store, browserHistory);
 
 socketStore(socketClient, store);
 
