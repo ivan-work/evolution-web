@@ -181,8 +181,8 @@ export class GameModelClient extends Record({
       : this.players.get(pid);
   }
 
-  isUserTurn() {
-    return this.getPlayer().index === this.status.currentPlayer
+  isPlayerTurn(userId) {
+    return this.getPlayer(userId).index === this.status.currentPlayer
       && (this.status.phase === PHASE.DEPLOY || this.status.phase === PHASE.FEEDING);
   }
 
@@ -192,6 +192,16 @@ export class GameModelClient extends Record({
 
   isFeeding() {
     return this.status.phase === PHASE.FEEDING;
+  }
+
+  getSortedPlayersByIndex() {
+    let players = [];
+    for (let i = 0, c = this.status.roundPlayer; i < this.players.size; ++i) {
+      players.push(this.players.find(player => player.index === c));
+      c = (c + 1) % this.players.size;
+    }
+    console.log('pklayer', players)
+    return players;
   }
 }
 

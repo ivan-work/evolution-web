@@ -55,16 +55,13 @@ export class GameWrapper extends React.Component {
   }
 
   render() {
-    const user = this.props.user;
-    const game = this.props.game;
+    const {game, user, room} = this.props;
 
     const gameView = (!user || !game || game.status.phase === 0)
       ? <div>Loading</div>
       : <Game user={user}/>;
 
-    return <div>
-      {gameView}
-    </div>;
+    return gameView;
   }
 }
 
@@ -76,7 +73,9 @@ export const GameWrapperView = connect(
     //console.log('state', state.toJS())
     const game = state.get('game');
     const user = state.get('user');
-    return {game, user}
+    const roomId = state.get('room');
+    const room = state.getIn(['rooms', roomId]);
+    return {game, user, room}
   }
   , (dispatch) => ({
     // GLOBAL

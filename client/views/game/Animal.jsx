@@ -28,7 +28,7 @@ class _Animal extends React.Component {
     , canDrop: React.PropTypes.bool
     // by GameProvider
     , game: React.PropTypes.object.isRequired
-    , isUserTurn: React.PropTypes.bool.isRequired
+    , isPlayerTurn: React.PropTypes.bool.isRequired
     , currentUserId: React.PropTypes.string.isRequired
     , isDeploy: React.PropTypes.bool.isRequired
     , isFeeding: React.PropTypes.bool.isRequired

@@ -20,6 +20,7 @@ import { DevTools } from './components/DevTools.jsx'
 import * as reducers from './reducers'
 
 // Styles
+import './styles/reset.scss';
 import 'react-mdl/extra/material.min.css'
 import 'react-mdl/extra/material.min.js'
 import './styles/style.scss';
@@ -39,6 +40,10 @@ const store = configureStore(reducer, void 0, [
 const history = syncHistoryWithStore(store, browserHistory);
 
 socketStore(socketClient, store);
+
+import {UserService} from './services/UserService';
+
+UserService.start(store.getState);
 
 ReactDOM.render(
   <Root store={store} history={history}>

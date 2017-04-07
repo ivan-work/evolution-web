@@ -15,7 +15,7 @@ export class Food extends React.Component {
     , disabled: React.PropTypes.bool.isRequired
     // by GameProvider
     , game: React.PropTypes.object.isRequired
-    , isUserTurn: React.PropTypes.bool.isRequired
+    , isPlayerTurn: React.PropTypes.bool.isRequired
     , currentUserId: React.PropTypes.string.isRequired
     , isDeploy: React.PropTypes.bool.isRequired
     , isFeeding: React.PropTypes.bool.isRequired
@@ -50,7 +50,7 @@ export const DragFood = GameProvider(DragSource(DND_ITEM_TYPE.FOOD
   , {
     beginDrag: (props) => ({index: props.index})
     , canDrag: (props, monitor) => !props.disabled
-      && props.isUserTurn
+      && props.isPlayerTurn
       && !props.game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, props.currentUserId, null)
   }
   , (connect, monitor) => ({

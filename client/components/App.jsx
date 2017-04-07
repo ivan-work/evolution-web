@@ -23,7 +23,7 @@ export const App = React.createClass({
         </Header>
         <Content>
           <AdminPanelView location={this.props.location}/>
-          <div className="layout-padding">
+          <div>
             {this.props.children}
           </div>
         </Content>
