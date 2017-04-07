@@ -30,6 +30,7 @@ global.navigator = {
 };
 
 global.window.localStorage = require('./test/setup-local-storage-mock').default();
+global.window.sessionStorage = require('./test/setup-local-storage-mock').default();
 
 global.window.matchMedia = window.matchMedia || (() => ({
     matches: false
@@ -111,6 +112,7 @@ global.mockServerStore = function (initialServerState) {
         next(action);
       })
       , applyMiddleware(socketServerMiddleware(ioServer))
+      //, applyMiddleware(thunk)
     ));
 
   socketServerStore(ioServer, serverStore);
@@ -128,8 +130,8 @@ global.mockClientStore = function (initialClientState) {
     combineReducers({...clientReducers, routing: routerReducer})
     , initialClientState
     , compose(
-      applyMiddleware(reduxTimeout())
-      , applyMiddleware(thunk)
+      applyMiddleware(thunk)
+      , applyMiddleware(reduxTimeout())
       , applyMiddleware(store => next => action => {
         clientStore.actions.push(action);
         next(action);

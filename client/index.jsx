@@ -8,7 +8,7 @@ import DockMonitor from 'redux-devtools-dock-monitor'
 import { combineReducers } from 'redux-immutable';
 import { createStore, compose, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk';
-import { reduxTimeout } from 'redux-timeout'
+import { reduxTimeout } from '~/shared/utils/reduxTimeout'
 // History
 import { browserHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux'

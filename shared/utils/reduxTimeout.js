@@ -21,17 +21,25 @@ export const reduxTimeout = function () {
   return store => next => action => {
     if (action.type === '@@reduxTimeout/addTimeout') {
       const {duration, name, callback} = action.data;
+      //console.log('timeout set')
       if (timeouts[name]) throw new Error(`reduxTimeout: timeout[${name}] already occupied!`);
       timeouts[name] = setTimeout(() => {
-        store.dispatch(typeof callback === 'object' ? callback : callback(store.dispatch, store.getState));
+        //console.log('Aftertimeout', typeof callback)
+        if (typeof callback === 'object') {
+          next(callback)
+        } else {
+          callback((action) => next(action), store.getState)
+        }
         timeouts[name] = void 0;
       }, duration);
     } else if (action.type === '@@reduxTimeout/cancelTimeout') {
       const nameToClear = action.data.name;
-      if (!timeouts[nameToClear]) throw new Error(`reduxTimeout: timeout[${name}] doesnt exists!`);
+      //console.log('cancelTimeout', action.type)
+      //if (!timeouts[nameToClear]) throw new Error(`reduxTimeout: timeout[${name}] doesnt exists!`);
       clearTimeout(timeouts[nameToClear]);
-      timeouts[name] = void 0;
+      timeouts[nameToClear] = void 0;
+    } else {
+      next(action);
     }
-    next(action);
   };
 };

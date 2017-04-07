@@ -51,7 +51,7 @@ export const logoutUser = (userId) => (dispatch, getState) => {
   const user = getState().get('users').get(userId);
   const room = getState().get('rooms').find(room => ~room.get('users').indexOf(userId));
   if (room) {
-    dispatch(roomsClientToServer.roomExitRequest({roomId: room.id}, {user}));
+    roomsClientToServer.roomExitRequest({roomId: room.id}, {user})(dispatch, getState);
   }
   dispatch({
     type: 'logoutUser'
@@ -81,57 +81,52 @@ export const authClientToServer = {
     const state = getState();
     const login = data.login;
 
-    // Trying to relogin existing user:
-    if (meta.user && meta.user.token) {
-      const userExists = state.get('users').find(user => user.token === meta.user.token);
-      if (userExists) {
-        const user = userExists.set('connectionId', meta.connectionId);
-        dispatch(cancelTimeout('logoutUser' + user.id));
-        dispatch(loginUserSuccess(user, data.redirect));
-        dispatch(loginState(user));
-        return true;
+    if (meta.user == void 0 || meta.user.token == void 0) {
+      if (!login) {
+        dispatch(loginUserFailure(meta.connectionId, 'Login is not supplied'));
+        return;
       }
-    }
-    // Otherwise try to login normally
-    if (login) {
       const userExists = state.get('users').find(user => user.login === login);
-      if (!userExists) {
-        const user = UserModel.new(login, meta.connectionId);
-        //console.log('new user record', user.id, user.login)
-        dispatch(onlineJoin(user));
-        //console.log('dispatching loginUserSuccess')
-        dispatch(loginUserSuccess(user, data.redirect));
-        dispatch(loginState(user));
-      } else {
+      if (userExists) {
         console.warn('User already exists:', login);
         dispatch(loginUserFailure(meta.connectionId, 'User already exists'));
+        return;
       }
-      return;
+      const user = UserModel.new(login, meta.connectionId);
+      //console.log('new user record', user.id, user.login)
+      dispatch(onlineJoin(user));
+      dispatch(loginUserSuccess(user, data.redirect));
+      dispatch(loginState(user));
+    } else {
+      const userExists = state.get('users').find(user => user.token === meta.user.token);
+      if (!userExists) {
+        dispatch(loginUserFailure(meta.connectionId, 'Relogin failed.'));
+        return;
+      }
+      const alreadyHasWorkingIdConnection = getState().get('connections').has(meta.user.connectionId);
+      if (alreadyHasWorkingIdConnection) {
+        dispatch(loginUserFailure(meta.connectionId, 'Duplicate tabs are not supported'));
+        return;
+      }
+      const user = userExists.set('connectionId', meta.connectionId);
+      dispatch(cancelTimeout('logoutUser' + user.id));
+      dispatch(loginUserSuccess(user, data.redirect));
+      dispatch(loginState(user));
     }
-    dispatch(loginUserFailure(meta.connectionId, 'Login is not supplied'));
   }
-  //, reloginUserRequest: (data, meta) => (dispatch, getState) => {
-  //  console.log('reloginUserRequest');
-  //  console.log('===========');
-  //  console.log('===========');
-  //  console.log('reloginUserRequest::DATA', data);
-  //  console.log('reloginUserRequest::META', meta);
-  //  console.log('===========');
-  //  console.log('===========');
-  //}
 };
 
 export const authServerToClient = {
   loginUserSuccess: (data) => (dispatch) => {
     //console.log('authServerToClient', data);
-    window.localStorage.setItem('user', JSON.stringify(data.user));
+    window.sessionStorage.setItem('user', JSON.stringify(data.user));
     dispatch(loginUserSuccess(new UserModel(data.user)));
     dispatch(push(data.redirect || '/'));
   }
-  , loginUserFailure: (message) => ({
+  , loginUserFailure: (message) => (dispatch) => {return{
     type: 'loginUserFailure'
     , data: message
-  })
+  }}
   , logoutUser: (data) => ({
     type: 'logoutUser'
     , data: {userId: data.userId}
