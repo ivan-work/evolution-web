@@ -18,8 +18,6 @@ import {
   , server$traitNotify_End
 } from '../../../../actions/actions';
 
-import {endTurnIfNoOptions} from '../../../../actions/ai';
-
 import {checkAction} from '../TraitDataModel';
 import {
   TraitMimicry
@@ -114,7 +112,6 @@ export const TraitCarnivorous = {
         dispatch(endHunt(game, sourceAnimal, targetAnimal));
         return true;
       }
-      //dispatch(endTurnIfNoOptions())
     };
 
     if (needToAskTargetUser) {

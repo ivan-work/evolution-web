@@ -11,7 +11,7 @@ import {
 } from '../models/game/evolution/constants';
 
 import {server$game} from './generic';
-import {endTurnIfNoOptions} from './ai';
+import {doesPlayerHaveOptions} from './ai';
 import {server$gameEndTurn} from './actions';
 
 import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
@@ -157,7 +157,8 @@ const playerActed = (gameId, userId) => ({
 
 export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
   dispatch(server$game(gameId, playerActed(gameId, userId)));
-  dispatch(endTurnIfNoOptions(gameId, userId));
+  if (!doesPlayerHaveOptions(selectGame(getState, gameId), userId))
+    dispatch(server$gameEndTurn(gameId, userId));
 };
 
 // Notification

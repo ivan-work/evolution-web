@@ -1,0 +1,32 @@
+gecko
+
+Симбиоз             = ages
+Сотрудничество      = duality / relationship-bounds
+Взаимодействие      = body-swapping / telepathy
+Хищник              = croc-jaws / bestial-fangs
+Паразит             = alien-egg / earthworm
+Жировой запас       = fat
+Водоплавающее       = dolphin
+Быстрое             = sprint
+Мимикрия            = transform
+Падальщик           = vulture
+Пиратство           = robber / snatch
+Отбрасывание хвоста = half-body-crawling / fox-tail
+Топотун             = stomp / boot-stomp
+Большой             = body-height / muscular-torso / biceps
+Спячка              = bed / pillow / coma
+Ядовитое            = biohazard poison-bottle
+Норное              = tumulus
+Камуфляж            = invisible
+Острое зрение       = beast-eye
+                    = 
+Раковина            = ammonite
+Интеллект           = brain
+Удильщик            = piranha
+Специализация       = clubs / spades
+Трематода           = two-shadows / duality
+Метаморфоза         = dodging / bandaged
+Чернильное облако   = fluffy-trefoil / fluffy-cloud
+Живорождение        = minions
+Засада              = grass
+Полет               = feather / bat-wing

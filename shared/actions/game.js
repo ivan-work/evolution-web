@@ -15,7 +15,7 @@ import {
 } from '../models/game/evolution/constants';
 
 import {server$game} from './generic';
-import {endTurnIfNoOptions} from './ai';
+import {doesPlayerHaveOptions} from './ai';
 import {redirectTo} from '../utils';
 import {selectGame, selectPlayers4Sockets} from '../selectors';
 
@@ -243,9 +243,9 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
 };
 
 // gameNextPlayer
-const gameNextPlayer = (gameId, nextPlayerIndex, roundChanged, turnTime) => ({
+const gameNextPlayer = (gameId, nextPlayerIndex, roundChanged, turnTime, playerHasOptions) => ({
   type: 'gameNextPlayer'
-  , data: {gameId, nextPlayerIndex, roundChanged, turnTime}
+  , data: {gameId, nextPlayerIndex, roundChanged, turnTime, playerHasOptions}
 });
 
 const makeTurnTimeoutId = (gameId) => `turnTimeTimeout#${gameId}`;
@@ -283,8 +283,16 @@ export const server$gamePlayerContinue = (gameId) => (dispatch, getState) => {
 };
 
 const server$gameNextPlayer = (gameId, nextPlayer, roundChanged) => (dispatch, getState) => {
-  dispatch(server$game(gameId, gameNextPlayer(gameId, nextPlayer.index, roundChanged, Date.now())));
-  dispatch(endTurnIfNoOptions(gameId, nextPlayer.id));
+  const turnTime = Date.now();
+  dispatch(gameNextPlayer(gameId, nextPlayer.index, roundChanged, turnTime));
+
+  const playerHasOptions = doesPlayerHaveOptions(selectGame(getState, gameId), nextPlayer.id);
+
+  dispatch(Object.assign(gameNextPlayer(gameId, nextPlayer.index, roundChanged, turnTime, playerHasOptions)
+    , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
+
+  if (!playerHasOptions)
+    dispatch(server$gameEndTurn(gameId, userId));
 };
 
 const choosePlayer = (game, startIndex) => {
@@ -540,8 +548,8 @@ export const gameServerToClient = {
     gameDeployAnimal(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardPosition)
   , gameDeployTrait: ({gameId, cardId, traits}) =>
     gameDeployTrait(gameId, cardId, traits.map(trait => TraitModel.fromServer(trait)))
-  , gameNextPlayer: ({gameId, nextPlayerIndex, roundChanged, turnTime}) =>
-    gameNextPlayer(gameId, nextPlayerIndex, roundChanged, turnTime)
+  , gameNextPlayer: ({gameId, nextPlayerIndex, roundChanged, turnTime, playerHasOptions}) =>
+    gameNextPlayer(gameId, nextPlayerIndex, roundChanged, turnTime, playerHasOptions)
   , gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
   , gameDestroy: ({gameId}) => gameDestroy(gameId)
   , gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
