@@ -9,10 +9,10 @@ var http = require('http');
 var config = require('./config/config.js');
 
 import * as reducers from './reducers';
-import { createStore, compose, applyMiddleware } from 'redux'
+import {createStore, compose, applyMiddleware} from 'redux'
 import thunk from 'redux-thunk';
-import { reduxTimeout } from '~/shared/utils/reduxTimeout'
-import { combineReducers } from 'redux-immutable';
+import {reduxTimeout} from '~/shared/utils/reduxTimeout'
+import {combineReducers} from 'redux-immutable';
 import {socketServer, socketStore, socketMiddleware} from './socket';
 import {errorMiddleware} from './middleware/error';
 
@@ -30,12 +30,13 @@ const server = http.createServer(app);
 const socket = socketServer(server);
 const store = createStore(
   reducer
-  , compose(
-    applyMiddleware(errorMiddleware())
-    , applyMiddleware(thunk)
-    , applyMiddleware(reduxTimeout(timeouts))
-    , applyMiddleware(socketMiddleware(socket))
-  ));
+  , applyMiddleware(
+    errorMiddleware()
+    , thunk
+    , reduxTimeout(timeouts)
+    , socketMiddleware(socket)
+  )
+);
 
 app.set('store', store);
 

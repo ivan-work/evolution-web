@@ -289,19 +289,9 @@ players:
     clientStore1.dispatch(gameReadyRequest());
     const gameId = serverStore.getState().get('games').first().id;
     serverStore.clearActions();
-    console.log('PARTY STARTED')
-    console.log('PARTY STARTED')
-    console.log('PARTY STARTED')
-    console.log('PARTY STARTED')
-    console.log('PARTY STARTED')
 
     clientStore0.disconnect(SOCKET_DISCONNECT_NOW);
     //console.log(serverStore.getState().getIn(['games', gameId, 'players']).keySeq().toArray())
-    console.log('PARTY ENNDEDED')
-    console.log('PARTY ENNDEDED')
-    console.log('PARTY ENNDEDED')
-    console.log('PARTY ENNDEDED')
-    console.log('PARTY ENNDEDED')
 
     clientStore1.disconnect(SOCKET_DISCONNECT_NOW);
 

@@ -47,7 +47,6 @@ export const roomExitSuccessNotify = (roomId, userId) => ({
 });
 
 export const server$roomExit = (roomId, userId) => (dispatch, getState) => {
-  console.log('server$roomExit')
   const room = selectRoom(getState, roomId);
   dispatch(roomExitSuccess(roomId, userId));
   if (room && room.gameId) {

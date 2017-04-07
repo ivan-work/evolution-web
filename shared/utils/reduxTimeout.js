@@ -1,7 +1,7 @@
 import logger from '~/shared/utils/logger';
 
 class Timer {
-  constructor (callback, delay) {
+  constructor(callback, delay) {
     this.callback = callback;
     this.remaining = delay;
     this.start();
@@ -29,16 +29,14 @@ class Timer {
   }
 }
 
-export const addTimeout = function addTimeout(duration, name, callback) {
-  return {
-    type: '@@reduxTimeout/addTimeout',
-    data: {
-      duration,
-      name,
-      callback
-    }
-  };
-};
+export const addTimeout = (duration, name, callback) => ({
+  type: '@@reduxTimeout/addTimeout',
+  data: {
+    duration,
+    name,
+    callback
+  }
+});
 
 export const cancelTimeout = function cancelTimeout(name) {
   return {
@@ -47,33 +45,26 @@ export const cancelTimeout = function cancelTimeout(name) {
   };
 };
 
-export const reduxTimeout = function (timeouts = {}) {
-  return ({dispatch, getState}) => next => action => {
-    if (action.type === '@@reduxTimeout/addTimeout') {
-      const {duration, name, callback} = action.data;
-      logger.silly('@@reduxTimeout/addTimeout', name, typeof callback);
-      console.log('@@reduxTimeout/addTimeout', name, typeof callback);
-      if (timeouts[name]) throw new Error(`reduxTimeout: timeout[${name}] already occupied!`);
-      timeouts[name] = new Timer(() => {
-        console.log('TIME TO DISPATCH THIS SHIT')
-        //if (typeof callback === 'object') {
-        //  next(callback)
-        //} else {
-        //  callback((action) => dispatch(action), getState)
-        //}
-        timeouts[name] = void 0;
-        dispatch(callback)
-      }, duration);
-    } else if (action.type === '@@reduxTimeout/cancelTimeout') {
-      const nameToClear = action.data.name;
-      logger.silly('@@reduxTimeout/cancelTimeout', nameToClear);
-      //console.log('cancelTimeout', action.type)
-      //if (!timeouts[nameToClear]) throw new Error(`reduxTimeout: timeout[${name}] doesnt exists!`);
-      if (timeouts[nameToClear]) {
-        timeouts[nameToClear].pause();
-        timeouts[nameToClear] = void 0;
-      }
+export const reduxTimeout = (timeouts = {}) => ({dispatch, getState}) => next => action => {
+  if (action.type === '@@reduxTimeout/addTimeout') {
+    const {duration, name, callback} = action.data;
+    logger.silly('@@reduxTimeout/addTimeout', name, typeof callback);
+    if (timeouts[name]) throw new Error(`reduxTimeout: timeout[${name}] already occupied!`);
+
+    timeouts[name] = new Timer(() => {
+      timeouts[name] = void 0;
+      dispatch(callback)
+    }, duration);
+  } else if (action.type === '@@reduxTimeout/cancelTimeout') {
+    const nameToClear = action.data.name;
+    logger.silly('@@reduxTimeout/cancelTimeout', nameToClear);
+    //console.log('cancelTimeout', action.type)
+    //if (!timeouts[nameToClear]) throw new Error(`reduxTimeout: timeout[${name}] doesnt exists!`);
+    if (timeouts[nameToClear]) {
+      timeouts[nameToClear].pause();
+      timeouts[nameToClear] = void 0;
     }
+  } else {
     next(action);
-  };
+  }
 };

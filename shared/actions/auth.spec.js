@@ -1,8 +1,7 @@
 import {Map, List} from 'immutable';
 import {UserModel} from '../models/UserModel';
-import {authServerToClient, authClientToServer, socketConnect, socketDisconnect, loginUserRequest, loginUserSuccess, loginUserFailure} from './auth';
+import {socketConnect, socketDisconnect, loginUserRequest} from './auth';
 
-import {addTimeout} from '../utils/reduxTimeout';
 //console.log('-----');
 //console.log('clientStore:');
 //console.log(clientStore.getState().toJS());
@@ -240,26 +239,6 @@ describe('Auth:', function () {
       clientStore1.disconnect();
       clientStore1.connect(serverStore);
       expect(clientStore1.getState().get('user').id).equal(User1.id);
-    });
-
-    it.only('temptest', (done) => {
-      const serverStore = mockServerStore();
-      const action2 = (dispatch, getState) => {
-        console.log('action level 2')
-        done()
-      };
-      const action1 = (dispatch, getState) => {
-        console.log('action level 1')
-        dispatch(action2)
-        dispatch(action2)
-      };
-      const action0 = (dispatch, getState) => {
-        console.log('action level 0')
-        dispatch(action1)
-        dispatch(action1)
-      };
-
-      serverStore.dispatch(addTimeout(1, 'a', action0))
     });
   });
 });

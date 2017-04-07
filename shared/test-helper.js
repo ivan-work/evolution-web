@@ -98,15 +98,15 @@ global.mockServerStore = function (initialServerState) {
   const serverStore = createStore(
     combineReducers({...serverReducers})
     , initialServerState
-    , compose(
-      applyMiddleware(serverErrorMiddleware(errorInterceptor))
-      , applyMiddleware(thunk)
-      , applyMiddleware(reduxTimeout())
-      , applyMiddleware(store => next => action => {
+    , applyMiddleware(
+      serverErrorMiddleware(errorInterceptor)
+      , thunk
+      , reduxTimeout()
+      , store => next => action => {
         serverStore.actions.push(action);
-        return next(action);
-      })
-      , applyMiddleware(socketServerMiddleware(ioServer))
+        next(action);
+      }
+      , socketServerMiddleware(ioServer)
     ));
 
   socketServerStore(ioServer, serverStore);
@@ -124,12 +124,7 @@ global.mockClientStore = function (initialClientState) {
   const ioClient = syncSocketIOClient();
   const history = createMemoryHistory('/');
   const clientStore = configureStore(combineReducers({...clientReducers, routing: routerReducer}), initialClientState, [
-    thunk
-    , (store => next => action => {
-      clientStore.actions.push(action);
-      return next(action);
-    })
-    , appRouterMiddleware(history)
+    appRouterMiddleware(history)
     , socketClientMiddleware(ioClient)
   ]);
   socketClientStore(ioClient, clientStore);

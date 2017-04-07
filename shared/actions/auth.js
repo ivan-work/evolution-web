@@ -83,7 +83,6 @@ export const loginUserFailure = (connectionId, msg) => {
 export const logoutUser = (userId) => (dispatch, getState) => {
   const room = getState().get('rooms').find(room => ~room.get('users').indexOf(userId));
   if (room) {
-    console.log('server$roomExit PRE')
     dispatch(server$roomExit(room.id, userId));
   }
   dispatch({
