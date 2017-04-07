@@ -88,7 +88,7 @@ players:
   - hand: 8 CardCooperation
     continent: $D, $E, $F
 `);
-      const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+      const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
       expect(selectCard(User1, 7).trait1).equal('TraitCooperation');
       clientStore0.dispatch(gameEndTurnRequest());
 

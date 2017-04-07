@@ -34,7 +34,7 @@ export const server$socketDisconnect = (connectionId, reason) => (dispatch, getS
   if (!!user) {
     if (reason !== SOCKET_DISCONNECT_NOW) {
       dispatch(addTimeout(
-        TIMEOUT
+        (process.env.TEST ? 1 : TIMEOUT)
         , 'logoutUser' + user.id
         , server$logoutUser(user.id)));
     } else {

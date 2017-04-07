@@ -5,6 +5,8 @@ export const SETTINGS_PLAYERS = [2, 8];
 
 export const SETTINGS_TIME_VALUES = [0, 60 * 24];
 
+export const SETTINGS_TIME_MODIFIER = 60000; // by 1 minute
+
 export const SettingsRules = {
   name: 'string|between:6,12|regex:/^[a-zA-Zа-яА-Я\\d\\s]*$/'
   , maxPlayers: `integer|between:${SETTINGS_PLAYERS[0]},${SETTINGS_PLAYERS[1]}`
@@ -15,8 +17,8 @@ export const SettingsRules = {
 
 export class SettingsRecord extends Record({
   maxPlayers: 4
-  , timeTurn: 2 * 60000
-  , timeTraitResponse: .5 * 60000
+  , timeTurn: process.env.TEST ? 0 : 4 * SETTINGS_TIME_MODIFIER
+  , timeTraitResponse: process.env.TEST ? 0 : 1 * SETTINGS_TIME_MODIFIER
   , decks: List(['Base'])
 }) {
   static fromJS(js) {
@@ -30,11 +32,12 @@ export class SettingsRecord extends Record({
 
   applySettings(settings) {
     return this.mergeWith((prev, next, key) => {
+      //console.log(prev, next, key, Number.isInteger(next));
       switch (key) {
         case 'decks':
           return next.size > 0 ? next : prev;
         default:
-          return next !== null ? next : prev;
+          return Number.isInteger(next) ? next : prev;
       }
     }, SettingsRecord.fromJS(settings));
   }

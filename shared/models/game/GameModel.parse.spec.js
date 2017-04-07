@@ -1,5 +1,6 @@
 import {List, Map} from 'immutable';
 import {GameModel, PHASE, StatusRecord} from './GameModel';
+import {SettingsRecord} from './GameSettings';
 import {AnimalModel} from './evolution/AnimalModel';
 import {TraitModel} from './evolution/TraitModel';
 import * as cardsData from './evolution/cards/index';
@@ -131,6 +132,34 @@ players:
     expect(ServerGame().getIn(['players', User1.id, 'continent'])).equal(List());
   });
 
+  it('mockGame.ParseGame settings', () => {
+    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+    const gameId = ParseGame(`
+settings:
+  timeTraitResponse: 10
+  timeTurn: 20
+  decks: TEST
+`);
+    expect(ServerGame().settings).equal(new SettingsRecord({
+      timeTurn: 20
+      , timeTraitResponse: 10
+      , decks: List(['TEST'])
+    }))
+  });
+
+  it('mockGame.ParseGame settings without decks', () => {
+    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+    const gameId = ParseGame(`
+settings:
+  timeTraitResponse: 10
+  timeTurn: 20
+`);
+    expect(ServerGame().settings).equal(new SettingsRecord({
+      timeTurn: 20
+      , timeTraitResponse: 10
+    }))
+  });
+
   it('mockGame.ParseGame phase 0', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
@@ -143,12 +172,12 @@ players:
 `);
     expect(ServerGame().started).equal(true);
     expect(ServerGame().food, 'ServerGame().food').equal(2);
-    expect(ServerGame().status).equal(new StatusRecord({
-      turn: 0
-      , round: 0
-      , player: 0
-      , phase: 1
-    }));
+    expect(ServerGame().status.turn, 'turn').equal(0);
+    expect(ServerGame().status.round, 'round').equal(0);
+    expect(ServerGame().status.currentPlayer, 'currentPlayer').equal(0);
+    expect(ServerGame().status.roundPlayer, 'roundPlayer').equal(0);
+    expect(ServerGame().status.phase, 'phase').equal(1);
+    expect(ServerGame().status.turnTime, 'turnTime').above(0);
     expect(ServerGame().deck.size).equal(6);
     expect(ServerGame().getIn(['players', User0.id, 'ready'])).true;
     expect(ServerGame().getIn(['players', User0.id, 'hand'])).size(8);
