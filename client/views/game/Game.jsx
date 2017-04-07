@@ -8,8 +8,23 @@ import {GameModelClient} from '../../../shared/models/game/GameModel';
 import {CARD_POSITIONS} from './CARD_POSITIONS';
 import {CardCollection} from './CardCollection.jsx';
 import {Card, DragCard} from './Card.jsx';
+import {Continent} from './Continent.jsx';
 
 export class Game extends React.Component {
+  static contextTypes = {
+    gameActions: React.PropTypes.object
+  };
+
+  static childContextTypes = {
+    phase: React.PropTypes.number
+  };
+
+  getChildContext() {
+    return {
+      phase: this.props.game.status.phase
+    };
+  }
+
   static propTypes = {
     user: React.PropTypes.instanceOf(UserModel).isRequired
     , game: React.PropTypes.instanceOf(GameModelClient)
@@ -42,7 +57,7 @@ export class Game extends React.Component {
 
         <MDL.Button className="EndTurn"
                     raised disabled={disabled}
-                    onClick={this.props.$endTurn}>EndTurn</MDL.Button>
+                    onClick={this.context.gameActions.$endTurn}>EndTurn</MDL.Button>
 
         <CardCollection
           ref="Deck" name="Deck"
@@ -54,7 +69,10 @@ export class Game extends React.Component {
       {/* USER */}
 
       <div className='PlayerWrapper UserWrapper' style={CARD_POSITIONS[game.players.size].player}>
-        {this.props.makeContinent(player.continent, true)}
+        <Continent
+          isUserContinent={true}
+          continent={player.continent}
+        />
 
         <CardCollection
           ref="Hand" name="Hand"
@@ -78,7 +96,9 @@ export class Game extends React.Component {
               {enemy.hand.toArray().map((cardModel, i) => <Card model={cardModel} key={i} index={i}/>)}
             </CardCollection>
 
-            {this.props.makeContinent(enemy.continent)}
+            <Continent
+              continent={enemy.continent}
+            />
           </div>
           })
         }

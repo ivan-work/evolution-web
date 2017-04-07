@@ -1,3 +1,4 @@
+import logger from '~/shared/utils/logger';
 import io from 'socket.io';
 import {ObjectID} from 'mongodb';
 import {socketConnect, socketDisconnect, clientToServer} from '../shared/actions/actions'
@@ -6,16 +7,16 @@ export const socketServer = (server, options) => io(server, {});
 
 export const socketStore = (serverSocket, store) => {
   serverSocket.on('connect', (socket) => {
-    //console.log('server:connect');
+    logger.silly('server:connect');
     store.dispatch(socketConnect(socket.id, socket));
 
     socket.on('disconnect', (reason) => {
-      //console.log('server:disconnect', reason);
+      logger.silly('server:disconnect', reason);
       store.dispatch(socketDisconnect(socket.id, reason));
     });
 
     socket.on('action', (action) => {
-      //console.log('Server:Receive', action.type);
+      logger.silly('Server:Receive', action.type);
       if (!clientToServer.$unprotected) {
 
       }
@@ -26,12 +27,12 @@ export const socketStore = (serverSocket, store) => {
           , ...action.meta
         }));
       } else {
-        console.warn('clientToServer action doesnt exist: ' + action.type);
+        logger.warn('clientToServer action doesnt exist: ' + action.type);
       }
     });
 
     socket.on('error', (error) => {
-      console.error('Server:Error', error);
+      logger.error('Server:Error', error);
     });
   });
 };
@@ -60,7 +61,7 @@ export const socketMiddleware = io => store => next => action => {
     } else if (action.meta.userId) {
       sockets = [store.getState().getIn(['users', action.meta.userId, 'connectionId'])];
     } else {
-      console.error('Meta not valid', action.type, action.meta);
+      logger.error('Meta not valid', action.type, action.meta);
     }
     //console.log('Server:Send', action.type, action.meta, sockets);
     sockets
