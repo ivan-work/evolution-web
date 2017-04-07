@@ -8,16 +8,14 @@ import {CardModel} from '../../../../shared/models/game/CardModel';
 // Components
 import {AnimationServiceRef} from '../../../services/AnimationService';
 import {Card} from '../Card.jsx';
-import {CardCollection} from '../CardCollection.jsx';
+import Deck from './Deck.jsx';
 
 export const DeckWrapper = AnimationServiceRef(({deck, connectRef}) => (
   <div className='DeckWrapper'>
     <h6>Deck ({deck.size}):</h6>
-    <CardCollection
-      name="Deck" ref={connectRef('Deck')}
-      shift={[2, 1]}>
+    <Deck ref={connectRef('Deck')}>
       {deck.toArray().map((cardModel, i) => <Card card={cardModel} key={i}/>)}
-    </CardCollection>
+    </Deck>
   </div>
 ));
 

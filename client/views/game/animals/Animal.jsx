@@ -10,12 +10,16 @@ import { TraitModel } from '~/shared/models/game/evolution/TraitModel';
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 
 import {Tooltip} from './../../utils/Tooltips.jsx';
-import { AnimalTrait, DragAnimalTrait, ANIMAL_TRAIT_SIZE } from './AnimalTrait.jsx';
+import { AnimalTrait, DragAnimalTrait } from './AnimalTrait.jsx';
 import { AnimalLinkedTrait } from './AnimalLinkedTrait.jsx';
 import { DragAnimalSelectLink } from './AnimalSelectLink.jsx'
 import {GameProvider} from './../providers/GameProvider.jsx';
 import {Food} from './../food/Food.jsx';
 
+export const ANIMAL_SIZE = {
+  width: 40
+  , height: 60
+};
 
 import './Animal.scss';
 
@@ -60,10 +64,7 @@ class Animal extends React.Component {
           .toArray()
           .map((trait, index) =>{
           return <div key={trait.id}
-                      style={{
-            marginBottom: 1 + 'px'
-            , width: ANIMAL_TRAIT_SIZE.width + 'px'
-            }}>
+                      style={{marginBottom: 1 + 'px'}}>
             {this.renderTrait(trait, model)}
           </div>})}
       </div>

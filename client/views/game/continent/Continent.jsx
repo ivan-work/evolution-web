@@ -37,12 +37,21 @@ export class Continent extends React.Component {
       , EnemyContinent: !this.props.isUserContinent
     });
     return <div className={className}>
-          {this.renderPlaceholderWrapper(0)}
-          {continent.toArray().map((animal, index) => {
-            return [
-              this.renderAnimal(animal, index)
-              , this.renderPlaceholderWrapper(index + 1)
-              ]})}
+      {this.renderPlaceholderWrapper(0)}
+      <div className="slice">
+        {continent.skip(10).toArray().map((animal, index) => {
+          return [
+            this.renderAnimal(animal, index)
+            , this.renderPlaceholderWrapper(index + 1)
+            ]})}
+      </div>
+      <div className="slice">
+        {continent.take(10).toArray().map((animal, index) => {
+          return [
+            this.renderAnimal(animal, index)
+            , this.renderPlaceholderWrapper(index + 1)
+            ]})}
+      </div>
     </div>;
   }
 }

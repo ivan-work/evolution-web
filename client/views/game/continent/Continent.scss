@@ -4,10 +4,14 @@ $VERTICAL_MARGIN: 2px;
 .Continent {
   position: relative;
   min-width: 200px;
+  min-height: $ANIMAL_HEIGHT;
   background: #dfd;
   border: 1px solid #898;
-  display: flex;
-  justify-content: center;
+
+  .slice {
+    display: flex;
+    justify-content: center;
+  }
 
   &.EnemyContinent {
     //transform: rotate(180deg);
