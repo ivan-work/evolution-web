@@ -1,35 +1,23 @@
 import Express from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
-import path from 'path';
-
-// Webpack Requirements
-import webpack from 'webpack';
-import config from '../webpack.config.dev';
-import webpackDevMiddleware from 'webpack-dev-middleware';
-import webpackHotMiddleware from 'webpack-hot-middleware';
 
 import serverConfig from './config';
 
-// Initialize the Express App
 const app = new Express();
+const frontend = require('./frontend');
 
-if (process.env.NODE_ENV !== 'production') {
-  const compiler = webpack(config);
-  app.use(webpackDevMiddleware(compiler, { noInfo: true, publicPath: config.output.publicPath }));
-  app.use(webpackHotMiddleware(compiler));
-}
+const webpackConfig = (process.env.NODE_ENV !== 'production'
+  ? require('../webpack.dev.babel')
+  : require('../webpack.prod.babel'));
 
-// Apply body Parser and server public assets and routes
-app.use(bodyParser.json({ limit: '20mb' }));
-app.use(bodyParser.urlencoded({ limit: '20mb', extended: false }));
-app.use(Express.static(path.resolve(__dirname, '../client/static')));
+console.log((process.env.NODE_ENV !== 'production'));
 
-// start app
+app.use(frontend(webpackConfig));
+
 app.listen(serverConfig.port, (error) => {
   if (!error) {
-    console.log(`MERN is running on port: ${serverConfig.port}! Build something amazing!`); // eslint-disable-line
+    console.log(`running on port: ${serverConfig.port}`); // eslint-disable-line
   }
 });
 
-export default app;
