@@ -6,7 +6,7 @@ import {Map} from 'immutable';
 
 const initialState = Map({
   token: null,
-  userName: null,
+  user: null,
   isAuthenticated: false,
   isAuthenticating: false,
   statusText: null
@@ -25,7 +25,9 @@ export const auth = createReducer(initialState, {
       'isAuthenticated': true,
       //'token': payload.token,
       //'userName': jwtDecode(payload.token).userName,
-      'username': payload.username,
+      'user': Map({
+        name: payload.username
+      }),
       'statusText': 'You have been successfully logged in.'
     }));
 

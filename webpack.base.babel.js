@@ -19,7 +19,7 @@ module.exports = (options) => ({
       query: options.babelQuery,
     }, {
       // Transform our own .css files with PostCSS and CSS-modules
-      test: /\.css$/,
+      test: /(\.css|\.scss)$/,
       exclude: /node_modules/,
       loader: options.cssLoaders,
     }, {
@@ -31,9 +31,6 @@ module.exports = (options) => ({
       test: /\.css$/,
       include: /node_modules/,
       loaders: ['style-loader', 'css-loader'],
-    }, {
-      test: /\.scss$/,
-      loaders: ["style-loader", "css-loader", "sass-loader"]
     }, {
       test: /\.(eot|svg|ttf|woff|woff2)$/,
       loader: 'file-loader',

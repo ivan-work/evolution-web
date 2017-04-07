@@ -5,23 +5,16 @@ import * as actionCreators from 'actions'
 
 export const Lobbies = React.createClass({
   mixins: [PureRenderMixin]
-  , getInitialState: function () {
-    return {
-      user: {
-        name: "user"
-      }
-    };
-  }
   , render: function () {
     return <div className="loginForm">
-      <div>Hello {this.state.user.name}</div>
+      <div>Hello {this.props.username}</div>
     </div>;
   }
 });
 
 export const LobbiesView = connect(
   (state) => ({
-    user: state.user
+    username: state.getIn(['auth', 'user', 'name'], '%USERNAME%')
   }),
   actionCreators
 )(Lobbies);

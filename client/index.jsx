@@ -15,13 +15,15 @@ import thunk from 'redux-thunk';
 import * as reducers from './reducers'
 import routes from './routes';
 
+import 'react-mdl/extra/material.min.css'
+import 'react-mdl/extra/material.min.js'
 import './styles/style.scss';
 
 const routerReducerState = Map({
   locationBeforeTransitions: null
 });
 const routerReducer = (state = routerReducerState, action) => {
-  console.log('state', state.toJS());
+  //console.log('state', state.toJS());
   if (action.type === LOCATION_CHANGE) {
     return state.merge({
       locationBeforeTransitions: action.payload
@@ -46,14 +48,14 @@ const store = createStore(
   , Map()
   , compose(
     applyMiddleware(thunk),
-    routerMiddleware(browserHistory),
+    applyMiddleware(routerMiddleware(browserHistory)),
     DevTools.instrument()
   )
 );
 
 const history = syncHistoryWithStore(browserHistory, store, {
-  selectLocationState (state) {
-    console.log('selectLocationState', state.toJS())
+  selectLocationState: (state) => {
+    //console.log('selectLocationState', state.toJS());
     return state.get('routing').toJS();
   }
 });

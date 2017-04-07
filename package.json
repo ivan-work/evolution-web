@@ -52,12 +52,12 @@
     "isomorphic-fetch": "*",
     "materialize-css": "^0.97.6",
     "mongoose": "*",
-    "postcss-loader": "^0.9.1",
     "react": "*",
     "react-addons-linked-state-mixin": "^15.1.0",
     "react-addons-pure-render-mixin": "^15.1.0",
     "react-dom": "*",
     "react-helmet": "*",
+    "react-mdl": "^1.5.4",
     "react-redux": "*",
     "react-router": "*",
     "react-router-redux": "^4.0.5",
@@ -72,6 +72,7 @@
     "slug": "*"
   },
   "devDependencies": {
+    "postcss-loader": "^0.9.1",
     "babel-eslint": "*",
     "babel-loader": "*",
     "babel-plugin-react-transform": "*",
