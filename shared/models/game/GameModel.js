@@ -6,6 +6,9 @@ import {CardModel} from './CardModel';
 import uuid from 'node-uuid';
 import {ensureParameter} from '~/shared/utils';
 
+export const TEST_DECK_SIZE = 24;
+export const TEST_HAND_SIZE = 6;
+
 export class GameModel extends Record({
   id: null
   , roomId: null
@@ -32,7 +35,7 @@ export class GameModel extends Record({
     return new GameModel({
       id: uuid.v4()
       , roomId: room.id
-      , deck: CardModel.generate(24)
+      , deck: CardModel.generate(TEST_DECK_SIZE)
       , players: room.users.reduce((result, userId) => result.set(userId, PlayerModel.new(userId)), Map())
     })
   }
