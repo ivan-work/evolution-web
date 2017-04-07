@@ -1,7 +1,5 @@
 module.exports = {
-  mongoURL: process.env.MONGO_URL
-  , port: process.env.PORT || 8080
-  , sessionOptions: {
+  sessionOptions: {
     secret: 'aasdasdasdqw2@d23f23g232121edqw',
     saveUninitialized: true, // save new sessions
     resave: false, // do not automatically write to the session store

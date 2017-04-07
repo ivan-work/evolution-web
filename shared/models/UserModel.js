@@ -21,20 +21,20 @@ export class UserModel extends Record({
 
   static new(login, connectionId) {
     return new UserModel({
-      id: uuid.v4().slice(0, 4)
+      id: uuid.v4()
       , login, connectionId
     }).sign()
   }
 
   sign() {
-    return this.set('token', jwt.sign(this, process.env.JWT_SECRET))
+    const token = jwt.sign({id: this.id, login: this.login}, process.env.JWT_SECRET);
+    return this.set('token', token);
   };
 
   toOthers() {
     return new UserModel({
       id: this.id
       , login: this.login
-      , connectionId: this.connectionId
     });
   }
 

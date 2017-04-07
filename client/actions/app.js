@@ -1,4 +1,7 @@
 import T from 'i18n-react';
+import deepForceUpdate from 'react-deep-force-update';
+
+import RootService from '../services/RootService';
 
 export const appChangeLanguage = (langCode) => (dispatch) => {
   //console.log('fetching', langCode);
@@ -10,5 +13,6 @@ export const appChangeLanguage = (langCode) => (dispatch) => {
         type: 'appChangeLanguage'
         , data: langCode
       });
+      if (RootService.root) deepForceUpdate(RootService.root);
     });
 };

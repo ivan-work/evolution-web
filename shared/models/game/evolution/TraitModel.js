@@ -17,7 +17,7 @@ export class TraitModel extends Record({
 }) {
   static new(type) {
     return TraitModel.fromServer({
-      id: uuid.v4().slice(0, 6)
+      id: uuid.v4()
       , type
     });
   }

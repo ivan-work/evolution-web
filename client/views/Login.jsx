@@ -2,12 +2,14 @@ import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import T from 'i18n-react';
 import {connect} from 'react-redux';
-
-import { loginUserRequest } from '../../shared/actions/actions';
-import Validator from 'validatorjs';
-import { RulesLoginPassword } from '../../shared/models/UserModel';
-
 import {Button, Textfield} from 'react-mdl';
+
+import {loginUserFormRequest, loginUserTokenRequest} from '../../shared/actions/actions';
+import Validator from 'validatorjs';
+import {RulesLoginPassword} from '../../shared/models/UserModel';
+
+import LocationService from '../services/LocationService';
+import VKAPILogin from './auth/VKAPILogin.jsx';
 
 export class Login extends React.Component {
   constructor(props) {
@@ -18,7 +20,7 @@ export class Login extends React.Component {
     this.state.form = {};
     this.state.form.login = '';
     this.state.form.password = '';
-    this.state.form.redirectTo = this.props.location.query.redirect;
+    this.state.form.redirectTo = LocationService.getLocationQuery().redirect;
     this.state.validation = new Validator(this.state.form, RulesLoginPassword);
   }
 
@@ -38,27 +40,46 @@ export class Login extends React.Component {
 
   render() {
     return (
-      <div>
-        <form role='form'>
-          <Textfield
-            type='text'
-            floatingLabel
-            value={this.state.form.login}
-            onChange={({target}) => this.formOnChange('login', target)}
-            error={this.state.validation.errors.errors.login}
-            autoComplete='off'
-            label={T.translate('App.Login.Username')}
-          />
-          <div>
-            <Button
-              id='Login'
-              type='submit'
-              raised colored
-              onClick={this.login}
-            >{T.translate('App.Login.Login')}
-            </Button>
-          </div>
-        </form>
+      <div className="layout-padding flex-row">
+        {//!this.props.locationQuery.form ? null :
+          <div className="layout-padding">
+            <form role='form'>
+              <div>
+                <Textfield
+                  type='text'
+                  floatingLabel
+                  value={this.state.form.login}
+                  onChange={({target}) => this.formOnChange('login', target)}
+                  error={this.state.validation.errors.errors.login}
+                  autoComplete='off'
+                  label={T.translate('App.Login.Username')}
+                />
+              </div>
+              {/*<div>*/}
+                {/*<Textfield*/}
+                  {/*type='text'*/}
+                  {/*floatingLabel*/}
+                  {/*value={this.state.form.password}*/}
+                  {/*onChange={({target}) => this.formOnChange('password', target)}*/}
+                  {/*error={this.state.validation.errors.errors.password}*/}
+                  {/*autoComplete='off'*/}
+                  {/*label={T.translate('App.Login.Password')}*/}
+                {/*/>*/}
+              {/*</div>*/}
+              <div>
+                <Button
+                  id='Login'
+                  type='submit'
+                  raised colored
+                  onClick={this.login}
+                >{T.translate('App.Login.Login')}
+                </Button>
+              </div>
+            </form>
+          </div>}
+        <div className="layout-padding">
+          <VKAPILogin $loginUser={this.props.$loginUser}/>
+        </div>
       </div>
     );
   }
@@ -66,6 +87,8 @@ export class Login extends React.Component {
 
 export const LoginView = connect(
   (state) => ({}),
-  (dispatch) => ({$loginUser: (...args) => dispatch(loginUserRequest(...args))})
+  (dispatch) => ({
+    $loginUser: (...args) => dispatch(loginUserFormRequest(...args))
+  })
 )(Login);
 

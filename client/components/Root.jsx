@@ -1,16 +1,26 @@
 import React from 'react';
 
-import { Provider } from 'react-redux'
-import { Router, browserHistory } from 'react-router'
+import {Provider} from 'react-redux'
+import {Router, browserHistory} from 'react-router'
 
-import routes from '~/client/routes/index.jsx';
+import makeRoutes from '../routes/index.jsx';
 
-export const Root = props =>
-  <Provider store={props.store}>
-    <div>
-      <Router history={props.history}>
-        {routes(props.store.getState)}
-      </Router>
-      {props.children}
-    </div>
-  </Provider>;
+
+export class Root extends React.Component {
+  constructor(props) {
+    super(props);
+    this.routes = makeRoutes(props.store.getState);
+  }
+
+  render() {
+    const props = this.props;
+    return (<Provider store={props.store}>
+      <div>
+        <Router history={props.history}>
+          {this.routes}
+        </Router>
+        {props.children}
+      </div>
+    </Provider>);
+  }
+}

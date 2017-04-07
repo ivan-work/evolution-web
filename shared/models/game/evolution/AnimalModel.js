@@ -14,7 +14,7 @@ export class AnimalModel extends Record({
 }) {
   static new(ownerId) {
     return new AnimalModel({
-      id: uuid.v4().slice(0, 6)
+      id: uuid.v4()
       , ownerId
     });
   }

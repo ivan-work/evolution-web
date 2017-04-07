@@ -2,7 +2,7 @@ import {Map, List, fromJS} from 'immutable';
 import {UserModel} from '../models/UserModel';
 import {RoomModel} from '../models/RoomModel';
 import {
-  loginUserRequest
+  loginUserFormRequest
   , roomCreateRequest
   , roomJoinRequest
   , roomExitRequest
@@ -44,12 +44,12 @@ describe('Rooms:', function () {
       const clientStore0 = mockClientStore().connect(serverStore);
       const clientStore1 = mockClientStore().connect(serverStore);
 
-      clientStore0.dispatch(loginUserRequest('/test', 'User0', 'User0'));
+      clientStore0.dispatch(loginUserFormRequest('/test', 'User0', 'User0'));
       clientStore0.dispatch(roomCreateRequest());
 
       const Room = serverStore.getState().get('rooms').first();
 
-      clientStore1.dispatch(loginUserRequest('/test', 'User1', 'User1'));
+      clientStore1.dispatch(loginUserFormRequest('/test', 'User1', 'User1'));
 
       expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(Room.id);
       expect(clientStore0.getState().getIn(['rooms', Room.id]), 'clientStore0.rooms').equal(Room);

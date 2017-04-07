@@ -1,22 +1,18 @@
 import logger from '~/shared/utils/logger';
 import {UserModel, RulesLoginPassword} from '../models/UserModel';
 import {RoomModel} from '../models/RoomModel';
-import {GameModel, GameModelClient} from '../models/game/GameModel';
-import {List, Map} from 'immutable';
+import {GameModelClient} from '../models/game/GameModel';
+import {Map} from 'immutable';
 import {redirectTo} from '../utils';
 import {server$roomExit} from './rooms';
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 import jwt from 'jsonwebtoken';
 import Validator from 'validatorjs';
 
-import {
-
-} from './auth.checks';
-
 import {ActionCheckError} from '../models/ActionCheckError';
 
 export const SOCKET_DISCONNECT_NOW = 'SOCKET_DISCONNECT_NOW';
-export const TIMEOUT = 30 * 1000;
+export const TIMEOUT = 120 * 1000;
 
 export const socketConnect = (connectionId, sendToClient) => ({
   type: 'socketConnect'
@@ -43,8 +39,18 @@ export const server$socketDisconnect = (connectionId, reason) => (dispatch, getS
   }
 };
 
-export const loginUserRequest = (redirect, login, password) => ({
-  type: 'loginUserRequest'
+/***
+ * Login
+ */
+
+export const loginUserTokenRequest = (redirect, token) => ({
+  type: 'loginUserTokenRequest'
+  , data: {redirect, token}
+  , meta: {server: true}
+});
+
+export const loginUserFormRequest = (redirect, login, password) => ({
+  type: 'loginUserFormRequest'
   , data: {redirect, login, password}
   , meta: {server: true}
 });
@@ -65,6 +71,7 @@ export const onlineUpdate = (user) => ({
 });
 
 export const server$loginUser = (user, redirect) => (dispatch, getState) => {
+  if (!user.id) throw new Error('User has no ID');
   const online = getState().get('users').map(u => u.toOthers());
   const rooms = getState().get('rooms');
   const games = getState().get('games');
@@ -72,11 +79,16 @@ export const server$loginUser = (user, redirect) => (dispatch, getState) => {
   const roomId = room.id;
   const game = games.find(game => game.roomId === roomId) || null;
   const clientGame = game !== null ? game.toOthers(user.id).toClient() : null;
+  dispatch(loginUser({user}));
   dispatch(Object.assign(loginUser({user: user.toClient(), redirect, online, rooms, roomId, game: clientGame}),
-    {meta: {socketId: user.connectionId}}));
+    {meta: {clientOnly: true, socketId: user.connectionId}}));
   dispatch(Object.assign(onlineUpdate(user.toOthers().toClient()),
-    {meta: {users: true}}));
+    {meta: {clientOnly: true, users: true}}));
 };
+
+/***
+ * Logout
+ */
 
 const logoutUser = (userId) => ({
   type: 'logoutUser'
@@ -93,24 +105,24 @@ export const server$logoutUser = (userId) => (dispatch, getState) => {
     , {meta: {users: true}}));
 };
 
+/***
+ * Register
+ */
 
-const server$loginExistingUser = (requestUser, connectionId) => (dispatch, getState) => {
-  logger.silly('server$loginExistingUser', requestUser.id);
-  try {
-    jwt.verify(requestUser.token, process.env.JWT_SECRET);
-  } catch (err) {
-    throw new ActionCheckError('server$loginExistingUser', `Token not valid (%s) (%s)`, requestUser.id, requestUser.token);
-  }
-  const currentUser = getState().get('users').find(u => u.token === requestUser.token);
-  if (!currentUser)
-    throw new ActionCheckError('server$loginExistingUser', `User not exists (%s) (%s)`, requestUser.id, requestUser.token);
-
-  if (getState().get('connections').has(currentUser.connectionId))
-    throw new ActionCheckError('server$loginExistingUser', `Duplicate tabs are not supported`);
-
-  dispatch(cancelTimeout('logoutUser' + currentUser.id));
-  return currentUser.set('connectionId', connectionId);
+export const server$injectUser = (id, login) => (dispatch) => {
+  // console.log('dbUser', id, login)
+  const user = new UserModel({id, login}).sign();
+  dispatch(loginUser({user}));
+  dispatch(addTimeout(
+    (process.env.TEST ? 1 : TIMEOUT)
+    , 'logoutUser' + user.id
+    , server$logoutUser(user.id)));
+  return user;
 };
+
+/***
+ * Misc
+ */
 
 const customErrorReport = (customErrorAction, fn) => (dispatch, getState) => {
   const result = dispatch(fn);
@@ -121,30 +133,43 @@ const customErrorReport = (customErrorAction, fn) => (dispatch, getState) => {
 };
 
 export const authClientToServer = {
-  loginUserRequest: ({redirect = '/', login = void 0, password = void 0}, {user, connectionId}) =>
+  loginUserFormRequest: ({redirect = '/', login = void 0, password = void 0}, {connectionId}) =>
     customErrorReport((dispatch) => Object.assign(loginUserFailure(), {meta: {socketId: connectionId}}), (dispatch, getState) => {
-      let newUser;
-      if (user && user.token) {
-        newUser = dispatch(server$loginExistingUser(user, connectionId));
-        if (!(newUser instanceof UserModel)) logger.debug('server$loginExistingUser failed', newUser);
-      }
-      if (!(newUser instanceof UserModel)) {
-        const validation = new Validator({login, password}, RulesLoginPassword);
-        if (validation.fails()) throw new ActionCheckError('loginUserRequest', 'validation failed: %s', JSON.stringify(validation.errors.all()));
+      const validation = new Validator({login, password}, RulesLoginPassword);
+      if (validation.fails()) throw new ActionCheckError('loginUserFormRequest', 'validation failed: %s', JSON.stringify(validation.errors.all()));
 
-        if (getState().get('users').find(user => user.login === login))
-          throw new ActionCheckError('loginUserRequest', 'User already exists');
+      if (getState().get('users').find(user => user.login === login))
+        throw new ActionCheckError('loginUserFormRequest', 'User already exists');
 
-        newUser = UserModel.new(login, connectionId);
+      const user = UserModel.new(login, connectionId);
+
+      dispatch(server$loginUser(user, redirect));
+    })
+  , loginUserTokenRequest: ({redirect = '/', token}, {connectionId}) =>
+    customErrorReport((dispatch) => Object.assign(loginUserFailure(), {meta: {socketId: connectionId}}), (dispatch, getState) => {
+      logger.silly('server$loginExistingUser', connectionId);
+      try {
+        jwt.verify(token, process.env.JWT_SECRET);
+      } catch (err) {
+        throw new ActionCheckError('server$loginExistingUser', `Token not valid (%s)`, token);
       }
-      dispatch(server$loginUser(newUser, redirect));
+      const currentUser = getState().get('users').find(u => u.token === token);
+      if (!currentUser) {
+        throw new ActionCheckError('server$loginExistingUser', `User not exists (%s)`, token);
+      }
+
+      if (getState().get('connections').has(currentUser.connectionId))
+        throw new ActionCheckError('server$loginExistingUser', `Duplicate tabs are not supported`);
+
+      dispatch(cancelTimeout('logoutUser' + currentUser.id));
+
+      dispatch(server$loginUser(currentUser.set('connectionId', connectionId), redirect));
     })
 };
 
 export const authServerToClient = {
   loginUser: ({user, redirect = '/', online, rooms, roomId, game}) => (dispatch) => {
     user = UserModel.fromJS(user);
-    if (window && window.sessionStorage) window.sessionStorage.setItem('user', JSON.stringify(user));
     dispatch(loginUser({
       user: user
       , online: Map(online).map(u => new UserModel(u).toOthers())
@@ -152,7 +177,7 @@ export const authServerToClient = {
       , roomId
       , game: GameModelClient.fromServer(game, user.id)
     }));
-    dispatch(redirectTo(redirect));
+    dispatch(redirectTo(redirect || '/'));
   }
   , loginUserFailure: ({error}) => (dispatch, getState) => {
     dispatch(loginUserFailure(error));
@@ -160,4 +185,5 @@ export const authServerToClient = {
   }
   , onlineUpdate: ({user}) => onlineUpdate(UserModel.fromJS(user).toOthers())
   , logoutUser: ({userId}) => logoutUser(userId)
+  , socketConnect: ({connectionId}) => socketConnect(connectionId)
 };

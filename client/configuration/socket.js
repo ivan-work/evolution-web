@@ -1,6 +1,7 @@
 import logger from '~/shared/utils/logger';
 import io from 'socket.io-client';
-import {serverToClient, socketDisconnect, loginUserRequest} from '../../shared/actions/actions'
+import {serverToClient, socketDisconnect, loginUserTokenRequest, loginUserFailure} from '../../shared/actions/actions'
+import LocationService from '../services/LocationService';
 
 export const makeSocketClient = (url, options) => io(url, options);
 
@@ -19,10 +20,20 @@ export const socketMiddleware = socket => store => next => action => {
 export const socketStore = (socket, store) => {
   socket.on('connect', () => {
     //console.log('Client store:',store.getState());
-    const user = store.getState().get('user');
-    if (user != null) {
-      const previousLocation = store.getState().getIn(['routing', 'locationBeforeTransitions', 'pathname'], '/');
-      store.dispatch(loginUserRequest(previousLocation));
+    // console.log('socket connected', LocationService.getLocationQuery().token)
+    const locationToken = LocationService.getLocationQuery().token;
+    const userToken = store.getState().getIn(['user', 'token']);
+    let previousLocation = store.getState().getIn(['routing', 'locationBeforeTransitions', 'pathname'], '/');
+    if (previousLocation === '/login') previousLocation = '/';
+    if (locationToken) {
+      // console.log('locationToken', previousLocation)
+      store.dispatch(loginUserTokenRequest(previousLocation, locationToken));
+    } else if (userToken) {
+      // console.log('userToken', previousLocation)
+      store.dispatch(loginUserTokenRequest(previousLocation, userToken));
+    } else {
+      // console.log('no token')
+      store.dispatch(loginUserFailure());
     }
   });
   //socket.on('connect_error', function(error) {

@@ -1,7 +1,7 @@
 import logger from '~/shared/utils/logger';
 import {UserModel} from '~/shared/models/UserModel';
 import {GameModel} from '~/shared/models/game/GameModel';
-import {loginUserRequest} from '~/shared/actions/actions';
+import {loginUserFormRequest} from '~/shared/actions/actions';
 import {
   roomCreateRequest
 , roomJoinRequest
@@ -18,7 +18,7 @@ import {
     let debugInfo = 'Started test with ';
     for (let i = 0; i < count; ++i) {
       const clientStore = mockClientStore().connect(serverStore);
-      clientStore.dispatch(loginUserRequest('/', 'User' + i, 'testPassword'));
+      clientStore.dispatch(loginUserFormRequest('/', 'User' + i, 'testPassword'));
       const User = UserSpy.lastCall.returnValue;
       debugInfo += `(${User.id}) `;
       result.push({
