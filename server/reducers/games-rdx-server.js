@@ -1,5 +1,5 @@
 import logger from '~/shared/utils/logger';
-import {createReducer, ensureParameter, validateParameter} from '~/shared/utils';
+import {createReducer, ensureParameter, validateParameter} from '../../shared/utils';
 import {Map, List} from 'immutable';
 import {GameModel, PHASE} from '../../shared/models/game/GameModel';
 import {CardModel} from '../../shared/models/game/CardModel';
@@ -35,16 +35,23 @@ export const gameDeployAnimal = (game, {userId, animal, animalPosition, cardPosi
     .updateIn(['players', userId, 'continent'], continent => continent.insert(animalPosition, animal))
 };
 
-export const gameDeployTrait = (game, {userId, cardId, animalId, trait}) => {
-  ensureParameter(userId, 'string');
-  ensureParameter(cardId, 'string');
-  ensureParameter(animalId, 'string');
-  ensureParameter(trait, TraitModel);
-  const cardIndex = game.getIn(['players', userId, 'hand']).findIndex(card => card.id === cardId);
-  const animalIndex = game.getIn(['players', userId, 'continent']).findIndex(animal => animal.id === animalId);
-  return game
-    .removeIn(['players', userId, 'hand', cardIndex])
-    .updateIn(['players', userId, 'continent', animalIndex, 'traits'], traits => traits.push(trait))
+export const gameDeployTrait = (game, {cardId, traitType, animalId, linkedAnimalId}) => {
+  const {playerId: cardOwnerId, cardIndex} = game.locateCard(cardId);
+  const {playerId: animalOwnerId, animalIndex, animal} = game.locateAnimal(animalId);
+  const {playerId: linkedAnimalOwnerId, linkedAnimalIndex, linkedAnimal} = game.locateAnimal(linkedAnimalId);
+
+  if (linkedAnimalId == void 0) {
+    const trait = TraitModel.new(traitType).attachTo(animal);
+    return game
+      .removeIn(['players', cardOwnerId, 'hand', cardIndex])
+      .updateIn(['players', animalOwnerId, 'continent', animalIndex, 'traits'], traits => traits.push(trait))
+  } else {
+    const trait = TraitModel.new(traitType).linkBetween(animal, linkedAnimal);
+    return game
+      .removeIn(['players', cardOwnerId, 'hand', cardIndex])
+      .updateIn(['players', animalOwnerId, 'continent', animalIndex, 'traits'], traits => traits.push(trait))
+      .updateIn(['players', linkedAnimalOwnerId, 'continent', linkedAnimalIndex, 'traits'], traits => traits.push(trait));
+  }
 };
 
 export const playerActed = (game, {userId}) => {
@@ -160,8 +167,9 @@ export const traitKillAnimal = (game, {targetAnimalId}) => {
     .removeIn(['players', playerId, 'continent', animalIndex])
 };
 
-export const animalStarve = (game, {userId, animalId}) => {
-  const {playerId, animalIndex} = game.locateAnimal(animalId);
+export const animalStarve = (game, {animalId}) => {
+  const {playerId, animalIndex, animal} = game.locateAnimal(animalId);
+  if (!animal) throw new Error('reducer error animalStarve')
   return game
     .removeIn(['players', playerId, 'continent', animalIndex])
 };

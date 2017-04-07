@@ -3,7 +3,7 @@ import {
 } from '../actions/actions';
 
 describe('Trait: Parasite:', () => {
-  it.only('Can be casted to enemy', () => {
+  it('Can be casted to enemy', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     ParseGame(`
 food: 2
@@ -13,7 +13,6 @@ players:
     continent: $
   - continent: $
 `);
-    console.log(ServerGame().getPlayer(User0))
     expect(ServerGame().getPlayer(User0).getCard(0).trait1.type).equal('TraitParasite');
     clientStore0.dispatch(gameDeployTraitRequest(
       ServerGame().getPlayer(User0).getCard(0).id

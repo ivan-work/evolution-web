@@ -137,12 +137,8 @@ export const traitClientToServer = {
         if (animalId === targetId) {
           throw new ActionCheckError(`traitActivateRequest@Game(${gameId})`, 'Animal(%s):Trait(%s) cant target self', animalId, traitType)
         }
-        const {playerId, animalIndex} = game.locateAnimal(targetId);
-        if (playerId === null || animalIndex < 0) {
-          throw new ActionCheckError(`traitActivateRequest@Game(${gameId})`, 'Animal(%s):Trait(%s) cant locate Animal(%s)', animalId, traitType, targetId)
-        }
-        const targetAnimal = game.getPlayerAnimal(playerId, animalIndex);
-        if (!targetAnimal) {
+        const {playerId, animalIndex, animal: targetAnimal} = game.locateAnimal(targetId);
+        if (playerId === null || !targetAnimal) {
           throw new ActionCheckError(`traitActivateRequest@Game(${gameId})`, 'Animal(%s):Trait(%s) cant locate Animal(%s)', animalId, traitType, targetId)
         }
         if (traitData.checkTarget && !traitData.checkTarget(game, sourceAnimal, targetAnimal)) {
