@@ -117,6 +117,7 @@
     "gulp-watch": "^4.3.8",
     "html-loader": "^0.4.3",
     "html-webpack-plugin": "^2.19.0",
+    "jsdom": "^9.2.1",
     "json-loader": "^0.5.4",
     "mocha": "*",
     "node-sass": "^3.7.0",

@@ -11,26 +11,15 @@ const testWatch = (paths) => gulp.src(paths)
     bail: true
   }))
   .on('error', () => console.error('error'));
-
-gulp.task('test:client:watch', () => {
-  const paths = ['./shared/test-helper.js', 'shared/**/*.spec.js', 'client/**/*.spec.js'];
-  testWatch(paths);
-  return watch('{shared,client}/**/*.js', () => testWatch(paths))
-});
+  //.on('error', (error) => console.error(error));
 
 gulp.task('test:server', () => {
   const paths = ['./shared/test-helper.js', 'shared/**/*.spec.js', 'server/**/*.spec.js'];
   testWatch(paths);
 });
 
-gulp.task('test:server:watch', () => {
-  const paths = ['./shared/test-helper.js', 'shared/**/*.spec.js', 'server/**/*.spec.js'];
-  testWatch(paths);
-  return watch('{shared,server}/**/*.js', () => testWatch(paths));
-});
-
 gulp.task('test:all:watch', () => {
-  const paths = ['./shared/test-helper.js', 'shared/**/*.spec.js', 'server/**/*.spec.js', 'client/**/*.spec.js'];
+  const paths = ['./shared/test-helper.js', 'shared/**/*.spec.js', 'server/**/*.spec.js', 'client/**/*.spec.js', 'client/**/*.spec.jsx'];
   testWatch(paths);
   return watch('{shared,server,client}/**/*.js*(x)', () => testWatch(paths));
 });
