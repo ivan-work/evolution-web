@@ -41,7 +41,6 @@
     "classnames": "^2.2.5",
     "compression": "^1.6.2",
     "cross-env": "*",
-    "cuid": "*",
     "dotenv": "*",
     "eventsource-polyfill": "^0.9.6",
     "express": "*",
@@ -70,7 +69,6 @@
     "redux-thunk": "*",
     "redux-timeout": "^2.0.0",
     "sanitize-html": "*",
-    "slug": "*",
     "socket.io": "^1.4.6",
     "socket.io-client": "^1.4.6"
   },
@@ -135,7 +133,6 @@
     "sinon": "^1.17.4",
     "source-map-support": "^0.4.1",
     "style-loader": "^0.13.1",
-    "supertest": "*",
     "webpack": "*",
     "webpack-dev-middleware": "*",
     "webpack-hot-middleware": "*"
