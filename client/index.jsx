@@ -27,7 +27,7 @@ import './styles/style.scss';
 
 // Services
 import {UserService} from './services/UserService';
-import {AnimationService, animationMiddleware} from './services/AnimationService';
+import {animationMiddleware} from './services/AnimationService';
 
 const reducer = combineReducers({
   ...reducers,
