@@ -1,5 +1,5 @@
 import {createReducer} from '~/shared/utils';
-import {Map} from 'immutable';
+import {Map, List} from 'immutable';
 import {RoomModel} from '~/shared/models/RoomModel';
 
 export const reducer = createReducer(Map(), {
@@ -9,10 +9,17 @@ export const reducer = createReducer(Map(), {
   ,
   roomJoinSuccess: (state, data) => state.update(data.roomId, room => room.update('users', users => users.push(data.userId)))
   ,
-  roomExitSuccess: (state, data) => state.update(data.roomId, room => {
-    let index = room.users.indexOf(data.userId);
-    return (!~index
-      ? room
-      : room.update('users', users => users.remove(index)));
-  })
+  roomExitSuccess: (state, data) => {
+    const {userId, roomId} = data;
+    const room = state.get(roomId);
+    return room.users.equals(List.of(userId))
+      ? state.remove(roomId)
+      :
+      state.update(roomId, (room) => {
+        let index = room.users.indexOf(userId);
+        return (!~index
+          ? room
+          : room.update('users', users => users.remove(index)));
+      });
+  }
 });
