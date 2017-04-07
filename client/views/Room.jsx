@@ -6,7 +6,7 @@ import {Map} from 'immutable';
 import * as MDL from 'react-mdl';
 import {UsersList} from './UsersList.jsx';
 
-import {roomExit} from '~/shared/actions/actions';
+import {roomExitRequest} from '~/shared/actions/actions';
 
 export const Room = React.createClass({
   mixins: [PureRenderMixin]
@@ -28,7 +28,6 @@ export const Room = React.createClass({
 export const RoomView = connect(
   (state) => {
     const roomId = state.get('room');
-    console.log('STATE', roomId, state.getIn(['rooms', roomId]))
     return {
       room: state.getIn(['rooms', roomId])
       , online: state.get('online')
@@ -37,7 +36,7 @@ export const RoomView = connect(
   , (dispatch) => ({
     actions: {
       roomExit: function () {
-        dispatch(roomExit())
+        dispatch(roomExitRequest())
       }
     }
   })

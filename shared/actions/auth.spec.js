@@ -168,7 +168,7 @@ describe('Auth:', function () {
       expect(serverStore.getActionData(0)).eql({connectionId: clientStore0.getConnectionId()});
 
       expect(serverStore.getActionType(1)).eql('logoutUser');
-      expect(serverStore.getActionData(1)).eql(User0.id);
+      expect(serverStore.getActionData(1)).eql({userId: User0.id});
       expect(serverStore.getActionMeta(1)).eql({clients: true});
 
       expect(serverStore.getActionType(2)).eql('socketDisconnect');

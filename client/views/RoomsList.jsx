@@ -6,7 +6,6 @@ import * as MDL from 'react-mdl';
 export const RoomsList = React.createClass({
   mixins: [PureRenderMixin]
   , render: function () {
-    console.log("p", this.props.onItemClick);
     return <MDL.List className="RoomsList">
       {Object.keys(this.props.map).map((roomId) =>
       <MDL.ListItem key={roomId}>
