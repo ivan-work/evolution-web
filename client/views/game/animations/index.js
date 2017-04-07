@@ -26,19 +26,17 @@ export const createAnimationServiceConfig = () => ({
       if (localTraits[traitType + '_Start']) {
         localTraits[traitType + '_Start'](done, actionData);
       } else {
-        const TraitHtml = document.getElementById('AnimalTrait' + traitId);
-        TraitHtml.classList.add('Animate');
-        setTimeout(() => {
-          const TraitHtml = document.getElementById('AnimalTrait' + traitId);
-          if (TraitHtml) TraitHtml.classList.remove('Animate');
-          done();
-        }, 500);
+        localTraits.pingTrait(done, traitId);
       }
     });
 
     subscribe('traitNotify_End', (done, actionData, getState) => {
       const {sourceAid, traitId, traitType, targetId} = actionData;
-      if (localTraits[traitType + '_End']) localTraits[traitType + '_End'](done, actionData);
+      if (localTraits[traitType + '_End']) {
+        localTraits[traitType + '_End'](done, actionData);
+      } else {
+        done();
+      }
     });
 //, gameNextPlayer: (done, component, {cards}) => {
 //  component.setState({

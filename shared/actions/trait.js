@@ -46,6 +46,7 @@ export const traitActivateRequest = (sourceAid, traitId, targetId) => (dispatch,
 });
 
 export const server$traitActivate = (game, sourceAnimal, trait, ...params) => (dispatch, getState) => {
+  dispatch(server$traitNotify_Start(game, sourceAnimal, trait, ...params));
   const traitData = trait.getDataModel();
   logger.verbose('server$traitActivate:', sourceAnimal.id, trait.type);
   const result = dispatch(traitData.action(game, sourceAnimal, trait, ...params));
@@ -123,7 +124,9 @@ export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
     dispatch(server$gameEndTurn(gameId, userId));
 };
 
-// Notification
+/**
+ * Notification
+ */
 
 const traitNotify_Start = (gameId, sourceAid, traitId, traitType, targetId) => ({
   type: 'traitNotify_Start'
@@ -135,8 +138,8 @@ const traitNotify_End = (gameId, sourceAid, traitId, traitType, targetId) => ({
   , data: {gameId, sourceAid, traitId, traitType, targetId}
 });
 
-export const server$traitNotify_Start = (game, sourceAnimal, trait, targetId) =>
-  server$game(game.id, traitNotify_Start(game.id, sourceAnimal.id, trait.id, trait.type, targetId));
+export const server$traitNotify_Start = (game, sourceAnimal, trait, target) =>
+  server$game(game.id, traitNotify_Start(game.id, sourceAnimal.id, trait.id, trait.type, target && target.id));
 
 //TODO TRAIT
 export const server$traitNotify_End = (gameId, sourceAid, trait, targetId) => {
@@ -161,7 +164,9 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
       .forEach(trait => {
         const game = selectGame(getState, gameId);
         const {animal: linkedAnimal} = game.locateAnimal(trait.linkAnimalId);
-        if (checkAction(game, TraitCooperation, linkedAnimal)) {
+        if (linkedAnimal && checkAction(game, TraitCooperation, linkedAnimal)) {
+          const linkedTrait = linkedAnimal.hasTrait(TraitCooperation.type);
+          dispatch(server$traitNotify_Start(game, animal, trait, linkedTrait));
           dispatch(server$startFeeding(gameId, linkedAnimal, 1, FOOD_SOURCE_TYPE.GAME, animal.id));
         }
       });
@@ -173,7 +178,9 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
     .forEach(trait => {
       const game = selectGame(getState, gameId);
       const {animal: linkedAnimal} = game.locateAnimal(trait.linkAnimalId);
-      if (checkAction(game, TraitCommunication, linkedAnimal)) {
+      if (linkedAnimal && checkAction(game, TraitCommunication, linkedAnimal)) {
+        const linkedTrait = linkedAnimal.hasTrait(TraitCommunication.type);
+        dispatch(server$traitNotify_Start(game, animal, trait, linkedTrait));
         dispatch(server$startFeeding(gameId, linkedAnimal, 1, FOOD_SOURCE_TYPE.ANIMAL_COPY, animal.id));
       }
     });
@@ -308,7 +315,6 @@ export const traitClientToServer = {
     const {sourceAnimal, trait, target} = checkTraitActivation(game, userId, sourceAid, traitId, targetId);
 
     checkPlayerTurnAndPhase(game, userId, PHASE.FEEDING);
-    dispatch(server$traitNotify_Start(game, sourceAnimal, trait, targetId));
     const result = dispatch(server$traitActivate(game, sourceAnimal, trait, target));
     if (result === void 0) {
       throw new Error(`traitActivateRequest@Game(${gameId}): Animal(${sourceAid})-${trait.type}-Animal(${targetId}) result undefined`);
