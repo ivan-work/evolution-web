@@ -1,4 +1,4 @@
-import {TRAIT_TARGET_TYPE, TRAIT_COOLDOWN_DURATION, TRAIT_COOLDOWN_PLACE, TRAIT_COOLDOWN_LINK} from './constants';
+import {TRAIT_TARGET_TYPE, TRAIT_COOLDOWN_DURATION, TRAIT_COOLDOWN_PLACE, TRAIT_COOLDOWN_LINK} from '../constants';
 
 export {TraitCarnivorous} from './TraitCarnivorous';
 
@@ -28,7 +28,7 @@ export const TraitMimicry = {
 export const TraitScavenger = {
   type: 'TraitScavenger'
   , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
-  , cooldownCost: TRAIT_COOLDOWN_DURATION.ROUND
+  , cooldownDuration: TRAIT_COOLDOWN_DURATION.ROUND
   , cooldownLink: 'TraitScavenger'
 };
 
@@ -42,7 +42,7 @@ export const TraitPiracy = {
   type: 'TraitPiracy'
   , targetType: TRAIT_TARGET_TYPE.ANIMAL
   , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
-  , cooldownCost: TRAIT_COOLDOWN_DURATION.PHASE
+  , cooldownDuration: TRAIT_COOLDOWN_DURATION.PHASE
   , cooldownLink: 'TraitPiracy'
   , action: (target) => (getState, dispatch) => {
     // TODO target is animal
@@ -67,7 +67,7 @@ export const TraitCommunication = {
 export const TraitGrazing = {
   type: 'TraitGrazing'
   , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
-  , cooldownCost: TRAIT_COOLDOWN_DURATION.ROUND
+  , cooldownDuration: TRAIT_COOLDOWN_DURATION.ROUND
   , cooldownLink: 'TraitGrazing'
   , action: (target) => (getState, dispatch) => {
     // TODO target is animal
@@ -88,7 +88,7 @@ export const TraitHibernation = {
   type: 'TraitHibernation'
   , disableLastRound: true
   , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
-  , cooldownCost: TRAIT_COOLDOWN_DURATION.TWO_ROUNDS
+  , cooldownDuration: TRAIT_COOLDOWN_DURATION.TWO_ROUNDS
   , cooldownLink: 'TraitHibernation'
 };
 
@@ -101,7 +101,7 @@ export const TraitPoisonous = {
 export const TraitCooperation = {
   type: 'TraitCooperation'
   , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
-  , cooldownCost: TRAIT_COOLDOWN_DURATION.ACTIVATION
+  , cooldownDuration: TRAIT_COOLDOWN_DURATION.ACTIVATION
   , cooldownLink: 'TraitCooperation'
 };
 

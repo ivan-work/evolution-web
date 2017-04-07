@@ -49,11 +49,23 @@ export class AnimalModel extends Record({
     return this.traits.some(trait => trait.type === type)
   }
 
-  canEat() {
-    return this.food < this.getMaxFood();
+  getFood() {
+    return this.food;
+  }
+
+  getFat() {
+    return 0;
   }
 
   getMaxFood() {
     return 1 + this.traits.reduce((result, trait) => result + trait.dataModel.food, 0);
+  }
+
+  getMaxFat() {
+    return 0;
+  }
+
+  canEat() {
+    return this.food < (this.getMaxFood() + this.getMaxFat());
   }
 }

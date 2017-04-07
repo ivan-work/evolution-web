@@ -3,7 +3,7 @@ import {ActionCheckError} from '~/shared/models/ActionCheckError';
 
 export const checkGameDefined = (game) => {
   if (game === void 0)
-    throw new ActionCheckError(`checkGameDefined(${game.id})`, 'Cannot find selectGame');
+    throw new ActionCheckError(`checkGameDefined`, 'Cannot find game');
 };
 
 export const checkGameHasUser = (game, userId) => {

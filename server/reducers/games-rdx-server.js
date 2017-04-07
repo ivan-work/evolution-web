@@ -3,9 +3,10 @@ import {createReducer, ensureParameter, validateParameter} from '~/shared/utils'
 import {Map, List} from 'immutable';
 import {GameModel, PHASE} from '../../shared/models/game/GameModel';
 import {CardModel} from '../../shared/models/game/CardModel';
-import {CooldownsList} from '../../shared/models/game/CooldownModel';
+import {CooldownList} from '../../shared/models/game/CooldownList';
 import {AnimalModel} from '../../shared/models/game/evolution/AnimalModel';
 import {TraitModel} from '../../shared/models/game/evolution/TraitModel';
+import {FOOD_SOURCE_TYPE} from '../../shared/models/game/evolution/constants';
 
 export const gameStart = game => game.start();
 
@@ -61,7 +62,6 @@ export const gameNextPlayer = (game) => {
       break;
     }
   } while (emergencyCount >= 0);
-
   return emergencyCount < 0 ? game : game
     .setIn(['status', 'round'], round)
     .setIn(['status', 'player'], playerIndex)
@@ -83,16 +83,30 @@ export const gameStartEat = (game, {food}) => {
     .setIn(['status', 'player'], 0);
 };
 
-export const traitGiveFood = (game, {animalId, amount}) => {
+export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) => {
   ensureParameter(animalId, 'string');
   ensureParameter(amount, 'number');
   const {playerId, animalIndex} = game.locateAnimal(animalId);
-  return game
-    .updateIn(['players', playerId, 'continent', animalIndex, 'food'], food => food + amount)
-    .update('food', food => food - amount);
+  const addedFood = game
+    .updateIn(['players', playerId, 'continent', animalIndex, 'food'], food => food + amount);
+
+  switch (sourceType) {
+    case FOOD_SOURCE_TYPE.GAME:
+      return addedFood.update('food', food => food - amount);
+    default:
+      return addedFood;
+  }
 };
 
-export const startCooldown = (game, {link, duration, place, placeId}) => CooldownsList.addCooldown(game, link, duration, place, placeId);
+export const traitKillAnimal = (game, {targetAnimalId}) => {
+  ensureParameter(targetAnimalId, 'string');
+  const {playerId, animalIndex} = game.locateAnimal(targetAnimalId);
+  return game
+    .removeIn(['players', playerId, 'continent', animalIndex])
+};
+
+export const startCooldown = (game, {link, duration, place, placeId}) =>
+  game.update('cooldowns', cooldowns => cooldowns.startCooldown(link, duration, place, placeId));
 
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
@@ -112,6 +126,7 @@ export const reducer = createReducer(Map(), {
   , gameDeployTrait: (state, data) => state.update(data.gameId, game => gameDeployTrait(game, data))
   , gameEndTurn: (state, data) => state.update(data.gameId, game => gameEndTurn(game, data))
   , gameStartEat: (state, data) => state.update(data.gameId, game => gameStartEat(game, data))
-  , traitGiveFood: (state, data) => state.update(data.gameId, game => traitGiveFood(game, data))
+  , traitMoveFood: (state, data) => state.update(data.gameId, game => traitMoveFood(game, data))
   , startCooldown: (state, data) => state.update(data.gameId, game => startCooldown(game, data))
+  , traitKillAnimal: (state, data) => state.update(data.gameId, game => traitKillAnimal(game, data))
 });

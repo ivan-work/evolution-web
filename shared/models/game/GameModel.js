@@ -2,6 +2,7 @@ import {Record, Map, Range, List} from 'immutable';
 
 import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
+import {CooldownList} from './CooldownList';
 import * as cardTypes from './evolution/cards';
 
 import uuid from 'node-uuid';
@@ -45,6 +46,7 @@ const GameModelData = {
   , food: -1
   , started: false
   , status: new StatusRecord()
+  , cooldowns: CooldownList.new()
 };
 
 export class GameModel extends Record(GameModelData) {
@@ -84,6 +86,7 @@ export class GameModel extends Record(GameModelData) {
       , deck: List(js.deck).map(c => CardModel.fromServer(c))
       , players: Map(js.players).map(p => PlayerModel.fromServer(p))
       , status: new StatusRecord(js.status)
+      , cooldowns: CooldownList.fromServer(js.cooldowns)
     });
   }
 
@@ -115,7 +118,7 @@ export class GameModel extends Record(GameModelData) {
   }
 
   locateAnimal(animalId) {
-    let playerId = -1, animalIndex = -1;
+    let playerId = null, animalIndex = -1;
     this.players.some(player => {
       animalIndex = player.continent.findIndex(animal => animal.id === animalId);
       if (~animalIndex) {

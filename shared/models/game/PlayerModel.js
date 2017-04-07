@@ -1,7 +1,6 @@
 import {Record, List, Map} from 'immutable';
 import {UserModel, STATUS} from '../UserModel';
 import {CardModel} from './CardModel';
-import {CooldownsList} from './CooldownModel';
 import {AnimalModel} from './evolution/AnimalModel';
 
 export class PlayerModel extends Record({
@@ -11,7 +10,6 @@ export class PlayerModel extends Record({
   , status: STATUS.LOADING
   , index: -1
   , ended: false
-  , cooldowns: CooldownsList.new()
 }) {
   toOthers() {
     return this
@@ -24,8 +22,7 @@ export class PlayerModel extends Record({
       ? null
       : new PlayerModel(js)
         .set('hand', List(js.hand).map(card => CardModel.fromServer(card)))
-        .set('continent', List(js.continent).map(animalModel => AnimalModel.fromServer(animalModel)))
-        .set('cooldowns', CooldownsList.fromServer(js));
+        .set('continent', List(js.continent).map(animalModel => AnimalModel.fromServer(animalModel)));
   }
 
   static new(userId, index) {
