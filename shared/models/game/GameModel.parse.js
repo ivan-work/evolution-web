@@ -4,13 +4,17 @@ import {Map, List} from 'immutable';
 
 import {GameModel, StatusRecord} from './GameModel';
 import {PlayerModel} from './PlayerModel';
+import {CardModel} from './CardModel';
 import {AnimalModel} from './evolution/AnimalModel';
 import {TraitModel} from './evolution/TraitModel';
 import * as cardClasses from './evolution/cards';
 import yaml from 'yaml-js';
 
-const searchCardClasses = (name) => cardClasses[Object.keys(cardClasses)
-  .find(cardClassName => ~cardClasses[cardClassName].type.toLowerCase().indexOf(name.toLowerCase()))];
+const searchCardClasses = (name) => Object.keys(cardClasses)
+  .filter(cardClassName => cardClasses[cardClassName])
+  .map(cardClassName => cardClasses[cardClassName])
+  .sort((cc1, cc2) => CardModel.new(cc1).traitsCount > CardModel.new(cc2).traitsCount)
+  .find(cardClass => ~cardClass.type.toLowerCase().indexOf(name.toLowerCase()));
 
 export const parseCardList = string => {
   invariant(typeof string === 'string', `GameModel.parseCardList: bad string: (${string})`)

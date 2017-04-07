@@ -20,6 +20,7 @@ export class CardModel extends Record({
     const id = !process.env.BROWSER
       ? uuid.v4().slice(0, 4)
       : Math.floor(Math.random() * 0xFFFF);
+    // TODO check for class
     return CardModel.fromServer({
       id
       , ...cardClass
@@ -34,6 +35,10 @@ export class CardModel extends Record({
     return js == null
       ? null
       : new CardModel(js);
+  }
+
+  get traitsCount () {
+    return this.trait2type === null ? 1 : 2;
   }
 
   toString() {

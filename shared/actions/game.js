@@ -137,9 +137,9 @@ export const server$gameDeployAnimal = (gameId, userId, animal, animalPosition, 
 };
 
 // gameDeployTrait
-export const gameDeployTraitRequest = (cardId, animalId, traittype) => (dispatch, getState) =>dispatch({
+export const gameDeployTraitRequest = (cardId, animalId, alternateTrait) => (dispatch, getState) =>dispatch({
   type: 'gameDeployTraitRequest'
-  , data: {gameId: getState().get('game').id, cardId, animalId, traittype}
+  , data: {gameId: getState().get('game').id, cardId, animalId, alternateTrait}
   , meta: {server: true}
 });
 export const gameDeployTrait = (gameId, userId, cardId, animalId, trait) => ({
@@ -342,7 +342,7 @@ export const gameClientToServer = {
     dispatch(server$gameDeployNext(gameId, userId));
     // console.timeEnd('server$gameDeployNext');
   }
-  , gameDeployTraitRequest: ({gameId, cardId, animalId, traittype}, {user}) => (dispatch, getState) => {
+  , gameDeployTraitRequest: ({gameId, cardId, animalId, alternateTrait}, {user}) => (dispatch, getState) => {
     const userId = user.id;
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
@@ -351,14 +351,15 @@ export const gameClientToServer = {
 
     const cardIndex = checkPlayerHasCard(game, userId, cardId);
     const card = game.players.get(userId).hand.get(cardIndex);
-    if (card.trait1type !== traittype && card.trait2type !== traittype) {
-      throw new ActionCheckError(`checkCardHasTrait@Game(${game.id})`, 'Card(%s;%s) doesn\'t have trait (%s)', card.trait1type, card.trait2type, traittype);
+    const traitType = !alternateTrait ? card.trait1type : card.trait2type;
+    if (!traitType) {
+      throw new ActionCheckError(`checkCardHasTrait@Game(${game.id})`, 'Card(%s;%s) doesn\'t have trait (%s)', card.trait1type, card.trait2type, traitType);
     }
 
     if (card.target & CARD_TARGET_TYPE.ANIMAL_SELF) {
       const animal = checkPlayerHasAnimal(game, userId, animalId);
       // TODO check if exists
-      const trait = TraitModel.new(traittype);
+      const trait = TraitModel.new(traitType);
       const animalValidation = animal.validateTrait(trait);
       if (animalValidation !== true) {
         dispatch(actionError(userId, animalValidation));

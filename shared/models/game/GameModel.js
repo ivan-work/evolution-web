@@ -71,7 +71,7 @@ export class GameModel extends Record(GameModelData) {
       , roomId: room.id
       , deck: GameModel.generateDeck([
         //[8, cardTypes.CardCamouflage]
-        [16, cardTypes.CardPoisonousCarnivore]
+        [24, cardTypes.CardPoisonousCarnivore]
         //, [8, cardTypes.CardSharpVision]
       ], true)
       , players: room.users.reduce((result, userId, index) => result.set(userId, PlayerModel.new(userId, index)), Map())
