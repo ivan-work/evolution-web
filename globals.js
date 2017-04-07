@@ -1,4 +1,6 @@
-require('dotenv').config();
+import fs from 'fs';
+
+if (fs.existsSync('.env')) require('dotenv').config();
 
 global.GLOBAL_VERSION = require('./package.json').version;
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';

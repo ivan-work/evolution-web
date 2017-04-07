@@ -12,17 +12,14 @@
   "scripts": {
     "postinstall": "npm run build",
     "start:version": "npm version patch --force && npm start",
-    "start": "nodemon server/index.js",
-    "clean": "rimraf dist",
+    "start": "node_modules/.bin/nodemon server/index.js",
+    "clean": "node_modules/.bin/rimraf dist",
     "build": "npm run clean && npm run build:server && npm run build:client",
-    "clean:server": "rimraf dist/server",
+    "clean:server": "node_modules/.bin/rimraf dist/server",
     "build:server": "node_modules/.bin/webpack --config webpack.server.babel.js",
     "start:server": "node dist/server/index.js",
-    "clean:client": "rimraf dist/client",
+    "clean:client": "node_modules/.bin/rimraf dist/client",
     "build:client": "node_modules/.bin/webpack --config webpack.client.babel.js --progress"
-  },
-  "watch": {
-    "test:shared:watch": "{shared}/*.spec.js"
   },
   "repository": {
     "type": "git",
@@ -117,8 +114,8 @@
     "jsdom": "*",
     "json-loader": "*",
     "mocha": "*",
-    "nodemon": "*",
     "node-sass-json-importer": "*",
+    "nodemon": "*",
     "react-addons-test-utils": "*",
     "react-dnd-test-backend": "*",
     "react-transform-hmr": "*",
@@ -126,6 +123,7 @@
     "redux-devtools-dispatch": "*",
     "redux-devtools-dock-monitor": "*",
     "redux-devtools-log-monitor": "*",
+    "rimraf": "^2.5.4",
     "sass-loader": "*",
     "sinon": "*",
     "source-map-support": "*",
