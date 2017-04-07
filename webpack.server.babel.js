@@ -14,7 +14,7 @@ const nodeModules = fs.readdirSync('node_modules')
   .reduce((result, mod) => Object.assign(result, {[mod]: 'commonjs ' + mod}, {}));
 
 export default {
-  devtool: isDevelopment ? 'eval-source-map' : 'cheap-module-source-map'
+  devtool: isDevelopment ? 'eval-source-map' : 'eval-source-map'
   , entry: isDevelopment ? ['./server/index.js'] : ['./server/index.js']
   , output: {
     path: path.join(__dirname, 'dist/server/')

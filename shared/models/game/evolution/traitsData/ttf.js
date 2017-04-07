@@ -1,5 +1,5 @@
 import logger from '~/shared/utils/logger';
-import {fromJS} from 'immutable';
+import {List, fromJS} from 'immutable';
 import {AnimalModel} from '../AnimalModel';
 import {
   TRAIT_TARGET_TYPE
@@ -45,9 +45,21 @@ export const TraitMetamorphose = {
     dispatch(server$startFeeding(game.id, animal, 1, 'TraitMetamorphose'));
     return true;
   }
-  , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game)
-  , checkTarget: (game, sourceAnimal, targetTrait) => targetTrait.getDataModel().food === 0
-  , getTargets: (game, sourceAnimal, traitMetamorphose) => sourceAnimal.traits.filter(trait => trait.getDataModel().food === 0)
+  , $checkAction: (game, sourceAnimal) => sourceAnimal.getWantedFood() > 0 && sourceAnimal.getEatingBlockers(game).length <= 1
+  , checkTarget: (game, sourceAnimal, targetTrait) => {
+    const eatingBlockers = sourceAnimal.getEatingBlockers(game);
+    if (eatingBlockers.length === 0)
+      return targetTrait.getDataModel().food === 0;
+    else // length === 1
+      return targetTrait.id === eatingBlockers[0].id;
+  }
+  , getTargets: (game, sourceAnimal, traitMetamorphose) => {
+    const eatingBlockers = sourceAnimal.getEatingBlockers(game);
+    if (eatingBlockers.length === 0)
+      return sourceAnimal.getTraits().filter(trait => trait.getDataModel().food === 0);
+    else // length === 1
+      return List(eatingBlockers);
+  }
 };
 
 export const TraitShell = {

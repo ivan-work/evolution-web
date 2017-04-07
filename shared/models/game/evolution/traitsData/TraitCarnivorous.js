@@ -171,22 +171,22 @@ export const TraitCarnivorous = {
         if (defenseTrait.type === TraitRunning.type) {
           traitRunning = defenseTrait;
           possibleDefenses.push(defenseTrait);
-        } else if (defenseTrait.type === TraitMimicry.type) {
-          traitMimicry = defenseTrait;
-          traitMimicryTargets = TraitMimicry.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
-          possibleDefenseTargets += traitMimicryTargets.size;
-          if (traitMimicryTargets.size > 0) possibleDefenses.push(defenseTrait);
+        } else if (defenseTrait.type === TraitInkCloud.type) {
+          traitInkCloud = defenseTrait;
+          possibleDefenses.push(defenseTrait);
         } else if (defenseTrait.type === TraitTailLoss.type) {
           traitTailLoss = defenseTrait;
-          traitTailLossTargets = targetAnimal.traits;
+          traitTailLossTargets = TraitTailLoss.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
           possibleDefenseTargets += traitTailLossTargets.size;
           if (traitTailLossTargets.size > 0) possibleDefenses.push(defenseTrait);
         } else if (defenseTrait.type === TraitShell.type) {
           traitShell = defenseTrait;
           possibleDefenses.push(defenseTrait);
-        } else if (defenseTrait.type === TraitInkCloud.type) {
-          traitInkCloud = defenseTrait;
-          possibleDefenses.push(defenseTrait);
+        } else if (defenseTrait.type === TraitMimicry.type) {
+          traitMimicry = defenseTrait;
+          traitMimicryTargets = TraitMimicry.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
+          possibleDefenseTargets += traitMimicryTargets.size;
+          if (traitMimicryTargets.size > 0) possibleDefenses.push(defenseTrait);
         }
       });
 
@@ -218,12 +218,11 @@ export const TraitCarnivorous = {
         }
       }
     }
-
     /**
      * Actual attack started - check for running first
      * */
 
-    if (traitRunning && !!TraitRunning.action()) {
+    if (traitRunning && !!TraitRunning.action() && traitRunning.id !== disabledTid) {
       dispatch(server$traitNotify_Start(game, targetAnimal, traitRunning, sourceAnimal));
       dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
       return true;
@@ -266,7 +265,7 @@ export const TraitCarnivorous = {
         dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
 
         const poisonous = targetAnimal.hasTrait(TraitPoisonous);
-        if (poisonous) {
+        if (poisonous && disabledTid !== poisonous.id) {
           dispatch(server$traitActivate(game, targetAnimal, poisonous, sourceAnimal));
         }
 

@@ -2,7 +2,7 @@ import {Record, List, Map} from 'immutable';
 import uuid from 'uuid';
 import {TraitModel} from './TraitModel';
 
-import {TraitFatTissue, TraitSymbiosis} from './traitTypes/index';
+import {TraitFatTissue, TraitSymbiosis, TraitShell, TraitHibernation} from './traitTypes/index';
 import {TRAIT_ANIMAL_FLAG, CTT_PARAMETER} from './constants';
 
 export class AnimalModel extends Record({
@@ -46,6 +46,10 @@ export class AnimalModel extends Record({
     return `Animal#${this.id} (${this.getFood()}/${this.foodSize}+${this.getFat()}/${this.fatSize})`;
   }
 
+  getTraits() {
+    return this.traits.filter(trait => !trait.getDataModel().hidden)
+  }
+
   hasTrait(type) {
     return this.traits.find(trait => trait.type === type)
   }
@@ -83,7 +87,7 @@ export class AnimalModel extends Record({
   }
 
   hasFlag(flag) {
-    return this.flags.get(flag);
+    return !!this.flags.get(flag);
   }
 
   /**
@@ -125,16 +129,25 @@ export class AnimalModel extends Record({
       || this.getFoodAndFat() >= this.foodSize
   }
 
-  canEat(game) {
-    return this.getWantedFood() > 0
-      && !this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
-      && !this.hasFlag(TRAIT_ANIMAL_FLAG.SHELL)
-      && !this.traits // TODO replace by flag
-        .filter(trait => trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === this.id)
-        .some(trait => {
+  getEatingBlockers(game) {
+    let eatingBlockers = [];
+    eatingBlockers = eatingBlockers.concat(this.traits
+      .filter(trait => {
+        if (trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === this.id) {
           const {animal: hostAnimal} = game.locateAnimal(trait.linkAnimalId);
           return !hostAnimal.isSaturated();
-        });
+        }
+      }).toArray());
+    const traitShell = this.hasTrait(TraitShell);
+    if (this.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && traitShell) eatingBlockers.push(traitShell);
+    const traitHibernation = this.hasTrait(TraitHibernation);
+    if (this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && TraitHibernation) eatingBlockers.push(traitHibernation);
+    return eatingBlockers;
+  }
+
+  canEat(game) {
+    return this.getWantedFood() > 0
+      && this.getEatingBlockers(game).length === 0;
   }
 
   receiveFood(amount) {

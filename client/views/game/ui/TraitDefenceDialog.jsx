@@ -38,7 +38,7 @@ export class TraitDefenceDialog extends Component {
     const {animal: targetAnimal} = game.locateAnimal(targetAid);
 
     const traitTailLoss = targetAnimal.hasTrait(TraitTailLoss.type);
-    const targetsTailLoss = traitTailLoss && targetAnimal.traits;
+    const targetsTailLoss = traitTailLoss && TraitTailLoss.getTargets(game, attackAnimal, TraitCarnivorous, targetAnimal);
 
     const traitMimicry = targetAnimal.hasTrait(TraitMimicry.type);
     const targetsMimicry = traitMimicry && TraitMimicry.getTargets(game, attackAnimal, TraitCarnivorous, targetAnimal);

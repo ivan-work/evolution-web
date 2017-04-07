@@ -58,6 +58,7 @@ players:
     const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
+    expect(selectAnimal(User0, 0).traits).size(1);
     expect(selectAnimal(User0, 0).id).equal('$B');
   });
 
@@ -79,19 +80,38 @@ players:
 
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(traitActivateRequest('$W', 'TraitCarnivorous', '$S'));
-    expect(selectAnimal(User0, 1).id).equal('$W');
     clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$E', 'TraitCarnivorous', '$D'));
     clientStore1.dispatch(traitAnswerRequest('TraitIntellect', 'TraitTailLoss'));
     clientStore0.dispatch(traitAnswerRequest('TraitMimicry', '$E2'));
 
-    //expect(selectAnimal(User0, 0));
-    //expect(selectAnimal(User0, 1));
-    //expect(selectAnimal(User0, 2));
-    //expect(selectAnimal(User0, 3)).ok;
-    //expect(selectAnimal(User1, 0).getFatAndFood()).equal(2);
-    //expect(selectAnimal(User1, 1).getFatAndFood()).equal(2);
-    //expect(selectAnimal(User1, 2).getFatAndFood()).equal(2);
+    expect(selectAnimal(User0, 0)).ok;
+    expect(selectAnimal(User0, 1)).ok;
+    expect(selectAnimal(User0, 2)).ok;
+    expect(selectAnimal(User0, 0).id).equal('$Q');
+    expect(selectAnimal(User0, 1).id).equal('$W');
+    expect(selectAnimal(User0, 2).id).equal('$E');
+    expect(selectAnimal(User0, 3)).undefined;
+    expect(selectAnimal(User1, 0).getFood()).equal(2);
+    expect(selectAnimal(User1, 1).getFood()).equal(1);
+    expect(selectAnimal(User1, 2).getFood()).equal(2);
+  });
+
+  it('Tailloss shouldnt be able to lose Angler', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: 2
+food: 10
+players:
+  - continent: $Q carn
+  - continent: $A tail angler
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$A'));
+    expect(selectAnimal(User0, 0)).ok;
+    expect(selectAnimal(User0, 0).getFood()).equal(1);
   });
 });

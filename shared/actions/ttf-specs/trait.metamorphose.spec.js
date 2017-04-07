@@ -44,11 +44,13 @@ players:
 
   /**
    * TODO
-   * Solution: rewrite canEat to count Eating Blockers.
+   * Problem: When something blocks animal from eating, you still can activate metamorphose to drop that blocking trait
+   * f.e.: Animal with Shell active can drop shell or Animal with symbiosis can drop it.
+   * Solution: rewrite checkAction: canEat to countEatingBlockers.
    * Rewrute checkAction to countEatingBlockers() <= 1
    * Rewrite getTargets to EatingBlocker OR any other
    */
-  it.skip('Can drop traits', () => {
+  it('Can drop traits', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 10 camo
@@ -73,6 +75,7 @@ players:
     }, serverStore, clientStore0);
 
     expectUnchanged('Metamorphose cannot activate when animal is blocked', () => {
+      //console.log(selectAnimal(User0, 1).getEatingBlockers())
       clientStore0.dispatch(traitActivateRequest('$Sh', 'TraitMetamorphose', 'TraitMetamorphose'));
     }, serverStore, clientStore0);
 

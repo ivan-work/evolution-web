@@ -6,6 +6,7 @@ import {
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
+import {TRAIT_ANIMAL_FLAG} from '../../models/game/evolution/constants';
 import {replaceGetRandom} from '../../utils/randomGenerator';
 
 import {makeGameSelectors} from '../../selectors';
@@ -86,5 +87,60 @@ players:
     expectUnchanged('Cannot cancel Intellect', () => {
       clientStore1.dispatch(traitAnswerRequest('TraitMimicry', '$B'));
     }, serverStore, clientStore0, clientStore1);
+  });
+
+  it('Intellect ignore poison and running', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: 2
+food: 10
+players:
+  - continent: $Q carn int + graz, $W carn int pois, $E carn int run +++
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$W'));
+    expect(selectAnimal(User0, 0).getFood()).equal(3);
+    expect(selectAnimal(User0, 0).hasFlag(TRAIT_ANIMAL_FLAG.POISONED)).equal(false);
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(gameEndTurnRequest());
+    replaceGetRandom(() => 1, () => {
+      clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$E'));
+    });
+    expect(selectAnimal(User0, 0).getFood()).equal(2);
+  });
+
+  it('BUG: Intellect > IC + swimming', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: 2
+food: 10
+players:
+  - continent: $Q carn int + graz, $W swim ink cloud
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$W'));
+    expect(selectAnimal(User0, 0).getFood()).equal(1);
+    expect(selectAnimal(User0, 1)).ok;
+  });
+
+  it('BUG: Intellect should ignore Shell', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: 2
+food: 10
+players:
+  - continent: $Q carn int + graz, $W shell
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$W'));
+    expect(selectAnimal(User0, 0).getFood()).equal(3);
+    expect(selectAnimal(User0, 1)).undefined;
   });
 });
