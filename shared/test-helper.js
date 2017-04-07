@@ -13,6 +13,7 @@ global.sinon = sinon;
 global.expect = chai.expect;
 global.mount = mount;
 global.shallow = shallow;
+global.fastCheck = false;
 
 var exposedProperties = ['window', 'navigator', 'document', 'componentHandler'];
 
@@ -144,7 +145,7 @@ global.mockClientStore = function (initialClientState) {
   clientStore.getHistory = () => history;
   clientStore.getClient = () => ioClient;
   clientStore.getSocket = () => ioClient.socket;
-  clientStore.getConnectionId = () => ioClient.id;
+  clientStore.getConnectionId = () => ioClient.socket.id;
 
   clientStore.getConnection = () => ({
     connectionId: clientStore.getConnectionId()

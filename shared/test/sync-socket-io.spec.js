@@ -90,6 +90,7 @@ describe('Sync-socket-io:', function () {
       let serverMessage = ''
         , client1Message = ''
         , client2Message = '';
+
       server.on('connect', () => serverConnections++);
       client1.on('connect', () => client1Connections++);
       client2.on('connect', () => client2Connections++);
@@ -99,8 +100,8 @@ describe('Sync-socket-io:', function () {
 
       let emitToClient1, emitToClient2;
       server.on('connect', (clientSocket) => {
-        if (client1.id == clientSocket.id) emitToClient1 = (...args) => clientSocket.emit(...args);
-        if (client2.id == clientSocket.id) emitToClient2 = (...args) => clientSocket.emit(...args);
+        if (client1.socket.id == clientSocket.id) emitToClient1 = (...args) => clientSocket.emit(...args);
+        if (client2.socket.id == clientSocket.id) emitToClient2 = (...args) => clientSocket.emit(...args);
       });
 
       server.on('message', (msg) => serverMessage = msg);
