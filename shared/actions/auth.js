@@ -1,5 +1,4 @@
 import {push} from 'react-router-redux';
-import {UserRecord} from '../models/User';
 
 export const socketConnect = (connectionId, socket) => ({
   type: 'socketConnect'
@@ -9,7 +8,6 @@ export const socketConnect = (connectionId, socket) => ({
 export const socketDisconnect = (connectionId) => (dispatch, getState) => {
   const usersState = getState().get('users');
   let user = usersState.find((user) => user.connectionId == connectionId);
-  console.log('socketDisconnect', !!user);
   if (!!user) {
     dispatch(logoutUser(user.id))
   }
@@ -55,15 +53,20 @@ let userIds = 0;
 export const authClientToServer = {
   loginUserRequest: (connectionId, data) => (dispatch, getState) => {
     const login = data.login;
-    const state = getState().get('users');
-    const userExists = state.find(user => user.login === login);
+    const state = getState();
+    const userExists = state.get('users').find(user => user.login === login);
     if (!userExists) {
-      const user = new UserRecord({
-        id: userIds++
-        , login: login
-        , connectionId: connectionId
-      });
-      dispatch(loginUserSuccess(connectionId, user, data.redirect));
+      console.log(connectionId, state.get('connections').toJS())
+      if (state.get('connections').has(connectionId)) {
+        const user = {
+          id: userIds++
+          , login: login
+          , connectionId: connectionId
+        };
+        dispatch(loginUserSuccess(connectionId, user, data.redirect));
+      } else {
+        dispatch(loginUserFailure(connectionId, 'Connection is missing'));
+      }
     } else {
       dispatch(loginUserFailure(connectionId, 'User already exists'));
     }

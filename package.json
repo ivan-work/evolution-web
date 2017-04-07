@@ -9,8 +9,11 @@
     "test:client": "npm run test:prepare -- client/**/*.spec.js",
     "test:client:watch": "npm run test:client -- --watch",
     "test:shared": "npm run test:prepare -- shared/**/*.spec.js",
-    "test:shared:watch": "npm run test:shared -- --watch",
-    "test:all": "npm run test:prepare -- **/*.spec.js",
+    "test:shared:watch": "shared/**/*.spec.js",
+    "test:all": "npm run test:prepare -- server/**/*.spec.js client/**/*.spec.js shared/**/*.spec.js",
+    "test:all:watch": "watch-run -i -p './shared/**/*.jsx?,./shared/**/*.jsx?' npm run test:all",
+    "tape:prepare": "node_modules/.bin/cross-env NODE_ENV=test node_modules/.bin/tape-watch ./shared/**/*.spec.js -r babel-register ./shared/test-helper.js | faucet",
+    "tape:shared": "npm run tape:prepare -- shared/**/*.spec.js",
     "start": "node_modules/.bin/cross-env NODE_ENV=development node_modules/.bin/nodemon index.js",
     "start:prod": "node_modules/.bin/cross-env NODE_ENV=production node index.js",
     "bs": "npm run clean && npm run build && npm run start:prod",
@@ -18,7 +21,11 @@
     "build": "node_modules/.bin/cross-env NODE_ENV=production webpack --config webpack.config.prod.js && npm run minify",
     "clean": "rimraf static/dist",
     "slate": "rimraf node_modules && npm install",
-    "lint": "node_modules/.bin/eslint client server shared"
+    "lint": "node_modules/.bin/eslint client server shared",
+    "watch": "npm-watch"
+  },
+  "watch": {
+    "test:shared:watch": "{shared}/*.spec.js"
   },
   "pre-commit": [
     "lint",
@@ -103,6 +110,11 @@
     "expect-jsx": "*",
     "extract-text-webpack-plugin": "*",
     "file-loader": "^0.8.5",
+    "gulp": "^3.9.1",
+    "gulp-mocha": "^2.2.0",
+    "gulp-tape": "0.0.9",
+    "gulp-util": "^3.0.7",
+    "gulp-watch": "^4.3.8",
     "html-loader": "^0.4.3",
     "html-webpack-plugin": "^2.19.0",
     "json-loader": "^0.5.4",
@@ -119,10 +131,13 @@
     "redux-devtools": "*",
     "redux-devtools-dock-monitor": "*",
     "redux-devtools-log-monitor": "*",
+    "redux-mock-store": "^1.1.1",
     "rimraf": "*",
     "sass-loader": "^3.2.0",
     "style-loader": "^0.13.1",
     "supertest": "*",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.6.0",
     "webpack": "*",
     "webpack-dev-middleware": "*",
     "webpack-hot-middleware": "*"
