@@ -7,7 +7,8 @@ import {
   , server$traitActivate
   , server$traitStartCooldown
 } from '../../../../actions/actions';
-import {TraitMimicry, TraitRunning} from './index';
+import {GameModel} from '../../GameModel';
+import {TraitMimicry, TraitRunning, TraitScavenger} from './index';
 
 export const TraitCarnivorous = {
   type: 'TraitCarnivorous'
@@ -36,6 +37,17 @@ export const TraitCarnivorous = {
     if (success) {
       dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, sourceAnimal));
       dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
+
+      // Scavenge
+      const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
+      GameModel.sortPlayersFromIndex(game, currentPlayerIndex).some(player => player.continent.some(animal => {
+        const traitScavenger = animal.hasTrait(TraitScavenger.type);
+        if (traitScavenger && animal.needsFood() > 0) {
+          dispatch(server$startFeeding(game.id, animal, 1));
+          return true;
+        }
+      }));
+
       dispatch(server$startFeeding(game.id, sourceAnimal, 2));
       return true;
     }

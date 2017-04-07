@@ -120,21 +120,23 @@ const traitQuestion = (gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, t
 
 export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId) => (dispatch, getState) => {
   const neededFood = animal.needsFood();
+
+  if (neededFood === 0) return false;
+
   // TODO bug with 2 amount on animal 2/3
   dispatch(server$game(gameId, traitMoveFood(gameId, animal.id, Math.min(amount, neededFood), sourceType, sourceId)));
 
   // TODO mb move to traitData?
-  if (neededFood > 0) {
-    dispatch(startCooldown(gameId, 'TraitCommunication', TRAIT_COOLDOWN_DURATION.ACTIVATION, TRAIT_COOLDOWN_PLACE.ANIMAL, animal.id));
-    animal.traits.filter(trait => trait.type === 'TraitCommunication')
-      .forEach(trait => {
-        const game = selectGame(getState, gameId);
-        const {animal: linkedAnimal} = game.locateAnimal(trait.linkAnimalId);
-        if (!game.cooldowns.checkFor(TraitCommunication.cooldownLink, linkedAnimal.ownerId, linkedAnimal.id)) {
-          dispatch(server$startFeeding(gameId, linkedAnimal, 1, FOOD_SOURCE_TYPE.ANIMAL_COPY, animal.id));
-        }
-      });
-  }
+  dispatch(startCooldown(gameId, 'TraitCommunication', TRAIT_COOLDOWN_DURATION.ACTIVATION, TRAIT_COOLDOWN_PLACE.ANIMAL, animal.id));
+  animal.traits.filter(trait => trait.type === 'TraitCommunication')
+    .forEach(trait => {
+      const game = selectGame(getState, gameId);
+      const {animal: linkedAnimal} = game.locateAnimal(trait.linkAnimalId);
+      if (!game.cooldowns.checkFor(TraitCommunication.cooldownLink, linkedAnimal.ownerId, linkedAnimal.id)) {
+        dispatch(server$startFeeding(gameId, linkedAnimal, 1, FOOD_SOURCE_TYPE.ANIMAL_COPY, animal.id));
+      }
+    });
+  return true;
 };
 
 // Cooldowns

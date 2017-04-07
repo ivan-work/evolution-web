@@ -263,7 +263,7 @@ export const server$gameExtict = (gameId) => (dispatch, getState) => {
 
   if (deckSize !== 0) {
     dispatch(server$game(gameId, gameStartDeploy(gameId)));
-    const players = GameModel.getSortedPlayersByIndex(selectGame(getState, gameId));
+    const players = GameModel.sortPlayersFromIndex(selectGame(getState, gameId));
     while (deckSize > 0 && Object.keys(cardNeedToPlayer).length > 0) {
       players.forEach((player) => {
         if (deckSize <= 0) return true;

@@ -1,4 +1,4 @@
-import {Record, Map, Range, List} from 'immutable';
+import {Record, Map, OrderedMap, Range, List} from 'immutable';
 
 import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
@@ -45,7 +45,7 @@ const GameModelData = {
   id: null
   , roomId: null
   , deck: null
-  , players: Map()
+  , players: OrderedMap()
   , food: -1
   , started: false
   , status: new StatusRecord()
@@ -97,7 +97,7 @@ export class GameModel extends Record(GameModelData) {
       : new GameModel({
       ...js
       , deck: List(js.deck).map(c => CardModel.fromServer(c))
-      , players: Map(js.players).map(p => PlayerModel.fromServer(p))
+      , players: OrderedMap(js.players).map(p => PlayerModel.fromServer(p)).sort((p1, p2) => p1.index > p2.index)
       , status: new StatusRecord(js.status)
       , cooldowns: CooldownList.fromServer(js.cooldowns)
     });
@@ -168,14 +168,10 @@ export class GameModel extends Record(GameModelData) {
     return {playerId, cardIndex, card};
   }
 
-  static getSortedPlayersByIndex(game) {
-    let players = [];
-    for (let i = 0, c = game.status.roundPlayer; i < game.players.size; ++i) {
-      const player = game.players.find(p => p.index === c);
-      if (player) players.push(player);
-      c = (c + 1) % (game.players.size);
-    }
-    return players;
+  static sortPlayersFromIndex(game, index) {
+    if (index === void 0) index = game.status.roundPlayer;
+    const playersList = game.players.toList();
+    return playersList.slice(index).concat(playersList.slice(0, index));
   }
 }
 
