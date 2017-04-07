@@ -1,10 +1,10 @@
 import React from 'react';
-import { DragLayer } from 'react-dnd';
-import { DND_ITEM_TYPE } from './DND_ITEM_TYPE';
+import {DragLayer} from 'react-dnd';
+import {DND_ITEM_TYPE} from './DND_ITEM_TYPE';
 import DragCardPreview from '../cards/DragCardPreview.jsx';
-import { AnimalTraitArrow } from '../animals/AnimalTraitArrow.jsx';
-import { Food } from '../food/Food.jsx';
-import { ArrowPreview } from './ArrowPreview.jsx';
+import {AnimalTraitArrow} from '../animals/AnimalTraitArrow.jsx';
+import {Food} from '../food/Food.jsx';
+import {ArrowPreview} from './ArrowPreview.jsx';
 
 const layerStyles = {
   position: 'fixed',
@@ -37,14 +37,14 @@ class CustomDragLayer extends React.Component {
   }
 
   render() {
-    const { item, itemType, isDragging } = this.props;
+    const {item, itemType, isDragging} = this.props;
     const offset = this.props.getClientOffset;
     const initialOffset = this.props.getInitialSourceClientOffset;
 
     this.animationCounter = item ? ++this.animationCounter : 0;
 
-    const MAX_VELOCITY = 30;
-    const VELOCITY = 5;
+    const MAX_VELOCITY = 60;
+    const VELOCITY = 15;
     const velocity = {x: 0, y: 0};
     if (offset) {
       if (this.previousOffset) {
@@ -54,15 +54,11 @@ class CustomDragLayer extends React.Component {
         velocity.x *= VELOCITY;
         velocity.y *= VELOCITY;
 
-        velocity.x = velocity.x > MAX_VELOCITY
-          ? MAX_VELOCITY
-          : velocity.x < -MAX_VELOCITY
-          ? -MAX_VELOCITY
+        velocity.x = velocity.x > MAX_VELOCITY ? MAX_VELOCITY
+          : velocity.x < -MAX_VELOCITY ? -MAX_VELOCITY
           : velocity.x;
-        velocity.y = velocity.y > MAX_VELOCITY
-          ? MAX_VELOCITY
-          : velocity.y < -MAX_VELOCITY
-          ? -MAX_VELOCITY
+        velocity.y = velocity.y > MAX_VELOCITY ? MAX_VELOCITY
+          : velocity.y < -MAX_VELOCITY ? -MAX_VELOCITY
           : velocity.y;
       }
       this.previousOffset = offset;
@@ -90,12 +86,12 @@ class CustomDragLayer extends React.Component {
 }
 
 const Marker = ({offset, color}) => offset === null ? null : <div style={{
-        background: color
-        , width: '5px', height: '5px'
-        , position: 'absolute'
-        , left: offset.x + 'px'
-        , top: offset.y + 'px'
-        }}></div>
+  background: color
+  , width: '5px', height: '5px'
+  , position: 'absolute'
+  , left: offset.x + 'px'
+  , top: offset.y + 'px'
+}}></div>
 
 const DefaultPreview = (props) => {
   const {offset} = props;
@@ -107,7 +103,7 @@ const DefaultPreview = (props) => {
     , position: 'absolute'
     , transform: 'translate(-50%, -50%)'
     , pointerEvents: 'none'
-    }}>
+  }}>
     {props.children}
   </div>
 };

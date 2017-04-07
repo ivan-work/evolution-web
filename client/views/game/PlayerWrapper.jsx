@@ -45,7 +45,7 @@ export class PlayerWrapper extends Component {
 
   render() {
     const {game, player, upsideDown} = this.props;
-    const isUser = game.getPlayer().id === player.id;
+    const isUser = game.userId === player.id;
     const innerElements = [
       this.renderContinent(game, player.continent, isUser)
       , this.renderCardCollection(game, player, isUser)

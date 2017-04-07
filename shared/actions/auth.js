@@ -1,4 +1,4 @@
-import logger, {fileLogger} from '~/shared/utils/logger';
+import logger, {loggerOnline} from '~/shared/utils/logger';
 import {Map} from 'immutable';
 import {UserModel, RulesLoginPassword} from '../models/UserModel';
 import {GameModelClient} from '../models/game/GameModel';
@@ -9,7 +9,7 @@ import Validator from 'validatorjs';
 
 import {ActionCheckError} from '../models/ActionCheckError';
 
-import {toUser$Client} from './generic';
+import {to$, toUser$Client} from './generic';
 import {chatInit} from './chat';
 import {server$roomsInit, server$roomExit} from './rooms';
 
@@ -57,9 +57,9 @@ export const loginUserFormRequest = (redirect, login, password) => ({
   , meta: {server: true}
 });
 
-export const loginUser = ({user, redirect, online, rooms, roomId, game}) => ({
+export const loginUser = ({user, redirect, online}) => ({
   type: 'loginUser'
-  , data: {user, redirect, online, rooms, roomId, game}
+  , data: {user, redirect, online}
 });
 
 export const loginUserFailure = (error) => ({
@@ -74,22 +74,14 @@ export const onlineUpdate = (user) => ({
 
 export const server$loginUser = (user, redirect) => (dispatch, getState) => {
   if (!user.id) throw new Error('User has no ID');
-  fileLogger.info(`User ${user.login} joined`);
+  loggerOnline.info(`User ${user.login} joined`);
   const online = getState().get('users').map(u => u.toOthers());
   const rooms = getState().get('rooms');
-  const games = getState().get('games');
-  const room = rooms.find(room => ~room.users.indexOf(user.id));
-  const roomId = !!room && room.id || null;
-  const game = !!roomId && games.find(game => game.roomId === roomId) || null;
-  const clientGame = !!game && game.toOthers(user.id).toClient() || null;
   dispatch(loginUser({user}));
-
   dispatch(server$roomsInit(user.id));
+  dispatch(toUser$Client(user.id, loginUser({user: user.toClient(), redirect, online})));
   dispatch(toUser$Client(user.id, chatInit(getState().get('chat'))));
-
-  dispatch(toUser$Client(user.id, loginUser({user: user.toClient(), redirect, online, game: clientGame})));
-  dispatch(Object.assign(onlineUpdate(user.toOthers().toClient()),
-    {meta: {clientOnly: true, users: true}}));
+  dispatch(to$({clientOnly: true, users: true}, onlineUpdate(user.toOthers().toClient())));
 };
 
 /***
@@ -108,7 +100,7 @@ export const server$logoutUser = (userId) => (dispatch, getState) => {
   if (room) {
     dispatch(server$roomExit(room.id, userId));
   }
-  fileLogger.info(`User ${userLogin} left`);
+  loggerOnline.info(`User ${userLogin} left`);
   dispatch(Object.assign(logoutUser(userId)
     , {meta: {users: true}}));
 };
@@ -181,7 +173,6 @@ export const authServerToClient = {
     dispatch(loginUser({
       user: user
       , online: Map(online).map(u => new UserModel(u).toOthers())
-      , game: GameModelClient.fromServer(game, user.id)
     }));
     dispatch(redirectTo(redirect || '/'));
   }
@@ -198,4 +189,5 @@ export const redirectToLogin = (getState, redirectTo) => {
   let previousLocation = getState().getIn(['routing', 'locationBeforeTransitions', 'pathname'], '/');
   if (previousLocation !== '/login')
     redirectTo('/login?redirect=' + previousLocation);
+  redirectTo('/login');
 };

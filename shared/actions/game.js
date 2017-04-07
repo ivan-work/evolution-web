@@ -1,4 +1,4 @@
-import logger, {fileLogger} from '~/shared/utils/logger';
+import logger, {loggerOnline} from '~/shared/utils/logger';
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import {List} from 'immutable';
 
@@ -17,7 +17,7 @@ import {
 import {server$game} from './generic';
 import {endTurnIfNoOptions} from './ai';
 import {redirectTo} from '../utils';
-import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
+import {selectGame, selectPlayers4Sockets} from '../selectors';
 
 import {
   checkGameDefined
@@ -30,6 +30,12 @@ import {
 import {checkComboRoomCanStart} from './rooms.checks';
 
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
+
+/**
+ * Init
+ * */
+
+export const gameInit = (game, userId) => ({type: 'gameInit', data: {game, userId}});
 
 // Game Create
 export const gameCreateRequest = (roomId, seed) => ({
@@ -84,7 +90,7 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
     case 1:
       dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
       if (game.status.phase !== PHASE.FINAL) {
-        fileLogger.info(`Game left ${game.players.map(p => getState().getIn(['users', p.id, 'login'])).join(', ')}`);
+        loggerOnline.info(`Game left ${game.players.map(p => getState().getIn(['users', p.id, 'login'])).join(', ')}`);
         dispatch(server$game(gameId, gameEnd(gameId, selectGame(getState, gameId).toClient())));
       }
       break;
@@ -380,7 +386,7 @@ export const server$gameExtict = (gameId) => (dispatch, getState) => {
       });
     }
   } else {
-    fileLogger.info(`Game finished ${game.players.map(p => getState().getIn(['users', p.id, 'login'])).join(', ')}`);
+    loggerOnline.info(`Game finished ${game.players.map(p => getState().getIn(['users', p.id, 'login'])).join(', ')}`);
     dispatch(server$game(gameId, gameEnd(gameId, selectGame(getState, gameId))));
   }
 };
@@ -514,7 +520,8 @@ export const gameClientToServer = {
 // gameServerToClient
 
 export const gameServerToClient = {
-  gameCreateSuccess: (({game}, currentUserId) => (dispatch) => {
+  gameInit: ({game, userId}, currentUserId) => gameInit(GameModelClient.fromServer(game, userId))
+  , gameCreateSuccess: (({game}, currentUserId) => (dispatch) => {
     dispatch(gameCreateSuccess(GameModelClient.fromServer(game, currentUserId)));
     dispatch(redirectTo('/game'));
   })

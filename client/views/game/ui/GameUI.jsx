@@ -31,14 +31,13 @@ class _GameUI extends React.Component {
 
         <PlayersList game={game}/>
 
+        {game.getPlayer() &&
         <Button id="Game$endTurn" colored={game.getPlayer().acted} accent={!game.getPlayer().acted} raised
                 disabled={!isPlayerTurn}
                 style={{width: '100%'}}
                 onClick={this.context.gameActions.$endTurn}>
-          {T.translate(game.getPlayer().acted
-            ? 'Game.UI.EndTurn':
-            'Game.UI.EndPhase')}
-        </Button>
+          {T.translate(game.getPlayer().acted ? 'Game.UI.EndTurn' : 'Game.UI.EndPhase')}
+        </Button>}
 
         <GameStatusDisplay game={game}/>
 

@@ -1,7 +1,6 @@
 import React from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
+import T from 'i18n-react';
 import {Button} from 'react-mdl';
-import cn from 'classnames';
 
 import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 
@@ -35,8 +34,8 @@ class Game extends React.Component {
 
     return <div className='Game'>
       <Portal target='header'>
-        <ControlGroup name='Game'>
-          <Button id="Game$exit" onClick={this.context.gameActions.$exit}>Exit</Button>
+        <ControlGroup name={T.translate('Game.Game')}>
+          <Button id="Game$Exit" onClick={this.context.gameActions.$exit}>{T.translate('App.Room.$Exit')}</Button>
           <GameScoreboardFinal game={game}/>
         </ControlGroup>
       </Portal>

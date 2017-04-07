@@ -55,7 +55,7 @@ const DragFood = DragSource(DND_ITEM_TYPE.FOOD
     beginDrag: (props) => ({index: props.index})
     , canDrag: ({game}, monitor) =>
     game.isPlayerTurn()
-    && !game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, game.getPlayer().id, null)
+    && !game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, game.userId, null)
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource()

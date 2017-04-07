@@ -23,10 +23,6 @@ export const GameProvider = (DecoratedComponent) => class GameProvider extends R
     }
     return <DecoratedComponent {...this.props}
       game={game}
-      isPlayerTurn={game.isPlayerTurn()}
-      currentUserId={game.getPlayer().id}
-      isDeploy={game.isDeploy()}
-      isFeeding={game.isFeeding()}
     />
   }
 };

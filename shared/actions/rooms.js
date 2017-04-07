@@ -2,14 +2,15 @@ import logger from '~/shared/utils/logger';
 import {Map} from 'immutable';
 
 import {RoomModel} from '../models/RoomModel';
+import {GameModelClient} from '../models/game/GameModel';
 import {SettingsRules} from '../models/game/GameSettings';
 import {ActionCheckError} from '../models/ActionCheckError';
 
-import {server$gameLeave} from './game';
+import {gameInit, server$gameLeave} from './game';
 import {toUser$Client} from './generic';
 
 import {redirectTo} from '../utils';
-import {selectRoom} from '../selectors';
+import {selectRoom, selectGame} from '../selectors';
 
 const selectClientRoomId = (getState) => getState().get('room');
 
@@ -42,7 +43,11 @@ export const server$roomsInit = (userId) => (dispatch, getState) => {
   const room = findRoomByUser(getState, userId);
   const roomId = !!room && room.id || null;
   const roomsClient = rooms.map(r => r.id === roomId ? r.toClient() : r.toOthers().toClient());
-  dispatch(toUser$Client(userId, roomsInit(roomId, roomsClient)))
+  dispatch(toUser$Client(userId, roomsInit(roomId, roomsClient)));
+
+  const game = !!room && room.gameId && selectGame(getState, room.gameId) || null;
+  const gameUserId = !!game && game.players.has(userId) && userId;
+  !!game && dispatch(toUser$Client(userId, gameInit(game.toOthers(gameUserId).toClient(), gameUserId)));
 };
 
 /**
@@ -68,7 +73,7 @@ export const server$roomCreate = (room) => (dispatch, getState) => dispatch(Obje
  */
 
 export const roomJoinRequestSoft = (roomId) => (dispatch, getState) => (
-  getState().get('room') === roomId
+  getState().get('room') === roomId && getState().get('rooms').find(r => ~r.users.indexOf(getState().getIn(['user', 'id'])))
     ? dispatch(redirectTo(`/room/${roomId}`))
     : dispatch(roomJoinRequest(roomId))
 );
@@ -102,7 +107,10 @@ export const server$roomJoin = (roomId, userId) => (dispatch, getState) => {
     else throw new ActionCheckError('User already in users');
   dispatch(roomJoin(roomId, userId));
   dispatch(Object.assign(roomJoin(roomId, userId), {meta: {clientOnly: true, users: true}}));
-  dispatch(Object.assign(roomJoinSelf(roomId, userId, selectRoom(getState, roomId).toClient()), {clientOnly: true, meta: {userId}}));
+  dispatch(Object.assign(roomJoinSelf(roomId, userId, selectRoom(getState, roomId).toClient()), {
+    clientOnly: true,
+    meta: {userId}
+  }));
 };
 
 /**
@@ -110,7 +118,7 @@ export const server$roomJoin = (roomId, userId) => (dispatch, getState) => {
  */
 
 export const roomSpectateRequestSoft = (roomId) => (dispatch, getState) => (
-  getState().get('room') === roomId
+  getState().get('room') === roomId && getState().get('rooms').find(r => ~r.spectators.indexOf(getState().getIn(['user', 'id'])))
     ? dispatch(redirectTo(`/room/${roomId}`))
     : dispatch(roomSpectateRequest(roomId))
 );
@@ -126,9 +134,9 @@ const roomSpectate = (roomId, userId) => ({
   , data: {roomId, userId}
 });
 
-const roomSpectateSelf = (roomId, userId, room) => ({
+const roomSpectateSelf = (roomId, userId, room, game) => ({
   type: 'roomSpectateSelf'
-  , data: {roomId, userId, room}
+  , data: {roomId, userId, room, game}
 });
 
 // Exit
@@ -153,7 +161,7 @@ export const server$roomExit = (roomId, userId, checkForDestroy = true) => (disp
   //logger.debug('server$roomExit:', roomId, userId);
   const room = selectRoom(getState, roomId);
   dispatch(Object.assign(roomExit(roomId, userId), {meta: {users: true}}));
-  if (room && room.gameId)
+  if (room && room.gameId && !!~room.users.indexOf(userId))
     dispatch(server$gameLeave(room.gameId, userId));
   if (checkForDestroy && selectRoom(getState, roomId).users.size + selectRoom(getState, roomId).spectators.size === 0)
     dispatch(server$roomDestroy(roomId));
@@ -273,7 +281,11 @@ export const roomsClientToServer = {
 
     dispatch(roomSpectate(roomId, userId));
     dispatch(Object.assign(roomSpectate(roomId, userId), {meta: {clientOnly: true, users: true}}));
-    dispatch(Object.assign(roomSpectateSelf(roomId, userId, selectRoom(getState, roomId).toClient()), {clientOnly: true, meta: {userId}}));
+    const game = room.gameId && selectGame(getState, room.gameId).toOthers(userId).toClient();
+    dispatch(Object.assign(roomSpectateSelf(roomId, userId, selectRoom(getState, roomId).toClient(), game), {
+      clientOnly: true,
+      meta: {userId}
+    }));
   }
   , roomExitRequest: ({roomId}, {userId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
@@ -316,17 +328,22 @@ export const roomsClientToServer = {
 };
 
 export const roomsServerToClient = {
-  roomCreate: ({room}) => roomCreate(RoomModel.fromJS(room))
-  , roomsInit: ({roomId, rooms}) => roomsInit(roomId, Map(rooms).map(r => RoomModel.fromJS(r)))
+  roomsInit: ({roomId, rooms}) => roomsInit(roomId, Map(rooms).map(r => RoomModel.fromJS(r)))
+  , roomCreate: ({room}) => roomCreate(RoomModel.fromJS(room))
   , roomJoin: ({roomId, userId}) => roomJoin(roomId, userId)
   , roomJoinSelf: ({roomId, userId, room}, currentUserId) => (dispatch, getState) => {
     dispatch(roomJoinSelf(roomId, userId, RoomModel.fromJS(room)));
     dispatch(redirectTo(`/room/${roomId}`));
   }
   , roomSpectate: ({roomId, userId}) => roomSpectate(roomId, userId)
-  , roomSpectateSelf: ({roomId, userId, room}, currentUserId) => (dispatch, getState) => {
+  , roomSpectateSelf: ({roomId, userId, room, game}, currentUserId) => (dispatch, getState) => {
     dispatch(roomSpectateSelf(roomId, userId, RoomModel.fromJS(room)));
-    dispatch(redirectTo(`/room/${roomId}`));
+    if (!game) {
+      dispatch(redirectTo(`/room/${roomId}`));
+    } else {
+      dispatch(gameInit(GameModelClient.fromServer(game)));
+      dispatch(redirectTo(`/game`));
+    }
   }
   , roomExit: ({roomId, userId}, currentUserId) => (dispatch, getState) => {
     dispatch(roomExit(roomId, userId));

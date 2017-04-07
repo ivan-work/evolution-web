@@ -1,7 +1,6 @@
 import React from 'react';
 import {PlayersList} from './PlayersList.jsx';
 
-import {UserServiceClass} from '../../../services/UserService';
 import {SOCKET_DISCONNECT_NOW} from '../../../../shared/actions/actions';
 
 describe('PlayersList:', () => {
@@ -11,9 +10,7 @@ describe('PlayersList:', () => {
       , {clientStore1, User1, ClientGame1}
       , {clientStore2, User2, ClientGame2}] = mockGame(3);
     ParseGame(``);
-      mount(<PlayersList game={ClientGame0()}/>, {
-        context: {userService: new UserServiceClass(clientStore0.getState)}
-      })
+      mount(<PlayersList game={ClientGame0()}/>)
   });
   it('with leaver:', () => {
     const [{serverStore, ServerGame, ParseGame}
@@ -24,8 +21,6 @@ describe('PlayersList:', () => {
     ParseGame(``);
       clientStore1.disconnect(SOCKET_DISCONNECT_NOW);
       clientStore3.disconnect(SOCKET_DISCONNECT_NOW);
-      mount(<PlayersList game={ClientGame0()}/>, {
-        context: {userService: new UserServiceClass(clientStore0.getState)}
-      })
+      mount(<PlayersList game={ClientGame0()}/>)
   });
 });

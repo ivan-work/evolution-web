@@ -1,4 +1,5 @@
 App:
+  TBD: In development
   Login:
     Login: Login
     Username: Username
@@ -31,6 +32,7 @@ App:
     $Start: Start game
     in_this_room: In this room
 Game:
+  Game: Game
   Trait:
     TraitSymbiosis      : Symbiosis
     TraitCommunication  : Communication
@@ -55,6 +57,12 @@ Game:
     1: Deploy
     2: Feeding
   UI:
+    Scores:
+      Label: Scoreboard
+      Winner: Winner
+      TablePlayer: Player
+      TableScoreNormal: Score
+      TableScoreDead: Score (for dead)
     EndTurn: End turn
     EndPhase: End phase
     Status:
