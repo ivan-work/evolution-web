@@ -24,6 +24,8 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import MouseBackend from './dnd/react-dnd-mouse-backend';
 import TestBackend from 'react-dnd-test-backend';
 
+import './GameWrapper.scss';
+
 
 export class GameWrapper extends React.Component {
   static childContextTypes = {
@@ -56,9 +58,9 @@ export class GameWrapper extends React.Component {
     if (!user || !game || game.status.phase === 0)
       return <div>Loading</div>;
 
-    return (<div className='GameWrapper' style={{display: 'flex'}}>
+    return (<div className='GameWrapper'>
       <GameUI/>
-      <Game user={user}/>
+      <Game game={game} user={user}/>
     </div>);
   }
 }

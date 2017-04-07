@@ -7,8 +7,9 @@ export const gameGiveCards = (done, game, cards, getRef) => {
   const Deck = getRef('Deck');
   const DeckHtml = ReactDOM.findDOMNode(Deck);
 
-  cards.map((card, index) => {
+  cards.some((card, index) => {
     const CardComponent = getRef('Card#'+card.id);
+    if (!CardComponent) return true;
     const CardHtml = ReactDOM.findDOMNode(CardComponent);
 
     //console.log(`index ${index}`, `deck pos ${game.deck.size - cards.size + index}`, cards.map(c => c.id).toArray());

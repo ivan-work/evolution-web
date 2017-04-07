@@ -37,16 +37,6 @@ $CURRENT_TURN_BACKGROUND: #dfd;
   }
 }
 
-.GameWrapper {
-  position: absolute;
-  bottom: 2px;
-  top: 0;
-  #game {
-    height: 100%;
-    display: flex;
-  }
-}
-
 .GameUI {
   width: 120px;
   padding: .5em 1em 0;
@@ -55,31 +45,14 @@ $CURRENT_TURN_BACKGROUND: #dfd;
 
 .Game {
   position: relative;
-  //width: 600px;
-  //height: 600px;
+  flex: 1;
   background: #eee;
-
   &.isPlayerTurn {
     background: #fff;
   }
-
   .PlayerWrapper {
     .CardCollection {
       height: 80px;
-    }
-  }
-
-  .UserWrapper {
-    position: absolute;
-  }
-
-  .EnemyWrapper {
-    float: left;
-    transition: width .25s, transform .25s;
-    width: 125px;
-    &:hover {
-      width: 250px;
-      transform: none !important;
     }
   }
 }

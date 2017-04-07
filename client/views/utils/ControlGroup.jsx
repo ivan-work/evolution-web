@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import './ControlGroup.scss';
 
 export class ControlGroup extends Component {
   static propTypes = {
@@ -10,9 +11,9 @@ export class ControlGroup extends Component {
   }
 
   render() {
-    return <div className='control-group'>
-      <div className='control-group__title'>{this.props.name}</div>
-      <div className='control-group__body'>{this.props.children}</div>
+    return <div className='ControlGroup'>
+      <div className='title'>{this.props.name}</div>
+      <div className='body'>{this.props.children}</div>
     </div>;
   }
 }

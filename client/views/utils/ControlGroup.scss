@@ -1,16 +1,17 @@
-.control-group {
+.ControlGroup {
   margin: 0 0 0 1em;
-  border: 1px solid rgba(255,255,255,.25);
+  border: 1px solid rgba(255, 255, 255, .25);
   display: inline-block;
 
-  .control-group__title {
+  .title {
     display: inline-block;
     margin: 0 1em;
     &:after {
       content: ':'
     }
   }
-  .control-group__body {
+
+  .body {
     display: inline-block;
   }
 }
