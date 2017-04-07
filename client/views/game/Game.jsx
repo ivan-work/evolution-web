@@ -115,7 +115,7 @@ export class Game extends React.Component {
       {/* USER */}
 
       <div className='PlayerWrapper UserWrapper' style={CARD_POSITIONS[game.players.size].player}>
-        <PlayerContinent continent={player.continent} $deployAnimal={this.$deployAnimal} $deployTrait={this.$deployTrait}/>
+        <PlayerContinent isUserContinent={true} continent={player.continent} $deployAnimal={this.$deployAnimal} $deployTrait={this.$deployTrait}/>
 
         <CardCollection
           ref="Hand" name="Hand"
@@ -138,10 +138,7 @@ export class Game extends React.Component {
                 shift={[20, 0]}>
                 {enemy.hand.toArray().map((cardModel, i) => <Card model={cardModel} key={i} index={i}/>)}
               </CardCollection>
-              <EnemyContinent>
-                {/*enemy.continent.toArray().map((animal, i) =>
-                  <DropTargetAnimal key={i} index={i} onCardDropped={this.$deployTrait}/>)*/}
-              </EnemyContinent>
+              <PlayerContinent continent={enemy.continent} $deployTrait={this.$deployTrait}/>
             </div>
           })
       }

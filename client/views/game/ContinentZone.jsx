@@ -6,8 +6,8 @@ import { DropTarget } from 'react-dnd';
 
 export class ContinentZone extends React.Component {
   static propTypes = {
-    width: React.PropTypes.string.isRequired
-    , index: React.PropTypes.number.isRequired
+    index: React.PropTypes.number.isRequired
+    //, width: React.PropTypes.string.isRequired
     , onCardDropped: React.PropTypes.func.isRequired
     , onOver: React.PropTypes.func.isRequired
   };
@@ -25,11 +25,11 @@ export class ContinentZone extends React.Component {
   }
 
   render() {
-    const {width, isOver} = this.props;
+    const {isOver} = this.props;
     return this.props.connectDropTarget(<div className={classnames({
       ContinentZone: true
       , highlight: isOver
-    })} style={{width}}>
+    })}><div className="inner"></div>
     </div>);
   }
 }
