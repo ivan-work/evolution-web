@@ -11,6 +11,7 @@ export const errorMiddleware = (interceptor = () => null) => store => next => ac
       logger.warn(`${error.name}${actionType}: ` + util.format(error.message, ...error.data));
     } else {
       logger.error(`GenericError${actionType}:`, error);
+      if (process.env.TEST) throw error;
     }
     return error;
     //next(action);

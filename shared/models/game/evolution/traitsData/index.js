@@ -128,6 +128,7 @@ export const TraitCommunication = {
   , cooldowns: fromJS([
     ['TraitCommunication', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
+  , action: () => true
 };
 
 //
@@ -184,6 +185,7 @@ export const TraitCooperation = {
   , cooldowns: fromJS([
     ['TraitCooperation', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
+  , action: () => true
 };
 
 export const TraitBurrowing = {
