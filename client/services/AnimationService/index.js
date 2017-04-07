@@ -1,6 +1,6 @@
 import {AnimationServiceClass} from './AnimationServiceClass';
 
-const debug = true;
+const debug = false;
 const log = debug ? console.log : () => null;
 
 export const animationMiddleware = () => ({dispatch, getState}) => next => action =>
