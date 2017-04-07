@@ -49,7 +49,7 @@ class Animal extends React.Component {
   }
 
   render() {
-    const {model, isOver, canDrop} = this.props;
+    const {model, isOver, canDrop, game} = this.props;
 
     const className = classnames({
       Animal: true
@@ -69,7 +69,7 @@ class Animal extends React.Component {
       </div>
       {this.renderSelectLink()}
       <div id={'AnimalBody'+model.id} className='inner'>
-        {this.renderFoodStatus(model)}
+        {game && game.isFeeding() && this.renderFoodStatus(model, game)}
         {model.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) ?
         <span className='material-icons Flag Poisoned'>smoking_rooms</span> : null}
         {model.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) ?

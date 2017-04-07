@@ -191,15 +191,14 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
   if (sourceType === 'GAME' && game.food > 0) {
     animal.traits.filter(trait => trait.type === TraitCooperation && trait.checkAction(game, animal))
       .forEach(traitCooperation => {
-        const {animal: linkedAnimal} = game.locateAnimal(traitCooperation.linkAnimalId);
-
         if (selectGame(getState, gameId).food <= 0) return; // Re-check food after each cooperation
 
-        animal.traits.filter(t => t.linkAnimalId === linkedAnimal.id) // Get all paired traits that link to Linked Animal
-          .concat(linkedAnimal.traits.filter(t => t.linkAnimalId === animal.id)) // And get all paired traits that link from Linked Animal to this
-          .map(trait => traitMakeCooldownActions(gameId, trait)) // A-a-and...
-          .reduce((result, arrayOfCooldownActions) => result.concat(arrayOfCooldownActions), [])
-          .forEach(cooldownAction => dispatch(cooldownAction)); // Put them all in a cooldown.
+        const {animal: linkedAnimal} = game.locateAnimal(traitCooperation.linkAnimalId);
+        const linkedTrait = linkedAnimal.traits.find(trait => trait.id === traitCooperation.linkId);
+
+        traitMakeCooldownActions(gameId, traitCooperation, animal)
+          .concat(traitMakeCooldownActions(gameId, linkedTrait, linkedAnimal))
+          .map(cooldownAction => dispatch(cooldownAction));
 
         dispatch(server$traitNotify_Start(game, animal, traitCooperation, linkedAnimal));
         dispatch(server$startFeeding(gameId, linkedAnimal, 1, 'GAME', animal.id));
@@ -207,9 +206,9 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
   }
 
   // Communication
-  animal.traits.filter(traitCommunication => traitCommunication.type === TraitCommunication
-    && traitCommunication.checkAction(selectGame(getState, gameId), animal))
+  animal.traits.filter(traitCommunication => traitCommunication.type === TraitCommunication)
     .map(traitCommunication => {
+      if (!traitCommunication.checkAction(selectGame(getState, gameId), animal)) return;
       const {animal: linkedAnimal} = game.locateAnimal(traitCommunication.linkAnimalId);
       const linkedTrait = linkedAnimal.traits.find(trait => trait.id === traitCommunication.linkId);
 
