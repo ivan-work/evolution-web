@@ -21,6 +21,9 @@ import {GameScoreboardFinalView} from './ui/GameScoreboardFinal.jsx';
 import {GameStatusDisplay} from './ui/GameStatusDisplay.jsx';
 import {PlayersList} from './ui/PlayersList.jsx';
 
+import {AnimationService} from '../../services/AnimationService';
+import * as GameAnimations from './GameAnimations';
+
 class _Game extends React.Component {
   static contextTypes = {
     gameActions: React.PropTypes.object
@@ -34,7 +37,23 @@ class _Game extends React.Component {
 
   constructor(props) {
     super(props);
+    this.Cards = {};
+    this.CardCollections = {};
     //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+  }
+
+  componentDidMount() {
+    const {game} = this.props;
+    AnimationService.after('onlineUpdate', (done) => {
+      GameAnimations.gameGiveCards(done, game, game.getPlayer().hand, this.Deck, this.Cards);
+    });
+    AnimationService.after('gameGiveCards', (done, {data: {cards}}) => {
+      GameAnimations.gameGiveCards(done, game, cards, this.Deck, this.Cards);
+    });
+  }
+
+  componentWillUnmount() {
+    AnimationService.off('gameGiveCards');
   }
 
   render() {
@@ -89,7 +108,7 @@ class _Game extends React.Component {
     return <div className='DeckWrapper'>
       <h6>Deck ({game.deck.size}):</h6>
       <CardCollection
-        ref="Deck" name="Deck"
+        name="Deck" ref={(component) => this.Deck = component}
         shift={[2, 1]}>
         {game.deck.toArray().map((cardModel, i) => <Card card={cardModel} key={i} index={i}/>)}
       </CardCollection>
@@ -108,10 +127,15 @@ class _Game extends React.Component {
       />
 
       <CardCollection
-        ref="Hand" name="Hand"
+        name="Hand" ref={(component) => this.CardCollections[player.id] = component}
         shift={[55, 0]}>
         {player.hand.toArray().map((cardModel, i) =>
-        <GameCard card={cardModel} key={cardModel} index={i} disabled={!game.isPlayerTurn()}/>)}
+        <GameCard
+          key={cardModel}
+          card={cardModel}
+          ref={(component) => this.Cards[cardModel.id] = component}
+          disabled={!game.isPlayerTurn()}/>
+          )}
       </CardCollection>
     </div>;
   }
@@ -123,9 +147,14 @@ class _Game extends React.Component {
         return <div className='PlayerWrapper EnemyWrapper' key={enemy.id}
                     style={GAME_POSITIONS[game.players.size][i]}>
           <CardCollection
-            ref={enemy.id} name={enemy.id}
+            name={enemy.id}
             shift={[20, 0]}>
-            {enemy.hand.toArray().map((cardModel, i) => <Card card={cardModel} key={i} index={i}/>)}
+            {enemy.hand.toArray().map((cardModel, i) =>
+            <Card
+              key={i}
+              card={cardModel}
+              ref={(component) => this.Cards[cardModel.id] = component}
+            />)}
           </CardCollection>
 
           <GameContinent

@@ -16,15 +16,17 @@ export class CardModel extends Record({
   , trait2type: null
 }) {
   static new(cardClass) {
-    const id = uuid.v4().slice(0, 4);
+    const id = !process.env.BROWSER
+      ? uuid.v4().slice(0, 4)
+      : Math.floor(Math.random() * 0xFFFF);
     return CardModel.fromServer({
       id
       , ...cardClass
     });
   }
 
-  static generate(count) {
-    return Range(0, count).map(i => CardModel.new(CardUnknown)).toList();
+  static generate(count, cardClass = CardUnknown) {
+    return Range(0, count).map(i => CardModel.new(cardClass)).toList();
   }
 
   static fromServer(js) {

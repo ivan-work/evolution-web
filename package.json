@@ -77,6 +77,7 @@
     "sanitize-html": "*",
     "socket.io": "^1.4.6",
     "socket.io-client": "^1.4.6",
+    "velocity-animate": "^1.2.3",
     "winston": "^2.2.0",
     "yaml-js": "^0.1.4"
   },
@@ -134,6 +135,7 @@
     "react-dnd-test-backend": "^1.0.2",
     "react-transform-hmr": "*",
     "redux-devtools": "*",
+    "redux-devtools-dispatch": "^2.2.0",
     "redux-devtools-dock-monitor": "*",
     "redux-devtools-log-monitor": "*",
     "redux-mock-store": "^1.1.1",

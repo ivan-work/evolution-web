@@ -13,42 +13,31 @@ export class CardCollection extends React.Component {
   static propTypes = {
     name: React.PropTypes.string.isRequired
     , shift: React.PropTypes.arrayOf(React.PropTypes.number)
-    //, children: React.PropTypes.arrayOf(React.PropTypes.element.isRequired)
   };
 
   constructor(props) {
     super(props);
-    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-    //if (props.cards) {
-    //  this.state = props.cards
-    //} else if (typeof props.count === 'number') {
-    //  this.state = CardModel.generate(props.count)
-    //} else {
-    //  throw new Error(`CardCollection[${this.props.name}] doesnt have .cards or .count`)
-    //}
   }
 
-  //
-  //componentWillReceiveProps(nextProps) {
-  //  //if (nextProps.cards) {
-  //  //  this.state = nextProps.cards
-  //  //} else if (typeof nextProps.count === 'number') {
-  //  //  this.state = CardModel.generate(nextProps.count)
-  //  //} else {
-  //  //  console.error(`CardCollection[${this.props.name}] doesnt have .cards or .count`, this.props);
-  //  //  throw new Error(`CardCollection[${this.props.name}] doesnt have .cards or .count: ${JSON.stringify(this.props)}`)
-  //  //}
-  //}
+  getXYForCard(index) {
+    return {
+      x: this.props.shift[0] * index
+      , y: this.props.shift[1] * index
+    }
+  }
+
+  renderCardPlace(card, index) {
+    const transform = this.getXYForCard(index);
+    return <div className="CardPlace" key={index} style={{
+          transform: `translate(${transform.x}px,${transform.y}px)`
+        }}>
+      {card}
+    </div>
+  }
 
   render() {
     return <div className={`CardCollection ${this.props.name}`}>
-      {React.Children.map(this.props.children, (card, index) => {
-        return <div className="CardPlace" key={index} style={{
-          transform: `translate(${this.props.shift[0] * index}px,${this.props.shift[1] * index}px)`
-        }}>
-          {card}
-        </div>
-        })}
+      {React.Children.map(this.props.children, (card, index) => this.renderCardPlace(card, index))}
     </div>;
   }
 }

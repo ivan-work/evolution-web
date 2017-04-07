@@ -25,6 +25,10 @@ import 'react-mdl/extra/material.min.css'
 import 'react-mdl/extra/material.min.js'
 import './styles/style.scss';
 
+// Services
+import {UserService} from './services/UserService';
+import {AnimationService, animationMiddleware} from './services/AnimationService';
+
 const reducer = combineReducers({
   ...reducers,
   routing: routerReducer
@@ -35,13 +39,12 @@ const socketClient = makeSocketClient(location.host, {forceNew: true});
 const store = configureStore(reducer, void 0, [
   appRouterMiddleware(browserHistory)
   , socketMiddleware(socketClient)
+  , animationMiddleware()
 ], [DevTools.instrument()]);
 
 const history = syncHistoryWithStore(store, browserHistory);
 
 socketStore(socketClient, store);
-
-import {UserService} from './services/UserService';
 
 UserService.start(store.getState);
 
