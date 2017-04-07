@@ -149,32 +149,32 @@ describe('Auth:', function () {
         .equal(List.of(User0.toOthers(), User1.toOthers()));
     });
   });
+
   describe('disconnecting', function () {
     it('clears everything', (done) => {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
       const clientStore1 = mockClientStore().connect(serverStore);
-      clientStore0.dispatch(loginUserRequest('/test', 'testLogin', 'testPassword'));
+      clientStore0.dispatch(loginUserRequest('/User0', 'User0', 'User0'));
       const User0 = UserSpy.lastCall.returnValue;
+      clientStore1.dispatch(loginUserRequest('/User1', 'User1', 'User1'));
+      const User1 = UserSpy.lastCall.returnValue;
+
+
       serverStore.clearActions();
+      clientStore1.clearActions();
 
       clientStore0.getClient().disconnect();
-      clientStore1.getClient().disconnect();
 
       setTimeout(() => {
-        expect(serverStore.getState().get('connections')).equal(Map());
-        expect(serverStore.getState().get('users')).equal(Map());
+        console.log(serverStore.getActions())
+        console.log(clientStore1.getActions())
 
-        //expect(serverStore.getActionType(0)).eql('socketDisconnect');
-        //expect(serverStore.getActionData(0)).eql({connectionId: clientStore0.getConnectionId()});
-        //
-        //expect(serverStore.getActionType(1)).eql('@@reduxTimeout/addTimeout');
-        //
-        //expect(serverStore.getActionType(2)).eql('socketDisconnect');
-        //expect(serverStore.getActionData(2)).eql({connectionId: clientStore1.getConnectionId()});
-        //
-        //expect(serverStore.getActionType(3)).eql('logoutUser');
-        //expect(serverStore.getActionData(3)).eql({userId: User0.id});
+        expect(serverStore.getState().get('connections')).equal(Map({[clientStore1.getConnectionId()]: clientStore1.getConnection().socket}));
+        expect(serverStore.getState().get('users')).equal(Map({[User1.id]: User1}));
+
+        expect(clientStore0.getState().get('online')).equal(List());
+        expect(clientStore1.getState().get('online')).equal(List.of(User1.toOthers()));
         done();
       }, 20);
     });
