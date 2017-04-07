@@ -14,10 +14,6 @@ import { TraitModel } from '../../../../shared/models/game/evolution/TraitModel'
 import './AnimalTrait.scss';
 
 class AnimalTrait extends Component {
-  static defaultProps = {
-    isPlayerTurn: false
-  };
-
   static propTypes = {
     trait: React.PropTypes.instanceOf(TraitModel).isRequired
   };
@@ -41,7 +37,7 @@ class AnimalTrait extends Component {
 
     return <div className={className}>
       <div className='inner'>
-        {T.translate('Game.Trait.' + trait.type)}
+        {T.translate('Game.Trait.' + trait.type)} {trait.getDataModel().food > 0 ? '+'+trait.getDataModel().food : null}
       </div>
     </div>;
   }
@@ -54,6 +50,7 @@ class DragAnimalTraitBody extends AnimalTrait {
     , canDrag: PropTypes.bool.isRequired
     , isDragging: PropTypes.bool.isRequired
   };
+
   render() {
     return this.props.connectDragSource(super.render());
   }

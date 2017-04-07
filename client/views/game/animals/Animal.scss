@@ -10,6 +10,7 @@
   & > .inner {
     width: 100%;
     height: $ANIMAL_HEIGHT;
+    text-align: center;
     word-wrap: break-word;
 
     border: 1px solid #bbb;
@@ -22,15 +23,23 @@
     box-shadow: 0px 0px 1em 1em yellow;
   }
 
-  .AnimalFoodContainer {
-    margin: 20px auto 0;
-    padding: 1px;
-    .Food {
-      color: #966;
+  .material-icons {
+    width: 1em;
+    height: 1em;
+  }
 
-      font-size: 1.1em;
-      width: 1em;
-      height: 1em;
+  .Flag {
+    font-size: 1.5em;
+    &.Poisoned {
+      color: #f00;
     }
+    &.Hibernated {
+      color: #66f;
+    }
+  }
+
+  .Food {
+    color: #966;
+    font-size: 1.1em;
   }
 }
