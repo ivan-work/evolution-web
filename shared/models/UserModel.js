@@ -1,11 +1,7 @@
 import {Record} from 'immutable';
 
 import jwt from 'jsonwebtoken';
-//console.log('process.env.APP_ENV' + process.env.APP_ENV);
-//if (process.env.APP_ENV == 'browser') {
-//} else {
-//  const jwt = require('jsonwebtoken');
-//}
+import uuid from 'node-uuid';
 
 export class UserModel extends Record({
   id: null
@@ -13,9 +9,13 @@ export class UserModel extends Record({
   , connectionId: null
   , token: null
 }) {
-  new(login, data) {
-    (process.env.TEST ? uuid.v4().substr(0, 4) : uuid.v4())
+  static new(login, connectionId) {
+    return new UserModel({
+      id: uuid.v4()
+      , login, connectionId
+    }).sign()
   }
+
   sign() {
     return this.set('token', jwt.sign(this, process.env.JWT_SECRET))
   };

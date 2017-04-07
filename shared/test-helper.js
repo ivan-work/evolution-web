@@ -1,9 +1,11 @@
 import chai from 'chai';
+import sinon from 'sinon';
 import chaiImmutable from 'chai-immutable';
 import jsdom from 'jsdom';
 
 chai.use(chaiImmutable);
 
+global.sinon = sinon;
 global.expect = chai.expect;
 
 global.document = jsdom.jsdom('<!doctype html><html><body></body></html>');
@@ -48,6 +50,18 @@ import syncSocketIOClient from './test/sync-socket-io-client'
 import {socketStore as socketClientStore, socketMiddleware as socketClientMiddleware} from '../client/socket';
 import {socketStore as socketServerStore, socketMiddleware as socketServerMiddleware} from '../server/socket';
 
+const mixinActions = (store => {
+  store.actions = [];
+  store.getActions = () => store.actions;
+  store.clearActions = () => store.actions = [];
+  store.getAction = (i) => store.getActions()[i];
+  store.getActionData = (i) => store.getActions()[i].data;
+  store.getActionType = (i) => store.getActions()[i].type;
+  store.hook = (actionType, callback) => {
+    //store.hooks.
+  };
+});
+
 global.mockServerStore = function (initialServerState) {
   const ioServer = syncSocketIOServer();
   const serverStore = createStore(
@@ -66,9 +80,8 @@ global.mockServerStore = function (initialServerState) {
 
   serverStore.getSocket = () => ioServer;
 
-  serverStore.actions = [];
-  serverStore.getActions = () => serverStore.actions;
-  serverStore.clearActions = () => serverStore.actions = [];
+  mixinActions(serverStore);
+
   return serverStore
 };
 
@@ -101,8 +114,7 @@ global.mockClientStore = function (initialClientState) {
     return clientStore;
   };
 
-  clientStore.actions = [];
-  clientStore.getActions = () => clientStore.actions;
-  clientStore.clearActions = () => clientStore.actions = [];
+  mixinActions(clientStore);
+
   return clientStore
 };
