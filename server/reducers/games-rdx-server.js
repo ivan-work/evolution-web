@@ -211,6 +211,12 @@ export const gameEnd = (state, {game}) => game.end();
 export const gamePlayerLeft = (game, {userId}) => game
   .setIn(['players', userId, 'playing'], false);
 
+export const traitDefenceQuestion = (game, {questionId, traitTuple}) => game
+  .set('question', Map({id: questionId, ...traitTuple}));
+
+export const traitDefenceAnswerSuccess = (game, {questionId}) => game
+  .remove('question');
+
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
   , gameDestroy: (state, data) => state.remove(data.gameId)
@@ -229,6 +235,8 @@ export const reducer = createReducer(Map(), {
   , playerActed: (state, data) => state.update(data.gameId, game => playerActed(game, data))
   , traitMoveFood: (state, data) => state.update(data.gameId, game => traitMoveFood(game, data))
   , startCooldown: (state, data) => state.update(data.gameId, game => startCooldown(game, data))
+  , traitDefenceQuestion: (state, data) => state.update(data.gameId, game => traitDefenceQuestion(game, data))
+  , traitDefenceAnswerSuccess: (state, data) => state.update(data.gameId, game => traitDefenceAnswerSuccess(game, data))
   , traitKillAnimal: (state, data) => state.update(data.gameId, game => traitKillAnimal(game, data))
   , traitAnimalRemoveTrait: (state, data) => state.update(data.gameId, game => traitAnimalRemoveTrait(game, data))
   , animalStarve: (state, data) => state.update(data.gameId, game => animalStarve(game, data))

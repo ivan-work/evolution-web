@@ -44,7 +44,7 @@ export const TraitRunning = {
   type: 'TraitRunning'
   , action: (game, runningAnimal, attackAnimal) => dispatch => {
     if (getRandom(0, 1) > 0) {
-      dispatch(server$traitNotify(game.id, 'TraitRunning', runningAnimal, attackAnimal));
+      dispatch(server$traitNotify(game.id, runningAnimal, 'TraitRunning', attackAnimal));
       return true;
     }
     return false;
@@ -59,7 +59,7 @@ export const TraitMimicry = {
   ])
   , action: (game, mimicryAnimal, newTargetAnimal, attackAnimal, attackTraitData) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, TraitMimicry, mimicryAnimal));
-    dispatch(server$traitNotify(game.id, 'TraitMimicry', mimicryAnimal, attackAnimal));
+    dispatch(server$traitNotify(game.id, mimicryAnimal, 'TraitMimicry', attackAnimal));
     dispatch(server$traitActivate(game, attackAnimal, attackTraitData, newTargetAnimal.id));
     return true;
   }

@@ -61,7 +61,7 @@ export const socketMiddleware = io => store => next => action => {
     } else if (action.meta.userId) {
       sockets = [store.getState().getIn(['users', action.meta.userId, 'connectionId'])];
     } else {
-      logger.silly('Meta not valid', action.type, action.meta);
+      logger.error('Meta not valid', action.type, action.meta);
     }
     //console.log('Server:Send', action.type, action.meta, sockets);
     sockets

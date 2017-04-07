@@ -11,7 +11,7 @@ import {replaceGetRandom} from '../../utils/randomGenerator';
 
 import {makeGameSelectors} from '../../selectors';
 
-describe.only('Complex traits:', async () => {
+describe('Complex traits:', async () => {
   it('Hunt on Mimicry + TailLoss + Running', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`

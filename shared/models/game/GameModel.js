@@ -52,6 +52,7 @@ const GameModelData = {
   , started: false
   , status: new StatusRecord()
   , cooldowns: CooldownList.new()
+  , question: null
   , scoreboardFinal: null
   , winnerId: null
 };
@@ -88,6 +89,7 @@ export class GameModel extends Record(GameModelData) {
   }
 
   toClient() {
+    // TODO question
     return this
       .set('deck', this.deck.map(card => card.toClient()))
       .set('players', this.players.map(player => player.toClient()));
