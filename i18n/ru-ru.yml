@@ -87,7 +87,10 @@ Game:
     gameEndTurn: $Player@{0} закончил ход
     gameNextPlayer: $Player@{0} начал ход
     PhaseDeploy: Фаза развития
+    PhaseExtinct: Фаза вымирания
     gameStartEat: 'Фаза питания. Еда: {0}'
+    traitTakeShell: '${0} залезает в раковину'
+    traitGiveBirth: '${0} рожает ребенка'
     traitMoveFood:
       GAME: '{2} взяло {0} из кормовой базы.'
       TraitPiracy: '{2} пиратит $F у {3}'

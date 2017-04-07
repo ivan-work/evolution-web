@@ -158,9 +158,6 @@ export const traitGiveBirth = (gameId, sourceAid) => ({
 });
 
 export const server$tryViviparous = (gameId, animal) => (dispatch, getState) => {
-  // Viviparous
-  const game = selectGame(getState, gameId);
-  const {sourceAnimal, trait} = checkTraitActivation(game, animal.ownerId, animal.id, TraitViviparous);
   return passesChecks(() => {
     const game = selectGame(getState, gameId);
     const {sourceAnimal, trait} = checkTraitActivation(game, animal.ownerId, animal.id, TraitViviparous);

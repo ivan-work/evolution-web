@@ -7,7 +7,7 @@ import {CooldownList} from '../../shared/models/game/CooldownList';
 import {AnimalModel} from '../../shared/models/game/evolution/AnimalModel';
 import {TraitModel} from '../../shared/models/game/evolution/TraitModel';
 import {TraitDataModel} from '../../shared/models/game/evolution/TraitDataModel';
-import {CTT_PARAMETER, TRAIT_TARGET_TYPE} from '../../shared/models/game/evolution/constants';
+import {CTT_PARAMETER, TRAIT_TARGET_TYPE, TRAIT_ANIMAL_FLAG} from '../../shared/models/game/evolution/constants';
 import {TraitFatTissue, TraitShell} from '../../shared/models/game/evolution/traitTypes';
 
 /**
@@ -121,6 +121,7 @@ export const gameStartDeploy = (game) => {
     .update('players', players => players.map(player => player
       .set('ended', !player.playing)
       .update('continent', continent => continent.map(animal => animal
+        .set('food', 0)
         .set('flags', Map())
       ))
     ))
@@ -273,9 +274,16 @@ export const traitTakeShell = (game, {continentId, animalId, trait}) => {
 };
 
 export const traitGiveBirth = (game, {sourceAid}) => {
+  const ending = game.deck.size === 1;
   const {animalIndex, animal} = game.locateAnimal(sourceAid);
+  const card = game.getIn(['deck', 0]);
   const newborn = AnimalModel.new(animal.ownerId).set('food', 1);
   return game
+    .update(game => !ending ? game
+      : game
+      .update('players', players => players.map(player => player
+        .update('continent', continent => continent.map(animal => animal.setIn(['flags', TRAIT_ANIMAL_FLAG.HIBERNATED], false))))))
+    .update('deck', deck => deck.skip(1))
     .updateIn(['players', animal.ownerId, 'continent'], continent => continent.splice(animalIndex + 1, 0, newborn))
     .update(addToGameLog(['traitGiveBirth', logAnimal(animal)]));
 };
@@ -295,6 +303,7 @@ export const reducer = createReducer(Map(), {
   , gamePlayerLeft: (state, data) => state.update(data.gameId, game => gamePlayerLeft(game, data))
   , gameStartEat: (state, data) => state.update(data.gameId, game => gameStartEat(game, data))
   , gameStartDeploy: (state, data) => state.update(data.gameId, game => gameStartDeploy(game, data))
+  , gameStartExtinct: (state, data) => state.update(data.gameId, game => gameStartExtinct(game, data))
   , playerActed: (state, data) => state.update(data.gameId, game => playerActed(game, data))
   , traitMoveFood: (state, data) => state.update(data.gameId, game => traitMoveFood(game, data))
   , startCooldown: (state, data) => state.update(data.gameId, game => startCooldown(game, data))

@@ -153,10 +153,9 @@ export class AnimalModel extends Record({
     let fatToSpend = Math.max(0, this.foodSize - this.getFood());
     if (this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)) {
       return this
-        .set('food', 0)
     } else {
       return this
-        .set('food', 0)
+        .update('food', food => food + Math.min(this.getFat(), fatToSpend))
         .update('traits', traits => traits.map(trait =>
           (trait.type === TraitFatTissue && trait.value && fatToSpend-- > 0) ? trait.set('value', false)
             : trait));

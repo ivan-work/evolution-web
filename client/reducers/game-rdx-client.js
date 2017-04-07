@@ -14,8 +14,9 @@ import {
   , gameEndTurn
   , gameEnd
   , gamePlayerLeft
-  , gameStartEat
   , gameStartDeploy
+  , gameStartEat
+  , gameStartExtinct
   , playerActed
   , traitMoveFood
   , startCooldown
@@ -47,8 +48,9 @@ export const reducer = createReducer(null, {
   , gameEndTurn
   , gameEnd
   , gamePlayerLeft
-  , gameStartEat
   , gameStartDeploy
+  , gameStartEat
+  , gameStartExtinct
   , playerActed
   , traitMoveFood
   , startCooldown

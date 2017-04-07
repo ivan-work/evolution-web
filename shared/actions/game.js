@@ -354,7 +354,7 @@ const gameStartExtinct = (gameId) => ({
 });
 
 const server$gameExtict = (gameId) => (dispatch, getState) => {
-  dispatch(gameStartExtinct(gameId));
+  dispatch(server$game(gameId, gameStartExtinct(gameId)));
   selectGame(getState, gameId).players.forEach((player) =>
     player.continent.forEach((animal) => {
       if (animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED)) {
