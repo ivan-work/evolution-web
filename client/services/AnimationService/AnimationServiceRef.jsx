@@ -8,11 +8,9 @@ export const AnimationServiceRef = (WrappedComponentClass) => class AnimationSer
 
   constructor(props, context) {
     super(props);
-    if (!context || !context.animationServiceContext) throw new Error(WrappedComponentClass.displayName + ': context.animationServiceContext is undefined');
-    const animationServiceContext = context;
-    this.connectRef = (name) => (component) => {
-      animationServiceContext.setRef(name, component);
-    };
+    if (!context || !context.animationServiceContext) throw new Error(WrappedComponentClass.displayName + ': context.animationServiceContext is undefined')
+    const animationServiceContext = context.animationServiceContext;
+    this.connectRef = (name) => (component) => animationServiceContext.setRef(name, component);
     this.getRef = animationServiceContext.getRef
   }
 
