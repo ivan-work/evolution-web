@@ -21,6 +21,7 @@ export class Login extends React.Component {
     this.state.form.login = '';
     this.state.form.password = '';
     this.state.form.redirectTo = LocationService.getLocationQuery().redirect;
+    console.log(LocationService.getLocationQuery());
     this.state.validation = new Validator(this.state.form, RulesLoginPassword);
   }
 

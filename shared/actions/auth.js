@@ -186,8 +186,9 @@ export const authServerToClient = {
 };
 
 export const redirectToLogin = (getState, redirectTo) => {
-  let previousLocation = getState().getIn(['routing', 'locationBeforeTransitions', 'pathname'], '/');
-  if (previousLocation !== '/login')
-    redirectTo('/login?redirect=' + previousLocation);
+  //let previousLocation = getState().getIn(['routing', 'locationBeforeTransitions', 'pathname'], '/');
+  //if (previousLocation !== '/login')
+  //  redirectTo('/login?redirect=' + previousLocation);
+  //else
   redirectTo('/login');
 };

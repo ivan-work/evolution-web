@@ -24,7 +24,7 @@ class _GameUI extends React.Component {
   }
 
   render() {
-    const {game, isPlayerTurn} = this.props;
+    const {game} = this.props;
     return (
       <div className='GameUI'>
         <TraitDefenceDialog game={game} $traitDefenceAnswer={this.context.gameActions.$traitDefenceAnswer}/>
@@ -33,7 +33,7 @@ class _GameUI extends React.Component {
 
         {game.getPlayer() &&
         <Button id="Game$endTurn" colored={game.getPlayer().acted} accent={!game.getPlayer().acted} raised
-                disabled={!isPlayerTurn}
+                disabled={!game.isPlayerTurn()}
                 style={{width: '100%'}}
                 onClick={this.context.gameActions.$endTurn}>
           {T.translate(game.getPlayer().acted ? 'Game.UI.EndTurn' : 'Game.UI.EndPhase')}
@@ -57,8 +57,4 @@ export const GameUI = GameProvider(_GameUI);
 GameUI.propTypes = {
   // by GameProvider
   game: PropTypes.object
-  , isPlayerTurn: PropTypes.bool
-  , currentUserId: PropTypes.string
-  , isDeploy: PropTypes.bool
-  , isFeeding: PropTypes.bool
 };

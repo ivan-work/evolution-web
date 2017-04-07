@@ -83,12 +83,10 @@ export class PlayerWrapper extends Component {
   }
 
   renderContinent(game, continent, isUser) {
-    const isDeploy = (game.status.phase === PHASE.DEPLOY);
-
     return (<Continent
       key='Continent'
       isUserContinent={isUser}>
-      {continent.map(animal => this.renderAnimal(animal, isUser, isDeploy))}
+      {continent.map(animal => this.renderAnimal(animal, isUser, game.isDeploy()))}
     </Continent>)
   }
 
