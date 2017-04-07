@@ -63,14 +63,14 @@ export class AnimalModel extends Record({
   }
 
   canEat(game) {
-    return this.needsFood() > 0 && this.traits
+    return this.needsFood() > 0 && !this.traits
         .filter(trait => trait.type === TraitSymbiosis.type && trait.symbioticAid === this.id)
-        .filter(trait => {
+        .some(trait => {
           //console.log(`${this.id} is living on ${trait.linkAnimalId}`);
           const {animal: hostAnimal} = game.locateAnimal(trait.linkAnimalId);
           //console.log(`And ${trait.linkAnimalId} ${hostAnimal.canSurvive() ? `can` : `can't`} survive`)
           return !hostAnimal.canSurvive();
-        }).size == 0;
+        });
   }
 
   needsFood() {

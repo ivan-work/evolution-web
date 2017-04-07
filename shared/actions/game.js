@@ -216,6 +216,7 @@ export const gameStartEat = (gameId, food) => ({
 });
 
 export const server$gameFinishFeeding = (gameId, userId) => (dispatch, getState) => {
+  logger.verbose('server$gameFinishFeeding', userId);
   dispatch(Object.assign(gameEndTurn(gameId, userId), {
     meta: {users: selectPlayers4Sockets(getState, gameId)}
   }));

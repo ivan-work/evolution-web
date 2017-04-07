@@ -16,6 +16,8 @@ import {
 import {addTimeout} from '../../../../utils/reduxTimeout';
 import {getRandom} from '../../../../utils/randomGenerator';
 
+import {FOOD_SOURCE_TYPE} from '../constants';
+
 //
 
 export {TraitCarnivorous} from './TraitCarnivorous';
@@ -96,17 +98,16 @@ export const TraitSymbiosis = {
 export const TraitPiracy = {
   type: 'TraitPiracy'
   , targetType: TRAIT_TARGET_TYPE.ANIMAL
-  , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
-  , cooldownDuration: TRAIT_COOLDOWN_DURATION.TURN
-  , cooldownLink: 'TraitPiracy'
-  , action: (target) => (getState, dispatch) => {
-    // TODO target is animal
-    if (this.checkTarget(target)) {
-      // dispatch(traitStealFood)
-    }
+  , cooldowns: fromJS([
+    ['TraitPiracy', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
+  ])
+  , action: (game, sourceAnimal, targetAnimal) => dispatch => {
+    dispatch(server$traitStartCooldown(game.id, TraitPiracy, sourceAnimal));
+    dispatch(server$startFeeding(game.id, sourceAnimal, 1, FOOD_SOURCE_TYPE.ANIMAL_TAKE, targetAnimal.id));
+    return true;
   }
   , checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game)
-  , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.needOfNormalFood() > 0
+  , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.food > 0 && !targetAnimal.canSurvive()
 };
 
 export const TraitTailLoss = {
@@ -130,24 +131,18 @@ export const TraitTailLoss = {
 export const TraitCommunication = {
   type: 'TraitCommunication'
   , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
-  , cooldownLink: 'TraitCommunication'
-  , cooldownDuration: TRAIT_COOLDOWN_DURATION.ACTIVATION
-  , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
-  //, action: ({gameId, sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}) => (dispatch, getState) => {
-  //  animal.traits.filter(trait => trait.type === 'TraitCommunication')
-  //    .forEach(trait => {
-  //      dispatch(server$startFeeding(gameId, trait.linkAnimalId, 1, FOOD_SOURCE_TYPE.ANIMAL_COPY, animal.id));
-  //    })
-  //}
+  //, cooldowns: fromJS([
+  //  ['TraitCommunication', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
+  //])
 };
 
 //
 
 export const TraitGrazing = {
   type: 'TraitGrazing'
-  , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
-  , cooldownDuration: TRAIT_COOLDOWN_DURATION.ROUND
-  , cooldownLink: 'TraitGrazing'
+  , cooldowns: fromJS([
+    ['TraitGrazing', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ROUND]
+  ])
   , action: (target) => (getState, dispatch) => {
     // TODO target is animal
     if (this.checkTarget(target)) {
@@ -165,9 +160,9 @@ export const TraitHighBodyWeight = {
 export const TraitHibernation = {
   type: 'TraitHibernation'
   , disableLastRound: true
-  , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
-  , cooldownDuration: TRAIT_COOLDOWN_DURATION.TWO_TURNS
-  , cooldownLink: 'TraitHibernation'
+  , cooldowns: fromJS([
+    ['TraitHibernation', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TWO_TURNS]
+  ])
 };
 
 export const TraitPoisonous = {
@@ -178,9 +173,9 @@ export const TraitPoisonous = {
 
 export const TraitCooperation = {
   type: 'TraitCooperation'
-  , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
-  , cooldownDuration: TRAIT_COOLDOWN_DURATION.ACTIVATION
-  , cooldownLink: 'TraitCooperation'
+  //, cooldowns: fromJS([
+  //  ['TraitCooperation', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
+  //])
 };
 
 export const TraitBurrowing = {

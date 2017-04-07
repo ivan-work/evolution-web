@@ -165,6 +165,10 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
   switch (sourceType) {
     case FOOD_SOURCE_TYPE.GAME:
       return updatedGame.update('food', food => food - amount);
+    case FOOD_SOURCE_TYPE.ANIMAL_TAKE:
+      const {playerId: takenFromPid, animalIndex: takenFromAix} = game.locateAnimal(sourceId);
+      return updatedGame
+        .updateIn(['players', takenFromPid, 'continent', takenFromAix, 'food'], food => Math.max(food - 1, 0));
     default:
       return updatedGame;
   }

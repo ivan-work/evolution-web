@@ -26,7 +26,7 @@ import {
         , ['User' + i]: User
       });
     }
-    logger.info(debugInfo);
+    logger.debug(debugInfo);
     result.forEach((r, i) => r['clientStore' + i].clearActions())
     serverStore.clearActions();
     sandbox.restore();
@@ -57,7 +57,8 @@ import {
 
     result[0].ParseGame = (string) => {
       result[0].serverStore.dispatch(gameCreateSuccess(GameModel.parse(room, string)));
-      const gameId = result[0].serverStore.getState().get('games').last().id;
+      const game = result[0].serverStore.getState().get('games').last();
+      const gameId = game.id;
 
       for (let i = 0; i < count; ++i) {
         const clientStore = mockedStores[i + 1]['clientStore' + i];
@@ -68,6 +69,7 @@ import {
         const clientStore = mockedStores[i + 1]['clientStore' + i];
         clientStore.dispatch(gameReadyRequest());
       }
+      logger.info(`Parsed game#${gameId} with ${game.players.toArray().map(p => p.id).join(', ')}`);
       return gameId;
     };
 

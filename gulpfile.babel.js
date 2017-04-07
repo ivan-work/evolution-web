@@ -8,7 +8,8 @@ const watch = require('gulp-watch');
 let watching = false;
 
 const TEST_PATH_WATCH = '{shared,server,client}/**/*.js*(x)';
-const TEST_PATH_SERVER = ['shared/**/*.spec.js', 'server/**/*.spec.js'];
+const TEST_PATH_SHARED = ['shared/**/*.spec.js'];
+const TEST_PATH_SERVER = ['server/**/*.spec.js'];
 const TEST_PATH_CLIENT = ['client/**/*.spec.js', 'client/**/*.spec.jsx'];
 
 const testWatch = (paths) => gulp.src(paths)
@@ -26,20 +27,14 @@ gulp.task('test:setup', () => {
   process.env.NODE_ENV = 'test';
 });
 
-gulp.task('test:server:single', ['test:setup'], () =>
-  testWatch(TEST_PATH_SERVER));
+gulp.task('test:shared:single', ['test:setup'], () =>  testWatch(TEST_PATH_SHARED));
+gulp.task('test:shared', ['test:shared:single'], () =>  gulp.watch(TEST_PATH_WATCH, ['test:shared:single']));
 
-gulp.task('test:client:single', ['test:setup'], () =>
-  testWatch(TEST_PATH_CLIENT));
+gulp.task('test:server:single', ['test:setup'], () =>  testWatch(TEST_PATH_SERVER));
+gulp.task('test:server', ['test:server:single'], () =>  gulp.watch(TEST_PATH_WATCH, ['test:server:single']));
 
-gulp.task('test:all:single', ['test:setup'], () =>
-  testWatch([].concat(TEST_PATH_SERVER, TEST_PATH_CLIENT)));
+gulp.task('test:client:single', ['test:setup'], () =>  testWatch(TEST_PATH_CLIENT));
+gulp.task('test:client', ['test:client:single'], () =>  gulp.watch(TEST_PATH_WATCH, ['test:client:single']));
 
-gulp.task('test:server', ['test:server:single'], () =>
-  gulp.watch(TEST_PATH_WATCH, ['test:server:single']));
-
-gulp.task('test:client', ['test:client:single'], () =>
-  gulp.watch(TEST_PATH_WATCH, ['test:client:single']));
-
-gulp.task('test:all', ['test:all:single'], () =>
-  gulp.watch(TEST_PATH_WATCH, ['test:all:single']));
+gulp.task('test:all:single', ['test:setup'], () =>  testWatch([].concat(TEST_PATH_SERVER, TEST_PATH_SHARED, TEST_PATH_CLIENT)));
+gulp.task('test:all', ['test:all:single'], () =>  gulp.watch(TEST_PATH_WATCH, ['test:all:single']));

@@ -15,7 +15,7 @@ export class TraitDataModel extends Record({
   , multiple: false
   , disableLastRound: false
   , action: null
-  , checkAction: null
+  , $checkAction: null
   , checkTarget: null
 }) {
   static new(traitType) {
