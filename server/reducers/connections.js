@@ -1,17 +1,7 @@
 import {Map} from 'immutable';
+import {createReducer} from '~/shared/utils';
 
-export function reducer(state = Map(), action) {
-  switch (action.type) {
-    case 'socketConnect':
-      return state.set(action.data.connectionId, action.data.socket);
-    case 'socketDisconnect':
-      return state.delete(action.data.connectionId);
-    default:
-      return state;
-  }
-}
-
-export const reducer2 = {
-  socketConnect: (state, action) => state.set(action.data.connectionId, action.data.socket)
-  , socketDisconnect: (state, action) => state.delete(action.data.connectionId)
-};
+export const reducer = createReducer(Map(), {
+  socketConnect: (state, data) => state.set(data.connectionId, data.socket)
+  , socketDisconnect: (state, data) => state.delete(data.connectionId)
+});

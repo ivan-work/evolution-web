@@ -8,7 +8,10 @@ describe('Auth testing', () => {
 
   it('socketDisconnect', () => {
     const store = mockStore(fromJS({
-      users: {
+      connections: {
+        '0': 'socket', '1': 'socket'
+      }
+      , users: {
         0: new UserRecord({id: 0, connectionId: '0'})
         , 1: new UserRecord({id: 1, connectionId: '1'})
       }
@@ -21,6 +24,8 @@ describe('Auth testing', () => {
       , {type: 'logoutUser', data: 1} // clients
       , {type: 'socketDisconnect', data: {connectionId: '1'}}
     ]);
+
+    console.log(store.getState().toJS())
   });
 
   describe('loginUserRequest', () => {
