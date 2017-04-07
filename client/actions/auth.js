@@ -4,11 +4,7 @@ import { Map } from 'immutable';
 import { push, replace } from 'react-router-redux';
 //import jwtDecode from 'jwt-decode';
 
-export const server = {
-  [LOGIN_USER_SUCCESS]: (data) => {
 
-  }
-};
 
 export function loginUserRequest(login, password, redirect="/") {
   return {

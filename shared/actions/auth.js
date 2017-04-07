@@ -1,0 +1,86 @@
+import {User} from '../models/User';
+
+export const socketConnect = (connectionId, socket) => ({
+  type: 'socketConnect'
+  , data: {connectionId, socket}
+});
+
+export const socketDisconnect = (connectionId) => ({
+  type: 'socketDisconnect'
+  , data: {connectionId}
+});
+
+export const loginUserRequest = (redirect = "/", login, password) => {
+  return {
+    type: 'loginUserRequest'
+    , data: {login}
+    , meta: {
+      server: true
+    }
+  }
+};
+
+export const loginUserSuccess = (connectionId, user) => ({
+  type: 'loginUserSuccess'
+  , data: user
+  , meta: {
+    connectionId: connectionId
+  }
+});
+
+export const loginUserFailure = (connectionId, msg) => ({
+  type: 'loginUserFailure'
+  , data: msg
+  , meta: {
+    connectionId: connectionId
+  }
+});
+
+export const clientToServer = {
+  loginUserRequest: (connectionId, data) => (dispatch, getState) => {
+    const username = data.login;
+    const state = getState().get('users');
+    const userExists = state.find(user => user.name === username);
+    if (!userExists) {
+      const user = User(connectionId, data.username);
+      return dispatch(loginUserSuccess(connectionId, user));
+    } else {
+      return dispatch(loginUserFailure(connectionId, 'User already exists'));
+    }
+  }
+};
+
+export const serverToClient = {
+  loginUserSuccess: (data) => {
+
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
