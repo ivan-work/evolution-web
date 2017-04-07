@@ -20,8 +20,7 @@ import 'react-mdl/extra/material.min.css'
 import 'react-mdl/extra/material.min.js'
 import './styles/style.scss';
 
-import {socket, bindSocketToStore} from './socket';
-import socketMiddleware from './socket/socketMiddleware';
+import {socket, socketStore, socketMiddleware} from './socket';
 
 const routerReducerState = Map({
   locationBeforeTransitions: null
@@ -58,7 +57,7 @@ const store = createStore(
   )
 );
 
-bindSocketToStore(store);
+socketStore(socket, store);
 
 const history = syncHistoryWithStore(browserHistory, store, {
   selectLocationState: (state) => {
