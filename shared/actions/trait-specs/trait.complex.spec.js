@@ -116,6 +116,21 @@ players:
     expect(selectGame().getIn(['question', 'id']), 'Server game has question').ok
   });
 
+  it('Player should not set "acted" after instant question', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+
+    const gameId = ParseGame(`
+phase: 2
+food: 1
+players:
+  - continent: $A carn, $B tail
+`);
+    const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
+    expect(selectGame().status.round).equal(1);
+    expect(selectPlayer(User0).acted, 'User0 not acted').false;
+  });
+
   it('Attacker should not act when questioning', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
 

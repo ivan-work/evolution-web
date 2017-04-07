@@ -50,7 +50,7 @@ export default class RoomSettings extends Component {
       <div><MDLForm.Textfield name='timeTurn'/></div>
       <div><MDLForm.Textfield name='timeTraitResponse'/></div>
       <div><MDLForm.Checkbox name='halfDeck'/></div>
-      {/*<div><MDLForm.Checkbox name='addon_timeToFly' disabled={true}/></div>*/}
+      <div><MDLForm.Checkbox name='addon_timeToFly' disabled={true}/></div>
       <div>
         <MDLForm.Submit id='RoomSettings$Submit'>
           {T.translate('App.Room.$Edit')}

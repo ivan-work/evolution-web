@@ -29,6 +29,7 @@ import {
   , traitConvertFat
   , traitSetAnimalFlag
   , traitNotify_Start
+  , traitTakeShell
 } from '../../server/reducers/games-rdx-server';
 
 export const reducer = createReducer(null, {
@@ -60,4 +61,5 @@ export const reducer = createReducer(null, {
   , traitConvertFat
   , traitSetAnimalFlag
   , traitNotify_Start
+  , traitTakeShell
 });

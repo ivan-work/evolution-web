@@ -4,6 +4,7 @@ import {DND_ITEM_TYPE} from './DND_ITEM_TYPE';
 import DragCardPreview from '../cards/DragCardPreview.jsx';
 import {AnimalTraitArrow} from '../animals/AnimalTraitArrow.jsx';
 import {Food} from '../food/Food.jsx';
+import AnimalTraitIcon from '../animals/AnimalTraitIcon.jsx';
 import {ArrowPreview} from './ArrowPreview.jsx';
 
 const layerStyles = {
@@ -31,6 +32,8 @@ class CustomDragLayer extends React.Component {
         return <AnimalTraitArrow trait={item.trait} {...dragProps}/>;
       case DND_ITEM_TYPE.FOOD:
         return <DefaultPreview {...dragProps}><Food/></DefaultPreview>;
+      case DND_ITEM_TYPE.TRAIT_SHELL:
+        return <DefaultPreview {...dragProps}><AnimalTraitIcon trait={item.trait}/></DefaultPreview>;
       case DND_ITEM_TYPE.ANIMAL_LINK:
         return <ArrowPreview initialOffsetShift={{x: 0, y: 0}} fill='red' {...dragProps}/>;
     }

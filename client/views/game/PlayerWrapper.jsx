@@ -65,7 +65,10 @@ export class PlayerWrapper extends Component {
     };
     this.$deployLinkedTrait = (card, animal, alternateTrait, linkedAnimal) => {
       this.context.gameActions.$deployTrait(card.id, animal.id, alternateTrait, linkedAnimal.id);
-    }
+    };
+    this.$traitTakeShell = (animal, trait) => {
+      this.context.gameActions.$traitTakeShell(animal.id, trait.id);
+    };
   }
 
   render() {
@@ -119,8 +122,10 @@ export class PlayerWrapper extends Component {
   }
 
   renderAnimal(animal, isUserContinent, isDeploy) {
-    const onTraitDropped = !isDeploy ? this.$traitActivate : this.$noop;
-    const onFoodDropped = !isDeploy ? this.$traitTakeFood : this.$noop;
+    const isFeeding = !isDeploy; // Just easier to read
+    const onTraitDropped = isFeeding ? this.$traitActivate : this.$noop;
+    const onTraitShellDropped = isFeeding ? this.$traitTakeShell : this.$noop;
+    const onFoodDropped = isFeeding ? this.$traitTakeFood : this.$noop;
     const onCardDropped = isDeploy ? this.$deployTrait : this.$noop;
     const onAnimalLink = isDeploy ? this.$deployLinkedTrait : this.$noop;
     return <DropAnimal
@@ -129,6 +134,7 @@ export class PlayerWrapper extends Component {
       model={animal}
       isUserAnimal={isUserContinent}
       onTraitDropped={onTraitDropped}
+      onTraitShellDropped={onTraitShellDropped}
       onFoodDropped={onFoodDropped}
       onCardDropped={onCardDropped}
       onAnimalLink={onAnimalLink}/>

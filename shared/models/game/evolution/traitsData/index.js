@@ -118,7 +118,7 @@ export const TraitTailLoss = {
     ['TraitTailLoss', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
   , action: (game, targetAnimal, trait, targetTrait, attackAnimal, attackTrait) => (dispatch, getState) => {
-    dispatch(server$traitAnimalRemoveTrait(game.id, targetAnimal, targetTrait.id));
+    dispatch(server$traitAnimalRemoveTrait(game, targetAnimal, targetTrait));
 
     dispatch(server$startFeeding(game.id, attackAnimal, 1, 'TraitTailLoss', targetAnimal.id));
 

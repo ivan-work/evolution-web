@@ -13,6 +13,7 @@ import {
   , traitTakeFoodRequest
   , traitActivateRequest
   , traitDefenceAnswerRequest
+  , traitTakeShellRequest
 } from '../../../shared/actions/actions';
 
 import {GameUI} from './ui/GameUI.jsx';
@@ -99,6 +100,7 @@ GameWrapperHOC = connect(
       , $traitTakeFood: (...args) => dispatch(traitTakeFoodRequest(...args))
       , $traitActivate: (...args) => dispatch(traitActivateRequest(...args))
       , $traitDefenceAnswer: (...args) => dispatch(traitDefenceAnswerRequest(...args))
+      , $traitTakeShell: (...args) => dispatch(traitTakeShellRequest(...args))
     }
   })
 )(GameWrapperHOC);

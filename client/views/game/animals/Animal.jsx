@@ -70,10 +70,9 @@ class Animal extends React.Component {
       {this.renderSelectLink()}
       <div id={'AnimalBody'+model.id} className='inner'>
         {game && game.isFeeding() && this.renderFoodStatus(model, game)}
-        {model.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) ?
-        <span className='material-icons Flag Poisoned'>smoking_rooms</span> : null}
-        {model.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) ?
-        <span className='material-icons Flag Hibernated'>snooze</span> : null}
+        {model.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) && <span className='material-icons Flag Poisoned'>smoking_rooms</span>}
+        {model.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && <span className='material-icons Flag Hibernated'>snooze</span>}
+        {model.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <span className='material-icons Flag Shell'>lock</span>}
         <div className='AnimalFoodContainer'>
           {Array.from({length: model.food}).map((u, index) => <Food key={index}/>)}
         </div>
@@ -82,7 +81,7 @@ class Animal extends React.Component {
   }
 }
 
-const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT, DND_ITEM_TYPE.ANIMAL_LINK], {
+const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT, DND_ITEM_TYPE.TRAIT_SHELL, DND_ITEM_TYPE.ANIMAL_LINK], {
   drop(props, monitor, component) {
     switch (monitor.getItemType()) {
       case DND_ITEM_TYPE.CARD:
@@ -97,6 +96,13 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
       {
         const {trait, sourceAnimal} = monitor.getItem();
         props.onTraitDropped(sourceAnimal, trait, props.model.id);
+        break;
+      }
+      case DND_ITEM_TYPE.TRAIT_SHELL:
+      {
+        const {model: animal} = props;
+        const {trait} = monitor.getItem();
+        props.onTraitShellDropped(animal, trait);
         break;
       }
       case DND_ITEM_TYPE.ANIMAL_LINK:
@@ -120,6 +126,12 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
         const {trait, sourceAnimal} = monitor.getItem();
         const targetCheck = !trait.getDataModel().checkTarget || trait.getDataModel().checkTarget(props.game, sourceAnimal, props.model);
         return sourceAnimal.id !== props.model.id && targetCheck;
+      }
+      case DND_ITEM_TYPE.TRAIT_SHELL:
+      {
+        const {model: animal} = props;
+        const {trait} = monitor.getItem();
+        return trait.checkAttach(animal);
       }
       case DND_ITEM_TYPE.ANIMAL_LINK:
       {
@@ -153,6 +165,7 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
       , onCardDropped: React.PropTypes.func.isRequired
       , onFoodDropped: React.PropTypes.func.isRequired
       , onTraitDropped: React.PropTypes.func.isRequired
+      , onTraitShellDropped: React.PropTypes.func.isRequired
       , onAnimalLink: React.PropTypes.func.isRequired
     };
 

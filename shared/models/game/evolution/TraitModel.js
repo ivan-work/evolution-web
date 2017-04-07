@@ -38,6 +38,13 @@ export class TraitModel extends Record({
       .find(traitType => ~traitType.toLowerCase().indexOf(type.toLowerCase()));
   }
 
+  static LinkBetweenCheck(traitType, animal1, animal2) {
+    return (animal1.hasTrait(traitType)
+      && animal2.hasTrait(traitType)
+      && animal1.traits.some((trait) => trait.type === traitType && (trait.hostAnimalId === animal2.id || trait.linkAnimalId === animal2.id))
+    );
+  }
+
   static LinkBetween(traitType, animal1, animal2) {
     if (this.LinkBetweenCheck(traitType, animal1, animal2)) {
       throw new ActionCheckError(`TraitModelValidation`, `Animal#%s already has LinkedTrait(%s) on Animal#%s`, animal1.id, traitType, animal2.id);
@@ -60,20 +67,17 @@ export class TraitModel extends Record({
     ];
   }
 
+  checkAttach(animal) {
+    return (this.getDataModel().multiple || !animal.hasTrait(this.type));
+  }
+
   attachTo(animal) {
-    if (!this.getDataModel().multiple && animal.hasTrait(this.type)) {
+    if (!this.checkAttach(animal)) {
       throw new ActionCheckError(`TraitModelValidation`, `Animal#%s already has Trait(%s)`, animal.id, this.type);
     }
     return this
       .set('ownerId', animal.ownerId)
       .set('hostAnimalId', animal.id);
-  }
-
-  static LinkBetweenCheck(traitType, animal1, animal2) {
-    return (animal1.hasTrait(traitType)
-      && animal2.hasTrait(traitType)
-      && animal1.traits.some((trait) => trait.type === traitType && (trait.hostAnimalId === animal2.id || trait.linkAnimalId === animal2.id))
-    );
   }
 
   getDataModel() {
