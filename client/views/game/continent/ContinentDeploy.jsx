@@ -1,14 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import {CTT_PARAMETER} from '../../../shared/models/game/evolution/constants';
+import {CTT_PARAMETER} from '../../../../shared/models/game/evolution/constants';
 
 import {Continent} from './Continent.jsx'
 import {DropTargetContinentZone} from './ContinentZone.jsx'
-import {DroppableAnimal} from './Animal.jsx';
+import {DroppableAnimal} from '../Animal.jsx';
 
 import * as MDL from 'react-mdl';
-import {Dialog, DialogActions} from '../utils/Dialog.jsx';
+import {Dialog, DialogActions} from '../../utils/Dialog.jsx';
 
 export class ContinentDeploy extends Continent {
   componentWillMount() {

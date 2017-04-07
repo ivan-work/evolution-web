@@ -59,11 +59,12 @@ export class GameWrapper extends React.Component {
   render() {
     const {game, user, room} = this.props;
 
-    const gameView = (!user || !game || game.status.phase === 0)
-      ? <div>Loading</div>
-      : <Game user={user}/>;
+    if (!user || !game || game.status.phase === 0)
+      return <div>Loading</div>;
 
-    return gameView;
+    return (<div className='GameWrapper'>
+      <Game user={user}/>
+    </div>);
   }
 }
 

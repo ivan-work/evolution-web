@@ -25,9 +25,7 @@ export const App = PortalsContext(React.createClass({
           </Navigation>
         </Header>
         <Content>
-          <div>
-            {this.props.children}
-          </div>
+          {this.props.children}
         </Content>
         <AdminPanelView location={this.props.location}/>
       </Layout>

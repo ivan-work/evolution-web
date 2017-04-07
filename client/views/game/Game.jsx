@@ -17,8 +17,8 @@ import {ControlGroup} from '../utils/ControlGroup.jsx';
 import {GameProvider} from './providers/GameProvider.jsx';
 import {CardCollection} from './CardCollection.jsx';
 import {Card, DragCard} from './Card.jsx';
-import {ContinentDeploy} from './ContinentDeploy.jsx';
-import {ContinentFeeding} from './ContinentFeeding.jsx';
+import {ContinentDeploy} from './continent/ContinentDeploy.jsx';
+import {ContinentFeeding} from './continent/ContinentFeeding.jsx';
 import {GameFoodContainer} from './food/GameFoodContainer.jsx';
 import CustomDragLayer from './dnd/CustomDragLayer.jsx';
 
@@ -76,7 +76,7 @@ class _Game extends React.Component {
 
         <div style={GAME_POSITIONS[game.players.size].food}>
           {game.status.phase === PHASE.FEEDING &&
-          <GameFoodContainer food={game.food}/>}
+          <GameFoodContainer food={game.food} />}
         </div>
 
         {this.renderUser(game, player, GameContinent)}

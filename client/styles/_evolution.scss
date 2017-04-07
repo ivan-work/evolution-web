@@ -1,7 +1,4 @@
 $CARD_WIDTH: 60px;
-$ANIMAL_WIDTH: 60px;
-$ANIMAL_HEIGHT: 80px;
-$ANIMAL_MARGIN: 20px;
 
 $CURRENT_TURN_BACKGROUND: #dfd;
 
@@ -40,15 +37,26 @@ $CURRENT_TURN_BACKGROUND: #dfd;
   }
 }
 
+.GameWrapper {
+  position: absolute;
+  bottom: 2px;
+  top: 0;
+  #game {
+    height:100%;
+    display: flex;
+  }
+}
+
 .GameUI {
   width: 120px;
   padding: .5em 1em 0;
+  border-right: 1px solid #ccc;
 }
 
 .Game {
   position: relative;
-  width: 600px;
-  height: 600px;
+  //width: 600px;
+  //height: 600px;
   background: #eee;
 
   &.isPlayerTurn {
@@ -61,71 +69,11 @@ $CURRENT_TURN_BACKGROUND: #dfd;
     .CardCollection {
       height: 80px;
     }
-
-    .Continent {
-      position: relative;
-      width: 500px;
-      background: #aaf;
-
-      .animals-container-outer {
-        width: 100%;
-        text-align: center;
-        .animals-container-inner {
-          display: inline-block;
-          .Animal {
-            display: inline-block;
-            margin: 10px 0 10px 0;
-            z-index: 4;
-            position: relative;
-            vertical-align: top;
-            width: $ANIMAL_WIDTH;
-            height: $ANIMAL_HEIGHT;
-            &.highlight {
-              box-shadow: 0px 0px 1em 1em yellow;
-            }
-          }
-
-          .ContinentZone {
-            display: inline-block;
-            padding: 10px 0 10px 0;
-            z-index: 1;
-            position: relative;
-            width: ($ANIMAL_MARGIN * 2);
-            height: $ANIMAL_HEIGHT;
-            transition: width .1s;
-            background: #aaaafa;
-
-            .inner {
-              position: absolute;
-              left: ($ANIMAL_MARGIN);
-              right: ($ANIMAL_MARGIN);
-              height: 100%;
-            }
-
-            &.highlight {
-              width: ($ANIMAL_WIDTH + $ANIMAL_MARGIN * 2);
-              .inner {
-                left: ($ANIMAL_MARGIN);
-                right: ($ANIMAL_MARGIN);
-                height: $ANIMAL_HEIGHT;
-                outline: 2px dotted green;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    .drop-targets-container {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-    }
   }
 
   .Animal {
-    width: $ANIMAL_WIDTH;
-    height: $ANIMAL_HEIGHT;
+    //width: $ANIMAL_WIDTH;
+    //height: $ANIMAL_HEIGHT;
     //position: absolute;
     //bottom: 0;
 
@@ -144,7 +92,7 @@ $CURRENT_TURN_BACKGROUND: #dfd;
 
     .inner {
       width: 100%;
-      height: $ANIMAL_HEIGHT;
+      //height: $ANIMAL_HEIGHT;
       word-wrap: break-word;
       outline: 1px solid black;
       background: #9fe1e7;
