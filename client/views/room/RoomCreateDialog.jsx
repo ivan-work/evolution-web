@@ -31,13 +31,13 @@ export class RoomCreateDialog extends Component {
             <MDL.Textfield floatingLabel label='Name' value={this.state.name} onChange={(e) => this.setState({name: e.target.value})}/>
           </MDL.DialogContent>
           <DialogActions>
-            <MDL.Button type='button' raised primary onClick={() => {
+            <MDL.Button id='RoomCreateDialog$ok' type='button' raised primary onClick={() => {
               this.props.onCreateRoom({
                 name: this.state.name
               });
               this.setState({show: false});
             }}>Create</MDL.Button>
-            <MDL.Button type='button' raised onClick={() => this.setState({show: false})}>Cancel</MDL.Button>
+            <MDL.Button id='RoomCreateDialog$cancel'  type='button' raised onClick={() => this.setState({show: false})}>Cancel</MDL.Button>
           </DialogActions>
         </Dialog>
       </span>;

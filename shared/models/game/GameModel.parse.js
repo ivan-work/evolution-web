@@ -47,7 +47,7 @@ export const parseAnimalList = (userId, string) => {
       }, AnimalModel.new(userId)));
 };
 
-export const parse = (room, string = '') => {
+export const parseFromRoom = (room, string = '') => {
   const seed = yaml.load(string) || {};
 
   const deck = parseCardList(seed.deck || '');
@@ -76,3 +76,8 @@ export const parse = (room, string = '') => {
     , players
   });
 };
+
+export const parseRaw = (string) => parseFromRoom({
+  id: 'test'
+  , users
+}, string);

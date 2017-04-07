@@ -58,7 +58,7 @@ export class RoomModel extends Record({
   validateCanStart(userId) {
     if (!~this.users.indexOf(userId)) return RoomModel.ERRORS.room_error_user_not_in_room;
     if (this.users.get(0) !== userId) return RoomModel.ERRORS.room_error_user_not_host;
-    if (this.users.size <= 1) return RoomModel.ERRORS.room_error_size_min;
+    //if (this.users.size <= 1) return RoomModel.ERRORS.room_error_size_min;
     if (this.gameId !== null) return RoomModel.ERRORS.room_error_has_game;
     return true;
   }

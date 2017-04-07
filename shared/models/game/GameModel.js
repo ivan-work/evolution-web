@@ -8,7 +8,7 @@ import * as cardTypes from './evolution/cards';
 import uuid from 'node-uuid';
 import {ensureParameter} from '~/shared/utils';
 
-import {parse, parseCardList, parseAnimalList} from './GameModel.parse';
+import {parseFromRoom, parseCardList, parseAnimalList} from './GameModel.parse';
 
 export const TEST_DECK_SIZE = 24;
 export const TEST_HAND_SIZE = 6;
@@ -182,19 +182,9 @@ export class GameModelClient extends Record({
   isFeeding() {
     return this.status.phase === PHASE.FEEDING;
   }
-
-  getSortedPlayersByIndex() {
-    let players = [];
-    for (let i = 0, c = this.status.roundPlayer; i < this.players.size; ++i) {
-      players.push(this.players.find(player => player.index === c));
-      c = (c + 1) % this.players.size;
-    }
-    console.log('pklayer', players)
-    return players;
-  }
 }
 
-GameModel.parse = parse;
+GameModel.parse = parseFromRoom;
 GameModel.parseCardList = parseCardList;
 GameModel.parseAnimalList = parseAnimalList;
 GameModelClient.prototype.end = GameModel.prototype.end;

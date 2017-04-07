@@ -9,7 +9,7 @@ import { AnimalModel } from '~/shared/models/game/evolution/AnimalModel';
 import { AnimalTrait, DraggableAnimalTrait } from './AnimalTrait.jsx';
 import {GameProvider} from './providers/GameProvider.jsx';
 
-class _Animal extends React.Component {
+export class _Animal extends React.Component {
   static displayName = 'Animal';
 
   static defaultProps = {
@@ -27,11 +27,11 @@ class _Animal extends React.Component {
     , isOver: React.PropTypes.bool
     , canDrop: React.PropTypes.bool
     // by GameProvider
-    , game: React.PropTypes.object.isRequired
-    , isPlayerTurn: React.PropTypes.bool.isRequired
-    , currentUserId: React.PropTypes.string.isRequired
-    , isDeploy: React.PropTypes.bool.isRequired
-    , isFeeding: React.PropTypes.bool.isRequired
+    , game: React.PropTypes.object
+    , isPlayerTurn: React.PropTypes.bool
+    , currentUserId: React.PropTypes.string
+    , isDeploy: React.PropTypes.bool
+    , isFeeding: React.PropTypes.bool
   };
 
   constructor(props) {
@@ -105,4 +105,4 @@ const _DroppableAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND
 }))(_Animal);
 
 export const DroppableAnimal = GameProvider(_DroppableAnimal);
-export const Animal = GameProvider(_Animal);
+export const Animal = _Animal;

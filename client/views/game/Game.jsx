@@ -16,9 +16,10 @@ import {ContinentDeploy} from './ContinentDeploy.jsx';
 import {ContinentFeeding} from './ContinentFeeding.jsx';
 import {DragFood} from './Food.jsx';
 import CustomDragLayer from './dnd/CustomDragLayer.jsx';
-import {GameScoreboardFinalView} from './ui/GameScoreboardFinal.jsx';
 
-import {UserService} from '../../services/UserService'
+import {GameScoreboardFinalView} from './ui/GameScoreboardFinal.jsx';
+import {GameStatusDisplay} from './ui/GameStatusDisplay.jsx';
+import {PlayersList} from './ui/PlayersList.jsx';
 
 class _Game extends React.Component {
   static contextTypes = {
@@ -46,39 +47,29 @@ class _Game extends React.Component {
       : ContinentFeeding);
 
     return <div style={{display: 'flex'}}>
-      <div style={{width: '200px'}}>
-        <ul className='PlayersList'>
-          <h6>Players:</h6>
-          {game.getSortedPlayersByIndex()
-            .map(player => {
-            const user = UserService.get(player.id);
-            const className = cn({
-              Player: true
-              , isPlayerTurn: game.isPlayerTurn(player.id)
-              });
-            //let status;
-            //switch (player.status) {
-            //  case 'READY':
-            //
-            //}
-            return <li key={player.id} className={className}>
-              {user.login} {player.index} {status}
-            </li>})}
-        </ul>
+      <GameScoreboardFinalView/>
 
+      <div className='GameUI'>
+        <PlayersList game={game}/>
+
+        <MDL.Button id="Game$endTurn" colored raised
+                    disabled={!isPlayerTurn}
+                    style={{width: '100%'}}
+                    onClick={this.context.gameActions.$endTurn}>EndTurn</MDL.Button>
+
+        <GameStatusDisplay game={game}/>
+
+        {this.renderDeck(game)}
       </div>
+
       <div className="Game" style={{
       background: game.isPlayerTurn() ? '#dfd' : '#fdd'
     }}>
         <Portal target='header'>
           <ControlGroup name='Game'>
             <MDL.Button id="Game$exit" onClick={this.context.gameActions.$exit}>Exit</MDL.Button>
-            <MDL.Button id="Game$endTurn" disabled={!isPlayerTurn}
-                        onClick={this.context.gameActions.$endTurn}>EndTurn</MDL.Button>
           </ControlGroup>
         </Portal>
-
-        {this.renderDeck(game)}
 
         {game.status.phase === PHASE.FEEDING ? <div className='GameFoodContainer' style={GAME_POSITIONS[game.players.size].food}>
           {Array.from({length: game.food}).map((u, index) => <DragFood key={index} index={index} disabled={!isPlayerTurn}/>)}
@@ -90,24 +81,16 @@ class _Game extends React.Component {
 
         <CustomDragLayer />
       </div>
-    </div>;
+    </div>
+      ;
   }
 
   renderDeck(game) {
-    return <div className='DeckWrapper' style={GAME_POSITIONS[game.players.size].deck}>
-      <div className="GameStatus">
-        Turn: {game.status.turn}
-        <br/> Phase: {game.status.phase}
-        <br/> Round: {game.status.round}
-        <br/> Player: {game.status.currentPlayer}
-        <br/> RoundStarter: {game.status.roundPlayer}
-      </div>
-
-      <GameScoreboardFinalView/>
-
+    return <div className='DeckWrapper'>
+      <h6>Deck ({game.deck.size}):</h6>
       <CardCollection
         ref="Deck" name="Deck"
-        shift={[1, 2]}>
+        shift={[2, 1]}>
         {game.deck.toArray().map((cardModel, i) => <Card card={cardModel} key={i} index={i}/>)}
       </CardCollection>
     </div>

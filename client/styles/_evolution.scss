@@ -8,32 +8,20 @@ $CURRENT_TURN_BACKGROUND: #dfd;
 .enabled[draggable] {
   cursor: -webkit-grab;
 }
+
 .enabled.drag {
   cursor: -webkit-grabbing;
 }
 
-.PlayersList {
-  margin: .5em;
-  .Player {
-
-  }
-  .isPlayerTurn {
-    background: $CURRENT_TURN_BACKGROUND;
-    font-weight: bold;
-  }
+.GameUI {
+  width: 120px;
+  padding: .5em 1em 0;
 }
 
 .Game {
   position: relative;
   width: 600px;
   height: 600px;
-
-  .DeckWrapper {
-    position: absolute;
-    .CardPlace {
-      position: absolute;
-    }
-  }
 
   .PlayerWrapper {
     position: absolute;
@@ -100,30 +88,8 @@ $CURRENT_TURN_BACKGROUND: #dfd;
 
     .drop-targets-container {
       position: absolute;
-      width: 100%; height: 100%;
-    }
-  }
-
-  .Card {
-    position: absolute;
-    border: 1px solid black;
-    background: gray;
-    word-wrap: break-word;
-    &.enabled {
-      background: #797;
-    }
-    &.disabled {
-      background: #977;
-    }
-    &.drag {
-      .inner {
-        user-select: none;
-        width: 100%;
-        height: 100%;
-        //transform: translate(-3px, -3px);
-        box-shadow: 3px 3px 1px;
-        transition: transform .25s, box-shadow .25s;
-      }
+      width: 100%;
+      height: 100%;
     }
   }
 
@@ -178,6 +144,57 @@ $CURRENT_TURN_BACKGROUND: #dfd;
     outline: 1px solid black;
     &.disabled {
       background: #888;
+    }
+  }
+}
+
+.PlayersList {
+  .Player {
+  }
+  .isPlayerTurn {
+    background: $CURRENT_TURN_BACKGROUND;
+    font-weight: bold;
+  }
+}
+
+.GameStatus {
+  margin-top: .5em;
+  .key {
+    display: inline-block;
+    width:4em;
+    font-weight: bold;
+  }
+}
+
+.DeckWrapper {
+  margin-top: .5em;
+  .CardPlace {
+    position: absolute;
+    .Card {
+      border-color: gray;
+    }
+  }
+}
+
+.Card {
+  position: absolute;
+  border: 1px solid black;
+  background: gray;
+  word-wrap: break-word;
+  &.enabled {
+    background: #797;
+  }
+  &.disabled {
+    background: #977;
+  }
+  &.drag {
+    .inner {
+      user-select: none;
+      width: 100%;
+      height: 100%;
+      //transform: translate(-3px, -3px);
+      box-shadow: 3px 3px 1px;
+      transition: transform .25s, box-shadow .25s;
     }
   }
 }
