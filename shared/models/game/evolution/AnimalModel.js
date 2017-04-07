@@ -9,8 +9,9 @@ export class AnimalModel extends Record({
   id: null
   , ownerId: null
   , food: 0
-  , maxFat: 0
-  , maxFood: 1
+  , foodSize: 1
+  , fat: 0
+  , fatSize: 0
   , traits: List()
   , flags: Map()
 }) {
@@ -50,54 +51,17 @@ export class AnimalModel extends Record({
     return this.traits.find(trait => trait.type === type)
   }
 
-  hasFlag(flag) {
-    return this.flags.get(flag);
+  traitAdd(trait) {
+    return this
+      .update('traits', traits => traits.push(trait))
+      .update('foodSize', foodSize => foodSize + trait.getDataModel().food);
   }
 
-
-
-
-
-
-
-
-
-
-
-  getFood() {
-    return this.food + this.getFat();
-  }
-
-  getFat() {
-    return this.traits.filter(trait => trait.type === TraitFatTissue && trait.value).size
-  }
-
-  sizeOfNormalFood() {
-    return 1 + this.traits.reduce((result, trait) => result + trait.getDataModel().food, 0);
-  }
-
-  sizeOfFat() {
-    return this.traits.filter(trait => trait.type === TraitFatTissue).size
-  }
-
-  canEat(game) {
-    return this.needsFood() > 0
-      && !this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
-      && !this.hasFlag(TRAIT_ANIMAL_FLAG.SHELL)
-      && !this.traits // TODO replace by flag
-        .filter(trait => trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === this.id)
-        .some(trait => {
-          const {animal: hostAnimal} = game.locateAnimal(trait.linkAnimalId);
-          return !hostAnimal.canSurvive();
-        });
-  }
-
-  needsFood() {
-    return this.sizeOfNormalFood() + this.sizeOfFat() - this.getFood();
-  }
-
-  canSurvive() {
-    return this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) || this.getFood() >= this.sizeOfNormalFood();
+  traitRemove(lookup) {
+    return this.update('traits', traits => traits.filterNot(lookup))
+      .update('foodSize', foodSize => 1 + this.traits.reduce(
+        (result, trait) => result + trait.getDataModel().food
+        , 0));
   }
 
   updateTrait(filterFn, updateFn, direction = true) {
@@ -107,15 +71,50 @@ export class AnimalModel extends Record({
       : this);
   }
 
+  hasFlag(flag) {
+    return this.flags.get(flag);
+  }
+
+  getFood() {
+    return this.food + this.fat;
+  }
+
+  get fat() {
+    return this.traits.filter(trait => trait.type === TraitFatTissue && trait.value).size
+  }
+
+  getCapacity() {
+    return this.foodSize + this.fatSize;
+  }
+
+  isFull() { //Without fat
+    return this.food >= this.foodSize
+      || this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
+  }
+
+  canEat(game) {
+    return this.getFood() < this.getCapacity()
+      && !this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
+      && !this.hasFlag(TRAIT_ANIMAL_FLAG.SHELL)
+      && !this.traits // TODO replace by flag
+        .filter(trait => trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === this.id)
+        .some(trait => {
+          const {animal: hostAnimal} = game.locateAnimal(trait.linkAnimalId);
+          return !hostAnimal.isFull();
+        });
+  }
+
+  canSurvive() {
+    return this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) || this.getFood() >= this.foodSize;
+  }
+
   receiveFood(amount) {
     let self = this;
-    let needOfNormalFood = this.sizeOfNormalFood() - this.food;
-    let needOfFat = this.sizeOfFat() - this.getFat();
-    while (amount > 0 && needOfNormalFood > 0) {
-      amount--;
-      needOfNormalFood--;
-      self = self.update('food', food => ++food)
-    }
+    let needOfFood = this.foodSize - this.food;
+    let needOfFat = this.fatSize - this.fat;
+    self = self.set('food', this.food + Math.min(this.foodSize, this.food + amount));
+
+
     while (amount > 0 && needOfFat > 0) {
       amount--;
       needOfFat--;
@@ -124,17 +123,15 @@ export class AnimalModel extends Record({
         , trait => trait.set('value', true)
       );
     }
-//    console.log(`${this.id} has ${self.getFood()} (${self.food}/${self.getFood() - self.food}).
-//Needs ${needOfNormalFood}/${needOfFat}`);
     return self;
   }
 
   digestFood() {
     let self = this;
     if (!this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)) {
-      let foodBalance = this.food - this.sizeOfNormalFood(); // +1 means animal overate, -1 means to generate from fat
-      while (foodBalance < 0 && self.getFat() > 0) {
-        foodBalance++;
+      let toEat = self.foodSize - self.food; // +1 means animal overate, -1 means to generate from fat
+      while (toEat > 0 && self.fat > 0) {
+        toEat--;
         self = self.updateTrait(
           trait => trait.type === TraitFatTissue && trait.value
           , trait => trait.set('value', false)
@@ -142,8 +139,7 @@ export class AnimalModel extends Record({
         );
       }
     }
-    return self
-      .set('food', 0)
+    return self.set('food', 0)
   }
 
   countScore() {

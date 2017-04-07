@@ -97,7 +97,7 @@ export const TraitPiracy = {
   }
   , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game)
   , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.food > 0
-  && !(targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) || targetAnimal.food >= targetAnimal.sizeOfNormalFood())
+    && !targetAnimal.isFull()
 };
 
 export const TraitTailLoss = {
