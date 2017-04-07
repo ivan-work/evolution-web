@@ -10,6 +10,9 @@ $ANIMAL_MARGIN: 10px;
 
   .DeckWrapper {
     position: absolute;
+    .CardPlace {
+      position: absolute;
+    }
   }
 
   .PlayerWrapper {
@@ -74,12 +77,6 @@ $ANIMAL_MARGIN: 10px;
           }
         }
       }
-    }
-
-    .EnemyContinent {
-      width: 500px;
-      height: 200px;
-      background: #aaf;
     }
 
     .drop-targets-container {

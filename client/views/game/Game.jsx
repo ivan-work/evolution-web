@@ -25,7 +25,7 @@ import {DragDropContext} from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import TestBackend from 'react-dnd-test-backend';
 
-const DECK_POSITION = {right: '0', top: '40%'};
+const DECK_POSITION = {left: '100%', top: '40%'};
 const PLAYER_POSITION = {left: '10%', bottom: '0'};
 const CARD_POSITIONS = {
   0: null
@@ -75,33 +75,25 @@ export class Game extends React.Component {
     if (!user || !game) return <div>Loading</div>;
     const disabled = game.status.player != game.getPlayer().index;
     const player = game.getPlayer();
-    //
-    //console.log('GameRender: =====')
-    //console.log('game', this.context)
-    //console.log('game', CARD_POSITIONS[game.players.size], game.players.size)
-    const continentType = Continent;
 
     return <div className="Game">
-
-      <div className="GameStatus">
-        Turn: {game.status.turn}
-        <br/> Phase: {game.status.phase}
-        <br/> Round: {game.status.round}
-        <br/> Player: {game.status.player}
-      </div>
-
-      <MDL.Button className="EndTurn"
-                  raised disabled={disabled}
-                  onClick={this.props.$endTurn}>EndTurn</MDL.Button>
-
       {/* DECK */}
-
       <div className='DeckWrapper' style={CARD_POSITIONS[game.players.size].deck}>
+        <div className="GameStatus">
+          Turn: {game.status.turn}
+          <br/> Phase: {game.status.phase}
+          <br/> Round: {game.status.round}
+          <br/> Player: {game.status.player}
+        </div>
+
+        <MDL.Button className="EndTurn"
+                    raised disabled={disabled}
+                    onClick={this.props.$endTurn}>EndTurn</MDL.Button>
+
         <CardCollection
           ref="Deck" name="Deck"
-          shift={[1, 2]}
-          count={game.deck}>
-          {/*Array.from({length: game.deck}, (u, i) => <Card key={i} index={i}/>)*/}
+          shift={[1, 2]}>
+          {game.deck.toArray().map((cardModel, i) => <Card model={cardModel} key={i} index={i}/>)}
         </CardCollection>
       </div>
 
@@ -135,8 +127,7 @@ export class Game extends React.Component {
           </div>
           })
         }
-    </div>
-      ;
+    </div>;
   }
 }
 
