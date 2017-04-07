@@ -24,6 +24,8 @@ import {
 
 import {checkComboRoomCanStart} from './rooms.checks';
 
+import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
+
 // Game Create
 export const gameCreateRequest = (roomId, seed) => ({
   type: 'gameCreateRequest'
@@ -80,7 +82,7 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
       break;
     default:
       if (game.status.currentPlayer === leaver.index) {
-        dispatch(server$game(gameId, gameNextPlayer(gameId)));
+        dispatch(server$gameNextPlayer(gameId));
       }
   }
 };
@@ -176,7 +178,7 @@ export const server$gameDeployTrait = (gameId, cardId, traits) => (dispatch, get
 export const server$gameDeployNext = (gameId, userId) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   if (game.getPlayer(userId).hand.size !== 0) {
-    dispatch(server$game(gameId, gameNextPlayer(gameId)));
+    dispatch(server$gameNextPlayer(gameId));
   } else {
     dispatch(server$gameFinishDeploy(gameId, userId));
   }
@@ -184,6 +186,7 @@ export const server$gameDeployNext = (gameId, userId) => (dispatch, getState) =>
 
 // gameDeployNext || gameEndTurnRequest > gameFinishDeploy > gameEndTurn && (gameNextPlayer || gameStartEat)
 export const server$gameFinishDeploy = (gameId, userId) => (dispatch, getState) => {
+  dispatch(cancelTimeout(makeTurnTimeTimeoutId(gameId)));
   dispatch(Object.assign(gameEndTurn(gameId, userId), {
     meta: {users: selectPlayers4Sockets(getState, gameId)}
   }));
@@ -194,7 +197,7 @@ export const server$gameFinishDeploy = (gameId, userId) => (dispatch, getState) 
       meta: {users: selectPlayers4Sockets(getState, gameId)}
     }));
   } else {
-    dispatch(server$game(gameId, gameNextPlayer(gameId)));
+    dispatch(server$gameNextPlayer(gameId));
   }
 };
 
@@ -209,11 +212,43 @@ export const gameEndTurn = (gameId, userId) => ({
   , data: {gameId, userId}
 });
 
+export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  if (game.status.phase === PHASE.DEPLOY) {
+    dispatch(server$gameFinishDeploy(gameId, userId));
+  } else {
+    dispatch(server$gameFinishFeeding(gameId, userId));
+  }
+};
+
 // gameNextPlayer
-export const gameNextPlayer = (gameId) => ({
+const gameNextPlayer = (gameId, nextPlayerIndex, roundChanged) => ({
   type: 'gameNextPlayer'
-  , data: {gameId}
+  , data: {gameId, nextPlayerIndex, roundChanged}
 });
+
+const makeTurnTimeTimeoutId = (gameId) => `turnTimeTimeout#${gameId}`;
+
+export const server$gameNextPlayer = (gameId) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+
+  const roundPlayer = game.getIn(['status', 'roundPlayer']);
+  const currentPlayer = game.getIn(['status', 'currentPlayer']);
+
+  let roundChanged = false;
+
+  const nextPlayer = GameModel.sortPlayersFromIndex(game, (currentPlayer + 1) % game.players.size)
+    .find((player) => {
+      if (player.index === roundPlayer) roundChanged = true;
+      return player.playing && !player.ended;
+    });
+
+  //dispatch(cancelTimeout(makeTurnTimeTimeoutId(gameId)));
+  //dispatch(addTimeout(game.settings.timeTurn), makeTurnTimeTimeoutId(gameId), (dispatch, getState) => {
+  //  dispatch(server$gameEndTurn(gameId, userId))
+  //});
+  dispatch(server$game(gameId, gameNextPlayer(gameId, nextPlayer.index, roundChanged)));
+};
 
 // ===== EATING!
 
@@ -224,6 +259,7 @@ export const gameStartEat = (gameId, food) => ({
 
 export const server$gameFinishFeeding = (gameId, userId) => (dispatch, getState) => {
   logger.verbose('server$gameFinishFeeding', userId);
+  dispatch(cancelTimeout(makeTurnTimeTimeoutId(gameId)));
   dispatch(Object.assign(gameEndTurn(gameId, userId), {
     meta: {users: selectPlayers4Sockets(getState, gameId)}
   }));
@@ -231,7 +267,7 @@ export const server$gameFinishFeeding = (gameId, userId) => (dispatch, getState)
   if (game.players.every(player => player.ended)) {
     dispatch(server$gameExtict(gameId));
   } else {
-    dispatch(server$game(gameId, gameNextPlayer(gameId)));
+    dispatch(server$gameNextPlayer(gameId));
   }
 };
 
@@ -339,11 +375,7 @@ export const gameClientToServer = {
     checkGameDefined(game);
     checkGameHasUser(game, userId);
     checkPlayerTurnAndPhase(game, userId);
-    if (game.status.phase === PHASE.DEPLOY) {
-      dispatch(server$gameFinishDeploy(gameId, userId));
-    } else {
-      dispatch(server$gameFinishFeeding(gameId, userId));
-    }
+    dispatch(server$gameEndTurn(gameId, userId));
   }
   , gameDeployAnimalRequest: ({gameId, cardId, animalPosition = 0}, {user: {id: userId}}) => (dispatch, getState) => {
     // console.time('gameDeployAnimalRequest body');
@@ -444,7 +476,7 @@ export const gameServerToClient = {
     gameDeployAnimal(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardPosition)
   , gameDeployTrait: ({gameId, cardId, traits}) =>
     gameDeployTrait(gameId, cardId, traits.map(trait => TraitModel.fromServer(trait)))
-  , gameNextPlayer: ({gameId}) => gameNextPlayer(gameId)
+  , gameNextPlayer: ({gameId, nextPlayerIndex, roundChanged}) => gameNextPlayer(gameId, nextPlayerIndex, roundChanged)
   , gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
   , gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
   , gamePlayerLeft: ({gameId, userId}, currentUserId) => (dispatch, getState) => {

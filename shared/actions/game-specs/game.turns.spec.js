@@ -119,4 +119,17 @@ deck: 50 camo
     expect(ServerGame().getIn(['status', 'currentPlayer'])).equal(0);
     expect(ServerGame().getIn(['status', 'roundPlayer'])).equal(0);
   });
+
+  it('turn time', async () => {
+    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);    ParseGame(`
+deck: 50 camo
+`);
+    expect(ServerGame().getIn(['status', 'turn'])).equal(0);
+    expect(ServerGame().getIn(['status', 'phase'])).equal(PHASE.DEPLOY);
+    expect(ServerGame().getIn(['status', 'currentPlayer'])).equal(0);
+    expect(ServerGame().getIn(['status', 'roundPlayer'])).equal(0);
+
+    console.log('turn time', ServerGame().settings)
+
+  });
 });

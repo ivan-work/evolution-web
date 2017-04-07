@@ -27,6 +27,7 @@ export const StatusRecord = Record({
   , currentPlayer: 0
   , roundPlayer: 0
   , phase: PHASE.PREPARE
+  , time: null
 });
 
 export const QuestionRecord = Record({

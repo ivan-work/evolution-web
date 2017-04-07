@@ -121,10 +121,10 @@ export class AnimalModel extends Record({
   digestFood() {
     let foodBalance = this.food - this.sizeOfNormalFood(); // +1 means animal overate, -1 means to generate from fat
     let self = this;
-    console.log(`${this.id} ${this.sizeOfNormalFood()} + ${this.sizeOfFat()} - ${this.getFood()}.
-foodBalance ${foodBalance}
-fat size: ${self.getFat()}
-`);
+//    console.log(`${this.id} ${this.sizeOfNormalFood()} + ${this.sizeOfFat()} - ${this.getFood()}.
+//foodBalance ${foodBalance}
+//fat size: ${self.getFat()}
+//`);
     while (foodBalance < 0 && self.getFat() > 0) {
       foodBalance++;
       self = self.updateTrait(
@@ -132,7 +132,6 @@ fat size: ${self.getFat()}
         , trait => trait.set('value', false)
         , false
       );
-      console.log(self.traits.toJS())
     }
     return self
       .set('food', 0)

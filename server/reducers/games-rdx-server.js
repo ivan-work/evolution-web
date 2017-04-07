@@ -108,33 +108,10 @@ export const gameStartDeploy = (game) => {
     .update('cooldowns', cooldowns => cooldowns.eventNextTurn());
 };
 
-export const gameNextPlayer = (game) => {
-  //console.log('gameNextPlayer', game.players.toJS());
-  const roundPlayer = game.getIn(['status', 'roundPlayer']);
-  let currentPlayer = game.getIn(['status', 'currentPlayer']);
-  const totalPlayers = game.players.size;
-  let emergencyCount = game.players.size;
-  let round = game.getIn(['status', 'round']);
-  let roundChanged = false;
-  do {
-    --emergencyCount;
-    ++currentPlayer;
-    if (currentPlayer >= totalPlayers) {
-      currentPlayer = 0;
-    }
-    if (currentPlayer === roundPlayer) {
-      ++round;
-      roundChanged = true;
-    }
-    const player = game.players.find(player => player.index === currentPlayer && player.playing);
-    if (player && !player.ended) {
-      break;
-    }
-  } while (emergencyCount >= 0);
-  if (emergencyCount < 0) throw new Error('emergency count');
+export const gameNextPlayer = (game, {round, nextPlayerIndex, roundChanged}) => {
   return game
-    .setIn(['status', 'round'], round)
-    .setIn(['status', 'currentPlayer'], currentPlayer)
+    .updateIn(['status', 'round'], round => roundChanged ? round + 1 : round)
+    .setIn(['status', 'currentPlayer'], nextPlayerIndex)
     .update('cooldowns', cooldowns => cooldowns.eventNextPlayer(roundChanged));
 };
 

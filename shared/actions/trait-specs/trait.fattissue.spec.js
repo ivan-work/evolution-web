@@ -10,7 +10,7 @@ import {PHASE} from '../../models/game/GameModel';
 import {makeGameActionHelpers} from '../generic';
 import {makeGameSelectors} from '../../selectors';
 
-describe.only('TraitFatTissue:', () => {
+describe('TraitFatTissue:', () => {
   describe('Deploy:', () => {
     it('Can deploy multiple', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
