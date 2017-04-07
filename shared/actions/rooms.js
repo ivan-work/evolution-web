@@ -1,6 +1,6 @@
 import {RoomModel} from '../models/RoomModel';
 import {push} from 'react-router-redux';
-import {List} from 'immutable';
+import {List, Map} from 'immutable';
 
 export const roomCreateRequest = () => ({
   type: 'roomCreateRequest'
@@ -46,6 +46,13 @@ export const roomsClientToServer = {
     const {roomId} = data;
     const room = getState().getIn(['rooms', roomId]);
     if (!room.users.some(uid => userId === uid)) {
+      const previousRoom = getState().get('rooms').find(room => {
+        return room.users.some(uid => uid === userId);
+      });
+      if (previousRoom) {
+        const previousRoomId = previousRoom.id;
+        dispatch(roomUpdate(previousRoomId, previousRoom.leave(userId)));
+      }
       dispatch(roomUpdate(roomId, room.join(userId)));
     }
     dispatch(roomJoinSuccess(roomId, userId));

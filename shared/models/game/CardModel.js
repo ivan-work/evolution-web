@@ -1,4 +1,4 @@
-import {Record} from 'immutable';
+import {Record, Range} from 'immutable';
 import uuid from 'node-uuid';
 
 export class CardModel extends Record({
@@ -8,6 +8,9 @@ export class CardModel extends Record({
   , imageFront: ''
   , imageBack: ''
 }) {
+  static generate(count) {
+    return Range(0, count).map(i => CardModel.new(i)).toList();
+  }
   static fromJS(js) {
     //checkNotNull(js)
     return new CardModel(js);

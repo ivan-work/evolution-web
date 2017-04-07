@@ -35,26 +35,24 @@ export class RoomModel extends Record({
     ensureParameter(userId, 'string');
     let index = this.users.indexOf(userId);
     let newRoom;
-    if (index === -1) throw new RoomModel.UserNotInRoomError();
+    if (index === -1) throw new Error(RoomModel.ERRORS.room_error_user_not_in_room);
     return (this.users.size == 1
         ? null
         : this.update('users', users => users.remove(index))
     );
   }
 
-  canStart(userId) {
-    return this.users.get(0) === userId && this.users.size > 1;
+  validateCanStart(userId) {
+    if (!~this.users.indexOf(userId)) return RoomModel.ERRORS.room_error_user_not_in_room;
+    if (this.users.get(0) !== userId) return RoomModel.ERRORS.room_error_user_not_host;
+    if (this.users.size <= 1) return RoomModel.ERRORS.room_error_size_min;
+    return true;
   }
 }
 
-RoomModel.MaxSizeError = class MaxSizeError extends Error {
-  constructor() {
-    super('room_error_max_size');
-  }
-};
-
-RoomModel.UserNotInRoomError = class UserNotInRoomError extends Error {
-  constructor() {
-    super('room_error_user_not_in_room');
-  }
+RoomModel.ERRORS = {
+  room_error_size_max: 'room_error_size_max'
+  , room_error_size_min: 'room_error_size_min'
+  , room_error_user_not_in_room: 'room_error_user_not_in_room'
+  , room_error_user_not_host: 'room_error_user_not_host'
 };
