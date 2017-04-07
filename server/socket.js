@@ -9,22 +9,22 @@ export const socketServer = (server, options) => io(server, {
 
 export const socketStore = (serverSocket, store) => {
   serverSocket.on('connect', (socket) => {
-    console.log('server:connect');
+    //console.log('server:connect');
     store.dispatch(socketConnect(socket.id, socket));
 
     socket.emit('connectionId', socket.id);
 
     socket.on('disconnect', () => {
-      console.log('server:disconnect');
+      //console.log('server:disconnect');
       store.dispatch(socketDisconnect(socket.id));
     });
 
     socket.on('action', (action) => {
-      console.log('server:action');
+      //console.log('server:action', action.type);
       if (clientToServer[action.type]) {
         store.dispatch(clientToServer[action.type](socket.id, action.data));
       } else {
-        console.warn('Client action doesnt exist: ' + action.type);
+        console.warn('clientToServer action doesnt exist: ' + action.type);
       }
     });
   });
@@ -32,14 +32,15 @@ export const socketStore = (serverSocket, store) => {
 
 export const socketMiddleware = io => store => next => action => {
   const state = store.getState().get('connections');
+  const nextResult = next(action);
   if (action.meta) {
     if (action.meta.connectionId && state.has(action.meta.connectionId)) {
       const clientSocket = state.get(action.meta.connectionId);
       clientSocket.emit('action', action);
     }
     if (action.meta.clients) {
-      io.sockets.emit('action', action);
+      io.emit('action', action);
     }
   }
-  return next(action);
+  return nextResult;
 };
