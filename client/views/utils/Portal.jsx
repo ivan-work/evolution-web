@@ -31,8 +31,10 @@ export class Portal extends Component {
     }
   }
 
-  renderChildren() {
-    return <span>{this.props.children}</span>;
+  renderChildren(container) {
+    return React.createElement(container
+      , null
+      , this.props.children)
   }
 
   render() {

@@ -10,6 +10,7 @@ import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 import {GAME_POSITIONS} from './GAME_POSITIONS';
 import {Portal} from '../utils/Portal.jsx';
 import {BodyPortal} from '../utils/BodyPortal.jsx';
+import {PortalTarget} from '../utils/PortalTarget.jsx';
 import {ControlGroup} from '../utils/ControlGroup.jsx';
 import {GameProvider} from './providers/GameProvider.jsx';
 import {CardCollection} from './CardCollection.jsx';

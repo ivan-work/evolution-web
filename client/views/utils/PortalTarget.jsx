@@ -22,12 +22,17 @@ export const PortalsContext = (WrappedComponent) => class PortalsContext extends
 };
 
 export class PortalTarget extends Component {
-  static propTypes = {
-    name: React.PropTypes.string.isRequired
-  };
-
   static contextTypes = {
     portalsContext: React.PropTypes.object.isRequired
+  };
+
+  static propTypes = {
+    name: React.PropTypes.string.isRequired
+    , container: React.PropTypes.string
+  };
+
+  static defaultProps = {
+    container: 'span'
   };
 
   constructor(props) {
@@ -65,12 +70,29 @@ export class PortalTarget extends Component {
   }
 
   render() {
-    return <span>{
-      this.state.portals
-        .map(portal => React.cloneElement(portal.renderChildren(), {
-        key: portal.id
-        }))
-      }
-    </span>
+    //console.log(<span></span>)
+    //console.log(React.createElement(this.props.container))
+    //return <span>{
+    //  this.state.portals
+    //    .map(portal => React.cloneElement(portal.renderChildren(this.props.container), {
+    //    key: portal.id
+    //    }))
+    //  }
+    //</span>
+
+    //return React.createElement(this.props.container
+    //  , null
+    //  , [<div key='1'>1</div>, <div key='2'>2</div>])
+
+    //Object.keys(this.state.portals)
+    //  .map(portalId => this.state.portals[portalId])
+    //  .map(portal => <div key={portal.id}>hehe</div>)
+
+    return React.createElement(this.props.container
+      , null
+      , this.state.portals
+        .map(portal => React.cloneElement(portal.renderChildren(this.props.container), {
+          key: portal.id
+        })))
   }
 }

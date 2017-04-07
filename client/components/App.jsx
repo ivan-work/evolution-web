@@ -16,6 +16,9 @@ export const App = PortalsContext(React.createClass({
     const {socket} = this.props;
     return (
       <Layout fixedHeader>
+        <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
+          <PortalTarget name='game-svg' container='g'/>
+        </svg>
         <Header title="Evolution" hideSpacer={true}>
           <Navigation className='header'>
             <PortalTarget name='header'/>
