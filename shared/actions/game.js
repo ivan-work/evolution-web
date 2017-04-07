@@ -137,9 +137,9 @@ export const server$gameDeployAnimal = (gameId, userId, animal, animalPosition, 
 };
 
 // gameDeployTrait
-export const gameDeployTraitRequest = (cardId, animalId) => (dispatch, getState) =>dispatch({
+export const gameDeployTraitRequest = (cardId, animalId, traittype) => (dispatch, getState) =>dispatch({
   type: 'gameDeployTraitRequest'
-  , data: {gameId: getState().get('game').id, cardId, animalId}
+  , data: {gameId: getState().get('game').id, cardId, animalId, traittype}
   , meta: {server: true}
 });
 export const gameDeployTrait = (gameId, userId, cardId, animalId, trait) => ({
@@ -342,7 +342,7 @@ export const gameClientToServer = {
     dispatch(server$gameDeployNext(gameId, userId));
     // console.timeEnd('server$gameDeployNext');
   }
-  , gameDeployTraitRequest: ({gameId, cardId, animalId}, {user}) => (dispatch, getState) => {
+  , gameDeployTraitRequest: ({gameId, cardId, animalId, traittype}, {user}) => (dispatch, getState) => {
     const userId = user.id;
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
@@ -351,10 +351,14 @@ export const gameClientToServer = {
 
     const cardIndex = checkPlayerHasCard(game, userId, cardId);
     const card = game.players.get(userId).hand.get(cardIndex);
+    if (card.trait1type !== traittype && card.trait2type !== traittype) {
+      throw new ActionCheckError(`checkCardHasTrait@Game(${game.id})`, 'Card(%s;%s) doesn\'t have trait (%s)', card.trait1type, card.trait2type, traittype);
+    }
+
     if (card.target & CARD_TARGET_TYPE.ANIMAL_SELF) {
       const animal = checkPlayerHasAnimal(game, userId, animalId);
       // TODO check if exists
-      const trait = TraitModel.new(card.trait1type);
+      const trait = TraitModel.new(traittype);
       const animalValidation = animal.validateTrait(trait);
       if (animalValidation !== true) {
         dispatch(actionError(userId, animalValidation));

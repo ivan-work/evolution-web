@@ -12,7 +12,7 @@ import {
   , gameDeployTraitRequest
   , traitTakeFoodRequest
   , traitActivateRequest
-} from '~/shared/actions/actions';
+} from '../../../shared/actions/actions';
 
 import {Game} from './Game.jsx';
 import {GameModelClient} from '../../../shared/models/game/GameModel';
