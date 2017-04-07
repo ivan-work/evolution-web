@@ -25,6 +25,7 @@ export class AdminPanel extends Component {
       , left: '240px'
       , top: 0
       , zIndex: 1337
+      , background: 'white'
     }}>
       {this.renderSection('Admin Panel', <div>
         {this.props.room && !this.props.room.gameId ? this.renderSection('Room', <RoomSectionView/>) : null}

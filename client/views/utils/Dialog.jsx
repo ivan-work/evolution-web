@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
-import {Portal} from './Portal.jsx';
+import {BodyPortal} from './BodyPortal.jsx';
 import shallowEqual from 'shallowequal';
 
 const transitionTime = 500;
@@ -43,7 +43,7 @@ export class Dialog extends Component {
     if (!show) {
       return null;
     }
-    return <Portal className='DialogContainer'>
+    return <BodyPortal className='DialogContainer'>
       <div className='Backdrop' style={{
         background: this.state.isShowing ? '' : 'none'
         , transition: `${transitionTime}ms all`
@@ -54,7 +54,7 @@ export class Dialog extends Component {
         , transition: `${transitionTime}ms all`
       }}>{this.props.children}</div>
       </div>
-    </Portal>;
+    </BodyPortal>;
   }
 
   rendered() {

@@ -1,9 +1,17 @@
 @import 'base';
 @import 'evolution';
+@import 'control-group';
 
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
 }
+
+h1 {font-size: 2.0em;}
+h2 {font-size: 1.8em;}
+h3 {font-size: 1.6em;}
+h4 {font-size: 1.4em;}
+h5 {font-size: 1.2em;}
+h6 {font-size: 1.2em;}
 
 .pointer {
   cursor: pointer;
@@ -39,6 +47,15 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+.mdl-navigation.header {
+  .mdl-button {
+    color: white;
+    &[disabled] {
+      color: gray;
+    }
+  }
+}
+
 #Room\$back {
-  background: red
+  //background: red
 }
