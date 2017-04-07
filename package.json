@@ -1,6 +1,6 @@
 {
   "name": "cards3",
-  "version": "0.0.56",
+  "version": "0.0.57",
   "description": "blahblah",
   "browser": {
     "jsonwebtoken": false,
@@ -49,6 +49,7 @@
     "materialize-css": "*",
     "mongodb": "*",
     "morgan": "*",
+    "node-sass": "^3.13.0",
     "react": "*",
     "react-addons-css-transition-group": "*",
     "react-addons-pure-render-mixin": "*",
