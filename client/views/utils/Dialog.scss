@@ -37,6 +37,7 @@ $transition: 200ms;
   }
 
   .Dialog {
+    max-width: 80%;
     max-height: 70%;
     overflow: auto;
     display: inline-block;
