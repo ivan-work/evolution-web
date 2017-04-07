@@ -2,7 +2,7 @@ import logger from '~/shared/utils/logger';
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import util from 'util';
 
-export const errorMiddleware = interceptor => store => next => action => {
+export const errorMiddleware = (interceptor = () => null) => store => next => action => {
   try {
     return next(action);
   } catch (error) {
