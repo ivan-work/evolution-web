@@ -1,2 +1,2 @@
 export {LoginView} from './Login';
-export {LobbiesView} from './Lobbies';
+export {RoomsView} from './Rooms';

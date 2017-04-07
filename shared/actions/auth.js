@@ -9,6 +9,7 @@ export const socketConnect = (connectionId, socket) => ({
 export const socketDisconnect = (connectionId) => (dispatch, getState) => {
   const usersState = getState().get('users');
   let user = usersState.find((user) => user.connectionId == connectionId);
+  console.log('socketDisconnect', !!user);
   if (!!user) {
     dispatch(logoutUser(user.id))
   }
@@ -18,19 +19,19 @@ export const socketDisconnect = (connectionId) => (dispatch, getState) => {
   })
 };
 
-export const loginUserRequest = (redirect = "/", login, password) => {
+export const loginUserRequest = (redirect, login, password) => {
   return {
     type: 'loginUserRequest'
-    , data: {login: login}
+    , data: {redirect, login, password}
     , meta: {
       server: true
     }
   }
 };
 
-export const loginUserSuccess = (connectionId, user) => ({
+export const loginUserSuccess = (connectionId, user, redirect) => ({
   type: 'loginUserSuccess'
-  , data: user
+  , data: {user, redirect}
   , meta: {
     connectionId: connectionId
   }
@@ -53,8 +54,6 @@ let userIds = 0;
 
 export const authClientToServer = {
   loginUserRequest: (connectionId, data) => (dispatch, getState) => {
-    console.log('loginUserRequest', data);
-    console.log('loginUserRequest', data.login);
     const login = data.login;
     const state = getState().get('users');
     const userExists = state.find(user => user.login === login);
@@ -64,7 +63,7 @@ export const authClientToServer = {
         , login: login
         , connectionId: connectionId
       });
-      dispatch(loginUserSuccess(connectionId, user));
+      dispatch(loginUserSuccess(connectionId, user, data.redirect));
     } else {
       dispatch(loginUserFailure(connectionId, 'User already exists'));
     }
@@ -72,13 +71,16 @@ export const authClientToServer = {
 };
 
 export const authServerToClient = {
-  loginUserSuccess: (user) => (dispatch) => {
-    console.log(authServerToClient, user);
+  loginUserSuccess: (data) => (dispatch) => {
+    //console.log('authServerToClient', data);
+    window.localStorage.setItem('user', JSON.stringify(data.user));
     dispatch({
       type: 'loginUserSuccess'
-      , data: user
+      , data: {
+        user: data.user
+      }
     });
-    dispatch(push('/lobbies'));
+    dispatch(push(data.redirect || '/'));
   }
 };
 
