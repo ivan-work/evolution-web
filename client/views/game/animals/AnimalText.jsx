@@ -27,12 +27,4 @@ export const AnimalText = ({animal, select}) =>(
   </span>
 );
 
-export const AnimalTextView = connect((store, {id}) => {
-  const game = store.get('game');
-  const {animal} = game.locateAnimal(id);
-  return {animal};
-})(AnimalText);
-
-AnimalTextView.propTypes = {id: React.PropTypes.string.isRequired};
-
-export default AnimalTextView;
+export default AnimalText;

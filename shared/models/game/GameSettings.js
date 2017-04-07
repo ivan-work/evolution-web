@@ -83,4 +83,6 @@ export const Deck_Base = [
   , [4, cardsData.CardCommunicationAndCarnivorous.type]
 ];
 
-export const Deck_TimeToFly = [];
+export const Deck_TimeToFly = [
+
+];

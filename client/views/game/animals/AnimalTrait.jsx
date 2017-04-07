@@ -42,7 +42,8 @@ class AnimalTrait extends Component {
     return (<div id={'AnimalTrait' + trait.id} className={className}>
       <Tooltip label={<AnimalTraitDetails trait={trait}/>}>
         <div className='inner'>
-          {T.translate('Game.Trait.' + trait.type)} {trait.getDataModel().food > 0 ? '+' + trait.getDataModel().food : null}
+          <div className='name'>{T.translate('Game.Trait.' + trait.type)}</div>
+          <div className='food'>{trait.getDataModel().food > 0 ? ' +' + trait.getDataModel().food : null}</div>
         </div>
       </Tooltip>
     </div>);

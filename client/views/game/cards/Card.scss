@@ -1,5 +1,4 @@
 @import '../../../styles/variables';
-@import '../../../styles/traits';
 
 .Card {
   width: $CARD_WIDTH;
@@ -36,11 +35,6 @@
     transform: rotate(180deg);
   }
 
-  &.canDrag .inner {
-    background-color: #fff;
-    @include traits();
-  }
-
   &.isDragging {
     opacity: 0;
   }
@@ -61,5 +55,15 @@
   }
   .trait2 {
     transform: rotate(.5turn);
+  }
+
+  &.active .inner {
+    background-color: #fff;
+    //@include traits();
+  }
+  &.disabled {
+    .trait {
+      color: black;
+    }
   }
 }
