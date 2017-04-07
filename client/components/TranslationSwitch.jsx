@@ -1,6 +1,6 @@
 import React from 'react'
 import {connect} from 'react-redux';
-import langCodes from '../../i18n/available';
+import langCodes from '../../i18n';
 
 import {appChangeLanguage} from '../actions/app';
 

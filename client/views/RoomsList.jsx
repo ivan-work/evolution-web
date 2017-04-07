@@ -29,7 +29,7 @@ export class RoomsList extends React.Component {
           <a href="#" onClick={() => this.props.onRoomClick(roomId)}>
             {room.name}
           </a>
-          &nbsp;({room.users.size}/{room.maxUsers})
+          &nbsp;({room.users.size}/{room.settings.maxPlayers})
         </span>
       </MDL.ListItem>).valueSeq().toArray()}
     </MDL.List>;

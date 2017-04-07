@@ -1,18 +1,26 @@
 var router = require('express').Router();
 var path = require('path');
 import oauth from './oauth';
+import glob from 'glob';
+import fs from 'fs';
+import yamlParser from 'yaml-js';
 
 module.exports = (app, passport) => {
-// Rest API
-//require(path.join(__dirname, './', 'todos'))(router);
-//require(path.join(__dirname, './', 'users'))(router);
-
-// Homepage/Client
-  router.get('/', function (req, res, next) {
-    res.send("ok");
+  const translations = glob.sync('i18n/*.yml')
+    .reduce((result, fileName) => {
+      const key = fileName.substr(fileName.lastIndexOf('/') + 1).replace(/\.yml$/, '');
+      const value = yamlParser.load(fs.readFileSync(fileName).toString());
+      return {...result, [key]: value};
+    }, {});
+  router.get('/i18n/*', function (req, res, next) {
+    const translation = req.path.substr(req.path.lastIndexOf('/') + 1);
+    if (translations.hasOwnProperty(translation)) {
+      res.json(translations[translation]);
+    } else {
+      res.status(404).send('404');
+    }
   });
 
-// Homepage/Client
   router.get('/state', function (req, res, next) {
     const state = app.get('store').getState().toJS();
 

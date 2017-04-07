@@ -1,16 +1,17 @@
 import React, {Component} from 'react';
 import T from 'i18n-react';
 import {connect} from 'react-redux';
-import {Map} from 'immutable';
 
 import * as MDL from 'react-mdl';
 import {UsersList} from './../UsersList.jsx';
 import {Portal} from './../utils/Portal.jsx';
-import {ControlGroup} from './../utils/ControlGroup.jsx';
-
-import {redirectTo} from '../../shared/utils';
-import {roomExitRequest, gameCreateRequest} from '../../../shared/actions/actions';
+import RoomControlGroup from './RoomControlGroup.jsx';
 import {RoomModel} from '../../../shared/models/RoomModel';
+
+import Validator from 'validatorjs';
+import {SettingsRules} from '../../../shared/models/game/GameSettings';
+
+import {roomEditSettingsRequest} from '../../../shared/actions/actions';
 
 export class Room extends Component {
   static propTypes = {
@@ -24,58 +25,72 @@ export class Room extends Component {
     this.state.form = {};
     this.state.form.name = props.room.name;
     this.state.form.maxPlayers = props.room.settings.maxPlayers;
-    this.state.form.timeTurn = props.room.settings.timeTurn;
-    this.state.form.timeTraitResponse = props.room.settings.timeTraitResponse;
+    this.state.form.timeTurn = props.room.settings.timeTurn / 6000;
+    this.state.form.timeTraitResponse = props.room.settings.timeTraitResponse / 6000;
+    this.state.validation = new Validator(this.state.form, SettingsRules);
+  }
+
+  isHost() {
+    return this.props.room.users.get(0) === this.props.userId;
   }
 
   formOnChange(key, target) {
-    const form = this.state.form;
-    form[key] = target.value;
-    this.setState({form});
+    if (this.isHost()) {
+      const form = this.state.form;
+      form[key] = target.value;
+      const validation = new Validator(form, SettingsRules);
+      validation.passes();
+      this.setState({form, validation});
+    }
   }
 
   render() {
-    const {room} = this.props;
-    const {form} = this.state;
+    const {room, userId} = this.props;
+    const {form, validation} = this.state;
 
     if (!room) return null;
 
     return <div className="Room">
       <Portal target='header'>
-        <RoomControlGroupView inRoom={true}/>
+        <RoomControlGroup inRoom={true}/>
       </Portal>
       <h1>{T.translate('App.Room.Room')} «{room.name}»</h1>
       <div className="Room-online">
-        {T.translate('App.Room.in_this_room')}
+        {T.translate('App.Room.in_this_room')} ({room.users.size}/{room.settings.maxPlayers}):
         <UsersList list={room.users.map(userId => this.props.online.get(userId))}/>
         <div>
           <MDL.Textfield floatingLabel
                          label={T.translate('App.Room.Settings.name')}
                          value={form.name}
+                         error={validation.errors.errors.name}
                          onChange={({target}) => this.formOnChange('name', target)}/>
         </div>
         <div>
           <MDL.Textfield floatingLabel
                          label={T.translate('App.Room.Settings.maxPlayers')}
                          value={form.maxPlayers}
+                         error={validation.errors.errors.maxPlayers}
                          onChange={({target}) => this.formOnChange('maxPlayers', target)}/>
         </div>
         <div>
           <MDL.Textfield floatingLabel
                          label={T.translate('App.Room.Settings.timeTurn')}
                          value={form.timeTurn}
+                         error={validation.errors.errors.timeTurn}
                          onChange={({target}) => this.formOnChange('timeTurn', target)}/>
         </div>
         <div>
           <MDL.Textfield floatingLabel
                          label={T.translate('App.Room.Settings.timeTraitResponse')}
                          value={form.timeTraitResponse}
+                         error={validation.errors.errors.timeTraitResponse}
                          onChange={({target}) => this.formOnChange('timeTraitResponse', target)}/>
         </div>
         <div>
           <MDL.Button id="Room$Edit"
                       primary raised
-                      onClick={() => 0}>
+                      disabled={!(this.isHost() && validation.passes())}
+                      onClick={() => this.props.$roomEditSettings(this.state.form)}>
             {T.translate('App.Room.$Edit')}
           </MDL.Button>
         </div>
@@ -94,51 +109,9 @@ export const RoomView = connect(
       , online: state.get('online')
     }
   }
-  , (dispatch) => ({})
-)(Room);
-
-/*
- * RoomControlGroup
- * */
-
-export class RoomControlGroup extends Component {
-  static propTypes = {
-    room: React.PropTypes.instanceOf(RoomModel)
-    , userId: React.PropTypes.string.isRequired
-    , inRoom: React.PropTypes.bool
-  };
-
-  back() {
-    const {room, userId, inRoom} = this.props;
-    this.props.$redirectTo(inRoom ? '/' : '/room/' + room.id)
-  }
-
-  render() {
-    const {room, userId, inRoom} = this.props;
-
-    if (!room) return null;
-
-    return <ControlGroup name={T.translate('App.Room.Room')}>
-      <MDL.Button id="Room$back" onClick={() => this.back()}>{T.translate('App.Room.$Back')}</MDL.Button>
-      <MDL.Button id="Room$exit" onClick={this.props.$exit}>{T.translate('App.Room.$Exit')}</MDL.Button>
-      <MDL.Button id="Room$start" onClick={this.props.$start(room.id)}
-                  disabled={!room.checkCanStart(userId)}>{T.translate('App.Room.$Start')}</MDL.Button>
-    </ControlGroup>
-  }
-}
-
-export const RoomControlGroupView = connect(
-  (state) => {
-    const roomId = state.get('room');
-    return {
-      room: state.getIn(['rooms', roomId])
-      , userId: state.getIn(['user', 'id'])
-      , lang: state.getIn(['app', 'lang'])
-    }
-  }
   , (dispatch) => ({
-    $redirectTo: (location) => dispatch(redirectTo(location))
-    , $exit: () => dispatch(roomExitRequest())
-    , $start: roomId => () => dispatch(gameCreateRequest(roomId))
+    $roomEditSettings: (settings) => dispatch(roomEditSettingsRequest(settings))
   })
-)(RoomControlGroup);
+)((props) => !props.room ? null : <Room {...props}/>);
+
+export default RoomView;

@@ -1,8 +1,3 @@
-export const TIME_TURN = 60 * 1000;
-
-export const TURN_TIMEOUT_VARIANTS = [1, 2, 5];
-export const TIME_TRAIT_RESPONSE = [.5, 1];
-
 export const CTT_PARAMETER = (i => ({
   ANIMAL: 1 << i++
   , SELF: 1 << i++

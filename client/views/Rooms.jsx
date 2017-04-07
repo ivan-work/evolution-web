@@ -10,7 +10,7 @@ import {RoomsList} from './RoomsList.jsx';
 import {Portal} from './utils/Portal.jsx';
 import {ControlGroup} from './utils/ControlGroup.jsx';
 import {RoomCreateDialog} from './room/RoomCreateDialog.jsx';
-import {RoomControlGroupView} from './Room.jsx';
+import RoomControlGroup from './room/RoomControlGroup.jsx';
 
 import {redirectTo} from '../../shared/utils';
 import {roomCreateRequest, roomJoinRequest} from '../../shared/actions/actions';
@@ -35,9 +35,9 @@ export class Rooms extends React.Component {
     return <div className="loginForm">
       <Portal target='header'>
         <ControlGroup name={T.translate('App.Rooms')}>
-          <RoomCreateDialog onCreateRoom={this.props.$createRequest}/>
+          <MDL.Button id="Rooms$create" onClick={this.props.$createRequest}>{T.translate('App.Rooms$Create')}</MDL.Button>
         </ControlGroup>
-        {!this.props.room ? null : <RoomControlGroupView/>}
+        {!this.props.room ? null : <RoomControlGroup/>}
       </Portal>
       <div>Hello {this.props.username}</div>
       <div>Online: <UsersList list={this.props.online}/></div>
@@ -57,7 +57,7 @@ export const RoomsView = connect(
     }
   }
   , (dispatch) => ({
-    $createRequest: (data) => dispatch(roomCreateRequest(data))
+    $createRequest: () => dispatch(roomCreateRequest())
     , $joinRequest: (roomId) => dispatch(roomJoinRequest(roomId))
     , $redirectTo: (roomId) => dispatch(redirectTo(`/room/${roomId}`))
   })
