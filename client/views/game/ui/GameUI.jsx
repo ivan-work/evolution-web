@@ -11,6 +11,8 @@ import {GameStatusDisplay} from './GameStatusDisplay.jsx';
 import TraitDefenceDialog from './TraitDefenceDialog.jsx';
 import Chat from '../../Chat.jsx';
 
+import './GameUI.scss';
+
 class _GameUI extends React.Component {
   static displayName = 'GameUI';
 

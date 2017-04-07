@@ -418,8 +418,9 @@ const gameEnd = (gameId, game) => ({
 });
 
 const server$gameEnd = (gameId) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
   loggerOnline.info(`Game finished ${game.players.map(p => getState().getIn(['users', p.id, 'login'])).join(', ')}`);
-  dispatch(server$game(gameId, gameEnd(gameId, selectGame(getState, gameId))));
+  dispatch(server$game(gameId, gameEnd(gameId, game)));
 };
 
 export const gameClientToServer = {

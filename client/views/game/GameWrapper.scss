@@ -5,8 +5,18 @@
   min-width: $FULL_SCREEN_MIN_WIDTH + 149px;
   min-height: $FULL_SCREEN_MIN_HEIGHT;
   flex: 1;
-  #game {
-    height: 100%;
-    display: flex;
+}
+
+.Game {
+  position: relative;
+  flex: 1;
+  background: #eee;
+  &.isPlayerTurn {
+    background: #fff;
+  }
+  .PlayerWrapper {
+    .CardCollection {
+      height: 80px;
+    }
   }
 }

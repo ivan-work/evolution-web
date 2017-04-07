@@ -8,12 +8,13 @@ export class UsersList extends React.Component {
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    this.renderUser = props.children || ((user) => <li key={user.id}>{user.login}</li>);
   }
 
   render() {
     const {users} = this.props;
     return (<ul className="UsersList">
-      {users.filter(u => !!u).map((user) => <li key={user.id}>{user.login}</li>).toArray()}
+      {users.filter(u => !!u).map(this.renderUser)}
     </ul>);
   }
 }
