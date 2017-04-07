@@ -42,7 +42,7 @@ $CURRENT_TURN_BACKGROUND: #dfd;
   bottom: 2px;
   top: 0;
   #game {
-    height:100%;
+    height: 100%;
     display: flex;
   }
 }
@@ -64,10 +64,22 @@ $CURRENT_TURN_BACKGROUND: #dfd;
   }
 
   .PlayerWrapper {
-    position: absolute;
-
     .CardCollection {
       height: 80px;
+    }
+  }
+
+  .UserWrapper {
+    position: absolute;
+  }
+
+  .EnemyWrapper {
+    float: left;
+    transition: width .25s, transform .25s;
+    width: 125px;
+    &:hover {
+      width: 250px;
+      transform: none !important;
     }
   }
 }
