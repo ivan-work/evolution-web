@@ -47,6 +47,8 @@ players:
     expect(selectGame().status.phase, 'PHASE.DEPLOY').equal(PHASE.DEPLOY);
     clientStore1.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(gameEndTurnRequest());
+    clientStore1.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(gameEndTurnRequest());
 
     // Turn1, action
     expect(selectGame().status.phase).equal(PHASE.FEEDING);

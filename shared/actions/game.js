@@ -218,19 +218,30 @@ export const gameEndTurn = (gameId, userId) => ({
 });
 
 export const server$autoTurn = (gameId, userId) => (dispatch, getState) => {
+  // Return true if autoturn happened, so no need to end the turn
   const game = selectGame(getState, gameId);
   const player = game.getPlayer(userId);
-  if (game.status.phase === PHASE.FEEDING && !player.acted) {
-    const animal = getFeedingOption(game, userId);
-    if (!!animal) {
-      console.log('TAKING THE FOOD', animal.id);
-      dispatch(server$takeFoodRequest(gameId, userId, animal.id, true));
+  if (game.status.phase === PHASE.DEPLOY) {
+    if (player.continent.size === 0 && player.hand.size > 0) {
+      const animal = AnimalModel.new(userId);
+      dispatch(server$gameDeployAnimalFromHand(gameId, userId, animal, 0, player.hand.get(0).id));
+      dispatch(server$gameDeployNext(gameId, userId));
+      return true;
+    }
+  } else if (game.status.phase === PHASE.FEEDING) {
+    if (!player.acted) {
+      const animal = getFeedingOption(game, userId);
+      if (!!animal) {
+        dispatch(server$takeFoodRequest(gameId, userId, animal.id));
+        return true;
+      }
     }
   }
 };
 
 export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
-  dispatch(server$autoTurn(gameId, userId));
+  const isAutoTurn = !!dispatch(server$autoTurn(gameId, userId));
+  if (isAutoTurn) return;
   logger.debug('server$gameEndTurn:', userId);
   dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
   dispatch(server$game(gameId, gameEndTurn(gameId, userId)));

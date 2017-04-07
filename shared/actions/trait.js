@@ -205,10 +205,9 @@ const playerActed = (gameId, userId) => ({
   , data: {gameId, userId}
 });
 
-export const server$playerActed = (gameId, userId, auto) => (dispatch, getState) => {
+export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
   dispatch(server$game(gameId, playerActed(gameId, userId)));
-  //console.log(`${userId} acted`, !auto, !doesPlayerHasOptions(selectGame(getState, gameId), userId))
-  if (!auto && !doesPlayerHasOptions(selectGame(getState, gameId), userId))
+  if (!doesPlayerHasOptions(selectGame(getState, gameId), userId))
     dispatch(server$gameEndTurn(gameId, userId));
 };
 
@@ -285,7 +284,7 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
   return true;
 };
 
-export const server$takeFoodRequest = (gameId, playerId, animalId, auto) => (dispatch, getState) => {
+export const server$takeFoodRequest = (gameId, playerId, animalId) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   checkGameDefined(game);
   checkGameHasUser(game, playerId);
@@ -299,10 +298,10 @@ export const server$takeFoodRequest = (gameId, playerId, animalId, auto) => (dis
 
   dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, playerId)));
   dispatch(server$game(gameId, startCooldown(gameId, TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, playerId)));
-  dispatch(server$startFeedingFromGame(game.id, animal.id, 1, auto));
+  dispatch(server$startFeedingFromGame(game.id, animal.id, 1));
 };
 
-export const server$startFeedingFromGame = (gameId, animalId, amount, auto) => (dispatch, getState) => {
+export const server$startFeedingFromGame = (gameId, animalId, amount) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   const {animal} = game.locateAnimal(animalId);
   const ambushed = game.someAnimalOnContinent('standard', (attackAnimal) => {
@@ -324,7 +323,7 @@ export const server$startFeedingFromGame = (gameId, animalId, amount, auto) => (
   });
   if (!ambushed) {
     dispatch(server$startFeeding(gameId, animal, amount, 'GAME'));
-    dispatch(server$playerActed(gameId, animal.ownerId, auto));
+    dispatch(server$playerActed(gameId, animal.ownerId));
   }
 };
 

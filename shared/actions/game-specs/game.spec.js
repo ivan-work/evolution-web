@@ -103,7 +103,7 @@ players:
     const User0OriginalHand = ClientGame0().getIn(['players', User0.id, 'hand']);
     const User1OriginalHand = ClientGame1().getIn(['players', User1.id, 'hand']);
 
-    clientStore0.dispatch(gameDeployAnimalRequest(User0OriginalHand.get(0).id, 0));
+    clientStore0.dispatch(gameEndTurnRequest());
 
     expect(ServerGame().getIn(['players', User0.id, 'hand']), 'Server: User0.hand').size(5);
     expect(ServerGame().getIn(['players', User0.id, 'hand', 0]), 'Server: User0.hand.0').equal(User0OriginalHand.get(1));
@@ -123,7 +123,7 @@ players:
     expect(ClientGame1().getIn(['players', User0.id, 'continent']), 'User1 see User0.continent')
       .equal(ServerGame().getIn(['players', User0.id, 'continent']));
 
-    /*
+    /**
      * State: 0-0-1
      * User0: Card#1, Card#2, Card#3, ... | Animal#0
      * User1: Card#0, Card#1, Card#2, ... |
@@ -135,9 +135,9 @@ players:
     expect(ServerGame().status.currentPlayer, 'ServerGame().status.currentPlayer').equal(1);
     expect(ClientGame0().status.currentPlayer, 'ClientGame0().status.currentPlayer').equal(1);
     expect(ClientGame1().status.currentPlayer, 'ClientGame1().status.currentPlayer').equal(1);
-    clientStore1.dispatch(gameDeployAnimalRequest(User1OriginalHand.get(1).id, 0));
+    clientStore1.dispatch(gameEndTurnRequest());
 
-    /*
+    /**
      * State: 0-1-0
      * User0: Card#1, Card#2, Card#3, ... | Animal#0
      * User1: Card#0, Card#2, Card#3, ... | Animal#1
@@ -151,7 +151,7 @@ players:
     expect(ClientGame1().status.currentPlayer, 'ClientGame1().status.currentPlayer').equal(0);
     clientStore0.dispatch(gameDeployAnimalRequest(User0OriginalHand.get(2).id, 0));
 
-    /*
+    /**
      * State: 0-1-1
      * User0: Card#1, Card#3, Card#4, ... | Animal#2, Animal#0
      * User1: Card#0, Card#2, Card#3, ... | Animal#1
@@ -163,10 +163,9 @@ players:
     expect(ServerGame().status.currentPlayer, 'ServerGame().status.currentPlayer').equal(1);
     expect(ClientGame0().status.currentPlayer, 'ClientGame0().status.currentPlayer').equal(1);
     expect(ClientGame1().status.currentPlayer, 'ClientGame1().status.currentPlayer').equal(1);
-    clientStore1.dispatch(gameDeployAnimalRequest(User1OriginalHand.get(0).id, 1));
+    clientStore1.dispatch(gameDeployAnimalRequest(User1OriginalHand.get(1).id, 1));
 
-
-    /*
+    /**
      * State: 0-2-0
      * User0: Card#1, Card#3, Card#4, ... | Animal#2, Animal#0
      * User1: Card#2, Card#3, Card#4, ... | Animal#1, Animal#0
@@ -177,7 +176,7 @@ players:
     expect(ServerGame().status.round, 'ServerGame().status.round').equal(2);
     clientStore0.dispatch(gameDeployAnimalRequest(User0OriginalHand.get(4).id, 1));
 
-    /*
+    /**
      * State: 0-2-1
      * User0: Card#1, Card#3, Card#5, ... | Animal#2, Animal#4, Animal#0
      * User1: Card#2, Card#3, Card#4, ... | Animal#1, Animal#0
@@ -258,14 +257,17 @@ players:
     ParseGame(`
 players:
   - hand: 5 camo
+  - hand: 5 camo
 `);
 
     clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id));
     clientStore1.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id));
+    clientStore1.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id));
 
     expect(ServerGame().getIn(['players', User0.id, 'hand']), 'Server: User0.hand').size(2);
+    expect(ServerGame().getIn(['players', User1.id, 'hand']), 'Server: User0.hand').size(4);
   });
 
   it('Reload', () => {
