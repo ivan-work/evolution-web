@@ -24,15 +24,15 @@ players:
 
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitGrazing'));
     expect(selectGame().food).equal(6);
-    expect(selectPlayer(User0).acted).equal(false);
+    expect(selectPlayer(User0).acted).equal(true);
     expectUnchanged('Grazing on cooldown', () =>
         clientStore0.dispatch(traitActivateRequest('$A', 'TraitGrazing'))
       , serverStore, clientStore0, clientStore1);
     clientStore0.dispatch(traitActivateRequest('$B', 'TraitGrazing'));
-    expect(selectPlayer(User0).acted).equal(false);
+    expect(selectPlayer(User0).acted).equal(true);
     expect(selectGame().food).equal(5);
     clientStore0.dispatch(traitActivateRequest('$C', 'TraitGrazing'));
-    expect(selectPlayer(User0).acted).equal(false);
+    expect(selectPlayer(User0).acted).equal(true);
     expect(selectGame().food).equal(4);
 
     clientStore0.dispatch(traitTakeFoodRequest('$A'));

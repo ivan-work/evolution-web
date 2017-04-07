@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
-export class AnimalTraitArrowMarker extends Component {
+export default class AnimalTraitArrowMarker extends Component {
   componentDidMount() {
     const markerNode = ReactDOM.findDOMNode(this);
     const {markerSize} = this.props;
@@ -10,7 +10,7 @@ export class AnimalTraitArrowMarker extends Component {
     markerNode.setAttribute('markerHeight', markerSize);
     markerNode.setAttribute('refX', 0);
     markerNode.setAttribute('refY', markerSize / 2);
-    markerNode.setAttribute('orient', 'auto');
+    markerNode.setAttribute('orient', 'auto-start-reverse');
   }
 
   render() {

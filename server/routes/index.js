@@ -6,6 +6,9 @@ import fs from 'fs';
 import yamlParser from 'yaml-js';
 
 module.exports = (app, passport) => {
+   /**
+   * Translations
+   * */
   const translations = glob.sync('i18n/*.yml')
     .reduce((result, fileName) => {
       const key = fileName.substr(fileName.lastIndexOf('/') + 1).replace(/\.yml$/, '');
@@ -19,6 +22,13 @@ module.exports = (app, passport) => {
     } else {
       res.status(404).send('404');
     }
+  });
+
+  /**
+   * Time Service
+   * */
+  router.get('/time', function (req, res, next) {
+    res.status(200).json(Date.now());
   });
 
   router.get('/state', function (req, res, next) {

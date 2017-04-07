@@ -119,19 +119,17 @@ export class AnimalModel extends Record({
   }
 
   digestFood() {
-    let foodBalance = this.food - this.sizeOfNormalFood(); // +1 means animal overate, -1 means to generate from fat
     let self = this;
-//    console.log(`${this.id} ${this.sizeOfNormalFood()} + ${this.sizeOfFat()} - ${this.getFood()}.
-//foodBalance ${foodBalance}
-//fat size: ${self.getFat()}
-//`);
-    while (foodBalance < 0 && self.getFat() > 0) {
-      foodBalance++;
-      self = self.updateTrait(
-        trait => trait.type === TraitFatTissue && trait.value
-        , trait => trait.set('value', false)
-        , false
-      );
+    if (!this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)) {
+      let foodBalance = this.food - this.sizeOfNormalFood(); // +1 means animal overate, -1 means to generate from fat
+      while (foodBalance < 0 && self.getFat() > 0) {
+        foodBalance++;
+        self = self.updateTrait(
+          trait => trait.type === TraitFatTissue && trait.value
+          , trait => trait.set('value', false)
+          , false
+        );
+      }
     }
     return self
       .set('food', 0)

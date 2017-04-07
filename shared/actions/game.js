@@ -326,11 +326,9 @@ export const server$gameExtict = (gameId) => (dispatch, getState) => {
   //console.log('server$gameExtinct')
   const game = selectGame(getState, gameId);
   const cardNeedToPlayer = {};
-  const cardGivePerPlayer = {};
   let deckSize = game.deck.size;
 
   game.players.forEach((player) => {
-    cardGivePerPlayer[player.id] = 0;
     cardNeedToPlayer[player.id] = 1;
     player.continent.forEach((animal) => {
       if (!animal.canSurvive() || animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED)) {
@@ -339,6 +337,12 @@ export const server$gameExtict = (gameId) => (dispatch, getState) => {
         cardNeedToPlayer[player.id] += 1;
       }
     });
+    if (player.continent.size === 0 && player.hand.size === 0) {
+      cardNeedToPlayer[player.id] = 6;
+    }
+  });
+
+  selectGame(getState, gameId).players.forEach((player) => {
     if (player.continent.size === 0 && player.hand.size === 0) {
       cardNeedToPlayer[player.id] = 6;
     }

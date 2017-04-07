@@ -37,7 +37,7 @@ export class SettingsRecord extends Record({
         case 'decks':
           return next.size > 0 ? next : prev;
         default:
-          return Number.isInteger(next) ? next : prev;
+          return Number.isInteger(+next) ? next : prev;
       }
     }, SettingsRecord.fromJS(settings));
   }

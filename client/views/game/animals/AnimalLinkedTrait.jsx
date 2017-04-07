@@ -9,7 +9,7 @@ import classnames from 'classnames';
 import {Tooltip} from './../../utils/Tooltips.jsx';
 import {Portal} from '../../utils/Portal.jsx';
 import {AnimalTrait} from './AnimalTrait.jsx';
-import {AnimalTraitArrowMarker} from './AnimalTraitArrowMarker.jsx';
+import AnimalTraitArrowMarker from './AnimalTraitArrowMarker.jsx';
 
 const AnimalLinkedTraits = [];
 
@@ -22,7 +22,7 @@ const traitPropsMap = _.forIn({
   }
   , TraitSymbiosis: {
     color: '#F0F'
-    , markerEnd: 'url(#symbioticArrow)'
+    , marker: 'url(#symbioticArrow)'
   }
   , default: {
     color: '#999'
@@ -31,7 +31,7 @@ const traitPropsMap = _.forIn({
 }, (obj) => _.defaults(obj, {
   color: '#000'
   , opacity: .75
-  , markerEnd: 'none'
+  , marker: 'none'
 }));
 
 export class AnimalLinkedTrait extends Component {
@@ -63,7 +63,7 @@ export class AnimalLinkedTrait extends Component {
 
   tick() {
     if (this._isMounted) {
-      const {trait, angle} = this.props;
+      const {trait} = this.props;
       if (this.targetTrait && this.targetTrait._isMounted) {
         // http://stackoverflow.com/questions/25630035/javascript-getboundingclientrect-changes-while-scrolling
         const bbx1 = this.node.getBoundingClientRect();
@@ -73,13 +73,20 @@ export class AnimalLinkedTrait extends Component {
         const x2 = bbx2.left + bbx2.width / 2 + (window.scrollX || 0);
         const y2 = bbx2.top + bbx2.height / 2 + (window.scrollY || 0);
 
-        const [px1, py1, px2, py2] = x1 < x2 || y1 > y2 ? [x1, y1, x2, y2] : [x2, y2, x1, y1];
+        const reversed = x1 < x2 || (x1 === x2 && y1 < y2 );
+        const [px1, py1, px2, py2] = reversed
+          ? [x1, y1, x2, y2]
+          : [x2, y2, x1, y1];
+
+        const angle = Math.atan2(y1 - y2, x1 - x2) * 180 / Math.PI;
+        //${.5 + .5 * length}
+        const length = 1 - .0025 * Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 
         const strokeWidth = 4;
 
         this.setState({
-          d: `M${px1},${py1} A 1 1 ${angle || 0} 1 1 ${px2},${py2}`
-          //d: `M${x1},${y1} ${x2},${y2}`
+          d: `M${px1},${py1} A 1 ${.5 + .5 * length} ${angle || 0} 1 1 ${px2},${py2}`
+          , reversed
           , strokeWidth
         });
       } else {
@@ -109,7 +116,8 @@ export class AnimalLinkedTrait extends Component {
          , stroke: traitProps.color
          , fill: 'none'
          , pointerEvents: 'auto'
-         , markerEnd: traitProps.markerEnd
+         , markerStart: !this.state.reversed ? traitProps.marker : 'none'
+         , markerEnd: this.state.reversed ? traitProps.marker : 'none'
         }}/>
       </Tooltip>
     </g>
@@ -119,6 +127,7 @@ export class AnimalLinkedTrait extends Component {
     const {trait} = this.props;
     return (<div>
       <AnimalTrait trait={trait}/>
+      {/*this.state && this.state.angle*/}
       <Portal target='game-svg'>
         {this.renderInPortal()}
       </Portal>

@@ -6,6 +6,15 @@ import {RoomModel} from '../../../shared/models/RoomModel';
 import Validator from 'validatorjs';
 import {SettingsRules, SETTINGS_TIME_MODIFIER} from '../../../shared/models/game/GameSettings';
 
+const INITIAL_STATE = (props) => ({
+  form: {
+    name: props.room.name
+    , maxPlayers: props.room.settings.maxPlayers
+    , timeTurn: props.room.settings.timeTurn / SETTINGS_TIME_MODIFIER
+    , timeTraitResponse: props.room.settings.timeTraitResponse / SETTINGS_TIME_MODIFIER
+  }
+});
+
 export default class RoomSettings extends Component {
   static propTypes = {
     room: React.PropTypes.instanceOf(RoomModel)
@@ -16,13 +25,12 @@ export default class RoomSettings extends Component {
   constructor(props) {
     super(props);
     this.formSubmit = this.formSubmit.bind(this);
-    this.state = {};
-    this.state.form = {};
-    this.state.form.name = props.room.name;
-    this.state.form.maxPlayers = props.room.settings.maxPlayers;
-    this.state.form.timeTurn = props.room.settings.timeTurn / SETTINGS_TIME_MODIFIER;
-    this.state.form.timeTraitResponse = props.room.settings.timeTraitResponse / SETTINGS_TIME_MODIFIER;
+    this.state = INITIAL_STATE(props);
     this.state.validation = new Validator(this.state.form, SettingsRules);
+  }
+
+  componentWillReceiveProps(props) {
+    this.setState(INITIAL_STATE(props));
   }
 
   isHost() {

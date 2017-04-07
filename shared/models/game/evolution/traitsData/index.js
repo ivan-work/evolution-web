@@ -143,7 +143,7 @@ export const TraitGrazing = {
   , action: (game, sourceAnimal) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, TraitGrazing, sourceAnimal));
     dispatch(server$traitGrazeFood(game.id, 1, sourceAnimal));
-    return false;
+    return true;
   }
   , $checkAction: (game, sourceAnimal) => game.food > 0
 };
@@ -163,7 +163,7 @@ export const TraitHibernation = {
   , action: (game, sourceAnimal) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, TraitHibernation, sourceAnimal));
     dispatch(server$traitSetAnimalFlag(game, sourceAnimal, TRAIT_ANIMAL_FLAG.HIBERNATED));
-    return true;
+    return false;
   }
   , $checkAction: (game, sourceAnimal) => game.deck.size > 0
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import {List} from 'immutable';
 
-import {Animal, _Animal} from './Animal.jsx';
+import {Animal} from './Animal.jsx';
 
 import {GameModel, GameModelClient} from '../../../../shared/models/game/GameModel';
 import {CardModel} from '../../../../shared/models/game/CardModel';

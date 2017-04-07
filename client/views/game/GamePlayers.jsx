@@ -49,7 +49,7 @@ export default class GamePlayers extends Component {
                           , transformOrigin: `top`
                           }}>
             <div style={{transform: `rotate(${upsideDown > 0 ? 0 : Math.PI}rad)`}}>
-              <PlayerWrapper angle={r2g(angle)} game={game} player={player} upsideDown={upsideDown > 0}/>
+              <PlayerWrapper game={game} player={player} upsideDown={upsideDown > 0}/>
             </div>
           </div>
           })}

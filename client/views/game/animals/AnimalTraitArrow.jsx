@@ -1,7 +1,7 @@
 //import React, {Component} from 'react';
 import React from 'react';
 import cn from 'classnames';
-import {AnimalTraitArrowMarker} from './AnimalTraitArrowMarker.jsx';
+import AnimalTraitArrowMarker from './AnimalTraitArrowMarker.jsx';
 
 import styles from '../../../styles.json'
 const {ANIMAL_WIDTH, ANIMAL_TRAIT_HEIGHT} = styles;
@@ -26,7 +26,7 @@ export class AnimalTraitArrow extends React.Component {
 
     return <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0'}}>
       <defs>
-        <AnimalTraitArrowMarker id='arrow' markerSize={2} style={{
+        <AnimalTraitArrowMarker id='arrow' markerSize={2} markerEnd={true} style={{
           fill: 'red'
         }}/>
       </defs>
