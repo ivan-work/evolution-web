@@ -12,6 +12,7 @@ export class TraitDataModel extends Record({
   , cooldowns: null // array of cooldown data arrays (checks before use, adds after use)
   , multiple: false // is allowed multiple traits with same type? (only for FatTissue)
   , transient: false // for ambush
+  , hidden: false
   , action: null // action function
   // (game, sourceAnimal, trait:TraitModel, targetAnimal/targetTrait/none, attackTrait/none, attackAnimal/none) => should return (dispatch, getState)
   , $checkAction: null // if trait is allowed to be clicked? (game, sourceAnimal) => boolean

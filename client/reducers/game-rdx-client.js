@@ -9,7 +9,8 @@ import {
   , gameGiveCards
   , gameNextPlayer
   , gameAddTurnTimeout
-  , gameDeployAnimal
+  , gameDeployAnimalFromHand
+  , gameDeployAnimalFromDeck
   , gameDeployTrait
   , gameEndTurn
   , gameEnd
@@ -26,13 +27,13 @@ import {
   , gameAnimalStarve
   , traitAnimalPoisoned
   , traitAnimalRemoveTrait
+  , traitAnimalAttachTrait
   , traitGrazeFood
   , traitConvertFat
   , traitSetAnimalFlag
   , traitSetValue
   , traitNotify_Start
   , traitTakeShell
-  , traitGiveBirth
 } from '../../server/reducers/games-rdx-server';
 
 export const reducer = createReducer(null, {
@@ -44,7 +45,8 @@ export const reducer = createReducer(null, {
   , gameGiveCards
   , gameNextPlayer
   , gameAddTurnTimeout
-  , gameDeployAnimal
+  , gameDeployAnimalFromHand
+  , gameDeployAnimalFromDeck
   , gameDeployTrait
   , gameEndTurn
   , gameEnd
@@ -61,11 +63,11 @@ export const reducer = createReducer(null, {
   , gameAnimalStarve
   , traitAnimalPoisoned
   , traitAnimalRemoveTrait
+  , traitAnimalAttachTrait
   , traitGrazeFood
   , traitConvertFat
   , traitSetAnimalFlag
   , traitSetValue
   , traitNotify_Start
   , traitTakeShell
-  , traitGiveBirth
 });

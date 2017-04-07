@@ -8,6 +8,7 @@ import {AnimalModel} from '../models/game/evolution/AnimalModel';
 import {TraitModel} from '../models/game/evolution/TraitModel';
 import {
   CARD_TARGET_TYPE,
+  CARD_SOURCE,
   CTT_PARAMETER,
   TRAIT_TARGET_TYPE,
   TRAIT_ANIMAL_FLAG
@@ -149,21 +150,28 @@ export const gameDeployAnimalRequest = (cardId, animalPosition) => (dispatch, ge
   , data: {gameId: getState().get('game').id, cardId, animalPosition}
   , meta: {server: true}
 });
-export const gameDeployAnimal = (gameId, userId, animal, animalPosition, cardPosition) => ({
-  type: 'gameDeployAnimal'
-  , data: {gameId, userId, animal, animalPosition, cardPosition}
+
+const gameDeployAnimalFromHand = (gameId, userId, animal, animalPosition, cardId) => ({
+  type: 'gameDeployAnimalFromHand'
+  , data: {gameId, userId, animal, animalPosition, cardId}
 });
-export const server$gameDeployAnimal = (gameId, userId, animal, animalPosition, cardPosition) => (dispatch, getState) => {
-  dispatch(gameDeployAnimal(gameId, userId, animal, animalPosition, cardPosition));
+
+export const server$gameDeployAnimalFromHand = (gameId, userId, animal, animalPosition, cardId) => (dispatch, getState) => {
+  dispatch(gameDeployAnimalFromHand(gameId, userId, animal, animalPosition, cardId));
   dispatch(Object.assign(
-    gameDeployAnimal(gameId, userId, animal.toClient(), animalPosition, cardPosition)
+    gameDeployAnimalFromHand(gameId, userId, animal.toClient(), animalPosition, cardId)
     , {meta: {clientOnly: true, userId}}
   ));
   dispatch(Object.assign(
-    gameDeployAnimal(gameId, userId, animal.toOthers().toClient(), animalPosition, cardPosition)
+    gameDeployAnimalFromHand(gameId, userId, animal.toOthers().toClient(), animalPosition, cardId)
     , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId).filter(uid => uid !== userId)}}
   ));
 };
+
+export const gameDeployAnimalFromDeck = (gameId, animal, sourceAid) => ({
+  type: 'gameDeployAnimalFromDeck'
+  , data: {gameId, animal, sourceAid}
+});
 
 // gameDeployTrait
 export const gameDeployTraitRequest = (cardId, animalId, alternateTrait, linkId) => (dispatch, getState) => dispatch({
@@ -466,13 +474,12 @@ export const gameClientToServer = {
     checkGamePhase(game, PHASE.DEPLOY);
     checkPlayerCanAct(game, userId);
     checkValidAnimalPosition(game, userId, animalPosition);
-    const cardIndex = checkPlayerHasCard(game, userId, cardId);
-    const card = game.getPlayer(userId).hand.get(cardIndex);
+    checkPlayerHasCard(game, userId, cardId);
     const animal = AnimalModel.new(userId);
-    logger.verbose('selectGame > gameDeployAnimalRequest:', card);
+    logger.verbose('selectGame > gameDeployAnimalRequest:', cardId);
     // console.timeEnd('gameDeployAnimalRequest body');
     // console.time('server$gameDeployAnimal');
-    dispatch(server$gameDeployAnimal(gameId, userId, animal, parseInt(animalPosition), cardIndex));
+    dispatch(server$gameDeployAnimalFromHand(gameId, userId, animal, parseInt(animalPosition), cardId));
     // console.timeEnd('server$gameDeployAnimal');
     // console.time('server$gameDeployNext');
     dispatch(server$gameDeployNext(gameId, userId));
@@ -561,8 +568,9 @@ export const gameServerToClient = {
   , gamePlayerReadyChange: ({gameId, userId, ready}) => gamePlayerReadyChange(gameId, userId, ready)
   , gameGiveCards: ({gameId, userId, cards}) =>
     gameGiveCards(gameId, userId, List(cards).map(card => CardModel.fromServer(card)))
-  , gameDeployAnimal: ({gameId, userId, animal, animalPosition, cardPosition}) =>
-    gameDeployAnimal(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardPosition)
+  , gameDeployAnimalFromHand: ({gameId, userId, animal, animalPosition, cardId}) =>
+    gameDeployAnimalFromHand(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardId)
+  , gameDeployAnimalFromDeck: ({gameId, animal, sourceAid}) => gameDeployAnimalFromDeck(gameId, AnimalModel.fromServer(animal), sourceAid)
   , gameDeployTrait: ({gameId, cardId, traits}) =>
     gameDeployTrait(gameId, cardId, traits.map(trait => TraitModel.fromServer(trait)))
   , gameAddTurnTimeout: ({gameId, turnStartTime, turnDuration}) =>

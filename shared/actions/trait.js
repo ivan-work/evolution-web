@@ -163,14 +163,17 @@ export const server$traitAnimalRemoveTrait = (game, animal, trait) => (dispatch)
   dispatch(server$game(game.id, traitAnimalRemoveTrait(game.id, animal.ownerId, animal.id, trait.id)));
 };
 
+const traitAnimalAttachTrait = (gameId, sourcePid, sourceAid, trait) => ({
+  type: 'traitAnimalAttachTrait'
+  , data: {gameId, sourcePid, sourceAid, trait}
+});
+
+export const server$traitAnimalAttachTrait = (game, animal, trait) =>
+  server$game(game.id, traitAnimalAttachTrait(game.id, animal.ownerId, animal.id, trait));
+
 const traitTakeShell = (gameId, continentId, animalId, trait) => ({
   type: 'traitTakeShell'
   , data: {gameId, continentId, animalId, trait}
-});
-
-export const traitGiveBirth = (gameId, sourceAid) => ({
-  type: 'traitGiveBirth'
-  , data: {gameId, sourceAid}
 });
 
 export const server$tryViviparous = (gameId, animal) => (dispatch, getState) => {
@@ -543,14 +546,14 @@ export const traitServerToClient = {
     traitNotify_End(gameId, sourceAid, traitId, traitType, targetId)
   , traitAnimalRemoveTrait: ({gameId, sourcePid, sourceAid, traitId}) =>
     traitAnimalRemoveTrait(gameId, sourcePid, sourceAid, traitId)
+  , traitAnimalAttachTrait: ({gameId, sourcePid, sourceAid, trait}) =>
+    traitAnimalAttachTrait(gameId, sourcePid, sourceAid, TraitModel.fromServer(trait))
   , traitGrazeFood: ({gameId, food, sourceAid}) => traitGrazeFood(gameId, food, sourceAid)
   , traitConvertFat: ({gameId, sourceAid, traitId}) => traitConvertFat(gameId, sourceAid, traitId)
   , traitSetAnimalFlag: ({gameId, sourceAid, flag, on}) =>
     traitSetAnimalFlag(gameId, sourceAid, flag, on)
   , traitTakeShell: ({gameId, continentId, animalId, trait}) =>
     traitTakeShell(gameId, continentId, animalId, TraitModel.fromServer(trait))
-  , traitGiveBirth: ({gameId, sourceAid}) =>
-    traitGiveBirth(gameId, sourceAid)
   , traitSetValue: ({gameId, sourceAid, traitId, value}) =>
     traitSetValue(gameId, sourceAid, traitId, value)
 };

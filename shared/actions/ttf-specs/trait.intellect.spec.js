@@ -10,7 +10,7 @@ import {replaceGetRandom} from '../../utils/randomGenerator';
 
 import {makeGameSelectors} from '../../selectors';
 
-describe.only('TraitIntellect:', () => {
+describe('TraitIntellect:', () => {
   it('Works', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
