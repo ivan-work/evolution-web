@@ -1,13 +1,16 @@
-import React, {Component} from 'react';
+import React, {Component, PropTypes} from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
+import IPT from 'react-immutable-proptypes';
 
-import {GameModelClient, PHASE} from '../../../../shared/models/game/GameModel';
+import {StatusRecord, PHASE} from '../../../../shared/models/game/GameModel';
+import {PlayerModel} from '../../../../shared/models/game/PlayerModel';
 
 import {UserService} from '../../../services/UserService'
 
 export class GameStatusDisplay extends Component {
   static propTypes = {
-    game: React.PropTypes.instanceOf(GameModelClient).isRequired
+    status: PropTypes.instanceOf(StatusRecord).isRequired
+    , players: IPT.mapOf(PropTypes.instanceOf(PlayerModel), PropTypes.string).isRequired
   };
 
   constructor(props) {
@@ -15,8 +18,8 @@ export class GameStatusDisplay extends Component {
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
   }
 
-  getPhaseAsString() {
-    switch (this.props.game.status.phase){
+  static getPhaseAsString(phase) {
+    switch (phase){
       case PHASE.DEPLOY:
         return 'Deploy';
       case PHASE.FEEDING:
@@ -26,30 +29,30 @@ export class GameStatusDisplay extends Component {
     }
   }
 
-  getPlayerNameByIndex(index) {
-    const player = this.props.game.players.find(player => player.index === index);
+  getPlayerNameByIndex(players, index) {
+    const player = players.find(player => player.index === index);
     return UserService.get(player.id).login;
   }
 
   render() {
-    const {game} = this.props;
+    const {status, players} = this.props;
     return <ul className="GameStatus">
       <h6>Game Status:</h6>
       <li>
         <span className='key'>Turn:</span>
-        <span className='value'>{game.status.turn}</span>
+        <span className='value'>{status.turn}</span>
       </li>
       <li>
         <span className='key'>Phase:</span>
-        <span className='value'>{this.getPhaseAsString()}</span>
+        <span className='value'>{GameStatusDisplay.getPhaseAsString(status.phase)}</span>
       </li>
       <li>
         <span className='key'>Round:</span>
-        <span className='value'>{game.status.round}</span>
+        <span className='value'>{status.round}</span>
       </li>
       <li>
         <span className='key'>Player:</span>
-        <span className='value'>{this.getPlayerNameByIndex(game.status.currentPlayer)}</span>
+        <span className='value'>{this.getPlayerNameByIndex(players, status.currentPlayer)}</span>
       </li>
     </ul>
   }

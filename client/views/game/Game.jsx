@@ -79,7 +79,7 @@ class _Game extends React.Component {
                     style={{width: '100%'}}
                     onClick={this.context.gameActions.$endTurn}>End Phase</MDL.Button>}
 
-        <GameStatusDisplay game={game}/>
+        <GameStatusDisplay status={game.status} players={game.players}/>
 
         {this.renderDeck(game)}
       </div>

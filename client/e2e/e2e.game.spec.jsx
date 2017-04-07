@@ -1,6 +1,6 @@
 import {Map} from 'immutable';
 import {push} from 'react-router-redux';
-//import React from 'react';
+import React from 'react';
 import {mountClient} from '~/shared/test/test-helpers.jsx'
 import {GameModel, GameModelClient, TEST_DECK_SIZE, TEST_HAND_SIZE} from '../../shared/models/game/GameModel';
 //var TestLocation = require('react-router');
@@ -27,7 +27,10 @@ describe('e2e (game): ', () => {
 
     const $Game0 = $client0.find('DragDropContext(GameWrapper)');
     const $Game1 = $client1.find('DragDropContext(GameWrapper)');
-    console.log($Game0.get(0))
+    //console.log($Game0.get(0))
+
+    $client0.unmount();
+    $client1.unmount();
     //const dndBackend0 = $Game0.get(0).getManager().getBackend();
 
 //    const userWrapper0 = $Game0.find('.PlayerWrapper.UserWrapper');
