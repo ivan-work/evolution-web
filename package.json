@@ -1,6 +1,6 @@
 {
   "name": "cards3",
-  "version": "0.0.47",
+  "version": "0.0.48",
   "description": "blahblah",
   "browser": {
     "jsonwebtoken": false,
@@ -61,6 +61,7 @@
     "react-immutable-proptypes": "*",
     "react-mdl": "*",
     "react-mdl-select": "^1.1.2",
+    "react-measure": "^1.4.2",
     "react-redux": "*",
     "react-router": "*",
     "react-router-redux": "*",
