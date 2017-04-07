@@ -107,11 +107,12 @@ export class AdminPanel extends Component {
     const value = this.toInput(gameSeed.getIn([...path]));
     return <textarea
       rows={1}
+      value={value}
       style={{
         overflow: 'hidden'
         , background: (this.validateInput(value) ? '#afa' : '#faa')
       }}
-      onChange={this.onInput(...path)}>{value}</textarea>
+      onChange={this.onInput(...path)}/>
   }
 }
 

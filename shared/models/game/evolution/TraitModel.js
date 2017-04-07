@@ -1,5 +1,6 @@
 import {Record} from 'immutable';
 import {TraitDataModel} from './TraitDataModel';
+import * as traitData from './traitData'
 
 export class TraitModel extends Record({
   type: null
@@ -17,7 +18,14 @@ export class TraitModel extends Record({
     return js == null
       ? null
       : new TraitModel(js)
-        .set('dataModel', TraitDataModel.new(js.type));
+      .set('dataModel', TraitDataModel.new(js.type));
+  }
+
+  static parse(string) {
+    const traitKey = Object.keys(traitData)
+      .find(traitKey => ~traitData[traitKey].type
+        .toLowerCase().indexOf(string.toLowerCase()));
+    return TraitModel.new(traitKey);
   }
 
   toClient() {
