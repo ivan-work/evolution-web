@@ -11,7 +11,7 @@ import {CARD_TARGET_TYPE, CTT_PARAMETER, TRAIT_TARGET_TYPE} from '../models/game
 import {actionError} from './generic';
 import {server$game} from './generic';
 import {redirectTo} from '../utils';
-import {selectRoom, selectGame, selectPlayers} from '../selectors';
+import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
 
 import {
   checkGameDefined
@@ -34,7 +34,7 @@ export const gameCreateSuccess = (game) => ({
 });
 export const server$gameCreateSuccess = (game) => (dispatch, getState) => {
   dispatch(gameCreateSuccess(game));
-  selectPlayers(getState, game.id).forEach(userId => {
+  selectPlayers4Sockets(getState, game.id).forEach(userId => {
     dispatch(Object.assign(
       gameCreateSuccess(game.toOthers(userId).toClient())
       , {meta: {userId, clientOnly: true}}
@@ -62,6 +62,7 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
   logger.info('server$gameLeave')
   dispatch(server$game(gameId, gamePlayerLeft(gameId, userId)));
   const game = selectGame(getState, gameId);
+  const leaver = game.getPlayer(userId);
   switch (game.players.filter(p => p.playing).size) {
     case 0:
       dispatch(server$game(gameId, gameDestroy(gameId)));
@@ -72,13 +73,16 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
       }
       break;
     default:
+      if (game.status.currentPlayer === leaver.index) {
+        dispatch(server$game(gameId, gameNextPlayer(gameId)));
+      }
   }
 };
 
 // Game Start
 export const server$gameStart = (gameId) => (dispatch, getState) =>
   dispatch(Object.assign(gameStart(gameId), {
-    meta: {users: selectPlayers(getState, gameId)}
+    meta: {users: selectPlayers4Sockets(getState, gameId)}
   }));
 export const gameStart = (gameId) => ({
   type: 'gameStart'
@@ -112,7 +116,7 @@ export const server$gameGiveCards = (gameId, userId, count) => (dispatch, getSta
   ));
   dispatch(Object.assign(
     gameGiveCards(gameId, userId, cards.map(card => card.toOthers().toClient()))
-    , {meta: {clientOnly: true, users: selectPlayers(getState, gameId).filter(uid => uid !== userId)}}
+    , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId).filter(uid => uid !== userId)}}
   ));
 };
 
@@ -136,7 +140,7 @@ export const server$gameDeployAnimal = (gameId, userId, animal, animalPosition, 
   ));
   dispatch(Object.assign(
     gameDeployAnimal(gameId, userId, animal.toOthers().toClient(), animalPosition, cardPosition)
-    , {meta: {clientOnly: true, users: selectPlayers(getState, gameId).filter(uid => uid !== userId)}}
+    , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId).filter(uid => uid !== userId)}}
   ));
 };
 
@@ -157,7 +161,7 @@ export const server$gameDeployTrait = (gameId, cardId, traitType, animalId, link
   dispatch(gameDeployTrait(gameId, cardId, traitType, animalId, linkedAnimalId));
   dispatch(Object.assign(
     gameDeployTrait(gameId, cardId, traitType, animalId, linkedAnimalId)
-    , {meta: {clientOnly: true, users: selectPlayers(getState, gameId)}}
+    , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId)}}
   ));
 };
 
@@ -174,13 +178,13 @@ export const server$gameDeployNext = (gameId, userId) => (dispatch, getState) =>
 // gameDeployNext || gameEndTurnRequest > gameFinishDeploy > gameEndTurn && (gameNextPlayer || gameStartEat)
 export const server$gameFinishDeploy = (gameId, userId) => (dispatch, getState) => {
   dispatch(Object.assign(gameEndTurn(gameId, userId), {
-    meta: {users: selectPlayers(getState, gameId)}
+    meta: {users: selectPlayers4Sockets(getState, gameId)}
   }));
   const game = selectGame(getState, gameId);
   if (game.players.every(player => player.ended)) {
     const food = game.generateFood();
     dispatch(Object.assign(gameStartEat(gameId, food), {
-      meta: {users: selectPlayers(getState, gameId)}
+      meta: {users: selectPlayers4Sockets(getState, gameId)}
     }));
   } else {
     dispatch(server$game(gameId, gameNextPlayer(gameId)));
@@ -213,7 +217,7 @@ export const gameStartEat = (gameId, food) => ({
 
 export const server$gameFinishFeeding = (gameId, userId) => (dispatch, getState) => {
   dispatch(Object.assign(gameEndTurn(gameId, userId), {
-    meta: {users: selectPlayers(getState, gameId)}
+    meta: {users: selectPlayers4Sockets(getState, gameId)}
   }));
   const game = selectGame(getState, gameId);
   if (game.players.every(player => player.ended)) {

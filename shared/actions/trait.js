@@ -14,7 +14,7 @@ import {
 
 import {server$actionsChain, server$game} from './generic';
 
-import {selectRoom, selectGame, selectPlayers} from '../selectors';
+import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
 
 import {TraitCommunication} from '../models/game/evolution/traitData';
 
@@ -55,7 +55,7 @@ const traitKillAnimal = (gameId, sourcePlayerId, sourceAnimalId, targetPlayerId,
 
 export const server$traitKillAnimal = (gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId) => (dispatch, getState) => dispatch(
   Object.assign(traitKillAnimal(gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId)
-    , {meta: {users: selectPlayers(getState, gameId)}}));
+    , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
 
 const playerActed = (gameId, userId) => ({
   type: 'playerActed'
@@ -64,7 +64,7 @@ const playerActed = (gameId, userId) => ({
 
 export const server$playerActed = (gameId, userId) => (dispatch, getState) => dispatch(
   Object.assign(playerActed(gameId, userId)
-    , {meta: {users: selectPlayers(getState, gameId)}}));
+    , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
 
 // complexActions
 
@@ -96,7 +96,7 @@ export const startCooldown = (gameId, link, duration, place, placeId) => ({
 
 export const server$startCooldown = (gameId, link, duration, place, placeId) => (dispatch, getState) => dispatch(
   Object.assign(startCooldown(gameId, link, duration, place, placeId), {
-    meta: {users: selectPlayers(getState, gameId)}
+    meta: {users: selectPlayers4Sockets(getState, gameId)}
   }));
 
 //export const cancelCooldown = (gameId, link, playerId, animalId) => ({

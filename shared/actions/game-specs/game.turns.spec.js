@@ -2,9 +2,9 @@ import {Map, List} from 'immutable';
 
 import {
   gameEndTurnRequest
-} from '../actions/actions';
+} from '../actions';
 
-import {PHASE} from '../../shared/models/game/GameModel';
+import {PHASE} from '../../models/game/GameModel';
 
 describe('Game (TURNS):', function () {
   it('Hunting after phase', () => {

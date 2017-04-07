@@ -14,7 +14,7 @@ import {PHASE} from '../../../shared/models/game/GameModel';
 import {makeGameActionHelpers} from '../generic';
 import {makeGameSelectors} from '../../selectors';
 
-describe.only('Game (LEAVERS):', function () {
+describe('Game (LEAVERS):', function () {
   it('Deploy, User1 leaves at User0 turn', () => {
     const [{serverStore, ServerGame, ParseGame}
       , {clientStore0, User0, ClientGame0}
@@ -36,19 +36,17 @@ deck: 50 camo
     clientStore2.dispatch(deployAnimal(User2, 0, 0));
 
     clientStore0.dispatch(deployAnimal(User0, 0, 0));
-    clientStore1.dispatch(deployAnimal(User1, 0, 0));
-    clientStore2.dispatch(deployAnimal(User2, 0, 0));
-
     clientStore1.disconnect(SOCKET_DISCONNECT_NOW);
+    clientStore2.dispatch(deployAnimal(User2, 0, 0));
 
     clientStore0.dispatch(deployAnimal(User0, 0, 0));
     clientStore2.dispatch(deployAnimal(User2, 0, 0));
 
-    expect(ServerGame().getIn(['status', 'turn'])).equal(0);
-    expect(ServerGame().getIn(['status', 'phase'])).equal(PHASE.DEPLOY);
-    expect(ServerGame().getIn(['status', 'currentPlayer'])).equal(0);
+    expect(ServerGame().getIn(['status', 'turn']), 'turn').equal(0);
+    expect(ServerGame().getIn(['status', 'phase']), 'PHASE.DEPLOY').equal(PHASE.DEPLOY);
+    expect(ServerGame().getIn(['status', 'currentPlayer']), 'currentPlayer').equal(0);
     expect(ServerGame().getPlayer(User0).continent).size(3);
-    expect(ServerGame().getPlayer(User1).continent).size(2);
+    expect(ServerGame().getPlayer(User1).continent).size(1);
     expect(ServerGame().getPlayer(User2).continent).size(3);
   });
 });

@@ -4,9 +4,9 @@ import {
   traitTakeFoodRequest
   , gameEndTurnRequest
   , traitActivateRequest
-} from '../actions/actions';
+} from '../actions';
 
-import {PHASE} from '../../shared/models/game/GameModel';
+import {PHASE} from '../../models/game/GameModel';
 
 describe('Game (Hunting):', function () {
   const shortcutHunt = (sourceGame, sourceIndex, targetGame, targetIndex) => traitActivateRequest(

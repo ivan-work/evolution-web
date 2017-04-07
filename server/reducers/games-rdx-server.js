@@ -133,7 +133,7 @@ export const gameNextPlayer = (game) => {
       ++round;
       roundChanged = true;
     }
-    const player = game.players.find(player => player.index === currentPlayer);
+    const player = game.players.find(player => player.index === currentPlayer && player.playing);
     if (player && !player.ended) {
       break;
     }
