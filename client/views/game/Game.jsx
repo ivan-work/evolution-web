@@ -1,71 +1,24 @@
 import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
-import {connect} from 'react-redux';
-import {List, Map} from 'immutable';
 import * as MDL from 'react-mdl';
 
 import {UserModel} from '~/shared/models/UserModel';
-import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
-import {CardModel} from '~/shared/models/game/CardModel';
+import {GameModelClient} from '../../../shared/models/game/GameModel';
 
-import {
-  gameReadyRequest,
-  gameDeployAnimalRequest,
-  gameDeployTraitRequest,
-  gameEndTurnRequest
-} from '~/shared/actions/actions';
-import {redirectTo} from '~/shared/utils'
-
-import {Continent} from './Continent.jsx';
+import {CARD_POSITIONS} from './CARD_POSITIONS';
 import {CardCollection} from './CardCollection.jsx';
 import {Card, DragCard} from './Card.jsx';
-import {DropTargetAnimal} from './Animal.jsx';
-
-import {DragDropContext} from 'react-dnd';
-import HTML5Backend from 'react-dnd-html5-backend';
-import TestBackend from 'react-dnd-test-backend';
-
-const DECK_POSITION = {left: '100%', top: '40%'};
-const PLAYER_POSITION = {left: '10%', bottom: '0'};
-const CARD_POSITIONS = {
-  0: null
-  , 1: {
-    deck: DECK_POSITION
-    , player: PLAYER_POSITION
-  }
-  , 2: {
-    deck: DECK_POSITION
-    , player: PLAYER_POSITION
-    , 0: {top: '0', left: '0'}
-  }
-  , 3: {
-    deck: DECK_POSITION
-    , player: PLAYER_POSITION
-    , 0: {top: 0, left: '50%'}
-    , 1: {top: 0, left: '50%'}
-  }
-  , 4: {
-    deck: DECK_POSITION
-    , player: PLAYER_POSITION
-    , 0: {top: 0, left: '50%'}
-    , 1: {top: 0, left: '50%'}
-    , 2: {top: 0, left: '50%'}
-  }
-};
 
 export class Game extends React.Component {
   static propTypes = {
     user: React.PropTypes.instanceOf(UserModel).isRequired
     , game: React.PropTypes.instanceOf(GameModelClient)
+    , makeContinent: React.PropTypes.func
   };
 
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
-
-  componentDidMount() {
-    if (this.props.game && !this.props.game.started) this.props.$ready();
   }
 
   render() {
@@ -77,6 +30,7 @@ export class Game extends React.Component {
     const player = game.getPlayer();
 
     return <div className="Game">
+
       {/* DECK */}
       <div className='DeckWrapper' style={CARD_POSITIONS[game.players.size].deck}>
         <div className="GameStatus">
@@ -100,7 +54,7 @@ export class Game extends React.Component {
       {/* USER */}
 
       <div className='PlayerWrapper UserWrapper' style={CARD_POSITIONS[game.players.size].player}>
-        <Continent isUserContinent={true} continent={player.continent} $deployAnimal={this.props.$deployAnimal} $deployTrait={this.props.$deployTrait}/>
+        {this.props.makeContinent(player.continent, true)}
 
         <CardCollection
           ref="Hand" name="Hand"
@@ -123,27 +77,11 @@ export class Game extends React.Component {
               shift={[20, 0]}>
               {enemy.hand.toArray().map((cardModel, i) => <Card model={cardModel} key={i} index={i}/>)}
             </CardCollection>
-            <Continent continent={enemy.continent} $deployTrait={this.props.$deployTrait}/>
+
+            {this.props.makeContinent(enemy.continent)}
           </div>
           })
         }
     </div>;
   }
 }
-
-const backend = !process.env.TEST ? HTML5Backend : TestBackend;
-export const DDCGame = DragDropContext(backend)(Game);
-
-export const GameView = connect(
-  (state) => {
-    const game = state.get('game');
-    const user = state.get('user');
-    return {game, user}
-  }
-  , (dispatch) => ({
-    $ready: () => dispatch(gameReadyRequest())
-    , $deployAnimal: (...args) => dispatch(gameDeployAnimalRequest(...args))
-    , $deployTrait: (...args) => dispatch(gameDeployTraitRequest(...args))
-    , $endTurn: () => dispatch(gameEndTurnRequest())
-  })
-)(DDCGame);

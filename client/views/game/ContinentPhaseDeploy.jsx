@@ -1,18 +1,13 @@
 import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
-import {connect} from 'react-redux';
 import {List} from 'immutable';
 import classnames from 'classnames';
 import {DropTargetContinentZone} from './ContinentZone.jsx'
 import {DropTargetAnimal} from './Animal.jsx';
-import {
-  gameDeployAnimalRequest
-  , gameDeployTraitRequest
-} from '~/shared/actions/actions';
 
 import {ANIMAL_SIZE} from './Animal.jsx'
 
-export class Continent extends React.Component {
+export class ContinentPhaseDeploy extends React.Component {
   static propTypes = {
     $deployAnimal: React.PropTypes.func
     , $deployTrait: React.PropTypes.func
@@ -30,15 +25,16 @@ export class Continent extends React.Component {
     this.onOver = this.onOver.bind(this);
     this.onOverZone = (isOver, index) => this.onOver(isOver, false, index);
     this.onOverAnimal = (isOver, index) => this.onOver(isOver, true, index);
+
+    this.state = {overIndex: null, overAnimal: false};
     this.$deployAnimal = (card, zoneIndex) => this.props.$deployAnimal(card.id, zoneIndex);
     this.$deployTrait = (card, animal) => this.props.$deployTrait(card.id, animal.id);
-    this.state = {overIndex: null, overAnimal: false}
+
   }
 
   onOver(isOver, isAnimal, index) {
     if (isOver) {
       this.setState({overAnimal: isAnimal, overIndex: index});
-      //} else if (this.state.overAnimal === isAnimal && this.state.overIndex === index) {
     } else {
       this.setState({overAnimal: false, overIndex: null});
     }
@@ -78,6 +74,7 @@ export class Continent extends React.Component {
     const {continent} = this.props;
     const className = classnames({
       Continent: true
+      , ContinentPhaseDeploy: true
       , UserContinent: this.props.isUserContinent
     });
     return <div className={className}>

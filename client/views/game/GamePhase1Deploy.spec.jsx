@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {List, Map} from 'immutable';
-import {Game, DDCGame} from './Game.jsx';
+import {DnDContextGameWrapper} from './GameWrapper.jsx';
 
 import {UserModel, STATUS} from '../../../shared/models/UserModel';
 import {PlayerModel} from '../../../shared/models/game/PlayerModel';
@@ -63,7 +63,7 @@ const clientAnimalHID = ($Game, index) => $Game.find('DropTarget(Animal)').get(i
 
 describe('Game: Deploying:', () => {
   it('Displays default game', () => {
-    const $Game = mount(<DDCGame {...makeClientState().toObject()}/>);
+    const $Game = mount(<DnDContextGameWrapper {...makeClientState().toObject()}/>);
     expect($Game.find('.CardCollection.Deck').children(), '.CardCollection.Deck').length(12);
     expect($Game.find('.CardCollection.Hand').children(), '.CardCollection.Hand').length(3);
     expect($Game.find('.CardCollection.User1').children(), '.CardCollection.User1').length(6);
@@ -72,10 +72,12 @@ describe('Game: Deploying:', () => {
   it('0-0, empty board', () => {
     let deployAnimal = {};
     const $deployAnimal = (cardId, animalPosition) => deployAnimal = {cardId, animalPosition};
-    const $Game = mount(<DDCGame {...makeClientState().toObject()} $deployAnimal={$deployAnimal}/>);
+    const $Game = mount(<DnDContextGameWrapper {...makeClientState().toObject()} $deployAnimal={$deployAnimal}/>);
     const dndBackend = $Game.instance().getManager().getBackend();
 
-    expect($Game.find('DropTarget(ContinentZone)')).length(1);
+    //console.log($Game.find('.PlayerWrapper').debug())
+
+    expect($Game.find('DropTarget(ContinentZone)'), 'DropTarget(ContinentZone)').length(1);
     expect($Game.find('DragSource(Card)').at(0).prop('disabled'), 'Card(0) is enabled').false;
     expect($Game.find('.animal-wrapper')).length(0);
 
@@ -113,7 +115,7 @@ describe('Game: Deploying:', () => {
     let deployTrait = {};
     const $deployAnimal = (cardId, animalPosition) => deployAnimal = {cardId, animalPosition};
     const $deployTrait = (cardId, animalId) => deployTrait = {cardId, animalId};
-    const $Game = mount(<DDCGame {...props} $deployAnimal={$deployAnimal} $deployTrait={$deployTrait}/>);
+    const $Game = mount(<DnDContextGameWrapper {...props} $deployAnimal={$deployAnimal} $deployTrait={$deployTrait}/>);
     const dndBackend = $Game.instance().getManager().getBackend();
 
     expect($Game.find('DropTarget(ContinentZone)'), 'DropTarget(ContinentZone)').length(3);
@@ -151,7 +153,7 @@ describe('Game: Deploying:', () => {
   it('endTurn', () => {
     let endTurn = false;
     const $endTurn = () => endTurn = true;
-    const $Game = mount(<DDCGame {...makeClientState().toObject()} $endTurn={$endTurn}/>);
+    const $Game = mount(<DnDContextGameWrapper {...makeClientState().toObject()} $endTurn={$endTurn}/>);
 
     expect($Game.find('.EndTurn')).length(1);
     $Game.find('.EndTurn').simulate('click');
@@ -172,7 +174,7 @@ describe('Game: Deploying:', () => {
     const $deployAnimal = (cardId, animalPosition) => deployAnimal = true;
     const $deployTrait = (cardId, animalId) => deployTrait = true;
     const $endTurn = () => endTurn = true;
-    const $Game = mount(<DDCGame {...props} $deployAnimal={$deployAnimal} $deployTrait={$deployTrait} $endTurn={$endTurn}/>);
+    const $Game = mount(<DnDContextGameWrapper {...props} $deployAnimal={$deployAnimal} $deployTrait={$deployTrait} $endTurn={$endTurn}/>);
     const dndBackend = $Game.instance().getManager().getBackend();
 
     expect($Game.find('DragSource(Card)').at(0).props().disabled, '.CardCollection.Hand').true;
