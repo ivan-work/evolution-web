@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import {serverToClient, loginUserRequest, clientSelfDisconnect} from '../shared/actions/actions'
+import {serverToClient, loginUserRequest, clientSelfDisconnect} from '../../shared/actions/actions'
 
 export const makeSocketClient = (url, options) => io(url, options);
 
