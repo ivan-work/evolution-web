@@ -41,9 +41,7 @@ export const TraitMetamorphose = {
   }
   , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game)
   , checkTarget: (game, sourceAnimal, targetTrait) => targetTrait.getDataModel().food === 0
-  , getTargets: (game, sourceAnimal, traitMetamorphose) => {
-    return sourceAnimal.traits.filter(trait => trait !== traitMetamorphose && trait.getDataModel().food === 0)
-  }
+  , getTargets: (game, sourceAnimal, traitMetamorphose) => sourceAnimal.traits.filter(trait => trait.getDataModel().food === 0)
 };
 
 export const TraitShell = {
@@ -57,6 +55,9 @@ export const TraitShell = {
     dispatch(server$traitSetAnimalFlag(game, defenceAnimal, TRAIT_ANIMAL_FLAG.SHELL, true));
     dispatch(endHunt(game, attackAnimal, attackTrait, defenceAnimal));
     return true;
+  }
+  , onRemove: (game, animal) => {
+    dispatch(server$traitSetAnimalFlag(game, animal, TRAIT_ANIMAL_FLAG.SHELL, false));
   }
 };
 
