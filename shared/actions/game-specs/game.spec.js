@@ -15,6 +15,7 @@ import {
   gameDeployTraitRequest,
   gameEndTurnRequest
 } from '../actions';
+import {makeGameSelectors} from '../../selectors';
 
 describe('Game:', function () {
   it('Game start', () => {
@@ -197,46 +198,49 @@ players:
       .equal(ServerGame().getIn(['players', User0.id, 'continent']));
   });
 
-  it('Play as upgrade', () => {
+  it.only('Play as upgrade', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
-    ParseGame(`
+    const gameId = ParseGame(`
 players:
   - hand: 1 camo, 1 sharp
-    continent: $
+    continent: $A
   - hand: 6 camo
-    continent: $
+    continent: $B
 `);
+    const {selectGame, selectCard, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
-    const cardSharpVision = ClientGame0().getPlayerCard(User0, 1);
-    const traitCamouflage = TraitModel.new('TraitCamouflage');
-    const traitSharpVision = TraitModel.new('TraitSharpVision');
+    clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A'));
 
-    clientStore0.dispatch(
-      gameDeployTraitRequest(
-        ClientGame0().getPlayerCard(null, 0).id
-        , ClientGame0().getPlayerAnimal(null, 0).id
-      ));
+    expect(ServerGame().getPlayer(User0).hand, 'ServerGame.hand').size(1);
+    expect(ServerGame().getPlayer(User0).getIn(['hand', 0, 'type'])).equal('CardSharpVision');
+    expect(ClientGame0().getPlayer(User0).hand, 'ClientGame0.hand').size(1);
+    expect(ClientGame0().getPlayer(User0).getIn(['hand', 0, 'type'])).equal('CardSharpVision');
+    expect(ClientGame1().getPlayer(User0).hand, 'ClientGame1.hand').size(1);
+    expect(ClientGame1().getPlayer(User0).getIn(['hand', 0, 'type'])).not.equal('CardSharpVision');
 
+    const traitCamouflage = selectTrait(User0, 0, 0);
 
-    expect(ClientGame0().getPlayer().hand).equal(List.of(cardSharpVision));
-    expect(ServerGame().getPlayerAnimal(User0, 0).traits).equal(List.of(traitCamouflage));
-    expect(ClientGame0().getPlayerAnimal(User0, 0).traits).equal(List.of(traitCamouflage));
-    expect(ClientGame1().getPlayerAnimal(User0, 0).traits).equal(List.of(traitCamouflage));
-
-    serverStore.clearActions();
-    clientStore1.clearActions();
+    expect(ServerGame().getPlayer(User0).getAnimal(0).getIn(['traits', 0, 'type'])).equal('TraitCamouflage');
+    expect(ClientGame0().getPlayer(User0).getAnimal(0).getIn(['traits', 0])).equal(traitCamouflage);
+    expect(ClientGame1().getPlayer(User0).getAnimal(0).getIn(['traits', 0])).equal(traitCamouflage);
 
     clientStore1.dispatch(gameEndTurnRequest());
 
-    clientStore0.dispatch(
-      gameDeployTraitRequest(
-        ClientGame0().getPlayerCard(null, 0).id
-        , ClientGame0().getPlayerAnimal(null, 0).id
-      ));
+    clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A'));
 
-    expect(ServerGame().getPlayerAnimal(User0, 0).traits).equal(List.of(traitCamouflage, traitSharpVision));
-    expect(ClientGame0().getPlayerAnimal(User0, 0).traits).equal(List.of(traitCamouflage, traitSharpVision));
-    expect(ClientGame1().getPlayerAnimal(User0, 0).traits).equal(List.of(traitCamouflage, traitSharpVision));
+    expect(ServerGame().getPlayer(User0).hand).size(0);
+    expect(ClientGame0().getPlayer(User0).hand).size(0);
+    expect(ClientGame1().getPlayer(User0).hand).size(0);
+
+
+    console.log(ServerGame().getPlayer(User0).getAnimal(0).getIn(['traits', 0, 'id'])) ;
+    console.log(ClientGame0().getPlayer(User0).getAnimal(0).getIn(['traits', 0, 'id']));
+    console.log(ClientGame1().getPlayer(User0).getAnimal(0).getIn(['traits', 0, 'id']));
+
+    const traitSharpVision = selectTrait(User0, 0, 1);
+    expect(ServerGame().getPlayer(User0).getAnimal(0).traits).equal(List.of(traitCamouflage, traitSharpVision));
+    expect(ClientGame0().getPlayer(User0).getAnimal(0).traits).equal(List.of(traitCamouflage, traitSharpVision));
+    expect(ClientGame1().getPlayer(User0).getAnimal(0).traits).equal(List.of(traitCamouflage, traitSharpVision));
   });
 
   it('Play as skip turn', () => {

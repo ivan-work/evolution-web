@@ -16,8 +16,10 @@ export class CardModel extends Record({
   , trait1type: null
   , trait2type: null
 }) {
-  static new(cardClass) {
-    const id = !process.env.BROWSER
+  static new(cardClass, forcedId) {
+    const id = forcedId
+      ? forcedId
+      : !process.env.BROWSER
       ? uuid.v4().slice(0, 4)
       : Math.floor(Math.random() * 0xFFFF);
     if (!cardClass) throw new Error('CardClass is null!');
@@ -53,7 +55,7 @@ export class CardModel extends Record({
   }
 
   toOthers() {
-    return CardModel.new(CardUnknown)
+    return CardModel.new(CardUnknown, this.id)
   }
 
   get traitsCount() {
