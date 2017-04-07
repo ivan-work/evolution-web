@@ -9,8 +9,18 @@ import {
   traitTakeFoodRequest
   , gameEndTurnRequest
   , roomExitRequest
+
+  , roomCreateRequest
+  , gameDeployAnimalRequest
+  , roomJoinRequest
+  , roomSpectateRequest
+  , gameCreateRequest
+  , gameReadyRequest
+
   , SOCKET_DISCONNECT_NOW
 } from '../actions';
+
+import {makeGameSelectors} from '../../selectors';
 
 describe('Game (ENDING PHASE):', function () {
   it('Skip Turn limit', () => {
@@ -196,5 +206,42 @@ players:
     expect(ServerGame().winnerId).equal(User1.id);
     expect(ClientGame1().status.phase, 'PHASE.FINAL').equal(PHASE.FINAL);
     expect(ClientGame1().winnerId).equal(User1.id);
+  });
+
+  it('Spectators can exit after finish', () => {
+    const [serverStore, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockStores(3);
+    clientStore0.dispatch(roomCreateRequest());
+    const roomId = serverStore.getState().get('rooms').first().id;
+    clientStore1.dispatch(roomJoinRequest(roomId));
+    clientStore2.dispatch(roomSpectateRequest(roomId));
+    clientStore0.dispatch(gameCreateRequest(roomId, `
+deck: 2 camo
+phase: 0
+`))
+    const gameId = serverStore.getState().get('rooms').first().gameId;
+    clientStore0.dispatch(gameReadyRequest());
+    clientStore1.dispatch(gameReadyRequest());
+
+    const {selectGame, selectCard} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id, 0));
+    clientStore1.dispatch(gameDeployAnimalRequest(selectCard(User1, 0).id, 0));
+
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore1.dispatch(gameEndTurnRequest());
+
+    expect(selectGame().status.phase).equal(PHASE.FINAL);
+
+    clientStore0.dispatch(roomExitRequest(roomId));
+    clientStore1.dispatch(roomExitRequest(roomId));
+
+    expect(clientStore0.getState().get('game')).null;
+    expect(clientStore1.getState().get('game')).null;
+    expect(clientStore2.getState().get('game')).ok;
+
+    clientStore2.dispatch(roomExitRequest(roomId));
+
+    expect(clientStore2.getState().get('game')).null;
+    expect(clientStore2.getState().get('room')).null;
   });
 });

@@ -41,8 +41,8 @@ const socketClient = makeSocketClient(window.location.host, {forceNew: true});
 
 const store = configureStore(reducer, void 0, [
   appRouterMiddleware(browserHistory)
-  , socketMiddleware(socketClient)
   , animationMiddleware()
+  , socketMiddleware(socketClient)
 ], DevToolsArray);
 
 const history = syncHistoryWithStore(store, browserHistory);

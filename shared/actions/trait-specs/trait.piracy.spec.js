@@ -139,4 +139,31 @@ players:
       , serverStore, clientStore0, clientStore1);
     clientStore1.dispatch(gameEndTurnRequest());
   });
+
+  it('Steals from fat massive', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+deck: 20 camo
+phase: 2
+food: 4
+players:
+  - continent: $Q piracy +, $W +
+  - continent: $A ++ massive fat
+`);
+    const {selectGame, selectPlayer, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    // 0-0-0
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore1.dispatch(traitTakeFoodRequest('$A'));
+
+    // Deploy
+    clientStore1.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    // Feeding
+    clientStore1.dispatch(traitTakeFoodRequest('$A'));
+    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitPiracy', '$A'));
+
+    expect(selectAnimal(User0, 0).getFood(), 'Can steal from fat massive').equal(1);
+  });
 });

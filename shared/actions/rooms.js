@@ -6,7 +6,7 @@ import {GameModelClient} from '../models/game/GameModel';
 import {SettingsRules} from '../models/game/GameSettings';
 import {ActionCheckError} from '../models/ActionCheckError';
 
-import {gameInit, server$gameLeave} from './game';
+import {gameInit, server$gameLeave, gameDestroy} from './actions';
 import {toUser$Client} from './generic';
 
 import {redirectTo} from '../utils';
@@ -140,7 +140,7 @@ const roomSpectateSelf = (roomId, userId, room, game) => ({
 
 // Exit
 
-export const roomExitRequest = (roomId) => (dispatch, getState) => dispatch({
+export const roomExitRequest = () => (dispatch, getState) => dispatch({
   type: 'roomExitRequest'
   , data: {roomId: selectClientRoomId(getState)}
   , meta: {server: true}
@@ -158,10 +158,11 @@ const roomExitSelf = (roomId, userId) => ({
 
 export const server$roomExit = (roomId, userId, checkForDestroy = true) => (dispatch, getState) => {
   //logger.debug('server$roomExit:', roomId, userId);
-  const room = selectRoom(getState, roomId);
   dispatch(Object.assign(roomExit(roomId, userId), {meta: {users: true}}));
-  if (room && room.gameId && !!~room.users.indexOf(userId))
+  const room = selectRoom(getState, roomId);
+  if (room.gameId && selectGame(getState, room.gameId).getPlayer(userId))
     dispatch(server$gameLeave(room.gameId, userId));
+
   if (checkForDestroy && selectRoom(getState, roomId).users.size + selectRoom(getState, roomId).spectators.size === 0)
     dispatch(server$roomDestroy(roomId));
 };
@@ -173,9 +174,13 @@ export const roomDestroy = (roomId) => ({
   , data: {roomId}
 });
 
-export const server$roomDestroy = (roomId) => (dispatch, getState) =>
+export const server$roomDestroy = (roomId) => (dispatch, getState) => {
+  const room = selectRoom(getState, roomId);
+  const game = selectGame(getState, room.gameId);
+  if (game) dispatch(gameDestroy(game.id));
   dispatch(Object.assign(roomDestroy(roomId)
     , {meta: {users: true}}));
+};
 
 // Settings
 

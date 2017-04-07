@@ -48,7 +48,6 @@ export class GameWrapper extends React.Component {
   componentDidMount() {
     if (!this.ready && this.props.game) {
       this.ready = true;
-      console.log(this.props.game.userId);
       if (this.props.game.userId) {
         this.props.gameActions.$ready();
       }

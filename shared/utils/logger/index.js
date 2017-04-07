@@ -10,12 +10,14 @@ const colors = {
   silly: 'gray'
 };
 
-export default new winston.Logger({
-  colors
-  , transports: [
-    new winston.transports.Console(consoleTransport)
-  ],
-  exitOnError: false
+require('winston-google-spreadsheet').GoogleSpreadSheet;
+const SSTransport = (sheetIdx = 1, level = 'info') => new (winston.transports.GoogleSpreadsheet)({
+  'fileId': process.env.GOOGLE_LOGS_FILE
+  , level
+  , 'refreshToken': process.env.GOOGLE_REFRESH_TOKEN
+  , 'clientId': process.env.GOOGLE_CLIENT_ID
+  , 'clientSecret': process.env.GOOGLE_CLIENT_SECRET
+  , sheetIdx
 });
 
 const NullTransport = () => ({
@@ -23,14 +25,13 @@ const NullTransport = () => ({
   , log: (level, msg, meta, callback) => callback(null)
 });
 
-require('winston-google-spreadsheet').GoogleSpreadSheet;
-const SSTransport = (sheetIdx = 1) => new (winston.transports.GoogleSpreadsheet)({
-  'fileId': process.env.GOOGLE_LOGS_FILE
-  , 'level': 'info'
-  , 'refreshToken': process.env.GOOGLE_REFRESH_TOKEN
-  , 'clientId': process.env.GOOGLE_CLIENT_ID
-  , 'clientSecret': process.env.GOOGLE_CLIENT_SECRET
-  , sheetIdx
+export default new winston.Logger({
+  colors
+  , transports: [
+    new winston.transports.Console(consoleTransport)
+    , (process.env.GOOGLE_LOGS_FILE ? SSTransport(3, 'error') : NullTransport())
+  ],
+  exitOnError: false
 });
 
 export const loggerOnline = new winston.Logger({

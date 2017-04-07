@@ -6,10 +6,10 @@ export const selectGame = (getState, gameId) =>
   getState().getIn(['games', gameId]);
 
 export const selectPlayers4Sockets = (getState, gameId) => {
-  const roomId = getState().getIn(['games', gameId, 'roomId']);
+  const roomId = selectGame(getState, gameId).roomId;
   return [].concat(
-    getState().getIn(['rooms', roomId, 'users']).valueSeq().toArray()
-    , getState().getIn(['rooms', roomId, 'spectators']).valueSeq().toArray()
+    selectRoom(getState, roomId).users.valueSeq().toArray()
+    , selectRoom(getState, roomId).spectators.valueSeq().toArray()
   );
 };
 
