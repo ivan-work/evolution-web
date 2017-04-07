@@ -3,7 +3,7 @@ import {Record, Map, OrderedMap, Range, List} from 'immutable';
 import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
 import {CooldownList} from './CooldownList';
-import {SettingsRecord, Decks} from './GameSettings';
+import {SettingsRecord, DeckVariants} from './GameSettings';
 
 import uuid from 'uuid';
 import {ensureParameter} from '../../utils';
@@ -81,7 +81,7 @@ export class GameModel extends Record(GameModelData) {
   }
 
   static new(room) {
-    const deck = room.settings.decks.reduce((result, deckName) => result.concat(Decks[deckName]), List());
+    const deck = room.settings.decks.reduce((result, deckName) => result.concat(DeckVariants[deckName]), List());
 
     return new GameModel({
       id: uuid.v4().slice(0, 4)

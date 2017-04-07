@@ -2,7 +2,8 @@ import {List, Map, Record} from 'immutable';
 import * as cardsData from './evolution/cards/index';
 
 export const SETTINGS_PLAYERS = [2, 8];
-export const SETTINGS_TIME_VALUES = [0, 60 * 24 * 6000];
+
+export const SETTINGS_TIME_VALUES = [0, 60 * 24];
 
 export const SettingsRules = {
   name: 'string|between:6,12|regex:/^[a-zA-Zа-яА-Я\\d\\s]*$/'
@@ -28,9 +29,14 @@ export class SettingsRecord extends Record({
   }
 
   applySettings(settings) {
-    const ops = [];
-    return this.merge(SettingsRecord.fromJS(settings))
-    //roomEditSettings
+    return this.mergeWith((prev, next, key) => {
+      switch (key) {
+        case 'decks':
+          return next.length > 0 ? next : prev;
+        default:
+          return next !== null ? next : prev;
+      }
+    }, SettingsRecord.fromJS(settings));
   }
 }
 
@@ -71,4 +77,4 @@ const NormalDecks = {
   ]
 };
 
-export const Decks = Object.assign({}, NormalDecks, process.env.NODE_ENV !== 'production' ? TestDecks : null);
+export const DeckVariants = Object.assign({}, NormalDecks, process.env.NODE_ENV !== 'production' ? TestDecks : null);
