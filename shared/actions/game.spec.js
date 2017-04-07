@@ -1,13 +1,12 @@
-import {Map, List, fromJS} from 'immutable';
-import {UserModel, STATUS} from '../models/UserModel';
-import {RoomModel} from '../models/RoomModel';
+import {Map, List} from 'immutable';
+import {STATUS} from '../models/UserModel';
 
 import {GameModel, TEST_DECK_SIZE, TEST_HAND_SIZE} from '../models/game/GameModel';
 import {CardModel} from '../models/game/CardModel';
 import * as cardTypes from '../models/game/evolution/cards';
+import * as traits from '../models/game/evolution/traits';
 import {AnimalModel} from '../models/game/evolution/AnimalModel';
 import {TraitModel} from '../models/game/evolution/TraitModel';
-import {PlayerModel} from '../models/game/PlayerModel';
 
 import {
   SOCKET_DISCONNECT_NOW,
@@ -17,7 +16,7 @@ import {
   gameReadyRequest,
   gameDeployAnimalRequest,
   gameDeployTraitRequest,
-  gameEndDeployRequest
+  gameEndTurnRequest
 } from '../actions/actions';
 
 describe('Game:', function () {
@@ -220,9 +219,9 @@ describe('Game:', function () {
       }
     });
 
-    const cardSharpVision = ClientGame0().getPlayerCard(null, 1);
-    const traitCamouflage = TraitModel.new('TraitCamouflage');
-    const traitSharpVision = TraitModel.new('TraitSharpVision');
+    const cardSharpVision = ClientGame0().getPlayerCard(User0, 1);
+    const traitCamouflage = TraitModel.new(traits.TraitCamouflage);
+    const traitSharpVision = TraitModel.new(traits.TraitSharpVision);
 
     clientStore0.dispatch(
       gameDeployTraitRequest(
@@ -239,7 +238,7 @@ describe('Game:', function () {
     serverStore.clearActions();
     clientStore1.clearActions();
 
-    clientStore1.dispatch(gameEndDeployRequest());
+    clientStore1.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(
       gameDeployTraitRequest(

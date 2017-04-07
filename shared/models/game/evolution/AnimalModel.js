@@ -6,12 +6,14 @@ import {TraitModel} from './TraitModel';
 export class AnimalModel extends Record({
   id: null
   , base: null
+  , food: 0
   , traits: List()
 }) {
-  static new(card) {
+  static new(card, traits) {
     return new AnimalModel({
       id: uuid.v4().slice(0, 4)
       , base: card
+      , ...traits
     });
   }
 
@@ -36,5 +38,13 @@ export class AnimalModel extends Record({
       return 'duplicate type';
     }
     return true;
+  }
+
+  canEat() {
+    return this.food < this.getMaxFood();
+  }
+
+  getMaxFood() {
+    return 1 + this.traits.reduce((result, trait) => result + trait.food, 0);
   }
 }

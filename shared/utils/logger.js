@@ -1,7 +1,5 @@
 function makeLogger() {
-  console.log('process.env.BROWSER', process.env.BROWSER)
   if (process.env.BROWSER) {
-    console.log('ITS TRUE')
     var Logger = function () {
       this.debug = this.log.bind(this, 'debug');
       this.info = this.log.bind(this, 'info');
