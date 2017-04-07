@@ -9,7 +9,7 @@ import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
 
-describe.skip('TraitFatTissue:', () => {
+describe('TraitFatTissue:', () => {
   describe('Deploy:', () => {
     it('Can deploy multiple', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
@@ -42,29 +42,27 @@ players:
   });
   describe('Feeding:', () => {
     it('FatTissue test', () => {
-      const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+      const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
-deck: 12 camo
+deck: 12 CardGrazingAndFatTissue
 phase: 2
 food: 12
 players:
   - continent: $A fat carn, $B fat fat fat, $Waiter,  $C
-    hand: 1 CardGrazingAndFatTissue
-  - continent: $C, $D
 `);
       const {selectGame, selectCard, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
       expect(selectTrait(User0, 0, 0).type).equal('TraitFatTissue');
 
       clientStore0.dispatch(traitTakeFoodRequest('$A'));
-      clientStore1.dispatch(gameEndTurnRequest());
       //$A+ fat carn, $B fat fat
 
       clientStore0.dispatch(traitTakeFoodRequest('$A'));
       //$A++ fat carn, $B fat fat
 
       clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$C'));
-      expect(selectPlayer(User1).continent).size(1);
+
+      expect(selectPlayer(User0).continent).size(3);
 
       // selectAnimal(User0, 1)
 
@@ -79,7 +77,6 @@ players:
       clientStore0.dispatch(traitTakeFoodRequest('$Waiter'));
 
       expect(selectGame().status.phase, 'Turn 2, deploy').equal(PHASE.DEPLOY);
-      clientStore1.dispatch(gameEndTurnRequest());
 
       clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$B', true));
       clientStore0.dispatch(gameEndTurnRequest());
@@ -98,21 +95,21 @@ players:
       expect(selectTrait(User0, 0, 1).value, '1').equal(true);
       expect(selectTrait(User0, 0, 2).value, '2').equal(true);
       expect(selectTrait(User0, 0, 3).value, '3').equal(false);
-
-      expect(selectPlayer(User1).continent).size(0);
     });
 
-    it.skip('FatTissue activation', () => {
+    it('FatTissue activation', () => {
       const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
 deck: 12 camo
 phase: 2
 food: 12
 players:
-  - continent: $A mass fat fat fat ++, $B fat +, $Waiter graz +
+  - continent: $A mass fat fat fat fat ++, $B fat +, $Waiter graz +
 `);
-      const {selectGame, selectCard, selectPlayer, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
+      const {selectGame, selectCard, selectPlayer, selectAnimal, selectTrait, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
+      clientStore0.dispatch(gameEndTurnRequest());
+      clientStore0.dispatch(traitTakeFoodRequest('$A'));
       clientStore0.dispatch(gameEndTurnRequest());
       clientStore0.dispatch(traitTakeFoodRequest('$A'));
       clientStore0.dispatch(gameEndTurnRequest());
@@ -121,7 +118,7 @@ players:
       clientStore0.dispatch(traitTakeFoodRequest('$A'));
 
       expect(selectAnimal(User0, 0).getFood()).equal(2);
-      expect(selectAnimal(User0, 0).getFat()).equal(3);
+      expect(selectAnimal(User0, 0).getFat()).equal(4);
       clientStore0.dispatch(gameEndTurnRequest());
       clientStore0.dispatch(gameEndTurnRequest());
 
@@ -130,22 +127,22 @@ players:
       expect(selectGame().status.phase, 'Turn 1').equal(PHASE.FEEDING);
 
       expect(selectAnimal(User0, 0).getFood()).equal(0);
-      expect(selectAnimal(User0, 0).getFat()).equal(3);
+      expect(selectAnimal(User0, 0).getFat()).equal(4);
 
       clientStore0.dispatch(traitActivateRequest('$A', selectTraitId(User0, 0, 2)));
 
-      expect(selectAnimal(User0, 0).getFood()).equal(1);
+      expect(selectAnimal(User0, 0).getFood()).equal(2);
       expect(selectAnimal(User0, 0).getFat()).equal(2);
 
       expectUnchanged('Animal $A cant take food now', () =>
           clientStore0.dispatch(traitTakeFoodRequest('$A'))
         , serverStore, clientStore0);
 
-      expectUnchanged('Animal $A cant reactivate', () =>
-        clientStore0.dispatch(traitActivateRequest('$A', selectTraitId(User0, 0, 2)))
-        , serverStore, clientStore0);
-
-
+      expectUnchanged('Animal $A cant reactivate', () => {
+        clientStore0.dispatch(traitActivateRequest('$A', selectTraitId(User0, 0, 1)));
+        clientStore0.dispatch(traitActivateRequest('$A', selectTraitId(User0, 0, 3)));
+        clientStore0.dispatch(traitActivateRequest('$B', selectTraitId(User0, 0, 0)));
+      }, serverStore, clientStore0);
     });
   });
 });

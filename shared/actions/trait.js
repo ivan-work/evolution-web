@@ -68,7 +68,7 @@ const startCooldown = (gameId, link, duration, place, placeId) => ({
 
 const traitMakeCooldownActions = (gameId, trait, sourceAnimal) => {
   const traitData = trait.getDataModel();
-  return traitData.cooldowns.concat(traitData.cooldownsAddOnly || []).map(([link, place, duration]) => {
+  return traitData.cooldowns.map(([link, place, duration]) => {
     const placeId = (place === TRAIT_COOLDOWN_PLACE.PLAYER ? sourceAnimal.ownerId
       : place === TRAIT_COOLDOWN_PLACE.TRAIT ? trait.id
       : sourceAnimal.id);

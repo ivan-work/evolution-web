@@ -102,6 +102,10 @@ export class AnimalModel extends Record({
     return this.getFood() + this.getFat();
   }
 
+  getNeededFood() {
+    return Math.max(0, this.foodSize - this.getFood());
+  }
+
   getWantedFood() {
     return (this.foodSize + this.fatSize) - (this.getFood() + this.getFat())
   }
@@ -129,8 +133,7 @@ export class AnimalModel extends Record({
   }
 
   receiveFood(amount) {
-    const needOfFood = Math.max(0, this.foodSize - this.getFood());
-
+    const needOfFood = this.getNeededFood();
     const amountForFood = Math.min(needOfFood, amount);
     let amountForFat = amount - amountForFood;
 

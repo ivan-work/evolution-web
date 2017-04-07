@@ -10,7 +10,6 @@ export class TraitDataModel extends Record({
   , targetType: null // from TRAIT_TARGET_TYPE
   , playerControllable: false // if player can click/drag trait
   , cooldowns: null // array of cooldown data arrays (checks before use, adds after use)
-  , cooldownsAddOnly: null // array of cooldown data arrays (only adds after use)
   , multiple: false // is allowed multiple traits with same type? (only for FatTissue) //TODO remove
   , disableLastRound: false // is allowed to work last round? //TODO remove
   , action: null // action function

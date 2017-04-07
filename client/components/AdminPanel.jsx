@@ -20,6 +20,8 @@ export class AdminPanel extends Component {
   }
 
   render() {
+    if (!this.props.visible) return null;
+
     return <div className="AdminPanel" style={{
       position: 'absolute'
       , right: '0px'
@@ -49,13 +51,14 @@ export const AdminPanelView = connect(
     const userId = state.getIn(['user', 'id'], '%USERNAME%');
     const roomId = state.get('room');
     const room = state.getIn(['rooms', roomId]);
+    const visible = state.getIn(['app', 'showAdminPanel']) || process.env.NODE_ENV === 'development';
     return {
       roomId
       , userId
       , room
+      , visible
       //, online: state.getIn(['online'], Map())
     }
   }
-  , (dispatch) => ({
-  })
+  , (dispatch) => ({})
 )(AdminPanel);

@@ -26,7 +26,7 @@ export const App = ServicesContext(PortalsContext(TooltipsContext(
       </Navigation>
     </Header>
     <ErrorReporter/>
-    {process.env.NODE_ENV === 'development' && <AdminPanelView location={location}/>}
+    <AdminPanelView location={location}/>
     <Content>
       {children}
     </Content>

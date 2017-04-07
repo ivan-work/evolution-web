@@ -28,11 +28,8 @@
     @include ellipsis();
   }
 
-  &.draggable.active {
-    background: #f90;
-  }
-  &.pointer.active {
-    background: #f90;
+  &.draggable.active, &.pointer.active {
+    background: $TRAIT_ACTIVE_BACK;
   }
 
   &.Animate {

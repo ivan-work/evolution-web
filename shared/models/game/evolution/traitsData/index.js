@@ -38,11 +38,8 @@ export const TraitFatTissue = {
   type: 'TraitFatTissue'
   , multiple: true
   , cooldowns: fromJS([
-    ['TraitFatTissue', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
-  ])
-  , cooldownsAddOnly: fromJS([
-    [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
-    , ['TraitFatTissue', TRAIT_COOLDOWN_PLACE.OTHER_ANIMALS, TRAIT_COOLDOWN_DURATION.ROUND]
+    ['TraitFatTissue', TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
+    , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
@@ -51,7 +48,7 @@ export const TraitFatTissue = {
     dispatch(server$traitStartCooldown(game.id, traitFatTissue, sourceAnimal));
     return true;
   }
-  , $checkAction: (game, sourceAnimal) => !sourceAnimal.isFull()
+  , $checkAction: (game, sourceAnimal, trait) => trait.value && !sourceAnimal.isFull()
 };
 
 //

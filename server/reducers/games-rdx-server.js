@@ -8,6 +8,7 @@ import {AnimalModel} from '../../shared/models/game/evolution/AnimalModel';
 import {TraitModel} from '../../shared/models/game/evolution/TraitModel';
 import {TraitDataModel} from '../../shared/models/game/evolution/TraitDataModel';
 import {CTT_PARAMETER, TRAIT_TARGET_TYPE} from '../../shared/models/game/evolution/constants';
+import {TraitFatTissue} from '../../shared/models/game/evolution/traitTypes';
 
 /**
  * TRAITS
@@ -219,9 +220,13 @@ export const traitConvertFat = (game, {sourceAid, traitId}) => {
   const {playerId, animalIndex} = game.locateAnimal(sourceAid);
   return game.updateIn(['players', playerId, 'continent', animalIndex], animal => {
     const traitIndex = animal.traits.findIndex(t => t.id === traitId);
+    const availableFat = animal.traits.take(traitIndex + 1).filter(trait => trait.type === TraitFatTissue && trait.value).size;
+    let fatCounter = availableFat;
     return animal
-      .set('food', animal.getFood() + 1)
-      .setIn(['traits', traitIndex, 'value'], false)
+      .update('traits', traits => traits.map(trait =>
+        (trait.type === TraitFatTissue && trait.value) ? trait.set('value', fatCounter-- <= 0)
+          : trait))
+      .receiveFood(availableFat)
   });
 };
 
