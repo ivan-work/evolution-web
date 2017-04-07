@@ -9,6 +9,7 @@ import {Button} from 'react-mdl';
 import {PlayersList} from './PlayersList.jsx';
 import {GameStatusDisplay} from './GameStatusDisplay.jsx';
 import TraitDefenceDialog from './TraitDefenceDialog.jsx';
+import Chat from '../../Chat.jsx';
 
 class _GameUI extends React.Component {
   static displayName = 'GameUI';
@@ -31,9 +32,9 @@ class _GameUI extends React.Component {
         <PlayersList game={game}/>
 
         <Button id="Game$endTurn" colored={game.getPlayer().acted} accent={!game.getPlayer().acted} raised
-                    disabled={!isPlayerTurn}
-                    style={{width: '100%'}}
-                    onClick={this.context.gameActions.$endTurn}>
+                disabled={!isPlayerTurn}
+                style={{width: '100%'}}
+                onClick={this.context.gameActions.$endTurn}>
           {T.translate(game.getPlayer().acted
             ? 'Game.UI.EndTurn':
             'Game.UI.EndPhase')}
@@ -41,7 +42,11 @@ class _GameUI extends React.Component {
 
         <GameStatusDisplay game={game}/>
 
-        <PortalTarget name='deck'/>
+        <div style={{height: '140px'}}>
+          <PortalTarget name='deck'/>
+        </div>
+
+        <Chat chatTargetType='ROOM' roomId={game.roomId}/>
       </div>);
   }
 }

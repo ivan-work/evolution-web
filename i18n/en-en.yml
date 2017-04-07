@@ -7,6 +7,9 @@ App:
     Twitter: Sign in with Twitter
   Name: Evolution
   Online: Online
+  Chat:
+    Label: Chat
+    EnterMessage: ...
   Rooms:
     Greeting: Hello
     Rooms: Rooms

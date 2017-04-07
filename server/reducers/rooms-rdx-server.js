@@ -25,6 +25,8 @@ export const roomUnban = (state, {roomId, userId}) => state.update(roomId, room 
 export const gameCreateNotify = (state, {roomId, gameId}) => state.update(roomId, room => room
   .set('gameId', gameId));
 
+export const chatMessageRoom = (rooms, {message}) => rooms.updateIn([message.to, 'chat'], chat => chat.receiveMessage(message));
+
 export const reducer = createReducer(Map(), {
   roomCreate
   , roomJoin
@@ -34,4 +36,5 @@ export const reducer = createReducer(Map(), {
   , roomUnban
   , roomEditSettings
   , gameCreateNotify
+  , chatMessageRoom
 });

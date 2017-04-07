@@ -5,6 +5,7 @@ import {Button, Card, CardTitle, CardText} from 'react-mdl';
 
 import {RoomModel} from '../../../shared/models/RoomModel';
 
+import Chat from './../Chat.jsx';
 import {UsersList} from './../UsersList.jsx';
 import {Portal} from './../utils/Portal.jsx';
 import RoomControlGroup from './RoomControlGroup.jsx';
@@ -37,6 +38,12 @@ export class Room extends Component {
         <Card className='RoomSettings'>
           <CardText>
             <RoomSettings {...this.props}/>
+          </CardText>
+        </Card>
+        <Card>
+          <CardTitle>{T.translate('App.Chat.Label')} </CardTitle>
+          <CardText>
+            <Chat chatTargetType='ROOM' roomId={room.id}/>
           </CardText>
         </Card>
         <Card>

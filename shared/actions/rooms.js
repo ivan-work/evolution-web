@@ -1,8 +1,11 @@
 import logger from '~/shared/utils/logger';
+import {Map} from 'immutable';
+
 import {RoomModel} from '../models/RoomModel';
 import {SettingsRules} from '../models/game/GameSettings';
 
 import {server$gameLeave} from './game';
+import {toUser$Client} from './generic';
 
 import {redirectTo} from '../utils';
 import {selectRoom} from '../selectors';
@@ -22,6 +25,22 @@ import {
   , checkUserNotBanned
 } from './rooms.checks';
 
+/**
+ * Init
+ * */
+const roomsInit = (roomId, rooms) => ({
+  type: 'roomsInit'
+  , data: {roomId, rooms}
+});
+
+export const server$roomsInit = (userId) => (dispatch, getState) => {
+  const rooms = getState().get('rooms');
+  const room = rooms.find(room => ~room.users.indexOf(userId));
+  const roomId = !!room && room.id || null;
+  const roomsClient = rooms.map(r => r.id === roomId ? r.toClient() : r.toOthers().toClient());
+  dispatch(toUser$Client(userId, roomsInit(roomId, roomsClient)))
+};
+
 // Create
 
 export const roomCreateRequest = () => ({
@@ -35,7 +54,7 @@ const roomCreate = (room) => ({
   , data: {room}
 });
 
-export const server$roomCreate = (room) => (dispatch, getState) => dispatch(Object.assign(roomCreate(room)
+export const server$roomCreate = (room) => (dispatch, getState) => dispatch(Object.assign(roomCreate(room.toClient().toOthers())
   , {meta: {users: true}}));
 
 // Join
@@ -55,9 +74,9 @@ const roomJoin = (roomId, userId) => ({
   , data: {roomId, userId}
 });
 
-const roomJoinNotify = (roomId, userId) => ({
-  type: 'roomJoinNotify'
-  , data: {roomId, userId}
+const roomJoinSelf = (roomId, userId, room) => ({
+  type: 'roomJoinSelf'
+  , data: {roomId, userId, room}
 });
 
 export const server$roomJoin = (roomId, userId) => (dispatch, getState) => {
@@ -68,8 +87,9 @@ export const server$roomJoin = (roomId, userId) => (dispatch, getState) => {
   if (previousRoom) {
     dispatch(server$roomExit(previousRoom.id, userId));
   }
-  dispatch(Object.assign(roomJoin(roomId, userId)
-    , {meta: {users: true}}));
+  dispatch(roomJoin(roomId, userId));
+  dispatch(Object.assign(roomJoinSelf(roomId, userId, room.toClient()), {clientOnly: true, meta: {userId}}));
+  dispatch(Object.assign(roomJoin(roomId, userId), {meta: {clientOnly: true, users: true}}));
 };
 
 // Exit
@@ -85,8 +105,8 @@ const roomExit = (roomId, userId) => ({
   , data: {roomId, userId}
 });
 
-const roomExitNotify = (roomId, userId) => ({
-  type: 'roomExitNotify'
+const roomExitSelf = (roomId, userId) => ({
+  type: 'roomExitSelf'
   , data: {roomId, userId}
 });
 
@@ -190,24 +210,23 @@ const server$roomUnban = (roomId, userId) => (dispatch, getState) =>
     , {meta: {users: true}}));
 
 export const roomsClientToServer = {
-  roomCreateRequest: (data, {user: {id: userId}}) => (dispatch, getState) => {
+  roomCreateRequest: (data, {userId}) => (dispatch, getState) => {
     const room = RoomModel.new();
     dispatch(server$roomCreate(room));
     dispatch(server$roomJoin(room.id, userId));
   }
-  , roomJoinRequest: ({roomId}, {user: {id: userId}}) => (dispatch, getState) => {
+  , roomJoinRequest: ({roomId}, {userId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
     checkRoomIsNotInGame(room);
     checkUserNotBanned(room, userId);
     dispatch(server$roomJoin(roomId, userId));
   }
-  , roomExitRequest: ({roomId}, {user: {id: userId}}) => (dispatch, getState) => {
+  , roomExitRequest: ({roomId}, {userId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
     checkUserInRoom(room, userId);
     dispatch(server$roomExit(roomId, userId));
   }
-  , roomEditSettingsRequest: ({roomId, settings}, {user}) => (dispatch, getState) => {
-    const userId = user.id;
+  , roomEditSettingsRequest: ({roomId, settings}, {userId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
     checkUserInRoom(room, userId);
     checkRoomIsNotInGame(room);
@@ -217,26 +236,26 @@ export const roomsClientToServer = {
     settings.timeTraitResponse *= 60000;
     dispatch(server$roomEditSettings(roomId, settings));
   }
-  , roomKickRequest: ({roomId, userId}, {user}) => (dispatch, getState) => {
+  , roomKickRequest: ({roomId, userId}, {userId: hostId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
     checkUserInRoom(room, userId);
     checkRoomIsNotInGame(room);
-    checkUserIsHost(room, user.id);
+    checkUserIsHost(room, hostId);
     dispatch(server$roomKick(roomId, userId));
   }
-  , roomBanRequest: ({roomId, userId}, {user}) => (dispatch, getState) => {
+  , roomBanRequest: ({roomId, userId}, {userId: hostId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
     checkUserInRoom(room, userId);
     checkRoomIsNotInGame(room);
-    checkUserIsHost(room, userId);
+    checkUserIsHost(room, hostId);
     checkUserNotBanned(room, userId);
     dispatch(server$roomBan(roomId, userId));
   }
-  , roomUnbanRequest: ({roomId, userId}, {user}) => (dispatch, getState) => {
+  , roomUnbanRequest: ({roomId, userId}, {userId: hostId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
     checkUserInRoom(room, userId);
     checkRoomIsNotInGame(room);
-    checkUserIsHost(room, userId);
+    checkUserIsHost(room, hostId);
     checkUserBanned(room, userId);
     dispatch(server$roomUnban(roomId, userId));
   }
@@ -244,17 +263,16 @@ export const roomsClientToServer = {
 
 export const roomsServerToClient = {
   roomCreate: ({room}) => roomCreate(RoomModel.fromJS(room))
-  , roomJoin: ({roomId, userId}, currentUserId) => (dispatch, getState) => {
-    dispatch(roomJoinNotify(roomId, userId));
-    if (currentUserId === userId) {
-      dispatch(roomJoin(roomId, userId));
-      dispatch(redirectTo(`/room/${roomId}`));
-    }
+  , roomsInit: ({roomId, rooms}) => roomsInit(roomId, Map(rooms).map(r => RoomModel.fromJS(r)))
+  , roomJoin: ({roomId, userId}) => roomJoin(roomId, userId)
+  , roomJoinSelf: ({roomId, userId, room}, currentUserId) => (dispatch, getState) => {
+    dispatch(roomJoinSelf(roomId, userId, RoomModel.fromJS(room)));
+    dispatch(redirectTo(`/room/${roomId}`));
   }
   , roomExit: ({roomId, userId}, currentUserId) => (dispatch, getState) => {
-    dispatch(roomExitNotify(roomId, userId));
+    dispatch(roomExit(roomId, userId));
     if (currentUserId === userId) {
-      dispatch(roomExit(roomId, userId));
+      dispatch(roomExitSelf(roomId, userId));
       dispatch(redirectTo(`/`));
     }
   }

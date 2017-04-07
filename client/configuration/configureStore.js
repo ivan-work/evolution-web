@@ -14,6 +14,7 @@ class ClientRecord extends Record({
   , rooms: void 0
   , user: void 0
   , routing: void 0
+  , chat: void 0
 }) {
 }
 

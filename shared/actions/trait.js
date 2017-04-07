@@ -321,7 +321,7 @@ export const server$traitDefenceAnswer = (gameId, questionId, traitType, targetI
 //
 
 export const traitClientToServer = {
-  traitTakeFoodRequest: ({gameId, animalId}, {user: {id: userId}}) => (dispatch, getState) => {
+  traitTakeFoodRequest: ({gameId, animalId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
@@ -338,7 +338,7 @@ export const traitClientToServer = {
     dispatch(server$playerActed(gameId, userId));
   }
   ,
-  traitActivateRequest: ({gameId, sourceAid, traitType, targetId}, {user: {id: userId}}) => (dispatch, getState) => {
+  traitActivateRequest: ({gameId, sourceAid, traitType, targetId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
     const {sourceAnimal, traitData, target} = checkTraitActivation(game, userId, sourceAid, traitType, targetId);
     checkPlayerTurnAndPhase(game, userId, PHASE.FEEDING);

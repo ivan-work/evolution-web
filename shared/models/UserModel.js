@@ -3,6 +3,8 @@ import {Record} from 'immutable';
 import jwt from 'jsonwebtoken';
 import uuid from 'uuid';
 
+import {ChatModel} from './ChatModel';
+
 export const RulesLoginPassword = {
   login: 'required|string|between:4,12|regex:/^[a-zA-Zа-яА-Я\\d]*$/'
 };
@@ -12,11 +14,13 @@ export class UserModel extends Record({
   , login: null
   , connectionId: null
   , token: null
+  , chat: ChatModel.new()
 }) {
   static fromJS(js) {
     return js == null
       ? null
-      : new UserModel(js);
+      : new UserModel(js)
+        .set('chat', ChatModel.fromJS(js.chat));
   }
 
   static new(login, connectionId) {

@@ -10,18 +10,24 @@ import {
   , roomUnban
   , roomEditSettings
   , gameCreateNotify
+  , chatMessageRoom
 } from '../../server/reducers/rooms-rdx-server';
 
-const initialState = Map();
+const roomJoinSelf = (state, {roomId, userId, room}) => state.set(roomId, room);
 
-export const reducer = createReducer(initialState, {
-  loginUser: (state, {rooms}) => rooms
+const roomExitSelf = (state, {roomId, userId}) => state.update(roomId, (room) =>
+  room.remove('chat'));
+
+export const reducer = createReducer(Map(), {
+  roomsInit: (state, {rooms}) => rooms
   , roomCreate
-  , roomJoinNotify: roomJoin
-  , roomExitNotify: roomExit
+  , roomJoin
+  , roomExit: (state, data) => roomExitSelf(roomExit(state, data), data)
+  , roomJoinSelf
   , roomDestroy
   , roomBan
   , roomUnban
   , roomEditSettings
   , gameCreateNotify
+  , chatMessageRoom
 });

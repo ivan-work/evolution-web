@@ -26,6 +26,8 @@ describe('Rooms:', function () {
     it('Simple join', () => {
       const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
       clientStore0.dispatch(roomCreateRequest());
+      expect(clientStore1.getState().get('room'), 'clientStore1.room').null;
+      expect(clientStore1.getState().get('game'), 'clientStore1.game').null;
       clientStore1.dispatch(roomJoinRequest(serverStore.getState().get('rooms').first().id));
       const Room = serverStore.getState().get('rooms').first();
       expect(serverStore.getState().getIn(['rooms', Room.id, 'users']), 'Room.users').equal(List([User0.id, User1.id]));

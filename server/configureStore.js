@@ -19,6 +19,7 @@ export class ServerRecord extends Record({
   , games: void 0
   , rooms: void 0
   , users: void 0
+  , chat: void 0
 }) {
 }
 

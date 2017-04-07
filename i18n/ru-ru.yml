@@ -7,6 +7,9 @@ App:
     Twitter: Войти через Twitter
   Name: Эволюция
   Online: Онлайн
+  Chat:
+    Label: Чат
+    EnterMessage: ...
   Rooms:
     Greeting: Привет
     Rooms: Комнаты
