@@ -43,7 +43,7 @@ function makeLogger() {
           let obj = '';
           if (meta) {
             if (Object.keys(meta).length === 2 && meta.hasOwnProperty('message') && meta.hasOwnProperty('stack')) {
-              obj = meta.stack.slice("Error: ".length, meta.stack.length);
+              obj = meta.stack;//.slice("Error: ".length, meta.stack.length);
             } else if (meta.toString) {
               if (meta.toJS) {
                 obj = meta.toString.call(meta.toJS())

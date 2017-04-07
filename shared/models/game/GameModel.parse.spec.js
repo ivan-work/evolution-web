@@ -31,6 +31,27 @@ describe('GameModel.parse', () => {
     expect(GameModel.parseAnimalList('u', '$').first().traits.size, 'parseAnimalList($)').equal(0);
   });
 
+  it('parseAnimalListWithFood', () => {
+    const list = GameModel.parseAnimalList('u', '$, +, $ ++ carn sharp, $ sharp camo, + camo');
+    expect(list.size).equal(5);
+    expect(list.get(0).traits.size).equal(0);
+    expect(list.get(1).traits.size).equal(0);
+    expect(list.get(2).traits.size).equal(2);
+    expect(list.get(2).traits.get(0).type).equal('TraitCarnivorous');
+    expect(list.get(2).traits.get(1).type).equal('TraitSharpVision');
+    expect(list.get(3).traits.size).equal(2);
+    expect(list.get(3).traits.get(0).type).equal('TraitSharpVision');
+    expect(list.get(3).traits.get(1).type).equal('TraitCamouflage');
+    expect(list.get(4).traits.size).equal(1);
+    expect(list.get(4).traits.get(0).type).equal('TraitCamouflage');
+
+    expect(list.get(0).getFood()).equal(0);
+    expect(list.get(1).getFood()).equal(1);
+    expect(list.get(2).getFood()).equal(2);
+    expect(list.get(3).getFood()).equal(0);
+    expect(list.get(4).getFood()).equal(1);
+  });
+
   it('Valid Seed', () => {
     const parsed = GameModel.parse({id: 'r0', users: List(['u0', 'u1'])}
       , `

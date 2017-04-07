@@ -158,16 +158,19 @@ describe('Game:', function () {
     expect(ClientGame1().status.player, 'ClientGame1().status.player').equal(1);
     clientStore1.dispatch(gameDeployAnimalRequest(User1OriginalHand.get(0).id, 1));
 
+
     /*
      * State: 0-2-0
      * User0: Card#1, Card#3, Card#4, ... | Animal#2, Animal#0
      * User1: Card#2, Card#3, Card#4, ... | Animal#1, Animal#0
      * */
+    console.log('local')
 
     expect(ClientGame0().status.round, 'ServerGame().status.round').equal(2);
     expect(ClientGame1().status.round, 'ServerGame().status.round').equal(2);
     expect(ServerGame().status.round, 'ServerGame().status.round').equal(2);
     clientStore0.dispatch(gameDeployAnimalRequest(User0OriginalHand.get(4).id, 1));
+    console.log('local')
 
     /*
      * State: 0-2-1
