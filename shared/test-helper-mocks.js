@@ -46,7 +46,7 @@ import {
 
     for (let i = 0; i < count; ++i) {
       const clientStore = mockedStores[i + 1]['clientStore' + i];
-      clientStore.dispatch(roomJoinRequest(roomId));
+      if (i > 0) clientStore.dispatch(roomJoinRequest(roomId));
       result.push({
         ...mockedStores[i + 1]
         , ['ClientGame' + i]: () => clientStore.getState().get('game')

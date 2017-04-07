@@ -1,7 +1,15 @@
 import {Map, List, fromJS} from 'immutable';
 import {UserModel} from '../models/UserModel';
 import {RoomModel} from '../models/RoomModel';
-import {loginUserRequest, roomCreateRequest, roomJoinRequest, roomExitRequest, roomEditSettingsRequest} from '../actions/actions';
+import {
+  loginUserRequest
+  , roomCreateRequest
+  , roomJoinRequest
+  , roomExitRequest
+  , roomEditSettingsRequest
+  , roomKickRequest
+  , roomBanRequest
+} from '../actions/actions';
 import {selectRoom} from '../selectors';
 
 describe('Rooms:', function () {
@@ -115,7 +123,7 @@ describe('Rooms:', function () {
       clientStore0.connect(serverStore);
 
       //TODO enable rejoin func
-      expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(Room.id);
+      expect(clientStore0.getState().get('room'), 'clientStore0.room after rejoin').equal(Room.id);
       expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
       expect(selectRoom(serverStore.getState, Room.id).users).equal(List.of(User0.id, User1.id));
       expect(selectRoom(clientStore0.getState, Room.id).users).equal(List.of(User0.id, User1.id));
@@ -131,18 +139,70 @@ describe('Rooms:', function () {
     });
   });
 
-  describe.only('Actions:', function () {
+  describe('Actions:', function () {
     it('Can edit settings', () => {
       const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
       clientStore0.dispatch(roomCreateRequest());
-      clientStore1.dispatch(roomJoinRequest(serverStore.getState().get('rooms').first().id));
-      const Room = serverStore.getState().get('rooms').first();
+      const RoomId = serverStore.getState().get('rooms').first().id;
+      clientStore1.dispatch(roomJoinRequest(RoomId));
       clientStore0.dispatch(roomEditSettingsRequest({
         name: 'Room Test'
-        , maxPlayers: 6
-        , timeTurn: 60
-        , timeTraitResponse: 60
-      }))
+        , maxPlayers: 3
+        , timeTurn: 3
+        , timeTraitResponse: 1
+      }));
+      expect(serverStore.getState().getIn(['rooms', RoomId, 'name']), 'Room Test');
+      expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'maxPlayers']), 3);
+      expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'timeTurn']), 3 * 6000);
+      expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'timeTraitResponse']), 1 * 6000);
+      expect(clientStore0.getState().getIn(['rooms', RoomId, 'name']), 'Room Test');
+      expect(clientStore0.getState().getIn(['rooms', RoomId, 'settings', 'maxPlayers']), 3);
+      expect(clientStore0.getState().getIn(['rooms', RoomId, 'settings', 'timeTurn']), 3 * 6000);
+      expect(clientStore0.getState().getIn(['rooms', RoomId, 'settings', 'timeTraitResponse']), 1 * 6000);
+    });
+
+    it('Can kick', () => {
+      const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
+      clientStore0.dispatch(roomCreateRequest());
+      const RoomId = serverStore.getState().get('rooms').first().id;
+      clientStore1.dispatch(roomJoinRequest(RoomId));
+      clientStore0.dispatch(roomKickRequest(User1.id));
+      expect(serverStore.getState().getIn(['rooms', RoomId, 'users'])).size(1);
+      expect(clientStore0.getState().getIn(['rooms', RoomId, 'users'])).size(1);
+      expect(clientStore1.getState().getIn(['room'])).null;
+    });
+
+    it('Can ban', () => {
+      const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
+      clientStore0.dispatch(roomCreateRequest());
+      const RoomId = serverStore.getState().get('rooms').first().id;
+      clientStore1.dispatch(roomJoinRequest(RoomId));
+      clientStore0.dispatch(roomKickRequest(User1.id));
+      expect(serverStore.getState().getIn(['rooms', RoomId, 'users'])).size(1);
+    });
+
+    it('Room resize', () => {
+      const [serverStore, {clientStore0}, {clientStore1}, {clientStore2}, {clientStore3}] = mockStores(4);
+      clientStore0.dispatch(roomCreateRequest());
+      const roomId = serverStore.getState().get('rooms').first().id;
+      clientStore1.dispatch(roomJoinRequest(roomId));
+      clientStore2.dispatch(roomJoinRequest(roomId));
+      clientStore3.dispatch(roomJoinRequest(roomId));
+      clientStore0.dispatch(roomEditSettingsRequest({
+        name: 'Room Test'
+        , maxPlayers: 3
+        , timeTurn: 3
+        , timeTraitResponse: 1
+      }));
+      expect(serverStore.getState().getIn(['rooms', roomId, 'users']), 'Resize should kick').size(3);
+      expect(clientStore0.getState().getIn(['rooms', roomId, 'users'])).size(3);
+      expect(clientStore1.getState().getIn(['rooms', roomId, 'users'])).size(3);
+      expect(clientStore2.getState().getIn(['rooms', roomId, 'users'])).size(3);
+      expect(clientStore3.getState().getIn(['rooms', roomId, 'users'])).size(3);
+      expect(clientStore3.getState().getIn(['room'])).null;
+      expectUnchanged('User3 cannot join'
+        , () => clientStore3.dispatch(roomJoinRequest(roomId))
+        , serverStore, clientStore0, clientStore1, clientStore2, clientStore3)
     });
   });
 
