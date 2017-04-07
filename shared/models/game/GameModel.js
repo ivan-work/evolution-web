@@ -3,7 +3,7 @@ import {Record, Map, OrderedMap, Range, List} from 'immutable';
 import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
 import {CooldownList} from './CooldownList';
-import {SettingsRecord, DeckVariants} from './GameSettings';
+import {SettingsRecord, Deck_Base, Deck_TimeToFly} from './GameSettings';
 
 import uuid from 'uuid';
 import {ensureParameter} from '../../utils';
@@ -11,7 +11,7 @@ import {getRandom} from '../../utils/randomGenerator';
 
 import {parseFromRoom, parseCardList, parseAnimalList} from './GameModel.parse';
 
-export const TEST_DECK_SIZE = 24;
+export const TEST_DECK_SIZE = 84;
 export const TEST_HAND_SIZE = 6;
 
 export const PHASE = {
@@ -107,8 +107,10 @@ export class GameModel extends Record(GameModelData) {
   }
 
   static new(room) {
-    const deck = room.settings.decks.reduce((result, deckName) => result.concat(DeckVariants[deckName]), List());
+    let deck = Deck_Base;
+    if (room.settings.addon_timeToFly) deck = deck.concat(Deck_TimeToFly);
 
+    if (room.settings.halfDeck) deck = deck.map(([count, type]) => [count / 2, type]);
     return new GameModel({
       id: uuid.v4()
       , roomId: room.id

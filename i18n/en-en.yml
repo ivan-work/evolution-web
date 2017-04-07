@@ -21,8 +21,13 @@ App:
     Settings:
       name: Name
       maxPlayers: Max players
-      timeTurn: Turn time
+      timeTurn: Turn time (minutes)
       timeTraitResponse: Attack response time
+      halfDeck: Use only half of the cards
+      addon_timeToFly: Time To Fly
+      addon_continents: Continents
+      addon_bonus: Bonus cards
+      addon_plantarium: Plantarium
     Players: Players
     Spectators: Spectators
     Banned: Banned

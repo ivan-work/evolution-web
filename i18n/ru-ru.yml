@@ -23,8 +23,11 @@ App:
       maxPlayers: Количество игроков
       timeTurn: Время хода (В минутах)
       timeTraitResponse: Время реагирования на атаку
-      baseType1: Базовый набор
-      baseType2: Двойной базовый набор
+      halfDeck: Половина колоды
+      addon_timeToFly: Время Летать
+      addon_continents: Континенты
+      addon_bonus: Бонусные
+      addon_plantarium: Растения
     Players: Игроки
     Spectators: Зрители
     Banned: Забаненные

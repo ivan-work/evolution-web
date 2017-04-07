@@ -55,22 +55,14 @@ export const doesOptionExist = (game, playerId) => {
     return animal.traits.some((trait) => {
       const traitData = trait.getDataModel();
 
-      console.log('checking', trait.type, traitData.playerControllable, trait.checkAction(game, animal))
-      if (trait.type === 'TraitMetamorphose') {
-        console.log(game.cooldowns)
-        console.log(game.cooldowns.toJS())
-      }
-
       if (!(traitData.playerControllable && trait.checkAction(game, animal))) return false;
 
-      console.log('checking 2 passed checks')
       switch (traitData.targetType) {
         case TRAIT_TARGET_TYPE.ANIMAL:
           return allAnimals.some((targetAid) => {
             if (passesChecks(() => checkTraitActivation_Animal(game, animal, traitData, targetAid))) return true;
           });
         case TRAIT_TARGET_TYPE.TRAIT:
-          console.log('checking 3 return true', trait.type)
           return true;
         case TRAIT_TARGET_TYPE.NONE:
           return true;

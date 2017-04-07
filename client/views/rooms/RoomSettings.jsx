@@ -11,7 +11,11 @@ const propsToForm = (props) => ({
   , maxPlayers: props.room.settings.maxPlayers
   , timeTurn: props.room.settings.timeTurn / SETTINGS_TIME_MODIFIER
   , timeTraitResponse: props.room.settings.timeTraitResponse / SETTINGS_TIME_MODIFIER
-  , baseType: props.room.settings.baseType
+  , halfDeck: props.room.settings.halfDeck
+  , addon_ttf: props.room.settings.addon_ttf
+  , addon_continents: props.room.settings.addon_continents
+  , addon_bonus: props.room.settings.addon_bonus
+  , addon_plantarium: props.room.settings.addon_plantarium
 });
 
 export default class RoomSettings extends Component {
@@ -45,12 +49,8 @@ export default class RoomSettings extends Component {
       <div><MDLForm.Textfield name='maxPlayers'/></div>
       <div><MDLForm.Textfield name='timeTurn'/></div>
       <div><MDLForm.Textfield name='timeTraitResponse'/></div>
-      <div>
-        <MDLForm.RadioGroup name='baseType'>
-          <Radio value="Base">{T.translate('App.Room.Settings.baseType1')}</Radio>
-          <Radio value="Base2">{T.translate('App.Room.Settings.baseType2')}</Radio>
-        </MDLForm.RadioGroup>
-      </div>
+      <div><MDLForm.Checkbox name='halfDeck'/></div>
+      {/*<div><MDLForm.Checkbox name='addon_timeToFly' disabled={true}/></div>*/}
       <div>
         <MDLForm.Submit id='RoomSettings$Submit'>
           {T.translate('App.Room.$Edit')}
