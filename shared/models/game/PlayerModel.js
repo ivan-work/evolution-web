@@ -1,7 +1,12 @@
+import {Record, List, Map} from 'immutable';
+import {UserModel} from '../UserModel';
 
-/**
- * Created by ivan.naimark on 18.07.2016.
- */
-define(function () {
-  return {};
-});
+
+export class PlayerModel extends Record({
+  id: null
+  , hand: List()
+}) {
+  static new(userId) {
+    return new PlayerModel({id: userId})
+  }
+}

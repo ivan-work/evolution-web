@@ -1,3 +1,4 @@
+import {Record} from 'immutable';
 import uuid from 'node-uuid';
 
 export class CardModel extends Record({
@@ -7,6 +8,13 @@ export class CardModel extends Record({
   , imageFront: ''
   , imageBack: ''
 }) {
+  static new() {
+    return new CardModel();
+  }
 }
 
-CardModel.DefaultCard = CardModel.new();
+CardModel.DefaultCard = new CardModel({
+  id: 'DefaultCard'
+  , name: 'Default Card'
+  , description: 'Default Card'
+});

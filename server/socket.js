@@ -17,7 +17,7 @@ export const socketStore = (serverSocket, store) => {
     });
 
     socket.on('action', (action) => {
-      //console.log('server:action', action.type, action.meta);
+      //console.log('Server:Receive', action.type);
       if (!clientToServer.$unprotected) {
 
       }
@@ -40,6 +40,7 @@ export const socketMiddleware = io => store => next => action => {
   if (action.meta) {
     if (action.meta.clients === true) {
       // Clients == true => to all
+      //console.log('Server:SendAll', action.type);
       io.emit('action', action);
       return;
     }
