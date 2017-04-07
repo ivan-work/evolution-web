@@ -9,6 +9,7 @@ import {Animal} from '../animals/Animal.jsx';
 import {AnimalTrait} from '../animals/AnimalTrait.jsx';
 import AnimalTraitIcon from '../animals/AnimalTraitIcon.jsx';
 
+import {QuestionRecord} from '../../../../shared/models/game/GameModel.js';
 import {TraitCarnivorous, TraitMimicry, TraitTailLoss} from '../../../../shared/models/game/evolution/traitsData/index';
 import {TraitInkCloud, TraitShell} from '../../../../shared/models/game/evolution/traitTypes';
 
@@ -16,20 +17,21 @@ import './TraitDefenceDialog.scss';
 
 export class TraitDefenceDialog extends Component {
   static propTypes = {
-    $traitDefenceAnswer: PropTypes.func.isRequired
+    $traitAnswer: PropTypes.func.isRequired
   };
 
 
   render() {
     const {game} = this.props;
-    return (<Dialog show={game.question && game.question.targetPid === game.userId}>
+    const show = game.question && game.question.id && game.question.type === QuestionRecord.DEFENSE;
+    return (<Dialog show={show}>
       <DialogTitle>{T.translate('Game.UI.TraitDefenceDialog.Title')}</DialogTitle>
-      {game.question && this.renderDialogContent()}
+      {show && this.renderDialogContent()}
     </Dialog>);
   }
 
   renderDialogContent() {
-    const {game, $traitDefenceAnswer} = this.props;
+    const {game, $traitAnswer} = this.props;
     const {sourceAid, targetAid, time} = game.question;
     const {animal: attackAnimal} = game.locateAnimal(sourceAid);
     const {animal: targetAnimal} = game.locateAnimal(targetAid);
@@ -48,13 +50,13 @@ export class TraitDefenceDialog extends Component {
       <TooltipsContextElement>
         <div className='TraitDefenceDialog'>
           {traitTailLoss && targetsTailLoss.size > 0
-            && this.renderTailLoss(targetsTailLoss, $traitDefenceAnswer.bind(null, traitTailLoss.id))
+            && this.renderTailLoss(targetsTailLoss, $traitAnswer.bind(null, traitTailLoss.id))
             }
           {traitMimicry && targetsMimicry.size > 0
-            && this.renderMimicry(targetsMimicry, $traitDefenceAnswer.bind(null, traitMimicry.id))
+            && this.renderMimicry(targetsMimicry, $traitAnswer.bind(null, traitMimicry.id))
             }
           {otherTraits.length > 0
-            && this.renderOther(otherTraits, $traitDefenceAnswer.bind(null))}
+            && this.renderOther(otherTraits, $traitAnswer.bind(null))}
           <h1>
             <T.span text='Game.UI.TraitDefenceDialog.Time'/>:
             <Timer start={time} duration={game.settings.timeTraitResponse}/>

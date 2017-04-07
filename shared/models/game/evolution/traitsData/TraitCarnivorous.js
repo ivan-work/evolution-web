@@ -1,6 +1,6 @@
 import logger from '~/shared/utils/logger';
 import uuid from 'uuid';
-import {fromJS} from 'immutable';
+import {List, fromJS} from 'immutable';
 import {
   TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_DURATION
@@ -65,32 +65,36 @@ export const endHuntNoCd = (game, sourceAnimal, traitCarnivorous, targetAnimal) 
   dispatch(server$traitNotify_End(game.id, sourceAnimal.id, traitCarnivorous, targetAnimal.id));
 };
 
-const countStaticDefenses = (game, sourceAnimal, targetAnimal) => {
+const countUnavoidableDefenses = (game, sourceAnimal, targetAnimal) => {
   let defenses = 0;
-  if (targetAnimal.hasTrait(TraitCamouflage) && !sourceAnimal.hasTrait(TraitSharpVision))
+  if (sourceAnimal.hasTrait(TraitSwimming) && !targetAnimal.hasTrait(TraitSwimming))
     defenses++;
-  if (targetAnimal.traits.some(trait => trait.type === TraitSymbiosis && trait.linkSource))
-    defenses++;
-  if (targetAnimal.hasTrait(TraitMassive) && !sourceAnimal.hasTrait(TraitMassive))
-    defenses++;
-  if (targetAnimal.hasTrait(TraitBurrowing) && targetAnimal.isSaturated())
-    defenses++;
-  if (sourceAnimal.hasTrait(TraitSwimming) && !targetAnimal.hasTrait(TraitSwimming)
-    || (!sourceAnimal.hasTrait(TraitSwimming) && targetAnimal.hasTrait(TraitSwimming)))
-    defenses++;
-  if (targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL))
-    defenses++;
-  if (targetAnimal.hasTrait(TraitFlight) && (sourceAnimal.traits.size >= targetAnimal.traits.size))
-    defenses++;
-
   return defenses;
 };
 
-const countAffectiveDefenses = (game, sourceAnimal, targetAnimal) => {
-  return [
-    targetAnimal.hasTrait(TraitPoisonous)
-  ].filter(trait => !!trait);
-};
+export const getStaticDefenses = (game, sourceAnimal, targetAnimal) =>
+  targetAnimal.traits.filter((trait) =>
+    (trait.type === TraitCamouflage && !sourceAnimal.hasTrait(TraitSharpVision))
+    || (trait.type === TraitSymbiosis && trait.linkSource)
+    || (trait.type === TraitMassive && !sourceAnimal.hasTrait(TraitMassive))
+    || (trait.type === TraitBurrowing && targetAnimal.isSaturated())
+    || (trait.type === TraitSwimming && !sourceAnimal.hasTrait(TraitSwimming))
+    || (trait.type === TraitShell && targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL))
+    || (trait.type === TraitFlight && (sourceAnimal.traits.size >= targetAnimal.traits.size))
+  ).toArray();
+
+export const getAffectiveDefenses = (game, sourceAnimal, targetAnimal) => [
+  targetAnimal.hasTrait(TraitPoisonous)
+].filter(trait => !!trait);
+
+export const getActiveDefenses = (game, sourceAnimal, targetAnimal) =>
+  targetAnimal.traits.filter((trait) =>
+    (trait.type === TraitRunning.type)
+    || (trait.type === TraitMimicry.type && trait.checkAction(game, targetAnimal))
+    || (trait.type === TraitTailLoss.type && trait.checkAction(game, targetAnimal))
+    || (trait.type === TraitShell.type && trait.checkAction(game, targetAnimal))
+    || (trait.type === TraitInkCloud.type && trait.checkAction(game, targetAnimal))
+  ).toArray();
 
 export const TraitCarnivorous = {
   type: 'TraitCarnivorous'
@@ -110,39 +114,43 @@ export const TraitCarnivorous = {
 
     const traitIntellect = sourceAnimal.hasTrait(TraitIntellect);
     let disabledTid = traitIntellect && traitIntellect.value;
+    console.log(disabledTid)
 
-    targetAnimal.traits.find((defenseTrait) => {
-      if (defenseTrait.id === disabledTid) return;
+    getActiveDefenses(game, sourceAnimal, targetAnimal)
+      .forEach((defenseTrait) => {
+        if (defenseTrait.id === disabledTid || defenseTrait.type === disabledTid) return;
 
-      if (defenseTrait.type === TraitRunning.type) {
-        traitRunning = defenseTrait;
-        possibleDefenses.push(defenseTrait);
-      } else if (defenseTrait.type === TraitMimicry.type && defenseTrait.checkAction(game, targetAnimal)) {
-        traitMimicry = defenseTrait;
-        traitMimicryTargets = TraitMimicry.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
-        possibleDefenseTargets += traitMimicryTargets.size;
-        if (traitMimicryTargets.size > 0) possibleDefenses.push(defenseTrait);
-      } else if (defenseTrait.type === TraitTailLoss.type && defenseTrait.checkAction(game, targetAnimal)) {
-        traitTailLoss = defenseTrait;
-        traitTailLossTargets = targetAnimal.traits;
-        possibleDefenseTargets += traitTailLossTargets.size;
-        if (traitTailLossTargets.size > 0) possibleDefenses.push(defenseTrait);
-      } else if (defenseTrait.type === TraitShell.type && defenseTrait.checkAction(game, targetAnimal)) {
-        traitShell = defenseTrait;
-        possibleDefenses.push(defenseTrait);
-      } else if (defenseTrait.type === TraitInkCloud.type && defenseTrait.checkAction(game, targetAnimal)) {
-        traitInkCloud = defenseTrait;
-        possibleDefenses.push(defenseTrait);
-      }
-    });
+        if (defenseTrait.type === TraitRunning.type) {
+          traitRunning = defenseTrait;
+          possibleDefenses.push(defenseTrait);
+        } else if (defenseTrait.type === TraitMimicry.type) {
+          traitMimicry = defenseTrait;
+          traitMimicryTargets = TraitMimicry.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
+          possibleDefenseTargets += traitMimicryTargets.size;
+          if (traitMimicryTargets.size > 0) possibleDefenses.push(defenseTrait);
+        } else if (defenseTrait.type === TraitTailLoss.type) {
+          traitTailLoss = defenseTrait;
+          traitTailLossTargets = targetAnimal.traits;
+          possibleDefenseTargets += traitTailLossTargets.size;
+          if (traitTailLossTargets.size > 0) possibleDefenses.push(defenseTrait);
+        } else if (defenseTrait.type === TraitShell.type) {
+          traitShell = defenseTrait;
+          possibleDefenses.push(defenseTrait);
+        } else if (defenseTrait.type === TraitInkCloud.type) {
+          traitInkCloud = defenseTrait;
+          possibleDefenses.push(defenseTrait);
+        }
+      });
 
     if (traitIntellect && !disabledTid) {
       // default intellect found, need to ask
-      const staticDefenses = countStaticDefenses(game, sourceAnimal, targetAnimal);
-      if (staticDefenses === 0) {
-        const affectiveDefenses = countAffectiveDefenses(game, sourceAnimal, targetAnimal);
+      const unavoidableDefenses = countUnavoidableDefenses(game, sourceAnimal, targetAnimal);
+      const staticDefenses = getStaticDefenses(game, sourceAnimal, targetAnimal)
+      if (unavoidableDefenses === 0 && staticDefenses.length === 0) {
+        const affectiveDefenses = getAffectiveDefenses(game, sourceAnimal, targetAnimal);
 
-        if (possibleDefenses.length === 0 && affectiveDefenses.length === 0) {} //do nothing
+        if (possibleDefenses.length === 0 && affectiveDefenses.length === 0) {
+        } //do nothing
         else if (possibleDefenses.length === 1 && affectiveDefenses.length === 0) disabledTid = possibleDefenses[0].id;
         else if (possibleDefenses.length === 0 && affectiveDefenses.length === 1) disabledTid = affectiveDefenses[0].id;
         else {
@@ -152,7 +160,7 @@ export const TraitCarnivorous = {
               : true);
             return server$traitIntellectAnswer(game.id, questionId, traitIntellect.id, targetId);
           };
-          dispatch(server$traitIntellectQuestion(game, sourceAnimal, trait, targetAnimal, defaultIntellect));
+          dispatch(server$traitIntellectQuestion(game.id, sourceAnimal, trait, targetAnimal, defaultIntellect));
           return false;
         }
       }
@@ -233,12 +241,13 @@ export const TraitCarnivorous = {
     return sourceAnimal.canEat(game)
   }
   , checkTarget: (game, sourceAnimal, targetAnimal) => {
-    const defenses = countStaticDefenses(game, sourceAnimal, targetAnimal);
+    const unavoidable = countUnavoidableDefenses(game, sourceAnimal, targetAnimal);
+    if (unavoidable > 0) return false;
 
-    if (sourceAnimal.hasTrait(TraitIntellect)) {
-      return defenses < 2;
-    } else {
-      return defenses < 1;
-    }
+    const defenses = getStaticDefenses(game, sourceAnimal, targetAnimal).length;
+
+    return sourceAnimal.hasTrait(TraitIntellect)
+      ? defenses < 2
+      : defenses < 1;
   }
 };

@@ -68,6 +68,8 @@ Game:
       Round: Раунд
       Player: Игрок
       Time: Время
+    TraitActivateDialog:
+      Title: Выберите свойство
     TraitDefenceDialog:
       Title: Защищайтесь!
       Time: Осталось времени

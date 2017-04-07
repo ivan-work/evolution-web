@@ -32,7 +32,7 @@ class Game extends React.Component {
 
     const $traitTakeShell = this.context.gameActions;
 
-    //<TraitSelectDialog game={game} $traitDefenceAnswer={this.context.gameActions.$traitDefenceAnswer}/>
+    //<TraitSelectDialog game={game} $traitAnswer={this.context.gameActions.$traitDefenceAnswer}/>
 
     return <div className='Game'>
       <Portal target='header'>

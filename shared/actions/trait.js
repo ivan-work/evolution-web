@@ -138,6 +138,7 @@ const traitSetValue = (gameId, sourceAid, traitId, value) => ({
   , data: {gameId, sourceAid, traitId, value}
 });
 
+// TODO Remove and rewrite calls to traitSetValue with IDs. Because this one is bad fn =\
 export const server$traitSetValue = (game, sourceAnimal, trait, value) =>
   server$game(game.id, traitSetValue(game.id, sourceAnimal.id, trait.id, value));
 
@@ -419,7 +420,7 @@ export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetI
   const traitIntellect = attackAnimal.hasTrait(TraitIntellect);
 
   dispatch(server$traitAnswerSuccess(game.id, questionId));
-  dispatch(server$traitSetValue(game.id, sourceAnimal, traitIntellect, targetId));
+  dispatch(server$traitSetValue(game, attackAnimal, traitIntellect, targetId));
 
   // Reselecting animal from new game to refresh intellect value
   const {animal: sourceAnimal} = selectGame(getState, gameId).locateAnimal(attackAnimal.id);
@@ -498,15 +499,28 @@ export const traitClientToServer = {
         , 'Game doesnt have Question(%s)', questionId)
     }
 
-    const {sourcePid, targetPid} = game.question;
+    const {type, sourcePid, targetPid} = game.question;
     //checkPlayerTurn(game, sourcePid);
-    if (userId !== targetPid) {
-      throw new ActionCheckError(`checkPlayerCanAct@Game(${game.id})`
-        , `Player(%s) answering Target(%s)`
-        , userId, targetPid);
-    }
+    switch (type) {
+      case QuestionRecord.DEFENSE:
+        if (userId !== targetPid) {
+          throw new ActionCheckError(`checkPlayerCanAct@Game(${game.id})`
+            , `Player(%s) answering instead of Player(%s)`
+            , userId, targetPid);
+        }
 
-    dispatch(server$traitDefenceAnswer(gameId, questionId, traitId, targetId));
+        dispatch(server$traitDefenceAnswer(gameId, questionId, traitId, targetId));
+        break;
+      case QuestionRecord.INTELLECT:
+        if (userId !== sourcePid) {
+          throw new ActionCheckError(`checkPlayerCanAct@Game(${game.id})`
+            , `Player(%s) answering instead of Player(%s)`
+            , userId, sourcePid);
+        }
+
+        dispatch(server$traitIntellectAnswer(gameId, questionId, traitId, targetId));
+        break;
+    }
   }
 };
 
