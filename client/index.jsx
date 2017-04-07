@@ -12,8 +12,6 @@ import { Router, browserHistory } from 'react-router'
 import { syncHistoryWithStore, routerMiddleware, LOCATION_CHANGE } from 'react-router-redux'
 
 import thunk from 'redux-thunk';
-import socketMiddleware from './socket/socketMiddleware';
-import createClient from './socket/client';
 
 import * as reducers from './reducers'
 import routes from './routes';
@@ -21,6 +19,9 @@ import routes from './routes';
 import 'react-mdl/extra/material.min.css'
 import 'react-mdl/extra/material.min.js'
 import './styles/style.scss';
+
+import {socket, bindSocketToStore} from './socket';
+import socketMiddleware from './socket/socketMiddleware';
 
 const routerReducerState = Map({
   locationBeforeTransitions: null
@@ -50,14 +51,14 @@ const store = createStore(
   reducer
   , Map()
   , compose(
-    applyMiddleware(thunk),
-    applyMiddleware(routerMiddleware(browserHistory)),
-    applyMiddleware(socketMiddleware(client)),
-    DevTools.instrument()
+    applyMiddleware(thunk)
+    , applyMiddleware(routerMiddleware(browserHistory))
+    , applyMiddleware(socketMiddleware(socket))
+    , DevTools.instrument()
   )
 );
 
-const client =
+bindSocketToStore(store);
 
 const history = syncHistoryWithStore(browserHistory, store, {
   selectLocationState: (state) => {
