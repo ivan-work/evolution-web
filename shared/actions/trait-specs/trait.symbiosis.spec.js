@@ -140,7 +140,7 @@ players:
     });
   });
 
-  describe.only('Feedng:', () => {
+  describe('Feedng:', () => {
     it(`Can't get food when not full`, () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`

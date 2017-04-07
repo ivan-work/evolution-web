@@ -5,6 +5,7 @@ import { bindActionCreators } from 'redux';
 import {connect} from 'react-redux';
 import {loginUserRequest} from '~/shared/actions/actions';
 import * as MDL from 'react-mdl';
+import {VKAPILogin} from './auth/VKAPILogin.jsx';
 
 export const Login = React.createClass({
   mixins: [PureRenderMixin, LinkedStateMixin]
@@ -27,6 +28,7 @@ export const Login = React.createClass({
     return (
       <div>
         <h3>Login</h3>
+        <VKAPILogin/>
         {this.props.statusText ? <div className='alert alert-info'>{this.props.statusText}</div> : ''}
         <form role='form'>
           <MDL.Textfield
