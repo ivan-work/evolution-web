@@ -9,14 +9,17 @@ export class PlayerModel extends Record({
   , hand: List()
   , status: STATE_LOADING
 }) {
-  static fromJS(js) {
+  toClient() {
+    return this
+      .set('hand', this.hand.size);
+  }
+
+  static fromServer(js) {
     return js == null
       ? null
-      : new PlayerModel({
-      ...js
-      , hand: List(js.hand)
-    });
+      : new PlayerModel(js);
   }
+
   static new(userId) {
     return new PlayerModel({id: userId})
   }

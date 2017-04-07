@@ -1,6 +1,6 @@
-export {reducer as game} from './game-reducer';
-export {reducer as online} from './online-reducer';
-export {reducer as room} from './room-reducer';
-export {reducer as rooms} from './rooms-reducer';
-export {reducer as user} from './user-reducer';
+export {reducer as game} from './game-redclient';
+export {reducer as online} from './online-redclient';
+export {reducer as room} from './room-redclient';
+export {reducer as rooms} from './rooms-redclient';
+export {reducer as user} from './user-redclient';
 //export data from './data';
