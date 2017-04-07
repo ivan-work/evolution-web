@@ -56,6 +56,12 @@ global.ResizeObserver = function () {
   };
 };
 
+global.clock = (start) => {
+  if (!start) return process.hrtime();
+  var end = process.hrtime(start);
+  return Math.round((end[0] * 1000) + (end[1] / 1000000));
+}
+
 // https://stackoverflow.com/questions/26867535/calling-setstate-in-jsdom-based-tests-causing-cannot-render-markup-in-a-worker
 require('fbjs/lib/ExecutionEnvironment').canUseDOM = true;
 

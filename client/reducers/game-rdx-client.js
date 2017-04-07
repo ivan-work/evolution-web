@@ -22,7 +22,8 @@ import {
   , traitKillAnimal
   , traitDefenceQuestion
   , traitDefenceAnswerSuccess
-  , animalStarve
+  , gameAnimalStarve
+  , traitAnimalPoisoned
   , traitAnimalRemoveTrait
   , traitGrazeFood
   , traitSetAnimalFlag
@@ -51,7 +52,8 @@ export const reducer = createReducer(null, {
   , traitKillAnimal
   , traitDefenceQuestion
   , traitDefenceAnswerSuccess
-  , animalStarve
+  , gameAnimalStarve
+  , traitAnimalPoisoned
   , traitAnimalRemoveTrait
   , traitGrazeFood
   , traitSetAnimalFlag

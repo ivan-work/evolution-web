@@ -332,8 +332,13 @@ export const gameStartEat = (gameId, food) => ({
 
 // ===== EXTINCT!
 
-const animalStarve = (gameId, animalId) => ({
-  type: 'animalStarve'
+const gameAnimalStarve = (gameId, animalId) => ({
+  type: 'gameAnimalStarve'
+  , data: {gameId, animalId}
+});
+
+const traitAnimalPoisoned = (gameId, animalId) => ({
+  type: 'traitAnimalPoisoned'
   , data: {gameId, animalId}
 });
 
@@ -347,8 +352,11 @@ const server$gameExtict = (gameId) => (dispatch, getState) => {
 
   game.players.forEach((player) =>
     player.continent.forEach((animal) => {
-      if (!animal.canSurvive() || animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED)) {
-        dispatch(server$game(gameId, animalStarve(gameId, animal.id)));
+      if (!animal.canSurvive()) {
+        dispatch(server$game(gameId, gameAnimalStarve(gameId, animal.id)));
+      }
+      if (animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED)) {
+        dispatch(server$game(gameId, traitAnimalPoisoned(gameId, animal.id)));
       }
     }));
 };
@@ -555,7 +563,8 @@ export const gameServerToClient = {
   ,  gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
   ,  gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
   ,  gamePlayerLeft: ({gameId, userId}) => gamePlayerLeft(gameId, userId)
-  ,  animalStarve: ({gameId, animalId}) => animalStarve(gameId, animalId)
+  ,  gameAnimalStarve: ({gameId, animalId}) => gameAnimalStarve(gameId, animalId)
+  ,  traitAnimalPoisoned: ({gameId, animalId}) => traitAnimalPoisoned(gameId, animalId)
 };
 
 

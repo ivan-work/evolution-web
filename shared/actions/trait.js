@@ -139,7 +139,7 @@ const traitNotify_End = (gameId, sourceAid, traitId, traitType, targetId) => ({
 });
 
 export const server$traitNotify_Start = (game, sourceAnimal, trait, target) =>
-  server$game(game.id, traitNotify_Start(game.id, sourceAnimal.id, trait.id, trait.type, target && target.id));
+  server$game(game.id, traitNotify_Start(game.id, sourceAnimal.id, trait.id, trait.type, target && target.id || target));
 
 //TODO TRAIT
 export const server$traitNotify_End = (gameId, sourceAid, trait, targetId) => {
@@ -165,8 +165,7 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
         const game = selectGame(getState, gameId);
         const {animal: linkedAnimal} = game.locateAnimal(trait.linkAnimalId);
         if (linkedAnimal && checkAction(game, TraitCooperation, linkedAnimal)) {
-          const linkedTrait = linkedAnimal.hasTrait(TraitCooperation.type);
-          dispatch(server$traitNotify_Start(game, animal, trait, linkedTrait));
+          dispatch(server$traitNotify_Start(game, animal, trait, linkedAnimal));
           dispatch(server$startFeeding(gameId, linkedAnimal, 1, 'GAME', animal.id));
         }
       });
@@ -179,8 +178,7 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
       const game = selectGame(getState, gameId);
       const {animal: linkedAnimal} = game.locateAnimal(trait.linkAnimalId);
       if (linkedAnimal && checkAction(game, TraitCommunication, linkedAnimal)) {
-        const linkedTrait = linkedAnimal.hasTrait(TraitCommunication.type);
-        dispatch(server$traitNotify_Start(game, animal, trait, linkedTrait));
+        dispatch(server$traitNotify_Start(game, animal, trait, linkedAnimal));
         dispatch(server$startFeeding(gameId, linkedAnimal, 1, 'TraitCommunication', animal.id));
       }
     });

@@ -76,15 +76,28 @@ Game:
       1: $Player@{0} получил {1} карты
       2: $Player@{0} получил {1} карт
       3: $Player@{0} не получил карт =(
-    gameDeployAnimal  : $Player@{0} выложил $A
-    gameDeployTrait   : $Player@{0} выложил ${1} на {2}
-    gameDeployTrait_LINKED : $Player@{0} выложил ${1} на {2} и {3}
-    gameEndTurn       : $Player@{0} закончил ход
-    gameNextPlayer    : $Player@{0} начал ход
-    PhaseDeploy       : Фаза развития
-    gameStartEat      : Фаза питания. Еда: {0}
-    traitMoveFood     : $Animal{0} взяло {1}
-    traitNotify_Start : $Animal{0} использует свойство {1}
+    gameDeployAnimal: $Player@{0} выложил $A
+    gameDeployTrait:
+      1: $Player@{0} выложил ${1} на {2}
+      2: $Player@{0} выложил ${1} на {2} и {3}
+    gameDeployTrait_LINKED : $Player@{0} выложил свойтво "${1}" на {2} и {3}
+    gameEndTurn: $Player@{0} закончил ход
+    gameNextPlayer: $Player@{0} начал ход
+    PhaseDeploy: Фаза развития
+    gameStartEat: 'Фаза питания. Еда: {0}'
+    traitMoveFood:
+      GAME: '{2} взяло {0} из кормовой базы.'
+      TraitPiracy: '{2} пиратит $F у {3}'
+      TraitTailLoss: '{2} получает $F за "хвост"'
+      TraitCommunication: '{2} делится едой с {3}'
+      TraitCarnivorous: '{2} съедает {3}'
+      TraitScavenger: '{2} кушает останки.'
+    traitKillAnimal: '{0} убито.'
+    gameAnimalStarve: '{0} умерло от голода.'
+    traitAnimalPoisoned: '{0} умерло от яда.'
+    traitNotify_Start:
+      0: '{0} использует свойство ${1}'
+      1: '{0} использует свойство ${1} на {2}'
   Trait:
     TraitSymbiosis      : Симбиоз
     TraitCommunication  : Сотрудничество

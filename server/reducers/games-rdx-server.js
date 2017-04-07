@@ -16,7 +16,18 @@ import {CTT_PARAMETER, TRAIT_TARGET_TYPE} from '../../shared/models/game/evoluti
 //};
 const addToGameLog = (message) => (game) => game.update('log', log => log.push(message));
 
-const logAnimal = animal => animal && ['$Animal'].concat(animal.traits.map(trait => trait.type));
+const logAnimal = animal => animal && ['$Animal'].concat(animal.traits.map(trait => trait.type).toArray());
+
+const logAnimalById = (game, animalId) => {
+  const {animal} = game.locateAnimal(animalId);
+  return logAnimal(animal);
+};
+
+const logTrait = (game, traitId) => {
+  const {animal, traitIndex} = game.locateTrait(traitId);
+  const animalLog = logAnimal(animal);
+  return ['$Trait', traitIndex].concat(animalLog.slice(1));
+};
 
 export const gameStart = game => game
   .setIn(['status', 'started'], true)
@@ -141,17 +152,6 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
     : updatedGame;
 };
 
-export const traitKillAnimal = (game, {targetAnimalId}) => {
-  ensureParameter(targetAnimalId, 'string');
-  const {playerId, animal, animalIndex} = game.locateAnimal(targetAnimalId);
-  return game
-    .updateIn(['players', playerId, 'scoreDead'], scoreDead => scoreDead + animal.countScore())
-    .removeIn(['players', playerId, 'continent', animalIndex])
-    .updateIn(['players', playerId, 'continent'], continent => continent
-      .map(animal => animal.update('traits', traits => traits
-        .filter(trait => trait.linkAnimalId !== targetAnimalId))))
-};
-
 export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) => {
   ensureParameter(sourcePid, 'string');
   ensureParameter(sourceAid, 'string');
@@ -163,14 +163,32 @@ export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) =>
         .filterNot(trait => trait.id === traitId || trait.linkId === traitId))))
 };
 
-export const animalStarve = (game, {animalId}) => {
-  const {playerId, animal, animalIndex} = game.locateAnimal(animalId);
-  return game
+const killAnimal = (playerId, animalIndex, animal) => (game) => game
     .updateIn(['players', playerId, 'scoreDead'], scoreDead => scoreDead + animal.countScore())
     .removeIn(['players', playerId, 'continent', animalIndex])
     .updateIn(['players', playerId, 'continent'], continent => continent
-      .map(animal => animal.update('traits', traits => traits
-        .filter(trait => trait.linkAnimalId !== animalId))))
+      .map(a => a.update('traits', traits => traits
+        .filterNot(trait => trait.linkAnimalId === animal.id))));
+
+export const traitKillAnimal = (game, {targetAnimalId}) => {
+  const {playerId, animalIndex, animal} = game.locateAnimal(targetAnimalId);
+  return game
+    .update(killAnimal(playerId, animalIndex, animal))
+    .update(addToGameLog(['traitKillAnimal', logAnimal(animal)]))
+};
+
+export const gameAnimalStarve = (game, {animalId}) => {
+  const {playerId, animalIndex, animal} = game.locateAnimal(animalId);
+  return game
+    .update(killAnimal(playerId, animalIndex, animal))
+    .update(addToGameLog(['gameAnimalStarve', logAnimal(animal)]))
+};
+
+export const traitAnimalPoisoned = (game, {animalId}) => {
+  const {playerId, animalIndex, animal} = game.locateAnimal(animalId);
+  return game
+    .update(killAnimal(playerId, animalIndex, animal))
+    .update(addToGameLog(['traitAnimalPoisoned', logAnimal(animal)]))
 };
 
 export const startCooldown = (game, {link, duration, place, placeId}) =>
@@ -200,20 +218,19 @@ export const traitSetAnimalFlag = (game, {sourceAid, flag, on}) => {
 };
 
 const traitNotify_Start_getTarget = {
-  [TRAIT_TARGET_TYPE.ANIMAL]: (game, targetId) => {
-    const {animal} = game.locateAnimal(targetId);
-    return logAnimal(animal);
-  }
+  'TraitCommunication': logAnimalById
+  , 'TraitCooperation': logAnimalById
+  , 'TraitPoisonous': logAnimalById
+  , [TRAIT_TARGET_TYPE.ANIMAL]: logAnimalById
   , [TRAIT_TARGET_TYPE.TRAIT]: (game, targetId) => {
-    throw new Error('LOG TRAIT');
-    return targetId;
+    return logTrait(game, targetId);
   }
 };
 
 export const traitNotify_Start = (game, {sourceAid, traitId, traitType, targetId}) => {
   const {animal} = game.locateAnimal(sourceAid);
   const targetType = TraitDataModel.new(traitType).targetType;
-  const getTarget = traitNotify_Start_getTarget[targetType];
+  const getTarget = traitNotify_Start_getTarget[traitType] || traitNotify_Start_getTarget[targetType];
   const target = getTarget && getTarget(game, targetId);
   return game.update(addToGameLog(['traitNotify_Start', logAnimal(animal), traitType, target]));
 };
@@ -242,6 +259,7 @@ export const reducer = createReducer(Map(), {
   , traitAnimalRemoveTrait: (state, data) => state.update(data.gameId, game => traitAnimalRemoveTrait(game, data))
   , traitGrazeFood: (state, data) => state.update(data.gameId, game => traitGrazeFood(game, data))
   , traitSetAnimalFlag: (state, data) => state.update(data.gameId, game => traitSetAnimalFlag(game, data))
-  , animalStarve: (state, data) => state.update(data.gameId, game => animalStarve(game, data))
+  , gameAnimalStarve: (state, data) => state.update(data.gameId, game => gameAnimalStarve(game, data))
+  , traitAnimalPoisoned: (state, data) => state.update(data.gameId, game => traitAnimalPoisoned(game, data))
   , traitNotify_Start: (state, data) => state.update(data.gameId, game => traitNotify_Start(game, data))
 });

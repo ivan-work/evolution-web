@@ -91,8 +91,6 @@ export const TraitCarnivorous = {
         ));
         return false;
       } else {
-        dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
-
         const poisonous = targetAnimal.hasTrait(TraitPoisonous.type);
         if (poisonous) {
           dispatch(server$traitActivate(game, targetAnimal, poisonous, sourceAnimal));
@@ -111,6 +109,8 @@ export const TraitCarnivorous = {
         }));
 
         dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
+
+        dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
         return true;
       }
     };

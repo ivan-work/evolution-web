@@ -92,6 +92,8 @@ const GameModelData = {
   , winnerId: null
 };
 
+global.locateAnimalTime = 0;
+
 export class GameModel extends Record(GameModelData) {
   static generateDeck(config, shuffle) {
     const result = config.reduce((result, [count, type]) => result
@@ -182,6 +184,7 @@ export class GameModel extends Record(GameModelData) {
   }
 
   locateAnimal(animalId) {
+    // const start = clock();
     let playerId = null, animalIndex = -1;
     animalId && this.players.some(player => {
       animalIndex = player.continent.findIndex(animal => animal.id === animalId);
@@ -191,7 +194,25 @@ export class GameModel extends Record(GameModelData) {
       }
     });
     const animal = playerId !== null ? this.getPlayer(playerId).getAnimal(animalIndex) : null;
+    // locateAnimalTime += clock(start);
+    // console.log(locateAnimalTime);
     return {playerId, animalIndex, animal};
+  }
+
+  locateTrait(traitId) {
+    let playerId = null, animalIndex = -1, traitIndex = -1;
+    traitId && this.players.some(player => {
+      animalIndex = player.continent.findIndex(animal => {
+        traitIndex = animal.traits.findIndex(trait => trait.id === traitId);
+        return ~traitIndex;
+      });
+      if (~animalIndex) {
+        playerId = player.id;
+        return true;
+      }
+    });
+    const animal = playerId !== null ? this.getPlayer(playerId).getAnimal(animalIndex) : null;
+    return {animal, animalIndex, traitIndex, playerId};
   }
 
   locateCard(cardId) {
@@ -255,6 +276,7 @@ GameModelClient.prototype.end = GameModel.prototype.end;
 GameModelClient.prototype.getPlayerCard = GameModel.prototype.getPlayerCard;
 GameModelClient.prototype.getPlayerAnimal = GameModel.prototype.getPlayerAnimal;
 GameModelClient.prototype.locateAnimal = GameModel.prototype.locateAnimal;
+GameModelClient.prototype.locateTrait = GameModel.prototype.locateTrait;
 GameModelClient.prototype.locateCard = GameModel.prototype.locateCard;
 
 // TODO move to utils
