@@ -10,24 +10,28 @@ import {CardModel} from '~/shared/models/game/CardModel';
 import {gameReadyRequest, gamePlayCard} from '~/shared/actions/actions';
 import {redirectTo} from '~/shared/utils'
 
+import {EnemyContinent} from './EnemyContinent.jsx';
 import {PlayerContinent} from './PlayerContinent.jsx';
 import {CardCollection} from './CardCollection.jsx';
-import {Card, DragCard} from './Card.jsx';
+import {Card, UnknownCard, DragCard} from './Card.jsx';
+import {Animal, UnknownAnimal} from './Animal.jsx';
 
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
+import TestBackend from 'react-dnd-test-backend';
 
-const DECK_POSITION = {right: '0', top: '50%'};
-const PLAYER_POSITION = {left: '10%', bottom: '100px'};
+const DECK_POSITION = {right: '0', top: '40%'};
+const PLAYER_POSITION = {left: '10%', bottom: '0'};
 const CARD_POSITIONS = {
   0: null
-  , 1: { deck: DECK_POSITION
+  , 1: {
+    deck: DECK_POSITION
     , player: PLAYER_POSITION
   }
   , 2: {
     deck: DECK_POSITION
     , player: PLAYER_POSITION
-    , 0: {top: '80px', left: '50%', transform: 'rotate(180deg)'}
+    , 0: {top: '0', left: '0'}
   }
   , 3: {
     deck: DECK_POSITION
@@ -60,7 +64,7 @@ export class Game extends React.Component {
   }
 
   cardPlayed(model, cardPosition, animalPosition) {
-    this.props.$playCard(model, cardPosition, animalPosition);
+    this.props.$playCard(model.id, cardPosition, animalPosition);
   }
 
   render() {
@@ -70,44 +74,52 @@ export class Game extends React.Component {
     if (!user || !game) return <div>Loading</div>;
     const player = game.getPlayer();
     //console.log('GameRender: =====')
-    //console.log('game', player)
+    //console.log('game', player.continent.toJS())
     //console.log('game', CARD_POSITIONS[game.players.size], game.players.size)
     return <div className="Game">
-      <PlayerContinent onCardDropped={this.cardPlayed}>
-        {player.continent.toArray().map((animal, i) => <Card key={i}/>)}
-      </PlayerContinent>
+      <div className='DeckWrapper' style={CARD_POSITIONS[game.players.size].deck}>
+        <CardCollection
+          ref="Deck" name="Deck"
+          shift={[1, 2]}
+          count={game.deck}>
+          {Array.from({length: game.deck}, (u, i) => <UnknownCard key={i} index={i}/>)}
+        </CardCollection>
+      </div>
 
-      <CardCollection
-        ref="Deck" name="Deck"
-        position={CARD_POSITIONS[game.players.size].deck}
-        shift={[1, 2]}
-        count={game.deck}>
-        {Array.from({length: game.deck}, (u, i) => <Card key={i}/>)}
-      </CardCollection>
+      <div className='PlayerWrapper' style={CARD_POSITIONS[game.players.size].player}>
+        <PlayerContinent onCardDropped={this.cardPlayed}>
+          {player.continent.toArray().map((animal, i) => <Animal index={i} key={i} model={animal}/>)}
+        </PlayerContinent>
 
-      <CardCollection
-        ref="Hand" name="Hand" namex="Hand"
-        position={CARD_POSITIONS[game.players.size].player}
-        shift={[20, 0]}>
-        {player.hand.toArray().map((cardModel, i) => <DragCard model={cardModel} key={i} position={i} />)}
-      </CardCollection>
+        <CardCollection
+          ref="Hand" name="Hand"
+          shift={[55, 0]}>
+          {player.hand.toArray().map((cardModel, i) => <DragCard model={cardModel} key={i} index={i}/>)}
+        </CardCollection>
+      </div>
 
       {
-        //game.players.valueSeq()
-        //  .filter(player => player.id !== user.id)
-        //  .map((player, i) => {
-        //  return <CardCollection
-        //    ref={player.id} name={player.id} key={player.id}
-        //    position={CARD_POSITIONS[game.players.size][i]}
-        //    shift={[0, 10]}
-        //    count={player.hand}/>
-        //  })
+        game.players.valueSeq()
+          .filter(enemy => enemy.id !== user.id)
+          .map((enemy, i) => {
+          return <div className='PlayerWrapper' key={enemy.id} style={CARD_POSITIONS[game.players.size][i]}>
+            <CardCollection
+              ref={enemy.id} name={enemy.id}
+              shift={[20, 0]}>
+              {enemy.hand.toArray().map((cardModel, i) => <Card model={cardModel} key={i} index={i}/>)}
+            </CardCollection>
+            <EnemyContinent>
+              {enemy.continent.toArray().map((animal, i) => <UnknownAnimal key={i} index={i}/>)}
+            </EnemyContinent>
+          </div>
+          })
         }
     </div>;
   }
 }
 
-export const DDCGame = DragDropContext(HTML5Backend)(Game);
+const backend = !process.env.TEST ? HTML5Backend : TestBackend;
+export const DDCGame = DragDropContext(backend)(Game);
 
 export const GameView = connect(
   (state) => {

@@ -12,6 +12,7 @@ export class PlayerContinentDropTargetZone extends React.Component {
 export const DropTargetPlayerContinentDropTargetZone = DropTarget("Card", {
   drop(props, monitor, component) {
     const {model, position} = monitor.getItem();
+    console.log('drop registered')
     props.onCardDropped(model, position, props.position);
   }
 }, (connect, monitor) => ({

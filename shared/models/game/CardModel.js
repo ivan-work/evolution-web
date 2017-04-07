@@ -14,13 +14,17 @@ export class CardModel extends Record({
       , name: 'Card#' + index
     });
   }
+
   static generate(count) {
     return Range(0, count).map(i => CardModel.new(i)).toList();
   }
+
   static fromServer(js) {
-    //checkNotNull(js)
-    return new CardModel(js);
+    return js == null
+      ? null
+      : new CardModel(js);
   }
+
   toString() {
     return this.name + this.id
   }

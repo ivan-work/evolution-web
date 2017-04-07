@@ -39,7 +39,7 @@ describe('Game', () => {
         })
         , User1: new PlayerModel({
           id: 'User1'
-          , hand: TEST_HAND_SIZE
+          , hand: hand
           , status: STATUS.LOADING
         })
       })
@@ -53,28 +53,32 @@ describe('Game', () => {
 
     expect($Game.find({name: 'Deck'}).props().children.length, 'Deck.length > 0').equal(TEST_DECK_SIZE - TEST_HAND_SIZE - TEST_HAND_SIZE);
     expect($Game.find({name: 'Hand'}).props().children.length, 'Hand.length > 0').equal(TEST_HAND_SIZE);
-
-    //console.log(clientStore0.getState().get('game'))
-    //console.log($Game.debug())
-    //console.log($Game.find({name: 'Hand'}).props().cards.size)
-  });
+});
 
   it('Displays DDCGame', () => {
-    const TestContext = DragDropContext(TestBackend)(Game);
-    const $Game = mount(<TestContext {...props}/>);
+    let $playCardEvent = {};
+    const $playCard = (id, cardPosition, animalPosition) => $playCardEvent = {id, cardPosition, animalPosition};
+    const $Game = mount(<DDCGame {...props} $playCard={$playCard}/>);
 
     const dndBackend = $Game.instance().getManager().getBackend();
 
-    const cardHID = $Game.find('DragSource(Component)').get(1).getHandlerId();
+    const cardHID = $Game.find('.CardCollection.Hand').find('DragSource(Card)').get(1).getHandlerId();
+
+    const PlayerContinentHID = $Game.find('DropTarget(PlayerContinentDropTargetZone)').get(0).getHandlerId();
 
     dndBackend.simulateBeginDrag([cardHID]);
-
-
-    const PlayerContinentHID = $Game.find('DropTarget(PlayerContinentDropTargetZone)').get(0).getHandlerId()
 
     dndBackend.simulateHover([PlayerContinentHID]);
 
     dndBackend.simulateDrop();
+
+    expect($playCardEvent).eql({
+      id: $Game.find('.CardCollection.Hand').find('Card').at(1).props().model.id
+      , cardPosition: 1
+      , animalPosition: 0
+    });
+
+    dndBackend.simulateEndDrag();
   });
 });
 

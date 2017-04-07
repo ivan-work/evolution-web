@@ -4,25 +4,36 @@
   height: 800px;
   background: #dfd;
 
-  .CardCollection {
+  .DeckWrapper {
     position: absolute;
   }
 
-  .PlayerContinent {
+  .PlayerWrapper {
     position: absolute;
-    top: 150px;
-    bottom: 150px;
-    left: 10px;
-    right: 100px;
-    background: #aaf;
 
-    .PlayerContinentDropTargetZone {
-      float: left;
-      height: 100%;
-      outline: 2px solid green;
-      &:hover {
-        background: #9f9;
+    .CardCollection {
+      height: 80px;
+    }
+
+    .PlayerContinent {
+      width: 400px;
+      height: 200px;
+      background: #aaf;
+
+      .PlayerContinentDropTargetZone {
+        float: left;
+        height: 100%;
+        outline: 2px solid green;
+        &:hover {
+          background: #9f9;
+        }
       }
+    }
+
+    .EnemyContinent {
+      width: 400px;
+      height: 200px;
+      background: #aaf;
     }
 
     .cards-container-outer {
@@ -42,7 +53,9 @@
     position: absolute;
     border: 1px solid black;
     background: gray;
-    cursor: -webkit-grab;
+    &[draggable] {
+      cursor: -webkit-grab;
+    }
     &.drag {
       cursor: -webkit-grabbing;
       .inner {
@@ -54,5 +67,11 @@
         transition: transform .25s, box-shadow .25s;
       }
     }
+  }
+
+  .Animal {
+    position: absolute;
+    border: 1px solid black;
+    background: #9fe1e7;
   }
 }
