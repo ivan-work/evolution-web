@@ -95,29 +95,76 @@ players:
   });
 
   it.only('Cooldowns', () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1}] = mockGame(2);
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1, clientStore1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
 phase: 2
 food: 4
 players:
-  - continent: $A ambush=true carn hiber tail fat fat
-  - continent: $B ambush=true carn hiber tail fat fat
+  - continent: $Q ambush=true carn hiber tail fat fat, $W ambush carn hiber tail fat fat
+  - continent: $A ambush=true carn hiber tail fat fat, $S ambush carn hiber tail fat fat
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+    expect(selectGame().question, 'Game asks question').ok;
+    clientStore0.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expect(selectAnimal(User0, 0).getFoodAndFat(), '$Q should get food').equal(1);
+    expect(selectAnimal(User1, 0).getFoodAndFat(), '$A should get food').equal(1);
+
+    clientStore1.dispatch(traitTakeFoodRequest('$A'));
+    expect(selectGame().question, 'Game asks question 2').ok;
+    clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
+    clientStore1.dispatch(gameEndTurnRequest());
+
+    expect(selectAnimal(User0, 0).getFoodAndFat(), '$Q should get food').equal(2);
+    expect(selectAnimal(User1, 0).getFoodAndFat(), '$A should get food').equal(2);
+
+    expect(selectGame().status.round, 'Round').equal(1);
+    clientStore0.dispatch(traitActivateRequest('$W', 'TraitAmbush'));
+    clientStore1.dispatch(traitActivateRequest('$S', 'TraitAmbush'));
+    console.log(selectAnimal(User1, 1).traits.toJS())
+
+    clientStore0.dispatch(traitTakeFoodRequest('$W'));
+    expect(selectGame().question, 'Game asks question 3').ok;
+    clientStore0.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expect(selectAnimal(User0, 1).getFoodAndFat(), '$W should get food').equal(1);
+    expect(selectAnimal(User1, 1).getFoodAndFat(), '$S should get food').equal(1);
+
+    clientStore1.dispatch(traitTakeFoodRequest('$S'));
+    expect(selectGame().question, 'Game asks question 4').ok;
+    clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
+    clientStore1.dispatch(gameEndTurnRequest());
+
+    expect(selectAnimal(User0, 1).getFoodAndFat(), '$W should get food').equal(2);
+    expect(selectAnimal(User1, 1).getFoodAndFat(), '$S should get food').equal(2);
+  });
+
+  it.only('Double trouble', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1, clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: 2
+food: 4
+players:
+  - continent: $A tail fat
+  - continent: $B ambush=true carn, $C ambush=true carn, $D ambush=true carn
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
     expect(selectGame().question, 'Game asks question').ok;
+    clientStore0.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
+    expect(selectGame().question, 'Game asks question').ok;
     clientStore0.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitTailLoss'));
 
-    clientStore1.dispatch(traitTakeFoodRequest('$B'));
-    expect(selectGame().question, 'Game asks question').ok;
-    clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitTailLoss'));
-
-    //expect(selectAnimal(User1, 0).getFood(), '$C should get $A tail').equal(2);
-    //expect(selectAnimal(User0, 0).id, '$A should be alive').equal('$A');
-    //expect(selectAnimal(User0, 1).id, '$B should be alive').equal('$B');
-    //expect(selectAnimal(User0, 2), '$D should be alive').undefined;
-    //expect(selectAnimal(User0, 0).getFood(), '$A should get food').equal(1);
+    expect(selectAnimal(User0, 0), '$A dead').undefined;
+    expect(selectAnimal(User1, 0).getFoodAndFat(), '$B should get food').equal(1);
+    expect(selectAnimal(User1, 1).getFoodAndFat(), '$C should get food').equal(1);
+    expect(selectAnimal(User1, 2).getFoodAndFat(), '$D should get food').equal(2);
   });
 });

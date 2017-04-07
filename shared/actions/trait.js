@@ -274,6 +274,7 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
 };
 
 export const server$startFeedingFromGame = (gameId, animal, amount) => (dispatch, getState) => {
+  console.log('feed from game', animal.id)
   const game = selectGame(getState, gameId);
   const ambushed = game.someAnimalOnContinent('standard', (attackAnimal) => {
     if (attackAnimal.ownerId === animal.ownerId) return;
@@ -282,6 +283,7 @@ export const server$startFeedingFromGame = (gameId, animal, amount) => (dispatch
     if (!ambush || !ambush.value || !carnivorous) return;
     const carnivorousData = carnivorous.getDataModel();
     if (!carnivorous.checkAction(game, attackAnimal) || !carnivorousData.checkTarget(game, attackAnimal, animal)) return;
+    console.log('ambush!')
     dispatch(traitAmbushStart(gameId, animal));
     dispatch(server$traitActivate(game, attackAnimal, carnivorous, animal));
     return true;
