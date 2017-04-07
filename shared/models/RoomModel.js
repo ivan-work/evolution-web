@@ -8,7 +8,9 @@ export class RoomModel extends Record({
   , users: List()
 }) {
   static fromJS(js) {
-    return new RoomModel({
+    return js == null
+      ? null
+      : new RoomModel({
       ...js
       , users: List(js.users)
     });

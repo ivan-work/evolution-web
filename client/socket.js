@@ -26,12 +26,13 @@ export const socketStore = (socket, store) => {
   //  console.log('client:disconnect');
   //});
   socket.on('action', (action) => {
+    //console.log('Client:Action', action);
     if (serverToClient[action.type]) {
       const user = store.getState().get('user');
       //console.log('user', user);
       store.dispatch(serverToClient[action.type](action.data, user));
     } else {
-      console.warn('serverToClient action doesnt exist: ' + action.type);
+      console.error('serverToClient action doesnt exist: ' + action.type);
     }
   });
 };
