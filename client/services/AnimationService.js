@@ -28,6 +28,7 @@ class AnimationServiceClass {
   }
 
   componentUpdated(updatedComponent) {
+    console.log('componentUpdated');
     // If has queue
     if (this.currentAnimation) {
       const currentAction = this.currentAnimation;
