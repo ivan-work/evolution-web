@@ -3,7 +3,7 @@ import {Record, Map, Range, List} from 'immutable';
 import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
 import {CooldownList} from './CooldownList';
-import * as cardTypes from './evolution/cards';
+import * as cardData from './evolution/cardData';
 
 import uuid from 'node-uuid';
 import {ensureParameter} from '~/shared/utils';
@@ -57,7 +57,9 @@ const GameModelData = {
 
 export class GameModel extends Record(GameModelData) {
   static generateDeck(config, shuffle) {
-    const result = config.reduce((result, config) => result.concat(Array.from({length: config[0]}).map(u => CardModel.new(config[1]))), []);
+    const result = config.reduce((result, [count, model]) => result
+      .concat(Array.from({length: count})
+      .map(u => CardModel.new(model))), []);
     return List(shuffle ? doShuffle(result) : result);
   }
 
@@ -71,18 +73,25 @@ export class GameModel extends Record(GameModelData) {
       , roomId: room.id
       , deck: GameModel.generateDeck([
         //[8, cardTypes.CardCamouflage]
-        [24, cardTypes.CardPoisonousCarnivore]
+        [24, cardData.CardPoisonousAndCarnivorous]
         //, [8, cardTypes.CardSharpVision]
       ], true)
       , players: room.users.reduce((result, userId, index) => result.set(userId, PlayerModel.new(userId, index)), Map())
     })
   }
 
-  toClient(userId) {
+  toOthers(userId) {
     return this
-      .set('deck', CardModel.generate(this.deck.size))
+      .set('deck', this.deck.map(card => card.toOthers()))
       .set('players', this.players.map(player => player.id === userId ? player : player.toOthers()))
       .set('leavers', this.leavers.map(leaver => leaver.toOthers()))
+  }
+
+  toClient() {
+    return this
+      .set('deck', this.deck.map(card => card.toClient()))
+      .set('players', this.players.map(player => player.toClient()))
+      .set('leavers', this.leavers.map(leaver => leaver.toClient()))
   }
 
   static fromServer(js) {
@@ -147,6 +156,15 @@ export class GameModel extends Record(GameModelData) {
       }
     });
     return {playerId, animalIndex};
+  }
+
+  static getSortedPlayersByIndex(game) {
+    let players = [];
+    for (let i = 0, c = game.status.roundPlayer; i < game.players.size; ++i) {
+      players.push(game.players.find(player => player.index === c));
+      c = (c + 1) % game.players.size;
+    }
+    return players;
   }
 }
 

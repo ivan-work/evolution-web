@@ -16,8 +16,12 @@ export class PlayerModel extends Record({
 }) {
   toOthers() {
     return this
-      .set('hand', CardModel.generate(this.hand.size))
+      .update('hand', hand => hand.map((card) => card.toOthers()))
       .set('continent', this.continent.map(animalModel => animalModel.toOthers()));
+  }
+
+  toClient() {
+    return this.update('hand', hand => hand.map((card) => card.toClient()))
   }
 
   static fromServer(js) {

@@ -134,8 +134,20 @@ players:
     expect(ServerGame().getPlayer(User0).continent).size(1);
     expect(ServerGame().getPlayer(User1).continent).size(1);
     expect(ServerGame().getPlayer(User2).continent).size(1);
-    expect(ServerGame().getPlayer(User0).hand).size(2);
-    expect(ServerGame().getPlayer(User1).hand).size(1);
+    //console.log(
+    //  ServerGame().getPlayer(User0).hand.size
+    //  , ServerGame().getPlayer(User1).hand.size
+    //  , ServerGame().getPlayer(User2).hand.size
+    //)
+    //console.log(
+    //  ServerGame().status.currentPlayer
+    //  , ServerGame().status.roundPlayer
+    //  , ServerGame().getPlayer(User0).index
+    //  , ServerGame().getPlayer(User1).index
+    //  , ServerGame().getPlayer(User2).index
+    //)
+    expect(ServerGame().getPlayer(User0).hand).size(1);
+    expect(ServerGame().getPlayer(User1).hand).size(2);
     expect(ServerGame().getPlayer(User2).hand).size(1);
   });
 

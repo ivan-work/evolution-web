@@ -7,13 +7,12 @@ import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
 import {AnimalModel} from './evolution/AnimalModel';
 import {TraitModel} from './evolution/TraitModel';
-import * as cardClasses from './evolution/cards';
+import * as cardData from './evolution/cardData';
 import yaml from 'yaml-js';
 
-const searchCardClasses = (name) => Object.keys(cardClasses)
-  .filter(cardClassName => cardClasses[cardClassName])
-  .map(cardClassName => cardClasses[cardClassName])
-  .sort((cc1, cc2) => CardModel.new(cc1).traitsCount > CardModel.new(cc2).traitsCount)
+const searchCardClasses = (name) => Object.keys(cardData)
+  .filter(cardClassName => cardData[cardClassName])
+  .map(cardClassName => cardData[cardClassName])
   .find(cardClass => ~cardClass.type.toLowerCase().indexOf(name.toLowerCase()));
 
 export const parseCardList = string => {
@@ -54,7 +53,7 @@ export const parseAnimalList = (userId, string) => {
 export const parseFromRoom = (room, string = '') => {
   const seed = yaml.load(string) || {};
 
-  const deck = parseCardList(seed.deck || '');
+  const deck = parseCardList(seed.deck || '').map(card => card.toClient());
 
   const players = room.users.reduce((result, id, index) => {
     const player = new PlayerModel({
@@ -64,9 +63,10 @@ export const parseFromRoom = (room, string = '') => {
       , ready: true
       , index
       , ended: false
-    });
-    return result.set(id, player);
-  }, Map());
+    }).toClient();
+    result[id] = player;
+    return result;
+  }, {});
 
   return GameModel.fromServer({
     id: uuid.v4().slice(0, 4)

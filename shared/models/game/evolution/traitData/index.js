@@ -1,9 +1,14 @@
-import {TRAIT_TARGET_TYPE, TRAIT_COOLDOWN_DURATION, TRAIT_COOLDOWN_PLACE, TRAIT_COOLDOWN_LINK} from '../constants';
+import {TRAIT_TARGET_TYPE
+  , TRAIT_COOLDOWN_DURATION
+  , TRAIT_COOLDOWN_PLACE
+  , TRAIT_COOLDOWN_LINK
+  , CARD_TARGET_TYPE} from '../constants';
 
 export {TraitCarnivorous} from './TraitCarnivorous';
 
 export const TraitParasite = {
   type: 'TraitParasite'
+  , cardTargetType: CARD_TARGET_TYPE.ANIMAL_ENEMY
   , food: 2
 };
 
@@ -36,6 +41,7 @@ export const TraitScavenger = {
 
 export const TraitSymbiosys = {
   type: 'TraitSymbiosys'
+  , cardTargetType: CARD_TARGET_TYPE.LINK_SELF_ONEWAY
 };
 
 export const TraitPiracy = {
@@ -60,6 +66,10 @@ export const TraitTailLoss = {
 
 export const TraitCommunication = {
   type: 'TraitCommunication'
+  , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
+  , cooldownPlace: TRAIT_COOLDOWN_PLACE.ANIMAL
+  , cooldownDuration: TRAIT_COOLDOWN_DURATION.ACTIVATION
+  , cooldownLink: 'TraitCommunication'
 };
 
 //
