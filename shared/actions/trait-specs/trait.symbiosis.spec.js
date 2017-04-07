@@ -7,6 +7,7 @@ import {
 import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
+import {replaceGetRandom} from '../../utils/randomGenerator';
 
 describe('TraitSymbiosis:', () => {
   describe('Deploy:', () => {
@@ -115,85 +116,145 @@ players:
       expect(selectAnimal(User1, 3).traits).size(3);
     });
 
-    it('fail friendA > enemy0, fail friendA > friendA, fail enemy0 > enemy0', () => {
+    it('fail A > B; fail B > A', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`
 phase: 1
 players:
-  - continent: $A, $B, $C
-  - hand: 8 CardCommunication
-    continent: $D, $E, $F
+  - hand: 8 CardSymbiosis
+    continent: $A
+  - continent: $A1
 `);
       const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-      expect(selectCard(User1, 7).trait1.type).equal('TraitCommunication');
-      clientStore0.dispatch(gameEndTurnRequest());
+      expect(selectCard(User0, 7).trait1.type).equal('TraitSymbiosis');
 
-      expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameDeployTraitRequest(
-        selectCard(User1, 0).id
-        , '$D', false, '$A'
-      )), serverStore, clientStore0, clientStore1);
+      expectUnchanged('A > A1', () => clientStore1.dispatch(
+        gameDeployTraitRequest(selectCard(User0, 0).id
+          , '$A', false, '$A1'
+        )), serverStore, clientStore0, clientStore1);
 
-      expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameDeployTraitRequest(
-        selectCard(User1, 0).id
-        , '$D', false, '$D'
-      )), serverStore, clientStore0, clientStore1);
-
-      expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameDeployTraitRequest(
-        selectCard(User1, 0).id
-        , '$A', false, '$A'
-      )), serverStore, clientStore0, clientStore1);
-
-      expectChanged('CHANGEIT', () => clientStore1.dispatch(gameDeployTraitRequest(
-        selectCard(User1, 0).id
-        , '$D', false, '$E'
-      )), serverStore, clientStore0, clientStore1);
+      expectUnchanged('A1 > A', () => clientStore1.dispatch(
+        gameDeployTraitRequest(selectCard(User0, 0).id
+          , '$A1', false, '$A'
+        )), serverStore, clientStore0, clientStore1);
     });
   });
 
-  describe('Feeding:', () => {
-//    it('Generates food from taking', () => {
-//      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
-//      const gameId = ParseGame(`
-//phase: 1
-//players:
-//  -
-//  - hand: 3 CardCommunication
-//    continent: $A carn, $B carn, $C carn, $D carn
-//`);
-//      const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-//      clientStore0.dispatch(gameEndTurnRequest());
-//      clientStore1.dispatch(gameDeployTraitRequest(
-//        selectCard(User1, 0).id
-//        , '$A', false, '$B'
-//      ));
-//      clientStore1.dispatch(gameDeployTraitRequest(
-//        selectCard(User1, 0).id
-//        , '$B', false, '$C'
-//      ));
-//      clientStore1.dispatch(gameDeployTraitRequest(
-//        selectCard(User1, 0).id
-//        , '$B', false, '$D'
-//      ));
-//
-//      expect(selectGame().status.phase).equal(PHASE.FEEDING);
-//      expect(selectGame().food).above(1);
-//      expect(selectAnimal(User1, 0).traits, 'Animal#0.traits').size(2);
-//      expect(selectAnimal(User1, 1).traits, 'Animal#1.traits').size(4);
-//      expect(selectAnimal(User1, 2).traits, 'Animal#2.traits').size(2);
-//      expect(selectAnimal(User1, 3).traits, 'Animal#3.traits').size(2);
-//
-//      clientStore0.dispatch(gameEndTurnRequest());
-//
-//      clientStore1.dispatch(traitTakeFoodRequest('$A'));
-//
-//      expect(selectAnimal(User1, 0).getFood(), 'Animal#0.getFood()').equal(1);
-//      expect(selectAnimal(User1, 1).getFood(), 'Animal#1.getFood()').equal(1);
-//      expect(selectAnimal(User1, 2).getFood(), 'Animal#2.getFood()').equal(1);
-//      expect(selectAnimal(User1, 3).getFood(), 'Animal#3.getFood()').equal(1);
-//    });
-//  });
-//
-//  describe('Death:', () => {
+  describe.only('Feedng:', () => {
+    it(`Can't get food when not full`, () => {
+      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+      const gameId = ParseGame(`
+phase: 1
+players:
+  - hand: 3 CardSymbiosis
+    continent: $A carn, $B carn fat fat, $C carn
+`);
+      const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+      clientStore0.dispatch(gameDeployTraitRequest(
+        selectCard(User0, 0).id
+        , '$A', false, '$B'
+      ));
+      clientStore1.dispatch(gameEndTurnRequest());
+
+      clientStore0.dispatch(gameDeployTraitRequest(
+        selectCard(User0, 0).id
+        , '$A', false, '$C'
+      ));
+
+      replaceGetRandom(() => 6, () => {
+        clientStore0.dispatch(gameDeployTraitRequest(
+          selectCard(User0, 0).id
+          , '$B', false, '$C'
+        ));
+      });
+      expect(selectGame().food).equal(8);
+
+      expect(selectGame().status.phase).equal(PHASE.FEEDING);
+      expect(selectAnimal(User0, 0).traits, 'Animal $A.traits').size(3);
+      expect(selectAnimal(User0, 1).traits, 'Animal $B.traits').size(5);
+      expect(selectAnimal(User0, 2).traits, 'Animal $C.traits').size(3);
+
+      expectUnchanged(`$A can't take food`, () => clientStore0.dispatch(
+        traitTakeFoodRequest('$A')
+      ), serverStore);
+
+      expectUnchanged(`$B can't take food`, () => clientStore0.dispatch(
+        traitTakeFoodRequest('$B')
+      ), serverStore);
+
+      expectChanged(`$C can take food`, () => clientStore0.dispatch(
+        traitTakeFoodRequest('$C')
+      ), serverStore);
+
+      expect(selectAnimal(User0, 0).getFood(), 'Animal#0.getFood()').equal(0);
+      expect(selectAnimal(User0, 1).getFood(), 'Animal#1.getFood()').equal(0);
+      expect(selectAnimal(User0, 2).getFood(), 'Animal#2.getFood()').equal(1);
+      clientStore0.dispatch(gameEndTurnRequest());
+      clientStore1.dispatch(gameEndTurnRequest());
+
+      expectUnchanged(`$A can't take food`, () => clientStore0.dispatch(
+        traitTakeFoodRequest('$A')
+      ), serverStore);
+
+      expectUnchanged(`$B can't take food`, () => clientStore0.dispatch(
+        traitTakeFoodRequest('$B')
+      ), serverStore);
+
+      expectChanged(`$C can take food`, () => clientStore0.dispatch(
+        traitTakeFoodRequest('$C')
+      ), serverStore);
+
+      expect(selectAnimal(User0, 0).getFood(), 'Animal#0.getFood()').equal(0);
+      expect(selectAnimal(User0, 1).getFood(), 'Animal#1.getFood()').equal(0);
+      expect(selectAnimal(User0, 2).getFood(), 'Animal#2.getFood()').equal(2);
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      expectUnchanged(`$A can't take food`, () => clientStore0.dispatch(
+        traitTakeFoodRequest('$A')
+      ), serverStore);
+
+      expectChanged(`$B can take food`, () => clientStore0.dispatch(
+        traitTakeFoodRequest('$B')
+      ), serverStore);
+
+      expect(selectAnimal(User0, 0).getFood(), 'Animal#0.getFood()').equal(0);
+      expect(selectAnimal(User0, 1).getFood(), 'Animal#1.getFood()').equal(1);
+      expect(selectAnimal(User0, 2).getFood(), 'Animal#2.getFood()').equal(2);
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      expectUnchanged(`$A can't take food`, () => clientStore0.dispatch(
+        traitTakeFoodRequest('$A')
+      ), serverStore);
+
+      expectChanged(`$B can take food`, () => clientStore0.dispatch(
+        traitTakeFoodRequest('$B')
+      ), serverStore);
+
+      expect(selectAnimal(User0, 0).getFood(), 'Animal#0.getFood()').equal(0);
+      expect(selectAnimal(User0, 1).getFood(), 'Animal#1.getFood()').equal(2);
+      expect(selectAnimal(User0, 2).getFood(), 'Animal#2.getFood()').equal(2);
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      expectChanged(`$A can take food`, () => clientStore0.dispatch(
+        traitTakeFoodRequest('$A')
+      ), serverStore);
+
+      expect(selectAnimal(User0, 0).getFood(), 'Animal#0.getFood()').equal(1);
+      expect(selectAnimal(User0, 1).getFood(), 'Animal#1.getFood()').equal(2);
+      expect(selectAnimal(User0, 2).getFood(), 'Animal#2.getFood()').equal(2);
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      expectChanged(`$B can take food`, () => clientStore0.dispatch(
+        traitTakeFoodRequest('$B')
+      ), serverStore);
+
+      expect(selectAnimal(User0, 0).getFood(), 'Animal#0.getFood()').equal(1);
+      expect(selectAnimal(User0, 1).getFood(), 'Animal#1.getFood()').equal(3);
+      expect(selectAnimal(User0, 2).getFood(), 'Animal#2.getFood()').equal(2);
+    });
+  });
+
+  describe('Death:', () => {
 //    it('Dies from carnivore', () => {
 //      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
 //      const gameId = ParseGame(`

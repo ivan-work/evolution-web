@@ -121,14 +121,14 @@ const traitQuestion = (gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, t
 export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId) => (dispatch, getState) => {
   const neededFood = animal.needsFood();
 
-  if (neededFood === 0) return false;
+  if (!animal.canEat(selectGame(getState, gameId)) || neededFood === 0) return false;
 
   // TODO bug with 2 amount on animal 2/3
   dispatch(server$game(gameId, traitMoveFood(gameId, animal.id, Math.min(amount, neededFood), sourceType, sourceId)));
 
   // TODO mb move to traitData?
-  dispatch(startCooldown(gameId, 'TraitCommunication', TRAIT_COOLDOWN_DURATION.ACTIVATION, TRAIT_COOLDOWN_PLACE.ANIMAL, animal.id));
-  animal.traits.filter(trait => trait.type === 'TraitCommunication')
+  dispatch(startCooldown(gameId, TraitCommunication.type, TRAIT_COOLDOWN_DURATION.ACTIVATION, TRAIT_COOLDOWN_PLACE.ANIMAL, animal.id));
+  animal.traits.filter(trait => trait.type === TraitCommunication.type)
     .forEach(trait => {
       const game = selectGame(getState, gameId);
       const {animal: linkedAnimal} = game.locateAnimal(trait.linkAnimalId);
@@ -196,8 +196,8 @@ export const traitClientToServer = {
     if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, userId, animalId)) {
       throw new ActionCheckError(`traitTakeFoodRequest@Game(${gameId})`, 'Cooldown active')
     }
-    if (animal.needsFood() <= 0) {
-      throw new ActionCheckError(`traitTakeFoodRequest@Game(${gameId})`, 'Animal(%s) full', animal)
+    if (!animal.canEat(game)) {
+      throw new ActionCheckError(`traitTakeFoodRequest@Game(${gameId})`, `Animal(%s) can't eat`, animal)
     }
 
     dispatch(server$startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId));

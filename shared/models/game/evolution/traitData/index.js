@@ -105,7 +105,7 @@ export const TraitPiracy = {
       // dispatch(traitStealFood)
     }
   }
-  , checkAction: (game, sourceAnimal) => sourceAnimal.needsFood() > 0
+  , checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game)
   , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.needOfNormalFood() > 0
 };
 

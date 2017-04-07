@@ -43,7 +43,7 @@ export const TraitCarnivorous = {
       const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
       GameModel.sortPlayersFromIndex(game, currentPlayerIndex).some(player => player.continent.some(animal => {
         const traitScavenger = animal.hasTrait(TraitScavenger.type);
-        if (traitScavenger && animal.needsFood() > 0) {
+        if (traitScavenger && animal.canEat(game) > 0) {
           dispatch(server$startFeeding(game.id, animal, 1));
           return true;
         }
@@ -54,7 +54,7 @@ export const TraitCarnivorous = {
     }
   }
   , $checkAction: (game, sourceAnimal) => {
-    return sourceAnimal.needsFood() > 0
+    return sourceAnimal.canEat(game)
   }
   , checkTarget: (game, sourceAnimal, targetAnimal) => (
     (sourceAnimal.hasTrait('TraitSharpVision') || !targetAnimal.hasTrait('TraitCamouflage'))
