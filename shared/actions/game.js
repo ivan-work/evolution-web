@@ -400,7 +400,7 @@ export const gameClientToServer = {
     if (cardTrait.checkTraitPlacement && !cardTrait.checkTraitPlacement(animal))
       throw new ActionCheckError(`gameDeployTraitRequest(${game.id})`, `Trait(%s) failed checkTraitPlacement on Animal(%s)`, cardTrait.type, animal.id);
 
-    const trait = !linkedAnimal ? TraitModel.new(cardTrait.type).attachTo(animal) : TraitModel.new(cardTrait.type).linkBetween(animal, linkedAnimal);
+    const trait = !linkedAnimal ? TraitModel.new(cardTrait.type).attachTo(animal) : TraitModel.LinkBetween(cardTrait.type, animal, linkedAnimal);
     dispatch(server$gameDeployTrait(gameId, cardId, cardTrait.type, animal.id, linkedAnimal ? linkedAnimal.id : void 0));
     dispatch(server$gameDeployNext(gameId, userId));
   }

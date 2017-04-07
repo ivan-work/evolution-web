@@ -141,7 +141,7 @@ const _DroppableAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND
         const {card, animal: sourceAnimal, alternateTrait} = monitor.getItem();
         if (card && targetAnimal) {
           try {
-            TraitModel.new(card.getTraitDataModel(alternateTrait).type).linkBetween(sourceAnimal, targetAnimal)
+            TraitModel.LinkBetween(card.getTraitDataModel(alternateTrait).type, sourceAnimal, targetAnimal)
           } catch (e) {
             if (e instanceof ActionCheckError) {
               return false;
