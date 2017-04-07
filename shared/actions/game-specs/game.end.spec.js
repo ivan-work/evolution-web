@@ -168,24 +168,23 @@ players:
       , {clientStore1, User1, ClientGame1}
       , {clientStore2, User2, ClientGame2}] = mockGame(3);
     ParseGame(`
-food: 4
+food: 0
 phase: 2
 players:
   - continent: $ + , $
   - continent: $ + camo sharp
-  - continent: $ +,$,$,$
+  - continent: $ + comm$X, $X +,$,$
 `);
     expect(ServerGame().getPlayer(User0).countScore(), 'score for User0 before').equal(4);
     expect(ServerGame().getPlayer(User1).countScore(), 'score for User1 before').equal(4);
-    expect(ServerGame().getPlayer(User2).countScore(), 'score for User2 before').equal(8);
+    expect(ServerGame().getPlayer(User2).countScore(), 'score for User2 before').equal(9);
 
     clientStore0.dispatch(gameEndTurnRequest());
-    clientStore1.dispatch(gameEndTurnRequest());
     clientStore2.dispatch(gameEndTurnRequest());
 
     expect(ServerGame().getPlayer(User0).countScore(), 'score for User0 after').equal(2);
     expect(ServerGame().getPlayer(User1).countScore(), 'score for User1 after').equal(4);
-    expect(ServerGame().getPlayer(User2).countScore(), 'score for User2 after').equal(2);
+    expect(ServerGame().getPlayer(User2).countScore(), 'score for User2 after').equal(5);
     expect(ServerGame().status.phase).equal(PHASE.FINAL);
   });
 

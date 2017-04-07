@@ -3,7 +3,7 @@ import uuid from 'uuid';
 import {TraitModel} from './TraitModel';
 
 import {TraitFatTissue, TraitSymbiosis} from './traitTypes/index';
-import {TRAIT_ANIMAL_FLAG} from './constants';
+import {TRAIT_ANIMAL_FLAG, CTT_PARAMETER} from './constants';
 
 export class AnimalModel extends Record({
   id: null
@@ -164,6 +164,11 @@ export class AnimalModel extends Record({
   }
 
   countScore() {
-    return 2 + this.traits.reduce((result, trait) => result + 1 + trait.getDataModel().food, 0);
+    return (2 + this.traits.reduce((result, trait) => (
+    result
+    + (trait.getDataModel().cardTargetType & CTT_PARAMETER.LINK
+        ? .5 + trait.getDataModel().food * 2 // card is splitted to two traits, so .5. And food is doubled by traits, so 2x score
+        : 1 + trait.getDataModel().food
+    )), 0));
   }
 }
