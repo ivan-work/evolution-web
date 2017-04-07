@@ -7,7 +7,7 @@ import {UserModel} from '~/shared/models/UserModel';
 import {GameModelClient} from '~/shared/models/game/GameModel';
 import {CardModel} from '~/shared/models/game/CardModel';
 
-import {gameReadyRequest, gamePlayCard} from '~/shared/actions/actions';
+import {gameReadyRequest, gameDeployAnimalRequest} from '~/shared/actions/actions';
 import {redirectTo} from '~/shared/utils'
 
 import {EnemyContinent} from './EnemyContinent.jsx';
@@ -136,6 +136,6 @@ export const GameView = connect(
   }
   , (dispatch) => ({
     $ready: () => dispatch(gameReadyRequest())
-    , $playCard: (...args) => dispatch(gamePlayCard(...args))
+    , $playCard: (...args) => dispatch(gameDeployAnimalRequest(...args))
   })
 )(DDCGame);

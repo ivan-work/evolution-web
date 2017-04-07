@@ -33,21 +33,26 @@ export class GameModel extends Record({
   , started: false
   , status: new StatusRecord()
 }) {
+  static generateDeck(config, shuffle) {
+    const result = config.reduce((result, config) => result.concat(Array.from({length: config[0]}).map(u => CardModel.new(config[1]))), []);
+    return List(shuffle ? doShuffle(result) : result);
+  }
+
   static new(room) {
     return new GameModel({
-      id: uuid.v4().slice(0,4)
+      id: uuid.v4().slice(0, 4)
       , roomId: room.id
-      , deck: List(shuffle([
+      , deck: GameModel.generateDeck([
         [12, cardTypes.CardCamouflage]
         , [12, cardTypes.CardCarnivorous]
-      ].reduce((result, config) => result.concat(Array.from({length: config[0]}).map(u => CardModel.new(config[1]))), [])))
+      ])
       , players: room.users.reduce((result, userId, index) => result.set(userId, PlayerModel.new(userId, index)), Map())
     })
   }
 
   toClient(userId) {
     return this
-      .set('deck', this.deck.size)
+      .set('deck', CardModel.generate(this.deck.size))
       .set('players', this.players.map(player => player.id === userId ? player : player.toOthers()))
   }
 
@@ -56,9 +61,16 @@ export class GameModel extends Record({
       ? null
       : new GameModel({
       ...js
+      , deck: List(js.deck).map(c => CardModel.fromServer(c))
       , players: Map(js.players).map(p => PlayerModel.fromServer(p))
       , status: new StatusRecord(js.status)
     });
+  }
+
+  start() {
+    return this
+      .setIn(['started'], true)
+      .setIn(['status', 'phase'], PHASE.DEPLOY)
   }
 
   leave(userId) {
@@ -67,15 +79,30 @@ export class GameModel extends Record({
       ? null
       : this.removeIn(['players', userId]));
   }
+
+  getPlayer(pid) {
+    return pid.id
+      ? this.players.get(pid.id)
+      : this.players.get(pid);
+  }
+
+  getPlayerCard(pid, index) {
+    return this.getPlayer(pid).hand.get(index);
+  }
+
+  getPlayerAnimal(pid, index) {
+    return this.getPlayer(pid).continent.get(index);
+  }
 }
 
 export class GameModelClient extends Record({
   id: null
   , userId: null
   , roomId: null
-  , deck: -1
+  , deck: null
   , started: false
   , players: null
+  , status: null
 }) {
   static fromServer(js, userId) {
     const game = GameModel.fromServer(js);
@@ -85,12 +112,21 @@ export class GameModelClient extends Record({
       .set('userId', userId);
   }
 
-  getPlayer() {
-    return this.players.get(this.userId);
+  getPlayer(pid) {
+    return pid === void 0 || pid === null
+      ? this.players.get(this.userId)
+      : pid.id
+      ? this.players.get(pid.id)
+      : this.players.get(pid);
   }
 }
 
-function shuffle(array) {
+GameModelClient.prototype.start = GameModel.prototype.start;
+GameModelClient.prototype.getPlayerCard = GameModel.prototype.getPlayerCard;
+GameModelClient.prototype.getPlayerAnimal = GameModel.prototype.getPlayerAnimal;
+
+// TODO move to utils
+function doShuffle(array) {
   let counter = array.length;
 
   // While there are elements in the array

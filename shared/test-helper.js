@@ -164,25 +164,4 @@ global.mockClientStore = function (initialClientState) {
   return clientStore
 };
 
-import {UserModel} from '~/shared/models/UserModel';
-import {loginUserRequest} from '~/shared/actions/actions';
-global.mockStores = (count = 2, initialServerStore = void 0) => {
-  const serverStore = mockServerStore(initialServerStore);
-  const result = [];
-  const sandbox = sinon.sandbox.create();
-  const UserSpy = sandbox.spy(UserModel, 'new');
-  for (let i = 0; i < count; ++i) {
-    const clientStore = mockClientStore().connect(serverStore);
-    clientStore.dispatch(loginUserRequest('/', 'User' + i, 'testPassword'));
-    const User = UserSpy.lastCall.returnValue;
-    result.push({
-      ['clientStore' + i]: clientStore
-      , ['User' + i]: User
-    });
-  }
-  result.forEach((r, i) => r['clientStore' + i].clearActions())
-  serverStore.clearActions();
-  sandbox.restore();
-  result.unshift(serverStore);
-  return result;
-};
+import './test-helper-mocks';
