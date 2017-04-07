@@ -1,4 +1,4 @@
-export const TRAIT_RESPONSE_TIMEOUT = 30;
+export const TRAIT_RESPONSE_TIMEOUT = 120 * 1000;
 
 export const CTT_PARAMETER = (i => ({
   ANIMAL: 1 << i++

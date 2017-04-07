@@ -15,20 +15,12 @@ import { DragAnimalSelectLink } from './AnimalSelectLink.jsx'
 import {GameProvider} from './../providers/GameProvider.jsx';
 import {Food} from './../food/Food.jsx';
 
+import './Animal.scss';
+
 class Animal extends React.Component {
   //static displayName = 'Animal';
-
-  static defaultProps = {
-    isUserAnimal: false
-  };
-
   static propTypes = {
     model: React.PropTypes.instanceOf(AnimalModel).isRequired
-    , isUserAnimal: React.PropTypes.bool
-    , onCardDropped: React.PropTypes.func
-    , onFoodDropped: React.PropTypes.func
-    , onTraitDropped: React.PropTypes.func
-    , onAnimalLink: React.PropTypes.func
   };
 
   constructor(props) {
@@ -46,8 +38,6 @@ class Animal extends React.Component {
   renderTrait(trait, animal) {
     if (trait.isLinked()) {
       return <AnimalLinkedTrait trait={trait} sourceAnimalId={animal.id}/>;
-    } else if (trait.dataModel.targetType) {
-      return <DragAnimalTrait trait={trait} sourceAnimal={animal}/>;
     } else {
       return <AnimalTrait trait={trait} sourceAnimal={animal}/>;
     }
@@ -74,8 +64,9 @@ class Animal extends React.Component {
             }
           return <div key={index}
                       style={{
-            position: 'absolute'
-            , top: traitHeight + 'px'
+            //position: 'absolute'
+            //, top: traitHeight + 'px'
+            marginBottom: 1 + 'px'
             , width: ANIMAL_TRAIT_SIZE.width + 'px'
             }}>
             {this.renderTrait(trait, model)}
@@ -96,6 +87,16 @@ class Animal extends React.Component {
 class DropAnimal_Body extends Animal {
   render() {
     return this.props.connectDropTarget(super.render());
+  }
+
+  renderTrait(trait, animal) {
+    if (trait.isLinked()) {
+      return <AnimalLinkedTrait trait={trait} sourceAnimalId={animal.id}/>;
+    } else if (trait.dataModel.playerControllable) {
+      return <DragAnimalTrait trait={trait} sourceAnimal={animal}/>;
+    } else {
+      return <AnimalTrait trait={trait} sourceAnimal={animal}/>;
+    }
   }
 }
 DropAnimal_Body.displayName = 'Animal';
@@ -165,9 +166,18 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
   canDrop: monitor.canDrop()
 }))(DropAnimal_Body);
 
+DropAnimal.defaultProps = {
+  isUserAnimal: false
+};
 DropAnimal.propTypes = {
   // by GameProvider
   game: PropTypes.object.isRequired
+  // by direct
+  , isUserAnimal: React.PropTypes.bool
+  , onCardDropped: React.PropTypes.func
+  , onFoodDropped: React.PropTypes.func
+  , onTraitDropped: React.PropTypes.func
+  , onAnimalLink: React.PropTypes.func
 };
 
 const GameDropAnimal = GameProvider(DropAnimal);

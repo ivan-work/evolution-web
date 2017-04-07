@@ -12,7 +12,8 @@ module.exports = (options) => ({
     publicPath: '/',
   }, options.output), // Merge with env dependent settings
   module: {
-    loaders: [{
+    noParse: /.*\/colors\/.*/
+    , loaders: [{
       test: /\.jsx?$/, // Transform all .js files required somewhere with Babel
       loader: 'babel-loader',
       exclude: /node_modules/,
@@ -76,9 +77,9 @@ module.exports = (options) => ({
     //  'jsnext:main',
     //  'main',
     //],
-  },
-  devtool: options.devtool,
-  target: 'web', // Make web variables accessible to webpack, e.g. window
-  stats: false, // Don't show stats in the console
-  progress: true,
+  }
+  , devtool: options.devtool
+  , target: 'web' // Make web variables accessible to webpack, e.g. window
+  , stats: false // Don't show stats in the console
+  , progress: true
 });

@@ -40,7 +40,6 @@ class ReactGame extends React.Component {
   constructor(props) {
     super(props);
     //this.shouldCmponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-    this.refCard = this.refCard.bind(this);
   }
 
   render() {
@@ -78,14 +77,6 @@ class ReactGame extends React.Component {
     </div>;
   }
 
-  refCard(cardModel) {
-    return (component) => {
-      const Cards = this.props.getRef('Cards') || {};
-      Cards[cardModel.id] = component;
-      this.props.connectRef('Cards')(Cards);
-    }
-  }
-
   renderPlayer(game, player, GameContinent, index) {
     const isUser = game.getPlayer().id === player.id;
 
@@ -116,7 +107,7 @@ class ReactGame extends React.Component {
         <DragCard
           key={cardModel.id}
           card={cardModel}
-          ref={this.refCard(cardModel)}
+          ref={this.props.connectRef('Card#'+cardModel.id)}
           dragEnabled={dragEnabled}/>
           )}
       </CardCollection>

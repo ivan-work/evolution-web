@@ -2,8 +2,9 @@ import React from 'react';
 
 import {Continent} from './Continent.jsx'
 import {DropAnimal} from '../animals/Animal.jsx';
+import {AnimationServiceRef} from '../../../services/AnimationService';
 
-export class ContinentFeeding extends Continent {
+class ContinentFeeding extends Continent {
   getClassName() {
     return 'ContinentFeeding';
   }
@@ -21,8 +22,15 @@ export class ContinentFeeding extends Continent {
     return <DropAnimal
       key={animal.id}
       model={animal}
+      ref={this.props.connectRef('Animal#'+animal.id)}
       isUserAnimal={this.props.isUserContinent}
       onTraitDropped={this.$traitActivate}
       onFoodDropped={this.$traitTakeFood}/>
   }
+}
+
+const RefContinentFeeding = AnimationServiceRef(ContinentFeeding);
+
+export {
+  RefContinentFeeding as ContinentFeeding
 }

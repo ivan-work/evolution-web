@@ -70,21 +70,6 @@ $CURRENT_TURN_BACKGROUND: #dfd;
       height: 80px;
     }
   }
-
-  .Animal {
-    //width: $ANIMAL_WIDTH;
-    //height: $ANIMAL_HEIGHT;
-    //position: absolute;
-    //bottom: 0;
-
-    .inner {
-      width: 100%;
-      height: 100%;
-      word-wrap: break-word;
-      outline: 1px solid black;
-      background: #9fe1e7;
-    }
-  }
 }
 
 .PlayersList {

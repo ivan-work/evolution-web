@@ -3,11 +3,12 @@ import Velocity from 'velocity-animate'
 
 import {CardUnknown} from '../../../../shared/models/game/evolution/cardData'
 
-export const gameGiveCards = (done, game, cards, Deck, Cards) => {
+export const gameGiveCards = (done, game, cards, getRef) => {
+  const Deck = getRef('Deck');
   const DeckHtml = ReactDOM.findDOMNode(Deck);
 
   cards.map((card, index) => {
-    const CardComponent = Cards[card.id];
+    const CardComponent = getRef('Card#'+card.id);
     const CardHtml = ReactDOM.findDOMNode(CardComponent);
 
     const sourceBbx = DeckHtml.getBoundingClientRect();
