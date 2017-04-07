@@ -3,10 +3,10 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
 import { DragSource } from 'react-dnd';
-import { getEmptyImage } from 'react-dnd-html5-backend';
-import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
+import { DND_ITEM_TYPE } from './../dnd/DND_ITEM_TYPE';
 
-import { CardModel } from '../../../shared/models/game/CardModel';
+import { CardModel } from '../../../../shared/models/game/CardModel';
+import {AnimationServiceRef} from '../../services/AnimationService';
 
 export const CARD_SIZE = {
   width: 60
@@ -135,3 +135,6 @@ export const DragCard = DragSource(DND_ITEM_TYPE.CARD
     , canDrag: monitor.canDrag()
   })
 )(Card);
+
+
+export default DragCard;

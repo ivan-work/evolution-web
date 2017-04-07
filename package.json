@@ -1,6 +1,6 @@
 {
   "name": "cards3",
-  "version": "0.0.51",
+  "version": "0.0.52",
   "description": "blahblah",
   "browser": {
     "jsonwebtoken": false,
@@ -128,6 +128,7 @@
     "redux-devtools-dock-monitor": "*",
     "redux-devtools-log-monitor": "*",
     "sass-loader": "*",
+    "sass-variables-loader": "^0.1.3",
     "sinon": "*",
     "source-map-support": "*",
     "style-loader": "*",
