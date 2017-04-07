@@ -5,15 +5,15 @@ import {connect} from 'react-redux';
 import {Map} from 'immutable';
 
 import * as MDL from 'react-mdl';
-import {UsersList} from './UsersList.jsx';
-import {RoomsList} from './RoomsList.jsx';
-import {Portal} from './utils/Portal.jsx';
-import {ControlGroup} from './utils/ControlGroup.jsx';
-import {RoomCreateDialog} from './room/RoomCreateDialog.jsx';
-import RoomControlGroup from './room/RoomControlGroup.jsx';
+import {UsersList} from './../UsersList.jsx';
+import {RoomsList} from './../RoomsList.jsx';
+import {Portal} from './../utils/Portal.jsx';
+import {ControlGroup} from './../utils/ControlGroup.jsx';
+import {RoomCreateDialog} from 'RoomCreateDialog.jsx';
+import RoomControlGroup from 'RoomControlGroup.jsx';
 
 import {redirectTo} from '../../shared/utils';
-import {roomCreateRequest, roomJoinRequest} from '../../shared/actions/actions';
+import {roomCreateRequest, roomJoinRequest} from '../../../shared/actions/actions';
 
 export class Rooms extends React.Component {
   constructor(props) {
@@ -32,16 +32,19 @@ export class Rooms extends React.Component {
 
   render() {
     //console.log('RENDERING Rooms', this.props.actions.roomJoinRequest)
-    return <div className="loginForm">
+    return <div className="Rooms">
       <Portal target='header'>
-        <ControlGroup name={T.translate('App.Rooms')}>
-          <MDL.Button id="Rooms$create" onClick={this.props.$createRequest}>{T.translate('App.Rooms$Create')}</MDL.Button>
+        <ControlGroup name={T.translate('App.Rooms.Rooms')}>
+          <MDL.Button id="App.Rooms.$Create" onClick={this.props.$createRequest}>{T.translate('App.Rooms.$Create')}</MDL.Button>
         </ControlGroup>
         {!this.props.room ? null : <RoomControlGroup/>}
       </Portal>
       <div>Hello {this.props.username}</div>
       <div>Online: <UsersList list={this.props.online}/></div>
-      <div>Rooms: <RoomsList rooms={this.props.roomsList} onRoomClick={this.onRoomClick}/></div>
+      <div>
+        <h4>{T.translate('App.Rooms.Rooms')}:</h4>
+        <RoomsList rooms={this.props.roomsList} onRoomClick={this.onRoomClick}/>
+      </div>
     </div>;
   }
 }
