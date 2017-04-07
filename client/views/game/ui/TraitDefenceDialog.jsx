@@ -11,7 +11,8 @@ import AnimalTraitIcon from '../animals/AnimalTraitIcon.jsx';
 
 import {QuestionRecord} from '../../../../shared/models/game/GameModel.js';
 import {TraitCarnivorous, TraitMimicry, TraitTailLoss} from '../../../../shared/models/game/evolution/traitsData/index';
-import {TraitInkCloud, TraitShell} from '../../../../shared/models/game/evolution/traitTypes';
+import {TraitInkCloud, TraitShell, TraitIntellect} from '../../../../shared/models/game/evolution/traitTypes';
+import {checkIfTraitDisabledByIntellect} from '../../../../shared/actions/trait.checks';
 
 import './TraitDefenceDialog.scss';
 
@@ -49,14 +50,14 @@ export class TraitDefenceDialog extends Component {
     return (<DialogContent>
       <TooltipsContextElement>
         <div className='TraitDefenceDialog'>
-          {traitTailLoss && targetsTailLoss.size > 0
+          {traitTailLoss && targetsTailLoss.size > 0 && !checkIfTraitDisabledByIntellect(attackAnimal, traitTailLoss)
             && this.renderTailLoss(targetsTailLoss, $traitAnswer.bind(null, traitTailLoss.id))
             }
-          {traitMimicry && targetsMimicry.size > 0
+          {traitMimicry && targetsMimicry.size > 0 && !checkIfTraitDisabledByIntellect(attackAnimal, traitMimicry)
             && this.renderMimicry(targetsMimicry, $traitAnswer.bind(null, traitMimicry.id))
             }
           {otherTraits.length > 0
-            && this.renderOther(otherTraits, $traitAnswer.bind(null))}
+            && this.renderOther(otherTraits.filter(trait => !checkIfTraitDisabledByIntellect(attackAnimal, trait)), $traitAnswer.bind(null))}
           <h1>
             <T.span text='Game.UI.TraitDefenceDialog.Time'/>:
             <Timer start={time} duration={game.settings.timeTraitResponse}/>
@@ -100,7 +101,8 @@ export class TraitDefenceDialog extends Component {
     return (<div className='Other'>
       <h1><T.span text='Game.UI.TraitDefenceDialog.Other_Title'/></h1>
       <div className='Row'>
-        {traits.map((trait, index) =>
+        {traits
+          .map((trait, index) =>
         <div key={trait.id}
              className='Item'
              onClick={() => onClick(trait.id)}>

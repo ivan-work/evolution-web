@@ -29,7 +29,7 @@ import {
   , passesChecks
 } from './checks';
 
-import {checkAnimalCanEat, checkTraitActivation} from './trait.checks';
+import {checkAnimalCanEat, checkTraitActivation, checkIfTraitDisabledByIntellect} from './trait.checks';
 
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 
@@ -53,9 +53,11 @@ export const server$traitActivate = (game, sourceAnimal, trait, ...params) => (d
   if (!trait.getDataModel().transient) {
     dispatch(server$traitNotify_Start(game, sourceAnimal, trait, ...params));
   }
+  const newGame = selectGame(getState, game.id);
+  const {animal: newAnimal} = newGame.locateAnimal(sourceAnimal.id, sourceAnimal.ownerId);
   logger.verbose('server$traitActivate:', sourceAnimal.id, trait.type);
   const traitData = trait.getDataModel();
-  const result = dispatch(traitData.action(selectGame(getState, game.id), sourceAnimal, trait, ...params));
+  const result = dispatch(traitData.action(newGame, newAnimal, trait, ...params));
   logger.silly('server$traitActivate finish:', trait.type, result);
   return result;
 };
@@ -381,11 +383,16 @@ export const server$traitDefenceAnswer = (gameId, questionId, traitId, targetId)
     throw new ActionCheckError(`server$traitDefenceAnswer@Game(${game.id})`
       , 'QuesionID is incorrect (%s)', questionId)
   }
+
   const {sourceAnimal: attackAnimal, trait: attackTrait} =
     checkTraitActivation(game, question.sourcePid, question.sourceAid, question.traitId, question.targetAid);
 
   const {sourceAnimal: defenceAnimal, trait: defenceTrait, target} =
     checkTraitActivation(game, question.targetPid, question.targetAid, traitId, targetId);
+
+  if (checkIfTraitDisabledByIntellect(attackAnimal, defenceTrait))
+    throw new ActionCheckError(`server$traitDefenceAnswer@Game(${game.id})`
+      , 'Trait disabled by intellect');
 
   dispatch(server$traitAnswerSuccess(game.id, questionId));
   const result = dispatch(server$traitActivate(game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait));
@@ -422,8 +429,11 @@ export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetI
 
   const traitIntellect = attackAnimal.hasTrait(TraitIntellect);
 
-  dispatch(server$traitAnswerSuccess(game.id, questionId));
+  if (!targetId) {
+    throw new ActionCheckError(`server$traitIntellectAnswer@Game(${game.id})`, 'Wrong target trait')
+  }
   dispatch(server$traitSetValue(game, attackAnimal, traitIntellect, targetId));
+  dispatch(server$traitAnswerSuccess(game.id, questionId));
 
   // Reselecting animal from new game to refresh intellect value
   const {animal: sourceAnimal} = selectGame(getState, gameId).locateAnimal(attackAnimal.id);
@@ -511,7 +521,6 @@ export const traitClientToServer = {
             , `Player(%s) answering instead of Player(%s)`
             , userId, targetPid);
         }
-
         dispatch(server$traitDefenceAnswer(gameId, questionId, traitId, targetId));
         break;
       case QuestionRecord.INTELLECT:
@@ -520,7 +529,6 @@ export const traitClientToServer = {
             , `Player(%s) answering instead of Player(%s)`
             , userId, sourcePid);
         }
-
         dispatch(server$traitIntellectAnswer(gameId, questionId, traitId, targetId));
         break;
     }

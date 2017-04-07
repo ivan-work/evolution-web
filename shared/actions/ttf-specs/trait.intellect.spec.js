@@ -64,4 +64,27 @@ players:
     expect(selectPlayer(User1).continent, 'User1.continent').size(2);
     expect(selectAnimal(User0, 4).getFood(), 'Animal#T.getFood()').equal(2);
   });
+
+  it('No bullshit', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: 2
+food: 10
+players:
+  - continent: $Q carn int
+  - continent: $A tail mimi, $B
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$A'));
+
+    expectUnchanged('Cannot cancel Intellect', () => {
+      clientStore0.dispatch(traitAnswerRequest(null, null));
+      clientStore0.dispatch(traitAnswerRequest('TraitIntellect', null));
+    }, serverStore, clientStore0, clientStore1);
+    clientStore0.dispatch(traitAnswerRequest('TraitIntellect', 'TraitMimicry'));
+    expectUnchanged('Cannot cancel Intellect', () => {
+      clientStore1.dispatch(traitAnswerRequest('TraitMimicry', '$B'));
+    }, serverStore, clientStore0, clientStore1);
+  });
 });
