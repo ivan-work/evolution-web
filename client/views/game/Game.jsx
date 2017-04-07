@@ -152,13 +152,14 @@ class _Game extends React.Component {
 
 export const Game = GameProvider(AnimationServiceHOC({
   animations: {
-    onlineUpdate: (done, component) => {
-      const {game} = component.props;
-      GameAnimations.gameGiveCards(done, game, game.getPlayer().hand, component.Deck, component.Cards);
-    }
-    , gameGiveCards: (done, component, {cards}) => {
+    gameGiveCards: (done, component, {cards}) => {
       const {game} = component.props;
       GameAnimations.gameGiveCards(done, game, cards, component.Deck, component.Cards);
     }
+    //onlineUpdate: (done, component) => {
+    //  const {game} = component.props;
+    //  GameAnimations.gameGiveCards(done, game, game.getPlayer().hand, component.Deck, component.Cards);
+    //}
+    //,
   }
 })(_Game));

@@ -37,13 +37,13 @@ class CustomDragLayer extends React.Component {
     const { item, itemType, isDragging } = this.props;
     const offset = this.props.getClientOffset;
     const initialOffset = this.props.getInitialSourceClientOffset;
-    console.log(offset);
-    console.log(initialOffset);
+    //console.log(offset);
+    //console.log(initialOffset);
 
     this.animationCounter = item ? ++this.animationCounter : 0;
 
-    const MAX_VELOCITY = 60;
-    const VELOCITY = 8;
+    const MAX_VELOCITY = 30;
+    const VELOCITY = 5;
     const velocity = {x: 0, y: 0};
     //if (offset) {
     //  document.body.style.cursor = 'grabbing';
