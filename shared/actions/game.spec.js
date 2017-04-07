@@ -6,6 +6,7 @@ import {GameModel, TEST_DECK_SIZE, TEST_HAND_SIZE} from '../models/game/GameMode
 import {CardModel} from '../models/game/CardModel';
 import * as cardTypes from '../models/game/evolution/cards';
 import {AnimalModel} from '../models/game/evolution/AnimalModel';
+import {TraitModel} from '../models/game/evolution/TraitModel';
 import {PlayerModel} from '../models/game/PlayerModel';
 
 import {
@@ -219,17 +220,21 @@ describe('Game:', function () {
       }
     });
 
-    const traitCamouflage = ClientGame0().getPlayerCard(null, 0);
-    const traitSharpVision = ClientGame0().getPlayerCard(null, 1);
+    const cardSharpVision = ClientGame0().getPlayerCard(null, 1);
+    const traitCamouflage = TraitModel.new('TraitCamouflage');
+    const traitSharpVision = TraitModel.new('TraitSharpVision');
 
     clientStore0.dispatch(
-      gameDeployTraitRequest(traitCamouflage.id
+      gameDeployTraitRequest(
+        ClientGame0().getPlayerCard(null, 0).id
         , ClientGame0().getPlayerAnimal(null, 0).id
       ));
 
-    expect(ServerGame().getPlayerAnimal(User0, 0).cards).equal(List.of(traitCamouflage));
-    expect(ClientGame0().getPlayerAnimal(User0, 0).cards).equal(List.of(traitCamouflage));
-    expect(ClientGame1().getPlayerAnimal(User0, 0).cards).equal(List.of(traitCamouflage));
+
+    expect(ClientGame0().getPlayer().hand).equal(List.of(cardSharpVision));
+    expect(ServerGame().getPlayerAnimal(User0, 0).traits).equal(List.of(traitCamouflage));
+    expect(ClientGame0().getPlayerAnimal(User0, 0).traits).equal(List.of(traitCamouflage));
+    expect(ClientGame1().getPlayerAnimal(User0, 0).traits).equal(List.of(traitCamouflage));
 
     serverStore.clearActions();
     clientStore1.clearActions();
@@ -237,13 +242,14 @@ describe('Game:', function () {
     clientStore1.dispatch(gameEndDeployRequest());
 
     clientStore0.dispatch(
-      gameDeployTraitRequest(traitSharpVision.id
+      gameDeployTraitRequest(
+        ClientGame0().getPlayerCard(null, 0).id
         , ClientGame0().getPlayerAnimal(null, 0).id
       ));
 
-    expect(ServerGame().getPlayerAnimal(User0, 0).cards).equal(List.of(traitCamouflage, traitSharpVision));
-    expect(ClientGame0().getPlayerAnimal(User0, 0).cards).equal(List.of(traitCamouflage, traitSharpVision));
-    expect(ClientGame1().getPlayerAnimal(User0, 0).cards).equal(List.of(traitCamouflage, traitSharpVision));
+    expect(ServerGame().getPlayerAnimal(User0, 0).traits).equal(List.of(traitCamouflage, traitSharpVision));
+    expect(ClientGame0().getPlayerAnimal(User0, 0).traits).equal(List.of(traitCamouflage, traitSharpVision));
+    expect(ClientGame1().getPlayerAnimal(User0, 0).traits).equal(List.of(traitCamouflage, traitSharpVision));
   });
 
   it('Reload', () => {

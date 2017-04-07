@@ -42,7 +42,7 @@ export class GameModel extends Record({
   , roomId: null
   , deck: null
   , players: Map()
-  , board: Map()
+  , food: -1
   , started: false
   , status: new StatusRecord()
 }) {
@@ -51,8 +51,8 @@ export class GameModel extends Record({
     return List(shuffle ? doShuffle(result) : result);
   }
 
-  static generateFood() {
-    return FOOD_TABLE[this.players.size];
+  generateFood() {
+    return FOOD_TABLE[this.players.size]();
   }
 
   static new(room) {

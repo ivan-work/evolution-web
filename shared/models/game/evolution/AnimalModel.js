@@ -1,15 +1,16 @@
 import {Record, List} from 'immutable';
 import uuid from 'node-uuid';
 import {CardModel} from '../CardModel';
+import {TraitModel} from './TraitModel';
 
 export class AnimalModel extends Record({
   id: null
   , base: null
-  , cards: List()
+  , traits: List()
 }) {
   static new(card) {
     return new AnimalModel({
-      id: card.id//uuid.v4().slice(0, 4)
+      id: uuid.v4().slice(0, 4)
       , base: card
     });
   }
@@ -19,7 +20,7 @@ export class AnimalModel extends Record({
       ? null
       : new AnimalModel(js)
       .set('base', CardModel.fromServer(js.base))
-      .set('cards', List(js.cards).map(card => CardModel.fromServer(card)));
+      .set('traits', List(js.traits).map(trait => TraitModel.fromServer(trait)));
   }
 
   toOthers() {
@@ -30,11 +31,10 @@ export class AnimalModel extends Record({
     return `Animal#${this.id}`;
   }
 
-  validateTrait(card) {
-    if (!card.trait.multiple && this.cards.some(c => c.type === card.type)) {
+  validateTrait(trait) {
+    if (!trait.multiple && this.traits.some(t => t.type === trait.type)) {
       return 'duplicate type';
     }
-
     return true;
   }
 }
