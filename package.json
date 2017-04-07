@@ -1,6 +1,6 @@
 {
   "name": "cards3",
-  "version": "0.0.29",
+  "version": "0.0.30",
   "description": "blahblah",
   "browser": {
     "jsonwebtoken": false,
@@ -64,6 +64,7 @@
     "react-redux": "*",
     "react-router": "*",
     "react-router-redux": "*",
+    "react-translate": "*",
     "redux": "*",
     "redux-devtools": "*",
     "redux-devtools-dock-monitor": "*",
@@ -131,6 +132,7 @@
     "style-loader": "*",
     "webpack": "*",
     "webpack-dev-middleware": "*",
-    "webpack-hot-middleware": "*"
+    "webpack-hot-middleware": "*",
+    "yaml-loader": "^0.4.0"
   }
 }
