@@ -16,6 +16,8 @@ export default new winston.Logger({
   exitOnError: false
 });
 
+var NullTransport = require('winston-null');
+require('winston-loggly-bulk');
 export const fileLogger = new winston.Logger({
   colors: {
     error: 'red',
@@ -26,8 +28,12 @@ export const fileLogger = new winston.Logger({
     silly: 'gray'
   }
   , transports: [
-    new winston.transports.File(fileTransport)
-    // , new winston.transports.Console(consoleTransport)
+    (!process.env.LOGGLY_TOKEN ? NullTransport : new winston.transports.Loggly({
+      token: process.env.LOGGLY_TOKEN
+      , subdomain: "fen1kz"
+      , tags: ["Winston-NodeJS"]
+      , json: true
+    }))
   ],
   exitOnError: false
 });
