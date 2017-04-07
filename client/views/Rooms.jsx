@@ -15,9 +15,10 @@ export const Rooms = React.createClass({
 
 export const RoomsView = connect(
   (state) =>  {
+    console.log(state.toJS());
     return {
-      login: state.getIn(['auth', 'user', 'login'], '%USERNAME%')
-      , online: ['qweqwe', 'sadfasdf', 'asdasgr']
+      login: state.getIn(['users', 'user', 'login'], '%USERNAME%')
+      , online: state.getIn(['online'], [])
     }
   }
   //, actionCreators

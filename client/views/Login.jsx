@@ -61,8 +61,8 @@ export const Login = React.createClass({
 
 export const LoginView = connect(
   (state) => ({
-    isAuthenticating: state.getIn(['auth', 'isAuthenticating'])
-    , statusText: state.getIn(['auth', 'statusText'])
+    isAuthenticating: state.getIn(['users', 'isAuthenticating'])
+    , statusText: state.getIn(['users', 'statusText'])
   }),
   (dispatch) => ({actions: bindActionCreators({loginUserRequest}, dispatch)})
 )(Login);

@@ -6,7 +6,7 @@ import {UserRecord} from '../../shared/models/User';
 
 const initialState = fromJS({
   token: null,
-  user: JSON.parse(window.localStorage.getItem('user')),
+  user: null, //JSON.parse(window.localStorage.getItem('user')),
   isAuthenticated: false,
   isAuthenticating: false,
   statusText: null
