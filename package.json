@@ -116,6 +116,7 @@
     "jsdom": "^9.4.1",
     "json-loader": "^0.5.4",
     "mocha": "*",
+    "mocha-jsdom": "^1.1.0",
     "node-sass": "^3.7.0",
     "nodemon": "*",
     "postcss-cssnext": "^2.6.0",

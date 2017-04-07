@@ -13,7 +13,7 @@ export const App = React.createClass({
     const {socket} = this.props;
     return (
       <Layout fixedHeader>
-        <Header title="Title">
+        {/*<Header title="Title">
           <Navigation>
             <a href="">Link</a>
             <a href="">Link</a>
@@ -28,7 +28,7 @@ export const App = React.createClass({
             <a href="">Link</a>
             <a href="">Link</a>
           </Navigation>
-        </Drawer>
+        </Drawer>*/}
         <Content>
           <div className="layout-padding">
             {this.props.children}
