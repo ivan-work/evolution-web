@@ -10,15 +10,15 @@ import {roomExitRequest} from '~/shared/actions/actions';
 
 export const Room = React.createClass({
   mixins: [PureRenderMixin]
-  , back: function(e) {
-    this.actions.back()
-  }
   , render: function () {
+    console.log(this.props.actions)
     return <div className="Room">
-      <MDL.Button raised onClick={this.back}>Back</MDL.Button>
+      <MDL.Button raised onClick={this.props.actions.back}>Back</MDL.Button>
       <div>Room {this.props.room.name}</div>
       <div>Online users: <UsersList list={this.props.online}/></div>
-      <div>In this room: <UsersList list={this.props.room.users}/></div>
+      <div>In this room: <UsersList list={this.props.online.filter(user => {
+      return ~this.props.room.users.indexOf(user.id)
+      })}/></div>
     </div>;
   }
 });
@@ -35,7 +35,7 @@ export const RoomView = connect(
   }
   , (dispatch) => ({
     actions: {
-      roomExit: function () {
+      back: function () {
         dispatch(roomExitRequest())
       }
     }

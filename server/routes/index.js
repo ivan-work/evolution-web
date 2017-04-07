@@ -16,11 +16,12 @@ module.exports = (app, passport) => {
     const state = app.get('store').getState().toJS();
 
     state.connections = Object.keys(state.connections).reduce((result, key) => {
-      result[key] = '<socket>';
+      result[key] = '#socket#';
       return result;
     }, {});
 
-    res.json(state);
+    const format = (str) => `<pre>${str}</pre>`;
+    res.send(format(JSON.stringify(state, null, '  ')));
   });
 
   // set authentication routes
