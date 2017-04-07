@@ -16,6 +16,12 @@ import {CTT_PARAMETER} from '../../../shared/models/game/evolution/constants';
 
 import {TraitMetamorphose} from '../../../shared/models/game/evolution/traitTypes';
 
+import TraitActivateDialog from './ui/TraitActivateDialog.jsx';
+
+const INITIAL_STATE = {
+  traitActivateQuestion: null
+};
+
 export class PlayerWrapper extends Component {
   static contextTypes = {
     gameActions: React.PropTypes.object.isRequired
@@ -30,14 +36,25 @@ export class PlayerWrapper extends Component {
 
   constructor(props, context) {
     super(props, context);
+    this.state = INITIAL_STATE;
     this.$noop = () => null;
     this.$traitTakeFood = (animal) => context.gameActions.$traitTakeFood(animal.id);
     this.$traitActivate = (animal, trait, targetId) => {
-      //const traitData = trait.getDataModel();
-      //if (trait.type === TraitMetamorphose) {
-      //
-      //}
-      this.context.gameActions.$traitActivate(animal.id, trait.id, targetId);
+      const traitData = trait.getDataModel();
+      if (trait.type === TraitMetamorphose) {
+        this.setState({
+          traitActivateQuestion: {
+            animal
+            , trait
+            , onSelectTrait: (targetTraitId) => {
+              !!targetTraitId && this.context.gameActions.$traitActivate(animal.id, trait.id, targetTraitId);
+              this.setState(INITIAL_STATE)
+            }
+          }
+        });
+      } else {
+        this.context.gameActions.$traitActivate(animal.id, trait.id, targetId);
+      }
     };
     this.$deployTrait = (card, animal, alternateTrait, component) => {
       if (card.getTraitDataModel(alternateTrait).cardTargetType & CTT_PARAMETER.LINK) {
@@ -55,12 +72,13 @@ export class PlayerWrapper extends Component {
     const {game, player, upsideDown} = this.props;
     const isUser = game.userId === player.id;
     const innerElements = [
-      this.renderContinent(game, player.continent, isUser)
+      this.renderContinent(game, player, isUser)
       , this.renderCardCollection(game, player, isUser)
     ];
     return (
       <div className={cn({PlayerWrapper: true, UserWrapper: isUser, EnemyWrapper: !isUser})}
            data-player-id={player.id}>
+        <TraitActivateDialog question={this.state.traitActivateQuestion}/>
         {upsideDown ? innerElements : innerElements.reverse()}
         <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
           <PortalTarget name={`svg-player-wrapper-${player.id}`} container='g'/>
@@ -91,11 +109,12 @@ export class PlayerWrapper extends Component {
       dragEnabled={dragEnabled}/>);
   }
 
-  renderContinent(game, continent, isUser) {
+  renderContinent(game, player, isUser) {
     return (<Continent
       key='Continent'
+      isActive={game.isPlayerTurn(player)}
       isUserContinent={isUser}>
-      {continent.map(animal => this.renderAnimal(animal, isUser, game.isDeploy()))}
+      {player.continent.map(animal => this.renderAnimal(animal, isUser, game.isDeploy()))}
     </Continent>)
   }
 

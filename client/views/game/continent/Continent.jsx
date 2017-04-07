@@ -24,11 +24,12 @@ export default class Continent extends React.Component {
   }
 
   render() {
-    const {children, isUserContinent} = this.props;
+    const {children, isUserContinent, isActive} = this.props;
     const className = classnames({
       Continent: true
       , UserContinent: isUserContinent
       , EnemyContinent: !isUserContinent
+      , isActive
     });
     return <div className={className}>
       {this.renderPlaceholderWrapper(0)}

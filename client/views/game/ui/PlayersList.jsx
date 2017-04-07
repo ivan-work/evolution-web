@@ -24,6 +24,7 @@ export class PlayersList extends Component {
     const className = cn({
       Player: true
       , isPlayerTurn: game.isPlayerTurn(player.id)
+      , ended: player.ended
     });
     return <li key={player.id} className={className}>
       <User id={player.id}/>

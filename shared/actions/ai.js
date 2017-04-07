@@ -1,7 +1,6 @@
 import logger from '~/shared/utils/logger';
 import {Record} from 'immutable';
 import {PHASE} from '../models/game/GameModel';
-import {TraitDataModel} from '../models/game/evolution/TraitDataModel';
 import {TRAIT_TARGET_TYPE} from '../models/game/evolution/constants';
 import {passesChecks, failsChecks, checkGamePhase, checkPlayerCanAct} from './checks';
 import {checkAnimalCanEat, checkTraitActivation_Animal} from './trait.checks';
@@ -54,17 +53,25 @@ export const doesOptionExist = (game, playerId) => {
     if (passesChecks(() => checkAnimalCanEat(game, animal))) return true;
 
     return animal.traits.some((trait) => {
-      const traitData = TraitDataModel.new(trait.type);
+      const traitData = trait.getDataModel();
+
+      console.log('checking', trait.type, traitData.playerControllable, trait.checkAction(game, animal))
+      if (trait.type === 'TraitMetamorphose') {
+        console.log(game.cooldowns)
+        console.log(game.cooldowns.toJS())
+      }
 
       if (!(traitData.playerControllable && trait.checkAction(game, animal))) return false;
 
+      console.log('checking 2 passed checks')
       switch (traitData.targetType) {
         case TRAIT_TARGET_TYPE.ANIMAL:
           return allAnimals.some((targetAid) => {
             if (passesChecks(() => checkTraitActivation_Animal(game, animal, traitData, targetAid))) return true;
           });
         case TRAIT_TARGET_TYPE.TRAIT:
-          return false;
+          console.log('checking 3 return true', trait.type)
+          return true;
         case TRAIT_TARGET_TYPE.NONE:
           return true;
       }
@@ -80,7 +87,7 @@ export const getOptions = (game, playerId) => {
       result.push(Option.new('traitTakeFoodRequest', animal.id));
 
     animal.traits.forEach((trait) => {
-      const traitData = TraitDataModel.new(trait.type);
+      const traitData = trait.getDataModel();
 
       if (!(traitData.playerControllable && trait.checkAction(game, animal))) return;
 

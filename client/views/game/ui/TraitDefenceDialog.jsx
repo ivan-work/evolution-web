@@ -1,13 +1,16 @@
 import React, {Component, PropTypes} from 'react';
 import T from 'i18n-react';
 import {Dialog} from '../../utils/Dialog.jsx';
+import {DialogTitle, DialogContent} from 'react-mdl';
+
 import {TooltipsContextElement} from '../../utils/Tooltips.jsx';
 import {Timer} from '../../utils/Timer.jsx';
-import {DialogTitle, DialogContent} from 'react-mdl';
 import {Animal} from '../animals/Animal.jsx';
 import {AnimalTrait} from '../animals/AnimalTrait.jsx';
 import AnimalTraitIcon from '../animals/AnimalTraitIcon.jsx';
+
 import {TraitCarnivorous, TraitMimicry, TraitTailLoss} from '../../../../shared/models/game/evolution/traitsData/index';
+
 import './TraitDefenceDialog.scss';
 
 export class TraitDefenceDialog extends Component {

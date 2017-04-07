@@ -1,3 +1,5 @@
+@import "../../../styles/variables";
+
 .GameUI {
   max-width: 160px;
   display: flex;
@@ -14,6 +16,19 @@
       flex-basis: 0;
       max-height: none;
     }
+  }
+}
+
+.PlayersList {
+  .Player {
+    @include ellipsis();
+  }
+  .isPlayerTurn {
+    background: $CURRENT_TURN_BACKGROUND;
+    font-weight: bold;
+  }
+  .ended {
+    color: #bbb;
   }
 }
 

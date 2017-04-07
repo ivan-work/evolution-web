@@ -108,8 +108,7 @@ export const TraitPiracy = {
     return true;
   }
   , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game)
-  , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.food > 0
-  && !targetAnimal.isFull()
+  , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.food > 0  && !targetAnimal.isFull()
 };
 
 export const TraitTailLoss = {
