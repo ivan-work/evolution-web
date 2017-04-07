@@ -8,7 +8,7 @@ import {connect} from 'react-redux';
 import {GameModel, GameModelClient} from '../../../../shared/models/game/GameModel';
 
 import {Icon, Badge, Tooltip as MDLTooltip} from 'react-mdl';
-import User from '../../utils/User';
+import User from '../../utils/User.jsx';
 
 export class PlayersList extends Component {
   static propTypes = {

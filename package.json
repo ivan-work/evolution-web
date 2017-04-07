@@ -66,6 +66,7 @@
     "react-redux": "*",
     "react-router": "*",
     "react-router-redux": "*",
+    "react-string-replace": "^0.4.0",
     "redux": "*",
     "redux-devtools": "*",
     "redux-devtools-dock-monitor": "*",

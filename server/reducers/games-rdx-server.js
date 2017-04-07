@@ -6,7 +6,8 @@ import {CardModel} from '../../shared/models/game/CardModel';
 import {CooldownList} from '../../shared/models/game/CooldownList';
 import {AnimalModel} from '../../shared/models/game/evolution/AnimalModel';
 import {TraitModel} from '../../shared/models/game/evolution/TraitModel';
-import {CTT_PARAMETER} from '../../shared/models/game/evolution/constants';
+import {TraitDataModel} from '../../shared/models/game/evolution/TraitDataModel';
+import {CTT_PARAMETER, TRAIT_TARGET_TYPE} from '../../shared/models/game/evolution/constants';
 //
 //const gameLog = (actionType, data) => (state => state.updateIn([data.gameId, 'log'], log => log.push(gameLogsMap[actionType](data))));
 //
@@ -14,6 +15,8 @@ import {CTT_PARAMETER} from '../../shared/models/game/evolution/constants';
 //  gameGiveCards: ({userId, cards}) => ['GiveCards', userId, cards]
 //};
 const addToGameLog = (message) => (game) => game.update('log', log => log.push(message));
+
+const logAnimal = animal => animal && ['$Animal'].concat(animal.traits.map(trait => trait.type));
 
 export const gameStart = game => game
   .setIn(['status', 'started'], true)
@@ -46,13 +49,15 @@ export const gameDeployAnimal = (game, {userId, animal, animalPosition, cardPosi
 
 export const gameDeployTrait = (game, {cardId, traits}) => {
   const {playerId: cardOwnerId, cardIndex} = game.locateCard(cardId);
+  const animals = [];
   return game
     .removeIn(['players', cardOwnerId, 'hand', cardIndex])
     .update(game => traits.reduce((game, trait) => {
-      const {playerId, animalIndex} = game.locateAnimal(trait.hostAnimalId);
+      const {playerId, animalIndex, animal} = game.locateAnimal(trait.hostAnimalId);
+      animals.push(logAnimal(animal));
       return game.updateIn(['players', playerId, 'continent', animalIndex, 'traits'], traits => traits.push(trait))
     }, game))
-    .update(addToGameLog(['gameDeployTrait', cardOwnerId, traits[0].type].concat(traits.map(trait => trait.hostAnimalId))));
+    .update(addToGameLog(['gameDeployTrait', cardOwnerId, traits[0].type].concat(animals)));
 };
 
 export const playerActed = (game, {userId}) => {
@@ -123,24 +128,17 @@ export const gameAddTurnTimeout = (game, {turnStartTime, turnDuration}) => game
 export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) => {
   ensureParameter(animalId, 'string');
   ensureParameter(amount, 'number');
-  const {playerId, animalIndex} = game.locateAnimal(animalId);
-  const updatedGame = game
-    .updateIn(['players', playerId, 'continent', animalIndex], animal => animal.receiveFood(amount));
+  const {animal, playerId, animalIndex} = game.locateAnimal(animalId);
+  const {animal: another, playerId: takenFromPid, animalIndex: takenFromAix} = game.locateAnimal(sourceId);
 
-  switch (sourceType) {
-    case 'GAME':
-      return updatedGame
-        .update('food', food => food - amount)
-        .update(addToGameLog(['traitMoveFood', animalId, amount, sourceType, sourceId]))   ;
-    case 'TraitPiracy':
-      const {playerId: takenFromPid, animalIndex: takenFromAix} = game.locateAnimal(sourceId);
-      return updatedGame
-        .updateIn(['players', takenFromPid, 'continent', takenFromAix, 'food'], food => Math.max(food - amount, 0))
-        .update(addToGameLog(['traitMoveFood', animalId, amount, sourceType, sourceId]));
-    default:
-      return updatedGame
-        .update(addToGameLog(['traitMoveFood', animalId, amount, sourceType, sourceId]));
-  }
+  const updatedGame = game
+    .updateIn(['players', playerId, 'continent', animalIndex], animal => animal.receiveFood(amount))
+    .update(addToGameLog(['traitMoveFood', amount, sourceType, logAnimal(animal), logAnimal(another)]));
+
+
+  return sourceType === 'GAME' ? updatedGame.update('food', food => food - amount)
+    : sourceType === 'TraitPiracy' ? updatedGame.updateIn(['players', takenFromPid, 'continent', takenFromAix, 'food'], food => Math.max(food - amount, 0))
+    : updatedGame;
 };
 
 export const traitKillAnimal = (game, {targetAnimalId}) => {
@@ -201,8 +199,24 @@ export const traitSetAnimalFlag = (game, {sourceAid, flag, on}) => {
     .setIn(['players', playerId, 'continent', animalIndex, 'flags', flag], on);
 };
 
-export const traitNotify_Start = (game, {sourceAid, traitId, traitType, targetId}) => game
-  .update(addToGameLog(['traitNotify_Start', sourceAid, traitType, targetId]));
+const traitNotify_Start_getTarget = {
+  [TRAIT_TARGET_TYPE.ANIMAL]: (game, targetId) => {
+    const {animal} = game.locateAnimal(targetId);
+    return logAnimal(animal);
+  }
+  , [TRAIT_TARGET_TYPE.TRAIT]: (game, targetId) => {
+    throw new Error('LOG TRAIT');
+    return targetId;
+  }
+};
+
+export const traitNotify_Start = (game, {sourceAid, traitId, traitType, targetId}) => {
+  const {animal} = game.locateAnimal(sourceAid);
+  const targetType = TraitDataModel.new(traitType).targetType;
+  const getTarget = traitNotify_Start_getTarget[targetType];
+  const target = getTarget && getTarget(game, targetId);
+  return game.update(addToGameLog(['traitNotify_Start', logAnimal(animal), traitType, target]));
+};
 
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
