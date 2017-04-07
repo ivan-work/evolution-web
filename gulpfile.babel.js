@@ -2,7 +2,6 @@
 
 const gulp = require('gulp');
 const gutil = require('gulp-util');
-const tape = require('gulp-tape');
 const mocha = require('gulp-mocha');
 const watch = require('gulp-watch');
 

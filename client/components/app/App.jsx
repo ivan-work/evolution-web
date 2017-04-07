@@ -7,8 +7,8 @@ import {Layout, Header, Navigation, Drawer, Content} from 'react-mdl';
 
 //import '../styles/core.scss';
 
-export class App extends React.Component {
-  render() {
+export const App = React.createClass({
+  render: function() {
     const {dispatch} = this.props;
     const {socket} = this.props;
     return (
@@ -37,7 +37,7 @@ export class App extends React.Component {
       </Layout>
     );
   }
-}
+});
 
 export const AppView = connect((state) => {
   return {

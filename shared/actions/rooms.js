@@ -1,4 +1,6 @@
-//createRoomRequest
+import {RoomModel} from '../models/RoomModel'
+import uuid from 'node-uuid';
+
 export const roomCreateRequest = () => ({
   type: 'roomCreateRequest'
   , data: {}
@@ -6,11 +8,23 @@ export const roomCreateRequest = () => ({
     server: true
   }
 });
+export const roomCreateSuccess = (room) => ({
+  type: 'roomCreateSuccess'
+  , data: {room}
+  , meta: {
+    clients: true
+  }
+});
 export const roomsClientToServer = {
-  roomCreateRequest: (connectionId, data) => (dispatch, getState) => {
-    const login = data.login;
+  roomCreateRequest: (meta, data) => (dispatch, getState) => {
     const state = getState();
-    const roomExists = state.get('rooms').find(user => user.login == login);
+    const id = (process.env.TEST ? uuid.v4().substr(0, 4) : uuid.v4())
+    const room = new RoomModel({
+      id: id
+      , name: 'Room ' + id
+    });
+    console.log('meta', meta);
+    dispatch(roomCreateSuccess(room));
   }
 };
 

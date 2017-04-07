@@ -2,7 +2,7 @@ import {createReducer} from '~/shared/utils';
 //import {pushState} from 'redux-router';
 //import jwtDecode from 'jwt-decode';
 import {Map, fromJS} from 'immutable';
-import {UserRecord} from '../../shared/models/User';
+import {UserModel} from '../../shared/models/UserModel';
 
 const initialState = fromJS({
   token: null,
@@ -25,7 +25,7 @@ export const reducer = createReducer(initialState, {
       'isAuthenticated': true,
       //'token': payload.token,
       //'userName': jwtDecode(payload.token).userName,
-      'user': new UserRecord(data.user),
+      'user': new UserModel(data.user),
       'statusText': 'You have been successfully logged in.'
     }));
   }

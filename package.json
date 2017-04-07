@@ -2,6 +2,9 @@
   "name": "cards3",
   "version": "1.0.0",
   "description": "blahblah",
+  "browser": {
+    "jsonwebtoken": false
+  },
   "scripts": {
     "test:prepare": "node_modules/.bin/cross-env NODE_ENV=test node_modules/.bin/mocha --compilers js:babel-register --require shared/test-helper.js --bail",
     "test:server": "npm run test:prepare -- server/**/*.spec.js",
@@ -57,6 +60,7 @@
     "history": "*",
     "immutable": "^3.8.1",
     "isomorphic-fetch": "*",
+    "jsonwebtoken": "^7.0.1",
     "materialize-css": "^0.97.6",
     "mongoose": "*",
     "morgan": "^1.7.0",
@@ -112,7 +116,6 @@
     "file-loader": "^0.8.5",
     "gulp": "^3.9.1",
     "gulp-mocha": "^2.2.0",
-    "gulp-tape": "0.0.9",
     "gulp-util": "^3.0.7",
     "gulp-watch": "^4.3.8",
     "html-loader": "^0.4.3",

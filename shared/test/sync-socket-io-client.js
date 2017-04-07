@@ -21,7 +21,7 @@ class SyncSocketIOClientSocket extends EventEmitter {
 class SyncSocketIOClient extends EventEmitter {
   constructor(server) {
     super();
-    this.id = uuid.v4().substr(0, 4);
+    this.id = uuid.v4().substr(0, 6);
 
     this.socket = new SyncSocketIOClientSocket(this);
     this.socket.id = this.id;

@@ -9,7 +9,7 @@ import {List, Map} from 'immutable';
 import {RoomsList} from './RoomsList.jsx';
 
 
-describe('UsersList', () => {
+describe('RoomsList', () => {
   it('displays list', () => {
     const list = List([{id: 0, name: 'room0'}, {id: 1, name: 'room1'}, {id: 2, name: 'room2'}]);
 

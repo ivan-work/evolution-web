@@ -23,6 +23,9 @@ const addDevMiddlewares = (app, options) => {
   const fs = middleware.fileSystem;
 
   app.get('*', (req, res) => {
+
+    console.log(options.output.path)
+
     const file = fs.readFileSync(path.join(compiler.outputPath, 'index.html'));
     res.send(file.toString());
   });
@@ -34,7 +37,9 @@ const addProdMiddlewares = (app, options) => {
   // smaller (applies also to assets). You can read more about that technique
   // and other good practices on official Express.js docs http://mxs.is/googmy
   app.use(compression());
+
   app.use(options.output.publicPath, express.static(options.output.path));
+
 
   app.get('*', (req, res) => res.sendFile(path.join(options.output.path, 'index.html')));
 };
