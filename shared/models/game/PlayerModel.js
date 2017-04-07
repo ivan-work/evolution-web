@@ -8,6 +8,7 @@ export class PlayerModel extends Record({
   , hand: List()
   , continent: List()
   , status: STATUS.LOADING
+  , index: -1
 }) {
   toOthers() {
     return this
@@ -25,7 +26,7 @@ export class PlayerModel extends Record({
         .set('continent', List(js.continent).map(animalModel => AnimalModel.fromServer(animalModel)));
   }
 
-  static new(userId) {
-    return new PlayerModel({id: userId})
+  static new(userId, index) {
+    return new PlayerModel({id: userId, index})
   }
 }

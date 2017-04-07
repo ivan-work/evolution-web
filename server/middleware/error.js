@@ -1,5 +1,5 @@
 import logger from '~/shared/utils/logger';
-import {ActionCheckError} from '~/shared/utils/ActionCheckError';
+import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import util from 'util';
 
 export const errorMiddleware = interceptor => store => next => action => {
@@ -7,7 +7,7 @@ export const errorMiddleware = interceptor => store => next => action => {
     return next(action);
   } catch (error) {
     if (error instanceof ActionCheckError) {
-      logger.error(error.name + ': ' + util.format(error.message, ...error.data));
+      logger.warn(error.name + ': ' + util.format(error.message, ...error.data));
     }
     else {
       logger.error('GenericError:', error);

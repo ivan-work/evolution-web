@@ -8,17 +8,31 @@ import sinon from 'sinon';
 //import {AnimalModel} from '../models/game/evolution/AnimalModel';
 //import {PlayerModel} from '../models/game/PlayerModel';
 //
-import {roomCreateRequest, roomJoinRequest, gameCreateRequest, gameReadyRequest, gamePlayCard} from '../actions/actions';
+import {
+  roomCreateRequest,
+  roomJoinRequest,
+  gameCreateRequest,
+  gameCreateSuccess,
+  gameReadyRequest,
+  gamePlayCard
+} from '../actions/actions';
 
 const expectUnchanged = (cb, ...stores) => {
   let previousStates = stores.map(store => store.getState());
   cb();
   stores.forEach((store, i) => {
-    expect(store.getState()).equal(previousStates[i]);
+    expect(store.getState().toJS()).eql(previousStates[i].toJS());
+  });
+};
+const expectChanged = (cb, ...stores) => {
+  let previousStates = stores.map(store => store.getState());
+  cb();
+  stores.forEach((store, i) => {
+    expect(store.getState()).not.equal(previousStates[i]);
   });
 };
 
-describe('Game:', function () {
+describe('Hacking Game:', function () {
   //it('Game for two', () => {
 
   // Wrong gameCreateRequest:
@@ -29,51 +43,99 @@ describe('Game:', function () {
   //expect(previousClientState).equal(clientStore0.getState());
   //
   //})
-  it('Game for two', () => {
-    let previousServerState;
-    let previousClientState;
+  it('gameReadyRequest', () => {
     const [serverStore, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockStores(3);
     clientStore0.dispatch(roomCreateRequest());
     const roomId = serverStore.getState().get('rooms').first().id;
     clientStore0.dispatch(roomJoinRequest(roomId));
     clientStore1.dispatch(roomJoinRequest(roomId));
-
     clientStore0.dispatch(gameCreateRequest(roomId));
     const ServerGame = () => serverStore.getState().get('games').first();
     const ClientGame0 = () => clientStore0.getState().get('game');
     const ClientGame1 = () => clientStore1.getState().get('game');
+    clientStore2.dispatch(gameCreateSuccess(ServerGame()));
 
     // gameReadyRequest, wrong gameId
-    expectUnchanged(() => {
-      clientStore0.dispatch({
-        type: 'gameReadyRequest'
-        , data: {gameId: null}
-        , meta: {server: true}
-      })
-    }, serverStore, clientStore0);
+    expectUnchanged(() => clientStore0.dispatch({
+      type: 'gameReadyRequest'
+      , data: {gameId: null}
+      , meta: {server: true}
+    }), serverStore, clientStore0);
 
     // gameReadyRequest, wrong user
-    expectUnchanged(() => {
-      clientStore2.dispatch({
-        type: 'gameReadyRequest'
-        , data: {gameId: ServerGame().id}
-        , meta: {server: true}
-      })
-    }, serverStore, clientStore2);
+    expectUnchanged(() => clientStore2.dispatch(gameReadyRequest())
+      , serverStore, clientStore2);
 
+    // gameReadyRequest, double user
+    clientStore0.dispatch(gameReadyRequest());
+    expectUnchanged(() => clientStore0.dispatch(gameReadyRequest())
+      , serverStore, clientStore0);
+
+    // gameReadyRequest, double
+    clientStore1.dispatch(gameReadyRequest());
+    expectUnchanged(() => clientStore1.dispatch(gameReadyRequest())
+      , serverStore, clientStore1);
+  });
+
+  it('gamePlayCard', () => {
+    const [serverStore, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockStores(3);
+    clientStore0.dispatch(roomCreateRequest());
+    const roomId = serverStore.getState().get('rooms').first().id;
+    clientStore0.dispatch(roomJoinRequest(roomId));
+    clientStore1.dispatch(roomJoinRequest(roomId));
+    clientStore0.dispatch(gameCreateRequest(roomId));
     clientStore0.dispatch(gameReadyRequest());
     clientStore1.dispatch(gameReadyRequest());
-    //const Room = serverStore.getState().get('rooms').first();
-    //const ServerGame = () => serverStore.getState().get('games').first();
-    //const ClientGame0 = () => clientStore0.getState().get('game');
-    //const ClientGame1 = () => clientStore1.getState().get('game');
-    //const getUser0Card = (i) => clientStore0.getState().get('game').getPlayer().hand.get(i);
-    //
-    //const User0Card0 = getUser0Card(0);
-    //const User0Card1 = getUser0Card(1);
-    //const User0Card2 = getUser0Card(2);
-    //const User0Card3 = getUser0Card(3);
-    //
-    //clientStore0.dispatch(gamePlayCard(User0Card0.id, 0, 0));
+    const ServerGame = () => serverStore.getState().get('games').first();
+    const ClientGame0 = () => clientStore0.getState().get('game');
+    const ClientGame1 = () => clientStore1.getState().get('game');
+    const getUser0Card = (i) => clientStore0.getState().get('game').getPlayer().hand.get(i);
+    const getUser1Card = (i) => clientStore1.getState().get('game').getPlayer().hand.get(i);
+    clientStore2.dispatch(gameCreateSuccess(ServerGame()));
+
+    // gamePlayCard empty
+    expectUnchanged(() => clientStore0.dispatch(gamePlayCard())
+      , serverStore, clientStore0);
+
+    // gamePlayCard hacker, empty
+    expectUnchanged(() => clientStore2.dispatch(gamePlayCard())
+      , serverStore, clientStore2);
+
+    // gamePlayCard (0:0:0) User1 not in turn
+    expectUnchanged(() => clientStore1.dispatch(gamePlayCard(getUser1Card(0).id, 0, 0))
+      , serverStore, clientStore1);
+
+    // gamePlayCard (0:0:0) User0 turn
+    expectChanged(() => clientStore0.dispatch(gamePlayCard(getUser0Card(0).id, 0, 0)), serverStore, clientStore0);
+    expect(ServerGame().status.player, 'ServerGame().status.player').equal(1);
+
+    // gamePlayCard (0:0:1) User0 second try
+    expectUnchanged(() => clientStore0.dispatch(gamePlayCard(getUser0Card(0).id, 0, 0))
+      , serverStore, clientStore0);
+
+    // gamePlayCard (0:0:1) User1 turn
+    expectChanged(() => clientStore1.dispatch(gamePlayCard(getUser1Card(1).id, 0, 0)), serverStore, clientStore1);
+    expect(ServerGame().status.round, 'ServerGame().status.player').equal(1);
+    expect(ServerGame().status.player, 'ServerGame().status.player').equal(0);
+
+    // gamePlayCard (0:1:0) User1 second try
+    expectUnchanged(() => clientStore1.dispatch(gamePlayCard(getUser1Card(0).id, 0, 0))
+      , serverStore, clientStore1);
   });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,10 +1,10 @@
 import logger from '~/shared/utils/logger';
-import {ActionCheckError} from '~/shared/utils/ActionCheckError';
+import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import {List} from 'immutable';
 
 import {STATUS} from '../models/UserModel';
 
-import {GameModel, GameModelClient} from '../models/game/GameModel';
+import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
 import {CardModel} from '../models/game/CardModel';
 import {AnimalModel} from '../models/game/evolution/AnimalModel';
 
@@ -79,6 +79,7 @@ export const server$gameGiveCards = (gameId, userId, cards) => (dispatch, getSta
   ));
 };
 
+
 /*
  * Play!
  * */
@@ -105,6 +106,17 @@ export const server$gamePlayAnimal = (gameId, userId, animal, animalPosition, ca
   ));
 };
 
+
+export const gameNextPlayer = (gameId, userId) => ({
+  type: 'gameNextPlayer'
+  , data: {gameId, userId}
+});
+export const server$gameNextPlayer = (gameId, userId) => (dispatch, getState) => dispatch(
+  Object.assign(gameNextPlayer(gameId, userId), {
+    meta: {users: selectPlayers(getState, gameId)}
+  })
+);
+
 export const gameClientToServer = {
   gameCreateRequest: (data, meta) => (dispatch, getState) => {
     const userId = meta.user.id;
@@ -121,8 +133,8 @@ export const gameClientToServer = {
   , gameReadyRequest: ({gameId, ready}, {user}) => (dispatch, getState) => {
     const userId = user.id;
     const game = selectGame(getState, gameId);
-    checkGameDefined(game(), gameId);
-    checkGameHasUser(game(), userId);
+    checkGameDefined(getState, gameId);
+    checkGameHasUser(getState, gameId, userId);
     dispatch(server$gamePlayerStatusChange(gameId, userId, ready ? STATUS.READY : STATUS.LOADING));
     /*
      * Actual starting
@@ -142,18 +154,15 @@ export const gameClientToServer = {
   , gamePlayCard: ({gameId, cardId, animalPosition}, {user}) => (dispatch, getState) => {
     const userId = user.id;
     const game = selectGame(getState, gameId);
-    checkGameDefined(game(), gameId);
-    checkGameHasUser(game(), userId);
-    // TODO check if user has card
-    const cardIndex = game().players.get(user.id).hand.findIndex(card => card.id === cardId);
-    if (~cardIndex) {
-      const card = game().players.get(user.id).hand.get(cardIndex);
-      logger.verbose('game>gamePlayCard', card);
-      const animal = AnimalModel.new(card);
-      dispatch(server$gamePlayAnimal(gameId, userId, animal, animalPosition, cardIndex))
-    } else {
-      logger.warn(`game>gamePlayCard: ${cardId} not found in ${userId}`);
-    }
+    checkGameDefined(getState, gameId);
+    checkGameHasUser(getState, gameId, userId);
+    checkPlayerTurnAndPhase(getState, gameId, userId);
+    const cardIndex = checkPlayerHasCard(getState, gameId, userId, cardId);
+    const card = game().players.get(userId).hand.get(cardIndex);
+    const animal = AnimalModel.new(card);
+    logger.verbose('game > gamePlayCard', card);
+    dispatch(server$gamePlayAnimal(gameId, userId, animal, animalPosition, cardIndex))
+    dispatch(server$gameNextPlayer(gameId, userId));
   }
 };
 
@@ -170,13 +179,51 @@ export const gameServerToClient = {
     gamePlayAnimal(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardPosition)
 
 };
-
-const checkGameDefined = (game, gameId) => {
+const checkGameDefined = (getState, gameId) => {
+  const game = selectGame(getState, gameId)();
   if (game === void 0)
-    throw new ActionCheckError('checkGameDefined', 'Cannot find game %s', gameId);
+    throw new ActionCheckError(`checkGameDefined(${gameId})`, 'Cannot find game');
 };
 
-const checkGameHasUser = (game, userId) => {
+const checkGameHasUser = (getState, gameId, userId) => {
+  const game = selectGame(getState, gameId)();
   if (!game.players.has(userId))
-    throw new ActionCheckError('checkGameHasUser', 'Game %s has no player %s', game.id, userId);
+    throw new ActionCheckError(`checkGameHasUser(${gameId})`, 'Game has no player %s', userId);
 };
+
+const checkPlayerHasCard = (getState, gameId, userId, cardId) => {
+  const game = selectGame(getState, gameId)();
+  const cardIndex = game.players.get(userId).hand.findIndex(card => card.id === cardId);
+  if (!~cardIndex) {
+    throw new ActionCheckError(`checkPlayerHasCard(${gameId})`, 'Card#%s not found in Player#%s', cardId, userId);
+  }
+  return cardIndex;
+};
+
+const checkPlayerTurnAndPhase = (getState, gameId, userId) => {
+  const game = selectGame(getState, gameId)();
+  if (game.status.phase !== PHASE.DEPLOY) {
+    throw new ActionCheckError(`checkPlayerTurnAndPhase@Game(${gameId})`, 'Wrong phase (%s)', game.status.phase);
+  }
+  if (game.players.get(userId).index !== game.status.player) {
+    throw new ActionCheckError(`checkPlayerTurnAndPhase@Game(${gameId})`
+      , 'Wrong turn (%s), offender %s (%s)'
+      , game.status.player, userId, game.players.get(userId).index);
+  }
+  // const playerOrder = game.playersOrder.find()
+  // const cardIndex = game.players.get(userId).hand.findIndex(card => card.id === cardId);
+  // if (!~cardIndex) {
+  //   throw new ActionCheckError('game>gamePlayCard', 'Card #%s not found in %s', cardId, userId);
+  // }
+  // return cardIndex;
+};
+
+
+
+
+
+
+
+
+
+
