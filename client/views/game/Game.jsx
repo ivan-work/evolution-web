@@ -13,6 +13,7 @@ import {ContinentDeploy} from './ContinentDeploy.jsx';
 import {ContinentFeeding} from './ContinentFeeding.jsx';
 import {DragFood} from './Food.jsx';
 import CustomDragLayer from './dnd/CustomDragLayer.jsx';
+import {GameScoreboardFinal} from './ui/GameScoreboardFinal.jsx';
 
 class _Game extends React.Component {
   static contextTypes = {
@@ -27,7 +28,7 @@ class _Game extends React.Component {
 
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
   }
 
   render() {
@@ -37,15 +38,15 @@ class _Game extends React.Component {
 
     const GameContinent = (game.status.phase === PHASE.DEPLOY
       ? ContinentDeploy
-      : game.status.phase === PHASE.FEEDING
-      ? ContinentFeeding
-      : React.DOM.div);
+      : ContinentFeeding);
 
     const GameCard = (game.status.phase === PHASE.DEPLOY
       ? DragCard
       : Card);
 
     return <div className="Game">
+      {game.status.phase === PHASE.FINAL ? <GameScoreboardFinal game={game} show={true}/> : null}
+      <GameScoreboardFinal game={game} show={true}/>
       {/* DECK */}
       <div className='DeckWrapper' style={GAME_POSITIONS[game.players.size].deck}>
         <div className="GameStatus">

@@ -86,7 +86,10 @@ export const gameEndTurn = (game, {userId}) => {
   return game
     .updateIn(['players', userId], player => {
       //console.log(`skipped: ${player.skipped}, acted: ${player.acted}`);
-      const ended = player.skipped > 0;
+      //const ended = game.status.phase === PHASE.FEEDING
+      //  ? player.skipped > 0
+      //  : true;
+      const ended = !player.acted;
       if (ended) {
         logger.silly(`Player#${player.id} ended by skipping.`);
       }
@@ -115,6 +118,9 @@ export const gameStartDeploy = (game) => {
     .update('players', players => players.map(player => player
       .set('ended', false)
       .set('skipped', 0)
+      .update('continent', animal => animal.map(animal => animal
+        .set('food', 0)
+      ))
     ))
     .setIn(['food'], 0)
     .setIn(['status', 'phase'], PHASE.DEPLOY)
@@ -154,8 +160,28 @@ export const animalStarve = (game, {userId, animalId}) => {
 export const startCooldown = (game, {link, duration, place, placeId}) =>
   game.update('cooldowns', cooldowns => cooldowns.startCooldown(link, duration, place, placeId));
 
-export const gameEnd = (state, {game}) =>
-  game.setIn(['status', 'phase'], PHASE.FINAL);
+export const gameEnd = (state, {game}) => {
+  // Player score
+  // Player (wins/losses) score achievements
+  const scoreboard = [];
+  let winnerId = null;
+  let maxScore = 0;
+  game.players.forEach((player, playerId) => {
+    const score = player.countScore();
+    if (score > maxScore) {
+      winnerId = playerId;
+      maxScore = score;
+    }
+    scoreboard.push({
+      playerId
+      , score
+    })
+  });
+  return game
+    .setIn(['status', 'phase'], PHASE.FINAL)
+    .set('scoreboardFinal', scoreboard.sort((p1, p2) => p1.score < p2.score))
+    .set('winnerId', winnerId);
+};
 
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
