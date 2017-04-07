@@ -18,19 +18,19 @@ const CARD_POSITIONS = {
   0: null
   , 1: null
   , 2: {
-    deck: {right: 0, top: 0}
-    , player: {left: "50%", bottom: 0}
+    deck: {left: '50%', top: '50%'}
+    , player: {left: '50%', bottom: 0}
     , 0: {top: 0, left: '50%'}
   }
   , 3: {
     deck: {right: 0, top: 0}
-    , player: {left: "50%", bottom: 0}
+    , player: {left: '50%', bottom: 0}
     , 0: {top: 0, left: '50%'}
     , 1: {top: 0, left: '50%'}
   }
   , 4: {
     deck: {right: 0, top: 0}
-    , player: {left: "50%", bottom: 0}
+    , player: {left: '50%', bottom: 0}
     , 0: {top: 0, left: '50%'}
     , 1: {top: 0, left: '50%'}
   }
@@ -60,12 +60,12 @@ export class Game extends React.Component {
       <CardCollection
         ref="Deck" name="Deck"
         position={CARD_POSITIONS[game.players.size].deck}
-        shift={[-25, 1]}
+        shift={[1, 2]}
         count={game.deck}/>
       <CardCollection
         ref="Hand" name="Hand"
         position={CARD_POSITIONS[game.players.size][0]}
-        shift={[-25, 1]}
+        shift={[10, 10]}
         cards={game.hand}/>
       {
         game.players.valueSeq()
