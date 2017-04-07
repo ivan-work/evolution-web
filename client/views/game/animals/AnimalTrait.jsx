@@ -2,12 +2,12 @@ import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
-import {GameProvider} from './providers/GameProvider.jsx';
+import {GameProvider} from './../providers/GameProvider.jsx';
 
 import { DragSource } from 'react-dnd';
-import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
+import { DND_ITEM_TYPE } from './../dnd/DND_ITEM_TYPE';
 
-import { TraitModel } from '../../../shared/models/game/evolution/TraitModel';
+import { TraitModel } from '../../../../shared/models/game/evolution/TraitModel';
 
 import './AnimalTrait.scss';
 
