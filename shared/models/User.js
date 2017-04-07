@@ -6,18 +6,10 @@ export class UserRecord extends Record({
   , connectionId: null
 }) {
   toSecure() {
-    return {
+    return new UserRecord({
       id: this.id
       , login: this.login
       , connectionId: this.connectionId
-    }
+    });
   }
-}
-
-export function User(id, login, connectionId) {
-  return new UserRecord({
-    id: id
-    , login: login
-    , connectionId: connectionId
-  });
 }

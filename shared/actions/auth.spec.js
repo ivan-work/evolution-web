@@ -1,4 +1,4 @@
-import {Map, fromJS} from 'immutable';
+import {Map, List, fromJS} from 'immutable';
 import {UserRecord} from '../models/User';
 import {authServerToClient, authClientToServer, socketConnect, socketDisconnect, loginUserRequest, loginUserSuccess, loginUserFailure} from './auth';
 
@@ -69,35 +69,36 @@ describe('Auth testing', () => {
         connections: {'3': cs1}
       }));
 
-      expect(clientStore.getState()).equal(fromJS({
-        users: {
-          token: null,
-          user: User0.toSecure(),
-          isAuthenticated: true,
-          isAuthenticating: false,
-          statusText: 'You have been successfully logged in.'
-        }
-        , online: [User0.toSecure()]
+      expect(clientStore.getState().get('users')).equal(fromJS({
+        token: null,
+        user: User0.toSecure(),
+        isAuthenticated: true,
+        isAuthenticating: false,
+        statusText: 'You have been successfully logged in.'
       }));
+      expect(clientStore.getState().get('online')).equal(List([User0.toSecure()]));
 
-      expect(serverStore.getActions()).eql([{
+      expect(serverStore.getActions().length).equal(3);
+      expect(serverStore.getActions()[0], 'serverStore.getActions()[0]').eql({
         type: 'onlineJoin',
         data: {user: User0.toSecure()},
         meta: {clients: true}
-      }, {
+      });
+      expect(serverStore.getActions()[1], 'serverStore.getActions()[1]').eql({
         type: 'loginUserSuccess',
         data: {
           user: User0,
           redirect: '/test'
         },
         meta: {connectionId: '3'}
-      }, {
+      });
+      expect(serverStore.getActions()[2], 'serverStore.getActions()[2]').eql({
         type: 'onlineSet',
         data: {users: [User0.toSecure()]},
         meta: {connectionId: '3'}
-      }]);
+      });
 
-      expect(clientStore.getActions()).eql([{
+      expect(clientStore.getActions()[0], 'clientStore.getActions()[0]').eql({
         type: 'loginUserRequest',
         data: {
           redirect: '/test',
@@ -105,17 +106,21 @@ describe('Auth testing', () => {
           password: 'testPassword'
         },
         meta: {server: true}
-      }, {
+      });
+      expect(clientStore.getActions()[1], 'clientStore.getActions()[1]').eql({
         type: 'onlineJoin', data: {user: User0.toSecure()}
-      }, {
+      });
+      expect(clientStore.getActions()[2], 'clientStore.getActions()[2]').eql({
         type: 'loginUserSuccess',
         data: {user: User0}
-      }, {
+      });
+      expect(clientStore.getActions()[3], 'clientStore.getActions()[3]').eql({
         type: '@@router/CALL_HISTORY_METHOD',
         payload: {method: 'push', args: ['/test']}
-      }, {
-        type: 'onlineSet', data: {users: [User0.toSecure()]}
-      }]);
+      });
+      expect(clientStore.getActions()[4], 'clientStore.getActions()[4]').eql({
+        type: 'onlineSet', data: {users: List.of(User0.toSecure())}
+      });
     });
 
     it('valid Connection, two Users', () => {
@@ -141,51 +146,47 @@ describe('Auth testing', () => {
         , users: {'1': User0}
       }));
 
-      expect(clientStore0.getState(), 'clientStore0.getState()').equal(fromJS({
-        users: {
-          token: null,
-          user: User0.toSecure(),
-          isAuthenticated: true,
-          isAuthenticating: false,
-          statusText: 'You have been successfully logged in.'
-        }
-        , online: [User0.toSecure()]
+      expect(clientStore0.getState().get('users'), 'clientStore0.getState(users)').equal(fromJS({
+        token: null,
+        user: User0.toSecure(),
+        isAuthenticated: true,
+        isAuthenticating: false,
+        statusText: 'You have been successfully logged in.'
       }));
+      expect(clientStore0.getState().get('online'), 'clientStore0.getState(online)')
+        .equal(List([User0.toSecure()]));
 
-      expect(clientStore1.getState(), 'clientStore1.getState()').equal(fromJS({
-        users: {
-          token: null,
-          user: null,
-          isAuthenticated: false,
-          isAuthenticating: false,
-          statusText: null
-        }
-        , online: [User0.toSecure()]
+      expect(clientStore1.getState().get('users'), 'clientStore1.getState(users)').equal(fromJS({
+        token: null,
+        user: null,
+        isAuthenticated: false,
+        isAuthenticating: false,
+        statusText: null
       }));
+      expect(clientStore1.getState().get('online'), 'clientStore1.getState(online)')
+        .equal(List([User0.toSecure()]));
 
       clientStore1.dispatch(loginUserRequest('/test', User1.login, 'testPassword'));
 
-      expect(clientStore0.getState(), 'clientStore0.getState()').equal(fromJS({
-        users: {
-          token: null,
-          user: User0.toSecure(),
-          isAuthenticated: true,
-          isAuthenticating: false,
-          statusText: 'You have been successfully logged in.'
-        }
-        , online: [User0.toSecure(), User1.toSecure()]
+      expect(clientStore0.getState().get('users'), 'clientStore0.getState(users)').equal(fromJS({
+        token: null,
+        user: User0.toSecure(),
+        isAuthenticated: true,
+        isAuthenticating: false,
+        statusText: 'You have been successfully logged in.'
       }));
+      expect(clientStore0.getState().get('online'), 'clientStore0.getState(online)')
+        .equal(List([User0.toSecure(), User1.toSecure()]));
 
-      expect(clientStore1.getState(), 'clientStore1.getState()').equal(fromJS({
-        users: {
-          token: null,
-          user: User1.toSecure(),
-          isAuthenticated: true,
-          isAuthenticating: false,
-          statusText: 'You have been successfully logged in.'
-        }
-        , online: [User0.toSecure(), User1.toSecure()]
+      expect(clientStore1.getState().get('users'), 'clientStore1.getState(users)').equal(fromJS({
+        token: null,
+        user: User1.toSecure(),
+        isAuthenticated: true,
+        isAuthenticating: false,
+        statusText: 'You have been successfully logged in.'
       }));
+      expect(clientStore1.getState().get('online'), 'clientStore1.getState(online)')
+        .equal(List.of(User0.toSecure(), User1.toSecure()));
     });
   });
 });
