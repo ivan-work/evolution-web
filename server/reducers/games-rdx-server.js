@@ -35,30 +35,14 @@ export const gameDeployAnimal = (game, {userId, animal, animalPosition, cardPosi
     .updateIn(['players', userId, 'continent'], continent => continent.insert(animalPosition, animal))
 };
 
-export const gameDeployTrait = (game, {cardId, traitType, animalId, linkedAnimalId}) => {
+export const gameDeployTrait = (game, {cardId, traits}) => {
   const {playerId: cardOwnerId, cardIndex} = game.locateCard(cardId);
-  const {playerId: animalOwnerId, animalIndex, animal} = game.locateAnimal(animalId);
-  const {playerId: linkedAnimalOwnerId, animalIndex: linkedAnimalIndex, animal: linkedAnimal} = game.locateAnimal(linkedAnimalId);
-
-  const traitData = TraitModel.new(traitType).dataModel;
-
-  if (!(traitData.cardTargetType & CTT_PARAMETER.LINK)) {
-    const deploy = TraitModel.new(traitType).attachTo(animal);
-    return game
-      .removeIn(['players', cardOwnerId, 'hand', cardIndex])
-      .updateIn(['players', animalOwnerId, 'continent', animalIndex, 'traits'], traits => traits.push(deploy))
-  } else {
-    const deploy = TraitModel.LinkBetween(
-      traitType
-      , animal
-      , linkedAnimal
-      , traitData.cardTargetType & CTT_PARAMETER.ONEWAY);
-
-    return game
-      .removeIn(['players', cardOwnerId, 'hand', cardIndex])
-      .updateIn(['players', animalOwnerId, 'continent', animalIndex, 'traits'], traits => traits.push(deploy[0]))
-      .updateIn(['players', linkedAnimalOwnerId, 'continent', linkedAnimalIndex, 'traits'], traits => traits.push(deploy[1]));
-  }
+  return game
+    .removeIn(['players', cardOwnerId, 'hand', cardIndex])
+    .update(game => traits.reduce((game, trait) => {
+      const {playerId, animalIndex} = game.locateAnimal(trait.hostAnimalId);
+      return game.updateIn(['players', playerId, 'continent', animalIndex, 'traits'], traits => traits.push(trait))
+    }, game));
 };
 
 export const playerActed = (game, {userId}) => {
@@ -111,8 +95,8 @@ export const gameStartDeploy = (game) => {
       .set('ended', false)
       .set('skipped', 0)
       .update('continent', continent => continent.map(animal => animal
-          .set('flags', Map())
-          .digestFood()
+        .set('flags', Map())
+        .digestFood()
       ))
     ))
     .setIn(['food'], 0)

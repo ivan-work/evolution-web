@@ -20,7 +20,7 @@ export const App = ServicesContext(PortalsContext(React.createClass({
         <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
           <PortalTarget name='game-svg' container='g'/>
         </svg>
-        <Header title="Evolution" hideSpacer={true}>
+        <Header title={`Evolution v${DEFINE_VERSION}`} hideSpacer={true}>
           <Navigation className='header'>
             <PortalTarget name='header'/>
           </Navigation>

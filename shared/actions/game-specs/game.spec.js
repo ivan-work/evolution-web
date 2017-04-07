@@ -198,7 +198,7 @@ players:
       .equal(ServerGame().getIn(['players', User0.id, 'continent']));
   });
 
-  it.only('Play as upgrade', () => {
+  it('Play as upgrade', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 players:
@@ -219,8 +219,9 @@ players:
     expect(ClientGame1().getPlayer(User0).getIn(['hand', 0, 'type'])).not.equal('CardSharpVision');
 
     const traitCamouflage = selectTrait(User0, 0, 0);
-
     expect(ServerGame().getPlayer(User0).getAnimal(0).getIn(['traits', 0, 'type'])).equal('TraitCamouflage');
+    expect(ServerGame().getPlayer(User0).getAnimal(0).getIn(['traits', 0, 'dataModel'])).ok;
+    expect(ServerGame().getPlayer(User0).getAnimal(0).getIn(['traits', 0])).equal(traitCamouflage);
     expect(ClientGame0().getPlayer(User0).getAnimal(0).getIn(['traits', 0])).equal(traitCamouflage);
     expect(ClientGame1().getPlayer(User0).getAnimal(0).getIn(['traits', 0])).equal(traitCamouflage);
 
@@ -231,11 +232,6 @@ players:
     expect(ServerGame().getPlayer(User0).hand).size(0);
     expect(ClientGame0().getPlayer(User0).hand).size(0);
     expect(ClientGame1().getPlayer(User0).hand).size(0);
-
-
-    console.log(ServerGame().getPlayer(User0).getAnimal(0).getIn(['traits', 0, 'id'])) ;
-    console.log(ClientGame0().getPlayer(User0).getAnimal(0).getIn(['traits', 0, 'id']));
-    console.log(ClientGame1().getPlayer(User0).getAnimal(0).getIn(['traits', 0, 'id']));
 
     const traitSharpVision = selectTrait(User0, 0, 1);
     expect(ServerGame().getPlayer(User0).getAnimal(0).traits).equal(List.of(traitCamouflage, traitSharpVision));

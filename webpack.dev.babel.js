@@ -12,12 +12,11 @@ const postcssFocus = require('postcss-focus');
 const postcssReporter = require('postcss-reporter');
 
 module.exports = require('./webpack.base.babel')({
-  //devtool: 'cheap-module-eval-source-map'
-  devtool: 'inline-source-map'
+  devtool: 'cheap-module-eval-source-map'
+  //devtool: 'inline-source-map'
   // Add hot reloading in development
   , entry: [
-    'webpack-hot-middleware/client',
-    path.join(process.cwd(), 'client/index.jsx'), // Start with js/app.js
+    'webpack-hot-middleware/client'
   ],
 
   // Don't use hashes in dev mode for better performance

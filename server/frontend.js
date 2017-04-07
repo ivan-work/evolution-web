@@ -22,7 +22,9 @@ const addDevMiddlewares = (app, options) => {
   // artifacts, we use it instead
   const fs = middleware.fileSystem;
 
+
   app.get('*', (req, res) => {
+    console.log(compiler.outputPath)
     const file = fs.readFileSync(path.join(compiler.outputPath, 'index.html'));
     res.send(file.toString());
   });
