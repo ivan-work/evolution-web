@@ -6,29 +6,36 @@ import {GameModel} from '../models/game/GameModel';
 import {CardModel} from '../models/game/CardModel';
 import {PlayerModel} from '../models/game/PlayerModel';
 
-import {roomCreateRequest, roomJoinRequest, roomStartGameRequest} from '../actions/actions';
+import {roomCreateRequest, roomJoinRequest, gameStartRequest, gameReadyRequest} from '../actions/actions';
 
 describe('Game:', function () {
   it('Start for two:', () => {
-    //const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
-    //clientStore0.dispatch(roomCreateRequest());
-    //const roomId = serverStore.getState().get('rooms').first().id;
-    //clientStore0.dispatch(roomJoinRequest(roomId));
-    //clientStore1.dispatch(roomJoinRequest(roomId));
-    //clientStore0.dispatch(roomStartGameRequest(roomId));
-    //const Room = serverStore.getState().get('rooms').first();
-    //const Game = serverStore.getState().get('games').first();
-    //expect(Game).defined;
-    //expect(Game.roomId).equal(roomId);
-    //expect(Game.players).equal(List.of(
-    //  new PlayerModel({
-    //    id: User0.id
-    //    , hand: List()
-    //  })
-    //  , new PlayerModel({
-    //    id: User1.id
-    //    , hand: List()
-    //  })
-    //));
+    const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
+    clientStore0.dispatch(roomCreateRequest());
+    const roomId = serverStore.getState().get('rooms').first().id;
+    clientStore0.dispatch(roomJoinRequest(roomId));
+    clientStore1.dispatch(roomJoinRequest(roomId));
+    clientStore0.dispatch(gameStartRequest(roomId));
+    const Room = serverStore.getState().get('rooms').first();
+    const Game = () => serverStore.getState().get('games').first();
+    expect(Game()).not.undefined;
+    expect(Game().roomId).equal(roomId);
+    expect(Game().players.size).equal(2);
+    expect(clientStore0.getState().get('game'), 'clientStore0.get(game)').ok;
+    expect(clientStore0.getState().get('game').id, 'clientStore0.get(game).id').ok;
+    clientStore0.dispatch(gameReadyRequest());
+    //console.log(serverStore.getState().get('games').toJS())
+    //console.log(clientStore0.getState().get('game').toJS())
+    expect(Game().players.get(User0.id).status, 'Game.players.get(User0).state 1').equal(1);
+    expect(Game().players.get(User1.id).status, 'Game.players.get(User1).state 1').equal(0);
+    expect(Game().players.get(User0.id).hand.size).equal(0);
+    expect(Game().players.get(User1.id).hand.size).equal(0);
+    clientStore1.dispatch(gameReadyRequest());
+    expect(Game().players.get(User0.id).status, 'Game.players.get(0).state 2').equal(1);
+    expect(Game().players.get(User1.id).status, 'Game.players.get(1).state 2').equal(1);
+    // server dispatched turn 1 here
+    expect(Game().players.get(User0.id).hand.size).equal(6);
+    expect(Game().players.get(User1.id).hand.size).equal(6);
+    expect(Game().players.get(User1.id).deck.size).equal(24);
   });
 });

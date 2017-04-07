@@ -1,5 +1,6 @@
 export * from './auth';
 export * from './rooms';
+export * from './game';
 
 import {authClientToServer} from './auth';
 import {authServerToClient} from './auth';

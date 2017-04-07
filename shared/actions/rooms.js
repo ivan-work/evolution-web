@@ -17,12 +17,6 @@ export const roomExitRequest = () => (dispatch, getState) => dispatch({
   , data: {roomId: getState().get('room')}
   , meta: {server: true}
 });
-export const roomStartGameRequest = (roomId) => ({
-  type: 'roomStartGameRequest'
-  , data: {roomId}
-  , meta: {server: true}
-});
-
 export const roomUpdate = (roomId, room) => ({
   type: 'roomUpdate'
   , data: {roomId, room}

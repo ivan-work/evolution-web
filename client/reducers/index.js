@@ -1,3 +1,4 @@
+export {reducer as game} from './game-reducer';
 export {reducer as online} from './online-reducer';
 export {reducer as room} from './room-reducer';
 export {reducer as rooms} from './rooms-reducer';
