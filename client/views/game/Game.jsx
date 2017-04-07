@@ -2,21 +2,27 @@ import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import {List, Map} from 'immutable';
+import * as MDL from 'react-mdl';
 
 import {UserModel} from '~/shared/models/UserModel';
 import {GameModelClient} from '~/shared/models/game/GameModel';
 import {CardModel} from '~/shared/models/game/CardModel';
 
-import {gameReadyRequest, gameDeployAnimalRequest} from '~/shared/actions/actions';
+import {
+  gameReadyRequest,
+  gameDeployAnimalRequest,
+  gameDeployTraitRequest,
+  gameEndTurnRequest
+} from '~/shared/actions/actions';
 import {redirectTo} from '~/shared/utils'
 
 import {EnemyContinent} from './EnemyContinent.jsx';
 import {PlayerContinent} from './PlayerContinent.jsx';
 import {CardCollection} from './CardCollection.jsx';
-import {Card, UnknownCard, DragCard} from './Card.jsx';
+import {Card, DragCard} from './Card.jsx';
 import {DropTargetAnimal} from './Animal.jsx';
 
-import { DragDropContext } from 'react-dnd';
+import {DragDropContext} from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import TestBackend from 'react-dnd-test-backend';
 
@@ -56,15 +62,20 @@ export class Game extends React.Component {
 
   constructor(props) {
     super(props);
-    this.cardPlayed = this.cardPlayed.bind(this)
+    this.$deployAnimal = this.$deployAnimal.bind(this)
+    this.$deployTrait = this.$deployTrait.bind(this)
   }
 
   componentDidMount() {
     if (this.props.game && !this.props.game.started) this.props.$ready();
   }
 
-  cardPlayed(model, ...data) {
-    this.props.$playCard(model.id, ...data);
+  $deployAnimal(card, zoneIndex) {
+    this.props.$deployAnimal(card.id, zoneIndex);
+  }
+
+  $deployTrait(card, animal) {
+    this.props.$deployTrait(card.id, animal.id);
   }
 
   render() {
@@ -72,11 +83,23 @@ export class Game extends React.Component {
     const game = this.props.game;
 
     if (!user || !game) return <div>Loading</div>;
+    const disabled = game.status.player != game.getPlayer().index;
     const player = game.getPlayer();
-    //console.log('GameRender: =====')
-    //console.log('game', player.continent.toJS())
+    console.log('GameRender: =====')
+    console.log('game', game.deck)
     //console.log('game', CARD_POSITIONS[game.players.size], game.players.size)
     return <div className="Game">
+
+      <div className="GameStatus">
+        Turn: {game.status.turn}
+        <br/> Phase: {game.status.phase}
+        <br/> Round: {game.status.round}
+        <br/> Player: {game.status.player}
+      </div>
+
+      <MDL.Button className="EndTurn"
+                  raised  disabled={disabled}
+                  onClick={this.props.$endTurn}>EndTurn</MDL.Button>
 
       {/* DECK */}
 
@@ -85,21 +108,23 @@ export class Game extends React.Component {
           ref="Deck" name="Deck"
           shift={[1, 2]}
           count={game.deck}>
-          {Array.from({length: game.deck}, (u, i) => <UnknownCard key={i} index={i}/>)}
+          {/*{Array.from({length: game.deck}, (u, i) => <UnknownCard key={i} index={i}/>)}*/}
         </CardCollection>
       </div>
 
       {/* USER */}
 
       <div className='PlayerWrapper UserWrapper' style={CARD_POSITIONS[game.players.size].player}>
-        <PlayerContinent onCardDropped={this.cardPlayed}>
-          {player.continent.toArray().map((animal, i) => <DropTargetAnimal index={i} key={i} model={animal} onCardDropped={this.cardPlayed}/>)}
+        <PlayerContinent onCardDropped={this.$deployAnimal}>
+          {player.continent.toArray().map((animal, i) =>
+            <DropTargetAnimal index={i} key={i} model={animal} onCardDropped={this.$deployTrait}/>)}
         </PlayerContinent>
 
         <CardCollection
           ref="Hand" name="Hand"
           shift={[55, 0]}>
-          {player.hand.toArray().map((cardModel, i) => <DragCard model={cardModel} key={cardModel} index={i}/>)}
+          {player.hand.toArray().map((cardModel, i) =>
+            <DragCard model={cardModel} key={cardModel} index={i} disabled={disabled}/>)}
         </CardCollection>
       </div>
 
@@ -109,19 +134,22 @@ export class Game extends React.Component {
         game.players.valueSeq()
           .filter(enemy => enemy.id !== user.id)
           .map((enemy, i) => {
-          return <div className='PlayerWrapper EnemyWrapper' key={enemy.id} style={CARD_POSITIONS[game.players.size][i]}>
-            <CardCollection
-              ref={enemy.id} name={enemy.id}
-              shift={[20, 0]}>
-              {enemy.hand.toArray().map((cardModel, i) => <Card model={cardModel} key={i} index={i}/>)}
-            </CardCollection>
-            <EnemyContinent>
-              {enemy.continent.toArray().map((animal, i) => <DropTargetAnimal key={i} index={i} onCardDropped={this.cardPlayed}/>)}
-            </EnemyContinent>
-          </div>
+            return <div className='PlayerWrapper EnemyWrapper' key={enemy.id}
+                        style={CARD_POSITIONS[game.players.size][i]}>
+              <CardCollection
+                ref={enemy.id} name={enemy.id}
+                shift={[20, 0]}>
+                {enemy.hand.toArray().map((cardModel, i) => <Card model={cardModel} key={i} index={i}/>)}
+              </CardCollection>
+              <EnemyContinent>
+                {enemy.continent.toArray().map((animal, i) =>
+                  <DropTargetAnimal key={i} index={i} onCardDropped={this.$deployTrait}/>)}
+              </EnemyContinent>
+            </div>
           })
-        }
-    </div>;
+      }
+    </div>
+      ;
   }
 }
 
@@ -136,6 +164,8 @@ export const GameView = connect(
   }
   , (dispatch) => ({
     $ready: () => dispatch(gameReadyRequest())
-    , $playCard: (...args) => dispatch(gameDeployAnimalRequest(...args))
+    , $deployAnimal: (...args) => dispatch(gameDeployAnimalRequest(...args))
+    , $deployTrait: (...args) => dispatch(gameDeployTraitRequest(...args))
+    , $endTurn: () => dispatch(gameEndTurnRequest())
   })
 )(DDCGame);

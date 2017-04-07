@@ -19,6 +19,12 @@ gulp.task('test:server', () => {
   return watch('{shared,server,client}/**/*.js*(x)', () => testWatch(paths));
 });
 
+gulp.task('test:client', () => {
+  const paths = ['./shared/test-helper.js', 'client/**/*.spec.js', 'client/**/*.spec.jsx'];
+  testWatch(paths);
+  return watch('{shared,server,client}/**/*.js*(x)', () => testWatch(paths));
+});
+
 gulp.task('test:all', () => {
   const paths = ['./shared/test-helper.js', 'shared/**/*.spec.js', 'server/**/*.spec.js', 'client/**/*.spec.js', 'client/**/*.spec.jsx'];
   testWatch(paths);
