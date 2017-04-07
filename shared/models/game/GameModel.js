@@ -149,6 +149,10 @@ export class GameModelClient extends Record({
       ? this.players.get(pid.id)
       : this.players.get(pid);
   }
+
+  isUserTurn() {
+    return this.getPlayer().index === this.status.player;
+  }
 }
 
 GameModelClient.prototype.start = GameModel.prototype.start;

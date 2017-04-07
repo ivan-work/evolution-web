@@ -3,10 +3,10 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
 import { DropTarget } from 'react-dnd';
-import { DND_ITEM_TYPE } from './DND_ITEM_TYPE';
+import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
 
 import { AnimalModel } from '~/shared/models/game/evolution/AnimalModel';
-import { AnimalTrait, AnimalTraitRaw } from './AnimalTrait.jsx';
+import { AnimalTrait, DraggableAnimalTrait } from './AnimalTrait.jsx';
 
 export class Animal extends React.Component {
   static defaultProps = {
@@ -38,8 +38,8 @@ export class Animal extends React.Component {
       <div className='traits'>
         {model.traits.map((trait, index) => (
           trait.dataModel.targetType
-            ? <AnimalTrait key={index} index={index} trait={trait} owner={model}/>
-            : <AnimalTraitRaw key={index} index={index} trait={trait} owner={model}/>)
+            ? <DraggableAnimalTrait key={index} index={index} trait={trait} owner={model}/>
+            : <AnimalTrait key={index} index={index} trait={trait} owner={model}/>)
           )}
       </div>
       <div className='inner'>
@@ -55,10 +55,10 @@ export class Animal extends React.Component {
 
 export const DropTargetAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT], {
   drop(props, monitor, component) {
-    const {item} = monitor.getItem();
     switch (monitor.getItemType()) {
       case DND_ITEM_TYPE.CARD:
-        props.onCardDropped(item, props.model);
+        const {card} = monitor.getItem();
+        props.onCardDropped(card, props.model);
         break;
       case DND_ITEM_TYPE.FOOD:
         const {index} = monitor.getItem();
