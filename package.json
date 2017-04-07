@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "blahblah",
   "browser": {
-    "jsonwebtoken": false
+    "jsonwebtoken": false,
+    "node-uuid": false
   },
   "scripts": {
     "test:prepare": "node_modules/.bin/cross-env NODE_ENV=test node_modules/.bin/mocha --compilers js:babel-register --require shared/test-helper.js --bail",

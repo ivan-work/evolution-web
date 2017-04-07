@@ -11,7 +11,7 @@ export class UserModel extends Record({
 }) {
   static new(login, connectionId) {
     return new UserModel({
-      id: uuid.v4()
+      id: uuid.v4().slice(0, 6)
       , login, connectionId
     }).sign()
   }

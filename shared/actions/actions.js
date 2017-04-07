@@ -9,6 +9,7 @@ import {roomsServerToClient} from './rooms';
 export const clientToServer = Object.assign({}
   , authClientToServer
   , roomsClientToServer
+  , {$unprotected: []}
 );
 
 export const serverToClient = Object.assign({}

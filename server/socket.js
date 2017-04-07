@@ -17,12 +17,15 @@ export const socketStore = (serverSocket, store) => {
     });
 
     socket.on('action', (action) => {
-      //console.log('server:action', action.type);
+      //console.log('server:action', action.type, action.meta);
+      if (!clientToServer.$unprotected) {
+
+      }
       if (clientToServer[action.type]) {
-        store.dispatch(clientToServer[action.type]({
+        store.dispatch(clientToServer[action.type](action.data, {
           connectionId: socket.id
           , ...action.meta
-        }, action.data));
+        }));
       } else {
         console.warn('clientToServer action doesnt exist: ' + action.type);
       }

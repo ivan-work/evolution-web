@@ -25,7 +25,7 @@ export const reducer = createReducer(initialState, {
       'isAuthenticated': true,
       //'token': payload.token,
       //'userName': jwtDecode(payload.token).userName,
-      'user': new UserModel(data.user),
+      'user': data.user,
       'statusText': 'You have been successfully logged in.'
     }));
   }

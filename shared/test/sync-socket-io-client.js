@@ -34,7 +34,7 @@ class SyncSocketIOClient extends EventEmitter {
   }
 
   emitSelf(...args) {
-    super.emit(...args);
+    super.emit(...args.map(arg => JSON.parse(JSON.stringify(arg))));
   }
 
   emit(...args) {
