@@ -96,7 +96,7 @@ export const gameEndTurn = (game, {userId}) => {
       if (endedAlready) logger.silly(`Player#${player.id} already ended.`);
       if (endedNow) logger.debug(`Player#${player.id} ended by skipping.`);
       return player
-        .set('acted', false)
+        .set('acted', false) // TODO remove because we are setting it in gameNextPlayer
         .set('ended', endedNow)
     })
     .update(addToGameLog(['gameEndTurn', userId, endedNow, endedAlready]));
@@ -141,8 +141,9 @@ export const gameStartExtinct = (game) => game
   .update(addToGameLog(['PhaseExtinct']));
 
 export const gameNextPlayer = (game, {round, nextPlayerId, nextPlayerIndex, roundChanged, turnTime}) => game
-  .updateIn(['status', 'round'], round => roundChanged ? round + 1 : round)
+  .setIn(['players', nextPlayerId, 'acted'], false)
   .setIn(['status', 'currentPlayer'], nextPlayerIndex)
+  .updateIn(['status', 'round'], round => roundChanged ? round + 1 : round)
   .update('cooldowns', cooldowns => cooldowns.eventNextPlayer(roundChanged))
   .update(addToGameLog(['gameNextPlayer', nextPlayerId]));
 
@@ -210,6 +211,9 @@ export const traitAnimalPoisoned = (game, {animalId}) => {
 export const startCooldown = (game, {link, duration, place, placeId}) =>
   game.update('cooldowns', cooldowns => cooldowns.startCooldown(link, duration, place, placeId));
 
+export const clearCooldown = (game, {link, place, placeId}) =>
+  game.update('cooldowns', cooldowns => cooldowns.clearCooldown(link, place, placeId));
+
 // Transferring new game for game.end
 export const gameEnd = (state, {game}) => game.end();
 
@@ -218,10 +222,10 @@ export const gamePlayerLeft = (game, {userId}) => game
   .setIn(['players', userId, 'playing'], false)
   .setIn(['players', userId, 'ended'], true);
 
-export const traitDefenceQuestion = (game, {question}) => game
+export const traitQuestion = (game, {question}) => game
   .set('question', question);
 
-export const traitDefenceAnswerSuccess = (game, {questionId}) => game
+export const traitAnswerSuccess = (game, {questionId}) => game
   .remove('question');
 
 export const traitGrazeFood = (game, {food}) => game
@@ -318,8 +322,9 @@ export const reducer = createReducer(Map(), {
   , playerActed: (state, data) => state.update(data.gameId, game => playerActed(game, data))
   , traitMoveFood: (state, data) => state.update(data.gameId, game => traitMoveFood(game, data))
   , startCooldown: (state, data) => state.update(data.gameId, game => startCooldown(game, data))
-  , traitDefenceQuestion: (state, data) => state.update(data.gameId, game => traitDefenceQuestion(game, data))
-  , traitDefenceAnswerSuccess: (state, data) => state.update(data.gameId, game => traitDefenceAnswerSuccess(game, data))
+  , clearCooldown: (state, data) => state.update(data.gameId, game => clearCooldown(game, data))
+  , traitQuestion: (state, data) => state.update(data.gameId, game => traitQuestion(game, data))
+  , traitAnswerSuccess: (state, data) => state.update(data.gameId, game => traitAnswerSuccess(game, data))
   , traitKillAnimal: (state, data) => state.update(data.gameId, game => traitKillAnimal(game, data))
   , traitAnimalRemoveTrait: (state, data) => state.update(data.gameId, game => traitAnimalRemoveTrait(game, data))
   , traitConvertFat: (state, data) => state.update(data.gameId, game => traitConvertFat(game, data))

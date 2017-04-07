@@ -12,7 +12,7 @@ import {
   , gameDeployTraitRequest
   , traitTakeFoodRequest
   , traitActivateRequest
-  , traitDefenceAnswerRequest
+  , traitAnswerRequest
   , traitTakeShellRequest
 } from '../../../shared/actions/actions';
 
@@ -99,7 +99,7 @@ GameWrapperHOC = connect(
       // PHASE.FEEDING
       , $traitTakeFood: (...args) => dispatch(traitTakeFoodRequest(...args))
       , $traitActivate: (...args) => dispatch(traitActivateRequest(...args))
-      , $traitDefenceAnswer: (...args) => dispatch(traitDefenceAnswerRequest(...args))
+      , $traitDefenceAnswer: (...args) => dispatch(traitAnswerRequest(...args))
       , $traitTakeShell: (...args) => dispatch(traitTakeShellRequest(...args))
     }
   })

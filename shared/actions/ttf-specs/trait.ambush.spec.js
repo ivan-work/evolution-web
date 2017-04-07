@@ -2,14 +2,14 @@ import {
   gameEndTurnRequest
   , traitTakeFoodRequest
   , traitActivateRequest
-  , traitDefenceAnswerRequest
+  , traitAnswerRequest
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
 
-describe.only('TraitAmbush:', () => {
+describe('TraitAmbush:', () => {
   it('Simple attack', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1}] = mockGame(2);
     const gameId = ParseGame(`
@@ -85,7 +85,7 @@ players:
 
     expect(selectGame().question, 'Game asks question').ok;
 
-    clientStore0.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$D'));
+    clientStore0.dispatch(traitAnswerRequest('TraitMimicry', '$D'));
 
     expect(selectAnimal(User1, 0).getFood(), '$C should get $A tail').equal(2);
     expect(selectAnimal(User0, 0).id, '$A should be alive').equal('$A');
@@ -108,18 +108,15 @@ players:
 
     clientStore0.dispatch(traitTakeFoodRequest('$Q'));
     expect(selectGame().question, 'Game asks question').ok;
-    //console.log('test');
-    clientStore0.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
-    //console.log('test');
+    clientStore0.dispatch(traitAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
     clientStore0.dispatch(gameEndTurnRequest());
-    //console.log('test');
 
     expect(selectAnimal(User0, 0).getFoodAndFat(), '$Q should get food').equal(1);
     expect(selectAnimal(User1, 0).getFoodAndFat(), '$A should get food').equal(1);
 
     clientStore1.dispatch(traitTakeFoodRequest('$A'));
     expect(selectGame().question, 'Game asks question 2').ok;
-    clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
+    clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
     clientStore1.dispatch(gameEndTurnRequest());
 
     expect(selectAnimal(User0, 0).getFoodAndFat(), '$Q should get food').equal(2);
@@ -131,7 +128,7 @@ players:
 
     clientStore0.dispatch(traitTakeFoodRequest('$W'));
     expect(selectGame().question, 'Game asks question 3').ok;
-    clientStore0.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
+    clientStore0.dispatch(traitAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
     clientStore0.dispatch(gameEndTurnRequest());
 
     expect(selectAnimal(User0, 1).getFoodAndFat(), '$W should get food').equal(1);
@@ -139,7 +136,7 @@ players:
 
     clientStore1.dispatch(traitTakeFoodRequest('$S'));
     expect(selectGame().question, 'Game asks question 4').ok;
-    clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
+    clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
     clientStore1.dispatch(gameEndTurnRequest());
 
     expect(selectAnimal(User0, 1).getFoodAndFat(), '$W should get food').equal(2);
@@ -160,9 +157,7 @@ players:
 
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
     expect(selectGame().question, 'Game asks question').ok;
-    clientStore0.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
-    expect(selectGame().question, 'Game asks question').ok;
-    clientStore0.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitTailLoss'));
+    clientStore0.dispatch(traitAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
 
     expect(selectAnimal(User0, 0), '$A dead').undefined;
     expect(selectAnimal(User1, 0).getFoodAndFat(), '$B should get food').equal(1);
