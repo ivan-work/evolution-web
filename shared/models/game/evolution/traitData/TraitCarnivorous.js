@@ -4,6 +4,7 @@ import {
   server$traitKillAnimal
   , server$startFeeding
 } from '../../../../actions/actions';
+import {TraitMimicry} from './index';
 
 export const TraitCarnivorous = {
   type: 'TraitCarnivorous'
@@ -14,16 +15,29 @@ export const TraitCarnivorous = {
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: ({game, sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}) => (dispatch, getState) => {
-      //if (mimicry) {
-      //  askUser()
-      //    .then()
-      //}
+    //game.eventAttack(sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal)
+
+    //let huntingPromise = new Promise.resolve({sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal});
+    //const mimicryTrait = targetAnimal.hasTrait(TraitMimicry.type);
+    //if (mimicryTrait) {
+    //  huntingPromise = huntingPromise
+    //    .then(({game, sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}) => {
+    //      dispatch(mimicryTrait.dataModel.action({game, sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}))
+    //    });
+    //}
+
+    //if (mimicry) {
+    //  askUser()
+    //    .then()
+    //}
+    //huntingPromise.then(({sourcePlayerId, sourceAnimal, targetPlayerId, targetAnimal}) => {
       dispatch(server$traitKillAnimal(game.id, sourcePlayerId, sourceAnimal.id, targetPlayerId, targetAnimal.id));
       dispatch(server$startFeeding(game.id, sourceAnimal, 2));
+    //});
 
-      // dispatch(traitMimicryAsk)
-      // dispatch(traitMimicryRequest)
-      // dispatch(traitScavenger)
+    // dispatch(traitMimicryAsk)
+    // dispatch(traitMimicryRequest)
+    // dispatch(traitScavenger)
   }
   , checkAction: (game, sourceAnimal) => {
     if (TraitCarnivorous.cooldowns.some(([link, place]) =>

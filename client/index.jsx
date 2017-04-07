@@ -26,7 +26,6 @@ import 'react-mdl/extra/material.min.js'
 import './styles/style.scss';
 
 // Services
-import {UserService} from './services/UserService';
 import {animationMiddleware} from './services/AnimationService';
 
 const reducer = combineReducers({
@@ -45,8 +44,6 @@ const store = configureStore(reducer, void 0, [
 const history = syncHistoryWithStore(store, browserHistory);
 
 socketStore(socketClient, store);
-
-UserService.start(store.getState);
 
 ReactDOM.render(
   <Root store={store} history={history}>

@@ -9,6 +9,8 @@ import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
 
 import { TraitModel } from '../../../shared/models/game/evolution/TraitModel';
 
+import './AnimalTrait.scss';
+
 export const ANIMAL_TRAIT_SIZE = {
   width: 60
   , height: 20
@@ -22,7 +24,6 @@ class _AnimalTrait extends React.Component {
   static propTypes = {
     trait: React.PropTypes.instanceOf(TraitModel).isRequired
     , owner: React.PropTypes.object.isRequired
-    , index: React.PropTypes.number.isRequired
     // by DragSource
     , connectDragSource: React.PropTypes.func
     , isDragging: React.PropTypes.bool
@@ -44,7 +45,7 @@ class _AnimalTrait extends React.Component {
   }
 
   render() {
-    const {trait, index, connectDragSource, isDragging, canDrag} = this.props;
+    const {trait, connectDragSource, isDragging, canDrag} = this.props;
 
     const className = classnames({
       AnimalTrait: true
@@ -54,8 +55,7 @@ class _AnimalTrait extends React.Component {
     });
 
     const body = <div className={className} style={{
-      top: `-${(index + 1) * ANIMAL_TRAIT_SIZE.height}px`
-      , width: ANIMAL_TRAIT_SIZE.width + 'px'
+      width: ANIMAL_TRAIT_SIZE.width + 'px'
       , height: ANIMAL_TRAIT_SIZE.height + 'px'
     }}>{trait.type.replace('Trait', '')}</div>;
 

@@ -77,19 +77,6 @@ $CURRENT_TURN_BACKGROUND: #dfd;
     //position: absolute;
     //bottom: 0;
 
-    .AnimalTrait {
-      width: 100%;
-      font-size: 10px;
-      word-wrap: break-word;
-      outline: 1px solid black;
-      background: #9fe1e7;
-      position: absolute;
-      //top: -1em;
-      &.draggable.canDrag {
-        background: #f90;
-      }
-    }
-
     .inner {
       width: 100%;
       height: 100%;

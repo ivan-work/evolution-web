@@ -9,8 +9,6 @@ export class UserServiceClass {
   get(userId) {
     return this.getState().getIn(['online', userId]);
   }
-}
-
-export const UserService = new UserServiceClass();
+};
 
 export const UserServicePropType = PropTypes.instanceOf(UserServiceClass).isRequired;
