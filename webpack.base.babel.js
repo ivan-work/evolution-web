@@ -9,7 +9,7 @@ module.exports = (options) => ({
   entry: options.entry,
   output: Object.assign({ // Compile into js/build.js
     path: path.resolve(process.cwd(), 'dist'),
-    publicPath: 'http://localhost:8080/',
+    publicPath: 'http://localhost:3000/',
   }, options.output), // Merge with env dependent settings
   module: {
     loaders: [{

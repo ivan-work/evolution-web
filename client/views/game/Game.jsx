@@ -85,8 +85,8 @@ export class Game extends React.Component {
     if (!user || !game) return <div>Loading</div>;
     const disabled = game.status.player != game.getPlayer().index;
     const player = game.getPlayer();
-    console.log('GameRender: =====')
-    console.log('game', game.deck)
+    //console.log('GameRender: =====')
+    //console.log('game', game.status.player, game.getPlayer().index, game.status.player != game.getPlayer().index)
     //console.log('game', CARD_POSITIONS[game.players.size], game.players.size)
     return <div className="Game">
 
@@ -108,17 +108,14 @@ export class Game extends React.Component {
           ref="Deck" name="Deck"
           shift={[1, 2]}
           count={game.deck}>
-          {/*{Array.from({length: game.deck}, (u, i) => <UnknownCard key={i} index={i}/>)}*/}
+          {/*Array.from({length: game.deck}, (u, i) => <Card key={i} index={i}/>)*/}
         </CardCollection>
       </div>
 
       {/* USER */}
 
       <div className='PlayerWrapper UserWrapper' style={CARD_POSITIONS[game.players.size].player}>
-        <PlayerContinent onCardDropped={this.$deployAnimal}>
-          {player.continent.toArray().map((animal, i) =>
-            <DropTargetAnimal index={i} key={i} model={animal} onCardDropped={this.$deployTrait}/>)}
-        </PlayerContinent>
+        <PlayerContinent continent={player.continent} $deployAnimal={this.$deployAnimal} $deployTrait={this.$deployTrait}/>
 
         <CardCollection
           ref="Hand" name="Hand"
@@ -142,8 +139,8 @@ export class Game extends React.Component {
                 {enemy.hand.toArray().map((cardModel, i) => <Card model={cardModel} key={i} index={i}/>)}
               </CardCollection>
               <EnemyContinent>
-                {enemy.continent.toArray().map((animal, i) =>
-                  <DropTargetAnimal key={i} index={i} onCardDropped={this.$deployTrait}/>)}
+                {/*enemy.continent.toArray().map((animal, i) =>
+                  <DropTargetAnimal key={i} index={i} onCardDropped={this.$deployTrait}/>)*/}
               </EnemyContinent>
             </div>
           })

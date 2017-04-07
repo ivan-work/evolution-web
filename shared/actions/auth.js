@@ -29,7 +29,7 @@ export const socketDisconnect = (connectionId, reason) => (dispatch, getState) =
   if (!!user) {
     if (reason !== SOCKET_DISCONNECT_NOW) {
       dispatch(addTimeout(
-        !process.env.TEST ? 10000 : 1
+        !process.env.TEST ? 5*60*10000 : 1
         , 'logoutUser' + user.id
         , logoutUser(user.id)));
     } else {

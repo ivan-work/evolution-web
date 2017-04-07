@@ -28,6 +28,9 @@
         &:hover {
           background: #9f9;
         }
+        //&.highlight {
+        //  background-color: #9f9;
+        //}
       }
     }
 
@@ -48,7 +51,11 @@
       .animals-container-inner {
         display: inline-block;
         .animal-wrapper {
+          transition: width .1s;
           display: inline-block;
+          &.highlight {
+            box-shadow: 0px 0px 1em 1em yellow;
+          }
         }
       }
     }

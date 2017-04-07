@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
+import classnames from 'classnames';
 import { AnimalModel } from '~/shared/models/game/evolution/AnimalModel';
 import { DropTarget } from 'react-dnd';
 
@@ -17,6 +18,7 @@ export class Animal extends React.Component {
   static propTypes = {
     model: React.PropTypes.instanceOf(AnimalModel).isRequired
     , index: React.PropTypes.number.isRequired
+    , onOver: React.PropTypes.func
   };
 
   constructor(props) {
@@ -41,6 +43,9 @@ export const DropTargetAnimal = DropTarget("Card", {
   drop(props, monitor, component) {
     const {card} = monitor.getItem();
     props.onCardDropped(card, props.model);
+  }
+  , hover(props, monitor, component) {
+    props.onOver(monitor.isOver({shallow: true}), props.index);
   }
 }, (connect, monitor) => ({
   connectDropTarget: connect.dropTarget(),
