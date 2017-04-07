@@ -5,13 +5,14 @@ import {AnimalModel} from '~/shared/models/game/evolution/AnimalModel';
 
 import {
   gameStart
-  , gamePlayerStatusChange
+  , gamePlayerReadyChange
   , gameGiveCards
   , gameNextPlayer
   , gameDeployAnimal
   , gameDeployTrait
   , gameEndTurn
   , gameEnd
+  , gamePlayerLeft
   , gameStartEat
   , gameStartDeploy
   , playerActed
@@ -25,15 +26,16 @@ export const reducer = createReducer(null, {
   , gameCreateSuccess: (state, {game}) => game
   //, roomExitSuccess: (state, {userId}, currentUserId) => userId === currentUserId ? state : null //TODO do something
   , clientDisconnectSelf: (state, data) => null
-
   , gameStart
-  , gamePlayerStatusChange
+  , gamePlayerReadyChange
   , gameGiveCards
   , gameNextPlayer
   , gameDeployAnimal
   , gameDeployTrait
   , gameEndTurn
   , gameEnd
+  , gamePlayerLeft: (game) => null
+  , gamePlayerLeftNotification: gamePlayerLeft
   , gameStartEat
   , gameStartDeploy
   , playerActed

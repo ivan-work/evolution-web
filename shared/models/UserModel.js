@@ -3,19 +3,11 @@ import {Record} from 'immutable';
 import jwt from 'jsonwebtoken';
 import uuid from 'node-uuid';
 
-export const STATUS = {
-  ONLINE: 'ONLINE'
-  , OFFLINE: 'OFFLINE'
-  , LOADING: 'LOADING'
-  , READY: 'READY'
-};
-
 export class UserModel extends Record({
   id: null
   , login: null
   , connectionId: null
   , token: null
-  , state: STATUS.OFFLINE
 }) {
   static new(login, connectionId) {
     return new UserModel({

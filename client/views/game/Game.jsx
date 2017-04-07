@@ -3,7 +3,7 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import * as MDL from 'react-mdl';
 import cn from 'classnames';
 
-import {UserModel, STATUS} from '../../../shared/models/UserModel';
+import {UserModel} from '../../../shared/models/UserModel';
 import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 
 import {GAME_POSITIONS} from './GAME_POSITIONS';
@@ -56,9 +56,6 @@ class _Game extends React.Component {
               Player: true
               , isPlayerTurn: game.isPlayerTurn(player.id)
               });
-            const status = player.status === STATUS.READY
-              ? ''
-              : '';
             //let status;
             //switch (player.status) {
             //  case 'READY':

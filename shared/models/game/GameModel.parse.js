@@ -6,7 +6,6 @@ import {GameModel, StatusRecord} from './GameModel';
 import {PlayerModel} from './PlayerModel';
 import {AnimalModel} from './evolution/AnimalModel';
 import {TraitModel} from './evolution/TraitModel';
-import {STATUS} from '../UserModel';
 import * as cardClasses from './evolution/cards';
 import yaml from 'yaml-js';
 
@@ -58,7 +57,7 @@ export const parse = (room, string = '') => {
       id
       , hand: parseCardList(seed.players && seed.players[index] && seed.players[index].hand || '')
       , continent: parseAnimalList(id, seed.players && seed.players[index] && seed.players[index].continent || '')
-      , status: STATUS.READY
+      , ready: true
       , index
       , ended: false
     });
