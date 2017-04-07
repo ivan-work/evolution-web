@@ -12,17 +12,17 @@ export const TEST_DECK_SIZE = 24;
 export const TEST_HAND_SIZE = 6;
 
 export const PHASE = {
-  NONE: 0
+  PREPARE: 0
   , DEPLOY: 1
-  , EAT: 2
-  , DIE: 3
+  , FEEDING: 2
+  , EXTINCTION: 3
 };
 
 export const StatusRecord = Record({
   turn: 0
   , round: 0
   , player: 0
-  , phase: PHASE.NONE
+  , phase: PHASE.PREPARE
 });
 
 const rollDice = () => Math.floor(6 * Math.random()) + 1;

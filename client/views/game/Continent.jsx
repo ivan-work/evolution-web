@@ -1,12 +1,18 @@
 import React from 'react';
+import PureRenderMixin from 'react-addons-pure-render-mixin';
+import {connect} from 'react-redux';
 import {List} from 'immutable';
 import classnames from 'classnames';
 import {DropTargetContinentZone} from './ContinentZone.jsx'
 import {DropTargetAnimal} from './Animal.jsx';
+import {
+  gameDeployAnimalRequest
+  , gameDeployTraitRequest
+} from '~/shared/actions/actions';
 
 import {ANIMAL_SIZE} from './Animal.jsx'
 
-export class PlayerContinent extends React.Component {
+export class Continent extends React.Component {
   static propTypes = {
     $deployAnimal: React.PropTypes.func
     , $deployTrait: React.PropTypes.func
@@ -20,18 +26,13 @@ export class PlayerContinent extends React.Component {
 
   constructor(props) {
     super(props);
+    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     this.onOver = this.onOver.bind(this);
-    this.onOverZone = this.onOverZone.bind(this);
-    this.onOverAnimal = this.onOverAnimal.bind(this);
-    this.state = {overIndex: null, overAnimal: null}
-  }
-
-  onOverZone(isOver, index) {
-    this.onOver(isOver, false, index);
-  }
-
-  onOverAnimal(isOver, index) {
-    this.onOver(isOver, true, index);
+    this.onOverZone = (isOver, index) => this.onOver(isOver, false, index);
+    this.onOverAnimal = (isOver, index) => this.onOver(isOver, true, index);
+    this.$deployAnimal = (card, zoneIndex) => this.props.$deployAnimal(card.id, zoneIndex);
+    this.$deployTrait = (card, animal) => this.props.$deployTrait(card.id, animal.id);
+    this.state = {overIndex: null, overAnimal: false}
   }
 
   onOver(isOver, isAnimal, index) {
@@ -39,7 +40,7 @@ export class PlayerContinent extends React.Component {
       this.setState({overAnimal: isAnimal, overIndex: index});
       //} else if (this.state.overAnimal === isAnimal && this.state.overIndex === index) {
     } else {
-      this.setState({overAnimal: null, overIndex: null});
+      this.setState({overAnimal: false, overIndex: null});
     }
   }
 
@@ -53,7 +54,7 @@ export class PlayerContinent extends React.Component {
         'animal-placeholder': true
         , 'highlight': this.state.overAnimal && this.state.overIndex === index
         })}
-      onCardDropped={this.props.$deployAnimal}
+      onCardDropped={this.$deployAnimal}
       onOver={this.onOverZone}>
     </DropTargetContinentZone>
   }
@@ -69,13 +70,17 @@ export class PlayerContinent extends React.Component {
         index={index}
         model={animal}
         onOver={this.onOverAnimal}
-        onCardDropped={this.props.$deployTrait}/>
+        onCardDropped={this.$deployTrait}/>
     </div>
   }
 
   render() {
     const {continent} = this.props;
-    return <div className="PlayerContinent">
+    const className = classnames({
+      Continent: true
+      , UserContinent: this.props.isUserContinent
+    });
+    return <div className={className}>
       <div className="animals-container-outer">
         <div className="animals-container-inner">
           {this.renderPlaceholderWrapper(0)}

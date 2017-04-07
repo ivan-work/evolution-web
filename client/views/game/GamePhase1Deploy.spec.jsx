@@ -80,18 +80,18 @@ describe('Game: Deploying:', () => {
     expect($Game.find('.animal-wrapper')).length(0);
 
     dndBackend.simulateBeginDrag([clientCardHID($Game, 0)]);
+    expect($Game.find('.ContinentZone.highlight')).length(0);
     dndBackend.simulateHover([clientContinentZoneHID($Game, 0)]);
-    dndBackend.simulateHover([clientContinentZoneHID($Game, 0)]);
-    expect($Game.find('.animal-wrapper')).length(1);
+    expect($Game.find('.ContinentZone.highlight')).length(1);
     dndBackend.simulateDrop();
     dndBackend.simulateEndDrag();
+    expect($Game.find('.ContinentZone.highlight')).length(0);
     expect(deployAnimal).eql({
       cardId: 'card0'
       , animalPosition: 0
     });
 
     dndBackend.simulateBeginDrag([clientCardHID($Game, 1)]);
-    dndBackend.simulateHover([clientContinentZoneHID($Game, 0)]);
     dndBackend.simulateHover([clientContinentZoneHID($Game, 0)]);
     dndBackend.simulateDrop();
     dndBackend.simulateEndDrag();
@@ -121,10 +121,12 @@ describe('Game: Deploying:', () => {
     expect($Game.find('.animal-wrapper')).length(2);
 
     // Deploy Animal
+    expect($Game.find('.ContinentZone')).length(3);
+    expect($Game.find('.ContinentZone.highlight')).length(0);
     dndBackend.simulateBeginDrag([clientCardHID($Game, 2)]);
     dndBackend.simulateHover([clientContinentZoneHID($Game, 1)]);
-    dndBackend.simulateHover([clientContinentZoneHID($Game, 1)]);
-    expect($Game.find('.animal-wrapper')).length(3);
+    expect($Game.find('.ContinentZone')).length(3);
+    expect($Game.find('.ContinentZone.highlight')).length(1);
     dndBackend.simulateDrop();
     dndBackend.simulateEndDrag();
     expect(deployAnimal).eql({

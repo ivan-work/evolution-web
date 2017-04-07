@@ -158,10 +158,23 @@ describe('Rooms:', function () {
       clientStore0.dispatch(roomJoinRequest(Room0.id));
       clientStore1.dispatch(roomJoinRequest(Room0.id));
       clientStore1.dispatch(roomJoinRequest(Room1.id));
-      const newRoom0 = serverStore.getState().getIn(['rooms', Room0.id]);
       const newRoom1 = serverStore.getState().getIn(['rooms', Room1.id]);
-      expect(newRoom0.users).equal(List.of(User0.id));
-      expect(newRoom1.users).equal(List.of(User1.id));
+      expect(serverStore.getState().getIn(['rooms', Room0.id, 'users'])).equal(List.of(User0.id));
+      expect(serverStore.getState().getIn(['rooms', Room1.id, 'users'])).equal(List.of(User1.id));
+    });
+    it('User0 creates another room', () => {
+      const Room0 = RoomModel.new();
+      const [serverStore, {clientStore0, User0}]= mockStores(2, Map({
+        rooms: Map({
+          [Room0.id]: Room0
+        })
+      }));
+      clientStore0.dispatch(roomJoinRequest(Room0.id));
+      clientStore0.dispatch(roomCreateRequest());
+      const Room1id = clientStore0.getState().get('room');
+      expect(Room0.id).not.equal(Room1id);
+      const Room1 = serverStore.getState().getIn(['rooms', Room1id]);
+      expect(serverStore.getState().get('rooms')).equal(Map({[Room1id]: Room1}))
     });
   });
 });
