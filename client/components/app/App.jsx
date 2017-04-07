@@ -1,6 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {logoutAndRedirect} from 'actions';
+//import {logoutAndRedirect} from 'actions';
 
 import {Layout, Header, Navigation, Drawer, Content} from 'react-mdl';
 

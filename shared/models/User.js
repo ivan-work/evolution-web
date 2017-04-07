@@ -1,4 +1,3 @@
-import {ObjectID} from 'mongodb';
 import {Record} from 'immutable';
 
 export class UserRecord extends Record({

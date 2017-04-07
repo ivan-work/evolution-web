@@ -1,3 +1,4 @@
+import {push} from 'react-router-redux';
 import {User} from '../models/User';
 
 export const socketConnect = (connectionId, socket) => ({
@@ -13,7 +14,7 @@ export const socketDisconnect = (connectionId) => ({
 export const loginUserRequest = (redirect = "/", login, password) => {
   return {
     type: 'loginUserRequest'
-    , data: {login}
+    , data: {login: login}
     , meta: {
       server: true
     }
@@ -36,7 +37,7 @@ export const loginUserFailure = (connectionId, msg) => ({
   }
 });
 
-export const clientToServer = {
+export const authClientToServer = {
   loginUserRequest: (connectionId, data) => (dispatch, getState) => {
     const username = data.login;
     const state = getState().get('users');
@@ -50,9 +51,14 @@ export const clientToServer = {
   }
 };
 
-export const serverToClient = {
+export const authServerToClient = {
   loginUserSuccess: (data) => {
-
+    console.log('login user success')
+    push('/lobbies');
+    return {
+      type: 'loginUserSuccess'
+      , data: data
+    }
   }
 };
 

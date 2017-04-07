@@ -1,6 +1,6 @@
 import socketio from 'socket.io'
 import {ObjectID} from 'mongodb';
-import {socketConnect, socketDisconnect, clientToServer} from '../../shared/actions/actions'
+import {socketConnect, socketDisconnect, clientToServer} from '../shared/actions/actions'
 
 let connectionIds = 0;
 
@@ -28,8 +28,9 @@ export const socketStore = (serverSocket, store) => {
 };
 
 export const socketMiddleware = socket => store => next => action => {
-  if (action.meta && action.meta.client && store.has(action.meta.client)) {
-    const clientSocket = connections.get(action.meta.client);
+  const state = store.getState().get('connections');
+  if (action.meta && action.meta.connectionId && state.has(action.meta.connectionId)) {
+    const clientSocket = state.get(action.meta.connectionId);
     clientSocket.emit('action', action);
   }
   return next(action);

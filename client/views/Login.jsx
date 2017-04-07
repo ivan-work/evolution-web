@@ -3,14 +3,14 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import LinkedStateMixin from 'react-addons-linked-state-mixin';
 import { bindActionCreators } from 'redux';
 import {connect} from 'react-redux';
-import * as actionCreators from 'actions'
+import {loginUserRequest} from '~/shared/actions/actions';
 import * as MDL from 'react-mdl';
 
 export const Login = React.createClass({
   mixins: [PureRenderMixin, LinkedStateMixin]
   , getInitialState: function () {
     return {
-      username: '',
+      login: '',
       password: '',
       redirectTo: this.props.location.query.next || '/'
     };
@@ -20,11 +20,11 @@ export const Login = React.createClass({
   }
   , login: function (e) {
     e.preventDefault();
-    this.props.actions.loginUserRequest(this.state.username, this.state.password, this.state.redirectTo);
+    this.props.actions.loginUserRequest(this.state.redirectTo, this.state.login, this.state.password);
   }
   , render: function () {
-    const usernameLink = this.linkState('username');
-    var handleChange = (e) => usernameLink.requestChange(e.target.value);
+    const loginLink = this.linkState('login');
+    var handleChange = (e) => loginLink.requestChange(e.target.value);
 
     return (
       <div>
@@ -34,7 +34,7 @@ export const Login = React.createClass({
           <MDL.Textfield
             type='text'
             floatingLabel
-            value={usernameLink.value}
+            value={loginLink.value}
             onChange={handleChange}
             label='Username'
           />
@@ -64,6 +64,6 @@ export const LoginView = connect(
     isAuthenticating: state.getIn(['auth', 'isAuthenticating'])
     , statusText: state.getIn(['auth', 'statusText'])
   }),
-  (dispatch) => ({actions: bindActionCreators(actionCreators, dispatch)})
+  (dispatch) => ({actions: bindActionCreators({loginUserRequest}, dispatch)})
 )(Login);
 
