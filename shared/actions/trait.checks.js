@@ -11,10 +11,7 @@ import {
 } from '../models/game/evolution/constants';
 
 export const checkTraitActivation = (game, sourcePid, sourceAid, traitId, targetId, ...params) => {
-  checkGameDefined(game);
   const gameId = game.id;
-  checkGameHasUser(game, sourcePid);
-  //checkPlayerTurnAndPhase(game, sourcePid, PHASE.FEEDING); defence traits
   const sourceAnimal = checkPlayerHasAnimal(game, sourcePid, sourceAid);
   const trait = sourceAnimal.traits.find(trait => trait.id === traitId || trait.type === traitId);
   if (!trait) {

@@ -23,7 +23,8 @@ import {
   checkGameDefined
   , checkGameHasUser
   , checkPlayerHasCard
-  , checkPlayerTurnAndPhase
+  , checkPlayerCanAct
+  , checkGamePhase
   , checkValidAnimalPosition
 } from './checks';
 
@@ -449,7 +450,7 @@ export const gameClientToServer = {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
-    checkPlayerTurnAndPhase(game, userId);
+    checkPlayerCanAct(game, userId);
     dispatch(server$gameEndTurn(gameId, userId));
   }
   , gameDeployAnimalRequest: ({gameId, cardId, animalPosition = 0}, {userId}) => (dispatch, getState) => {
@@ -457,7 +458,8 @@ export const gameClientToServer = {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
-    checkPlayerTurnAndPhase(game, userId, PHASE.DEPLOY);
+    checkGamePhase(game, PHASE.DEPLOY);
+    checkPlayerCanAct(game, userId);
     checkValidAnimalPosition(game, userId, animalPosition);
     const cardIndex = checkPlayerHasCard(game, userId, cardId);
     const card = game.getPlayer(userId).hand.get(cardIndex);
@@ -475,7 +477,8 @@ export const gameClientToServer = {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
-    checkPlayerTurnAndPhase(game, userId, PHASE.DEPLOY);
+    checkGamePhase(game, PHASE.DEPLOY);
+    checkPlayerCanAct(game, userId);
 
     const cardIndex = checkPlayerHasCard(game, userId, cardId);
     const card = game.players.get(userId).hand.get(cardIndex);

@@ -101,7 +101,7 @@ settings:
     clientStore0.dispatch(gameEndTurnRequest());
   });
 
-  it('$A carn, $B Mimicry $C TailLoss fat', async () => {
+  it('Instant question resolves to complex question: $A attacks $B, gets redirected to $C, question should exist', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
 
     const gameId = ParseGame(`
@@ -113,6 +113,41 @@ players:
     const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
     expect(clientStore0.getState().getIn(['game', 'question', 'id']), 'Game has question').ok
+    expect(selectGame().getIn(['question', 'id']), 'Server game has question').ok
+  });
+
+  it('Attacker should not act when questioning', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+
+    const gameId = ParseGame(`
+phase: 2
+food: 5
+players:
+  - continent: $Q carn graz piracy hiber +
+  - continent: $A tail mimi carn graz piracy hiber +
+`);
+    const {selectGame, selectPlayer, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$A'));
+
+    expectUnchanged('split this if you have problems', () => {
+      clientStore0.dispatch(gameEndTurnRequest());
+      clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+      clientStore0.dispatch(traitActivateRequest('$Q', 'TraitGrazing'));
+      clientStore0.dispatch(traitActivateRequest('$Q', 'TraitHibernate'));
+      clientStore0.dispatch(traitActivateRequest('$Q', 'TraitPiracy', '$A'));
+    }, serverStore, clientStore0, clientStore1);
+
+    expectUnchanged('User1 cannot do anything', () => {
+      clientStore1.dispatch(gameEndTurnRequest());
+      clientStore1.dispatch(traitTakeFoodRequest('$A'));
+      clientStore1.dispatch(traitActivateRequest('$A', 'TraitGrazing'));
+      clientStore1.dispatch(traitActivateRequest('$A', 'TraitHibernate'));
+      clientStore1.dispatch(traitActivateRequest('$A', 'TraitPiracy', '$Q'));
+    }, serverStore, clientStore0, clientStore1);
+
+    expectChanged('User1 can only answer', () => {
+      clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', selectTraitId(User1, 0, 1)));
+    }, serverStore, clientStore0, clientStore1);
   });
 });
 

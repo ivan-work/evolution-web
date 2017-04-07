@@ -59,6 +59,31 @@ export const checkPlayerHasAnimal = (game, userId, animalId) => {
   return animal;
 };
 
+export const checkPlayerTurn = (game, userId) => {
+  if (game.players.get(userId).index !== game.status.currentPlayer) {
+    throw new ActionCheckError(`checkPlayerTurn@Game(${game.id})`
+      , `Player(%s@%s) acting on Player(%s)'s turn`
+      , userId, game.players.get(userId).index, game.status.currentPlayer);
+  }
+};
+
+export const checkPlayerCanAct = (game, userId) => {
+  if (!game.question) {
+    checkPlayerTurn(game, userId);
+  } else {
+    const {sourcePid, targetPid} = game.question;
+    throw new ActionCheckError(`checkPlayerCanAct@Game(${game.id})`
+      , `Player(%s) acting on Target(%s) answering`
+      , userId, targetPid);
+  }
+};
+
+export const checkGamePhase = (game, phase) => {
+  if (game.status.phase !== phase) {
+    throw new ActionCheckError(`checkGamePhase@Game(${game.id})`, 'Wrong phase (%s)', game.status.phase);
+  }
+};
+
 export const checkPlayerTurnAndPhase = (game, userId, phase = -1) => {
   if (~phase && game.status.phase !== phase) {
     throw new ActionCheckError(`checkPlayerTurnAndPhase@Game(${game.id})`, 'Wrong phase (%s)', game.status.phase);
