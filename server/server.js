@@ -4,7 +4,7 @@
 import polyfills from '../shared/utils/polyfills'
 
 var app = require('./app');
-//var debug = require('debug')('sample-app:server');
+var debug = require('debug')('sample-app:server');
 var http = require('http');
 var config = require('./config/config.js');
 
@@ -14,6 +14,7 @@ import thunk from 'redux-thunk';
 import { reduxTimeout } from '~/shared/utils/reduxTimeout'
 import { combineReducers } from 'redux-immutable';
 import {socketServer, socketStore, socketMiddleware} from './socket';
+import {errorMiddleware} from './middleware/error';
 
 /**
  * Create HTTP server and sockets.
@@ -27,7 +28,8 @@ const socket = socketServer(server);
 const store = createStore(
   reducer
   , compose(
-    applyMiddleware(thunk)
+    applyMiddleware(errorMiddleware())
+    , applyMiddleware(thunk)
     , applyMiddleware(reduxTimeout())
     , applyMiddleware(socketMiddleware(socket))
   ));

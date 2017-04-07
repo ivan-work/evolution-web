@@ -54,16 +54,6 @@ global.Node = global.window.Node;
 //  }
 //});
 
-//let warn = console.error;
-//console.error = function(warning) {
-//  if (/^Warning: (Invalid prop|Failed prop type)/.test(warning)) {
-//    //console.error('uhh', warning)
-//    console.log(warning);
-//    throw new Error('Invalid prop/Failed prop type');
-//  }
-//  warn.apply(console, arguments);
-//};
-
 process.env.TEST = true;
 process.env.DEBUG = '*';
 process.env.JWT_SECRET = 'secret';

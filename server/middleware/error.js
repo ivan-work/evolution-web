@@ -12,7 +12,6 @@ export const errorMiddleware = interceptor => store => next => action => {
     } else {
       logger.error(`GenericError${actionType}:`, error);
     }
-    return error;
     //next(action);
   }
 };

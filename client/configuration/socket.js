@@ -42,4 +42,7 @@ export const socketStore = (socket, store) => {
       console.error('serverToClient action doesnt exist: ' + action.type);
     }
   });
+  socket.on('error', (error) => {
+    console.error('Client:Error', error);
+  });
 };
