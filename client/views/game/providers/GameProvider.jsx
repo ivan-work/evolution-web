@@ -11,6 +11,8 @@ export const GameProvider = (DecoratedComponent) => class extends React.Componen
     return <DecoratedComponent {...this.props}
       game={game}
       isUserTurn={game.isUserTurn()}
+      isDeploy={game.isDeploy()}
+      isFeeding={game.isFeeding()}
     />
   }
 };

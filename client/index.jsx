@@ -29,7 +29,7 @@ const reducer = combineReducers({
   routing: routerReducer
 });
 
-const socketClient = makeSocketClient(location.host);
+const socketClient = makeSocketClient(location.host, {forceNew: true});
 
 const store = configureStore(reducer, void 0, [
   appRouterMiddleware(browserHistory)

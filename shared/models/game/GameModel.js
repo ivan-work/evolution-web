@@ -153,6 +153,14 @@ export class GameModelClient extends Record({
   isUserTurn() {
     return this.getPlayer().index === this.status.player;
   }
+
+  isDeploy() {
+    return this.status.phase === PHASE.DEPLOY;
+  }
+
+  isFeeding() {
+    return this.status.phase === PHASE.FEEDING;
+  }
 }
 
 GameModelClient.prototype.start = GameModel.prototype.start;

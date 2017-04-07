@@ -31,7 +31,6 @@ class _Game extends React.Component {
   }
 
   render() {
-    console.log('game render');
     const {game} = this.props;
     const player = game.getPlayer();
     const isUserTurn = game.isUserTurn();

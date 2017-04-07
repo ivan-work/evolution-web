@@ -30,7 +30,7 @@ export class Card extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.connectDragPreview)
+    if (this.props.connectDragPreview && !process.env.TEST)
       this.props.connectDragPreview(getEmptyImage());
   }
 
@@ -57,18 +57,22 @@ export class Card extends React.Component {
   }
 }
 
-export const DragCardPreview = ({offset, velocity, afterStart, card}) => {
+export const DragCardPreview = ({offset, velocity, afterStart, card, animationCounter}) => {
   if (!offset) return null;
   const {x, y} = offset;
-  const VELOCITY = 2;
+  const translate = afterStart ? `translate(${-CARD_SIZE.width / 2}px, ${-CARD_SIZE.height / 2}px)` : '';
   return <div className='Card' style={{
     ...CARD_SIZE
-    , transform: `translate(${x}px, ${y}px) perspective(400px) rotateY(${-velocity.x * VELOCITY}deg) rotateX(${velocity.y * VELOCITY}deg)`
-    , transition: 'box-shadow .5s'
+    //, transform: `translate(${x}px, ${y}px) perspective(400px) rotateY(${velocity.x * VELOCITY}deg) rotateX(${-velocity.y * VELOCITY}deg)`
+    , left: x + 'px'
+    , top: y + 'px'
+    , position: 'absolute'
+    , transform: `${translate} perspective(400px) rotateY(${velocity.x}deg) rotateX(${-velocity.y}deg)`
+    , transition: 'box-shadow .5s, transform .2s'
     , boxShadow: afterStart ? '5px 5px 5px black' : ''
     }}>
     <div className='inner'>
-      {card.name} {velocity.x * VELOCITY} {velocity.y * VELOCITY}
+      {card.name} {velocity.x} {velocity.y}
     </div>
   </div>
 };

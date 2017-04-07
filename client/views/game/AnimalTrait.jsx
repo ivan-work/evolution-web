@@ -10,6 +10,11 @@ import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
 
 import { TraitModel } from '~/shared/models/game/evolution/TraitModel';
 
+export const ANIMAL_TRAIT_SIZE = {
+  width: 60
+  , height: 20
+};
+
 class _AnimalTrait extends React.Component {
   static defaultProps = {
     isUserTurn: false
@@ -28,7 +33,7 @@ class _AnimalTrait extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.connectDragPreview) {
+    if (this.props.connectDragPreview && !process.env.TEST) {
       this.props.connectDragPreview(getEmptyImage());
     }
   }
@@ -43,7 +48,11 @@ class _AnimalTrait extends React.Component {
       , isDragging: isDragging
     });
 
-    const body = <div className={className} style={{top: `-${(index + 1) * 1.6}em`}}>{trait.type.replace('Trait', '')}</div>;
+    const body = <div className={className} style={{
+      top: `-${(index + 1) * ANIMAL_TRAIT_SIZE.height}px`
+      , width: ANIMAL_TRAIT_SIZE.width + 'px'
+      , height: ANIMAL_TRAIT_SIZE.height + 'px'
+    }}>{trait.type.replace('Trait', '')}</div>;
 
     return connectDragSource ? connectDragSource(body) : body;
   }
@@ -52,7 +61,7 @@ class _AnimalTrait extends React.Component {
 const _DraggableAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
   , {
     beginDrag: (props) => ({trait: props.trait, owner: props.owner})
-    , canDrag: (props, monitor) => props.isUserTurn && props.trait.dataModel.checkAction(props.game, props.owner)
+    , canDrag: (props, monitor) => props.isUserTurn && props.isFeeding && props.trait.dataModel.checkAction(props.game, props.owner)
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource()
