@@ -2,6 +2,8 @@ import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
+import './Food.scss';
+
 import {GameProvider} from './providers/GameProvider.jsx';
 
 import { DragSource } from 'react-dnd';
@@ -9,38 +11,43 @@ import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
 
 import {TRAIT_COOLDOWN_LINK} from '../../../shared/models/game/evolution/constants';
 
+//const graphics = ['\u1F345']/*, '&#127814;', '&#127815;'
+//  , '&#127816;', '&#127817;', '&#127818;', '&#127819;', '&#127820;'
+//  , '&#127821;', '&#127822;', '&#127823;', '&#127824;', '&#127825;', '&#127826;', '&#127827;'];*/
+//const getGraphics = () => graphics[Math.floor(Math.random() * graphics.length)];
+
 export class Food extends React.Component {
   static propTypes = {
-    index: React.PropTypes.number.isRequired
-    , disabled: React.PropTypes.bool.isRequired
+    // by DragFood
+    connectDragSource: React.PropTypes.func
+    , canDrag: React.PropTypes.bool
+    , isDragging: React.PropTypes.bool
     // by GameProvider
-    , game: React.PropTypes.object.isRequired
-    , isPlayerTurn: React.PropTypes.bool.isRequired
-    , currentUserId: React.PropTypes.string.isRequired
-    , isDeploy: React.PropTypes.bool.isRequired
-    , isFeeding: React.PropTypes.bool.isRequired
-  };
-
-  static defaultProps = {
-    disabled: false
+    , game: React.PropTypes.object
+    , isPlayerTurn: React.PropTypes.bool
+    , currentUserId: React.PropTypes.string
+    , isDeploy: React.PropTypes.bool
+    , isFeeding: React.PropTypes.bool
   };
 
   constructor(props) {
     super(props);
+    //this.graphics = getGraphics();
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
   }
 
   render() {
-    const {index, canDrag, connectDragSource, connectDragPreview, isDragging} = this.props;
+    const {canDrag, connectDragSource, isDragging} = this.props;
 
     const className = classnames({
       Food: true
-      , disabled: !canDrag
-      , enabled: canDrag
-      , isDragging: isDragging
+      , 'material-icons': true
+      , draggable: connectDragSource
+      , canDrag
+      , isDragging
     });
 
-    const body = <div className={className}></div>;
+    const body = <div className={className}>spa</div>;
 
     return connectDragSource ? connectDragSource(body) : body;
   }
@@ -55,7 +62,6 @@ export const DragFood = GameProvider(DragSource(DND_ITEM_TYPE.FOOD
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource()
-    , connectDragPreview: connect.dragPreview()
     , isDragging: monitor.isDragging()
     , canDrag: monitor.canDrag()
   })
