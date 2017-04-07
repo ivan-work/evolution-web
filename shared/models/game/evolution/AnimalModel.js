@@ -107,16 +107,21 @@ export class AnimalModel extends Record({
   }
 
   getWantedFood() {
-    return (this.foodSize + this.fatSize) - (this.getFood() + this.getFat())
+    return (this.foodSize + this.fatSize) - (this.getFood() + this.getFat());
+  }
+
+  isSaturated() {
+    return this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
+      || this.getNeededFood() <= 0;
   }
 
   isFull() {
     return this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
-      || this.food >= this.foodSize
+      || this.getWantedFood() <= 0;
   }
 
   canSurvive() {
-    return this.isFull()
+    return this.isSaturated()
       || this.getFoodAndFat() >= this.foodSize
   }
 
@@ -128,7 +133,7 @@ export class AnimalModel extends Record({
         .filter(trait => trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === this.id)
         .some(trait => {
           const {animal: hostAnimal} = game.locateAnimal(trait.linkAnimalId);
-          return !hostAnimal.isFull();
+          return !hostAnimal.isSaturated();
         });
   }
 
