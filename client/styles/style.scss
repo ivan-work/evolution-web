@@ -9,6 +9,10 @@ h1, h2, h3, h4, h5, h6 {
   cursor: pointer;
 }
 
+.bold {
+  font-weight: bold;
+}
+
 .layout-padding {
   padding: 2em;
 }
@@ -28,10 +32,6 @@ h1, h2, h3, h4, h5, h6 {
   }
   .Dialog {
     background: white;
-    width: 100%;
-    //margin: 0 auto;
-    min-width: 400px;
-    max-width: 600px;
   }
   .DialogActions {
     margin: 1em;

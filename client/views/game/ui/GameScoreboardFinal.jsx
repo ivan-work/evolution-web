@@ -1,65 +1,73 @@
 import React, {Component} from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import * as MDL from 'react-mdl';
+import {connect} from 'react-redux';
+import cn from 'classnames';
 
-import {GameModelClient} from '../../../../shared/models/game/GameModel';
+import {GameModelClient, PHASE} from '../../../../shared/models/game/GameModel';
 import {Dialog, DialogActions} from '../../utils/Dialog.jsx';
 
 export class GameScoreboardFinal extends Component {
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-    this.state = {showDialog: props.show}
+    this.state = {show: false};
+    this.showedOnce = false;
   }
 
   static propTypes = {
     game: React.PropTypes.instanceOf(GameModelClient).isRequired
   };
 
+  componentDidUpdate() {
+    if (!this.showedOnce && this.props.game.status.phase === PHASE.FINAL) {
+      this.showedOnce = true;
+      this.setState({show: true});
+    }
+  }
+
   render() {
-    const {game} = this.props;
+    const {userId, game, online} = this.props;
 
-    if (!this.state.showDialog) return null;
-
-    return <Dialog>
-      <MDL.DialogTitle>{game.winnerId === game.getPlayer().id ? 'You won :)' : 'You lost :('}</MDL.DialogTitle>
-      <MDL.DialogContent>
-        <table>
-          <tbody>
-          <tr>
-            <th>Player</th>
-            <th>Score</th>
-          </tr>
-          </tbody>
-        </table>
-      </MDL.DialogContent>
-      <DialogActions>
-        <MDL.Button type='button' raised primary onClick={() => this.setState({showDialog: false})}>OK</MDL.Button>
-      </DialogActions>
-    </Dialog>
+    return <div>
+      {game.status.phase === PHASE.FINAL
+        ? <MDL.Button className="ShowScoreboardFinal"
+                      raised
+                      onClick={() => this.setState({show: true})}>Scores</MDL.Button>
+        : null}
+      <Dialog show={this.state.show}>
+        <MDL.DialogTitle>{game.winnerId === game.getPlayer().id ? 'You won :)' : 'You lost :('}</MDL.DialogTitle>
+        <MDL.DialogContent>
+          <table>
+            <tbody>
+            <tr>
+              <th>Player</th>
+              <th>Score</th>
+            </tr>
+            {game.scoreboardFinal && game.scoreboardFinal.map(({playerId, score}) => <tr key={playerId} className={cn({'bold': userId === playerId})}>
+              <td>{online.get(playerId).login}</td>
+              <td>{score}</td>
+            </tr>)}
+            </tbody>
+          </table>
+        </MDL.DialogContent>
+        <DialogActions>
+          <MDL.Button type='button' raised primary onClick={() => this.setState({show: false})}>OK</MDL.Button>
+        </DialogActions>
+      </Dialog>
+    </div>
   }
 }
 
-
-
-//return <Dialog>
-//  <MDL.DialogTitle>{game.winnerId === game.getPlayer().id ? 'You won :)' : 'You lost :('}</MDL.DialogTitle>
-//  <MDL.DialogContent>
-//    <table>
-//      <tbody>
-//      <tr>
-//        <th>Player</th>
-//        <th>Score</th>
-//      </tr>
-//      {game.scoreboardFinal.map(({playerId, score}) => <tr key={playerId}>
-//        <th>{playerId}</th>
-//        <th>{score}</th>
-//      </tr>)}
-//      </tbody>
-//    </table>
-//  </MDL.DialogContent>
-//  <MDL.DialogActions>
-//    <MDL.Button type='button'>Agree</MDL.Button>
-//    <MDL.Button type='button'>Disagree</MDL.Button>
-//  </MDL.DialogActions>
-//</Dialog>
+export const GameScoreboardFinalView = connect(
+  (state) => {
+    return {
+      userId: state.getIn(['user', 'id'])
+      , game: state.getIn(['game'])
+      , online: state.getIn(['online'])
+    }
+  }
+  , (dispatch) => ({})
+  , null
+  , {withRef: true}
+)(GameScoreboardFinal);
