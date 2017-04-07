@@ -279,8 +279,6 @@ players:
 
     clientStore1.disconnect();
 
-    //expect(ClientGame1()).null;
-
     clientStore1.connect(serverStore);
 
     expect(ClientGame1()).ok;

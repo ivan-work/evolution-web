@@ -54,6 +54,11 @@ export const loginUser = ({user, redirect, online, rooms, roomId, game}) => ({
   , data: {user, redirect, online, rooms, roomId, game}
 });
 
+export const loginUserFailure = (error) => ({
+  type: 'loginUserFailure'
+  , data: {error}
+});
+
 export const onlineUpdate = (user) => ({
   type: 'onlineUpdate'
   , data: {user}
@@ -76,7 +81,7 @@ export const server$loginUser = (user, redirect) => (dispatch, getState) => {
 const logoutUser = (userId) => ({
   type: 'logoutUser'
   , data: {userId}
-})
+});
 
 export const server$logoutUser = (userId) => (dispatch, getState) => {
   logger.debug('server$logoutUser', userId);
@@ -107,24 +112,33 @@ const server$loginExistingUser = (requestUser, connectionId) => (dispatch, getSt
   return currentUser.set('connectionId', connectionId);
 };
 
-export const authClientToServer = {
-  loginUserRequest: ({redirect = '/', login = void 0, password = void 0}, {user, connectionId}) => (dispatch, getState) => {
-    let newUser;
-    if (user && user.token) {
-      newUser = dispatch(server$loginExistingUser(user, connectionId));
-      if (!(newUser instanceof UserModel)) logger.debug('server$loginExistingUser failed', newUser);
-    }
-    if (!(newUser instanceof UserModel)) {
-      const validation = new Validator({login, password}, RulesLoginPassword);
-      if (validation.fails()) throw new ActionCheckError('loginUserRequest', 'validation failed: %s', validation);
-
-      if (getState().get('users').find(user => user.login === login))
-        throw new ActionCheckError('loginUserRequest', 'User already exists');
-
-      newUser = UserModel.new(login, connectionId);
-    }
-    dispatch(server$loginUser(newUser, redirect));
+const customErrorReport = (customErrorAction, fn) => (dispatch, getState) => {
+  const result = dispatch(fn);
+  if (result instanceof Error) {
+    dispatch(customErrorAction(result));
   }
+  return result;
+};
+
+export const authClientToServer = {
+  loginUserRequest: ({redirect = '/', login = void 0, password = void 0}, {user, connectionId}) =>
+    customErrorReport((dispatch) => Object.assign(loginUserFailure(), {meta: {socketId: connectionId}}), (dispatch, getState) => {
+      let newUser;
+      if (user && user.token) {
+        newUser = dispatch(server$loginExistingUser(user, connectionId));
+        if (!(newUser instanceof UserModel)) logger.debug('server$loginExistingUser failed', newUser);
+      }
+      if (!(newUser instanceof UserModel)) {
+        const validation = new Validator({login, password}, RulesLoginPassword);
+        if (validation.fails()) throw new ActionCheckError('loginUserRequest', 'validation failed: %s', validation);
+
+        if (getState().get('users').find(user => user.login === login))
+          throw new ActionCheckError('loginUserRequest', 'User already exists');
+
+        newUser = UserModel.new(login, connectionId);
+      }
+      dispatch(server$loginUser(newUser, redirect));
+    })
 };
 
 export const authServerToClient = {
@@ -139,6 +153,10 @@ export const authServerToClient = {
       , game: GameModelClient.fromServer(game, user.id)
     }));
     dispatch(redirectTo(redirect));
+  }
+  , loginUserFailure: ({error}) => (dispatch, getState) => {
+    dispatch(loginUserFailure(error));
+    dispatch(redirectTo('/login'));
   }
   , onlineUpdate: ({user}) => onlineUpdate(UserModel.fromJS(user).toOthers())
   , logoutUser: ({userId}) => logoutUser(userId)

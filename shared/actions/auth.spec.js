@@ -1,4 +1,4 @@
-import {Map, List} from 'immutable';
+import {Map, List, fromJS} from 'immutable';
 import {UserModel} from '../models/UserModel';
 import {SOCKET_DISCONNECT_NOW, loginUserRequest} from './auth';
 
@@ -38,6 +38,19 @@ describe('Auth:', function () {
       expectUnchanged('Login validation', () => {
         clientStore0.dispatch(loginUserRequest('/test', '', 'testPassword'));
       }, serverStore, clientStore0);
+    });
+
+    it('Auth dropped from server', () => {
+      const serverStore = mockServerStore();
+      const clientStore0 = mockClientStore(fromJS({
+        user: new UserModel({id: '1234', token: 'hehe hehe hehe'})
+      })).connect(serverStore);
+
+      clientStore0.dispatch(loginUserRequest('/test'));
+
+      console.log(clientStore0.getActions())
+
+      expect(clientStore0.getState().get('user')).null;
     });
 
     it('User0 connects, User1 connects, User0 logins, User2 connects, User1 logins', () => {
