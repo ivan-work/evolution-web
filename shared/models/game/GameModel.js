@@ -121,24 +121,23 @@ export class GameModel extends Record(GameModelData) {
   }
 
   end() {
-    let scoreboard = [];
-    let winnerId = null;
-    let maxScore = -1;
-    this.players.forEach((player, playerId) => {
-      const score = player.countScore();
-      if (player.playing && score > maxScore) {
-        winnerId = playerId;
-        maxScore = score;
-      }
-      scoreboard.push({
-        playerId
-        , score
-      })
-    });
-    scoreboard = scoreboard.sort((p1, p2) => p1.score < p2.score);
+    const scoreboard = this.players.reduce((result, player, playerId) => result.concat([{
+      playerId
+      , playing: player.playing
+      , scoreNormal: player.countScore()
+      , scoreDead: player.scoreDead
+    }]), []);
+
+    const scoreboardFinal = scoreboard.sort((p1, p2) =>
+      !p1.playing ? 1
+        : !p2.playing ? -1
+        : p2.scoreNormal != p1.scoreNormal ? p2.scoreNormal - p1.scoreNormal
+        : p1.scoreDead != p2.scoreDead ? p2.scoreDead - p1.scoreDead
+        : 1 - Math.round(Math.random()) * 2);
+
     return this
-      .set('scoreboardFinal', scoreboard)
-      .set('winnerId', winnerId)
+      .set('scoreboardFinal', scoreboardFinal)
+      .set('winnerId', scoreboardFinal[0].playerId)
       .setIn(['status', 'phase'], PHASE.FINAL);
   }
 

@@ -12,8 +12,8 @@ export const createAnimationServiceConfig = () => ({
 
     subscribe('gameNextPlayer', (done, {nextPlayerIndex, playerHasOptions}, getState) => {
       const game = getState().get('game');
-      const soundsOn = getState().getIn(['app', 'soundsOn']);
-      if (soundsOn && playerHasOptions && game.getPlayer() && game.getPlayer().index === nextPlayerIndex) {
+      const sound = getState().getIn(['app', 'sound']);
+      if (sound && playerHasOptions && game.getPlayer() && game.getPlayer().index === nextPlayerIndex) {
         audio.play();
       }
       done();
