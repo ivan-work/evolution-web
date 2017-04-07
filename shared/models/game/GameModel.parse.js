@@ -20,8 +20,18 @@ export const parseCardList = string => {
   return GameModel.generateDeck(string
     .split(',')
     .map(raw => {
-      const countAndCard = raw.trim().split(' ');
-      if (countAndCard.length !== 2) return null;
+      let countAndCard = raw.trim().split(' ');
+      if (countAndCard.length === 1) {
+        if (countAndCard[0].length === 0) {
+          return null;
+        } else {
+          countAndCard = [1, countAndCard[0]];
+        }
+      }
+      if (countAndCard.length > 2) {
+        console.warn(`Cannot parse CardAndCount[${raw}]`);
+        return null;
+      }
       const cardClass = searchCardClasses(countAndCard[1]);
       invariant(cardClass, `GameModel.parseCardList: can't find ${countAndCard[1]}`);
       countAndCard[1] = cardClass;

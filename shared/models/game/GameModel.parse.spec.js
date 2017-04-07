@@ -7,14 +7,14 @@ import * as traitData from './evolution/traitData';
 
 describe('GameModel.parse', () => {
   it('parseCardList', () => {
-    const list = GameModel.parseCardList('  1 carn, 2 sharp  ');
+    const list = GameModel.parseCardList('  1 carn, 1 sharp, Parasite  ');
     expect(list.size).equal(3);
     expect(list.get(0).type).equal(cardData.CardCarnivorous.type);
     expect(list.get(0).trait1.type).equal(traitData.TraitCarnivorous.type);
     expect(list.get(1).type).equal(cardData.CardSharpVision.type);
     expect(list.get(1).trait1.type).equal(traitData.TraitSharpVision.type);
-    expect(list.get(2).type).equal(cardData.CardSharpVision.type);
-    expect(list.get(2).trait1.type).equal(traitData.TraitSharpVision.type);
+    expect(list.get(2).type).equal(cardData.CardParasiteAndCarnivorous.type);
+    expect(list.get(2).trait1.type).equal(traitData.TraitParasite.type);
 
     expect(GameModel.parseCardList(''), 'parseCardList(empty)').equal(List());
   });
