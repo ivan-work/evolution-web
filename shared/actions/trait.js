@@ -39,45 +39,19 @@ export const traitTakeFoodRequest = (animalId) => (dispatch, getState) => dispat
   , meta: {server: true}
 });
 
-export const traitActivateRequest = (sourceAid, traitType, targetId) => (dispatch, getState) => dispatch({
+export const traitActivateRequest = (sourceAid, traitId, targetId) => (dispatch, getState) => dispatch({
   type: 'traitActivateRequest'
-  , data: {gameId: getState().get('game').id, sourceAid, traitType, targetId}
+  , data: {gameId: getState().get('game').id, sourceAid, traitId, targetId}
   , meta: {server: true}
 });
 
-export const server$traitActivate = (game, sourceAnimal, traitData, ...params) => (dispatch, getState) => {
-  logger.verbose('server$traitActivate:', sourceAnimal.id, traitData.type)
-  let result = false;
-  switch (traitData.targetType) {
-    case TRAIT_TARGET_TYPE.ANIMAL:
-      result = dispatch(server$traitActivate_Animal(game, sourceAnimal, traitData, ...params));
-      break;
-    case TRAIT_TARGET_TYPE.TRAIT:
-      result = dispatch(server$traitActivate_Trait(game, sourceAnimal, traitData, ...params));
-      break;
-    case TRAIT_TARGET_TYPE.NONE:
-      result = dispatch(server$traitActivate_None(game, sourceAnimal, traitData, ...params));
-      break;
-    default:
-      throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
-        , 'Animal(%s):Trait(%s) unknown target type %s', sourceAnimal.id, traitData.type, traitData.targetType)
-  }
-  logger.silly('server$traitActivate finish:', traitData.type, result);
+export const server$traitActivate = (game, sourceAnimal, trait, ...params) => (dispatch, getState) => {
+  const traitData = trait.getDataModel();
+  logger.verbose('server$traitActivate:', sourceAnimal.id, trait.type);
+  const result = dispatch(traitData.action(game, sourceAnimal, trait, ...params));
+  logger.silly('server$traitActivate finish:', trait.type, result);
   return result;
 };
-
-const server$traitActivate_Animal = (game, sourceAnimal, traitData, targetAnimal, ...params) => {
-  return traitData.action(game, sourceAnimal, targetAnimal, ...params);
-};
-
-const server$traitActivate_Trait = (game, sourceAnimal, traitData, traitIndex, ...params) => {
-  return traitData.action(game, sourceAnimal, traitIndex, ...params);
-};
-
-const server$traitActivate_None = (game, sourceAnimal, traitData, ...params) => {
-  return traitData.action(game, sourceAnimal, ...params);
-};
-
 
 const local$traitStartCooldown = (gameId, traitData, sourceAnimal) => (dispatch) => {
   traitData.cooldowns.forEach(([link, place, duration]) => {
@@ -130,16 +104,13 @@ export const server$traitKillAnimal = (gameId, sourceAnimal, targetAnimal) => (d
     , targetAnimal.ownerId, targetAnimal.id)
     , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
 
-const traitAnimalRemoveTrait = (gameId, sourcePid, sourceAid, traitIndex) => ({
+const traitAnimalRemoveTrait = (gameId, sourcePid, sourceAid, traitId) => ({
   type: 'traitAnimalRemoveTrait'
-  , data: {gameId, sourcePid, sourceAid, traitIndex}
+  , data: {gameId, sourcePid, sourceAid, traitId}
 });
 
-export const server$traitAnimalRemoveTrait = (gameId, sourceAnimal, traitIndex) => (dispatch, getState) => dispatch(
-  Object.assign(traitAnimalRemoveTrait(gameId
-    , sourceAnimal.ownerId, sourceAnimal.id
-    , traitIndex)
-    , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
+export const server$traitAnimalRemoveTrait = (gameId, sourceAnimal, traitId) =>
+  server$game(gameId, traitAnimalRemoveTrait(gameId, sourceAnimal.ownerId, sourceAnimal.id, traitId));
 
 const playerActed = (gameId, userId) => ({
   type: 'playerActed'
@@ -154,33 +125,24 @@ export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
 
 // Notification
 
-const traitNotify_Start = (gameId, sourceAid, traitType, targetId) => ({
+const traitNotify_Start = (gameId, sourceAid, traitId, traitType, targetId) => ({
   type: 'traitNotify_Start'
-  , data: {gameId, sourceAid, traitType, targetId}
+  , data: {gameId, sourceAid, traitId, traitType, targetId}
 });
 
-const traitNotify_End = (gameId, sourceAid, traitType, targetId) => ({
+const traitNotify_End = (gameId, sourceAid, traitId, traitType, targetId) => ({
   type: 'traitNotify_End'
-  , data: {gameId, sourceAid, traitType, targetId}
+  , data: {gameId, sourceAid, traitId, traitType, targetId}
 });
 
-export const server$traitNotify_Start = (game, sourceAnimal, traitType, targetId) =>
-  server$game(game.id, traitNotify_Start(game.id, sourceAnimal.id, traitType, targetId));
+export const server$traitNotify_Start = (game, sourceAnimal, trait, targetId) =>
+  server$game(game.id, traitNotify_Start(game.id, sourceAnimal.id, trait.id, trait.type, targetId));
 
-export const server$traitNotify_End = (gameId, sourceAid, traitType, targetId) => {
+//TODO TRAIT
+export const server$traitNotify_End = (gameId, sourceAid, trait, targetId) => {
   logger.debug('server$traitNotify_End');
-  return server$game(gameId, traitNotify_End(gameId, sourceAid, traitType, targetId));
+  return server$game(gameId, traitNotify_End(gameId, sourceAid, trait.id, trait.type, targetId));
 };
-
-const client$traitNotify_End = (gameId, sourceAid, traitType, targetId) => ({
-  type: 'traitNotify_End_' + traitType
-  , data: {gameId, sourceAid, traitType, targetId}
-});
-
-const client$traitNotify_Start = (gameId, sourceAid, traitType, targetId) => ({
-  type: 'traitNotify_Start_' + traitType
-  , data: {gameId, sourceAid, traitType, targetId}
-});
 
 // complexActions
 
@@ -239,10 +201,10 @@ const traitDefenceQuestion = (gameId, question) => ({
   , data: {gameId, question}
 });
 
-export const server$traitDefenceQuestionInstant = (gameId, attackAnimal, traitType, defenceAnimal, defaultDefence) => (dispatch) => {
+export const server$traitDefenceQuestionInstant = (gameId, attackAnimal, trait, defenceAnimal, defaultDefence) => (dispatch) => {
   const questionId = uuid.v4();
-  logger.debug('server$traitDefenceQuestionInstant', questionId, attackAnimal.id, traitType, defenceAnimal.id);
-  const question = QuestionRecord.new(questionId, attackAnimal, traitType, defenceAnimal);
+  logger.debug('server$traitDefenceQuestionInstant', questionId, attackAnimal.id, trait.id, defenceAnimal.id);
+  const question = QuestionRecord.new(questionId, attackAnimal, trait.id, defenceAnimal);
   dispatch(traitDefenceQuestion(gameId, question));
   const result = dispatch(defaultDefence(questionId));
   dispatch(server$traitDefenceAnswerSuccess(gameId, questionId));
@@ -251,7 +213,7 @@ export const server$traitDefenceQuestionInstant = (gameId, attackAnimal, traitTy
 
 const makeTraitDefenceQuestionTimeout = (gameId, questionId) => `traitDefenceQuestion#${gameId}#${questionId}`;
 
-export const server$traitDefenceQuestion = (gameId, attackAnimal, traitType, defenceAnimal, defaultDefence) => (dispatch, getState) => {
+export const server$traitDefenceQuestion = (gameId, attackAnimal, trait, defenceAnimal, defaultDefence) => (dispatch, getState) => {
   const questionId = uuid.v4();
   const game = selectGame(getState, gameId);
 
@@ -259,7 +221,7 @@ export const server$traitDefenceQuestion = (gameId, attackAnimal, traitType, def
   const turnRemainingTime = dispatch(cancelTimeout(makeTurnTimeoutId(gameId))) || 0;
   const turnUserId = game.players.find(p => p.index === game.status.currentPlayer).id;
 
-  const question = QuestionRecord.new(questionId, attackAnimal, traitType, defenceAnimal, turnUserId, turnRemainingTime);
+  const question = QuestionRecord.new(questionId, attackAnimal, trait.id, defenceAnimal, turnUserId, turnRemainingTime);
 
   logger.verbose('server$traitDefenceQuestion', question.toJS());
   // Notify all users
@@ -274,9 +236,9 @@ export const server$traitDefenceQuestion = (gameId, attackAnimal, traitType, def
     , {meta: {userId: defenceAnimal.ownerId}}));
 };
 
-export const traitDefenceAnswerRequest = (questionId, traitType, targetId) => (dispatch, getState) => dispatch({
+export const traitDefenceAnswerRequest = (questionId, traitId, targetId) => (dispatch, getState) => dispatch({
   type: 'traitDefenceAnswerRequest'
-  , data: {gameId: getState().get('game').id, questionId, traitType, targetId}
+  , data: {gameId: getState().get('game').id, questionId, traitId, targetId}
   , meta: {server: true}
 });
 
@@ -295,9 +257,8 @@ export const server$traitDefenceAnswerSuccess = (gameId, questionId) => (dispatc
   }
 };
 
-
-export const server$traitDefenceAnswer = (gameId, questionId, traitType, targetId) => (dispatch, getState) => {
-  logger.debug('server$traitDefenceAnswer', questionId, traitType, targetId);
+export const server$traitDefenceAnswer = (gameId, questionId, traitId, targetId) => (dispatch, getState) => {
+  logger.debug('server$traitDefenceAnswer', questionId, traitId, targetId);
   const game = selectGame(getState, gameId);
   if (!game.get('question')) {
     throw new ActionCheckError(`server$traitDefenceAnswer@Game(${game.id})`
@@ -308,16 +269,17 @@ export const server$traitDefenceAnswer = (gameId, questionId, traitType, targetI
     throw new ActionCheckError(`server$traitDefenceAnswer@Game(${game.id})`
       , 'QuesionID is incorrect (%s)', questionId)
   }
-  const {sourceAnimal: attackAnimal, traitData: attackTraitData} =
-    checkTraitActivation(game, question.sourcePid, question.sourceAid, question.traitType, question.targetAid);
+  const {sourceAnimal: attackAnimal, trait: attackTrait} =
+    checkTraitActivation(game, question.sourcePid, question.sourceAid, question.traitId, question.targetAid);
+
   checkPlayerTurnAndPhase(game, attackAnimal.ownerId, PHASE.FEEDING);
 
-  const {sourceAnimal: defenceAnimal, traitData: defenceTraitData, target} =
-    checkTraitActivation(game, question.targetPid, question.targetAid, traitType, targetId);
+  const {sourceAnimal: defenceAnimal, trait: defenceTrait, target} =
+    checkTraitActivation(game, question.targetPid, question.targetAid, traitId, targetId);
 
   dispatch(server$traitDefenceAnswerSuccess(game.id, questionId));
-  const result = dispatch(server$traitActivate(game, defenceAnimal, defenceTraitData, target, attackAnimal, attackTraitData));
-  logger.debug('server$traitDefenceAnswer result:', attackTraitData.type, defenceTraitData.type, result);
+  const result = dispatch(server$traitActivate(game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait));
+  logger.debug('server$traitDefenceAnswer result:', attackTrait.type, defenceTrait.type, result);
   if (result) dispatch(server$playerActed(gameId, attackAnimal.ownerId));
   return result;
 };
@@ -341,23 +303,23 @@ export const traitClientToServer = {
     dispatch(server$startFeeding(gameId, animal, 1, FOOD_SOURCE_TYPE.GAME));
     dispatch(server$playerActed(gameId, userId));
   }
-  ,
-  traitActivateRequest: ({gameId, sourceAid, traitType, targetId}, {userId}) => (dispatch, getState) => {
+  , traitActivateRequest: ({gameId, sourceAid, traitId, targetId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
-    const {sourceAnimal, traitData, target} = checkTraitActivation(game, userId, sourceAid, traitType, targetId);
+    const {sourceAnimal, trait, target} = checkTraitActivation(game, userId, sourceAid, traitId, targetId);
+
     checkPlayerTurnAndPhase(game, userId, PHASE.FEEDING);
-    dispatch(server$traitNotify_Start(game, sourceAnimal, traitType, targetId));
-    const result = dispatch(server$traitActivate(game, sourceAnimal, traitData, target));
+    dispatch(server$traitNotify_Start(game, sourceAnimal, trait, targetId));
+    const result = dispatch(server$traitActivate(game, sourceAnimal, trait, target));
     if (result === void 0) {
-      throw new Error(`traitActivateRequest@Game(${gameId}): Animal(${sourceAid})-${traitType}-Animal(${targetId}) result undefined`);
+      throw new Error(`traitActivateRequest@Game(${gameId}): Animal(${sourceAid})-${trait.type}-Animal(${targetId}) result undefined`);
     }
     //logger.silly('traitActivateRequest: ' + result);
     if (result) {
       dispatch(server$playerActed(gameId, userId));
     }
   }
-  , traitDefenceAnswerRequest: ({gameId, questionId, traitType, targetId}) =>
-    server$traitDefenceAnswer(gameId, questionId, traitType, targetId)
+  , traitDefenceAnswerRequest: ({gameId, questionId, traitId, targetId}) =>
+    server$traitDefenceAnswer(gameId, questionId, traitId, targetId)
 };
 
 export const traitServerToClient = {
@@ -373,12 +335,12 @@ export const traitServerToClient = {
     traitDefenceQuestion(gameId, QuestionRecord.fromJS(question))
   , traitDefenceAnswerSuccess: ({gameId, questionId}, currentUserId) =>
     traitDefenceAnswerSuccess(gameId, questionId)
-  , traitNotify_Start: ({gameId, sourceAid, traitType, targetId}, currentUserId) =>
-    client$traitNotify_Start(gameId, sourceAid, traitType, targetId)
-  , traitNotify_End: ({gameId, sourceAid, traitType, targetId}, currentUserId) =>
-    client$traitNotify_End(gameId, sourceAid, traitType, targetId)
-  , traitAnimalRemoveTrait: ({gameId, sourcePid, sourceAid, traitIndex}) =>
-    traitAnimalRemoveTrait(gameId, sourcePid, sourceAid, traitIndex)
+  , traitNotify_Start: ({gameId, sourceAid, traitId, traitType, targetId}, currentUserId) =>
+    traitNotify_Start(gameId, sourceAid, traitId, traitType, targetId)
+  , traitNotify_End: ({gameId, sourceAid, traitId, traitType, targetId}, currentUserId) =>
+    traitNotify_End(gameId, sourceAid, traitId, traitType, targetId)
+  , traitAnimalRemoveTrait: ({gameId, sourcePid, sourceAid, traitId}) =>
+    traitAnimalRemoveTrait(gameId, sourcePid, sourceAid, traitId)
   , traitGrazeFood: ({gameId, food, sourceAid}) => traitGrazeFood(gameId, food, sourceAid)
   , traitSetAnimalFlag: ({gameId, sourceAid, flag, on}) =>
     traitSetAnimalFlag(gameId, sourceAid, flag, on)

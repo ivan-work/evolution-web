@@ -377,22 +377,27 @@ const getCardsForPlayers = (game) => {
 
 const server$gameDistributeCards = (gameId) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
-  const cardsNeedToPlayers = getCardsForPlayers(game);
+  const mapPlayersWantCards = getCardsForPlayers(game);
+  const mapPlayersGiveCards = {};
   let deckSize = game.deck.size;
 
   const players = GameModel.sortPlayersFromIndex(game);
-  while (deckSize > 0 && Object.keys(cardsNeedToPlayers).length > 0) {
+  while (deckSize > 0 && Object.keys(mapPlayersWantCards).length > 0) {
     players.some((player) => {
       if (deckSize <= 0) return true;
-      if (cardsNeedToPlayers[player.id] > 0) {
-        cardsNeedToPlayers[player.id] -= 1;
+      if (mapPlayersWantCards[player.id] > 0) {
+        mapPlayersWantCards[player.id] -= 1;
         deckSize--;
-        dispatch(server$gameGiveCards(gameId, player.id, 1));
+        if (!mapPlayersGiveCards[player.id]) mapPlayersGiveCards[player.id] = 0;
+        mapPlayersGiveCards[player.id] += 1;
       } else {
-        delete cardsNeedToPlayers[player.id];
+        delete mapPlayersWantCards[player.id];
       }
     });
   }
+  Object.keys(mapPlayersGiveCards).forEach((playerId) => {
+    dispatch(server$gameGiveCards(gameId, playerId, mapPlayersGiveCards[playerId]));
+  });
 };
 
 // ===== WIN!

@@ -10,7 +10,7 @@ export const errorMiddleware = (interceptor = () => null) => store => next => ac
     if (error instanceof ActionCheckError) {
       logger.warn(`${error.name}${actionType}: ` + util.format(error.message, ...error.data));
     } else {
-      logger.error(`GenericError${actionType}:`, error);
+      logger.error(`GenericError${actionType}:`, process.env.NODE_ENV === 'production' ? JSON.stringify(error) : error);
       if (process.env.TEST) throw error;
     }
     return error;

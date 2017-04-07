@@ -43,11 +43,13 @@ export class AnimalLinkedTrait extends Component {
 
   static propTypes = {
     trait: PropTypes.object.isRequired
+    , sourceAnimal: PropTypes.object.isRequired
   };
 
   componentDidMount() {
     this._isMounted = true;
     this.node = ReactDOM.findDOMNode(this);
+    this.animalHtml = document.getElementById('AnimalBody' + this.props.sourceAnimal.id);
     AnimalLinkedTraits.push(this);
     if (this.props.trait.linkSource) {
       window.requestAnimationFrame(this.tick)
@@ -68,25 +70,45 @@ export class AnimalLinkedTrait extends Component {
         // http://stackoverflow.com/questions/25630035/javascript-getboundingclientrect-changes-while-scrolling
         const bbx1 = this.node.getBoundingClientRect();
         const bbx2 = this.targetTrait.node.getBoundingClientRect();
-        const x1 = bbx1.left + bbx1.width / 2 + (window.scrollX || 0);
-        const y1 = bbx1.top + bbx1.height / 2 + (window.scrollY || 0);
-        const x2 = bbx2.left + bbx2.width / 2 + (window.scrollX || 0);
-        const y2 = bbx2.top + bbx2.height / 2 + (window.scrollY || 0);
 
-        const reversed = x1 < x2 || (x1 === x2 && y1 < y2 );
-        const [px1, py1, px2, py2] = reversed
+        const bbx1a = this.animalHtml.getBoundingClientRect();
+        const bbx2a = this.targetTrait.animalHtml.getBoundingClientRect();
+
+        let x1 = bbx1.left + bbx1.width / 2 + (window.scrollX || 0);
+        let y1 = bbx1.top + bbx1.height / 2 + (window.scrollY || 0);
+        let x2 = bbx2.left + bbx2.width / 2 + (window.scrollX || 0);
+        let y2 = bbx2.top + bbx2.height / 2 + (window.scrollY || 0);
+
+        const angleAnimal1 = Math.atan2(bbx1a.bottom - bbx2a.bottom, bbx1a.right - bbx2a.right);
+        const angleAnimal2 = Math.atan2(bbx2a.bottom - bbx1a.bottom, bbx2a.right - bbx1a.right);
+        const angleAnimal = -(Math.abs(angleAnimal1) < Math.abs(angleAnimal2)
+          ? angleAnimal1 : angleAnimal2);
+
+        const angle = Math.atan2(y1 - y2, x1 - x2);
+        x1 -= 8 * Math.sin(angleAnimal);
+        y1 -= 8 * Math.cos(angleAnimal);
+        x2 -= 8 * Math.sin(angleAnimal);
+        y2 -= 8 * Math.cos(angleAnimal);
+
+        //const reversed = true//x1 < x2 || (x1 === x2 && y1 < y2 );
+        const reversed = angleAnimal < 0 ? angleAnimal1 < angleAnimal2 : angleAnimal1 > angleAnimal2;
+
+        [x1, y1, x2, y2] = (reversed
           ? [x1, y1, x2, y2]
-          : [x2, y2, x1, y1];
+          : [x2, y2, x1, y1]);
 
-        const angle = Math.atan2(y1 - y2, x1 - x2) * 180 / Math.PI;
         //${.5 + .5 * length}
-        const length = 1 - .0025 * Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+        const length = 1 - .005 * Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 
         const strokeWidth = 4;
 
         this.setState({
-          d: `M${px1},${py1} A 1 ${.5 + .5 * length} ${angle || 0} 1 1 ${px2},${py2}`
+          d: `M${x1},${y1} A 1 ${.5 + .5 * length} ${angle * 180 / Math.PI || 0} 1 1 ${x2},${y2}`
           , reversed
+          , debug: [(angleAnimal*180/Math.PI).toFixed(1) >= 0
+            , angleAnimal1 > angleAnimal2
+            , x1 < x2
+          ].join(',')
           , strokeWidth
         });
       } else {
@@ -108,7 +130,7 @@ export class AnimalLinkedTrait extends Component {
           fill: traitPropsMap.TraitSymbiosis.color
         }}/>
       </defs>
-      <Tooltip tip={T.translate('Game.Trait.' + this.props.trait.type)}>
+      <Tooltip tip={/*T.translate('Game.Trait.' + this.props.trait.type)*/this.state.debug}>
         <path d={this.state.d} style={{
          strokeWidth: this.state.strokeWidth + 'px'
          , strokeLinecap: 'round'

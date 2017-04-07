@@ -36,7 +36,7 @@ export class Card extends React.Component {
 
     const classNames = classnames(this.getClassNames());
 
-    return <div className={classNames} onClick={this.onCardClick}>
+    return <div id={'Card'+card.id} className={classNames} onClick={this.onCardClick}>
       <div className='inner' style={{backgroundImage: `url('${card.image}')`}}>
         {card.traitsCount === 1
           ? (<div className={'trait trait-single ' + card.trait1}>{T.translate('Game.Trait.' + card.trait1)}</div>)

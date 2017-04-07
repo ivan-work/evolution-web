@@ -5,12 +5,14 @@
   min-width: $FULL_SCREEN_MIN_WIDTH + 149px;
   min-height: $FULL_SCREEN_MIN_HEIGHT;
   flex: 1;
+  overflow: hidden;
 }
 
 .Game {
   position: relative;
   flex: 1;
   background: #eee;
+
   &.isPlayerTurn {
     background: #fff;
   }

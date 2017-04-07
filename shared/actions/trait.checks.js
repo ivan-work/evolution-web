@@ -10,15 +10,15 @@ import {
   , TRAIT_COOLDOWN_LINK
 } from '../models/game/evolution/constants';
 
-export const checkTraitActivation = (game, sourcePid, sourceAid, traitType, targetId, ...params) => {
+export const checkTraitActivation = (game, sourcePid, sourceAid, traitId, targetId, ...params) => {
   checkGameDefined(game);
   const gameId = game.id;
   checkGameHasUser(game, sourcePid);
   //checkPlayerTurnAndPhase(game, sourcePid, PHASE.FEEDING); defence traits
   const sourceAnimal = checkPlayerHasAnimal(game, sourcePid, sourceAid);
-  const trait = sourceAnimal.traits.find(trait => trait.type === traitType);
+  const trait = sourceAnimal.traits.find(trait => trait.id === traitId || trait.type === traitId);
   if (!trait) {
-    throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s) doesnt have Trait(%s)', sourceAid, traitType)
+    throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s) doesnt have Trait(%s)', sourceAid, traitId)
   }
   const traitData = trait.getDataModel();
   if (!traitData.checkAction(game, sourceAnimal)) {
@@ -39,7 +39,7 @@ export const checkTraitActivation = (game, sourcePid, sourceAid, traitType, targ
       throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
         , 'Animal(%s):Trait(%s) unknown target type %s', sourceAnimal.id, traitData.type, traitData.targetType)
   }
-  return {sourceAnimal, traitData, target};
+  return {sourceAnimal, trait, traitData, target};
 };
 
 export const checkTraitActivation_Animal = (game, sourceAnimal, traitData, targetAid) => {
@@ -61,18 +61,18 @@ export const checkTraitActivation_Animal = (game, sourceAnimal, traitData, targe
   return targetAnimal;
 };
 
-export const checkTraitActivation_Trait = (game, sourceAnimal, traitData, traitIndex) => {
+export const checkTraitActivation_Trait = (game, sourceAnimal, traitData, traitId) => {
   const gameId = game.id;
-  if (!(traitIndex >= 0 && traitIndex < sourceAnimal.traits.size)) {
+  const trait = sourceAnimal.traits.find((t, i) => t.id === traitId || i === traitId);
+  if (!trait) {
     throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
-      , 'Animal(%s):Trait(%s) cant find Trait@%s', sourceAnimal.id, traitData.type, traitIndex)
+      , 'Animal(%s):Trait(%s) cant find Trait@%s', sourceAnimal.id, traitData.type, traitId)
   }
-  const trait = sourceAnimal.traits.get(traitIndex);
   if (traitData.checkTarget && !traitData.checkTarget(game, sourceAnimal, trait)) {
     throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
-      , 'Animal(%s):Trait(%s) checkTarget on Trait@%s failed', sourceAnimal.id, traitData.type, traitIndex)
+      , 'Animal(%s):Trait(%s) checkTarget on Trait@%s failed', sourceAnimal.id, traitData.type, traitId)
   }
-  return traitIndex;
+  return trait;
 };
 
 export const checkAnimalCanEat = (game, animal) => {

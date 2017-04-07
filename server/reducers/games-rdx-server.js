@@ -135,17 +135,15 @@ export const traitKillAnimal = (game, {targetAnimalId}) => {
         .filter(trait => trait.linkAnimalId !== targetAnimalId))))
 };
 
-export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitIndex}) => {
+export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) => {
   ensureParameter(sourcePid, 'string');
   ensureParameter(sourceAid, 'string');
-  ensureParameter(traitIndex, 'number');
+  ensureParameter(traitId, 'string');
   const {playerId, animalIndex} = game.locateAnimal(sourceAid);
-  const traitId = game.getIn(['players', sourcePid, 'continent', animalIndex, 'traits', traitIndex, 'id'])
   return game
-    .removeIn(['players', sourcePid, 'continent', animalIndex, 'traits', traitIndex])
     .updateIn(['players', sourcePid, 'continent'], continent => continent
       .map(animal => animal.update('traits', traits => traits
-        .filter(trait => trait.linkId !== traitId))))
+        .filterNot(trait => trait.id === traitId || trait.linkId === traitId))))
 };
 
 export const animalStarve = (game, {animalId}) => {
