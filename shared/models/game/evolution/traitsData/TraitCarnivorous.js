@@ -5,6 +5,7 @@ import {
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
   , TRAIT_COOLDOWN_LINK
+  , TRAIT_ANIMAL_FLAG
 } from '../constants';
 import {
   server$traitKillAnimal
@@ -24,6 +25,7 @@ import {
   , TraitRunning
   , TraitPoisonous
   , TraitTailLoss
+  , TraitShell
 } from './index';
 
 import {
@@ -36,7 +38,7 @@ import {
   , TraitSwimming
 } from '../traitTypes/index';
 
-const endHunt = (game, sourceAnimal, trait, targetAnimal) => (dispatch) => {
+export const endHunt = (game, sourceAnimal, trait, targetAnimal) => (dispatch) => {
   dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, sourceAnimal));
   dispatch(server$traitNotify_End(game.id, sourceAnimal.id, trait, targetAnimal.id));
 };
@@ -53,9 +55,10 @@ export const TraitCarnivorous = {
   ])
   , action: (game, sourceAnimal, trait, targetAnimal) => (dispatch, getState) => {
     logger.debug(`TraitCarnivorous: ${sourceAnimal.id} > ${targetAnimal.id}`);
-    let needToAskTargetUser;
-    let traitMimicry, traitTailLoss;
-    let ended = targetAnimal.traits.some((defenseTrait) => {
+    let possibleDefences = 0;
+    let traitMimicry, traitTailLoss, traitShell;
+
+    const ended = targetAnimal.traits.some((defenseTrait) => {
       if (defenseTrait.type === TraitRunning.type) {
         if (dispatch(TraitRunning.action(game, targetAnimal, sourceAnimal))) {
           dispatch(server$traitNotify_Start(game, targetAnimal, defenseTrait, sourceAnimal));
@@ -64,12 +67,17 @@ export const TraitCarnivorous = {
         }
       } else if (defenseTrait.type === TraitMimicry.type && checkAction(game, TraitMimicry, targetAnimal)) {
         traitMimicry = TraitMimicry.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
-        if (traitMimicry.size > 1) needToAskTargetUser = true;
         if (traitMimicry.size === 0) traitMimicry = void 0;
+        else if (traitMimicry.size === 1) possibleDefences += 1;
+        else if (traitMimicry.size > 1) possibleDefences += traitMimicry.size;
       } else if (defenseTrait.type === TraitTailLoss.type && checkAction(game, TraitTailLoss, targetAnimal)) {
         traitTailLoss = targetAnimal.traits;
-        if (traitTailLoss.size > 1) needToAskTargetUser = true;
         if (traitTailLoss.size === 0) traitTailLoss = void 0;
+        else if (traitTailLoss.size === 1) possibleDefences += 1;
+        else if (traitTailLoss.size > 1) possibleDefences += traitTailLoss.size;
+      } else if (defenseTrait.type === TraitShell.type && checkAction(game, TraitShell, targetAnimal)) {
+        traitShell = true;
+        possibleDefences += 1;
       }
     });
 
@@ -90,6 +98,12 @@ export const TraitCarnivorous = {
           , traitMimicry.get(0).id
         ));
         return false;
+      } else if (traitShell) {
+        dispatch(server$traitDefenceAnswer(game.id
+          , questionId
+          , targetAnimal.hasTrait(TraitShell.type).id
+        ));
+        return true;
       } else {
         const poisonous = targetAnimal.hasTrait(TraitPoisonous.type);
         if (poisonous) {
@@ -115,7 +129,7 @@ export const TraitCarnivorous = {
       }
     };
 
-    if (needToAskTargetUser) {
+    if (possibleDefences > 1) {
       dispatch(server$traitDefenceQuestion(game.id, sourceAnimal, trait, targetAnimal, defaultDefence));
       return false;
     } else {
@@ -134,5 +148,7 @@ export const TraitCarnivorous = {
       (sourceAnimal.hasTrait(TraitSwimming) && targetAnimal.hasTrait(TraitSwimming))
       || (!sourceAnimal.hasTrait(TraitSwimming) && !targetAnimal.hasTrait(TraitSwimming))
     )
+    // TFT
+    && !targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL)
   )
 };

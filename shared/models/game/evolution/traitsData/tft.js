@@ -18,6 +18,10 @@ import {
   , server$traitNotify_End
 } from '../../../../actions/actions';
 
+import {selectGame} from '../../../../selectors';
+
+import {endHunt} from './TraitCarnivorous';
+
 export const TraitMetamorphose = {
   type: 'TraitMetamorphose'
   , targetType: TRAIT_TARGET_TYPE.TRAIT
@@ -28,22 +32,27 @@ export const TraitMetamorphose = {
   ])
   , action: (game, sourceAnimal, traitMetamorphose, targetTrait) => (dispatch, getState) => {
     dispatch(server$traitAnimalRemoveTrait(game.id, sourceAnimal, targetTrait.id));
-    dispatch(server$startFeeding(game.id, sourceAnimal, 1, 'TraitMetamorphose'));
     dispatch(server$traitStartCooldown(game.id, TraitMetamorphose, sourceAnimal));
+
+    const {animal} = selectGame(getState, game.id).locateAnimal(sourceAnimal.id, sourceAnimal.ownerId);
+    dispatch(server$startFeeding(game.id, animal, 1, 'TraitMetamorphose'));
+    return true;
+  }
+  , checkTarget: (game, sourceAnimal, targetTrait) => targetTrait.getDataModel().food === 0
+};
+
+export const TraitShell = {
+  type: 'TraitShell'
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , cooldowns: fromJS([
+    ['TraitShell', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
+  ])
+  , action: (game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait) => (dispatch) => {
+    dispatch(server$traitSetAnimalFlag(game, defenceAnimal, TRAIT_ANIMAL_FLAG.SHELL, true));
+    dispatch(endHunt(game, attackAnimal, attackTrait, defenceAnimal));
     return true;
   }
 };
-
-//export const TraitShell = {
-//  type: 'TraitShell'
-//  , cooldowns: fromJS([
-//    ['TraitShell', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
-//  ])
-//  , action: (game, sourceAnimal, trait) => (dispatch) => {
-//    dispatch(server$traitSetAnimalFlag(game, sourceAnimal, TRAIT_ANIMAL_FLAG.SHELL))
-//    return true;
-//  }
-//};
 
 export const TraitIntellect = {type: 'TraitIntellect'};
 export const TraitAnglerfish = {type: 'TraitAnglerfish'};

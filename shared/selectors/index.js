@@ -19,6 +19,7 @@ export const makeGameSelectors = (getState, gameId) => ({
   , selectCard: (user, cardIndex) => selectGame(getState, gameId).getPlayer(user).getCard(cardIndex)
   , selectAnimal: (user, animalIndex) => selectGame(getState, gameId).getPlayer(user).getAnimal(animalIndex)
   , selectTrait: (user, animalIndex, traitIndex) => selectGame(getState, gameId).getPlayer(user).getAnimal(animalIndex).getIn(['traits', traitIndex])
+  , selectTraitId: (user, animalIndex, traitIndex) => selectGame(getState, gameId).getPlayer(user).getAnimal(animalIndex).getIn(['traits', traitIndex]).id
 });
 
 export const makeClientGameSelectors = (getState, gameId, i) => ({
