@@ -114,9 +114,9 @@ export const TraitTailLoss = {
   , action: (game, targetAnimal, traitIndex, attackAnimal, attackTraitData) => (dispatch, getState) => {
     dispatch(server$traitAnimalRemoveTrait(game.id, targetAnimal, traitIndex));
 
-    dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, attackAnimal));
-    dispatch(server$traitNotify_End(game, attackAnimal, TraitCarnivorous.type, targetAnimal.id));
     dispatch(server$startFeeding(game.id, attackAnimal, 1, FOOD_SOURCE_TYPE.ANIMAL_HUNT, targetAnimal.id));
+    dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, attackAnimal));
+    dispatch(server$traitNotify_End(game.id, attackAnimal.id, TraitCarnivorous.type, targetAnimal.id));
     return true;
   }
 };

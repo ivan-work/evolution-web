@@ -1,10 +1,12 @@
 import logger from '~/shared/utils/logger';
 import {fromJS} from 'immutable';
-import {TRAIT_TARGET_TYPE
+import {
+  TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
   , TRAIT_COOLDOWN_LINK
-  , FOOD_SOURCE_TYPE} from '../constants';
+  , FOOD_SOURCE_TYPE
+} from '../constants';
 import {
   server$traitKillAnimal
   , server$startFeeding
@@ -17,12 +19,15 @@ import {
 } from '../../../../actions/actions';
 
 import {checkAction} from '../TraitDataModel';
-import {TraitMimicry
+import {
+  TraitMimicry
   , TraitRunning
   , TraitPoisonous
-  , TraitTailLoss} from './index';
+  , TraitTailLoss
+} from './index';
 
-import {TraitScavenger
+import {
+  TraitScavenger
   , TraitSymbiosis
   , TraitSharpVision
   , TraitCamouflage
@@ -30,6 +35,11 @@ import {TraitScavenger
   , TraitBurrowing
   , TraitSwimming
 } from '../traitTypes/index';
+
+const endHunt = (game, sourceAnimal, targetAid) => (dispatch) => {
+  dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, sourceAnimal));
+  dispatch(server$traitNotify_End(game.id, sourceAnimal.id, TraitCarnivorous.type, targetAid));
+};
 
 export const TraitCarnivorous = {
   type: 'TraitCarnivorous'
@@ -84,7 +94,7 @@ export const TraitCarnivorous = {
           killed = false;
           cooldown = false;
         }
-        dispatch(server$traitNotify_End(game, sourceAnimal, TraitCarnivorous.type, targetAnimal.id)); //TODO ПОЧЕМУ
+        dispatch(server$traitNotify_End(game.id, sourceAnimal.id, TraitCarnivorous.type, targetAnimal.id)); //TODO ПОЧЕМУ
       };
 
       if (needToAskTargetUser) {

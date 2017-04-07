@@ -195,43 +195,41 @@ players:
     });
 
     it('Cant take more food than exists', () => {
-      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1}] = mockGame(2);
       const gameId = ParseGame(`
 phase: 1
 players:
-  -
   - hand: 2 CardCooperation
     continent: $A, $B, $C
 `);
       const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
       replaceGetRandom(() => 0, () => {
-        clientStore0.dispatch(gameEndTurnRequest());
-        clientStore1.dispatch(gameDeployTraitRequest(
-          selectCard(User1, 0).id
+        clientStore0.dispatch(gameDeployTraitRequest(
+          selectCard(User0, 0).id
           , '$A', false, '$B'
         ));
-        clientStore1.dispatch(gameDeployTraitRequest(
-          selectCard(User1, 0).id
+        clientStore1.dispatch(gameEndTurnRequest());
+        clientStore0.dispatch(gameDeployTraitRequest(
+          selectCard(User0, 0).id
           , '$B', false, '$C'
         ));
       });
 
       expect(selectGame().status.phase).equal(PHASE.FEEDING);
-      expect(selectAnimal(User1, 0).traits, 'Animal#0.traits').size(1);
-      expect(selectAnimal(User1, 1).traits, 'Animal#1.traits').size(2);
-      expect(selectAnimal(User1, 2).traits, 'Animal#2.traits').size(1);
+      expect(selectAnimal(User0, 0).traits, 'Animal#0.traits').size(1);
+      expect(selectAnimal(User0, 1).traits, 'Animal#1.traits').size(2);
+      expect(selectAnimal(User0, 2).traits, 'Animal#2.traits').size(1);
 
-      clientStore0.dispatch(gameEndTurnRequest());
 
       // FEEDING 0
-      expect(selectGame().food).equal(2);
+      expect(selectGame().food, 'food').equal(2);
 
-      clientStore1.dispatch(traitTakeFoodRequest('$A'));
+      clientStore0.dispatch(traitTakeFoodRequest('$A'));
 
       expect(selectGame().food).equal(0);
-      expect(selectAnimal(User1, 0).getFood(), 'Animal#0.traits').equal(1);
-      expect(selectAnimal(User1, 1).getFood(), 'Animal#0.traits').equal(1);
-      expect(selectAnimal(User1, 2).getFood(), 'Animal#0.traits').equal(0);
+      expect(selectAnimal(User0, 0).getFood(), 'Animal#0.traits').equal(1);
+      expect(selectAnimal(User0, 1).getFood(), 'Animal#0.traits').equal(1);
+      expect(selectAnimal(User0, 2)).undefined;
     });
   });
 

@@ -26,8 +26,8 @@ export const fileLogger = new winston.Logger({
     silly: 'gray'
   }
   , transports: [
-    new winston.transports.Console(consoleTransport)
-    , new winston.transports.File(fileTransport)
+    new winston.transports.File(fileTransport)
+    // , new winston.transports.Console(consoleTransport)
   ],
   exitOnError: false
 });

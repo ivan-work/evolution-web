@@ -176,9 +176,9 @@ export const server$traitNotify_Start = (game, sourceAnimal, traitType, targetId
   Object.assign(traitNotify_Start(game.id, sourceAnimal.id, traitType, targetId)
     , {meta: {users: selectPlayers4Sockets(getState, game.id)}}));
 
-export const server$traitNotify_End = (game, sourceAnimal, traitType, targetId) => (dispatch, getState) => {
+export const server$traitNotify_End = (gameId, sourceAid, traitType, targetId) => (dispatch, getState) => {
   logger.debug('server$traitNotify_End');
-  dispatch(server$game(game.id, traitNotify_End(game.id, sourceAnimal.id, traitType, targetId)));
+  dispatch(server$game(gameId, traitNotify_End(gameId, sourceAid, traitType, targetId)));
 };
 
 const client$traitNotify_End = (gameId, sourceAid, traitType, targetId) => ({
@@ -335,8 +335,8 @@ export const traitClientToServer = {
     dispatch(server$startFeeding(gameId, animal, 1, FOOD_SOURCE_TYPE.GAME));
     dispatch(server$playerActed(gameId, userId));
 
-    dispatch(endTurnIfNoOptions(gameId, userId));
     logger.debug('traitTakeFoodRequest');
+    dispatch(endTurnIfNoOptions(gameId, userId));
   }
   ,
   traitActivateRequest: ({gameId, sourceAid, traitType, targetId}, {user: {id: userId}}) => (dispatch, getState) => {

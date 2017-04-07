@@ -17,6 +17,17 @@ export const passesChecks = (checks) => {
   return true;
 };
 
+export const failsChecks = (checks) => {
+  try {
+    checks();
+  } catch (e) {
+    if (e instanceof ActionCheckError) {
+      return e;
+    } else throw e;
+  }
+  return false;
+};
+
 export const checkGameCanStart = (room) => {
   if (room.validateCanStart() === void 0)
     throw new ActionCheckError(`checkGameDefined`, 'Cannot find game');
