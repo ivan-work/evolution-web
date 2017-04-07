@@ -3,6 +3,37 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 
 import {AnimationService} from './index';
 
+class Subscription {
+  constructor(actionType, callback) {
+    this.callback = callback;
+    this.$resolveUpdate = null;
+    AnimationService.subscribe(actionType, this);
+  }
+
+  unsubscribe() {
+    AnimationService.unsubscribe(this);
+    this.resolveUpdate(null);
+  }
+
+  resolveUpdate(props) {
+    if (this.$resolveUpdate) {
+      this.$resolveUpdate(props);
+      this.$resolveUpdate = null;
+    }
+  }
+
+  waitForUpdate(actionData) {
+    return new Promise((resolve, reject) => this.$resolveUpdate = resolve)
+      .then(props => (props === null
+          ? Promise.resolve()
+          : new Promise((resolve) => this.callback(() => resolve(true), props, actionData))))
+  }
+
+  componentUpdated(props) {
+    this.resolveUpdate(props);
+  }
+}
+
 export const AnimationServiceContext = ({animations}) => (WrappedComponentClass) => class AnimationServiceContext extends Component {
   static childContextTypes = {
     animationServiceContext: React.PropTypes.object
@@ -22,7 +53,6 @@ export const AnimationServiceContext = ({animations}) => (WrappedComponentClass)
     this.getRef = this.getRef.bind(this);
     this.animationRefs = {};
     this.subscriptions = [];
-    this.waitForUpdate = [];
     this.animations = animations({
       subscribe: this.createSubscription
       , getRef: this.getRef
@@ -30,12 +60,8 @@ export const AnimationServiceContext = ({animations}) => (WrappedComponentClass)
   }
 
   createSubscription(actionType, callback) {
-    const subscriptionData = {props: this.props, callback};
-    const subscription = new Promise((resolve, reject) => {
-      this.waitForUpdate.push({resolve, reject, subscriptionData});
-    });
+    const subscription = new Subscription(actionType, callback);
     this.subscriptions.push(subscription);
-    AnimationService.subscribe(actionType, subscription);
   }
 
   setRef(name, component) {
@@ -48,14 +74,11 @@ export const AnimationServiceContext = ({animations}) => (WrappedComponentClass)
   }
 
   componentDidUpdate() {
-    this.waitForUpdate.forEach(({resolve, subscriptionData}) => resolve(subscriptionData));
-    this.waitForUpdate = [];
+    this.subscriptions.forEach((subscription) => subscription.componentUpdated(this.props))
   }
 
   componentWillUnmount() {
-    this.waitForUpdate.forEach(({resolve}) => resolve(null));
-    this.waitForUpdate = [];
-    this.subscriptions.forEach((subscription) => AnimationService.unsubscribe(subscription));
+    this.subscriptions.forEach((subscription) => subscription.unsubscribe());
     this.subscriptions = [];
   }
 

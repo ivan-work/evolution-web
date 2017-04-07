@@ -42,14 +42,7 @@ export class AnimationServiceClass {
       this.$log(`AnimationService:PA(${action.type})`, 'startAnimating');
       // if not - then start
       this.currentAnimation = true;
-      Promise.all(subscriptionsForAction.map(subscription => {
-          // subscription is a Promise of updated component after action
-          return subscription
-            .then((result) => (result === null
-                ? Promise.resolve()
-                : new Promise((resolve) => result.callback(() => resolve(true), result.props, action.data))
-            ))
-        }))
+      Promise.all(subscriptionsForAction.map(subscription => subscription.waitForUpdate(action.data)))
         .then(() => {
           this.$log(`AnimationService:PA(${action.type})`, `END: queue(${this.$queue.length})`);
           this.currentAnimation = false;

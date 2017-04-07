@@ -2,7 +2,7 @@ import React from 'react'
 import {redirectTo} from '~/shared/utils'
 import {mountClient} from '~/shared/test/test-helpers.jsx'
 
-import {selectHID, selectCard, selectUser, selectUserAnimal, selectAnimal} from './test.selectors';
+import {selectHID, selectCard, selectUser, selectUserDTAnimal, selectDTAnimal} from './test.selectors';
 
 describe('e2e Deploy', () => {
   it('Can deploy animal', () => {
@@ -28,7 +28,7 @@ players:
     dndBackend0.simulateEndDrag();
 
     expect(selectCard($client0, 0)).length(0);
-    expect(selectUserAnimal($client0, User0, 0)).length(1);
+    expect(selectUserDTAnimal($client0, User0, 0)).length(1);
 
     $client0.unmount();
     $client1.unmount();
@@ -53,12 +53,12 @@ players:
 
     dndBackend0.simulateBeginDrag([selectHID(selectCard($client0, 0))]);
     expect(selectCard($client0, 0).find('Card').prop('isDragging')).true;
-    dndBackend0.simulateHover([selectHID(selectAnimal($client0, '$A'))]);
+    dndBackend0.simulateHover([selectHID(selectDTAnimal($client0, '$A'))]);
     dndBackend0.simulateDrop();
     dndBackend0.simulateEndDrag();
 
     expect(selectCard($client0, 0)).length(0);
-    expect(selectUserAnimal($client0, User0, 0)).length(1);
+    expect(selectUserDTAnimal($client0, User0, 0)).length(1);
 
     $client0.unmount();
     $client1.unmount();
@@ -83,20 +83,20 @@ players:
 
     dndBackend0.simulateBeginDrag([selectHID(selectCard($client0, 0))]);
     expect(selectCard($client0, 0).find('Card').prop('isDragging')).true;
-    dndBackend0.simulateHover([selectHID(selectAnimal($client0, '$A'))]);
+    dndBackend0.simulateHover([selectHID(selectDTAnimal($client0, '$A'))]);
     dndBackend0.simulateDrop();
     dndBackend0.simulateEndDrag();
 
     expect($client0.find('DragSource(AnimalSelectLink)'), 'AnimalSelectLink').length(1);
 
     dndBackend0.simulateBeginDrag([selectHID($client0.find('DragSource(AnimalSelectLink)'))]);
-    dndBackend0.simulateHover([selectHID(selectAnimal($client0, '$B'))]);
+    dndBackend0.simulateHover([selectHID(selectDTAnimal($client0, '$B'))]);
     dndBackend0.simulateDrop();
     dndBackend0.simulateEndDrag();
 
     expect(selectCard($client0, 0)).length(0);
-    expect(selectAnimal($client0, '$A').find('AnimalLinkedTrait')).length(1);
-    expect(selectAnimal($client0, '$B').find('AnimalLinkedTrait')).length(1);
+    expect(selectDTAnimal($client0, '$A').find('AnimalLinkedTrait')).length(1);
+    expect(selectDTAnimal($client0, '$B').find('AnimalLinkedTrait')).length(1);
 
     $client0.unmount();
     $client1.unmount();

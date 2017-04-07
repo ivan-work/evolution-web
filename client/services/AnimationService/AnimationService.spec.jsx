@@ -16,7 +16,7 @@ const TestASContext = createTestASContext(({subscribe, getRef}) => {
 });
 
 
-describe.only('AnimationService2', () => {
+describe('AnimationService2', () => {
   it('Simple actions', async () => {
     const store = configureStore();
     const $Client = mount(<TestASContext getState={store.getState}/>);

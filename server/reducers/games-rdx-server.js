@@ -1,7 +1,7 @@
 import logger from '~/shared/utils/logger';
 import {createReducer, ensureParameter, validateParameter} from '../../shared/utils';
 import {Map, List} from 'immutable';
-import {GameModel, PHASE} from '../../shared/models/game/GameModel';
+import {GameModel, QuestionRecord, PHASE} from '../../shared/models/game/GameModel';
 import {CardModel} from '../../shared/models/game/CardModel';
 import {CooldownList} from '../../shared/models/game/CooldownList';
 import {AnimalModel} from '../../shared/models/game/evolution/AnimalModel';
@@ -199,7 +199,7 @@ export const gamePlayerLeft = (game, {userId}) => game
   .setIn(['players', userId, 'playing'], false);
 
 export const traitDefenceQuestion = (game, {questionId, traitTuple}) => game
-  .set('question', Map({id: questionId, ...traitTuple}));
+  .set('question', new QuestionRecord({id: questionId, ...traitTuple, time: Date.now()}));
 
 export const traitDefenceAnswerSuccess = (game, {questionId}) => game
   .remove('question');

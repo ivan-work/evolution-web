@@ -51,3 +51,7 @@ ReactDOM.render(
   </Root>,
   document.getElementById('app')
 );
+
+import T from 'i18n-react';
+
+//T.setTexts(require('./i18n/ru-ru.yml'));

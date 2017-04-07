@@ -13,11 +13,12 @@ import {
   , server$traitDefenceQuestion
   , server$traitDefenceQuestionInstant
   , server$traitDefenceAnswer
+  , server$traitNotify_End
 } from '../../../../actions/actions';
 import {addTimeout} from '../../../../utils/reduxTimeout';
 
 import {GameModel} from '../../GameModel';
-import {TraitDataModel} from '../TraitDataModel';
+import {checkAction} from '../TraitDataModel';
 import {TraitMimicry
   , TraitRunning
   , TraitScavenger
@@ -47,25 +48,14 @@ export const TraitCarnivorous = {
           killed = false;
           return true;
         }
-      } else if (trait.type === TraitMimicry.type && TraitDataModel.checkAction(game, TraitMimicry, targetAnimal)) {
-        traitMimicry = game.getPlayer(targetAnimal.ownerId).continent.filter((animal) =>
-          targetAnimal.id !== animal.id
-          && TraitCarnivorous.checkTarget(game, sourceAnimal, animal)
-        );
-        if (traitMimicry.size === 0) {
-          traitMimicry = void 0;
-        } else if (traitMimicry.size === 1) {
-        } else {
-          needToAskTargetUser = true;
-        }
-      } else if (trait.type === TraitTailLoss.type && TraitDataModel.checkAction(game, TraitTailLoss, targetAnimal)) {
+      } else if (trait.type === TraitMimicry.type && checkAction(game, TraitMimicry, targetAnimal)) {
+        traitMimicry = TraitMimicry.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
+        if (traitMimicry.size > 1) needToAskTargetUser = true;
+        if (traitMimicry.size === 0) traitMimicry = void 0;
+      } else if (trait.type === TraitTailLoss.type && checkAction(game, TraitTailLoss, targetAnimal)) {
         traitTailLoss = targetAnimal.traits;
-        if (traitTailLoss.size === 0) {
-          traitTailLoss = void 0;
-        } else if (traitTailLoss.size === 1) {
-        } else {
-          needToAskTargetUser = true;
-        }
+        if (traitTailLoss.size > 1) needToAskTargetUser = true;
+        if (traitTailLoss.size === 0) traitTailLoss = void 0;
       }
     });
 
@@ -89,6 +79,7 @@ export const TraitCarnivorous = {
           killed = false;
           cooldown = false;
         }
+        dispatch(server$traitNotify_End(game, sourceAnimal, TraitCarnivorous.type, targetAnimal.id));
       };
 
       if (needToAskTargetUser) {

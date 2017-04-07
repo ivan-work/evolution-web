@@ -47,7 +47,7 @@ export class GameWrapper extends React.Component {
   componentDidMount() {
     if (!this.ready && this.props.game) {
       this.ready = true;
-      this.props.$ready();
+      this.props.gameActions.$ready();
     }
   }
 
@@ -76,7 +76,6 @@ GameWrapperHOC = AnimationServiceContext(createAnimationServiceConfig())(GameWra
 
 GameWrapperHOC = connect(
   (state) => {
-    //console.log('state', state.toJS())
     const game = state.get('game');
     const user = state.get('user');
     const roomId = state.get('room');

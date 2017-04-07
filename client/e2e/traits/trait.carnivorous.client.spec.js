@@ -2,7 +2,7 @@ import React from 'react'
 import {redirectTo} from '~/shared/utils'
 import {mountClient} from '~/shared/test/test-helpers.jsx'
 
-import {selectTrait, selectAnimal, selectHID} from '../test.selectors';
+import {selectTrait, selectDTAnimal, selectHID} from '../test.selectors';
 
 /*
 phase: 2
@@ -35,15 +35,15 @@ players:
 
     dndBackend0.simulateBeginDrag([selectHID(selectTrait($client0, '$A', 0))]);
     expect(selectTrait($client0, '$A', 0).find('AnimalTrait').prop('isDragging')).true;
-    dndBackend0.simulateHover([selectHID(selectAnimal($client0, '$B'))]);
+    dndBackend0.simulateHover([selectHID(selectDTAnimal($client0, '$B'))]);
     dndBackend0.simulateDrop();
     dndBackend0.simulateEndDrag();
 
     await new Promise(resolve => setTimeout(resolve, 5));
 
-    expect(selectAnimal($client0, '$A').prop('model').getFood()).equal(2);
+    expect(selectDTAnimal($client0, '$A').prop('model').getFood()).equal(2);
     //expect(selectAnimal($client1, '$A').prop('model').getFood()).equal(2);
-    expect(selectAnimal($client0, '$B')).length(0);
+    expect(selectDTAnimal($client0, '$B')).length(0);
     //expect(selectAnimal($client1, '$Y')).length(0);
     $client0.unmount();
     //$client1.unmount();

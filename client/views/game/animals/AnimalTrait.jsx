@@ -9,7 +9,7 @@ import { DND_ITEM_TYPE } from './../dnd/DND_ITEM_TYPE';
 
 import { AnimalModel } from '../../../../shared/models/game/evolution/AnimalModel';
 import { TraitModel } from '../../../../shared/models/game/evolution/TraitModel';
-import { TraitDataModel } from '../../../../shared/models/game/evolution/TraitDataModel';
+import { checkAction } from '../../../../shared/models/game/evolution/TraitDataModel';
 
 import './AnimalTrait.scss';
 
@@ -25,7 +25,6 @@ class AnimalTrait extends Component {
 
   static propTypes = {
     trait: React.PropTypes.instanceOf(TraitModel).isRequired
-    , sourceAnimal: React.PropTypes.instanceOf(AnimalModel).isRequired
   };
 
   constructor(props) {
@@ -69,7 +68,7 @@ const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
       game.isPlayerTurn()
       && game.isFeeding()
       && sourceAnimal.ownerId === game.getPlayer().id
-      && TraitDataModel.checkAction(game, trait.dataModel, sourceAnimal)
+      && checkAction(game, trait.dataModel, sourceAnimal)
     )
   }
   , (connect, monitor) => ({
@@ -82,6 +81,8 @@ const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
 DragAnimalTrait.propTypes = {
   // by GameProvider
   game: PropTypes.object.isRequired
+  // by life
+  , sourceAnimal: React.PropTypes.instanceOf(AnimalModel).isRequired
 };
 
 const GameDragAnimalTrait = GameProvider(DragAnimalTrait);

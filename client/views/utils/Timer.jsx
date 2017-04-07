@@ -8,14 +8,21 @@ export class Timer extends Component {
 
   constructor(...args) {
     super(...args);
+    this.state = {};
     this.state.time = args[0].start;
     this.updateTime = this.updateTime.bind(this);
   }
 
   updateTime() {
     if (this.$isMounted) {
-      this.setState(Date.now() + this.props.end - this.props.start);
-      window.setTimeout(this.updateTime, 100)
+      //this.setState(Date.now() + this.props.end - this.props.start);
+      const time = this.props.end - Date.now();
+      if (time > 0) {
+        this.setState({time});
+        window.setTimeout(this.updateTime, 100)
+      } else {
+        this.setState({time: 0});
+      }
     }
   }
 
@@ -33,6 +40,6 @@ export class Timer extends Component {
   }
 
   renderTime(time) {
-    return time;
+    return (time / 1000).toFixed(1);
   }
 }

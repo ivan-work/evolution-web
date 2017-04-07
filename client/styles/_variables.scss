@@ -1,3 +1,7 @@
 $ANIMAL_WIDTH: 60px;
 $ANIMAL_HEIGHT: 80px;
 $ANIMAL_MARGIN: 10px;
+
+@mixin selection() {
+  box-shadow: 0px 0px .5em .5em yellow;
+}

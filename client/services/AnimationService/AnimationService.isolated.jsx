@@ -19,7 +19,9 @@ export const configureStore = () => createStore(reducer, 0, applyMiddleware(anim
 
 const TestASRef = AnimationServiceRef(({todo, getRef, connectRef}) => <div
   className='TestASRef'
-  ref={c => connectRef('todos')(Object.assign(getRef('todos') || {}, {[todo.id]: c}))}>{`#${todo.id}:${todo.text}`}</div>);
+  ref={c => connectRef('todo#'+todo.id)}>
+  {`#${todo.id}:${todo.text}`}
+</div>);
 
 export const createTestASContext = (animations) => AnimationServiceContext({animations})(({getState, getRef, connectRef}) => (<div>
   {Object.keys(getState())
