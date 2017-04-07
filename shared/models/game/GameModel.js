@@ -2,12 +2,20 @@ import {Record, Map, Range, List} from 'immutable';
 
 import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
+import * as cardTypes from './evolution/cards';
 
 import uuid from 'node-uuid';
 import {ensureParameter} from '~/shared/utils';
 
 export const TEST_DECK_SIZE = 24;
 export const TEST_HAND_SIZE = 6;
+
+export const PHASE = {
+  NONE: 0
+  , DEPLOY: 1
+  , EAT: 2
+  , DIE: 3
+};
 
 export class GameModel extends Record({
   id: null
@@ -16,7 +24,25 @@ export class GameModel extends Record({
   , players: Map()
   , board: Map()
   , started: false
+  , playersOrder: List()
+  , status: Map({
+    turn: 0
+    , round: 0
+    , phase: PHASE.NONE
+  })
 }) {
+  static new(room) {
+    return new GameModel({
+      id: uuid.v4()
+      , roomId: room.id
+      , deck: List(shuffle([
+        [12, cardTypes.CardCamouflage]
+        , [12, cardTypes.CardCarnivorous]
+      ].reduce((result, config) => result.concat(Array.from({length: config[0]}).map(u => CardModel.new(config[1]))), [])))
+      , players: room.users.reduce((result, userId) => result.set(userId, PlayerModel.new(userId)), Map())
+    })
+  }
+
   toClient(userId) {
     return this
       .set('deck', this.deck.size)
@@ -29,16 +55,9 @@ export class GameModel extends Record({
       : new GameModel({
       ...js
       , players: Map(js.players).map(p => PlayerModel.fromServer(p))
+      , playersOrder: Map(js.playersOrder)
+      , status: Map(js.status)
     });
-  }
-
-  static new(room) {
-    return new GameModel({
-      id: uuid.v4()
-      , roomId: room.id
-      , deck: CardModel.generate(TEST_DECK_SIZE)
-      , players: room.users.reduce((result, userId) => result.set(userId, PlayerModel.new(userId)), Map())
-    })
   }
 
   leave(userId) {
@@ -68,4 +87,24 @@ export class GameModelClient extends Record({
   getPlayer() {
     return this.players.get(this.userId);
   }
+}
+
+function shuffle(array) {
+  let counter = array.length;
+
+  // While there are elements in the array
+  while (counter > 0) {
+    // Pick a random index
+    let index = Math.floor(Math.random() * counter);
+
+    // Decrease counter by 1
+    counter--;
+
+    // And swap the last element with it
+    let temp = array[counter];
+    array[counter] = array[index];
+    array[index] = temp;
+  }
+
+  return array;
 }

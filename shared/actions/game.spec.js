@@ -70,9 +70,17 @@ describe('Game:', function () {
     // server dispatched turn 1 here
     checkFinalGame();
 
+    /* ERRORS */
+
     // duplicate ready request test
     clientStore1.dispatch(gameReadyRequest());
     checkFinalGame();
+
+    //// User1 tries to play
+    //clientStore1.dispatch(gamePlayCard(clientStore1.getState().get('game').getPlayer().hand.get(0), 0));
+    //checkFinalGame();
+
+    /* ERRORS END */
 
     const getUser0Card = (i) => clientStore0.getState().get('game').getPlayer().hand.get(i);
     const User0Card0 = getUser0Card(0);
@@ -102,13 +110,7 @@ describe('Game:', function () {
     expect(ClientGame1().getIn(['players', User0.id, 'continent', 0]).card, 'User0.continent(animal)').null;
     expect(ClientGame1().getIn(['players', User0.id, 'hand']).size, 'User1 see User0.hand').equal(TEST_HAND_SIZE - 1);
 
-    console.log('ServerGame', ServerGame().getIn(['players', User0.id, 'hand']))
-    console.log('ServerGame', ServerGame().getIn(['players', User0.id, 'continent']))
-
     clientStore0.dispatch(gamePlayCard(User0Card2.id, 0, 0));
-
-    console.log('ServerGame', ServerGame().getIn(['players', User0.id, 'hand']))
-    console.log('ServerGame', ServerGame().getIn(['players', User0.id, 'continent']))
 
     expect(ServerGame().getIn(['players', User0.id, 'hand']).size, 'Server: User0.hand').equal(TEST_HAND_SIZE - 2);
     expect(ServerGame().getIn(['players', User0.id, 'continent']).size, 'Server: User0.continent').equal(2);
@@ -166,33 +168,5 @@ describe('Game:', function () {
     clientStore1.disconnect(SOCKET_DISCONNECT_NOW);
 
     expect(serverStore.getState().get('games')).equal(Map());
-  });
-
-  it('Reload, after card played', () => {
-    const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
-    const ServerGame = () => serverStore.getState().get('games').first();
-    const ClientGame0 = () => clientStore0.getState().get('game');
-    clientStore0.dispatch(roomCreateRequest());
-    const roomId = serverStore.getState().get('rooms').first().id;
-    clientStore0.dispatch(roomJoinRequest(roomId));
-    clientStore1.dispatch(roomJoinRequest(roomId));
-    clientStore0.dispatch(gameCreateRequest(roomId));
-    clientStore0.dispatch(gameReadyRequest());
-    clientStore1.dispatch(gameReadyRequest());
-    clientStore0.dispatch(gamePlayCard(clientStore0.getState().get('game').getPlayer().hand.get(1).id, 0));
-
-    const oldClientGame0 = ClientGame0();
-    console.log('server', ServerGame().getIn(['players', User0.id, 'hand']))
-    console.log('server', ServerGame().getIn(['players', User0.id, 'continent']))
-    clientStore0.disconnect();
-    clientStore0.connect(serverStore);
-    console.log('old', oldClientGame0.getIn(['players', User0.id, 'hand']))
-    console.log('old', oldClientGame0.getIn(['players', User0.id, 'continent']))
-    console.log('server', ServerGame().getIn(['players', User0.id, 'hand']))
-    console.log('server', ServerGame().getIn(['players', User0.id, 'continent']))
-    console.log('current', ClientGame0().getIn(['players', User0.id, 'hand']))
-    console.log('current', ClientGame0().getIn(['players', User0.id, 'continent']))
-    //expect(ClientGame0().toJS()).equal(oldClientGame0.setIn(['players', User1.id, 'hand'], ClientGame0().getIn(['players', User1.id, 'hand'])))
-    expect(ClientGame0()).equal(oldClientGame0.setIn(['players', User1.id, 'hand'], ClientGame0().getIn(['players', User1.id, 'hand'])))
   });
 });
