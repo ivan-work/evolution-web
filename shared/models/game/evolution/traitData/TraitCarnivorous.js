@@ -5,6 +5,7 @@ import {
   , server$startFeeding
   , server$startCooldown
   , server$traitActivate
+  , server$traitStartCooldown
 } from '../../../../actions/actions';
 import {TraitMimicry, TraitRunning} from './index';
 
@@ -22,10 +23,11 @@ export const TraitCarnivorous = {
     const traitRunning = targetAnimal.hasTrait(TraitRunning.type);
     if (traitMimicry) {
       //dispatch(server$traitActivate(game, sourceAnimal, TraitMimicry, targetAnimal.id))
-      success = !dispatch(server$traitActivate(game, targetAnimal, TraitMimicry, sourceAnimal.id))
+      success = !dispatch(server$traitActivate(game, targetAnimal, TraitMimicry, sourceAnimal.id, TraitCarnivorous))
     }
 
     if (success) {
+      dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, sourceAnimal));
       dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
       dispatch(server$startFeeding(game.id, sourceAnimal, 2));
       return true;

@@ -55,6 +55,7 @@ export const parseAnimalList = (userId, string) => {
         } else if (/^\++$/.test(prop)) {
           return animal.set('food', prop.length)
         } else {
+          invariant(!!prop, `GameModel.parseAnimalList prop undefined: (${userId})`)
           return animal.update('traits', traits => traits.push(
             TraitModel.parse(prop).attachTo(animal)
           ))
