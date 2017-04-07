@@ -70,6 +70,7 @@
     "redux-immutable": "^3.0.6",
     "redux-logger": "^2.6.1",
     "redux-thunk": "*",
+    "redux-timeout": "^2.0.0",
     "sanitize-html": "*",
     "slug": "*",
     "socket.io": "^1.4.6",

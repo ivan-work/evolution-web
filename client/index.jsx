@@ -8,6 +8,7 @@ import DockMonitor from 'redux-devtools-dock-monitor'
 import { combineReducers } from 'redux-immutable';
 import { createStore, compose, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk';
+import { reduxTimeout } from 'redux-timeout'
 // History
 import { browserHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux'
@@ -39,6 +40,7 @@ const store = createStore(
   reducer
   , compose(
     applyMiddleware(thunk)
+    , applyMiddleware(reduxTimeout())
     , applyMiddleware(appRouterMiddleware(browserHistory))
     , applyMiddleware(socketMiddleware(socketClient))
     , DevTools.instrument()
