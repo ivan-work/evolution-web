@@ -7,8 +7,6 @@ import {List} from 'immutable';
 import {DropTargetContinentZone} from './ContinentZone.jsx'
 import {DropTargetAnimal} from './Animal.jsx';
 
-import {ANIMAL_SIZE} from './Animal.jsx'
-
 export class Continent extends React.Component {
   static contextTypes = {
     gameActions: React.PropTypes.object
@@ -27,31 +25,6 @@ export class Continent extends React.Component {
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-
-  }
-
-  componentWillMount() {
-    //bindActions(this, 'gameActions', ['$deployAnimal', '$deployTrait']);
-    this.$deployAnimal = (card, zoneIndex) => this.context.gameActions.$deployAnimal(card.id, zoneIndex);
-    this.$deployTrait = (card, animal) => this.context.gameActions.$deployTrait(card.id, animal.id);
-  }
-
-  renderPlaceholderWrapper(index) {
-    return !this.props.isUserContinent
-      ? null
-      : <DropTargetContinentZone
-      key={index}
-      index={index}
-      onCardDropped={this.$deployAnimal}>
-    </DropTargetContinentZone>
-  }
-
-  renderAnimal(animal, index) {
-    return <DropTargetAnimal
-      key={animal.id}
-      index={index}
-      model={animal}
-      onCardDropped={this.$deployTrait}/>
   }
 
   render() {
@@ -59,6 +32,7 @@ export class Continent extends React.Component {
     const className = classnames({
       Continent: true
       , UserContinent: this.props.isUserContinent
+      , EnemyContinent: !this.props.isUserContinent
     });
     return <div className={className}>
       <div className="animals-container-outer">

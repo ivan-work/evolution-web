@@ -1,40 +1,16 @@
 import React from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
-import classnames from 'classnames';
 
-import {List} from 'immutable';
-
-import {DropTargetContinentZone} from './ContinentZone.jsx'
+import {Continent} from './Continent.jsx'
 import {DropTargetAnimal} from './Animal.jsx';
 
-import {ANIMAL_SIZE} from './Animal.jsx'
-
-export class Continent extends React.Component {
-  static contextTypes = {
-    gameActions: React.PropTypes.object
-    , phase: React.PropTypes.number
-  };
-
-  static propTypes = {
-    isUserContinent: React.PropTypes.bool
-    , continent: React.PropTypes.instanceOf(List).isRequired
-  };
-
-  static defaultProps = {
-    isUserContinent: false
-  };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-
+export class ContinentFeeding extends Continent {
+  componentWillMount() {
+    this.$traitTakeFood = (animal) => this.context.gameActions.$traitTakeFood(animal.id);
+    this.$traitActivate = (source, trait, target) => this.context.gameActions.$traitActivate(source.id, trait.type, target.id);
   }
 
-  componentWillMount() {
-    //bindActions(this, 'gameActions', ['$deployAnimal', '$deployTrait']);
-    this.$deployAnimal = (card, zoneIndex) => this.context.gameActions.$deployAnimal(card.id, zoneIndex);
-    this.$deployTrait = (card, animal) => this.context.gameActions.$deployTrait(card.id, animal.id);
-    this.$traitTakeFood = (animal) => this.context.gameActions.$traitTakeFood(animal.id);
+  renderPlaceholderWrapper() {
+    return null;
   }
 
   renderAnimal(animal, index) {
@@ -42,27 +18,7 @@ export class Continent extends React.Component {
       key={animal.id}
       index={index}
       model={animal}
-      onCardDropped={this.$deployTrait}
+      onCardDropped={this.$traitActivate}
       onFoodDropped={this.$traitTakeFood} />
-  }
-
-  render() {
-    const {continent} = this.props;
-    const className = classnames({
-      Continent: true
-      , UserContinent: this.props.isUserContinent
-    });
-    return <div className={className}>
-      <div className="animals-container-outer">
-        <div className="animals-container-inner">
-          {this.renderPlaceholderWrapper(0)}
-          {continent.toArray().map((animal, index) => {
-            return [
-              this.renderAnimal(animal, index)
-              , this.renderPlaceholderWrapper(index + 1)
-              ]})}
-        </div>
-      </div>
-    </div>;
   }
 }
