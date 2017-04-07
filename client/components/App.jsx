@@ -1,10 +1,10 @@
 import React from 'react';
 import {ConnectionStateContainer} from './ConnectionState';
 
+//<ConnectionStateContainer />
 export default React.createClass({
-  render: function() {
+  render: function () {
     return <div>
-      <ConnectionStateContainer />
       {this.props.children}
     </div>
   }

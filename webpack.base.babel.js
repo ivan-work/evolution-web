@@ -9,7 +9,7 @@ module.exports = (options) => ({
   entry: options.entry,
   output: Object.assign({ // Compile into js/build.js
     path: path.resolve(process.cwd(), 'build'),
-    publicPath: '/',
+    publicPath: 'http://localhost:8080/',
   }, options.output), // Merge with env dependent settings
   module: {
     loaders: [{
@@ -63,7 +63,7 @@ module.exports = (options) => ({
   ]),
   postcss: () => options.postcssPlugins,
   resolve: {
-    modules: ['client', 'shared', 'node_modules'],
+    modulesDirectories: ['client', 'shared', 'node_modules'],
     extensions: [
       '',
       '.js',
