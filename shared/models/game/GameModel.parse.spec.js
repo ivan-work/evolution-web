@@ -113,6 +113,7 @@ players:
   - hand: 2 carn
     continent: carn sharp, sharp camo
 `);
+    expect(serverStore.getState().getIn(['rooms', ServerGame().roomId, 'gameId']), 'room.gameId === game.id').equal(ServerGame().id);
     expect(ServerGame().food).equal(2);
     expect(ServerGame().started).equal(true);
     expect(ServerGame().status).equal(new StatusRecord({

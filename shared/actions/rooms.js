@@ -4,7 +4,6 @@ import {SettingsRules} from '../models/game/GameSettings';
 
 import {server$gameLeave} from './game';
 
-import {actionError} from './generic';
 import {redirectTo} from '../utils';
 import {selectRoom} from '../selectors';
 
@@ -13,6 +12,7 @@ const selectClientRoomId = (getState) => getState().get('room');
 import {
   checkRoomExists
   , checkRoomSize
+  , checkRoomIsValid
   , checkUserInRoom
   , checkUserNotInRoom
   , checkUserIsHost
@@ -39,11 +39,15 @@ export const server$roomCreate = (room) => (dispatch, getState) => dispatch(Obje
 
 // Join
 
-export const roomJoinRequest = (roomId) => ({
-  type: 'roomJoinRequest'
-  , data: {roomId}
-  , meta: {server: true}
-});
+export const roomJoinRequest = (roomId) => (dispatch, getState) => {
+  (getState().get('room') === roomId
+    ? dispatch(redirectTo(`/room/${roomId}`))
+    : dispatch({
+    type: 'roomJoinRequest'
+    , data: {roomId}
+    , meta: {server: true}
+  }));
+};
 
 const roomJoin = (roomId, userId) => ({
   type: 'roomJoin'
@@ -85,6 +89,7 @@ const roomExitNotify = (roomId, userId) => ({
 });
 
 export const server$roomExit = (roomId, userId) => (dispatch, getState) => {
+  //logger.debug('server$roomExit:', roomId, userId);
   const room = selectRoom(getState, roomId);
   dispatch(Object.assign(roomExit(roomId, userId), {meta: {users: true}}));
   if (room && room.gameId) {
@@ -190,6 +195,7 @@ export const roomsClientToServer = {
   }
   , roomJoinRequest: ({roomId}, {user: {id: userId}}) => (dispatch, getState) => {
     checkRoomExists(getState, roomId);
+    checkRoomIsValid(getState, roomId);
     checkUserNotBanned(getState, roomId, userId);
     dispatch(server$roomJoin(roomId, userId));
   }
@@ -201,23 +207,27 @@ export const roomsClientToServer = {
   , roomEditSettingsRequest: ({roomId, settings}, {user}) => (dispatch, getState) => {
     const userId = user.id;
     checkUserInRoom(getState, roomId, userId);
+    checkRoomIsValid(getState, roomId);
     checkUserIsHost(getState, roomId, userId);
     checkValidate(getState, settings, SettingsRules);
     dispatch(server$roomEditSettings(roomId, settings));
   }
   , roomKickRequest: ({roomId, userId}, {user}) => (dispatch, getState) => {
     checkUserInRoom(getState, roomId, userId);
+    checkRoomIsValid(getState, roomId);
     checkUserIsHost(getState, roomId, user.id);
     dispatch(server$roomKick(roomId, userId));
   }
   , roomBanRequest: ({roomId, userId}, {user}) => (dispatch, getState) => {
     checkUserInRoom(getState, roomId, userId);
+    checkRoomIsValid(getState, roomId);
     checkUserIsHost(getState, roomId, userId);
     checkUserNotBanned(getState, roomId, userId);
     dispatch(server$roomBan(roomId, userId));
   }
   , roomUnbanRequest: ({roomId, userId}, {user}) => (dispatch, getState) => {
     checkUserInRoom(getState, roomId, userId);
+    checkRoomIsValid(getState, roomId);
     checkUserIsHost(getState, roomId, userId);
     checkUserBanned(getState, roomId, userId);
     dispatch(server$roomUnban(roomId, userId));

@@ -1,18 +1,18 @@
 import logger from '~/shared/utils/logger';
 import io from 'socket.io';
 import {ObjectID} from 'mongodb';
-import {socketConnect, socketDisconnect, clientToServer} from '../shared/actions/actions'
+import {socketConnect, server$socketDisconnect, clientToServer, actionError} from '../shared/actions/actions'
 
 export const socketServer = (server, options) => io(server, {});
 
 export const socketStore = (serverSocket, store) => {
   serverSocket.on('connect', (socket) => {
     logger.silly('server:connect');
-    store.dispatch(socketConnect(socket.id, socket));
+    store.dispatch(socketConnect(socket.id, (action) => socket.emit('action', action)));
 
     socket.on('disconnect', (reason) => {
-      logger.silly('server:disconnect', reason);
-      store.dispatch(socketDisconnect(socket.id, reason));
+      logger.silly('Server DISCONNECT:', reason);
+      store.dispatch(server$socketDisconnect(socket.id, reason));
     });
 
     socket.on('action', (action) => {
@@ -22,10 +22,17 @@ export const socketStore = (serverSocket, store) => {
       }
       if (clientToServer[action.type]) {
         //console.log('action.meta', action.meta)
-        store.dispatch(clientToServer[action.type](action.data, {
+        const result = store.dispatch(clientToServer[action.type](action.data, {
           connectionId: socket.id
           , ...action.meta
         }));
+        if (result instanceof Error) {
+          socket.emit('action', actionError({
+            name: result.name
+            , message: result.message
+            , data: result.data
+          }))
+        }
       } else {
         logger.warn('clientToServer action doesnt exist: ' + action.type);
       }
@@ -40,7 +47,6 @@ export const socketStore = (serverSocket, store) => {
 export const socketMiddleware = io => store => next => action => {
   const state = store.getState();
   const stateConnections = state.get('connections');
-  const stateUsers = state.get('users');
   const nextResult = (action.meta && action.meta.clientOnly
     ? null
     : next(action));
@@ -49,15 +55,14 @@ export const socketMiddleware = io => store => next => action => {
     let sockets = [];
     if (Array.isArray(action.meta.users)) {
       sockets = action.meta.users
-        .map(userId => stateUsers.get(userId))
+        .map(userId =>  state.get('users').get(userId))
         .map(user => user.connectionId);
     } else if (action.meta.users === true) {
-      sockets = stateUsers.toArray()
-        .map(user => user.connectionId);
-    } else if (Array.isArray(action.meta.clients)) {
-      sockets = action.meta.clients;
-    } else if (action.meta.clients === true) {
-      sockets = stateConnections.toArray();
+      sockets = state.get('users').map(user => user.connectionId).toArray();
+    } else if (action.meta.socketId) {
+      sockets = [action.meta.socketId];
+    //} else if (action.meta.clients === true) {
+    //  sockets = stateConnections.toArray();
     } else if (action.meta.userId) {
       sockets = [store.getState().getIn(['users', action.meta.userId, 'connectionId'])];
     } else {
@@ -67,7 +72,7 @@ export const socketMiddleware = io => store => next => action => {
     sockets
       .filter(connectionId => stateConnections.has(connectionId))
       .map(connectionId => stateConnections.get(connectionId))
-      .forEach((clientSocket) => clientSocket.emit('action', Object.assign({}, {
+      .forEach((sendToClient) => sendToClient(Object.assign({}, {
         type: action.type
         , data: action.data
       })));

@@ -1,9 +1,16 @@
 App:
-  Login_Login: Вход
+  Login:
+    Login: Вход
+    Username: Имя пользователя
+    Password: Пароль
+    VK: Войти через ВКонтакте
+    Twitter: Войти через Twitter
   Name: Эволюция
-  Rooms: Комнаты
-  Rooms$Create: Создать
-  Rooms_New_room: Новая комната
+  Online: Онлайн
+  Rooms:
+    Greeting: Привет
+    Rooms: Комнаты
+    $Create: Создать
   Room:
     Room: Комната
     Settings:
@@ -11,6 +18,7 @@ App:
       maxPlayers: Количество игроков
       timeTurn: Время хода (В минутах)
       timeTraitResponse: Время реагирования на атаку
+    $Edit: Применить
     $Back: Назад
     $Exit: Выйти
     $Start: Начать игру

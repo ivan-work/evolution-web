@@ -32,7 +32,7 @@ class Timer {
 export const addTimeout = (duration, name, callback) => ({
   type: '@@reduxTimeout/addTimeout',
   data: {
-    duration: (process.env.TEST ? 0 : duration),
+    duration: (process.env.TEST ? 1 : duration),
     name,
     callback
   }
@@ -48,9 +48,11 @@ export const cancelTimeout = function cancelTimeout(name) {
 export const reduxTimeout = (timeouts = {}) => ({dispatch, getState}) => next => action => {
   if (action.type === '@@reduxTimeout/addTimeout') {
     const {duration, name, callback} = action.data;
+    if (duration === 0) return;
     logger.silly('@@reduxTimeout/addTimeout', name, typeof callback);
     if (timeouts[name]) throw new Error(`reduxTimeout: timeout[${name}] already occupied!`);
     timeouts[name] = new Timer(() => {
+      logger.silly('@@reduxTimeout/executeTimeout', name);
       timeouts[name] = void 0;
       dispatch(callback)
     }, duration);

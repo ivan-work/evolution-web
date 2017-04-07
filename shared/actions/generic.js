@@ -13,10 +13,9 @@ export const makeGameActionHelpers = (getState, gameId) => ({
     gameDeployAnimalRequest(selectCard(getState, gameId, sourceUser, cardIndex).id, animalPosition)
 });
 
-export const actionError = (userId, error) => ({
+export const actionError = (error) => ({
   type: 'actionError'
   , data: {error}
-  , meta: {userId}
 });
 
 export const testAction = (data) => ({
@@ -33,8 +32,5 @@ export const genericClientToServer = {
 };
 
 export const genericServerToClient = {
-  actionError: (data) => {
-    logger.error('ERROR: ', data);
-    return actionError(null, data.error);
-  }
+  actionError: ({error}) => actionError(error)
 };

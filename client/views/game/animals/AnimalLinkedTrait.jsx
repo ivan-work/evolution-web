@@ -5,6 +5,7 @@ import T from 'i18n-react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
+//import {Tooltip} from './../../utils/Tooltips.jsx';
 import {Tooltip} from './../../utils/Tooltips.jsx';
 import {Portal} from '../../utils/Portal.jsx';
 import {AnimalTrait} from './AnimalTrait.jsx';

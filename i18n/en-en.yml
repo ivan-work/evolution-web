@@ -1,12 +1,24 @@
 App:
-  Login_Login: Login
+  Login:
+    Login: Login
+    Username: Username
+    Password: Password
+    VK: Sign in with VK
+    Twitter: Sign in with Twitter
   Name: Evolution
-  Rooms: Rooms
-  Rooms$Create: Create
-  Rooms_New_room: New room
-  Rooms_New_room_name: Name
+  Online: Online
+  Rooms:
+    Greeting: Hello
+    Rooms: Rooms
+    $Create: Create
   Room:
     Room: Room
+    Settings:
+      name: Name
+      maxPlayers: Max players
+      timeTurn: Turn time
+      timeTraitResponse: Attack response time
+    $Edit: Edit
     $Back: Back
     $Exit: Exit
     $Start: Start game

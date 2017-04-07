@@ -9,13 +9,13 @@ import {
   , roomBan
   , roomUnban
   , roomEditSettings
-  , gameCreateSuccess
+  , gameCreateNotify
 } from '../../server/reducers/rooms-rdx-server';
 
 const initialState = Map();
 
 export const reducer = createReducer(initialState, {
-  loginUserSuccess: (state, {rooms}) => rooms
+  loginUser: (state, {rooms}) => rooms
   , roomCreate
   , roomJoinNotify: roomJoin
   , roomExitNotify: roomExit
@@ -23,6 +23,5 @@ export const reducer = createReducer(initialState, {
   , roomBan
   , roomUnban
   , roomEditSettings
-  , gameCreateSuccess
-  , clientDisconnectSelf: (state, data) => initialState
+  , gameCreateNotify
 });

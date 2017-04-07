@@ -1,14 +1,16 @@
 import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
-import ImmutablePropTypes from 'react-immutable-proptypes';
+import RIP from 'react-immutable-proptypes';
 import {connect} from 'react-redux';
-import * as MDL from 'react-mdl';
 
+import {List, ListItem} from 'react-mdl';
+
+import {roomJoinRequest} from '../../../shared/actions/actions';
 
 export class RoomsList extends React.Component {
   static propTypes = {
-    rooms: ImmutablePropTypes.mapOf(ImmutablePropTypes.record, React.PropTypes.string).isRequired
-    , onRoomClick: React.PropTypes.func
+    rooms: RIP.listOf(RIP.record).isRequired
+    , $joinRequest: React.PropTypes.func.isRequired
   };
 
   static defaultProps = {
@@ -21,18 +23,19 @@ export class RoomsList extends React.Component {
   }
 
   render() {
+    const {rooms, $joinRequest} = this.props;
     //console.log(this.props.rooms.map((room, roomId) => roomId).valueSeq().toArray())
-    return <MDL.List className="RoomsList">
-      {this.props.rooms.map((room, roomId) =>
-      <MDL.ListItem key={roomId}>
+    return <List className="RoomsList">
+      {rooms.map(room =>
+      <ListItem key={room.id} disabled={room.gameId !== null}>
         <span>
-          <a href="#" onClick={() => this.props.onRoomClick(roomId)}>
+          <a href="#" onClick={() => $joinRequest(room.id)}>
             {room.name}
           </a>
           &nbsp;({room.users.size}/{room.settings.maxPlayers})
         </span>
-      </MDL.ListItem>).valueSeq().toArray()}
-    </MDL.List>;
+      </ListItem>)}
+    </List>;
   }
 }
 
@@ -40,15 +43,13 @@ export default connect(
   (state) => {
     //console.log(state.toJS());
     return {
-      username: state.getIn(['user', 'login'], '%USERNAME%')
-      , online: state.getIn(['online'], [])
-      , room: state.get('room')
-      , roomsList: state.getIn(['rooms'], Map()).filter(room => !room.gameId)
+      room: state.get('room')
+      , rooms: state.getIn(['rooms'])
+        .sort((r1, r2) => r1.gameId !== null)
+        .toList()
     }
   }
   , (dispatch) => ({
-    $createRequest: () => dispatch(roomCreateRequest())
-    , $joinRequest: (roomId) => dispatch(roomJoinRequest(roomId))
-    , $redirectTo: (roomId) => dispatch(redirectTo(`/room/${roomId}`))
+    $joinRequest: (roomId) => dispatch(roomJoinRequest(roomId))
   })
 )(RoomsList);

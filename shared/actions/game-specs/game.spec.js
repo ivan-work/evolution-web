@@ -22,7 +22,6 @@ describe('Game:', function () {
     const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
     clientStore0.dispatch(roomCreateRequest());
     const roomId = serverStore.getState().get('rooms').first().id;
-    clientStore0.dispatch(roomJoinRequest(roomId));
     clientStore1.dispatch(roomJoinRequest(roomId));
     clientStore0.dispatch(gameCreateRequest(roomId));
 
@@ -30,7 +29,7 @@ describe('Game:', function () {
     const ClientGame0 = () => clientStore0.getState().get('game');
     const ClientGame1 = () => clientStore1.getState().get('game');
 
-    expect(serverStore.getState().getIn(['rooms', roomId, 'gameId'])).equal(ServerGame().id);
+    expect(ServerGame().id).not.null;
     expect(clientStore0.getState().getIn(['rooms', roomId, 'gameId'])).equal(ServerGame().id);
     expect(clientStore1.getState().getIn(['rooms', roomId, 'gameId'])).equal(ServerGame().id);
 
@@ -76,6 +75,18 @@ describe('Game:', function () {
     expect(ClientGame1().getIn(['players', User0.id, 'hand'])).not.equal(ServerGame().getIn(['players', User0.id, 'hand']));
     expect(ClientGame1().getIn(['players', User1.id, 'hand'])).equal(ServerGame().getIn(['players', User1.id, 'hand']));
     expect(ClientGame1().getPlayer()).equal(ServerGame().getIn(['players', User1.id]));
+  });
+
+  it('Cant join in started', () => {
+    const [serverStore, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockStores(3);
+    clientStore0.dispatch(roomCreateRequest());
+    const roomId = serverStore.getState().get('rooms').first().id;
+    clientStore1.dispatch(roomJoinRequest(roomId));
+    clientStore0.dispatch(gameCreateRequest(roomId));
+
+    expectUnchanged(`Can't join started game`, () =>
+        clientStore2.dispatch(roomJoinRequest(roomId))
+      , serverStore, clientStore0, clientStore2);
   });
 
   it('Play as deploy', () => {
@@ -266,9 +277,9 @@ players:
     clientStore1.dispatch(gameReadyRequest());
     const gameId = serverStore.getState().get('games').first().id;
 
-    clientStore1.getClient().disconnect();
+    clientStore1.disconnect();
 
-    expect(ClientGame1()).null;
+    //expect(ClientGame1()).null;
 
     clientStore1.connect(serverStore);
 

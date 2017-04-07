@@ -28,10 +28,9 @@ import {
 } from '../../server/reducers/games-rdx-server';
 
 export const reducer = createReducer(null, {
-  loginUserSuccess: (state, {game}) => game
+  loginUser: (state, {game}) => game
   , gameCreateSuccess: (state, {game}) => game
   //, roomExitSuccess: (state, {userId}, currentUserId) => userId === currentUserId ? state : null //TODO do something
-  , clientDisconnectSelf: (state, data) => null
   , gameStart
   , gamePlayerReadyChange
   , gameGiveCards
