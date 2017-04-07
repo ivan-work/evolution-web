@@ -14,6 +14,7 @@ import {
   , traitActivateRequest
 } from '../../../shared/actions/actions';
 
+import {GameUI} from './ui/GameUI.jsx';
 import {Game} from './Game.jsx';
 import {GameModelClient} from '../../../shared/models/game/GameModel';
 

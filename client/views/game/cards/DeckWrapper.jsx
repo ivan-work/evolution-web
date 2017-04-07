@@ -1,5 +1,5 @@
 // Core
-import {PropTypes} from 'react';
+import React, {PropTypes} from 'react';
 import RIP from 'react-immutable-proptypes';
 
 // Validation
@@ -8,6 +8,7 @@ import {CardModel} from '../../../../shared/models/game/CardModel';
 // Components
 import {AnimationServiceRef} from '../../../services/AnimationService';
 import {Card} from '../Card.jsx';
+import {CardCollection} from '../CardCollection.jsx';
 
 export const DeckWrapper = AnimationServiceRef(({deck, connectRef}) => (
   <div className='DeckWrapper'>
@@ -22,5 +23,5 @@ export const DeckWrapper = AnimationServiceRef(({deck, connectRef}) => (
 
 DeckWrapper.propTypes = {
   deck: RIP.listOf(PropTypes.instanceOf(CardModel)).isRequired
-  , connectRef: PropTypes.func.isRequired
+  //, connectRef: PropTypes.func.isRequired
 };

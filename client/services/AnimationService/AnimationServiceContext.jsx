@@ -16,16 +16,25 @@ export const AnimationServiceContext = ({animations}) => (WrappedComponentClass)
 
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    this.getRef = this.getRef.bind(this);
     this.state = {};
-    this.refs = {};
+    this.animationRefs = {};
+  }
+
+  setRef(name, component) {
+    this.animationRefs[name] = component;
+  }
+
+  getRef(name) {
+    return this.animationRefs[name];
   }
 
   componentDidMount() {
     //log(`Component ${this.displayName} initialized`);
     this._isMounted = true;
     this.animations = animations({
-      getRef: (name) => this.refs[name]
+      getRef: this.getRef
     });
     Object.keys(this.animations).forEach((actionType) => {
       AnimationService.componentSubscribe(this, actionType);
@@ -40,7 +49,7 @@ export const AnimationServiceContext = ({animations}) => (WrappedComponentClass)
     this._isMounted = false;
     AnimationService.componentUnsubscribe(this);
     this.state = null;
-    this.refs = null;
+    this.animationRefs = {};
   }
 
   getAnimation(actionType) {

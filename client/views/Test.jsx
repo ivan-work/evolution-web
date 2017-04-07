@@ -1,21 +1,31 @@
 import React, {Component} from 'react';
 
 import {Dialog} from './utils/Dialog.jsx';
+import {GameFoodContainer} from './game/food/GameFoodContainer.jsx';
 
 export class Test extends Component {
   constructor(props) {
     super(props);
-    this.state = {show: true};
+    this.state = {
+      show: true
+      , food: Array.from({length: 37}).map((u, i) => i)
+    };
+    //setInterval(() => {
+    //  //console.log((this.state.food + 1) % 25)
+    //  this.setState({food: (this.state.food + 1) % 10})
+    //},1000)
   }
 
   render() {
     return <div>
-      <button onClick={() => this.setState({show: !this.state.show})}>Dialog</button>
-      {this.state.show ? 'true' : 'false'}
-      <Dialog show={this.state.show} onBackdropClick={() => this.setState({show: !this.state.show})}>
-        hey
-        <button onClick={() => this.setState({show: !this.state.show})}>close</button>
-      </Dialog>
+      <div style={{margin: '200px 200px 0 200px'}}>
+        <GameFoodContainer food={this.state.food} onFoodRemoved={(index) => {
+          let food = this.state.food;
+          food.remove(index);
+          this.setState({food})
+        }
+        }/>
+      </div>
     </div>
   }
 }

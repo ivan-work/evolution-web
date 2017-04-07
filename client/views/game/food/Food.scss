@@ -1,9 +1,6 @@
 .GameFoodContainer {
-  position: absolute;
-  width: 12em;
   .Food {
     display: inline-block;
-    margin: .2em;
   }
 }
 
@@ -15,8 +12,13 @@
 }
 .Food {
   //cursor: pointer;
-  width: 1em;
-  height: 1em;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  text-align: center;
+  width: 24px;
+  height: 24px;
   color: #888;
   //background: #FF0;
   //outline: 1px solid black;
