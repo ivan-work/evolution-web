@@ -9,9 +9,10 @@ export class CardModel extends Record({
   , imageBack: ''
 }) {
   static new(index) {
+    const id = uuid.v4().slice(0, 4);
     return new CardModel({
-      id: uuid.v4().slice(0, 2)
-      , name: 'Card#' + index
+      id
+      , name: 'Card#' + id
     });
   }
 
@@ -26,7 +27,7 @@ export class CardModel extends Record({
   }
 
   toString() {
-    return this.name + this.id
+    return this.name
   }
 }
 

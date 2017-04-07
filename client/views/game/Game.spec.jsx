@@ -44,8 +44,10 @@ describe('Game', () => {
         })
       })
     })
-    , $ready: () => {}
-    , $playCard: () => {}
+    , $ready: () => {
+    }
+    , $playCard: () => {
+    }
   };
 
   it('Displays default game', () => {
@@ -61,9 +63,7 @@ describe('Game', () => {
     const $Game = mount(<DDCGame {...props} $playCard={$playCard}/>);
 
     const dndBackend = $Game.instance().getManager().getBackend();
-
     const cardHID = $Game.find('.CardCollection.Hand').find('DragSource(Card)').get(1).getHandlerId();
-
     const PlayerContinentHID = $Game.find('DropTarget(PlayerContinentDropTargetZone)').get(0).getHandlerId();
 
     dndBackend.simulateBeginDrag([cardHID]);

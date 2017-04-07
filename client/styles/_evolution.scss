@@ -16,6 +16,7 @@
     }
 
     .PlayerContinent {
+      position: relative;
       width: 400px;
       height: 200px;
       background: #aaf;
@@ -36,23 +37,34 @@
       background: #aaf;
     }
 
-    .cards-container-outer {
+    .drop-targets-container {
       position: absolute;
+      width: 100%; height: 100%;
+    }
+
+    .animals-container-outer {
       width: 100%;
       text-align: center;
-      .cards-container-inner {
+      .animals-container-inner {
         display: inline-block;
-        .card-wrapper {
+        .animal-wrapper {
           display: inline-block;
         }
       }
     }
   }
 
+  .animal-placeholder {
+    border: 2px dotted gray;
+    width: 100%;
+    height: 100%;
+  }
+
   .Card {
     position: absolute;
     border: 1px solid black;
     background: gray;
+    word-wrap: break-word;
     &[draggable] {
       cursor: -webkit-grab;
     }
@@ -70,6 +82,7 @@
   }
 
   .Animal {
+    word-wrap: break-word;
     position: absolute;
     border: 1px solid black;
     background: #9fe1e7;
