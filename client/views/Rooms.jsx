@@ -26,7 +26,7 @@ export const RoomsView = connect(
   (state) => {
     //console.log(state.toJS());
     return {
-      username: state.get('user').login
+      username: state.getIn(['user', 'login'], '%USERNAME%')
       , online: state.getIn(['online'], [])
       , rooms: state.getIn(['rooms'], Map()).toJS()
     }

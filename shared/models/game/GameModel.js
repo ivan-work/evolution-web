@@ -45,8 +45,16 @@ export class GameModelClient extends Record({
   , board: null
   , hand: List()
 }) {
+  static fromServer(js, userId) {
+    const game = GameModel.fromServer(js);
+    return game == null
+      ? null
+      : new GameModelClient(game)
+        .set('hand', game.players.getIn([userId, 'hand'], List()));
+  }
+
   static fromGameModel(game, userId) {
     return new GameModelClient(game)
-      .set('hand', game.players.getIn([userId, 'hand'], List()));
+
   }
 }

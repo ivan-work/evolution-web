@@ -38,6 +38,20 @@ describe('e2e (game): ', () => {
     ////console.log('Client0URL:', client0);
     //
     //clientStore1.dispatch(roomJoinRequest(roomId));
+  });
+  it('Should reload game', () => {
+    const [serverStore, {clientStore0, User0}, {clientStore1, User1}]= mockStores(2);
+    const $client0 = mountClient(clientStore0);
+    const $client1 = mountClient(clientStore1);
+    $client0.find('#Rooms$create').simulate('click');
+    const roomId = serverStore.getState().get('rooms').first().id;
+    $client1.find(`RoomsList`).find({'data-id': roomId}).simulate('click');
+    $client0.find('#Room$start').simulate('click');
 
+    clientStore0.getClient().disconnect();
+
+    clientStore0.connect(serverStore);
+
+    expect($client0.find('App').props().location.pathname).equal('/game');
   });
 });

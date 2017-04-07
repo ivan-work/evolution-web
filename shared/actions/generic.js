@@ -8,7 +8,7 @@ export const genericClientToServer = {
 };
 export const genericServerToClient = {
   actionError: (data) => {
-    console.log('data', data)
+    console.error('ERROR: ', data)
     return actionError(null, data.error)
   }
 };
