@@ -141,8 +141,8 @@ players:
       expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $G, 'TraitMimicry', $H]);
       expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $X, 'TraitCarnivorous', $H]);
       expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $H, 'TraitPoisonous', $X]);
-      expect(selectGame().log.get(i++)).eql(['traitMoveFood', 2, 'TraitCarnivorous', $X, $H]);
       expect(selectGame().log.get(i++)).eql(['traitKillAnimal', $H]);
+      expect(selectGame().log.get(i++)).eql(['traitMoveFood', 2, 'TraitCarnivorous', $X, null]);
       expect(selectGame().log.get(i++)).eql(['traitMoveFood', 1, 'TraitScavenger', $A, $X]);
       expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $A, 'TraitCommunication', $S1]);
       expect(selectGame().log.get(i++)).eql(['traitMoveFood', 1, 'TraitCommunication', $S1, $A]);

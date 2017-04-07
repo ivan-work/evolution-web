@@ -1,18 +1,25 @@
 @import '../../../styles/variables';
+@import '../../../styles/traits';
 
 .TraitDefenceDialog {
-  .Animal {
-    cursor: pointer;
-    margin: $ANIMAL_MARGIN;
-    &:hover {
-      @include selection();
+  @include traits();
+
+  .Row {
+    display: flex;
+    flex-wrap: wrap;
+    .Item {
+      cursor: pointer;
+      margin: $ANIMAL_MARGIN;
+      &:hover {
+        @include selection();
+      }
     }
   }
-  .TailLoss .AnimalTrait {
-    cursor: pointer;
-    margin: $ANIMAL_MARGIN;
-    &:hover {
-      @include selection();
-    }
+
+  .TailLoss .Row {
+  }
+
+  .Mimicry .Row {
+    align-items: flex-end;
   }
 }
