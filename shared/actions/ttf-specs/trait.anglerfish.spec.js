@@ -7,11 +7,11 @@ import {
   , gameDeployTraitRequest
 } from '../actions';
 
-import {PHASE} from '../../models/game/GameModel';
+import {QuestionRecord, PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
 
-describe('TraitAnglerfish:', () => {
+describe.only('TraitAnglerfish:', () => {
   it('Deploy', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
@@ -113,5 +113,51 @@ players:
     clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$A'));
     expect(selectAnimal(User0, 0)).ok;
     expect(selectAnimal(User0, 0).getFood()).equal(1);
+  });
+
+  it('bug v043', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: 2
+food: 10
+players:
+  - continent: $Q carn intel camo tail angler ink wait, $W angler
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$W'));
+
+    expect(selectGame().question.type).equal(QuestionRecord.DEFENSE);
+    clientStore0.dispatch(traitAnswerRequest('TraitInkCloud'));
+
+    expect(selectAnimal(User0, 0)).ok;
+    expect(selectAnimal(User0, 1)).ok;
+    expect(selectAnimal(User0, 0).getFood()).equal(0);
+    expect(selectAnimal(User0, 1).getFood()).equal(0);
+  });
+
+  it.only('bug v043 2', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: 2
+food: 10
+players:
+  - continent: $Q carn intel tail angler ink wait, $W angler
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$W'));
+
+    expect(selectGame().question.type).equal(QuestionRecord.INTELLECT);
+    clientStore0.dispatch(traitAnswerRequest('TraitIntellect', 'TraitTailLoss'));
+
+    //expect(selectGame().question.type).equal(QuestionRecord.DEFENSE);
+    //clientStore0.dispatch(traitAnswerRequest('TraitInkCloud'));
+
+    //question.ans
+    //expect(selectAnimal(User0, 0)).ok;
+    //expect(selectAnimal(User0, 0).getFood()).equal(1);
   });
 });

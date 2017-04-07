@@ -13,13 +13,14 @@ import {
 export const checkTraitActivation = (game, sourcePid, sourceAid, traitId, targetId, ...params) => {
   const gameId = game.id;
   const sourceAnimal = checkPlayerHasAnimal(game, sourcePid, sourceAid);
-  const trait = sourceAnimal.traits.find(trait => trait.id === traitId || trait.type === traitId);
+  const trait = sourceAnimal.hasTrait(traitId);
   if (!trait) {
     throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s) doesnt have Trait(%s)', sourceAid, traitId)
   }
-  if (!trait.checkAction(game, sourceAnimal)) {
+  const reason = trait.checkActionFails(game, sourceAnimal);
+  if (!!reason) {
     throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
-      , 'Animal(%s):Trait(%s) checkAction failed', sourceAnimal.id, trait.type)
+      , `Animal(%s):Trait(%s) checkAction ${reason}`, sourceAnimal.id, trait.type)
   }
   let target = null;
   const traitData = trait.getDataModel();

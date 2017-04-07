@@ -29,7 +29,12 @@ import {
   , passesChecks
 } from './checks';
 
-import {checkAnimalCanEat, checkTraitActivation, checkIfTraitDisabledByIntellect} from './trait.checks';
+import {
+  checkAnimalCanEat
+  , checkTraitActivation
+  , checkTraitActivation_Animal
+  , checkIfTraitDisabledByIntellect
+} from './trait.checks';
 
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 
@@ -337,7 +342,7 @@ const makeTraitQuestionTimeout = (gameId, questionId) => `traitQuestion#${gameId
 
 export const traitAnswerRequest = (traitId, targetId) => (dispatch, getState) => dispatch({
   type: 'traitAnswerRequest'
-  , data: {gameId: getState().get('game').id, questionId: getState().getIn(['game', 'question', 'id']), traitId, targetId}
+  , data: {gameId: getState().getIn(['game', 'id']), questionId: getState().getIn(['game', 'question', 'id']), traitId, targetId}
   , meta: {server: true}
 });
 
@@ -401,8 +406,11 @@ export const server$traitDefenceAnswer = (gameId, questionId, traitId, targetId)
       , 'QuesionID is incorrect (%s)', questionId)
   }
 
-  const {sourceAnimal: attackAnimal, trait: attackTrait} =
-    checkTraitActivation(game, question.sourcePid, question.sourceAid, question.traitId, question.targetAid);
+  const attackAnimal = checkPlayerHasAnimal(game, question.sourcePid, question.sourceAid);
+  const attackTrait = attackAnimal.hasTrait(question.traitId);
+  if (!attackTrait) {
+    throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s) doesnt have Trait(%s)', question.sourceAid, traitId)
+  };
 
   const {sourceAnimal: defenceAnimal, trait: defenceTrait, target} =
     checkTraitActivation(game, question.targetPid, question.targetAid, traitId, targetId);
@@ -441,8 +449,12 @@ export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetI
       , 'QuesionID is incorrect (%s)', questionId)
   }
 
-  const {sourceAnimal: attackAnimal, trait: attackTrait, target: targetAnimal} =
-    checkTraitActivation(game, question.sourcePid, question.sourceAid, question.traitId, question.targetAid);
+  const attackAnimal = checkPlayerHasAnimal(game, question.sourcePid, question.sourceAid);
+  const attackTrait = attackAnimal.hasTrait(question.traitId);
+  if (!attackTrait) {
+    throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s) doesnt have Trait(%s)', question.sourceAid, traitId)
+  };
+  const targetAnimal = checkPlayerHasAnimal(game, question.targetPid, question.targetAid);
 
   const traitIntellect = attackAnimal.hasTrait(TraitIntellect);
 
@@ -505,6 +517,7 @@ export const traitClientToServer = {
     }
   }
   , traitAnswerRequest: ({gameId, questionId, traitId, targetId}, {userId}) => (dispatch, getState) => {
+    logger.verbose('traitAnswerRequest', gameId, questionId, traitId, targetId);
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGamePhase(game, PHASE.FEEDING);

@@ -145,6 +145,8 @@ export const TraitCarnivorous = {
       const reselectedGame = selectGame(getState, game.id);
       const {animal: revealledAnglerfish} = reselectedGame.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
       if (TraitCarnivorous.checkTarget(reselectedGame, revealledAnglerfish, sourceAnimal)) {
+
+        console.log('angler activates')
         dispatch(server$traitActivate(game, animalAnglerfish, newTraitCarnivorous, sourceAnimal));
       } else {
         dispatch(server$traitAnimalRemoveTrait(game, animalAnglerfish, newTraitIntellect));
@@ -194,11 +196,13 @@ export const TraitCarnivorous = {
      * Get Intellect info
      * After defenses because we need to know, if it will be useful to use intellect.
      */
-
     if (traitIntellect && !disabledTid) {
       // default intellect found, need to ask
       const unavoidableDefenses = countUnavoidableDefenses(game, sourceAnimal, targetAnimal);
       const staticDefenses = getStaticDefenses(game, sourceAnimal, targetAnimal)
+      //logger.debug(`${sourceAnimal.id} activates Intellect`);
+      //logger.debug(`UnavoidableDefenses: ${unavoidableDefenses}`);
+      //logger.debug(`StaticDefenses: ${staticDefenses.map(t => t.type)}`);
       if (unavoidableDefenses === 0 && staticDefenses.length === 0) {
         const affectiveDefenses = getAffectiveDefenses(game, sourceAnimal, targetAnimal);
 
@@ -291,7 +295,7 @@ export const TraitCarnivorous = {
      * Now we determine if we need to ask user at all
      * */
 
-    logger.debug(`possibleDefences: ${possibleDefenses.length}/${possibleDefenseTargets}`)
+    logger.debug(`possibleDefences: ${possibleDefenses.length}/${possibleDefenseTargets}`);
     if (possibleDefenseTargets > 1) {
       dispatch(server$traitDefenceQuestion(game.id, sourceAnimal, trait, targetAnimal, defaultDefence));
       return false;

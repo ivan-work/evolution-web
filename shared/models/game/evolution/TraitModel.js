@@ -90,6 +90,7 @@ export class TraitModel extends Record({
     return this.linkId !== null; // && this.dataModel.cardTargetType & CTT_PARAMETER.LINK
   }
 
+  // TODO replace it with checkActionFails
   checkAction(game, sourceAnimal) {
     const traitData = this.getDataModel();
     if (!traitData.action) return false;
@@ -99,6 +100,18 @@ export class TraitModel extends Record({
     }
     // Either no $checkAction or it is passing
     return !traitData.$checkAction || traitData.$checkAction(game, sourceAnimal, this);
+  };
+
+  checkActionFails(game, sourceAnimal) {
+    const traitData = this.getDataModel();
+    if (!traitData.action) return 'Trait has no .action';
+    if (traitData.cooldowns && traitData.cooldowns.some(([link, place]) =>
+        game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id, this.id)))
+      return 'Trait has cooldown'
+    // Either no $checkAction or it is passing
+    if (traitData.$checkAction && !traitData.$checkAction(game, sourceAnimal, this))
+      return '$checkAction fails';
+    return false;
   };
 
   toClient() {

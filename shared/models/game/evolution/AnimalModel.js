@@ -50,8 +50,8 @@ export class AnimalModel extends Record({
     return this.traits.filter(trait => !trait.getDataModel().hidden)
   }
 
-  hasTrait(type) {
-    return this.traits.find(trait => trait.type === type)
+  hasTrait(typeOrId) {
+    return this.traits.find(trait => trait.type === typeOrId || trait.id === typeOrId)
   }
 
   traitAttach(trait) {

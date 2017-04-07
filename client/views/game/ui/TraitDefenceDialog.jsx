@@ -46,7 +46,10 @@ export class TraitDefenceDialog extends Component {
     const otherTraits = [
       targetAnimal.hasTrait(TraitShell)
       , targetAnimal.hasTrait(TraitInkCloud)
-    ].filter(t => !!t && t.checkAction(game, targetAnimal));
+    ].filter(t => !!t // Really has trait
+      && t.checkAction(game, targetAnimal) // And can activate it
+      && !checkIfTraitDisabledByIntellect(attackAnimal, t) // And it's not blocked by attacking intellect
+    );
     return (<DialogContent>
       <TooltipsContextElement>
         <div className='TraitDefenceDialog'>
@@ -57,7 +60,7 @@ export class TraitDefenceDialog extends Component {
             && this.renderMimicry(targetsMimicry, $traitAnswer.bind(null, traitMimicry.id))
             }
           {otherTraits.length > 0
-            && this.renderOther(otherTraits.filter(trait => !checkIfTraitDisabledByIntellect(attackAnimal, trait)), $traitAnswer.bind(null))}
+            && this.renderOther(attackAnimal, otherTraits, $traitAnswer.bind(null))}
           <h1>
             <T.span text='Game.UI.TraitDefenceDialog.Time'/>:
             <Timer start={time} duration={game.settings.timeTraitResponse}/>

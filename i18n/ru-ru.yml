@@ -75,6 +75,7 @@ Game:
       Time: Осталось времени
       Mimicry_Title: Мимикрировать
       TailLoss_Title: Отбросить хвост
+      Other_Title: Использовать свойства
   Log:
     gameGiveCards:
       0: $Player@{0} получил {1} карту
