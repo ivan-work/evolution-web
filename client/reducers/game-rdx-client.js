@@ -12,5 +12,5 @@ export const reducer = createReducer(null, {
     return state
       .update('hand', hand => hand.concat(data.cards));
   }
-  , clientSelfDisconnect: (state, data) => null
+  , clientDisconnectSelf: (state, data) => null
 });

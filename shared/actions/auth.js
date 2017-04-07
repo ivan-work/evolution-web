@@ -3,7 +3,7 @@ import {RoomModel} from '../models/RoomModel';
 import {GameModel, GameModelClient} from '../models/game/GameModel';
 import {List, Map} from 'immutable';
 import {push} from 'react-router-redux';
-import {roomsClientToServer} from './rooms';
+import {roomExitSuccess} from './rooms';
 import {addTimeout, cancelTimeout} from '~/shared/utils/reduxTimeout';
 
 export const SOCKET_DISCONNECT_NOW = 'SOCKET_DISCONNECT_NOW';
@@ -13,8 +13,8 @@ export const socketConnect = (connectionId, socket) => ({
   , data: {connectionId, socket}
 });
 
-export const clientSelfDisconnect = (reason) => ({
-  type: 'clientSelfDisconnect'
+export const clientDisconnectSelf = (reason) => ({
+  type: 'clientDisconnectSelf'
   , data: {reason}
 });
 
@@ -45,11 +45,25 @@ export const loginUserRequest = (redirect, login, password) => {
   }
 };
 
-export const loginUserSuccess = (user, redirect) => ({
-  type: 'loginUserSuccess'
-  , data: {user, redirect}
-  , meta: {userId: user.id}
-});
+export const loginUserSuccess = (user, redirect) => (dispatch, getState) => {
+  const online = getState().get('users').toArray().map(u => u.toOthers());
+  const rooms = getState().get('rooms');
+  const games = getState().get('games');
+  const room = rooms.find(room => ~room.users.indexOf(user.id)) || {id: null};
+  const roomId = room.id;
+  const game = games.find(game => game.roomId === roomId) || null;
+  const clientGame = game !== null ? game.toClient(user.id) : null;
+  dispatch({
+    type: 'loginUserSuccess'
+    , data: {user, redirect, online, rooms, roomId, game: clientGame}
+    , meta: {userId: user.id}
+  });
+  dispatch({
+    type: 'onlineUpdate'
+    , data: {user: user.toOthers()}
+    , meta: {users: true}
+  })
+};
 
 export const loginUserFailure = (connectionId, msg) => {
   console.warn('loginUserFailure', msg);
@@ -66,7 +80,7 @@ export const logoutUser = (userId) => (dispatch, getState) => {
   const user = getState().get('users').get(userId);
   const room = getState().get('rooms').find(room => ~room.get('users').indexOf(userId));
   if (room) {
-    roomsClientToServer.roomExitRequest({roomId: room.id}, {user})(dispatch, getState);
+    dispatch(roomExitSuccess(room.id, userId));
   }
   dispatch({
     type: 'logoutUser'
@@ -75,76 +89,69 @@ export const logoutUser = (userId) => (dispatch, getState) => {
   });
 };
 
-export const loginState = (user) => (dispatch, getState) => {
-  const online = getState().get('users').toArray().map(u => u.toOthers());
-  const rooms = getState().get('rooms');
-  const games = getState().get('games');
-  const room = rooms.find(room => ~room.users.indexOf(user.id)) || {id: null};
-  const roomId = room.id;
-  const game = games.find(game => game.roomId === roomId) || null;
-  const clientGame = game !== null ? game.toClient(user.id) : null;
-  dispatch({
-    type: 'loginState'
-    , data: {online, rooms, roomId, game: clientGame}
-    , meta: {userId: user.id}
-  });
-};
-
-export const onlineJoin = (user) => ({
-  type: 'onlineJoin'
-  , data: {user: user.toOthers()}
-  , meta: {users: true}
-});
-
 export const authClientToServer = {
-  loginUserRequest: (data, meta) => (dispatch, getState) => {
+  loginUserRequest: ({login, password, redirect = '/'}, {user, connectionId}) => (dispatch, getState) => {
     const state = getState();
-    const login = data.login;
-    if (meta.user == void 0 || meta.user.token == void 0) {
+    if (user == void 0 || user.token == void 0) {
       if (!login) {
-        dispatch(loginUserFailure(meta.connectionId, 'Login is not supplied'));
+        dispatch(loginUserFailure(connectionId, 'Login is not supplied'));
         return;
       }
       const userExists = state.get('users').find(user => user.login === login);
       if (userExists) {
         console.warn('User already exists:', login);
-        dispatch(loginUserFailure(meta.connectionId, 'User already exists'));
+        dispatch(loginUserFailure(connectionId, 'User already exists'));
         return;
       }
-      const user = UserModel.new(login, meta.connectionId);
+      const user = UserModel.new(login, connectionId);
       //console.log('new user record', user.id, user.login)
-      dispatch(onlineJoin(user));
-      dispatch(loginUserSuccess(user, data.redirect));
-      dispatch(loginState(user));
+      dispatch(loginUserSuccess(user, redirect));
     } else {
-      const userExists = state.get('users').find(user => user.token === meta.user.token);
+      const userExists = state.get('users').find(user => user.token === user.token);
       if (!userExists) {
-        dispatch(loginUserFailure(meta.connectionId, 'Relogin failed.'));
+        dispatch(loginUserFailure(connectionId, 'Invalid token'));
         return;
       }
-      const alreadyHasWorkingIdConnection = getState().get('connections').has(meta.user.connectionId);
+      const alreadyHasWorkingIdConnection = getState().get('connections').has(user.connectionId);
       if (alreadyHasWorkingIdConnection) {
-        dispatch(loginUserFailure(meta.connectionId, 'Duplicate tabs are not supported'));
+        dispatch(loginUserFailure(connectionId, 'Duplicate tabs are not supported'));
         return;
       }
-      const user = userExists.set('connectionId', meta.connectionId);
-      dispatch(cancelTimeout('logoutUser' + user.id));
-      dispatch(loginUserSuccess(user, data.redirect));
-      dispatch(loginState(user));
+      const newUser = userExists.set('connectionId', connectionId);
+      dispatch(cancelTimeout('logoutUser' + newUser.id));
+      dispatch(loginUserSuccess(newUser, redirect));
     }
   }
 };
 
 export const authServerToClient = {
-  loginUserSuccess: (data) => (dispatch) => {
+  loginUserSuccess: ({user, redirect = '/', online, rooms, roomId, game}) => (dispatch) => {
     //console.log('authServerToClient', data);
+    user = new UserModel(user);
     if (typeof (window) != 'undefined') {
-      window.sessionStorage.setItem('user', JSON.stringify(data.user));
+      window.sessionStorage.setItem('user', JSON.stringify(user));
     }
-    dispatch(loginUserSuccess(new UserModel(data.user)));
-    dispatch(push(data.redirect || '/'));
+    dispatch({
+      type: 'loginUserSuccess'
+      , data: {
+        user: user
+        , online: List(online.map(u => new UserModel(u).toOthers()))
+        , rooms: Map(rooms).map(r => RoomModel.fromJS(r))
+        , roomId
+        , game: GameModelClient.fromServer(game, user.id)
+      }
+    });
+    dispatch(push(redirect));
   }
-, loginUserFailure: (message) => (dispatch) => {
+  , onlineUpdate: ({user}) => ({
+    type: 'onlineUpdate'
+    , data: {user: new UserModel(user).toOthers()}
+  })
+  , onlineLeave: ({userId}) => ({
+    type: 'onlineLeave'
+    , data: {userId}
+  })
+  , loginUserFailure: (message) => (dispatch) => {
     dispatch({
       type: 'loginUserFailure'
       , data: message
@@ -154,20 +161,6 @@ export const authServerToClient = {
   , logoutUser: (data) => ({
     type: 'logoutUser'
     , data: {userId: data.userId}
-  })
-  , loginState: ({online, rooms, roomId, game}, user) => ({
-    type: 'loginState'
-    , data: {
-      user
-      , online: List(online.map(u => new UserModel(u).toOthers()))
-      , rooms: Map(rooms).map(r => RoomModel.fromJS(r))
-      , roomId
-      , game: GameModelClient.fromServer(game, user.id)
-    }
-  })
-  , onlineJoin: (data) => ({
-    type: 'onlineJoin'
-    , data: {user: new UserModel(data.user).toOthers()}
   })
 };
 
