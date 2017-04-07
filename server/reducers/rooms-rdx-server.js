@@ -21,11 +21,9 @@ export const roomEditSettings = (state, {roomId, settings}) => state.update(room
   .set('name', settings.name)
   .update('settings', s => s.applySettings(settings)));
 
-export const roomBan = (state, {roomId, userId}) => state.update(roomId, room => room
-  .update('banlist', banlist => banlist.push(userId)));
+export const roomBan = (state, {roomId, userId}) => state.updateIn([roomId, 'banlist'], banlist => banlist.push(userId));
 
-export const roomUnban = (state, {roomId, userId}) => state.update(roomId, room => room
-  .update('banlist', banlist => banlist.remove(banlist.indexOf(userId))));
+export const roomUnban = (state, {roomId, userId}) => state.updateIn([roomId, 'banlist'], banlist => banlist.filterNot(u => u === userId));
 
 export const gameCreateNotify = (state, {roomId, gameId}) => state.update(roomId, room => room
   .set('gameId', gameId));

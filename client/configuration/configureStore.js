@@ -3,7 +3,7 @@ import {createStore, compose, applyMiddleware} from 'redux'
 // Basic Middleware
 import {Record} from 'immutable';
 import thunk from 'redux-thunk';
-import {reduxTimeout} from '~/shared/utils/reduxTimeout'
+import {reduxTimeoutMiddleware} from '../../shared/utils/reduxTimeout'
 
 class ClientRecord extends Record({
   app: void 0
@@ -24,7 +24,7 @@ export default (reducer, initialState, middleware = [], appliedMiddleware = []) 
   , compose(
     applyMiddleware(
       thunk
-      , reduxTimeout()
+      , reduxTimeoutMiddleware()
       , ...middleware
     )
     , ...appliedMiddleware

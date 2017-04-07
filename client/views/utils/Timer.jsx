@@ -25,7 +25,7 @@ export class Timer extends Component {
           const time = start + duration - timestamp;
           if (time > 0) {
             this.setState({time});
-            window.setTimeout(this.updateTime, 100)
+            window.setTimeout(this.updateTime, 500)
           } else {
             this.setState({time: 0});
           }
@@ -39,7 +39,7 @@ export class Timer extends Component {
 
   componentDidMount() {
     this.$isMounted = true;
-    window.setTimeout(this.updateTime, 100)
+    window.setTimeout(this.updateTime, 500)
   }
 
   componentWillUnmount() {

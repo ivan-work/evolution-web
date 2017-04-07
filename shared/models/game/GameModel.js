@@ -27,11 +27,12 @@ export const StatusRecord = Record({
   , currentPlayer: 0
   , roundPlayer: 0
   , phase: PHASE.PREPARE
-  , turnTime: null
+  , turnStartTime: null
+  , turnDuration: null
   , started: false
 });
 
-export const QuestionRecord = Record({
+export class QuestionRecord extends Record({
   id: null
   , time: null
   , sourcePid: null
@@ -39,7 +40,27 @@ export const QuestionRecord = Record({
   , traitType: null
   , targetPid: null
   , targetAid: null
-});
+  , turnUserId: null
+  , turnRemainingTime: null
+}) {
+  static new(questionId, sourceAnimal, traitType, targetAnimal, turnUserId, turnRemainingTime) {
+    return new QuestionRecord({
+      id: questionId
+      , sourcePid: sourceAnimal.ownerId
+      , sourceAid: sourceAnimal.id
+      , traitType
+      , targetPid: targetAnimal.ownerId
+      , targetAid: targetAnimal.id
+      , time: Date.now()
+      , turnUserId
+      , turnRemainingTime
+    });
+  }
+
+  static fromJS(js) {
+    return js === null ? null : new QuestionRecord(js);
+  }
+}
 
 const rollDice = () => getRandom(1, 6);
 

@@ -8,6 +8,7 @@ import {
   , gamePlayerReadyChange
   , gameGiveCards
   , gameNextPlayer
+  , gameAddTurnTimeout
   , gameDeployAnimal
   , gameDeployTrait
   , gameEndTurn
@@ -35,6 +36,7 @@ export const reducer = createReducer(null, {
   , gamePlayerReadyChange
   , gameGiveCards
   , gameNextPlayer
+  , gameAddTurnTimeout
   , gameDeployAnimal
   , gameDeployTrait
   , gameEndTurn

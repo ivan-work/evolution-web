@@ -1,18 +1,33 @@
 import React, {Component} from 'react';
 import T from 'i18n-react';
 import {connect} from 'react-redux';
-import {IconButton, Card, CardTitle, CardText, Tooltip} from 'react-mdl';
+import {
+  IconButton,
+  Card,
+  CardText,
+  Tooltip,
+  ListItem,
+  ListItemAction,
+  ListItemContent
+} from 'react-mdl';
 
 import {RoomModel} from '../../../shared/models/RoomModel';
 
+import {Portal} from './../utils/Portal.jsx';
+
 import Chat from './../Chat.jsx';
 import UsersList from './../UsersList.jsx';
-import {Portal} from './../utils/Portal.jsx';
+
 import RoomControlGroup from './RoomControlGroup.jsx';
 import RoomSettings from './RoomSettings.jsx';
 
 import {redirectTo} from '~/shared/utils'
-import {roomEditSettingsRequest} from '../../../shared/actions/actions';
+import {
+  roomEditSettingsRequest,
+  roomKickRequest,
+  roomBanRequest,
+  roomUnbanRequest
+} from '../../../shared/actions/actions';
 
 export class Room extends Component {
   static propTypes = {
@@ -23,29 +38,35 @@ export class Room extends Component {
 
   constructor(props) {
     super(props);
-    const {room, userId} = this.props;
-    const isHost = room && room.users.get(0) === userId;
-    this.renderUser = (user => <li key={user.id}>
-      {user.login}
-      {isHost && <Tooltip label={T.translate('App.Room.$Kick')}>
-        <IconButton name='clear'/>
-      </Tooltip>}
-      {isHost && <Tooltip label={T.translate('App.Room.$Ban')}>
-        <IconButton name='block'/>
-      </Tooltip>}
-    </li>)
-    this.renderBannedUser = (user => <li key={user.id}>
-      {user.login}
-      {isHost && <Tooltip label={T.translate('App.Room.$Unban')}>
-        <IconButton name='remove_circle_outline' raised/>
-      </Tooltip>}
-    </li>)
+    const {room, userId, $Kick, $Ban, $Unban} = this.props;
+    const isHost = room.users.get(0) === userId;
+    this.renderUser = (user => <ListItem key={user.id} className='small'>
+      <ListItemContent>{user.login}</ListItemContent>
+      <ListItemAction>
+        {user.id !== userId && isHost && <Tooltip label={T.translate('App.Room.$Kick')}>
+          <IconButton name='clear' onClick={() => $Kick(user.id)}/>
+        </Tooltip>}
+        {user.id !== userId && isHost && <Tooltip label={T.translate('App.Room.$Ban')}>
+          <IconButton name='block' onClick={() => $Ban(user.id)}/>
+        </Tooltip>}
+      </ListItemAction>
+    </ListItem>);
+    this.renderBannedUser = (user => <ListItem key={user.id} className='small'>
+      <ListItemContent>{user.login}</ListItemContent>
+      <ListItemAction>
+        {user.id !== userId && isHost && <Tooltip label={T.translate('App.Room.$Unban')}>
+          <IconButton name='remove_circle_outline' onClick={() => $Unban(user.id)}/>
+        </Tooltip>}
+      </ListItemAction>
+    </ListItem>);
+  }
+
+  componentWillReceiveProps(props) {
+
   }
 
   render() {
     const {room, roomId, userId} = this.props;
-
-    if (!room) return <div>Error! <a onClick={this.props.$goHome}>go back</a></div>;
 
     return (<div className='Room'>
       <Portal target='header'>
@@ -59,20 +80,20 @@ export class Room extends Component {
           </CardText>
         </Card>
         <Card>
-          <CardTitle>{T.translate('App.Chat.Label')} </CardTitle>
           <CardText>
+            <h4>{T.translate('App.Chat.Label')}</h4>
             <Chat chatTargetType='ROOM' roomId={room.id}/>
           </CardText>
         </Card>
         <Card>
           <CardText>
-            <h3>{T.translate('App.Room.Players')} ({room.users.size}/{room.settings.maxPlayers}):</h3>
+            <h4>{T.translate('App.Room.Players')} ({room.users.size}/{room.settings.maxPlayers}):</h4>
             <UsersList list={room.users}>{this.renderUser}</UsersList>
-            <h3>{T.translate('App.Room.Spectators')}:</h3>
+            <h4>{T.translate('App.Room.Spectators')}:</h4>
             <UsersList list={room.spectators}>{this.renderUser}</UsersList>
             {room.banlist.size > 0 && (<div>
-              <h3>{T.translate('App.Room.Banned')}:</h3>
-              <UsersList list={room.spectators}>{this.renderBannedUser}</UsersList>
+              <h4>{T.translate('App.Room.Banned')}:</h4>
+              <UsersList list={room.banlist}>{this.renderBannedUser}</UsersList>
             </div>)}
           </CardText>
         </Card>
@@ -80,6 +101,10 @@ export class Room extends Component {
     </div>);
   }
 }
+
+export const RoomCheck = (props) => (!!props.room
+  ? <Room {...props}/>
+  : <div>Error! <a onClick={props.$goHome}>go back</a></div>);
 
 export const RoomView = connect(
   (state, props) => {
@@ -94,7 +119,10 @@ export const RoomView = connect(
   , (dispatch) => ({
     $roomEditSettings: (settings) => dispatch(roomEditSettingsRequest(settings))
     , $goHome: () => dispatch(redirectTo('/'))
+    , $Kick: (userId) => dispatch(roomKickRequest(userId))
+    , $Ban: (userId) => dispatch(roomBanRequest(userId))
+    , $Unban: (userId) => dispatch(roomUnbanRequest(userId))
   })
-)(Room);
+)(RoomCheck);
 
-export default RoomView;
+export default RoomView

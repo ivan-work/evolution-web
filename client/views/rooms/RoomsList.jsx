@@ -8,6 +8,9 @@ import {List, ListItem} from 'react-mdl';
 
 import {roomJoinRequestSoft, roomSpectateRequestSoft} from '../../../shared/actions/actions';
 
+import {failsChecks} from '../../../shared/actions/checks';
+import {checkCanJoinRoomToPlay, checkCanJoinRoomToSpectate} from '../../../shared/actions/rooms.checks';
+
 export class RoomsList extends React.Component {
   static propTypes = {
     rooms: RIP.listOf(RIP.record).isRequired
@@ -25,17 +28,26 @@ export class RoomsList extends React.Component {
   }
 
   render() {
-    const {rooms, $roomJoin, $roomSpectate} = this.props;
+    const {rooms, userId, $roomJoin, $roomSpectate} = this.props;
     //console.log(this.props.rooms.map((room, roomId) => roomId).valueSeq().toArray())
     return <List className="RoomsList">
       {rooms.map(room =>
-      <ListItem key={room.id}>
+        <ListItem key={room.id}>
         <span>
-          <a disabled={room.gameId !== null} href="#" onClick={() => $roomJoin(room.id)}>{room.name}</a>
-          (<a href="#" onClick={() => $roomSpectate(room.id)}>{T.translate('App.Rooms.$Watch')}</a>)
+          <a href="#"
+             disabled={failsChecks(() => checkCanJoinRoomToPlay(room, userId))}
+             onClick={() => $roomJoin(room.id)}>
+            {room.name}
+          </a>
+          &nbsp;(
+          <a href="#"
+             disabled={failsChecks(() => checkCanJoinRoomToSpectate(room, userId))}
+             onClick={() => $roomSpectate(room.id)}>
+            {T.translate('App.Rooms.$Watch')}
+          </a>)
           &nbsp;({room.users.size}/{room.settings.maxPlayers}) {room.spectators.size > 0 && '+' + room.spectators.size}
         </span>
-      </ListItem>)}
+        </ListItem>)}
     </List>;
   }
 }
@@ -45,6 +57,7 @@ export default connect(
     //console.log(state.toJS());
     return {
       room: state.get('room')
+      , userId: state.getIn(['user', 'id'])
       , rooms: state.getIn(['rooms'])
         .sort((r1, r2) => r1.gameId !== null)
         .toList()

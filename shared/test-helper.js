@@ -69,9 +69,8 @@ import {ServerRecord} from '../server/configureStore';
 import {createStore, compose, applyMiddleware} from 'redux'
 import configureStore from '../client/configuration/configureStore'
 import thunk from 'redux-thunk';
-import {reduxTimeout} from './utils/reduxTimeout';
+import {reduxTimeoutMiddleware} from './utils/reduxTimeout';
 import {reduxQuestion} from './utils/reduxQuestion';
-//import { reduxTimeout } from 'redux-timeout';
 import {combineReducers} from 'redux-immutable';
 import * as actions from './actions/actions';
 import {createMemoryHistory} from 'react-router';
@@ -113,7 +112,7 @@ global.mockServerStore = function (initialServerState) {
       serverErrorMiddleware(errorInterceptor)
       , thunk
       , reduxQuestion()
-      , reduxTimeout(timeouts)
+      , reduxTimeoutMiddleware(timeouts)
       , store => next => action => {
         serverStore.actions.push(action);
         return next(action);

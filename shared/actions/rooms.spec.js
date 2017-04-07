@@ -180,7 +180,7 @@ describe('Rooms:', function () {
       clientStore0.dispatch(roomCreateRequest());
       const RoomId = serverStore.getState().get('rooms').first().id;
       clientStore1.dispatch(roomJoinRequest(RoomId));
-      clientStore0.dispatch(roomKickRequest(User1.id));
+      clientStore0.dispatch(roomBanRequest(User1.id));
       expect(serverStore.getState().getIn(['rooms', RoomId, 'users'])).size(1);
     });
 

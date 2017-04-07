@@ -9,7 +9,7 @@ import {Record} from 'immutable';
 import * as reducers from './reducers';
 import {createStore, compose, applyMiddleware} from 'redux'
 import thunk from 'redux-thunk';
-import {reduxTimeout} from '~/shared/utils/reduxTimeout'
+import {reduxTimeoutMiddleware} from '../shared/utils/reduxTimeout'
 import {combineReducers} from 'redux-immutable';
 import {socketServer, socketStore, socketMiddleware} from './socket';
 import {errorMiddleware} from './middleware/error';
@@ -41,7 +41,7 @@ export default (server, app) => {
     , applyMiddleware(
       errorMiddleware()
       , thunk
-      , reduxTimeout(timeouts)
+      , reduxTimeoutMiddleware(timeouts)
       , socketMiddleware(socket)
     )
   );

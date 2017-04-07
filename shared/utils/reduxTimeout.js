@@ -18,6 +18,7 @@ class Timer {
     this.running = false;
     clearTimeout(this.id);
     this.remaining -= new Date() - this.started
+    return this.remaining;
   }
 
   getRemaining() {
@@ -30,36 +31,35 @@ class Timer {
 }
 
 export const addTimeout = (duration, name, callback) => ({
-  type: '@@reduxTimeout/addTimeout',
+  type: '@@reduxTimeoutMiddleware/addTimeout',
   data: {duration, name, callback}
 });
 
-export const cancelTimeout = function cancelTimeout(name) {
-  return {
-    type: '@@reduxTimeout/cancelTimeout',
-    data: {name}
-  };
-};
+export const cancelTimeout = (name) => ({
+  type: '@@reduxTimeoutMiddleware/cancelTimeout',
+  data: {name}
+});
 
-export const reduxTimeout = (timeouts = {}) => ({dispatch, getState}) => next => action => {
-  if (action.type === '@@reduxTimeout/addTimeout') {
+export const reduxTimeoutMiddleware = (timeouts = {}) => ({dispatch, getState}) => next => action => {
+  if (action.type === '@@reduxTimeoutMiddleware/addTimeout') {
     const {duration, name, callback} = action.data;
     if (duration === 0) return;
-    logger.silly('@@reduxTimeout/addTimeout', duration, name, typeof callback);
+    logger.debug('@@reduxTimeoutMiddleware/addTimeout', duration, name, typeof callback);
     if (timeouts[name]) throw new Error(`reduxTimeout: timeout[${name}] already occupied!`);
     timeouts[name] = new Timer(() => {
-      logger.debug('@@reduxTimeout/executeTimeout', name);
+      logger.verbose('@@reduxTimeoutMiddleware/executeTimeout', name);
       timeouts[name] = void 0;
       dispatch(callback)
     }, duration);
-  } else if (action.type === '@@reduxTimeout/cancelTimeout') {
+  } else if (action.type === '@@reduxTimeoutMiddleware/cancelTimeout') {
     const nameToClear = action.data.name;
-    logger.silly('@@reduxTimeout/cancelTimeout', nameToClear);
+    logger.debug('@@reduxTimeoutMiddleware/cancelTimeout', nameToClear);
     //console.log('cancelTimeout', action.type)
-    //if (!timeouts[nameToClear]) throw new Error(`reduxTimeout: timeout[${name}] doesnt exists!`);
+    //if (!timeouts[nameToClear]) throw new Error(`reduxTimeoutMiddleware: timeout[${name}] doesnt exists!`);
     if (timeouts[nameToClear]) {
-      timeouts[nameToClear].pause();
+      const remaining = timeouts[nameToClear].pause();
       delete timeouts[nameToClear];
+      return remaining;
     }
   } else {
     return next(action);

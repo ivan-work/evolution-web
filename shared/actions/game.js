@@ -15,7 +15,7 @@ import {
 } from '../models/game/evolution/constants';
 
 import {server$game} from './generic';
-import {doesPlayerHaveOptions} from './ai';
+import {doesPlayerHasOptions} from './ai';
 import {redirectTo} from '../utils';
 import {selectGame, selectPlayers4Sockets} from '../selectors';
 
@@ -78,10 +78,12 @@ export const gameDestroy = (gameId) => ({
 });
 
 export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
-  logger.info(`server$gameLeave: ${gameId}, ${userId}`)
+  logger.info(`server$gameLeave: ${gameId}, ${userId}`);
   dispatch(server$game(gameId, gamePlayerLeft(gameId, userId)));
   const game = selectGame(getState, gameId);
   const leaver = game.getPlayer(userId);
+  // Can't place cancelTimeout here because
+  // we don't want timer drop when someone leaves in a valid game
   switch (game.players.filter(p => p.playing).size) {
     case 0:
       dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
@@ -103,10 +105,8 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
 
 // Game Start
 export const server$gameStart = (gameId) => (dispatch, getState) => {
-  dispatch(Object.assign(gameStart(gameId), {
-    meta: {users: selectPlayers4Sockets(getState, gameId)}
-  }));
-  const game = selectGame(getState, gameId);
+  dispatch(server$game(gameId, gameStart(gameId)));
+  dispatch(server$gameDistributeCards(gameId));
   dispatch(server$gamePlayerStart(gameId));
 };
 
@@ -194,31 +194,12 @@ export const server$gameDeployTrait = (gameId, cardId, traits) => (dispatch, get
 
 // gameDeployAnimal || gameDeployTrait > gameDeployNext > gameNextPlayer || gameFinishDeploy
 export const server$gameDeployNext = (gameId, userId) => (dispatch, getState) => {
+  logger.debug('server$gameDeployNext:', userId);
   const game = selectGame(getState, gameId);
   if (game.getPlayer(userId).hand.size !== 0) {
     dispatch(server$gamePlayerContinue(gameId));
   } else {
-    dispatch(server$gameFinishDeploy(gameId, userId));
-  }
-};
-
-// gameDeployNext || gameEndTurnRequest > gameFinishDeploy > gameEndTurn && (gameNextPlayer || gameStartEat)
-export const server$gameFinishDeploy = (gameId, userId) => (dispatch, getState) => {
-  logger.debug('server$gameFinishDeploy:', userId);
-  dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
-  dispatch(Object.assign(gameEndTurn(gameId, userId), {
-    meta: {users: selectPlayers4Sockets(getState, gameId)}
-  }));
-  const game = selectGame(getState, gameId);
-  if (game.players.every(player => player.ended)) {
-    const food = game.generateFood();
-
-    dispatch(Object.assign(gameStartEat(gameId, food), {
-      meta: {users: selectPlayers4Sockets(getState, gameId)}
-    }));
-    dispatch(server$gamePlayerStart(gameId));
-  } else {
-    dispatch(server$gamePlayerContinue(gameId));
+    dispatch(server$gameEndTurn(gameId, userId));
   }
 };
 
@@ -234,28 +215,58 @@ export const gameEndTurn = (gameId, userId) => ({
 });
 
 export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
+  logger.debug('server$gameEndTurn:', userId);
+  dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
+  dispatch(server$game(gameId, gameEndTurn(gameId, userId)));
+
   const game = selectGame(getState, gameId);
-  if (game.status.phase === PHASE.DEPLOY) {
-    dispatch(server$gameFinishDeploy(gameId, userId));
+
+  if (game.players.some(player => !player.ended)) {
+    dispatch(server$gamePlayerContinue(gameId));
+  } else if (game.status.phase === PHASE.DEPLOY) {
+    logger.debug('server$gameStartFEEDING:');
+    const food = game.generateFood();
+    dispatch(server$game(gameId, gameStartEat(gameId, food)));
+    dispatch(server$gamePlayerStart(gameId));
   } else {
-    dispatch(server$gameFinishFeeding(gameId, userId));
+    logger.debug('server$gameExtict:', userId);
+    dispatch(server$gameExtict(gameId));
+    if (selectGame(getState, gameId).deck.size > 0) {
+      logger.debug('server$gameStartDEPLOY');
+      dispatch(server$game(gameId, gameStartDeploy(gameId)));
+      dispatch(server$gameDistributeCards(gameId));
+      dispatch(server$gamePlayerStart(gameId));
+    } else {
+      dispatch(server$gameEnd(gameId));
+    }
   }
 };
 
 // gameNextPlayer
-const gameNextPlayer = (gameId, nextPlayerIndex, roundChanged, turnTime, playerHasOptions) => ({
+const gameNextPlayer = (gameId, nextPlayerIndex, roundChanged, playerHasOptions) => ({
   type: 'gameNextPlayer'
-  , data: {gameId, nextPlayerIndex, roundChanged, turnTime, playerHasOptions}
+  , data: {gameId, nextPlayerIndex, roundChanged, playerHasOptions}
 });
 
-const makeTurnTimeoutId = (gameId) => `turnTimeTimeout#${gameId}`;
+const gameNextPlayerNotify = (gameId, userId) => ({
+  type: 'gameNextPlayerNotify'
+  , data: {gameId, userId}
+});
 
-const server$addTurnTimeout = (gameId, userId) => (dispatch, getState) => {
-  const game = selectGame(getState, gameId);
-  dispatch(addTimeout(game.settings.timeTurn, makeTurnTimeoutId(gameId, userId), (dispatch, getState) => {
-    logger.info(`Turn Timeout:`, `${gameId}: ${userId}`)
+export const makeTurnTimeoutId = (gameId) => `turnTimeTimeout#${gameId}`;
+
+const gameAddTurnTimeout = (gameId, turnStartTime, turnDuration) => ({
+  type: 'gameAddTurnTimeout'
+  , data: {gameId, turnStartTime, turnDuration}
+});
+
+export const server$addTurnTimeout = (gameId, userId, turnTime) => (dispatch, getState) => {
+  if (turnTime === void 0) throw new Error('turnTime === undefined');
+  dispatch(addTimeout(turnTime, makeTurnTimeoutId(gameId, userId), (dispatch, getState) => {
+    logger.info(`Turn Timeout:`, `${gameId}: ${userId}`);
     dispatch(server$gameEndTurn(gameId, userId))
   }));
+  dispatch(server$game(gameId, gameAddTurnTimeout(gameId, Date.now(), turnTime)));
 };
 
 export const server$gamePlayerStart = (gameId) => (dispatch, getState) => {
@@ -267,7 +278,7 @@ export const server$gamePlayerStart = (gameId) => (dispatch, getState) => {
   dispatch(server$gameNextPlayer(gameId, nextPlayer, false));
 };
 
-export const server$gamePlayerContinue = (gameId) => (dispatch, getState) => {
+export const server$gamePlayerContinue = (gameId, previousUserId) => (dispatch, getState) => {
   logger.debug('server$gamePlayerContinue');
   const game = selectGame(getState, gameId);
   const currentPlayer = game.getIn(['status', 'currentPlayer']);
@@ -280,22 +291,20 @@ export const server$gamePlayerContinue = (gameId) => (dispatch, getState) => {
 const server$gameNextPlayer = (gameId, nextPlayer, roundChanged) => (dispatch, getState) => {
   logger.debug('server$gameNextPlayer:', nextPlayer.id, roundChanged);
   dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
-  dispatch(server$addTurnTimeout(gameId, nextPlayer.id));
 
-  const turnTime = Date.now();
   const currentPlayerIndex = selectGame(getState, gameId).getIn(['status', 'currentPlayer']);
-  dispatch(gameNextPlayer(gameId, nextPlayer.index, roundChanged, turnTime));
 
-  const playerHasOptions = doesPlayerHaveOptions(selectGame(getState, gameId), nextPlayer.id);
+  dispatch(server$game(gameId, gameNextPlayer(gameId, nextPlayer.index, roundChanged)));
 
-  dispatch(Object.assign(gameNextPlayer(gameId
-    , nextPlayer.index
-    , roundChanged, turnTime
-    , playerHasOptions && currentPlayerIndex !== nextPlayer.index)
-    , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId)}}));
-
-  if (!playerHasOptions)
-    dispatch(server$game(gameId, server$gameEndTurn(gameId, nextPlayer.id)));
+  const playerHasOptions = doesPlayerHasOptions(selectGame(getState, gameId), nextPlayer.id);
+  if (playerHasOptions) {
+    dispatch(server$addTurnTimeout(gameId, nextPlayer.id, selectGame(getState, gameId).settings.timeTurn));
+    if (currentPlayerIndex !== nextPlayer.index) {
+      dispatch(server$game(gameId, gameNextPlayerNotify(gameId, nextPlayer.id)))
+    }
+  } else {
+    dispatch(server$gameEndTurn(gameId, nextPlayer.id));
+  }
 };
 
 const choosePlayer = (game, startIndex) => {
@@ -325,29 +334,6 @@ export const gameStartEat = (gameId, food) => ({
   type: 'gameStartEat'
   , data: {gameId, food}
 });
-
-export const server$gameFinishFeeding = (gameId, userId) => (dispatch, getState) => {
-  dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
-  dispatch(Object.assign(gameEndTurn(gameId, userId), {
-    meta: {users: selectPlayers4Sockets(getState, gameId)}
-  }));
-  if (selectGame(getState, gameId).players.some(player => !player.ended)) {
-    logger.debug('server$gamePlayerContinue:', userId);
-    dispatch(server$gamePlayerContinue(gameId));
-  } else {
-    logger.debug('server$gameExtict:', userId);
-
-    dispatch(server$gameExtict(gameId));
-
-    if (selectGame(getState, gameId).deck.size > 0) {
-      dispatch(server$game(gameId, gameStartDeploy(gameId)));
-      dispatch(server$gameDistributeCards(gameId));
-      dispatch(server$gamePlayerStart(gameId));
-    } else {
-      dispatch(server$gameEnd(gameId));
-    }
-  }
-};
 
 // ===== EXTINCT!
 
@@ -418,6 +404,7 @@ const gameEnd = (gameId, game) => ({
 });
 
 const server$gameEnd = (gameId) => (dispatch, getState) => {
+  logger.debug('server$gameEnd', gameId);
   const game = selectGame(getState, gameId);
   loggerOnline.info(`Game finished ${game.players.map(p => getState().getIn(['users', p.id, 'login'])).join(', ')}`);
   dispatch(server$game(gameId, gameEnd(gameId, game)));
@@ -440,19 +427,12 @@ export const gameClientToServer = {
     checkGameDefined(game);
     checkGameHasUser(game, userId);
     dispatch(server$game(gameId, gamePlayerReadyChange(gameId, userId, ready)));
-    /*
+    /**
      * Actual starting
      * */
     const newGame = selectGame(getState, gameId);
     if (!newGame.status.started && newGame.players.every(player => player.ready)) {
-      const INITIAL_HAND_SIZE = 6;
-      //new Array(INITIAL_HAND_SIZE).fill().every(() => {
-      //  return true;
-      //})
       dispatch(server$gameStart(gameId));
-      newGame.players.forEach((player) => {
-        dispatch(server$gameGiveCards(gameId, player.id, INITIAL_HAND_SIZE));
-      });
     }
   }
   , gameEndTurnRequest: ({gameId}, {userId}) => (dispatch, getState) => {
@@ -549,7 +529,6 @@ export const gameServerToClient = {
     dispatch(gameInit(GameModelClient.fromServer(game, userId)));
     dispatch(redirectTo('/game'));
   }
-
   , gameCreateSuccess: (({game}, currentUserId) => (dispatch) => {
     dispatch(gameCreateSuccess(GameModelClient.fromServer(game, currentUserId)));
     dispatch(redirectTo('/game'));
@@ -565,8 +544,12 @@ export const gameServerToClient = {
     gameDeployAnimal(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardPosition)
   , gameDeployTrait: ({gameId, cardId, traits}) =>
     gameDeployTrait(gameId, cardId, traits.map(trait => TraitModel.fromServer(trait)))
-  , gameNextPlayer: ({gameId, nextPlayerIndex, roundChanged, turnTime, playerHasOptions}) =>
-    gameNextPlayer(gameId, nextPlayerIndex, roundChanged, turnTime, playerHasOptions)
+  , gameAddTurnTimeout: ({gameId, turnStartTime, turnDuration}) =>
+    gameAddTurnTimeout(gameId, turnStartTime, turnDuration)
+  , gameNextPlayer: ({gameId, nextPlayerIndex, roundChanged}) =>
+    gameNextPlayer(gameId, nextPlayerIndex, roundChanged)
+  , gameNextPlayerNotify: ({gameId, userId}, currentUserId) => (dispatch) =>
+    (userId === currentUserId && dispatch(gameNextPlayerNotify(gameId, userId)))
   , gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
   , gameDestroy: ({gameId}) => gameDestroy(gameId)
   , gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))

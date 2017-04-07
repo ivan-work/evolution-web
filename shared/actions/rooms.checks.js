@@ -27,6 +27,15 @@ export const checkComboRoomCanStart = (room, userId) => {
   checkRoomIsNotInGame(room);
 };
 
+
+export const checkCanJoinRoomToPlay = (room, userId) => {
+  checkRoomIsNotInGame(room);
+  checkUserNotBanned(room, userId);
+  checkRoomMaxSize(room, 1);
+};
+
+export const checkCanJoinRoomToSpectate = (room, userId) => checkUserNotBanned(room, userId);
+
 /**
  * Checks/Simple
  * */
@@ -36,9 +45,9 @@ export const checkRoomMinSize = (room) => {
     throw new ActionCheckError('checkRoomMinSize', `Room(%s) doesn't have min players`, room.id);
 };
 
-export const checkRoomMaxSize = (room, adding) => {
+export const checkRoomMaxSize = (room, adding = 0) => {
   // Adding = true means we check with joining player. Adding = false means we check existing room for start.
-  if (room.users.size + (adding ? 1 : 0) > room.settings.maxPlayers)
+  if ((room.users.size + adding) > room.settings.maxPlayers)
     throw new ActionCheckError('checkRoomMaxSize', `Room(%s) already has too much players`, room.id);
 };
 
@@ -48,13 +57,13 @@ export const checkRoomIsNotInGame = (room) => {
 };
 
 export const checkUserInRoom = (room, userId) => {
-  if (!~room.users.indexOf(userId))
+  if (!~room.users.indexOf(userId) && !~room.spectators.indexOf(userId))
     throw new ActionCheckError('checkUserInRoom', 'Room(%s) doesnt have User(%s)', room.id, userId);
 };
 
-export const checkUserNotInRoom = (room, userId) => {
+export const checkUserNotInPlayers = (room, userId) => {
   if (~room.users.indexOf(userId))
-    throw new ActionCheckError('checkUserNotInRoom', 'Room(%s) has User(%s)', room.id, userId);
+    throw new ActionCheckError('checkUserNotInPlayers', 'Room(%s) has User(%s)', room.id, userId);
 };
 
 export const checkUserNotSpectatingRoom = (room, userId) => {
