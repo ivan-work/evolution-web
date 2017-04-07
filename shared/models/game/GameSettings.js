@@ -15,8 +15,8 @@ export const SettingsRules = {
 
 export class SettingsRecord extends Record({
   maxPlayers: 4
-  , timeTurn: 2 * 6000
-  , timeTraitResponse: .5 * 6000
+  , timeTurn: 2 * 60000
+  , timeTraitResponse: .5 * 60000
   , decks: List(['Base'])
 }) {
   static fromJS(js) {
@@ -32,7 +32,7 @@ export class SettingsRecord extends Record({
     return this.mergeWith((prev, next, key) => {
       switch (key) {
         case 'decks':
-          return next.length > 0 ? next : prev;
+          return next.size > 0 ? next : prev;
         default:
           return next !== null ? next : prev;
       }
@@ -62,8 +62,8 @@ const NormalDecks = {
     // 2
     , [4, cardsData.CardTailLoss.type]
     , [4, cardsData.CardCamouflageAndFatTissue.type]
-    , [4, cardsData.CardHighBodyWeightAndCarnivorous.type]
-    , [4, cardsData.CardHighBodyWeightAndFatTissue.type]
+    , [4, cardsData.CardMassiveAndCarnivorous.type]
+    , [4, cardsData.CardMassiveAndFatTissue.type]
     // 3
     , [4, cardsData.CardParasiteAndCarnivorous.type]
     , [4, cardsData.CardParasiteAndFatTissue.type]

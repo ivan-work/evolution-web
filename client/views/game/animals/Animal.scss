@@ -12,7 +12,7 @@
     height: $ANIMAL_HEIGHT;
     word-wrap: break-word;
 
-    border: 1px solid gray;
+    border: 1px solid #bbb;
     border-radius: 2px;
 
     background: #fff;
@@ -20,5 +20,17 @@
 
   &.highlight {
     box-shadow: 0px 0px 1em 1em yellow;
+  }
+
+  .AnimalFoodContainer {
+    margin: 20px auto 0;
+    padding: 1px;
+    .Food {
+      color: #966;
+
+      font-size: 1.1em;
+      width: 1em;
+      height: 1em;
+    }
   }
 }

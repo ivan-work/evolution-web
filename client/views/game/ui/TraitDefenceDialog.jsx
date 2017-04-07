@@ -17,7 +17,7 @@ export class TraitDefenceDialog extends Component {
   render() {
     const {game} = this.props;
     return (<Dialog show={game.question && game.question.targetPid === game.getPlayer().id}>
-      <DialogTitle>Defend!</DialogTitle>
+      <DialogTitle>{T.translate('Game.UI.TraitDefenceDialog.Title')}</DialogTitle>
       {game.question ? this.renderDialogContent() : null}
     </Dialog>);
   }
@@ -44,7 +44,7 @@ export class TraitDefenceDialog extends Component {
 
   renderMimicry(targets, onClick) {
     return (<div className='Mimicry' style={{minWidth: (80 * targets.size)+'px'}}>
-      <h1><T.span text='Game.UI.TraitDefenceDialog.Mimicry.Title'/></h1>
+      <h1><T.span text='Game.UI.TraitDefenceDialog.Mimicry_Title'/></h1>
       <div>
         {targets.map(animal =>
         <div key={animal.id}
@@ -59,7 +59,7 @@ export class TraitDefenceDialog extends Component {
 
   renderTailLoss(targets, onClick) {
     return (<div className='TailLoss' style={{minWidth: (80 * targets.size)+'px'}}>
-      <h1><T.span text='Game.UI.TraitDefenceDialog.TailLoss.Title'/></h1>
+      <h1><T.span text='Game.UI.TraitDefenceDialog.TailLoss_Title'/></h1>
       <div>
         {targets.map((trait, index) =>
         <div key={trait.id}

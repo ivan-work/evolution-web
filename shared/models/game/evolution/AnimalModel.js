@@ -89,8 +89,8 @@ export class AnimalModel extends Record({
     return this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) || this.getFood() >= this.sizeOfNormalFood();
   }
 
-  updateFirstTrait(filterFn, updateFn) {
-    const index = this.traits.findIndex(filterFn)
+  updateTrait(filterFn, updateFn, direction = true) {
+    const index = this.traits[direction ? 'findIndex' : 'findLastIndex'](filterFn);
     return (~index
       ? this.updateIn(['traits', index], updateFn)
       : this);
@@ -108,7 +108,7 @@ export class AnimalModel extends Record({
     while (amount > 0 && needOfFat > 0) {
       amount--;
       needOfFat--;
-      self = self.updateFirstTrait(
+      self = self.updateTrait(
         trait => trait.type === TraitFatTissue && !trait.value
         , trait => trait.set('value', true)
       );
@@ -119,14 +119,20 @@ export class AnimalModel extends Record({
   }
 
   digestFood() {
-    let foodBalance = -this.needsFood(); // +1 means animal overate, -1 means to generate from fat
+    let foodBalance = this.food - this.sizeOfNormalFood(); // +1 means animal overate, -1 means to generate from fat
     let self = this;
-    while (foodBalance < 0 && self.getFat().size > 0) {
+    console.log(`${this.id} ${this.sizeOfNormalFood()} + ${this.sizeOfFat()} - ${this.getFood()}.
+foodBalance ${foodBalance}
+fat size: ${self.getFat()}
+`);
+    while (foodBalance < 0 && self.getFat() > 0) {
       foodBalance++;
-      self = self.updateFirstTrait(
+      self = self.updateTrait(
         trait => trait.type === TraitFatTissue && trait.value
         , trait => trait.set('value', false)
+        , false
       );
+      console.log(self.traits.toJS())
     }
     return self
       .set('food', 0)

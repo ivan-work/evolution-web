@@ -39,7 +39,7 @@ class _GameUI extends React.Component {
                     style={{width: '100%'}}
                     onClick={this.context.gameActions.$endTurn}>End Phase</Button>}
 
-        <GameStatusDisplay status={game.status} players={game.players}/>
+        <GameStatusDisplay game={game}/>
 
         <PortalTarget name='deck'/>
       </div>);

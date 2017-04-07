@@ -7,20 +7,24 @@
     transition: transform .5s;
     width: 100%;
     height: $CARD_HEIGHT;
-    border: 1px solid #555;
+    border: 1px solid #999;
     border-radius: 5px;
     background-color: #ddd;
     background-size: $CARD_WIDTH $CARD_HEIGHT;
     display: flex;
     flex-direction: column;
   }
+
+  // Selected alternate trait
   &.alternateTrait .inner {
     transform: rotate(180deg);
   }
+
   &.canDrag .inner {
     background-color: #fff;
     @include traits();
   }
+
   &.isDragging {
     opacity: 0;
   }

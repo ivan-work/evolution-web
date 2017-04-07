@@ -147,8 +147,8 @@ export const TraitGrazing = {
   , $checkAction: (game, sourceAnimal) => game.food > 0
 };
 
-export const TraitHighBodyWeight = {
-  type: 'TraitHighBodyWeight'
+export const TraitMassive = {
+  type: 'TraitMassive'
   , food: 1
 };
 
