@@ -305,8 +305,8 @@ export const traitTakeShell = (game, {continentId, animalId, trait}) => {
 };
 
 // No need to exports, serverside-only
-const traitAmbushStart = (game, {sourceAid}) => game.set('ambush', sourceAid);
-const traitAmbushEnd = (game, {sourceAid}) => game.remove('ambush');
+const traitAddHuntingCallback = (game, {callback}) => game.update('huntingCallbacks', (list) => list.push(callback));
+const traitClearHuntingCallbacks = (game, {}) => game.set('huntingCallbacks', List());
 
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
@@ -342,7 +342,7 @@ export const reducer = createReducer(Map(), {
   , traitAnimalPoisoned: (state, data) => state.update(data.gameId, game => traitAnimalPoisoned(game, data))
   , traitNotify_Start: (state, data) => state.update(data.gameId, game => traitNotify_Start(game, data))
   , traitTakeShell: (state, data) => state.update(data.gameId, game => traitTakeShell(game, data))
-  , traitAmbushStart: (state, data) => state.update(data.gameId, game => traitAmbushStart(game, data))
-  , traitAmbushEnd: (state, data) => state.update(data.gameId, game => traitAmbushEnd(game, data))
+  , traitAddHuntingCallback: (state, data) => state.update(data.gameId, game => traitAddHuntingCallback(game, data))
+  , traitClearHuntingCallbacks: (state, data) => state.update(data.gameId, game => traitClearHuntingCallbacks(game, data))
   , testHackGame: (state, data) => state.update(data.gameId, data.callback)
 });

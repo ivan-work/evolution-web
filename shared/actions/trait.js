@@ -191,14 +191,14 @@ export const server$tryViviparous = (gameId, animal) => (dispatch, getState) => 
   })
 };
 
-const traitAmbushStart = (gameId, animal) => ({
-  type: 'traitAmbushStart'
-  , data: {gameId, sourceAid: animal.id}
+export const traitAddHuntingCallback = (gameId, callback) => ({
+  type: 'traitAddHuntingCallback'
+  , data: {gameId, callback}
 });
 
-export const traitAmbushEnd = (gameId, animal) => ({
-  type: 'traitAmbushEnd'
-  , data: {gameId, sourceAid: animal.id}
+export const traitClearHuntingCallbacks = (gameId) => ({
+  type: 'traitClearHuntingCallbacks'
+  , data: {gameId}
 });
 
 /**
@@ -322,7 +322,10 @@ export const server$startFeedingFromGame = (gameId, animalId, amount) => (dispat
     if (!carnivorousData.$checkAction(game, attackAnimal) || !carnivorousData.checkTarget(game, attackAnimal, animal)) return;
 
     dispatch(clearCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, attackAnimal.ownerId));
-    dispatch(traitAmbushStart(gameId, animal));
+    dispatch(traitAddHuntingCallback(gameId, (game) => (dispatch) => {
+      const {animal} = game.locateAnimal(animalId);
+      if (animal) dispatch(server$startFeedingFromGame(game.id, animal.id, 1));
+    }));
     dispatch(server$traitActivate(game, attackAnimal, carnivorous, animal));
     return true;
   });

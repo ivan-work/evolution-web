@@ -92,7 +92,7 @@ export const TraitInkCloud = {
   ])
   , action: (game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, defenceTrait, defenceAnimal));
-    dispatch(endHuntNoCd(game, attackAnimal, attackTrait, defenceAnimal));
+    dispatch(endHuntNoCd(game.id, attackAnimal, attackTrait, defenceAnimal));
     return true;
   }
 };

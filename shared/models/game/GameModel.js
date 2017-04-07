@@ -121,7 +121,7 @@ global.locateAnimalTime = 0;
 
 export class GameModel extends Record({
   ...GameModelData
-  , ambush: void 0
+  , huntingCallbacks: List()
 }) {
   static generateDeck(config, shuffle) {
     const result = config.reduce((result, [count, type]) => result
@@ -174,6 +174,7 @@ export class GameModel extends Record({
       , cooldowns: CooldownList.fromServer(js.cooldowns)
       , settings: SettingsRecord.fromJS(js.settings)
       , log: List(js.log)
+      , huntingCallbacks: List()
     });
   }
 

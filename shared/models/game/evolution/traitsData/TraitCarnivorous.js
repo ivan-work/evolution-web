@@ -24,7 +24,8 @@ import {
   , server$traitNotify_End
   , server$traitAnimalAttachTrait
   , server$traitAnimalRemoveTrait
-  , traitAmbushEnd
+  , traitAddHuntingCallback
+  , traitClearHuntingCallbacks
   , server$traitSetValue
 } from '../../../../actions/actions';
 import {
@@ -60,23 +61,18 @@ import {
 
 export const endHunt = (game, sourceAnimal, traitCarnivorous, targetAnimal) => (dispatch) => {
   dispatch(server$traitStartCooldown(game.id, traitCarnivorous, sourceAnimal));
-  dispatch(endHuntNoCd(game, sourceAnimal, traitCarnivorous, targetAnimal));
+  dispatch(endHuntNoCd(game.id, sourceAnimal, traitCarnivorous, targetAnimal));
 };
 
-export const endHuntNoCd = (game, sourceAnimal, traitCarnivorous, targetAnimal) => (dispatch) => {
-  if (game.ambush) {
-    const {animal} = game.locateAnimal(game.ambush);
-    if (animal) {
-      dispatch(traitAmbushEnd(game.id, animal));
-      dispatch(server$startFeedingFromGame(game.id, animal.id, 1));
-    }
+export const endHuntNoCd = (gameId, sourceAnimal, traitCarnivorous, targetAnimal) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  if (game.huntingCallbacks.size > 0) {
+    dispatch(traitClearHuntingCallbacks(game.id));
+    game.huntingCallbacks.forEach((callback) => {
+      dispatch(callback(game, sourceAnimal, traitCarnivorous, targetAnimal))
+    });
   }
-  const traitAnglerfish = sourceAnimal.hasTrait(TraitAnglerfish);
-  if (traitAnglerfish) {
-    const traitIntellect = sourceAnimal.hasTrait(TraitIntellect);
-    dispatch(server$traitAnimalRemoveTrait(game, sourceAnimal, traitAnglerfish));
-    dispatch(server$traitAnimalRemoveTrait(game, sourceAnimal, traitIntellect));
-  }
+  // TODO WTF
   if (traitCarnivorous.value) dispatch(server$traitSetValue(game, sourceAnimal, traitCarnivorous, false));
   dispatch(server$traitNotify_End(game.id, sourceAnimal.id, traitCarnivorous, targetAnimal.id));
 };
@@ -123,10 +119,10 @@ export const TraitCarnivorous = {
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: (game, sourceAnimal, trait, targetAnimal) => (dispatch, getState) => {
+
     /**
      * Check for counter-attack (aka anglerfish)
      */
-
     const animalAnglerfish = game.getPlayer(targetAnimal.ownerId).continent.filter(animal =>
       animal.traits.size === 1
       && animal.traits.get(0).type === TraitAnglerfish
@@ -145,8 +141,15 @@ export const TraitCarnivorous = {
       const reselectedGame = selectGame(getState, game.id);
       const {animal: revealledAnglerfish} = reselectedGame.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
       if (TraitCarnivorous.checkTarget(reselectedGame, revealledAnglerfish, sourceAnimal)) {
-
-        console.log('angler activates')
+        dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
+          const {animal} = reselectedGame.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
+          if (animal) {
+            const traitAnglerfish = animal.hasTrait(TraitAnglerfish);
+            if (traitAnglerfish) dispatch(server$traitAnimalRemoveTrait(game, animal, traitAnglerfish));
+            const traitIntellect = animal.hasTrait(TraitIntellect);
+            if (traitIntellect) dispatch(server$traitAnimalRemoveTrait(game, animal, traitIntellect));
+          }
+        }));
         dispatch(server$traitActivate(game, animalAnglerfish, newTraitCarnivorous, sourceAnimal));
       } else {
         dispatch(server$traitAnimalRemoveTrait(game, animalAnglerfish, newTraitIntellect));

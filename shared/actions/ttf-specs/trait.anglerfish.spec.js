@@ -11,7 +11,7 @@ import {QuestionRecord, PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
 
-describe.only('TraitAnglerfish:', () => {
+describe('TraitAnglerfish:', () => {
   it('Deploy', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
@@ -137,7 +137,7 @@ players:
     expect(selectAnimal(User0, 1).getFood()).equal(0);
   });
 
-  it.only('bug v043 2', () => {
+  it('bug v043 2', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
