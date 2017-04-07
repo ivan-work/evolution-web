@@ -5,10 +5,9 @@ import classnames from 'classnames';
 import {GameProvider} from './providers/GameProvider.jsx';
 
 import { DragSource } from 'react-dnd';
-import { getEmptyImage } from 'react-dnd-html5-backend';
 import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
 
-import { TraitModel } from '~/shared/models/game/evolution/TraitModel';
+import { TraitModel } from '../../../shared/models/game/evolution/TraitModel';
 
 export const ANIMAL_TRAIT_SIZE = {
   width: 60
@@ -26,7 +25,6 @@ class _AnimalTrait extends React.Component {
     , index: React.PropTypes.number.isRequired
     // by DragSource
     , connectDragSource: React.PropTypes.func
-    , connectDragPreview: React.PropTypes.func
     , isDragging: React.PropTypes.bool
     , canDrag: React.PropTypes.bool
     // by GameProvider
@@ -43,9 +41,6 @@ class _AnimalTrait extends React.Component {
   }
 
   componentDidMount() {
-    //if (this.props.connectDragPreview && !process.env.TEST) {
-    //  this.props.connectDragPreview(getEmptyImage());
-    //}
   }
 
   render() {
@@ -78,7 +73,6 @@ const _DraggableAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource()
-    , connectDragPreview: connect.dragPreview()
     , isDragging: monitor.isDragging()
     , canDrag: monitor.canDrag()
   })

@@ -11,24 +11,17 @@ import * as MDL from 'react-mdl';
 import {Dialog, DialogActions} from '../utils/Dialog.jsx';
 
 export class ContinentDeploy extends Continent {
-  static contextTypes = {
-    game: React.PropTypes.object
-    , gameWrapper: React.PropTypes.object
-  };
   componentWillMount() {
-    const backend = this._reactInternalInstance._currentElement._owner._currentElement._owner._currentElement._owner._currentElement._owner
-      ._currentElement._owner._instance.getManager().getBackend()
-
-    console.log(backend);
     this.$deployAnimal = (card, zoneIndex) => this.context.gameActions.$deployAnimal(card.id, zoneIndex);
-    this.$deployTrait = (card, animal, alternateTrait) => {
-      if (card.trait1.cardTargetType & CTT_PARAMETER.LINK) {
-        const $el = document.getElementById(card.id);
-        //console.log($($el))
-        //$Game0.get(0).getManager().getBackend()
+    this.$deployTrait = (card, animal, alternateTrait, component) => {
+      if (card.getTraitModel(alternateTrait).cardTargetType & CTT_PARAMETER.LINK) {
+        component.setState({selectLink: {card, animal, alternateTrait}});
       } else {
         this.context.gameActions.$deployTrait(card.id, animal.id, alternateTrait);
       }
+    };
+    this.$deployLinkedTrait = (card, animal, alternateTrait, linkedAnimal) => {
+      this.context.gameActions.$deployTrait(card.id, animal.id, alternateTrait, linkedAnimal.id);
     }
   }
 
@@ -47,6 +40,7 @@ export class ContinentDeploy extends Continent {
       key={animal.id}
       model={animal}
       isUserAnimal={this.props.isUserContinent}
+      onAnimalLink={this.$deployLinkedTrait}
       onCardDropped={this.$deployTrait}/>
   }
 }

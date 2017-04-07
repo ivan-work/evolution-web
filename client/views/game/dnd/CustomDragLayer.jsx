@@ -4,6 +4,7 @@ import { DND_ITEM_TYPE } from './DND_ITEM_TYPE';
 import { Card, DragCardPreview } from '../Card.jsx';
 import { AnimalTraitArrow } from '../AnimalTraitArrow.jsx';
 import { Food } from '../Food.jsx';
+import { ArrowPreview } from './ArrowPreview.jsx';
 
 const layerStyles = {
   position: 'fixed',
@@ -30,6 +31,8 @@ class CustomDragLayer extends React.Component {
         return <AnimalTraitArrow trait={item.trait} {...dragProps}/>;
       case DND_ITEM_TYPE.FOOD:
         return <DefaultPreview {...dragProps}><Food/></DefaultPreview>;
+      case DND_ITEM_TYPE.ANIMAL_LINK:
+        return <ArrowPreview initialOffsetShift={{x: 0, y: 0}} fill='red' {...dragProps}/>;
     }
   }
 
@@ -75,7 +78,6 @@ class CustomDragLayer extends React.Component {
 
     return (
       <div style={layerStyles}>
-        {this.animationCounter}
         {isDragging && offset ? this.renderItem(itemType, item, dragProps) : null}
         {/*<Marker offset={this.props.getInitialClientOffset} color="red"/>
          <Marker offset={this.props.getInitialSourceClientOffset} color="teal"/>

@@ -38,7 +38,7 @@ export const gameDeployAnimal = (game, {userId, animal, animalPosition, cardPosi
 export const gameDeployTrait = (game, {cardId, traitType, animalId, linkedAnimalId}) => {
   const {playerId: cardOwnerId, cardIndex} = game.locateCard(cardId);
   const {playerId: animalOwnerId, animalIndex, animal} = game.locateAnimal(animalId);
-  const {playerId: linkedAnimalOwnerId, linkedAnimalIndex, linkedAnimal} = game.locateAnimal(linkedAnimalId);
+  const {playerId: linkedAnimalOwnerId, animalIndex: linkedAnimalIndex, animal: linkedAnimal} = game.locateAnimal(linkedAnimalId);
 
   if (linkedAnimalId == void 0) {
     const trait = TraitModel.new(traitType).attachTo(animal);
@@ -46,11 +46,12 @@ export const gameDeployTrait = (game, {cardId, traitType, animalId, linkedAnimal
       .removeIn(['players', cardOwnerId, 'hand', cardIndex])
       .updateIn(['players', animalOwnerId, 'continent', animalIndex, 'traits'], traits => traits.push(trait))
   } else {
-    const trait = TraitModel.new(traitType).linkBetween(animal, linkedAnimal);
+    const trait1 = TraitModel.new(traitType).linkBetween(animal, linkedAnimal);
+    const trait2 = TraitModel.new(traitType).linkBetween(linkedAnimal, animal);
     return game
       .removeIn(['players', cardOwnerId, 'hand', cardIndex])
-      .updateIn(['players', animalOwnerId, 'continent', animalIndex, 'traits'], traits => traits.push(trait))
-      .updateIn(['players', linkedAnimalOwnerId, 'continent', linkedAnimalIndex, 'traits'], traits => traits.push(trait));
+      .updateIn(['players', animalOwnerId, 'continent', animalIndex, 'traits'], traits => traits.push(trait1))
+      .updateIn(['players', linkedAnimalOwnerId, 'continent', linkedAnimalIndex, 'traits'], traits => traits.push(trait2));
   }
 };
 

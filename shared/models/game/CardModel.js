@@ -64,6 +64,10 @@ export class CardModel extends Record({
       : 2)
   }
 
+  getTraitModel(alternateTrait) {
+    return !alternateTrait ? this.trait1 : this.trait2;
+  }
+
   toString() {
     return `Card #${this.id} (${this.type})`;
   }

@@ -1,8 +1,9 @@
 function makeLogger() {
   if (process.env.BROWSER) {
+    const noop = () => 0;
     var Logger = function () {
       this.silly = this.log.bind(this, 'silly');
-      this.debug = this.log.bind(this, 'debug');
+      this.debug = noop;
       this.verbose = this.log.bind(this, 'verbose');
       this.info = this.log.bind(this, 'info');
       this.warn = this.log.bind(this, 'warn');

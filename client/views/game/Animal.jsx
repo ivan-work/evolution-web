@@ -7,6 +7,7 @@ import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
 
 import { AnimalModel } from '~/shared/models/game/evolution/AnimalModel';
 import { AnimalTrait, DraggableAnimalTrait } from './AnimalTrait.jsx';
+import { AnimalSelectLink } from './AnimalSelectLink.jsx'
 import {GameProvider} from './providers/GameProvider.jsx';
 import {Food} from './Food.jsx';
 
@@ -23,6 +24,7 @@ export class _Animal extends React.Component {
     , onCardDropped: React.PropTypes.func
     , onFoodDropped: React.PropTypes.func
     , onTraitDropped: React.PropTypes.func
+    , onAnimalLink: React.PropTypes.func
     // by DropTarget
     , connectDropTarget: React.PropTypes.func
     , isOver: React.PropTypes.bool
@@ -37,7 +39,14 @@ export class _Animal extends React.Component {
 
   constructor(props) {
     super(props);
+    this.state = {};
     //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+  }
+
+  renderSelectLink() {
+    if (this.state.selectLink) {
+      return <AnimalSelectLink onEndDrag={() => this.setState({selectLink: null})} {...this.state.selectLink}/>;
+    }
   }
 
   render() {
@@ -56,6 +65,7 @@ export class _Animal extends React.Component {
             : <AnimalTrait key={index} index={index} trait={trait} owner={model}/>)
           )}
       </div>
+      {this.renderSelectLink()}
       <div className='inner'>
         {model.id}
         <div className='AnimalFoodContainer'>
@@ -67,20 +77,25 @@ export class _Animal extends React.Component {
   }
 }
 
-const _DroppableAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT], {
+const _DroppableAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT, DND_ITEM_TYPE.ANIMAL_LINK], {
   drop(props, monitor, component) {
     switch (monitor.getItemType()) {
       case DND_ITEM_TYPE.CARD:
         const {card, alternateTrait} = monitor.getItem();
-        props.onCardDropped(card, props.model, alternateTrait);
+        props.onCardDropped(card, props.model, alternateTrait, component);
         break;
       case DND_ITEM_TYPE.FOOD:
-        const {index} = monitor.getItem();
+      const {index} = monitor.getItem();
         props.onFoodDropped(props.model, index);
         break;
       case DND_ITEM_TYPE.TRAIT:
         const {trait, owner} = monitor.getItem();
         props.onTraitDropped(owner.id, trait.type, props.model.id);
+        break;
+      case DND_ITEM_TYPE.ANIMAL_LINK:
+        const {model: targetAnimal} = props;
+        const {animal: sourceAnimal} = monitor.getItem();
+        props.onAnimalLink(monitor.getItem().card, sourceAnimal, monitor.getItem().alternateTrait, targetAnimal);
         break;
     }
   }
@@ -95,6 +110,11 @@ const _DroppableAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND
         const {trait, owner} = monitor.getItem();
         const targetCheck = !trait.dataModel.checkTarget || trait.dataModel.checkTarget(props.game, owner, props.model);
         return owner.id !== props.model.id && targetCheck;
+      case DND_ITEM_TYPE.ANIMAL_LINK:
+        const {model: targetAnimal} = props;
+        const {card, animal: sourceAnimal, alternateTrait} = monitor.getItem();
+        return targetAnimal !== sourceAnimal
+          && targetAnimal.ownerId === sourceAnimal.ownerId;
       default:
         return true;
     }
