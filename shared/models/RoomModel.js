@@ -30,10 +30,10 @@ export class RoomModel extends Record({
   }
 
   static new() {
-    const id = uuid.v4()
+    const id = uuid.v4();
     return new RoomModel({
       id: id
-      , name: 'Room ' + id
+      , name: 'Room ' + id.slice(0, 4)
       , users: List()
     })
   }
