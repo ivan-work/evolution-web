@@ -15,42 +15,42 @@ global.expect = chai.expect;
 global.mount = mount;
 global.shallow = shallow;
 
-//var exposedProperties = ['window', 'navigator', 'document', 'componentHandler'];
-//
-//global.document = jsdom.jsdom('<!doctype html><html><body></body></html>');
-//global.window = document.defaultView;
-//Object.keys(document.defaultView).forEach((property) => {
-//  if (typeof global[property] === 'undefined') {
-//    exposedProperties.push(property);
-//    global[property] = document.defaultView[property];
-//  }
-//});
-//global.navigator = {
-//  userAgent: 'node.js'
-//};
-//
-//global.window.localStorage = require('./test/setup-local-storage-mock').default();
-//global.window.sessionStorage = require('./test/setup-local-storage-mock').default();
-//
-//global.window.matchMedia = window.matchMedia || (() => ({
-//    matches: false
-//    , addListener: () => {
-//    }
-//    , removeListener: () => {
-//    }
-//  }));
-//
-////https://github.com/tleunen/react-mdl/issues/193
-//require('react-mdl/extra/material');
-//global.Element = global.window.Element;
-//global.CustomEvent = global.window.CustomEvent;
-//global.Event = global.window.Event;
+var exposedProperties = ['window', 'navigator', 'document', 'componentHandler'];
 
-//Object.keys(window).forEach((key) => {
-//  if (!(key in global)) {
-//    global[key] = window[key];
-//  }
-//});
+global.document = jsdom.jsdom('<!doctype html><html><body></body></html>');
+global.window = document.defaultView;
+Object.keys(document.defaultView).forEach((property) => {
+  if (typeof global[property] === 'undefined') {
+    exposedProperties.push(property);
+    global[property] = document.defaultView[property];
+  }
+});
+global.navigator = {
+  userAgent: 'node.js'
+};
+
+global.window.localStorage = require('./test/setup-local-storage-mock').default();
+global.window.sessionStorage = require('./test/setup-local-storage-mock').default();
+
+global.window.matchMedia = window.matchMedia || (() => ({
+    matches: false
+    , addListener: () => {
+    }
+    , removeListener: () => {
+    }
+  }));
+
+//https://github.com/tleunen/react-mdl/issues/193
+require('react-mdl/extra/material');
+global.Element = global.window.Element;
+global.CustomEvent = global.window.CustomEvent;
+global.Event = global.window.Event;
+
+Object.keys(window).forEach((key) => {
+  if (!(key in global)) {
+    global[key] = window[key];
+  }
+});
 
 Array.prototype.remove = function (argument) {
   const removeFn = (typeof argument === 'function'

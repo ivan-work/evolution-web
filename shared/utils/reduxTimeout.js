@@ -33,7 +33,7 @@ export const reduxTimeout = function () {
       }, duration);
     } else if (action.type === '@@reduxTimeout/cancelTimeout') {
       const nameToClear = action.data.name;
-      console.log('cancelTimeout', action.type)
+      //console.log('cancelTimeout', action.type)
       //if (!timeouts[nameToClear]) throw new Error(`reduxTimeout: timeout[${name}] doesnt exists!`);
       clearTimeout(timeouts[nameToClear]);
       timeouts[nameToClear] = void 0;
