@@ -55,7 +55,7 @@ describe('Rooms:', function () {
 
     it('User0, User1 in Room, User0 exits, User1 exits', () => {
       const Room = RoomModel.new();
-      const [serverStore, {clientStore0, User0}, {clientStore1, User1}]= mockStores(2, Map({rooms: Map({[Room.id]: Room})}));
+      const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2, Map({rooms: Map({[Room.id]: Room})}));
       clientStore0.dispatch(roomJoinRequest(Room.id));
       clientStore1.dispatch(roomJoinRequest(Room.id));
 

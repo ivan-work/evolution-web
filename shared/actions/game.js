@@ -1,4 +1,4 @@
-import {GameModel} from '../models/game/GameModel';
+import {GameModel, GameModelClient} from '../models/game/GameModel';
 import {CardModel} from '../models/game/CardModel';
 import {push} from 'react-router-redux';
 import {List} from 'immutable';
@@ -12,6 +12,7 @@ export const gameStartRequest = (roomId) => ({
 export const gameStartSuccess = (game) => ({
   type: 'gameStartSuccess'
   , data: {game: game}
+  //, meta: {users: game.players.keySeq().toArray()}
 });
 
 export const gameReadyRequest = () => (dispatch, getState) => dispatch({
@@ -24,20 +25,25 @@ export const gameReadyRequest = () => (dispatch, getState) => dispatch({
 export const gameReadySuccess = (game, userId) => ({
   type: 'gameReadySuccess'
   , data: {userId, gameId: game.id}
-  , meta: {users: game.players.keySeq().toArray()}
 });
 
 export const gameGiveCards = (gameId, userId, cards) => ({
   type: 'gameGiveCards'
   , data: {gameId, userId, cards}
-  , meta: {userId}
+  //, meta: {userId}
 });
 
-export const gameUpdate = (game) => ({
-  type: 'gameUpdate'
-  , data: {game : game.toClient()}
-  , meta: {users: game.players.keySeq().toArray()}
-});
+export const gameUpdate = (game) => (dispatch, getState) => {
+  game.players.forEach((player) => {
+    dispatch({
+      type: 'gameUpdate'
+      , data: {game: game.toClient(player.id)}
+      , meta: {userId: player.id}
+    });
+  });
+};
+
+export const gameUpdate_Client = (game, userId) => ({type: 'gameUpdate', data: {userId, game: GameModel.fromServer(game)}});
 
 export const gameClientToServer = {
   gameStartRequest: (data, meta) => (dispatch, getState) => {
@@ -46,39 +52,30 @@ export const gameClientToServer = {
     const roomId = data.roomId;
     const room = state.getIn(['rooms', roomId]);
     if (room.canStart(userId)) {
-      dispatch(gameStartSuccess(GameModel.new(room)));
+      const game = GameModel.new(room);
+      dispatch(gameStartSuccess(game));
+      dispatch(gameUpdate(game));
     }
   }
   , gameReadyRequest: (data, meta) => (dispatch, getState) => {
     const userId = meta.user.id;
     const gameId = data.gameId;
-    const game = () => getState().getIn(['games', gameId]);
-    dispatch(gameReadySuccess(getState().getIn(['games', gameId]), userId));
+    const selectGame = () => getState().getIn(['games', gameId]);
+    dispatch(gameReadySuccess(selectGame(), userId));
     /*
      * Actual starting
      * */
     if (getState().getIn(['games', gameId]).players.every(player => player.status > 0)) {
       const INITIAL_HAND_SIZE = 6;
-      getState().getIn(['games', gameId]).players.forEach((player) => {
-        const cards = game().deck.take(INITIAL_HAND_SIZE);
+      selectGame().players.forEach((player) => {
+        const cards = selectGame().deck.take(INITIAL_HAND_SIZE);
         dispatch(gameGiveCards(gameId, player.id, cards));
       });
     }
-    dispatch(gameUpdate(game()));
+    dispatch(gameUpdate(selectGame()));
   }
 };
 
 export const gameServerToClient = {
-  gameStartSuccess: (data) => gameStartSuccess(GameModel.fromServer(data.game))
-  , gameReadySuccess: (data, user) => ({
-    type: 'gameReadySuccess'
-    , data: {userId: user.id}
-  })
-  , gameGiveCards: (data, user) => ({
-    type: 'gameGiveCards'
-    , data: {
-      userId: user.id
-      , cards: List(data.cards).map(card => CardModel.fromJS(card))
-    }
-  })
+  gameUpdate: (data, user) => gameUpdate_Client(data.game, user.id)
 };

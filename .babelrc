@@ -1,5 +1,5 @@
 {
-  "presets": ["stage-2", "es2015", "react"],
+  "presets": ["es2015", "stage-0", "react"],
   "env": {
     "production": {
       "plugins": [
@@ -10,6 +10,6 @@
     }
   },
   "plugins": [
-    ["babel-root-import"]
+    ["babel-root-import", "transform-class-properties"]
   ]
 }
