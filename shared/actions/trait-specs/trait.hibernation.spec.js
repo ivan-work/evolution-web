@@ -24,13 +24,14 @@ players:
 
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitHibernation'));
     expect(selectAnimal(User0, 0).hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)).true;
-    clientStore0.dispatch(traitActivateRequest('$C', 'TraitHibernation'));
+
     expectUnchanged('Hibernation disables food intake', () => {
       clientStore0.dispatch(traitTakeFoodRequest('$A'));
     }, serverStore, clientStore0, clientStore1);
 
+    clientStore0.dispatch(traitActivateRequest('$C', 'TraitHibernation'));
+
     clientStore0.dispatch(gameEndTurnRequest());
-    clientStore1.dispatch(gameEndTurnRequest());
 
     // DEPLOY 1
     expect(selectGame().status.turn, 'DEPLOY 1').equal(1);
@@ -43,10 +44,9 @@ players:
     clientStore0.dispatch(gameEndTurnRequest());
     expect(selectAnimal(User0, 0).hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED), 'Hibernation false after turn').not.true;
 
-    // FEEDING
+    // FEEDING 1
     expect(selectGame().status.turn, 'FEEDING 1').equal(1);
     expect(selectGame().status.phase, 'FEEDING 1').equal(PHASE.FEEDING);
-    clientStore1.dispatch(gameEndTurnRequest());
     expectUnchanged('Cooldowns', () => {
       clientStore0.dispatch(traitActivateRequest('$A', 'TraitHibernation'));
       clientStore0.dispatch(traitActivateRequest('$C', 'TraitHibernation'));
@@ -54,7 +54,6 @@ players:
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
     clientStore0.dispatch(traitTakeFoodRequest('$C'));
     clientStore0.dispatch(gameEndTurnRequest());
-
 
     // DEPLOY 2
     expect(selectGame().status.turn, 'DEPLOY 2').equal(2);
@@ -73,7 +72,6 @@ players:
       clientStore0.dispatch(traitActivateRequest('$C', 'TraitHibernation'));
     }, serverStore, clientStore0, clientStore1);
     clientStore0.dispatch(gameEndTurnRequest());
-    clientStore1.dispatch(gameEndTurnRequest());
 
     // DEPLOY 3
     expect(selectGame().status.phase, 'DEPLOY 3').equal(PHASE.DEPLOY);
@@ -86,7 +84,6 @@ players:
 
     // FEEDING 3
     expect(selectGame().status.phase, 'FEEDING 3').equal(PHASE.FEEDING);
-    clientStore1.dispatch(gameEndTurnRequest());
     expectUnchanged('Hibernate cooldown', () => {
       clientStore0.dispatch(traitActivateRequest('$A', 'TraitHibernation'));
       clientStore0.dispatch(traitActivateRequest('$C', 'TraitHibernation'));
@@ -119,7 +116,7 @@ deck: 50 camo
 food: 3
 phase: 2
 players:
-  - continent: $A hiber fat fat
+  - continent: $A hiber fat fat, $B hiber
 `);
     const {selectGame, selectAnimal, selectPlayer, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     expect(selectTrait(User0, 0, 0).type).equal('TraitHibernation');

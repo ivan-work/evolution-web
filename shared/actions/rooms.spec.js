@@ -39,6 +39,10 @@ describe('Rooms:', function () {
       expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
       expect(clientStore1.getState().getIn(['rooms', Room.id]), 'clientStore1.Room').equal(Room);
       expect(clientStore1.getState().getIn(['rooms', Room.id, 'users']), 'clientStore1.Room.users').equal(List([User0.id, User1.id]));
+
+      expectUnchanged('User0 cannot join'
+        , () => clientStore0.dispatch(roomJoinRequest(Room.id))
+        , serverStore, clientStore0, clientStore1)
     });
 
     it('User0 creates Room, User1 logins', () => {

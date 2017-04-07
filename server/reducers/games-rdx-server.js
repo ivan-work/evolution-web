@@ -9,7 +9,7 @@ import {TraitModel} from '../../shared/models/game/evolution/TraitModel';
 import {FOOD_SOURCE_TYPE, CTT_PARAMETER} from '../../shared/models/game/evolution/constants';
 
 export const gameStart = game => game
-  .setIn(['started'], true)
+  .setIn(['status', 'started'], true)
   .setIn(['status', 'phase'], PHASE.DEPLOY)
   .setIn(['status', 'round'], 0);
 //.setIn(['status', 'currentPlayer'], 0); // TODO RANDOMIZE

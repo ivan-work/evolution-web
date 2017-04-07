@@ -198,6 +198,7 @@ export const server$gameDeployNext = (gameId, userId) => (dispatch, getState) =>
 
 // gameDeployNext || gameEndTurnRequest > gameFinishDeploy > gameEndTurn && (gameNextPlayer || gameStartEat)
 export const server$gameFinishDeploy = (gameId, userId) => (dispatch, getState) => {
+  logger.debug('server$gameFinishDeploy:', userId);
   dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
   dispatch(Object.assign(gameEndTurn(gameId, userId), {
     meta: {users: selectPlayers4Sockets(getState, gameId)}
@@ -305,15 +306,16 @@ export const gameStartEat = (gameId, food) => ({
 });
 
 export const server$gameFinishFeeding = (gameId, userId) => (dispatch, getState) => {
-  logger.debug('server$gameFinishFeeding:', userId);
   dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
   dispatch(Object.assign(gameEndTurn(gameId, userId), {
     meta: {users: selectPlayers4Sockets(getState, gameId)}
   }));
   const game = selectGame(getState, gameId);
   if (game.players.every(player => player.ended)) {
+    logger.debug('server$gameExtict:', userId);
     dispatch(server$gameExtict(gameId));
   } else {
+    logger.debug('server$gamePlayerContinue:', userId);
     dispatch(server$gamePlayerContinue(gameId));
   }
 };
@@ -411,7 +413,7 @@ export const gameClientToServer = {
      * Actual starting
      * */
     const newGame = selectGame(getState, gameId);
-    if (!newGame.started && newGame.players.every(player => player.ready)) {
+    if (!newGame.status.started && newGame.players.every(player => player.ready)) {
       const INITIAL_HAND_SIZE = 6;
       //new Array(INITIAL_HAND_SIZE).fill().every(() => {
       //  return true;

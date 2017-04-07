@@ -6,6 +6,22 @@ import {ChatModel} from './ChatModel';
 import {passesChecks} from '../actions/checks';
 import {checkComboRoomCanStart} from '../actions/rooms.checks';
 
+export class RoomUser extends Record({
+  id: null
+  , name: null
+  , isObserver: false
+}) {
+  static new(user) {
+    return new RoomUser({id: user.id, name: user.login})
+  }
+
+  static fromJS(js) {
+    return js == null
+      ? null
+      : new RoomUser(js);
+  }
+}
+
 export class RoomModel extends Record({
   id: null
   , name: null

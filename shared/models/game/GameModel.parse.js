@@ -85,9 +85,9 @@ export const parseFromRoom = (room, string = '') => {
     id: uuid.v4()
     , roomId: room.id
     , food: seed.food || 0
-    , started: seed.phase !== 0
     , status: new StatusRecord({
       phase: seed.phase
+      , started: seed.phase !== 0
     })
     , deck
     , players

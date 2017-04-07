@@ -329,7 +329,7 @@ export const traitClientToServer = {
     const animal = checkPlayerHasAnimal(game, userId, animalId);
     checkAnimalCanEat(game, animal);
 
-    logger.debug('traitTakeFoodRequest');
+    logger.debug('traitTakeFoodRequest:', userId, animalId);
 
     dispatch(server$startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId));
     dispatch(server$startCooldown(gameId, 'TraitCarnivorous', TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId));

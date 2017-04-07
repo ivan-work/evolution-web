@@ -163,7 +163,7 @@ export const TraitHibernation = {
     dispatch(server$traitSetAnimalFlag(game, sourceAnimal, TRAIT_ANIMAL_FLAG.HIBERNATED));
     return false;
   }
-  , $checkAction: (game, sourceAnimal) => game.deck.size > 0
+  , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game) && game.deck.size > 0
 };
 
 export const TraitPoisonous = {

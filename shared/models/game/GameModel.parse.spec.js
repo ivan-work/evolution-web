@@ -74,12 +74,12 @@ players:
 
     expect(parsed.roomId).equal('r0');
     expect(parsed.food).equal(2);
-    expect(parsed.started).equal(true);
     expect(parsed.status).equal(new StatusRecord({
       turn: 0
       , round: 0
       , player: 0
       , phase: 1
+      , started: true
     }));
     expect(parsed.deck.size).equal(18);
     expect(parsed.deck.first().type).equal('CardCarnivorous');
@@ -116,12 +116,12 @@ players:
 `);
     expect(serverStore.getState().getIn(['rooms', ServerGame().roomId, 'gameId']), 'room.gameId === game.id').equal(ServerGame().id);
     expect(ServerGame().food).equal(2);
-    expect(ServerGame().started).equal(true);
     expect(ServerGame().status).equal(new StatusRecord({
       turn: 0
       , round: 0
       , player: 0
       , phase: 2
+      , started: true
     }));
     expect(ServerGame().deck.size).equal(18);
     expect(ServerGame().getIn(['players', User0.id, 'ready'])).true;
@@ -171,7 +171,7 @@ players:
   - hand: 2 carn
     continent: carn sharp, sharp camo
 `);
-    expect(ServerGame().started).equal(true);
+    expect(ServerGame().status.started).equal(true);
     expect(ServerGame().food, 'ServerGame().food').equal(2);
     expect(ServerGame().status.turn, 'turn').equal(0);
     expect(ServerGame().status.round, 'round').equal(0);
