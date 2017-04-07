@@ -108,6 +108,7 @@ class ClickAnimalTrait extends AnimalTrait {
     this.classNames = {
       pointer: active
       , active
+      , ClickAnimalTrait
     };
     return (active
       ? React.cloneElement(super.render(), {onClick})

@@ -49,7 +49,7 @@ Game:
     EndPhase: Закончить фазу
     Deck: Колода
     Log:
-      Label: Лог действий
+      Label: Лог
       TakeFood: $player взял $F из кормовой базы.
 #      TraitCooperation:
 #      TraitCommunication:

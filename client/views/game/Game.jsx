@@ -8,12 +8,9 @@ import {Portal} from '../utils/Portal.jsx';
 import {ControlGroup} from '../utils/ControlGroup.jsx';
 import {GameFoodContainer} from './food/GameFoodContainer.jsx';
 import CustomDragLayer from './dnd/CustomDragLayer.jsx';
-import {DeckWrapper} from './cards/DeckWrapper.jsx';
 import GamePlayers from './GamePlayers.jsx';
 
 import GameScoreboardFinal from './ui/GameScoreboardFinal.jsx';
-
-//const MaxWidth
 
 class Game extends React.Component {
   static contextTypes = {
@@ -40,9 +37,9 @@ class Game extends React.Component {
         </ControlGroup>
       </Portal>
 
-      <Portal target='deck'>
-        <DeckWrapper deck={game.deck}/>
-      </Portal>
+      {/*<Portal target='deck'>
+        <DeckWrapper deck={game.deck} game={game}/>
+      </Portal>*/}
 
       <div style={{
         position: 'absolute'

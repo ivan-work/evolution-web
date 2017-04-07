@@ -152,7 +152,7 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
         return <AnimalLinkedTrait trait={trait} sourceAnimal={animal}/>;
       } else if (trait.getDataModel().playerControllable && trait.getDataModel().targetType === TRAIT_TARGET_TYPE.NONE) {
         return <ClickAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal} onClick={() => {
-      {/*//     this.props.onTraitDropped(animal.id, trait.id);*/}
+          this.props.onTraitDropped(animal.id, trait.id);
         }}/>;
       } else if (trait.getDataModel().playerControllable) {
         return <DragAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}/>;
