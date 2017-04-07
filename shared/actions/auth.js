@@ -1,4 +1,5 @@
 import {push} from 'react-router-redux';
+import {UserRecord} from '../models/User';
 
 export const socketConnect = (connectionId, socket) => ({
   type: 'socketConnect'
@@ -46,6 +47,22 @@ export const loginUserFailure = (connectionId, msg) => ({
 export const logoutUser = (userId) => ({
   type: 'logoutUser'
   , data: userId
+  , meta: {clients: true}
+});
+
+export const onlineSet = (connectionId) => (dispatch, getState) => {
+  const users = getState().get('users').toList().map(u => u.toSecure()).toJS();
+  dispatch({
+    type: 'onlineSet'
+    , data: {users}
+    , meta: {connectionId}
+  });
+};
+
+export const onlineJoin = (user) => ({
+  type: 'onlineJoin'
+  , data: {user}
+  , meta: {clients: true}
 });
 
 let userIds = 0;
@@ -54,16 +71,18 @@ export const authClientToServer = {
   loginUserRequest: (connectionId, data) => (dispatch, getState) => {
     const login = data.login;
     const state = getState();
-    const userExists = state.get('users').find(user => user.login === login);
+    const userExists = state.get('users').find(user => user.login == login);
     if (!userExists) {
-      console.log(connectionId, state.get('connections').toJS())
+      //console.log(connectionId, state.get('connections').toJS())
       if (state.get('connections').has(connectionId)) {
-        const user = {
+        const user = new UserRecord({
           id: userIds++
           , login: login
           , connectionId: connectionId
-        };
+        });
+        dispatch(onlineJoin(user.toSecure()));
         dispatch(loginUserSuccess(connectionId, user, data.redirect));
+        dispatch(onlineSet(connectionId));
       } else {
         dispatch(loginUserFailure(connectionId, 'Connection is missing'));
       }
@@ -85,6 +104,22 @@ export const authServerToClient = {
     });
     dispatch(push(data.redirect || '/'));
   }
+  , loginUserFailure: (message) => ({
+    type: 'loginUserFailure'
+    , data: message
+  })
+  , logoutUser: (id) => ({
+    type: 'logoutUser'
+    , data: id
+  })
+  , onlineSet: (data) => ({
+    type: 'onlineSet'
+    , data: {users: data.users}
+  })
+  , onlineJoin: (data) => ({
+    type: 'onlineJoin'
+    , data: {user: data.user}
+  })
 };
 
 
