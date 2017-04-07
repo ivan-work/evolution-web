@@ -5,6 +5,7 @@ import classnames from 'classnames';
 import {GameProvider} from './providers/GameProvider.jsx';
 
 import { DragSource } from 'react-dnd';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
 
 import { TraitModel } from '~/shared/models/game/evolution/TraitModel';
@@ -24,6 +25,12 @@ class _AnimalTrait extends React.Component {
   constructor(props) {
     super(props);
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+  }
+
+  componentDidMount() {
+    if (this.props.connectDragPreview) {
+      this.props.connectDragPreview(getEmptyImage());
+    }
   }
 
   render() {
@@ -49,6 +56,7 @@ const _DraggableAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource()
+    , connectDragPreview: connect.dragPreview()
     , isDragging: monitor.isDragging()
   })
 )(_AnimalTrait);
