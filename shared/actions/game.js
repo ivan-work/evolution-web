@@ -284,15 +284,20 @@ export const server$gamePlayerContinue = (gameId) => (dispatch, getState) => {
 
 const server$gameNextPlayer = (gameId, nextPlayer, roundChanged) => (dispatch, getState) => {
   const turnTime = Date.now();
+  const currentPlayerIndex = selectGame(getState, gameId).getIn(['status', 'currentPlayer']);
   dispatch(gameNextPlayer(gameId, nextPlayer.index, roundChanged, turnTime));
 
   const playerHasOptions = doesPlayerHaveOptions(selectGame(getState, gameId), nextPlayer.id);
 
-  dispatch(Object.assign(gameNextPlayer(gameId, nextPlayer.index, roundChanged, turnTime, playerHasOptions)
+  dispatch(Object.assign(gameNextPlayer(gameId
+    , nextPlayer.index
+    , roundChanged, turnTime
+    , playerHasOptions && currentPlayerIndex !== nextPlayer.index)
     , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
 
   if (!playerHasOptions)
-    dispatch(server$gameEndTurn(gameId, userId));
+    dispatch(Object.assign(server$gameEndTurn(gameId, nextPlayer.id)
+      , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId)}}));
 };
 
 const choosePlayer = (game, startIndex) => {

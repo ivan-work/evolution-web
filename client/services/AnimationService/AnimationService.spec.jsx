@@ -1,5 +1,4 @@
 import React from 'react';
-import {AnimationServiceContext} from './index';
 
 import {configureStore, createTestASContext, addTodo, removeTodo} from './AnimationService.isolated.jsx';
 

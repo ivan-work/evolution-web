@@ -27,7 +27,7 @@ export class AnimationServiceClass {
     }
   }
 
-  processAction(dispatch, next, action) {
+  processAction(dispatch, getState, next, action) {
     this.$log(`AnimationService:PA(${action.type}) Startx`, this.$subscriptions);
     const subscriptionsForAction = this.$subscriptions[action.type];
     if (!!this.currentAnimation) {
@@ -42,7 +42,7 @@ export class AnimationServiceClass {
       this.$log(`AnimationService:PA(${action.type})`, 'startAnimating');
       // if not - then start
       this.currentAnimation = true;
-      Promise.all(subscriptionsForAction.map(subscription => subscription.waitForUpdate(action.data)))
+      Promise.all(subscriptionsForAction.map(subscription => subscription.waitForUpdate(action.data, getState)))
         .then(() => {
           this.$log(`AnimationService:PA(${action.type})`, `END: queue(${this.$queue.length})`);
           this.currentAnimation = false;
