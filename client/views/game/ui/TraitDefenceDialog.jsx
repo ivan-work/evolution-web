@@ -10,6 +10,7 @@ import {AnimalTrait} from '../animals/AnimalTrait.jsx';
 import AnimalTraitIcon from '../animals/AnimalTraitIcon.jsx';
 
 import {TraitCarnivorous, TraitMimicry, TraitTailLoss} from '../../../../shared/models/game/evolution/traitsData/index';
+import {TraitInkCloud, TraitShell} from '../../../../shared/models/game/evolution/traitTypes';
 
 import './TraitDefenceDialog.scss';
 
@@ -32,20 +33,28 @@ export class TraitDefenceDialog extends Component {
     const {sourceAid, targetAid, time} = game.question;
     const {animal: attackAnimal} = game.locateAnimal(sourceAid);
     const {animal: targetAnimal} = game.locateAnimal(targetAid);
-    const targetsMimicry = TraitMimicry.getTargets(game, attackAnimal, TraitCarnivorous, targetAnimal);
-    const targetsTailLoss = targetAnimal.traits;
 
     const traitTailLoss = targetAnimal.hasTrait(TraitTailLoss.type);
+    const targetsTailLoss = traitTailLoss && targetAnimal.traits;
+
     const traitMimicry = targetAnimal.hasTrait(TraitMimicry.type);
+    const targetsMimicry = traitMimicry && TraitMimicry.getTargets(game, attackAnimal, TraitCarnivorous, targetAnimal);
+
+    const otherTraits = [
+      targetAnimal.hasTrait(TraitShell)
+      , targetAnimal.hasTrait(TraitInkCloud)
+    ].filter(t => !!t && t.checkAction(game, targetAnimal));
     return (<DialogContent>
       <TooltipsContextElement>
         <div className='TraitDefenceDialog'>
           {traitTailLoss && targetsTailLoss.size > 0
             && this.renderTailLoss(targetsTailLoss, $traitDefenceAnswer.bind(null, traitTailLoss.id))
-          }
+            }
           {traitMimicry && targetsMimicry.size > 0
             && this.renderMimicry(targetsMimicry, $traitDefenceAnswer.bind(null, traitMimicry.id))
-          }
+            }
+          {otherTraits.length > 0
+            && this.renderOther(otherTraits, $traitDefenceAnswer.bind(null))}
           <h1>
             <T.span text='Game.UI.TraitDefenceDialog.Time'/>:
             <Timer start={time} duration={game.settings.timeTraitResponse}/>
@@ -79,6 +88,21 @@ export class TraitDefenceDialog extends Component {
              className='Item'
              onClick={() => onClick(animal.id)}>
           <Animal model={animal}/>
+        </div>
+          )}
+      </div>
+    </div>);
+  }
+
+  renderOther(traits, onClick) {
+    return (<div className='Other'>
+      <h1><T.span text='Game.UI.TraitDefenceDialog.Other_Title'/></h1>
+      <div className='Row'>
+        {traits.map((trait, index) =>
+        <div key={trait.id}
+             className='Item'
+             onClick={() => onClick(trait.id)}>
+          <AnimalTraitIcon trait={trait}/>
         </div>
           )}
       </div>
