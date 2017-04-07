@@ -39,9 +39,10 @@ export const parseCardList = string => {
 };
 
 export const parseAnimalList = (userId, string) => {
-  invariant(typeof userId === 'string', `GameModel.parseAnimalList wrong userId: (${userId})`)
-  invariant(typeof string === 'string', `GameModel.parseAnimalList wrong string: (${string})`)
-  return List(string.split(','))
+  invariant(typeof userId === 'string', `GameModel.parseAnimalList wrong userId: (${userId})`);
+  invariant(typeof string === 'string', `GameModel.parseAnimalList wrong string: (${string})`);
+  const links = [];
+  let animalsMap = List(string.split(','))
     .map(rawAnimal => rawAnimal.trim())
     .filter(rawAnimal => rawAnimal.length > 0)
     .map(rawAnimal => rawAnimal
@@ -50,15 +51,34 @@ export const parseAnimalList = (userId, string) => {
         prop = prop.trim();
         if (/^\$.*$/.test(prop)) {
           return prop.length > 1 ? animal.set('id', prop) : animal;
-        } else if (/^\++$/.test(prop)) {
+        }
+        else if (/\$/.test(prop)) {
+          const [traitName, targetId] = prop.split('$');
+          links.push([animal.id, traitName, '$' + targetId]);
+          return animal;
+        }
+        else if (/^\++$/.test(prop)) {
           return animal.set('food', prop.length)
-        } else {
-          invariant(!!prop, `GameModel.parseAnimalList prop undefined: (${userId})`)
+        }
+        else {
+          invariant(!!prop, `GameModel.parseAnimalList prop undefined: (${userId})`);
           return animal.update('traits', traits => traits.push(
-            TraitModel.parse(prop).attachTo(animal)
+            TraitModel.new(TraitModel.parse(prop)).attachTo(animal)
           ))
         }
-      }, AnimalModel.new(userId)));
+      }, AnimalModel.new(userId)))
+    .reduce((result, animal) => result.set(animal.id, animal), Map());
+  links.forEach(([a1id, prop, a2id]) => {
+    invariant(animalsMap.has(a1id), 'invalid linkable trait ' + [a1id, prop, a2id]);
+    invariant(animalsMap.has(a2id), 'invalid linkable trait ' + [a1id, prop, a2id]);
+    const a1 = animalsMap.get(a1id);
+    const a2 = animalsMap.get(a2id);
+    const [trait1, trait2] = TraitModel.LinkBetween(TraitModel.parse(prop), a1, a2);
+    animalsMap = animalsMap
+      .updateIn([a1.id, 'traits'], traits => traits.push(trait1))
+      .updateIn([a2.id, 'traits'], traits => traits.push(trait2))
+  });
+  return animalsMap.toList();
 };
 
 export const parseFromRoom = (room, string = '') => {

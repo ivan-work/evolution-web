@@ -8,7 +8,6 @@ import {
 import {PHASE} from '../../models/game/GameModel';
 import {replaceGetRandom} from '../../utils/randomGenerator';
 
-import {makeGameActionHelpers} from '../generic';
 import {makeGameSelectors} from '../../selectors';
 
 describe('TraitRunning:', () => {
@@ -22,7 +21,6 @@ players:
   - continent: running
 `);
     const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    const {activateTrait} = makeGameActionHelpers(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitRunning');
 
     replaceGetRandom(() => 1, () => {

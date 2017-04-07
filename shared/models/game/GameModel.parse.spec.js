@@ -39,6 +39,43 @@ describe('GameModel.parse', () => {
     expect(GameModel.parseAnimalList('u', '$').first().traits.size, 'parseAnimalList($)').equal(0);
   });
 
+  it('parseAnimalList with links', () => {
+    const list = GameModel.parseAnimalList('u', '$A coop$B symb$C, $B, $C');
+    expect(list.size).equal(3);
+    expect(list.get(0).traits.size).equal(2);
+    expect(list.get(0).traits.first().type).equal('TraitCooperation');
+    expect(list.get(0).traits.last().type).equal('TraitSymbiosis');
+    expect(list.get(1).traits.size).equal(1);
+    expect(list.get(1).traits.first().type).equal('TraitCooperation');
+    expect(list.get(2).traits.size).equal(1);
+    expect(list.get(2).traits.first().type).equal('TraitSymbiosis');
+
+    const TraitCooperation$A = list.get(0).traits.first();
+    const TraitCooperation$B = list.get(1).traits.first();
+    const TraitSymbiosis$A = list.get(0).traits.first();
+    const TraitSymbiosis$C = list.get(1).traits.first();
+
+    expect(TraitCooperation$A.id).equal(TraitCooperation$B.linkId);
+    expect(TraitCooperation$A.hostAnimalId).equal('$A');
+    expect(TraitCooperation$A.linkAnimalId).equal('$B');
+    expect(TraitCooperation$B.hostAnimalId).equal('$B');
+    expect(TraitCooperation$B.linkAnimalId).equal('$A');
+    expect(TraitCooperation$A.linkSource).true;
+    expect(TraitCooperation$B.linkSource).false;
+    expect(TraitCooperation$A.ownerId).equal('u');
+    expect(TraitCooperation$B.ownerId).equal('u');
+
+    expect(TraitSymbiosis$A.id).equal(TraitCooperation$B.linkId);
+    expect(TraitSymbiosis$A.hostAnimalId).equal('$A');
+    expect(TraitSymbiosis$A.linkAnimalId).equal('$B');
+    expect(TraitSymbiosis$C.hostAnimalId).equal('$B');
+    expect(TraitSymbiosis$C.linkAnimalId).equal('$A');
+    expect(TraitSymbiosis$A.linkSource, '$A link source').true;
+    expect(TraitSymbiosis$C.linkSource, '$B link source').false;
+    expect(TraitSymbiosis$A.ownerId).equal('u');
+    expect(TraitSymbiosis$C.ownerId).equal('u');
+  });
+
   it('parseAnimalListWithFood', () => {
     const list = GameModel.parseAnimalList('u', '$A, +, $B ++ carn sharp, $ sharp camo, + camo');
     expect(list.size).equal(5);

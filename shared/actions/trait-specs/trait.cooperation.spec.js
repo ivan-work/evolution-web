@@ -231,6 +231,40 @@ players:
       expect(selectAnimal(User0, 1).getFood(), 'Animal#0.traits').equal(1);
       expect(selectAnimal(User0, 2)).undefined;
     });
+
+    it('Cant take more food than need', () => {
+      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+      const gameId = ParseGame(`
+phase: 1
+players:
+  - hand: 1 CardCooperation
+    continent: $A +, $B, $C
+`);
+      const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+      replaceGetRandom(() => 0, () => {
+        clientStore0.dispatch(gameDeployTraitRequest(
+          selectCard(User0, 0).id
+          , '$A', false, '$B'
+        ));
+      });
+
+      expect(selectGame().status.phase).equal(PHASE.FEEDING);
+      expect(selectAnimal(User0, 0).traits, 'Animal#0.traits').size(1);
+      expect(selectAnimal(User0, 1).traits, 'Animal#1.traits').size(1);
+
+      // FEEDING 0
+      expect(selectGame().food, 'food').equal(10);
+      expect(selectAnimal(User0, 0).getFood(), 'Animal#0.traits').equal(1);
+      expect(selectAnimal(User0, 1).getFood(), 'Animal#0.traits').equal(0);
+
+      expectUnchanged(`$A can't take food`, () =>
+          clientStore0.dispatch(traitTakeFoodRequest('$A'))
+        , serverStore, clientStore0);
+      clientStore0.dispatch(traitTakeFoodRequest('$B'));
+
+      expect(selectGame().food).equal(9);
+      //expect(selectAnimal(User0, 2)).undefined;
+    });
   });
 
   describe('Death:', () => {

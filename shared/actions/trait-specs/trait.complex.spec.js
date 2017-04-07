@@ -49,7 +49,7 @@ settings:
       expect(ClientGame1().question).null;
 
       expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$A'])).size(1);
-      expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$B'])).size(1);
+      expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$B'])).size(2);
       expect(selectGame().getIn(['cooldowns', 'PLAYER', User0.id])).size(1);
       expect(selectPlayer(User0).acted).true;
       expect(selectAnimal(User1, 0).id).equal('$Z');

@@ -124,7 +124,7 @@ export const TraitCommunication = {
   type: 'TraitCommunication'
   , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
   , cooldowns: fromJS([
-    ['TraitCommunication', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
+    ['TraitCommunication', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: () => true
 };
@@ -181,7 +181,7 @@ export const TraitCooperation = {
   type: 'TraitCooperation'
   , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
   , cooldowns: fromJS([
-    ['TraitCooperation', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
+    ['TraitCooperation', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: () => true
 };

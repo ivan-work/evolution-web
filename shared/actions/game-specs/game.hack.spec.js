@@ -8,17 +8,6 @@ import {
 } from '../actions';
 
 describe('Hacking Game:', function () {
-  //it('Game for two', () => {
-
-  // Wrong gameCreateRequest:
-  //previousServerState = serverStore.getState();
-  //previousClientState = clientStore0.getState();
-  //clientStore0.dispatch(gameCreateRequest(null));
-  //expect(previousServerState).equal(serverStore.getState());
-  //expect(previousClientState).equal(clientStore0.getState());
-  //
-  //})
-
   it('gameReadyRequest', () => {
     const [serverStore, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockStores(3);
     clientStore0.dispatch(roomCreateRequest());

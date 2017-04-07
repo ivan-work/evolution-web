@@ -26,13 +26,12 @@ export class TraitModel extends Record({
     return js == null
       ? null
       : new TraitModel(js)
-      //.set('dataModel', TraitDataModel.new(js.type));
+    //.set('dataModel', TraitDataModel.new(js.type));
   }
 
   static parse(type) {
-    const traitType = Object.keys(traitTypes)
+    return Object.keys(traitTypes)
       .find(traitType => ~traitType.toLowerCase().indexOf(type.toLowerCase()));
-    return TraitModel.new(traitType);
   }
 
   static LinkBetween(traitType, animal1, animal2) {
@@ -83,7 +82,7 @@ export class TraitModel extends Record({
 
   toClient() {
     return this
-      //.set('dataModel', null);
+    //.set('dataModel', null);
   }
 
   toOthers() {

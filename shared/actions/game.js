@@ -268,6 +268,7 @@ export const server$gamePlayerStart = (gameId) => (dispatch, getState) => {
 };
 
 export const server$gamePlayerContinue = (gameId) => (dispatch, getState) => {
+  logger.debug('server$gamePlayerContinue');
   const game = selectGame(getState, gameId);
   const currentPlayer = game.getIn(['status', 'currentPlayer']);
 
@@ -277,6 +278,7 @@ export const server$gamePlayerContinue = (gameId) => (dispatch, getState) => {
 };
 
 const server$gameNextPlayer = (gameId, nextPlayer, roundChanged) => (dispatch, getState) => {
+  logger.debug('server$gameNextPlayer:', nextPlayer.id, roundChanged);
   dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
   dispatch(server$addTurnTimeout(gameId, nextPlayer.id));
 
@@ -290,11 +292,10 @@ const server$gameNextPlayer = (gameId, nextPlayer, roundChanged) => (dispatch, g
     , nextPlayer.index
     , roundChanged, turnTime
     , playerHasOptions && currentPlayerIndex !== nextPlayer.index)
-    , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
+    , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId)}}));
 
   if (!playerHasOptions)
-    dispatch(Object.assign(server$gameEndTurn(gameId, nextPlayer.id)
-      , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId)}}));
+    dispatch(server$game(gameId, server$gameEndTurn(gameId, nextPlayer.id)));
 };
 
 const choosePlayer = (game, startIndex) => {
@@ -330,13 +331,21 @@ export const server$gameFinishFeeding = (gameId, userId) => (dispatch, getState)
   dispatch(Object.assign(gameEndTurn(gameId, userId), {
     meta: {users: selectPlayers4Sockets(getState, gameId)}
   }));
-  const game = selectGame(getState, gameId);
-  if (game.players.every(player => player.ended)) {
-    logger.debug('server$gameExtict:', userId);
-    dispatch(server$gameExtict(gameId));
-  } else {
+  if (selectGame(getState, gameId).players.some(player => !player.ended)) {
     logger.debug('server$gamePlayerContinue:', userId);
     dispatch(server$gamePlayerContinue(gameId));
+  } else {
+    logger.debug('server$gameExtict:', userId);
+
+    dispatch(server$gameExtict(gameId));
+
+    if (selectGame(getState, gameId).deck.size > 0) {
+      dispatch(server$game(gameId, gameStartDeploy(gameId)));
+      dispatch(server$gameDistributeCards(gameId));
+      dispatch(server$gamePlayerStart(gameId));
+    } else {
+      dispatch(server$gameEnd(gameId));
+    }
   }
 };
 
@@ -352,56 +361,52 @@ const gameStartDeploy = (gameId) => ({
   , data: {gameId}
 });
 
-const gameEventExtict = (gameId) => ({
-  type: 'gameEventExtict'
-  , data: {gameId}
-});
-
-export const server$gameExtict = (gameId) => (dispatch, getState) => {
-  //console.log('server$gameExtinct')
+const server$gameExtict = (gameId) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
-  const cardNeedToPlayer = {};
-  let deckSize = game.deck.size;
 
-  game.players.forEach((player) => {
-    cardNeedToPlayer[player.id] = 1;
+  game.players.forEach((player) =>
     player.continent.forEach((animal) => {
       if (!animal.canSurvive() || animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED)) {
         dispatch(server$game(gameId, animalStarve(gameId, animal.id)));
-      } else {
-        cardNeedToPlayer[player.id] += 1;
       }
+    }));
+};
+
+const getCardsForPlayers = (game) => {
+  const cardsNeedToPlayers = {};
+
+  game.players.forEach((player) => {
+    if (!player.playing) return;
+    cardsNeedToPlayers[player.id] = 1;
+    player.continent.forEach((animal) => {
+      // will be modified by viviparism, r-strategy
+      cardsNeedToPlayers[player.id] += 1;
     });
     if (player.continent.size === 0 && player.hand.size === 0) {
-      cardNeedToPlayer[player.id] = 6;
+      cardsNeedToPlayers[player.id] = 6;
     }
   });
 
-  selectGame(getState, gameId).players.forEach((player) => {
-    if (player.continent.size === 0 && player.hand.size === 0) {
-      cardNeedToPlayer[player.id] = 6;
-    }
-  });
+  return cardsNeedToPlayers;
+};
 
-  if (deckSize !== 0) {
-    dispatch(server$game(gameId, gameStartDeploy(gameId)));
-    dispatch(server$gamePlayerStart(gameId));
-    const players = GameModel.sortPlayersFromIndex(selectGame(getState, gameId));
-    while (deckSize > 0 && Object.keys(cardNeedToPlayer).length > 0) {
-      players.forEach((player) => {
-        if (deckSize <= 0) return true;
-        if (cardNeedToPlayer[player.id] > 0) {
-          cardNeedToPlayer[player.id] -= 1;
-          dispatch(server$gameGiveCards(gameId, player.id, 1));
-          deckSize--;
-        } else {
-          delete cardNeedToPlayer[player.id];
-        }
-      });
-    }
-  } else {
-    loggerOnline.info(`Game finished ${game.players.map(p => getState().getIn(['users', p.id, 'login'])).join(', ')}`);
-    dispatch(server$game(gameId, gameEnd(gameId, selectGame(getState, gameId))));
+const server$gameDistributeCards = (gameId) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  const cardsNeedToPlayers = getCardsForPlayers(game);
+  let deckSize = game.deck.size;
+
+  const players = GameModel.sortPlayersFromIndex(game);
+  while (deckSize > 0 && Object.keys(cardsNeedToPlayers).length > 0) {
+    players.some((player) => {
+      if (deckSize <= 0) return true;
+      if (cardsNeedToPlayers[player.id] > 0) {
+        cardsNeedToPlayers[player.id] -= 1;
+        deckSize--;
+        dispatch(server$gameGiveCards(gameId, player.id, 1));
+      } else {
+        delete cardsNeedToPlayers[player.id];
+      }
+    });
   }
 };
 
@@ -411,6 +416,11 @@ const gameEnd = (gameId, game) => ({
   type: 'gameEnd'
   , data: {gameId, game}
 });
+
+const server$gameEnd = (gameId) => (dispatch, getState) => {
+  loggerOnline.info(`Game finished ${game.players.map(p => getState().getIn(['users', p.id, 'login'])).join(', ')}`);
+  dispatch(server$game(gameId, gameEnd(gameId, selectGame(getState, gameId))));
+};
 
 export const gameClientToServer = {
   gameCreateRequest: ({roomId, seed = null}, {userId}) => (dispatch, getState) => {
