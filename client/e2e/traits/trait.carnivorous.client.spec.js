@@ -12,7 +12,7 @@ players:
 - continent: $X carn mimicry tailloss piracy fat, $Y
 */
 
-describe.only('Carnivorous', () => {
+describe('Carnivorous', () => {
   it('Can Eat', async () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
