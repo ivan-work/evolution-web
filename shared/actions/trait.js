@@ -23,9 +23,7 @@ import {
   , checkValidAnimalPosition
 } from './checks';
 
-/*
- * Activation
- * */
+// Activation
 
 export const traitTakeFoodRequest = (animalId) => (dispatch, getState) => dispatch({
   type: 'traitTakeFoodRequest'
@@ -39,9 +37,7 @@ export const traitActivateRequest = (animalId, traitType, targetId) => (dispatch
   , meta: {server: true}
 });
 
-/*
- * simpleActions
- * */
+// simpleActions
 
 const traitMoveFood = (gameId, animalId, amount, sourceType, sourceId) => ({
   type: 'traitMoveFood'
@@ -62,9 +58,16 @@ const executeFeeding = (gameId, actionsList) => ({
   , data: {gameId, actionsList}
 });
 
-/*
- * complexActions
- * */
+const playerActed = (gameId, userId) => ({
+  type: 'playerActed'
+  , data: {gameId, userId}
+});
+
+export const server$playerActed = (gameId, userId) => (dispatch, getState) => dispatch(
+  Object.assign(playerActed(gameId, userId)
+    , {meta: {users: selectPlayers(getState, gameId)}}));
+
+// complexActions
 
 const client$executeFeeding = (gameId, actionsList) => (dispatch, getState) => {
   //actionsList.reduce((result, action) => {
@@ -93,9 +96,7 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
   dispatch(server$executeFeeding(gameId, actionsList));
 };
 
-/*
- * Cooldowns
- * */
+// Cooldowns
 
 export const startCooldown = (gameId, link, duration, place, placeId) => ({
   type: 'startCooldown'
@@ -107,9 +108,7 @@ export const server$startCooldown = (gameId, link, duration, place, placeId) => 
     meta: {users: selectPlayers(getState, gameId)}
   }));
 
-/*
- * traitClientToServer
- * */
+// traitClientToServer
 
 export const traitClientToServer = {
   traitTakeFoodRequest: ({gameId, animalId}, {user: {id: userId}}) => (dispatch, getState) => {
@@ -131,6 +130,7 @@ export const traitClientToServer = {
     dispatch(server$startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId));
     dispatch(server$startCooldown(gameId, 'TraitCarnivorous', TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId));
 
+    dispatch(server$playerActed(gameId, userId));
     dispatch(server$startFeeding(gameId, animal, 1, FOOD_SOURCE_TYPE.GAME));
   }
   , traitActivateRequest: ({gameId, animalId, traitType, targetId}, {user: {id: userId}}) => (dispatch, getState) => {
@@ -178,6 +178,7 @@ export const traitClientToServer = {
             dispatch(server$startCooldown(game.id, link, duration, place, placeId));
           })
         }
+        dispatch(server$playerActed(gameId, userId));
         dispatch(traitData.action({
           game: game
           , sourcePlayerId: userId
@@ -196,4 +197,6 @@ export const traitServerToClient = {
   , startCooldown: ({gameId, link, duration, place, placeId}) => startCooldown(gameId, link, duration, place, placeId)
   , traitKillAnimal: ({gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId}) =>
     traitKillAnimal(gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId)
+  , playerActed: ({gameId, userId}) =>
+    playerActed(gameId, userId)
 };

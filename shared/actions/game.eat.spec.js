@@ -1,11 +1,5 @@
 import {Map, List} from 'immutable';
 
-import {GameModel, PHASE} from '../models/game/GameModel';
-import {CardModel} from '../models/game/CardModel';
-import * as cardTypes from '../models/game/evolution/cards';
-import {AnimalModel} from '../models/game/evolution/AnimalModel';
-import {TraitModel} from '../models/game/evolution/TraitModel';
-
 import {
   traitTakeFoodRequest
   , gameEndTurnRequest
@@ -14,27 +8,14 @@ import {
 
 describe('Game (EAT PHASE):', function () {
   it('Simple eating', () => {
-    const [{serverStore, ServerGame, CreateGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
-    CreateGame({
-      players: {
-        [User0.id]: {continent: [
-          AnimalModel.new(User0.id)
-          , AnimalModel.new(User0.id)
-        ]}
-        , [User1.id]: {continent: [
-          AnimalModel.new(User1.id)
-          , AnimalModel.new(User1.id)
-        ]}
-      }
-      , food: 2
-      , status: {
-        turn: 0
-        , round: 0
-        , player: 0
-        , phase: PHASE.FEEDING
-      }
-    });
-
+    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+    ParseGame(`
+food: 2
+phase: 2
+players:
+  - continent: $,$
+  - continent: $,$
+`);
     expectUnchanged(() => clientStore1.dispatch(traitTakeFoodRequest(ClientGame1().getPlayerAnimal(User1, 0).id)), serverStore, clientStore1);
     expectUnchanged(() => clientStore1.dispatch(gameEndTurnRequest()), serverStore, clientStore1);
 
@@ -67,22 +48,13 @@ describe('Game (EAT PHASE):', function () {
   });
 
   it('Increased eating', () => {
-    const [{serverStore, ServerGame, CreateGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
-    CreateGame({
-      players: {
-        [User0.id]: {continent: [
-          AnimalModel.new(User0.id).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
-        ]}
-        , [User1.id]: {continent: []}
-      }
-      , food: 10
-      , status: {
-        turn: 0
-        , round: 0
-        , player: 0
-        , phase: PHASE.FEEDING
-      }
-    });
+    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+    ParseGame(`
+food: 10
+phase: 2
+players:
+  - continent: TraitCarnivorous
+`);
 
     clientStore0.dispatch(traitTakeFoodRequest(ClientGame0().getPlayerAnimal(User0, 0).id));
     clientStore0.dispatch(gameEndTurnRequest());
@@ -95,30 +67,14 @@ describe('Game (EAT PHASE):', function () {
   });
 
   it('Hunting', () => {
-    const [{serverStore, ServerGame, CreateGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
-    CreateGame({
-      players: {
-        [User0.id]: {continent: [
-          AnimalModel.new(User0.id).set('traits', List.of(
-            TraitModel.new('TraitCarnivorous')
-          ))
-          , AnimalModel.new(User0.id).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
-          , AnimalModel.new(User0.id).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
-        ]}
-        , [User1.id]: {continent: [
-          AnimalModel.new(User1.id).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
-          , AnimalModel.new(User1.id).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
-          , AnimalModel.new(User1.id).set('traits', List.of(TraitModel.new('TraitCarnivorous')))
-        ]}
-      }
-      , food: 10
-      , status: {
-        turn: 0
-        , round: 0
-        , player: 0
-        , phase: PHASE.FEEDING
-      }
-    });
+    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+    ParseGame(`
+food: 10
+phase: 2
+players:
+  - continent: Carnivorous, Carnivorous, Carnivorous
+  - continent: Carnivorous, Carnivorous, Carnivorous
+`);
 
     clientStore0.dispatch(traitActivateRequest(
       ClientGame0().getPlayerAnimal(User0, 0).id

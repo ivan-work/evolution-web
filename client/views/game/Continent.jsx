@@ -5,7 +5,6 @@ import classnames from 'classnames';
 import {List} from 'immutable';
 
 import {DropTargetContinentZone} from './ContinentZone.jsx'
-import {DropTargetAnimal} from './Animal.jsx';
 
 export class Continent extends React.Component {
   static contextTypes = {

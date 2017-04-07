@@ -2,13 +2,23 @@ import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
+import {GameProvider} from './providers/GameProvider.jsx';
+
 import { DragSource } from 'react-dnd';
 import { DND_ITEM_TYPE } from './dnd/DND_ITEM_TYPE';
+
+import {TRAIT_COOLDOWN_LINK} from '../../../shared/models/game/evolution/constants';
 
 export class Food extends React.Component {
   static propTypes = {
     index: React.PropTypes.number.isRequired
     , disabled: React.PropTypes.bool.isRequired
+    // by GameProvider
+    , game: React.PropTypes.object.isRequired
+    , isUserTurn: React.PropTypes.bool.isRequired
+    , currentUserId: React.PropTypes.string.isRequired
+    , isDeploy: React.PropTypes.bool.isRequired
+    , isFeeding: React.PropTypes.bool.isRequired
   };
 
   static defaultProps = {
@@ -21,12 +31,12 @@ export class Food extends React.Component {
   }
 
   render() {
-    const {index, disabled, connectDragSource, isDragging} = this.props;
+    const {index, canDrag, connectDragSource, isDragging} = this.props;
 
     const className = classnames({
       Food: true
-      , disabled: disabled
-      , enabled: !disabled
+      , disabled: !canDrag
+      , enabled: canDrag
       , isDragging: isDragging
     });
 
@@ -36,13 +46,16 @@ export class Food extends React.Component {
   }
 }
 
-export const DragFood = DragSource(DND_ITEM_TYPE.FOOD
+export const DragFood = GameProvider(DragSource(DND_ITEM_TYPE.FOOD
   , {
     beginDrag: (props) => ({index: props.index})
     , canDrag: (props, monitor) => !props.disabled
+      && props.isUserTurn
+      && !props.game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, props.currentUserId, null)
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource()
     , isDragging: monitor.isDragging()
+    , canDrag: monitor.canDrag()
   })
-)(Food);
+)(Food));

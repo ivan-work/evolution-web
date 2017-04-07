@@ -1,9 +1,3 @@
-import {GameModel} from '../models/game/GameModel';
-import * as cardTypes from '../models/game/evolution/cards';
-import {CardModel} from '../models/game/CardModel';
-import {AnimalModel} from '../models/game/evolution/AnimalModel';
-//import {PlayerModel} from '../models/game/PlayerModel';
-//
 import {
   roomCreateRequest,
   roomJoinRequest,
@@ -75,13 +69,12 @@ describe('Hacking Game:', function () {
   });
 
   it('gameDeployAnimalRequest', () => {
-    const [{serverStore, ServerGame, CreateGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
-    CreateGame({
-      players: {
-        [User0.id]: {hand: GameModel.generateDeck([[6, cardTypes.CardCamouflage]])}
-        , [User1.id]: {hand: GameModel.generateDeck([[6, cardTypes.CardCamouflage]])}
-      }
-    });
+    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+    ParseGame(`
+players:
+  - hand: 6 camo
+  - hand: 6 camo
+`);
 
     // gameDeployAnimalRequest empty
     expectUnchanged(() => clientStore0.dispatch(gameDeployAnimalRequest())
@@ -113,19 +106,14 @@ describe('Hacking Game:', function () {
   });
 
   it('gameDeployTraitRequest', () => {
-    const [{serverStore, ServerGame, CreateGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
-    CreateGame({
-      players: {
-        [User0.id]: {
-          hand: GameModel.generateDeck([[6, cardTypes.CardCamouflage]])
-          , continent: [AnimalModel.new(User0.id)]
-        }
-        , [User1.id]: {
-          hand: GameModel.generateDeck([[6, cardTypes.CardCamouflage]])
-          , continent: [AnimalModel.new(User1.id)]
-        }
-      }
-    });
+    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+    ParseGame(`
+players:
+  - hand: 6 camo
+    continent: $
+  - hand: 6 camo
+    continent: $
+`);
 
     // gameDeployTraitRequest empty
     expectUnchanged(() => clientStore0.dispatch(gameDeployTraitRequest())
