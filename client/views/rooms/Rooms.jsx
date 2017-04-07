@@ -13,7 +13,6 @@ import {ControlGroup} from './../utils/ControlGroup.jsx';
 import RoomControlGroup from './RoomControlGroup.jsx';
 
 import {roomCreateRequest} from '../../../shared/actions/actions';
-import './Rooms.scss';
 
 export class Rooms extends React.Component {
   constructor(props) {
