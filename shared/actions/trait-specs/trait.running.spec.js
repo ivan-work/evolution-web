@@ -15,12 +15,12 @@ describe('TraitRunning:', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0}, {User1, clientStore1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: 2
-food: 1
+food: 0
 players:
-  - continent: carn graz, carn, carn, carn, carn, carn
+  - continent: carn waiter, carn, carn, carn, carn, carn
   - continent: running
 `);
-    const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitRunning');
 
     replaceGetRandom(() => 1, () => {
@@ -31,7 +31,6 @@ players:
       expect(ServerGame().status.phase).equal(PHASE.FEEDING);
 
       clientStore0.dispatch(gameEndTurnRequest());
-      clientStore1.dispatch(gameEndTurnRequest());
 
       clientStore0.dispatch(traitActivateRequest(selectAnimal(User0, 2).id, 'TraitCarnivorous', selectAnimal(User1, 0).id));
       expect(selectAnimal(User1, 0)).ok;

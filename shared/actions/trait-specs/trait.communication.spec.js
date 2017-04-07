@@ -163,9 +163,9 @@ players:
       const gameId = ParseGame(`
 deck: 10 camo
 phase: 2
-food: 1
+food: 0
 players:
-  - continent: $A carn mass piracy comm$B fat fat, $B fat fat, $TurnWaiter
+  - continent: $A carn mass piracy comm$B fat fat, $B fat fat
   - continent: $X + carn, $Y + carn, $Z +
 `);
       const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);

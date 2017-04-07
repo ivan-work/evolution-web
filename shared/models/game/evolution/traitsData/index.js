@@ -29,6 +29,13 @@ import {TraitCarnivorous, endHunt} from './TraitCarnivorous';
 export {TraitCarnivorous};
 export * from './ttf';
 
+export const TraitWaiter = {
+  type: 'TraitWaiter'
+  , playerControllable: true
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , action: () => (dispatch) => false
+};
+
 export const TraitParasite = {
   type: 'TraitParasite'
   , cardTargetType: CARD_TARGET_TYPE.ANIMAL_ENEMY

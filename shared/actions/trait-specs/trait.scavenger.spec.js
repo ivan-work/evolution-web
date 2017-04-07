@@ -39,9 +39,8 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0}, {User1, clientStore1}, {User2, clientStore2}] = mockGame(3);
     const gameId = ParseGame(`
 phase: 2
-food: 1
 players:
-  - continent: $A carn graz, $B carn, $C carn, $D scavenger, $E
+  - continent: $A carn waiter, $B carn, $C carn, $D scavenger, $E
   - continent: $A1 scavenger, $B1
   - continent: $A2 scavenger, $B2
 `);

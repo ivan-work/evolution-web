@@ -205,9 +205,10 @@ const playerActed = (gameId, userId) => ({
   , data: {gameId, userId}
 });
 
-export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
+export const server$playerActed = (gameId, userId, auto) => (dispatch, getState) => {
   dispatch(server$game(gameId, playerActed(gameId, userId)));
-  if (!doesPlayerHasOptions(selectGame(getState, gameId), userId))
+  //console.log(`${userId} acted`, !auto, !doesPlayerHasOptions(selectGame(getState, gameId), userId))
+  if (!auto && !doesPlayerHasOptions(selectGame(getState, gameId), userId))
     dispatch(server$gameEndTurn(gameId, userId));
 };
 
@@ -284,7 +285,24 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
   return true;
 };
 
-export const server$startFeedingFromGame = (gameId, animalId, amount) => (dispatch, getState) => {
+export const server$takeFoodRequest = (gameId, playerId, animalId, auto) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  checkGameDefined(game);
+  checkGameHasUser(game, playerId);
+  checkGamePhase(game, PHASE.FEEDING);
+  checkPlayerCanAct(game, playerId);
+
+  const animal = checkPlayerHasAnimal(game, playerId, animalId);
+  checkAnimalCanEat(game, animal);
+
+  logger.debug('traitTakeFoodRequest:', playerId, animalId);
+
+  dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, playerId)));
+  dispatch(server$game(gameId, startCooldown(gameId, TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, playerId)));
+  dispatch(server$startFeedingFromGame(game.id, animal.id, 1, auto));
+};
+
+export const server$startFeedingFromGame = (gameId, animalId, amount, auto) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   const {animal} = game.locateAnimal(animalId);
   const ambushed = game.someAnimalOnContinent('standard', (attackAnimal) => {
@@ -306,7 +324,7 @@ export const server$startFeedingFromGame = (gameId, animalId, amount) => (dispat
   });
   if (!ambushed) {
     dispatch(server$startFeeding(gameId, animal, amount, 'GAME'));
-    dispatch(server$playerActed(gameId, animal.ownerId));
+    dispatch(server$playerActed(gameId, animal.ownerId, auto));
   }
 };
 
@@ -448,20 +466,7 @@ export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetI
 
 export const traitClientToServer = {
   traitTakeFoodRequest: ({gameId, animalId}, {userId}) => (dispatch, getState) => {
-    const game = selectGame(getState, gameId);
-    checkGameDefined(game);
-    checkGameHasUser(game, userId);
-    checkGamePhase(game, PHASE.FEEDING);
-    checkPlayerCanAct(game, userId);
-
-    const animal = checkPlayerHasAnimal(game, userId, animalId);
-    checkAnimalCanEat(game, animal);
-
-    logger.debug('traitTakeFoodRequest:', userId, animalId);
-
-    dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
-    dispatch(server$game(gameId, startCooldown(gameId, TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
-    dispatch(server$startFeedingFromGame(game.id, animal.id, 1));
+    dispatch(server$takeFoodRequest(gameId, userId, animalId));
   }
   , traitTakeShellRequest: ({gameId, animalId, traitId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);

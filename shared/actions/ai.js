@@ -24,21 +24,21 @@ export class Option extends Record({
 }
 
 export const doesPlayerHasOptions = (game, playerId) => {
-  logger.debug('?doesPlayerHasOptions:', playerId);
+  logger.debug('?doesPlayerHasOptions:', playerId, hasError);
   const hasError = failsChecks(() => {
     checkGamePhase(game, PHASE.FEEDING);
     checkPlayerCanAct(game, playerId);
   });
-  if (hasError) {
+  if (!!hasError) {
     // logger.warn(hasError.name + hasError.message, ...hasError.data);
   } else if (!doesOptionExist(game, playerId)) {
     logger.debug('AutoTurn for:' + playerId);
     return false;
   } else {
-    if (process.env.LOG_LEVEL === 'silly') {
+    if (process.env.LOG_LEVEL === 'debug') {
       const options = getOptions(game, playerId);
       if (options.length === 0) throw new Error('Options length = 0');
-      console.log(options);
+      console.log('options', options);
     }
   }
   return true;
@@ -67,6 +67,13 @@ export const doesOptionExist = (game, playerId) => {
           return true;
       }
     });
+  });
+};
+
+export const getFeedingOption = (game, playerId) => {
+  return game.getPlayer(playerId).continent.find((animal) => {
+    if (passesChecks(() => checkAnimalCanEat(game, animal)))
+      return animal.id;
   });
 };
 

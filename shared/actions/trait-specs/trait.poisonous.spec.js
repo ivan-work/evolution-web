@@ -15,9 +15,9 @@ describe('TraitPoisonous:', () => {
     const gameId = ParseGame(`
 deck: 12 camo
 phase: 2
-food: 1
+food: 0
 players:
-  - continent: $A carn graz, $B carn, $C carn
+  - continent: $A carn, $B carn, $C carn, $Waiter fat=true
   - continent: $X pois, $Y pois
 `);
     const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
@@ -26,24 +26,19 @@ players:
 
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$X'));
     expect(selectAnimal(User0, 0).hasFlag(TRAIT_ANIMAL_FLAG.POISONED)).true;
-    clientStore0.dispatch(gameEndTurnRequest());
-    clientStore1.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$Y'));
     expect(selectAnimal(User0, 1).hasFlag(TRAIT_ANIMAL_FLAG.POISONED)).true;
-    clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$C', 'TraitCarnivorous', '$B'));
     expect(selectAnimal(User0, 1).hasFlag(TRAIT_ANIMAL_FLAG.POISONED)).not.true;
     expect(selectAnimal(User0, 1).getFoodAndFat()).equal(2);
     clientStore0.dispatch(gameEndTurnRequest());
 
-    clientStore0.dispatch(gameEndTurnRequest());
-
     // DEPLOY 1
 
     expect(selectGame().status.phase, 'DEPLOY 1').equal(PHASE.DEPLOY);
-    expect(selectPlayer(User0).continent).size(1);
+    expect(selectPlayer(User0).continent).size(2);
     expect(selectPlayer(User1).continent).size(0);
   });
 

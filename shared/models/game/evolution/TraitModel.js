@@ -5,7 +5,8 @@ import * as traitTypes from './traitTypes/index'
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import {CTT_PARAMETER} from './constants';
 
-const TraitData = Object.keys(traitTypes).reduce((result, traitType) => Object.assign(result, {[traitType]: TraitDataModel.new(traitType)}), {});
+const TraitData = Object.keys(traitTypes)
+  .reduce((result, traitType) => Object.assign(result, {[traitType]: TraitDataModel.new(traitType)}), {});
 
 export class TraitModel extends Record({
   type: null

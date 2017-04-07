@@ -1,3 +1,5 @@
+export const TraitWaiter = 'TraitWaiter';
+
 export const TraitCarnivorous = 'TraitCarnivorous';
 export const TraitParasite = 'TraitParasite';
 export const TraitFatTissue = 'TraitFatTissue';

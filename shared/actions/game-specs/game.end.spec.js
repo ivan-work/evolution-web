@@ -6,6 +6,7 @@ import * as traits from '../../models/game/evolution/traitsData/index';
 
 import {
   traitTakeFoodRequest
+  , traitActivateRequest
   , gameEndTurnRequest
   , roomExitRequest
 
@@ -22,131 +23,83 @@ import {
 import {makeGameSelectors} from '../../selectors';
 
 describe('Game (ENDING PHASE):', function () {
-  it('Skip Turn limit', () => {
-    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
-    ParseGame(`
-deck: 10 camo
-food: 4
-phase: 2
-players:
-  - continent: $A, $B, $C, $D graz
-  - continent: $X, $Y, $Z, $W
-`);
-    expect(ServerGame().getPlayer(User0.id).acted).equal(false);
-    expect(ServerGame().getPlayer(User1.id).acted).equal(false);
-    expect(ServerGame().getPlayer(User0.id).ended).equal(false);
-    expect(ServerGame().getPlayer(User1.id).ended).equal(false);
-
-    clientStore0.dispatch(traitTakeFoodRequest('$A'));
-    expect(ServerGame().getPlayer(User0.id).acted).equal(true);
-    expect(ServerGame().getPlayer(User1.id).acted).equal(false);
-    expect(ServerGame().getPlayer(User0.id).ended).equal(false);
-    expect(ServerGame().getPlayer(User1.id).ended).equal(false);
-
-    clientStore0.dispatch(gameEndTurnRequest());
-    expect(ServerGame().getPlayer(User0.id).acted).equal(false);
-    expect(ServerGame().getPlayer(User1.id).acted).equal(false);
-    expect(ServerGame().getPlayer(User0.id).ended).equal(false);
-    expect(ServerGame().getPlayer(User1.id).ended).equal(false);
-
-    clientStore1.dispatch(gameEndTurnRequest());
-    expect(ServerGame().getPlayer(User0.id).acted).equal(false);
-    expect(ServerGame().getPlayer(User1.id).acted).equal(false);
-    expect(ServerGame().getPlayer(User0.id).ended).equal(false);
-    expect(ServerGame().getPlayer(User1.id).ended).equal(true);
-
-    clientStore0.dispatch(traitTakeFoodRequest('$B'));
-    expect(ServerGame().getPlayer(User0.id).acted).equal(true);
-    expect(ServerGame().getPlayer(User0.id).ended).equal(false);
-
-    clientStore0.dispatch(gameEndTurnRequest());
-
-    expect(ServerGame().getPlayer(User0.id).acted).equal(false);
-    expect(ServerGame().getPlayer(User0.id).ended).equal(false);
-
-    clientStore0.dispatch(gameEndTurnRequest());
-
-    expect(ServerGame().getPlayer(User0.id).ended, 'next phase').equal(false);
-    expect(ServerGame().getPlayer(User1.id).ended).equal(false);
-  });
-
   it('Next deploy: (FULL DECK)', () => {
-    const [{serverStore, ServerGame, ParseGame}
+    const [{serverStore, ParseGame}
       , {clientStore0, User0, ClientGame0}
       , {clientStore1, User1, ClientGame1}
       , {clientStore2, User2, ClientGame2}] = mockGame(3);
     const gameId = ParseGame(`
 deck: 32 carn
-food: 4
+food: 0
 phase: 2
 players:
-  - continent: $A graz, $B, $C, $D carn +, $E
-  - continent: $Z +, $X, $C carn ++, $V, $N
+  - continent: $Q piracy, $W +
+  - continent: $A mass + fat=true fat=true, $D +
   - continent:
 `);
-    const {selectGame, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
     // User0: $A +, $B, $C, $D carn +, $E
-    clientStore0.dispatch(traitTakeFoodRequest('$A'));
-    expect(selectAnimal(User0, 0).getFood()).equal(1);
-    clientStore0.dispatch(gameEndTurnRequest());
 
-    clientStore1.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(gameEndTurnRequest()); // Q can't have AutoFood
+    expect(selectPlayer(User0).ended, 'User0.ended 0').equal(true);
 
-    expect(ServerGame().getPlayer(User0.id).ended).equal(false);
-    expect(ServerGame().getPlayer(User1.id).ended).equal(true);
-    expect(ServerGame().getPlayer(User2.id).ended).equal(true);
+    clientStore1.dispatch(traitActivateRequest('$A', 'TraitFatTissue')); // A used fat
 
-    // User0: $A +, $B +, $C, $D carn +, $E
-    clientStore0.dispatch(traitTakeFoodRequest('$B'));
-    clientStore0.dispatch(gameEndTurnRequest());
-
-    // User0: $A +, $B +, $C +, $D carn +, $E
-    clientStore0.dispatch(traitTakeFoodRequest('$C'));
-    clientStore0.dispatch(gameEndTurnRequest());
-
-    clientStore0.dispatch(gameEndTurnRequest());
-
-    expect(ServerGame().status.turn, 'ServerGame().status.turn').equal(1);
-    expect(ServerGame().status.turn, 'ServerGame().status.phase').equal(PHASE.DEPLOY);
+    expect(selectGame().status.turn, 'status.turn').equal(1);
+    expect(selectGame().status.phase, 'status.phase').equal(PHASE.DEPLOY);
     expect(ClientGame0().status.turn, 'ClientGame0().status.turn').equal(1);
     expect(ClientGame0().status.turn, 'ClientGame0().status.phase').equal(PHASE.DEPLOY);
-    expect(ServerGame().getPlayer(User0).continent, '$D and $E dies').size(3);
-    expect(ServerGame().getPlayerAnimal(User0, 0).getFood()).equal(0);
-    expect(ServerGame().getPlayerAnimal(User0, 1).getFood()).equal(0);
-    expect(ServerGame().getPlayerAnimal(User0, 2).getFood()).equal(0);
-    expect(ServerGame().getPlayer(User1).continent).size(2);
+
+    expect(selectPlayer(User0).continent).size(1);
+    expect(ClientGame0().getPlayer(User0).continent).size(1);
+    expect(ClientGame1().getPlayer(User0).continent).size(1);
+    expect(ClientGame2().getPlayer(User0).continent).size(1);
+    expect(selectAnimal(User0, 0).getFood()).equal(0);
+
+    expect(selectPlayer(User1).continent).size(2);
     expect(ClientGame0().getPlayer(User1).continent).size(2);
-    expect(ServerGame().getPlayer(User2).continent).size(0);
+    expect(ClientGame1().getPlayer(User1).continent).size(2);
+    expect(ClientGame2().getPlayer(User1).continent).size(2);
+    expect(selectAnimal(User1, 0).getFood()).equal(0);
+    expect(selectAnimal(User1, 1).getFood()).equal(0);
+
+    expect(selectPlayer(User2).continent).size(0);
     expect(ClientGame0().getPlayer(User2).continent).size(0);
-    expect(ServerGame().getPlayer(User0).hand).size(4);
-    expect(ServerGame().getPlayer(User1).hand).size(3);
-    expect(ServerGame().getPlayer(User2).hand).size(6);
+    expect(ClientGame1().getPlayer(User2).continent).size(0);
+    expect(ClientGame2().getPlayer(User2).continent).size(0);
+
+
+    expect(selectPlayer(User0).hand).size(2);
+    expect(selectPlayer(User1).hand).size(3);
+    expect(selectPlayer(User2).hand).size(6);
   });
 
   it('Next deploy: (not full DECK)', () => {
-    const [{serverStore, ServerGame, ParseGame}
+    const [{serverStore, ParseGame}
       , {clientStore0, User0, ClientGame0}
       , {clientStore1, User1, ClientGame1}
       , {clientStore2, User2, ClientGame2}] = mockGame(3);
-    ParseGame(`
+    const gameId = ParseGame(`
 deck: 4 carn
 food: 4
 phase: 2
 players:
-  - continent: $ +
-  - continent: $ +
-  - continent: $ +
+  - continent: $
+  - continent: $
+  - continent: $
 `);
+    const {selectGame, selectPlayer} = makeGameSelectors(serverStore.getState, gameId);
+
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore1.dispatch(gameEndTurnRequest());
     clientStore2.dispatch(gameEndTurnRequest());
 
-    expect(ServerGame().getPlayer(User0).continent).size(1);
-    expect(ServerGame().getPlayer(User1).continent).size(1);
-    expect(ServerGame().getPlayer(User2).continent).size(1);
-    expect(ServerGame().getPlayer(User0).hand).size(1);
-    expect(ServerGame().getPlayer(User1).hand).size(2);
-    expect(ServerGame().getPlayer(User2).hand).size(1);
+    expect(selectPlayer(User0).continent).size(1);
+    expect(selectPlayer(User1).continent).size(1);
+    expect(selectPlayer(User2).continent).size(1);
+    expect(selectPlayer(User0).hand).size(1);
+    expect(selectPlayer(User1).hand).size(2);
+    expect(selectPlayer(User2).hand).size(1);
   });
 
   it('Next deploy: (empty deck)', () => {

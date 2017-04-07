@@ -3,6 +3,7 @@ import {
   , gameEndTurnRequest
   , traitActivateRequest
   , traitTakeFoodRequest
+  , testHackGame
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
@@ -53,6 +54,7 @@ players:
     }, serverStore, clientStore0);
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
     clientStore0.dispatch(traitTakeFoodRequest('$C'));
+    serverStore.dispatch(testHackGame(gameId, game => game.set('food', 0)));
     clientStore0.dispatch(gameEndTurnRequest());
 
     // DEPLOY 2
@@ -90,6 +92,7 @@ players:
     }, serverStore, clientStore0);
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
     clientStore0.dispatch(traitTakeFoodRequest('$C'));
+    serverStore.dispatch(testHackGame(gameId, game => game.set('food', 0)));
     clientStore0.dispatch(gameEndTurnRequest());
 
     // DEPLOY 4

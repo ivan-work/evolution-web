@@ -23,28 +23,29 @@ players:
   - continent: $A Camouflage Scavenger Communication$S, $S TailLoss Grazing, $D Carnivorous FatTissue Piracy, $F Symbiosis$G Cooperation$G, $G Mimicry Running, $H Poisonous Hibernation
   - continent: $Z Carnivorous, $X Carnivorous, $C Carnivorous
 `);
-    const {selectGame, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
     const {selectGame0, selectAnimal0, selectTrait0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
     const {selectGame1, selectAnimal1, selectTrait1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
     const {selectGame2, selectAnimal2, selectTrait2} = makeClientGameSelectors(clientStore2.getState, gameId, 2);
 
-    clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id, 0));
+    replaceGetRandom(() => 3, () => {
+      clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id, 0));
 
-    clientStore1.dispatch(gameEndTurnRequest());
+      clientStore1.dispatch(gameEndTurnRequest());
 
-    clientStore2.dispatch(gameDeployAnimalRequest(selectCard(User2, 0).id, 0));
+      clientStore2.dispatch(gameDeployAnimalRequest(selectCard(User2, 0).id, 0));
 
-    clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, selectAnimal(User0, 0).id, true));
+      clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, selectAnimal(User0, 0).id, true));
 
-    clientStore2.dispatch(gameEndTurnRequest());
+      clientStore2.dispatch(gameEndTurnRequest());
 
-    replaceGetRandom(() => 6, () => {
       clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id, 1));
     });
 
     /**
      * FEEDING
      */
+    expect(selectGame().food).equal(6);
     clientStore0.dispatch(traitTakeFoodRequest('$Q'));
 
     clientStore1.dispatch(traitActivateRequest('$S', 'TraitGrazing'));
@@ -55,19 +56,21 @@ players:
     replaceGetRandom(() => 1, () => {
       clientStore2.dispatch(traitActivateRequest('$Z', 'TraitCarnivorous', '$G'));
     });
+
     clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$S'));
     const traitTailLossId = selectTrait1(1, 0).id;
     clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', traitTailLossId));
 
+    clientStore1.dispatch(traitActivateRequest('$S', 'TraitGrazing'));
     clientStore1.dispatch(traitTakeFoodRequest('$D'));
-    clientStore1.dispatch(gameEndTurnRequest());
+    //clientStore1.dispatch(gameEndTurnRequest());
 
     replaceGetRandom(() => 0, () => {
       clientStore2.dispatch(traitActivateRequest('$X', 'TraitCarnivorous', '$G'));
     });
 
     clientStore1.dispatch(traitAnswerRequest('TraitMimicry', '$H'));
-    clientStore2.dispatch(gameEndTurnRequest());
+    expect(selectGame().food, 'Food').equal(0);
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore1.dispatch(gameEndTurnRequest());
     clientStore2.dispatch(gameEndTurnRequest());
@@ -105,7 +108,7 @@ players:
       expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User0.id]);
       expect(selectGame().log.get(i++)).eql(['gameDeployAnimal', User0.id]);
       expect(selectGame().log.get(i++)).eql(['gameEndTurn', User0.id, true, false]);
-      expect(selectGame().log.get(i++)).eql(['gameStartEat', 12]);
+      expect(selectGame().log.get(i++)).eql(['gameStartEat', 6]);
       expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User0.id]);
 
       expect(selectGame().log.get(i++)).eql(['traitMoveFood', 1, 'GAME', $Q, null]);
@@ -133,6 +136,7 @@ players:
       expect(selectGame().log.get(i++)).eql(['gameEndTurn', User0.id, false, false]);
 
       expect(selectGame().log.get(i++)).eql(['gameNextPlayer', User1.id]);
+      expect(selectGame().log.get(i++)).eql(['traitNotify_Start', $S1, 'TraitGrazing', void 0]);
       expect(selectGame().log.get(i++)).eql(['traitMoveFood', 1, 'GAME', $D, null]);
       expect(selectGame().log.get(i++)).eql(['gameEndTurn', User1.id, false, false]);
 

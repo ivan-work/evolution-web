@@ -11,7 +11,7 @@ describe('Game (EAT PHASE):', function () {
   it('Simple eating', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
-food: 2
+food: 3
 phase: 2
 players:
   - continent: $A,$B
@@ -34,16 +34,16 @@ players:
       clientStore0.dispatch(traitTakeFoodRequest('$B'))
       , serverStore, clientStore0);
 
-    expect(selectGame().food, 'ServerGame().food').equal(1);
-    expect(ClientGame0().food, 'ClientGame0().food').equal(1);
-    expect(ClientGame1().food, 'ClientGame1().food').equal(1);
+    expect(selectGame().food, 'ServerGame().food').equal(2);
+    expect(ClientGame0().food, 'ClientGame0().food').equal(2);
+    expect(ClientGame1().food, 'ClientGame1().food').equal(2);
     expect(selectAnimal(User0, 0).food).equal(1);
     expect(ClientGame0().getPlayer(User0).getAnimal(0).food).equal(1);
     expect(ClientGame1().getPlayer(User0).getAnimal(0).food).equal(1);
 
     clientStore1.dispatch(gameEndTurnRequest());
 
-    expect(selectGame().food, 'Players dont take food when skip turns').equal(1); //TODO change
+    expect(selectGame().food).equal(1);
 
     expectUnchanged(`User 0 can't take food on full animal $A`, () =>
       clientStore0.dispatch(traitTakeFoodRequest('$A'))

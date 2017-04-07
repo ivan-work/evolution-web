@@ -126,7 +126,6 @@ export const gameEndTurn = (game, {userId}) => {
       if (endedAlready) logger.silly(`Player#${player.id} already ended.`);
       if (endedNow) logger.debug(`Player#${player.id} ended by skipping.`);
       return player
-        .set('acted', false) // TODO remove because we are setting it in gameNextPlayer
         .set('ended', endedNow)
     })
     .update(addToGameLog(['gameEndTurn', userId, endedNow, endedAlready]));
@@ -345,4 +344,5 @@ export const reducer = createReducer(Map(), {
   , traitTakeShell: (state, data) => state.update(data.gameId, game => traitTakeShell(game, data))
   , traitAmbushStart: (state, data) => state.update(data.gameId, game => traitAmbushStart(game, data))
   , traitAmbushEnd: (state, data) => state.update(data.gameId, game => traitAmbushEnd(game, data))
+  , testHackGame: (state, data) => state.update(data.gameId, data.callback)
 });

@@ -15,8 +15,8 @@ import {
 } from '../models/game/evolution/constants';
 
 import {server$game} from './generic';
-import {doesPlayerHasOptions} from './ai';
-import {server$tryViviparous} from './actions';
+import {doesPlayerHasOptions, getFeedingOption} from './ai';
+import {server$tryViviparous, server$takeFoodRequest} from './actions';
 import {redirectTo} from '../utils';
 import {selectGame, selectPlayers4Sockets} from '../selectors';
 
@@ -217,7 +217,20 @@ export const gameEndTurn = (gameId, userId) => ({
   , data: {gameId, userId}
 });
 
+export const server$autoTurn = (gameId, userId) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  const player = game.getPlayer(userId);
+  if (game.status.phase === PHASE.FEEDING && !player.acted) {
+    const animal = getFeedingOption(game, userId);
+    if (!!animal) {
+      console.log('TAKING THE FOOD', animal.id);
+      dispatch(server$takeFoodRequest(gameId, userId, animal.id, true));
+    }
+  }
+};
+
 export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
+  dispatch(server$autoTurn(gameId, userId));
   logger.debug('server$gameEndTurn:', userId);
   dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
   dispatch(server$game(gameId, gameEndTurn(gameId, userId)));
@@ -292,7 +305,7 @@ export const server$gamePlayerContinue = (gameId, previousUserId) => (dispatch, 
 };
 
 const server$gameNextPlayer = (gameId, nextPlayer, roundChanged) => (dispatch, getState) => {
-  logger.debug('server$gameNextPlayer:', nextPlayer.id, roundChanged);
+  logger.debug('server$gameNextPlayer:', nextPlayer.id, !!roundChanged);
   dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
 
   const currentPlayerIndex = selectGame(getState, gameId).getIn(['status', 'currentPlayer']);

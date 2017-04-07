@@ -3,6 +3,7 @@ import {
   , gameEndTurnRequest
   , traitTakeFoodRequest
   , traitActivateRequest
+  , testHackGame
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
@@ -46,7 +47,7 @@ players:
       const gameId = ParseGame(`
 deck: 12 CardGrazingAndFatTissue
 phase: 2
-food: 12
+food: 7
 players:
   - continent: $A fat carn, $B fat fat fat, $Waiter,  $C
 `);
@@ -71,7 +72,7 @@ players:
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
 
-      expect(selectAnimal(User0, 0).getFoodAndFat()).equal(3);
+      expect(selectAnimal(User0, 0).getFoodAndFat(), '$A.getFoodAndFat()').equal(3);
       expect(selectAnimal(User0, 1).getFoodAndFat()).equal(4);
 
       clientStore0.dispatch(traitTakeFoodRequest('$Waiter'));
@@ -82,6 +83,7 @@ players:
       clientStore0.dispatch(gameEndTurnRequest());
 
       expect(selectGame().status.phase, 'Turn 2, feed').equal(PHASE.FEEDING);
+      serverStore.dispatch(testHackGame(gameId, game => game.set('food', 0)));
       clientStore0.dispatch(gameEndTurnRequest());
 
 

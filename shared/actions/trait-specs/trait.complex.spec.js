@@ -18,7 +18,7 @@ describe('Complex traits:', () => {
 
     const gameId = ParseGame(`
 phase: 2
-food: 1
+food: 10
 players:
   - continent: $A carn graz, $B carn, $C carn, $D carn, $E carn, $F carn
   - continent: $Z tailloss mimicry running fat, $X, $Y
@@ -32,7 +32,6 @@ settings:
     });
 
     //expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$A'])).size(1);
-    expect(selectPlayer(User0).acted).true;
     expect(selectAnimal(User1, 0).id).equal('$Z');
 
     clientStore0.dispatch(gameEndTurnRequest());
@@ -62,6 +61,7 @@ settings:
       expect(selectAnimal(User1, 0).traits.get(2).type).equal('TraitFatTissue');
       clientStore0.dispatch(gameEndTurnRequest());
     });
+    clientStore1.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$C', 'TraitCarnivorous', '$Z'));
 
@@ -73,6 +73,7 @@ settings:
     expect(selectAnimal(User1, 0).traits.get(0).type).equal('TraitTailLoss');
     expect(selectAnimal(User1, 0).traits.get(1).type).equal('TraitMimicry');
     clientStore0.dispatch(gameEndTurnRequest());
+    clientStore1.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$D', 'TraitCarnivorous', '$Z'));
     expect(selectGame().question).ok;
@@ -87,6 +88,7 @@ settings:
     expect(selectAnimal(User1, 0).traits.get(1).type).equal('TraitMimicry');
     expect(selectAnimal(User1, 2)).undefined;
     clientStore0.dispatch(gameEndTurnRequest());
+    clientStore1.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$E', 'TraitCarnivorous', '$Z'));
     clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', 0));

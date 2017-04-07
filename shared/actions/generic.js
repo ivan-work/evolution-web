@@ -12,6 +12,11 @@ export const testAction = (data) => ({
   , data
 });
 
+export const testHackGame = (gameId, callback) => ({
+  type: 'testHackGame'
+  , data: {gameId, callback}
+});
+
 export const server$game = (gameId, action) => (dispatch, getState) =>
   dispatch(Object.assign(action, {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
 
