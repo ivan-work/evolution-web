@@ -281,11 +281,20 @@ export const server$startFeedingFromGame = (gameId, animal, amount) => (dispatch
     const ambush = attackAnimal.hasTrait(TraitAmbush);
     const carnivorous = attackAnimal.hasTrait(TraitCarnivorous);
     if (!ambush || !ambush.value || !carnivorous) return;
+
+    console.log('Ambush!', attackAnimal.id);
+
+    //if (game.cooldowns.checkFor(TraitAmbush, null, attackAnimal.id)) return;
+
     const carnivorousData = carnivorous.getDataModel();
+
     if (!carnivorous.checkAction(game, attackAnimal) || !carnivorousData.checkTarget(game, attackAnimal, animal)) return;
-    console.log('ambush!')
+
     dispatch(traitAmbushStart(gameId, animal));
     dispatch(server$traitActivate(game, attackAnimal, carnivorous, animal));
+
+    //dispatch(server$game(gameId, startCooldown(gameId, TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.ANIMAL, attackAnimal.id)));
+    //dispatch(server$game(gameId, startCooldown(gameId, TraitAmbush, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.ANIMAL, attackAnimal.id)));
     return true;
   });
   if (!ambushed) {

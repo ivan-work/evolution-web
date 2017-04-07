@@ -9,7 +9,7 @@ import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
 
-describe('TraitAmbush:', () => {
+describe.only('TraitAmbush:', () => {
   it('Simple attack', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1}] = mockGame(2);
     const gameId = ParseGame(`
@@ -94,7 +94,7 @@ players:
     expect(selectAnimal(User0, 0).getFood(), '$A should get food').equal(1);
   });
 
-  it.only('Cooldowns', () => {
+  it('Cooldowns', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1, clientStore1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
@@ -108,8 +108,11 @@ players:
 
     clientStore0.dispatch(traitTakeFoodRequest('$Q'));
     expect(selectGame().question, 'Game asks question').ok;
+    //console.log('test');
     clientStore0.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 'TraitFatTissue'));
+    //console.log('test');
     clientStore0.dispatch(gameEndTurnRequest());
+    //console.log('test');
 
     expect(selectAnimal(User0, 0).getFoodAndFat(), '$Q should get food').equal(1);
     expect(selectAnimal(User1, 0).getFoodAndFat(), '$A should get food').equal(1);
@@ -125,7 +128,6 @@ players:
     expect(selectGame().status.round, 'Round').equal(1);
     clientStore0.dispatch(traitActivateRequest('$W', 'TraitAmbush'));
     clientStore1.dispatch(traitActivateRequest('$S', 'TraitAmbush'));
-    console.log(selectAnimal(User1, 1).traits.toJS())
 
     clientStore0.dispatch(traitTakeFoodRequest('$W'));
     expect(selectGame().question, 'Game asks question 3').ok;
@@ -144,7 +146,7 @@ players:
     expect(selectAnimal(User1, 1).getFoodAndFat(), '$S should get food').equal(2);
   });
 
-  it.only('Double trouble', () => {
+  it('Triple trouble', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1, clientStore1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
