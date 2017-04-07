@@ -2,6 +2,7 @@ import React from 'react';
 import {Route, IndexRoute} from 'react-router';
 import {App} from '../components/App.jsx';
 import {LoginView, RoomsView, RoomView, GameWrapperView} from '../views/index';
+import {Test} from '../views/Test.jsx';
 
 const MakeAuthCheck = (getState) => (nextState, replace) => {
   //console.log('getState', getState().toJS());
@@ -21,6 +22,7 @@ export default (getState) => {
     <Route path='login' component={LoginView}/>
     <Route path='room/*' component={RoomView} onEnter={AuthCheck}/>
     <Route path='game' component={GameWrapperView} onEnter={AuthCheck}/>
+    <Route path='test' component={Test}/>
   </Route>
 }
 //<Route path='login' component={LoginView}/>

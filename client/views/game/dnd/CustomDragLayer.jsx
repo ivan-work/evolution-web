@@ -3,7 +3,7 @@ import { DragLayer } from 'react-dnd';
 import { DND_ITEM_TYPE } from './DND_ITEM_TYPE';
 import { Card, DragCardPreview } from '../Card.jsx';
 import { AnimalTraitArrow } from '../AnimalTraitArrow.jsx';
-import { Food } from '../Food.jsx';
+import { Food } from '../food/Food.jsx';
 import { ArrowPreview } from './ArrowPreview.jsx';
 
 const layerStyles = {

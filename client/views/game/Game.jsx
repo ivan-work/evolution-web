@@ -17,7 +17,7 @@ import {CardCollection} from './CardCollection.jsx';
 import {Card, DragCard} from './Card.jsx';
 import {ContinentDeploy} from './ContinentDeploy.jsx';
 import {ContinentFeeding} from './ContinentFeeding.jsx';
-import {DragFood} from './Food.jsx';
+import {GameFoodContainer} from './food/GameFoodContainer.jsx';
 import CustomDragLayer from './dnd/CustomDragLayer.jsx';
 
 import {GameScoreboardFinalView} from './ui/GameScoreboardFinal.jsx';
@@ -71,13 +71,13 @@ class _Game extends React.Component {
 
         {player.acted
           ? <MDL.Button id="Game$endTurn" colored raised
-                    disabled={!isPlayerTurn}
-                    style={{width: '100%'}}
-                    onClick={this.context.gameActions.$endTurn}>End Turn</MDL.Button>
+                        disabled={!isPlayerTurn}
+                        style={{width: '100%'}}
+                        onClick={this.context.gameActions.$endTurn}>End Turn</MDL.Button>
           : <MDL.Button id="Game$endTurn" accent raised
-                    disabled={!isPlayerTurn}
-                    style={{width: '100%'}}
-                    onClick={this.context.gameActions.$endTurn}>End Phase</MDL.Button>}
+                        disabled={!isPlayerTurn}
+                        style={{width: '100%'}}
+                        onClick={this.context.gameActions.$endTurn}>End Phase</MDL.Button>}
 
         <GameStatusDisplay status={game.status} players={game.players}/>
 
@@ -92,9 +92,10 @@ class _Game extends React.Component {
           </ControlGroup>
         </Portal>
 
-        {game.status.phase === PHASE.FEEDING ? <div className='GameFoodContainer' style={GAME_POSITIONS[game.players.size].food}>
-          {Array.from({length: game.food}).map((u, index) => <DragFood key={index} index={index} disabled={!isPlayerTurn}/>)}
-        </div>: null}
+        <div style={GAME_POSITIONS[game.players.size].food}>
+          {game.status.phase === PHASE.FEEDING &&
+          <GameFoodContainer food={game.food}/>}
+        </div>
 
         {this.renderUser(game, player, GameContinent)}
 

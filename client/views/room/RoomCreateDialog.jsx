@@ -16,16 +16,21 @@ export class RoomCreateDialog extends Component {
     super(props);
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     this.state = INITIAL_STATE;
+    this.close = this.close.bind(this);
   }
 
   static propTypes = {
     onCreateRoom: React.PropTypes.func.isRequired
   };
 
+  close() {
+    this.setState({show: false})
+  }
+
   render() {
     return <span>
-        <MDL.Button id="Rooms$create" onClick={() => this.setState({show: true})}>Create room</MDL.Button>
-        <Dialog show={this.state.show}>
+      <MDL.Button id="Rooms$create" onClick={() => this.setState({show: true})}>Create room</MDL.Button>
+        <Dialog show={this.state.show} onBackdropClick={this.close}>
           <MDL.DialogTitle>New room</MDL.DialogTitle>
           <MDL.DialogContent>
             <MDL.Textfield floatingLabel label='Name' value={this.state.name} onChange={(e) => this.setState({name: e.target.value})}/>
@@ -35,9 +40,9 @@ export class RoomCreateDialog extends Component {
               this.props.onCreateRoom({
                 name: this.state.name
               });
-              this.setState({show: false});
+              this.close();
             }}>Create</MDL.Button>
-            <MDL.Button id='RoomCreateDialog$cancel'  type='button' raised onClick={() => this.setState({show: false})}>Cancel</MDL.Button>
+            {/*<MDL.Button id='RoomCreateDialog$cancel' type='button' raised onClick={this.close}>Cancel</MDL.Button>*/}
           </DialogActions>
         </Dialog>
       </span>;

@@ -13,7 +13,7 @@ import { AnimalTrait, DraggableAnimalTrait } from './AnimalTrait.jsx';
 import { AnimalLinkedTrait } from './AnimalLinkedTrait.jsx';
 import { AnimalSelectLink } from './AnimalSelectLink.jsx'
 import {GameProvider} from './providers/GameProvider.jsx';
-import {Food} from './Food.jsx';
+import {Food} from './food/Food.jsx';
 
 export class _Animal extends React.Component {
   static displayName = 'Animal';

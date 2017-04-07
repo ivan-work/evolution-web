@@ -1,0 +1,69 @@
+$backdrop-background: rgba(0, 0, 0, .5);
+$transition: 200ms;
+
+.DialogContainer {
+  $_: &;
+  z-index: 999;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  .Backdrop {
+    @mixin visible {
+      width: 100%;
+      height: 100%;
+      padding: 10%;
+      background: rgba(0, 0, 0, .5);
+      transition: $transition background;
+    }
+
+    @mixin hidden {
+      background: none;
+    }
+
+    @include visible;
+
+    @at-root #{$_}.transition-enter .Backdrop {
+      @include hidden;
+    }
+    @at-root #{$_}.transition-enter-active .Backdrop {
+      @include visible;
+    }
+    @at-root #{$_}.transition-leave-active .Backdrop {
+      @include hidden;
+    }
+  }
+
+  .Dialog {
+    @mixin visible {
+      background: white;
+      transition: $transition margin-top, $transition transform;
+      margin-top: 0;
+      transform: none;
+    }
+
+    @mixin hidden {
+      margin-top: -10%;
+      transform: translate(0, -125%);
+    }
+
+    @include visible;
+
+    @at-root #{$_}.transition-enter .Dialog {
+      @include hidden;
+    }
+    @at-root #{$_}.transition-enter-active .Dialog {
+      @include visible;
+    }
+    @at-root #{$_}.transition-leave-active .Dialog {
+      @include hidden;
+    }
+  }
+
+  .DialogActions {
+    margin: 1em;
+    padding: 1em;
+  }
+}
