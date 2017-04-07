@@ -1,6 +1,6 @@
 {
   "name": "cards3",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "blahblah",
   "browser": {
     "jsonwebtoken": false,
@@ -128,6 +128,7 @@
     "source-map-support": "*",
     "style-loader": "*",
     "webpack": "*",
+    "webpack-auto-inject-version": "^0.2.11",
     "webpack-dev-middleware": "*",
     "webpack-hot-middleware": "*"
   }
