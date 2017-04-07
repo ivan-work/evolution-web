@@ -4,19 +4,23 @@ import {socketConnect, socketDisconnect, clientToServer} from '../shared/actions
 
 let connectionIds = 0;
 
-export const socketServer = (server) => io(server);
+export const socketServer = (server, options) => io(server, {
+});
 
 export const socketStore = (serverSocket, store) => {
-  serverSocket.on('connect', (socket) => {
+  serverSocket.sockets.on('connect', (socket) => {
+    console.log('server:connect');
     store.dispatch(socketConnect(socket.id, socket));
 
     socket.emit('connectionId', socket.id);
 
     socket.on('disconnect', () => {
+      console.log('server:disconnect');
       store.dispatch(socketDisconnect(socket.id));
     });
 
     socket.on('action', (action) => {
+      console.log('server:action');
       if (clientToServer[action.type]) {
         store.dispatch(clientToServer[action.type](socket.id, action.data));
       } else {
