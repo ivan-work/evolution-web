@@ -8,5 +8,8 @@
         "transform-react-inline-elements"
       ]
     }
-  }
+  },
+  "plugins": [
+    ["babel-root-import"]
+  ]
 }
