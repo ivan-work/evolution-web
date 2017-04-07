@@ -46,6 +46,22 @@ players:
     expect(selectPlayer(User0).continent).size(1);
     expect(selectPlayer(User1).continent).size(0);
   });
+
+  it('When not fed animal starves and poisons', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 12 camo
+phase: 2
+food: 0
+players:
+  - continent: $A pois, $B carn mass, $C carn mass, $D pois
+`);
+    const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$A'));
+    clientStore0.dispatch(traitActivateRequest('$C', 'TraitCarnivorous', '$D'));
+    expect(selectGame().status.turn, 'Turn 1').equal(1);
+    expect(selectPlayer(User0).continent, 'Everybody dead').size(0);
+  });
 });
 
 

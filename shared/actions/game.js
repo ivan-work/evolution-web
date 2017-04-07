@@ -15,6 +15,7 @@ import {
 
 import {server$game} from './generic';
 import {doesPlayerHasOptions} from './ai';
+import {server$tryViviparous} from './actions';
 import {redirectTo} from '../utils';
 import {selectGame, selectPlayers4Sockets} from '../selectors';
 
@@ -347,16 +348,21 @@ const gameStartDeploy = (gameId) => ({
   , data: {gameId}
 });
 
-const server$gameExtict = (gameId) => (dispatch, getState) => {
-  const game = selectGame(getState, gameId);
+const gameStartExtinct = (gameId) => ({
+  type: 'gameStartExtinct'
+  , data: {gameId}
+});
 
-  game.players.forEach((player) =>
+const server$gameExtict = (gameId) => (dispatch, getState) => {
+  dispatch(gameStartExtinct(gameId));
+  selectGame(getState, gameId).players.forEach((player) =>
     player.continent.forEach((animal) => {
-      if (!animal.canSurvive()) {
-        dispatch(server$game(gameId, gameAnimalStarve(gameId, animal.id)));
-      }
       if (animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED)) {
         dispatch(server$game(gameId, traitAnimalPoisoned(gameId, animal.id)));
+      } else if (!animal.canSurvive()) {
+        dispatch(server$game(gameId, gameAnimalStarve(gameId, animal.id)));
+      } else {
+        dispatch(server$tryViviparous(gameId, animal));
       }
     }));
 };
@@ -548,6 +554,7 @@ export const gameServerToClient = {
   , gameCreateNotify: ({roomId, gameId}) => gameCreateNotify(roomId, gameId)
   , gameStart: ({gameId}) => gameStart(gameId)
   , gameStartDeploy: ({gameId}) => gameStartDeploy(gameId)
+  , gameStartExtinct: ({gameId}) => gameStartExtinct(gameId)
   , gameStartEat: ({gameId, food}) => gameStartEat(gameId, food)
   , gamePlayerReadyChange: ({gameId, userId, ready}) => gamePlayerReadyChange(gameId, userId, ready)
   , gameGiveCards: ({gameId, userId, cards}) =>

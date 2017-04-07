@@ -30,6 +30,7 @@ import {
   , traitSetAnimalFlag
   , traitNotify_Start
   , traitTakeShell
+  , traitGiveBirth
 } from '../../server/reducers/games-rdx-server';
 
 export const reducer = createReducer(null, {
@@ -62,4 +63,5 @@ export const reducer = createReducer(null, {
   , traitSetAnimalFlag
   , traitNotify_Start
   , traitTakeShell
+  , traitGiveBirth
 });

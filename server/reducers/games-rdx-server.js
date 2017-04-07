@@ -121,7 +121,6 @@ export const gameStartDeploy = (game) => {
     .update('players', players => players.map(player => player
       .set('ended', !player.playing)
       .update('continent', continent => continent.map(animal => animal
-        .digestFood()
         .set('flags', Map())
       ))
     ))
@@ -133,6 +132,12 @@ export const gameStartDeploy = (game) => {
     .update('cooldowns', cooldowns => cooldowns.eventNextTurn())
     .update(addToGameLog(['PhaseDeploy']));
 };
+
+export const gameStartExtinct = (game) => game
+  .update('players', players => players.map(player => player
+    .update('continent', continent => continent.map(animal => animal.digestFood()))
+  ))
+  .update(addToGameLog(['PhaseExtinct']));
 
 export const gameNextPlayer = (game, {round, nextPlayerId, nextPlayerIndex, roundChanged, turnTime}) => game
   .updateIn(['status', 'round'], round => roundChanged ? round + 1 : round)
@@ -265,7 +270,15 @@ export const traitTakeShell = (game, {continentId, animalId, trait}) => {
     .removeIn(['continents', continentId, 'shells', trait.id])
     .updateIn(['players', animal.ownerId, 'continent', animalIndex], a => a.traitAttach(trait))
     .update(addToGameLog(['traitTakeShell', logAnimal(animal)]));
-}
+};
+
+export const traitGiveBirth = (game, {sourceAid}) => {
+  const {animalIndex, animal} = game.locateAnimal(sourceAid);
+  const newborn = AnimalModel.new(animal.ownerId).set('food', 1);
+  return game
+    .updateIn(['players', animal.ownerId, 'continent'], continent => continent.splice(animalIndex + 1, 0, newborn))
+    .update(addToGameLog(['traitGiveBirth', logAnimal(animal)]));
+};
 
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
@@ -296,4 +309,5 @@ export const reducer = createReducer(Map(), {
   , traitAnimalPoisoned: (state, data) => state.update(data.gameId, game => traitAnimalPoisoned(game, data))
   , traitNotify_Start: (state, data) => state.update(data.gameId, game => traitNotify_Start(game, data))
   , traitTakeShell: (state, data) => state.update(data.gameId, game => traitTakeShell(game, data))
+  , traitGiveBirth: (state, data) => state.update(data.gameId, game => traitGiveBirth(game, data))
 });

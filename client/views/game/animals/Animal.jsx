@@ -44,8 +44,8 @@ class Animal extends React.Component {
 
   renderFoodStatus(animal) {
     return (animal.isFull() ? <Icon name='sentiment_very_satisfied'/>
-      : !animal.canSurvive() ? <Icon name='sentiment_very_dissatisfied'/>
-      : <Icon name='sentiment_neutral'/>);
+      : animal.canSurvive() ? <Icon name='sentiment_neutral'/>
+      : <Icon name='sentiment_very_dissatisfied'/>);
   }
 
   render() {

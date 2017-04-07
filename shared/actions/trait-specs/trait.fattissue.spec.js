@@ -104,27 +104,15 @@ deck: 12 camo
 phase: 2
 food: 12
 players:
-  - continent: $A mass fat fat fat fat ++, $B fat +, $Waiter graz +
+  - continent: $A mass fat=true fat=true fat=true fat=true ++, $B fat=true +, $Waiter graz +
 `);
       const {selectGame, selectCard, selectPlayer, selectAnimal, selectTrait, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
-      clientStore0.dispatch(traitTakeFoodRequest('$B'));
-      clientStore0.dispatch(gameEndTurnRequest());
-      clientStore0.dispatch(traitTakeFoodRequest('$A'));
-      clientStore0.dispatch(gameEndTurnRequest());
-      clientStore0.dispatch(traitTakeFoodRequest('$A'));
-      clientStore0.dispatch(gameEndTurnRequest());
-      clientStore0.dispatch(traitTakeFoodRequest('$A'));
-      clientStore0.dispatch(gameEndTurnRequest());
-      clientStore0.dispatch(traitTakeFoodRequest('$A'));
-
       expect(selectAnimal(User0, 0).getFood()).equal(2);
       expect(selectAnimal(User0, 0).getFat()).equal(4);
       clientStore0.dispatch(gameEndTurnRequest());
       clientStore0.dispatch(gameEndTurnRequest());
-
       expect(selectGame().status.turn, 'Turn 1').equal(1);
-      clientStore0.dispatch(gameEndTurnRequest());
-      expect(selectGame().status.phase, 'Turn 1').equal(PHASE.FEEDING);
+      expect(selectGame().status.phase, 'PHASE.FEEDING').equal(PHASE.FEEDING);
 
       expect(selectAnimal(User0, 0).getFood()).equal(0);
       expect(selectAnimal(User0, 0).getFat()).equal(4);

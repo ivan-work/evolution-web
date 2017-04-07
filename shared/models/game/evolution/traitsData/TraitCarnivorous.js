@@ -26,7 +26,6 @@ import {QuestionRecord} from '../../GameModel';
 import {
   TraitMimicry
   , TraitRunning
-  , TraitPoisonous
   , TraitTailLoss
   , TraitShell
   , TraitInkCloud
@@ -38,6 +37,7 @@ import {
   , TraitSharpVision
   , TraitCamouflage
   , TraitMassive
+  , TraitPoisonous
   , TraitBurrowing
   , TraitSwimming
   , TraitFlight
@@ -122,7 +122,7 @@ export const TraitCarnivorous = {
         dispatch(server$traitDefenceAnswerSuccess(game.id, questionId));
         dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
 
-        const poisonous = targetAnimal.hasTrait(TraitPoisonous.type);
+        const poisonous = targetAnimal.hasTrait(TraitPoisonous);
         if (poisonous) {
           dispatch(server$traitActivate(game, targetAnimal, poisonous, sourceAnimal));
         }
@@ -170,18 +170,6 @@ export const TraitCarnivorous = {
     )
       // TFT
     && !targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL)
-      //&& !(targetAnimal.hasTrait(TraitFlight) && (sourceAnimal.traits.size >= targetAnimal.traits.size))
-    && test(sourceAnimal, targetAnimal)
+    && !(targetAnimal.hasTrait(TraitFlight) && (sourceAnimal.traits.size >= targetAnimal.traits.size))
   )
 };
-const test = (sourceAnimal, targetAnimal) => {
-  console.log(
-    targetAnimal.hasTrait(TraitFlight)
-    , sourceAnimal.traits.size >= targetAnimal.traits.size
-    , sourceAnimal.traits.size
-    , targetAnimal.traits.size
-    , targetAnimal.hasTrait(TraitFlight) && (sourceAnimal.traits.size >= targetAnimal.traits.size)
-    , !(targetAnimal.hasTrait(TraitFlight) && (sourceAnimal.traits.size >= targetAnimal.traits.size))
-  )
-  return !(targetAnimal.hasTrait(TraitFlight) && (sourceAnimal.traits.size >= targetAnimal.traits.size))
-}
