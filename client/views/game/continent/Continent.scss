@@ -1,63 +1,59 @@
 $ANIMAL_WIDTH: 60px;
 $ANIMAL_HEIGHT: 80px;
-$ANIMAL_MARGIN: 20px;
+$ANIMAL_MARGIN: 10px;
+$VERTICAL_MARGIN: 2px;
 
 .Continent {
   position: relative;
-  min-width: 500px;
-  background: #aaf;
+  min-width: 200px;
+  background: #dfd;
+  border: 1px solid #898;
+  display: flex;
+  justify-content: center;
 
-  .drop-targets-container {
-    position: absolute;
-    width: 100%;
-    height: 100%;
+  &.EnemyContinent,
+  &.ContinentFeeding {
+    padding: 0 $ANIMAL_MARGIN;
+    .Animal {
+      margin: $VERTICAL_MARGIN $ANIMAL_MARGIN;
+    }
   }
 
-  .animals-container-outer {
-    width: 100%;
-    text-align: center;
-    .animals-container-inner {
-      display: inline-block;
-      .Animal {
-        display: inline-block;
-        margin: 10px 0 10px 0;
-        z-index: 4;
-        position: relative;
-        vertical-align: top;
-        width: $ANIMAL_WIDTH;
-        height: $ANIMAL_HEIGHT;
-        &.highlight {
-          box-shadow: 0px 0px 1em 1em yellow;
-        }
+  .Animal {
+    margin: $VERTICAL_MARGIN 2px;
+    z-index: 4;
+    position: relative;
+    width: $ANIMAL_WIDTH;
+    height: $ANIMAL_HEIGHT;
+    &.highlight {
+      box-shadow: 0px 0px 1em 1em yellow;
+    }
+  }
+
+  .ContinentZone {
+    padding: $VERTICAL_MARGIN $ANIMAL_MARGIN;
+    z-index: 1;
+    position: relative;
+    //background: #77f;
+
+    &:first-child,
+    &:last-child {
+      flex: 1;
+      .inner {
+        margin: 0 auto;
       }
+    }
 
-      .ContinentZone {
-        display: inline-block;
-        padding: 10px 0 10px 0;
-        z-index: 1;
-        position: relative;
-        width: ($ANIMAL_MARGIN * 2);
-        height: $ANIMAL_HEIGHT;
-        transition: width .1s;
-        background: #77f;
+    .inner {
+      transition: width .1s;
+      width: 0px;
+      height: $ANIMAL_HEIGHT;
+      //outline: 2px dotted red;
+    }
 
-        .inner {
-          position: absolute;
-          left: ($ANIMAL_MARGIN);
-          right: ($ANIMAL_MARGIN);
-          height: 100%;
-        }
-
-        &.highlight {
-          width: ($ANIMAL_WIDTH + $ANIMAL_MARGIN * 2);
-          .inner {
-            left: ($ANIMAL_MARGIN);
-            right: ($ANIMAL_MARGIN);
-            height: $ANIMAL_HEIGHT;
-            outline: 2px dotted green;
-          }
-        }
-      }
+    &.highlight .inner {
+      width: $ANIMAL_WIDTH;
+      outline: 2px dotted green;
     }
   }
 }

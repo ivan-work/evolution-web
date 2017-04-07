@@ -32,20 +32,17 @@ export class Continent extends React.Component {
     const {continent} = this.props;
     const className = classnames({
       Continent: true
+      , [this.getClassName()]: true
       , UserContinent: this.props.isUserContinent
       , EnemyContinent: !this.props.isUserContinent
     });
     return <div className={className}>
-      <div className="animals-container-outer">
-        <div className="animals-container-inner">
           {this.renderPlaceholderWrapper(0)}
           {continent.toArray().map((animal, index) => {
             return [
               this.renderAnimal(animal, index)
               , this.renderPlaceholderWrapper(index + 1)
               ]})}
-        </div>
-      </div>
     </div>;
   }
 }

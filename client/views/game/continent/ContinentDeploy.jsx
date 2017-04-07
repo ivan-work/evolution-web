@@ -11,6 +11,10 @@ import * as MDL from 'react-mdl';
 import {Dialog, DialogActions} from '../../utils/Dialog.jsx';
 
 export class ContinentDeploy extends Continent {
+  getClassName() {
+    return 'ContinentDeploy';
+  }
+
   componentWillMount() {
     this.$deployAnimal = (card, zoneIndex) => this.context.gameActions.$deployAnimal(card.id, zoneIndex);
     this.$deployTrait = (card, animal, alternateTrait, component) => {
