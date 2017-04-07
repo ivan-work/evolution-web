@@ -14,10 +14,10 @@ const testWatch = (paths) => gulp.src(paths)
   }))
   //.on('error', () => console.error('error'));
   .on('error', function (error) {
-    console.error(error)
-    (watching
+    console.error(error);
+    watching
       ? this.emit('end')
-      : process.exit(1));
+      : process.exit(1);
   });
 
 gulp.task('test:server', () => {

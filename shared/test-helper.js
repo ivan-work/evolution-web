@@ -35,19 +35,20 @@ global.window.sessionStorage = require('./test/setup-local-storage-mock').defaul
 
 global.window.matchMedia = window.matchMedia || (() => ({
     matches: false
-    , addListener: () => {
-    }
-    , removeListener: () => {
-    }
+    , addListener: () => null
+    , removeListener: () => null
   }));
 
-////https://github.com/tleunen/react-mdl/issues/193
+// https://github.com/tleunen/react-mdl/issues/193
 require('react-mdl/extra/material');
 global.Element = global.window.Element;
 global.CustomEvent = global.window.CustomEvent;
 global.Event = global.window.Event;
 global.NodeList = global.window.NodeList;
 global.Node = global.window.Node;
+
+// https://stackoverflow.com/questions/26867535/calling-setstate-in-jsdom-based-tests-causing-cannot-render-markup-in-a-worker
+require('fbjs/lib/ExecutionEnvironment').canUseDOM = true;
 
 //Object.keys(window).forEach((key) => {
 //  if (!(key in global)) {

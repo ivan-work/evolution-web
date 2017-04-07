@@ -50,31 +50,52 @@ export class Dialog extends Component {
     }
   }
 
+  renderChild() {
+    // Can't change root element, fails tests
+    //const {show} = this.state;
+    //if (!show) {
+    //  console.log('rendering null')
+    //  return null;
+    //}
+    //if (process.env.TEST) {
+    //  console.log('rendering children')
+    //  return <span>{this.props.children}</span>;
+    //}
+    //console.log('rendering BODY PORTAL')
+    //return <BodyPortal className='DialogContainer'>
+    //  <div className='Backdrop' style={{
+    //    background: this.state.isShowing ? '' : 'none'
+    //    , transition: `${transitionTime}ms all`
+    //  }}>
+    //    <div className='Dialog mdl-dialog' style={{
+    //    marginTop: this.state.isShowing ? '' : '-10%'
+    //    , transform: this.state.isShowing ? '' : 'translate(0,-125%)'
+    //    , transition: `${transitionTime}ms all`
+    //  }}>{this.props.children}</div>
+    //  </div>
+    //</BodyPortal>;
+  }
+
   render() {
     const {show} = this.state;
     if (!show) {
       return null;
+    }
+    if (process.env.TEST) {
+      return <span>{this.props.children}</span>;
     }
     return <BodyPortal className='DialogContainer'>
       <div className='Backdrop' style={{
         background: this.state.isShowing ? '' : 'none'
         , transition: `${transitionTime}ms all`
       }}>
-        <div className='Dialog mdl-dialog' ref={() => this.rendered()} style={{
+        <div className='Dialog mdl-dialog' style={{
         marginTop: this.state.isShowing ? '' : '-10%'
         , transform: this.state.isShowing ? '' : 'translate(0,-125%)'
         , transition: `${transitionTime}ms all`
       }}>{this.props.children}</div>
       </div>
     </BodyPortal>;
-  }
-
-  rendered() {
-    //if (this.props.show && !this.state.isShowing) {
-    //  this.setState({
-    //    isShowing: true
-    //  });
-    //}
   }
 }
 
