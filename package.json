@@ -1,6 +1,6 @@
 {
   "name": "cards3",
-  "version": "0.0.53",
+  "version": "0.0.54",
   "description": "blahblah",
   "browser": {
     "jsonwebtoken": false,
@@ -43,9 +43,8 @@
     "eventsource-polyfill": "*",
     "express": "*",
     "history": "*",
-    "i18n-react": "^0.3.0-ts1",
+    "i18n-react": "^0.3.*",
     "immutable": "*",
-    "isomorphic-fetch": "*",
     "jsonwebtoken": "*",
     "materialize-css": "*",
     "mongodb": "*",
@@ -60,8 +59,8 @@
     "react-helmet": "*",
     "react-immutable-proptypes": "*",
     "react-mdl": "*",
-    "react-mdl-select": "^1.1.2",
-    "react-measure": "^1.4.2",
+    "react-mdl-select": "*",
+    "react-measure": "*",
     "react-redux": "*",
     "react-router": "*",
     "react-router-redux": "*",
@@ -76,7 +75,7 @@
     "sanitize-html": "*",
     "socket.io": "*",
     "socket.io-client": "*",
-    "validatorjs": "^3.9.0",
+    "validatorjs": "*",
     "velocity-animate": "*",
     "winston": "*",
     "yaml-js": "*"
@@ -114,12 +113,8 @@
     "jsdom": "*",
     "json-loader": "*",
     "mocha": "*",
-    "node-sass": "*",
     "nodemon": "*",
-    "postcss-cssnext": "*",
-    "postcss-focus": "*",
-    "postcss-loader": "*",
-    "postcss-reporter": "*",
+    "node-sass-json-importer": "*",
     "react-addons-test-utils": "*",
     "react-dnd-test-backend": "*",
     "react-transform-hmr": "*",
@@ -128,13 +123,11 @@
     "redux-devtools-dock-monitor": "*",
     "redux-devtools-log-monitor": "*",
     "sass-loader": "*",
-    "sass-variables-loader": "^0.1.3",
     "sinon": "*",
     "source-map-support": "*",
     "style-loader": "*",
     "webpack": "*",
     "webpack-dev-middleware": "*",
-    "webpack-hot-middleware": "*",
-    "yaml-loader": "^0.4.0"
+    "webpack-hot-middleware": "*"
   }
 }
