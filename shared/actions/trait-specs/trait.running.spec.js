@@ -52,9 +52,11 @@ players:
     });
 
     replaceGetRandom(() => 0, () => {
-      expectUnchanged('CHANGEIT', () => clientStore0.dispatch(traitActivateRequest(selectAnimal(User0, 1).id, 'TraitCarnivorous', selectAnimal(User1, 0).id)), serverStore, clientStore0);
+      expectUnchanged('Hunter has cooldown', () =>
+        clientStore0.dispatch(traitActivateRequest(selectAnimal(User0, 1).id, 'TraitCarnivorous', selectAnimal(User1, 0).id))
+        , serverStore, clientStore0);
       clientStore0.dispatch(traitActivateRequest(selectAnimal(User0, 0).id, 'TraitCarnivorous', selectAnimal(User1, 0).id));
-      expect(selectAnimal(User0, 0).getFood()).equal(2);
+      expect(selectAnimal(User0, 0).getFood(), 'User0, 0 gets food').equal(2);
       expect(selectAnimal(User1, 0)).undefined;
     });
   });

@@ -1,3 +1,4 @@
+import logger from '~/shared/utils/logger';
 import io from 'socket.io-client';
 import {serverToClient, loginUserRequest, clientDisconnectSelf} from '../../shared/actions/actions'
 
@@ -39,10 +40,10 @@ export const socketStore = (socket, store) => {
       //action.user = user;
       store.dispatch(serverToClient[action.type](action.data, currentUserId));
     } else {
-      console.error('serverToClient action doesnt exist: ' + action.type);
+      logger.error('serverToClient action doesnt exist: ' + action.type);
     }
   });
   socket.on('error', (error) => {
-    console.error('Client:Error', error);
+    logger.error('Client:Error', error);
   });
 };

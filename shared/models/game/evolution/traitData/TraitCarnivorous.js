@@ -1,6 +1,10 @@
 import logger from '~/shared/utils/logger';
 import {fromJS} from 'immutable';
-import {TRAIT_TARGET_TYPE, TRAIT_COOLDOWN_DURATION, TRAIT_COOLDOWN_PLACE, TRAIT_COOLDOWN_LINK
+import {TRAIT_TARGET_TYPE
+  , TRAIT_COOLDOWN_DURATION
+  , TRAIT_COOLDOWN_PLACE
+  , TRAIT_COOLDOWN_LINK
+  , FOOD_SOURCE_TYPE
   , TRAIT_RESPONSE_TIMEOUT} from '../constants';
 import {
   server$traitKillAnimal
@@ -38,8 +42,7 @@ export const TraitCarnivorous = {
 
     success = !targetAnimal.traits.some((trait) => {
       if (trait.type === TraitRunning.type) {
-        if (TraitRunning.action()) {
-          dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, sourceAnimal));
+        if (dispatch(TraitRunning.action(game, targetAnimal, sourceAnimal))) {
           return true;
         }
       } else if (trait.type === TraitMimicry.type && TraitDataModel.checkAction(game, TraitMimicry, targetAnimal)) {
@@ -63,6 +66,7 @@ export const TraitCarnivorous = {
         }
       }
     });
+    if (!success) return true;
 
     if (success) {
       const attackParameter = {
@@ -113,6 +117,8 @@ export const TraitCarnivorous = {
       dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
 
       // Scavenge
+      dispatch(server$startFeeding(game.id, sourceAnimal, 2, FOOD_SOURCE_TYPE.ANIMAL_HUNT, targetAnimal.id));
+
       const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
       GameModel.sortPlayersFromIndex(game, currentPlayerIndex).some(player => player.continent.some(animal => {
         const traitScavenger = animal.hasTrait(TraitScavenger.type);
@@ -121,10 +127,8 @@ export const TraitCarnivorous = {
           return true;
         }
       }));
-
-      dispatch(server$startFeeding(game.id, sourceAnimal, 2));
     }
-    return true;
+    return success;
   }
   , $checkAction: (game, sourceAnimal) => {
     return sourceAnimal.canEat(game)
