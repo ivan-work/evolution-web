@@ -38,11 +38,8 @@ export const doesPlayerHasOptions = (game, playerId) => {
     if (process.env.LOG_LEVEL === 'silly') {
       const options = getOptions(game, playerId);
       if (options.length === 0) throw new Error('Options length = 0');
-      console.log(options)
+      console.log(options);
     }
-    //const options = getOptions(selectGame(getState, gameId), playerId);
-    //if (options.length === 0) throw new Error('Options length = 0');
-    //console.log(options)
   }
   return true;
 };
@@ -54,6 +51,8 @@ export const doesOptionExist = (game, playerId) => {
 
     return animal.traits.some((trait) => {
       const traitData = trait.getDataModel();
+
+      if (traitData.transient) return false;
 
       if (!(traitData.playerControllable && trait.checkAction(game, animal))) return false;
 
@@ -80,6 +79,8 @@ export const getOptions = (game, playerId) => {
 
     animal.traits.forEach((trait) => {
       const traitData = trait.getDataModel();
+
+      if (traitData.transient) return;
 
       if (!(traitData.playerControllable && trait.checkAction(game, animal))) return;
 
