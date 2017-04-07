@@ -17,3 +17,15 @@ export const TraitCooperation = 'TraitCooperation';
 export const TraitBurrowing = 'TraitBurrowing';
 export const TraitCamouflage = 'TraitCamouflage';
 export const TraitSharpVision = 'TraitSharpVision';
+
+export const TraitShell = 'TraitShell';
+export const TraitIntellect = 'TraitIntellect';
+export const TraitAnglerfish = 'TraitAnglerfish';
+export const TraitTrematode = 'TraitTrematode';
+export const TraitMetamorphose = 'TraitMetamorphose';
+export const TraitInkCloud = 'TraitInkCloud';
+export const TraitViviparous = 'TraitViviparous';
+export const TraitAmbush = 'TraitAmbush';
+export const TraitFlight = 'TraitFlight';
+export const TraitSpecA = 'TraitSpecA';
+export const TraitSpecB = 'TraitSpecB';

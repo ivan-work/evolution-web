@@ -40,4 +40,5 @@ export const TRAIT_COOLDOWN_LINK = {
 export const TRAIT_ANIMAL_FLAG = {
   HIBERNATED: 'HIBERNATED'
   , POISONED: 'POISONED'
+  , SHELL: 'SHELL'
 };
