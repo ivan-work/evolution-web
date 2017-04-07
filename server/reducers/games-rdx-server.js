@@ -72,9 +72,9 @@ export const gameDeployTrait = (game, {cardId, traits}) => {
   return game
     .removeIn(['players', cardOwnerId, 'hand', cardIndex])
     .update(game => traits.reduce((game, trait) => {
-      const {playerId, animalIndex, animal} = game.locateAnimal(trait.hostAnimalId);
+      const {animalIndex, animal} = game.locateAnimal(trait.hostAnimalId);
       animals.push(logAnimal(animal));
-      return game.updateIn(['players', playerId, 'continent', animalIndex], a => a.traitAttach(trait))
+      return game.updateIn(['players', animal.ownerId, 'continent', animalIndex], a => a.traitAttach(trait))
     }, game))
     .update(addToGameLog(['gameDeployTrait', cardOwnerId, traits[0].type].concat(animals)));
 };
@@ -153,16 +153,16 @@ export const gameAddTurnTimeout = (game, {turnStartTime, turnDuration}) => game
 export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) => {
   ensureParameter(animalId, 'string');
   ensureParameter(amount, 'number');
-  const {animal, playerId, animalIndex} = game.locateAnimal(animalId);
-  const {animal: another, playerId: takenFromPid, animalIndex: takenFromAix} = game.locateAnimal(sourceId);
+  const {animal, animalIndex} = game.locateAnimal(animalId);
+  const {animal: another, animalIndex: takenFromAix} = game.locateAnimal(sourceId);
 
   const updatedGame = game
-    .updateIn(['players', playerId, 'continent', animalIndex], animal => animal.receiveFood(amount))
+    .updateIn(['players', animal.ownerId, 'continent', animalIndex], animal => animal.receiveFood(amount))
     .update(addToGameLog(['traitMoveFood', amount, sourceType, logAnimal(animal), logAnimal(another)]));
 
 
   return sourceType === 'GAME' ? updatedGame.update('food', food => food - amount)
-    : sourceType === 'TraitPiracy' ? updatedGame.updateIn(['players', takenFromPid, 'continent', takenFromAix, 'food'], food => Math.max(food - amount, 0))
+    : sourceType === 'TraitPiracy' ? updatedGame.updateIn(['players', another.ownerId, 'continent', takenFromAix, 'food'], food => Math.max(food - amount, 0))
     : updatedGame;
 };
 
@@ -187,23 +187,23 @@ const animalDies = (playerId, animalIndex, animal) => (game) => {
 };
 
 export const traitKillAnimal = (game, {targetAnimalId}) => {
-  const {playerId, animalIndex, animal} = game.locateAnimal(targetAnimalId);
+  const {animalIndex, animal} = game.locateAnimal(targetAnimalId);
   return game
-    .update(animalDies(playerId, animalIndex, animal))
+    .update(animalDies(animal.ownerId, animalIndex, animal))
     .update(addToGameLog(['traitKillAnimal', logAnimal(animal)]))
 };
 
 export const gameAnimalStarve = (game, {animalId}) => {
-  const {playerId, animalIndex, animal} = game.locateAnimal(animalId);
+  const {animalIndex, animal} = game.locateAnimal(animalId);
   return game
-    .update(animalDies(playerId, animalIndex, animal))
+    .update(animalDies(animal.ownerId, animalIndex, animal))
     .update(addToGameLog(['gameAnimalStarve', logAnimal(animal)]))
 };
 
 export const traitAnimalPoisoned = (game, {animalId}) => {
-  const {playerId, animalIndex, animal} = game.locateAnimal(animalId);
+  const {animalIndex, animal} = game.locateAnimal(animalId);
   return game
-    .update(animalDies(playerId, animalIndex, animal))
+    .update(animalDies(animal.ownerId, animalIndex, animal))
     .update(addToGameLog(['traitAnimalPoisoned', logAnimal(animal)]))
 };
 
@@ -228,8 +228,8 @@ export const traitGrazeFood = (game, {food}) => game
   .set('food', Math.max(game.food - 1, 0));
 
 export const traitConvertFat = (game, {sourceAid, traitId}) => {
-  const {playerId, animalIndex} = game.locateAnimal(sourceAid);
-  return game.updateIn(['players', playerId, 'continent', animalIndex], animal => {
+  const {animal, animalIndex} = game.locateAnimal(sourceAid);
+  return game.updateIn(['players', animal.ownerId, 'continent', animalIndex], animal => {
     const traitIndex = animal.traits.findIndex(t => t.id === traitId);
     const availableFat = animal.traits.take(traitIndex + 1).filter(trait => trait.type === TraitFatTissue && trait.value).size;
     let fatCounter = availableFat;
@@ -242,9 +242,16 @@ export const traitConvertFat = (game, {sourceAid, traitId}) => {
 };
 
 export const traitSetAnimalFlag = (game, {sourceAid, flag, on}) => {
-  const {playerId, animalIndex} = game.locateAnimal(sourceAid);
+  const {animal, animalIndex} = game.locateAnimal(sourceAid);
   return game
-    .setIn(['players', playerId, 'continent', animalIndex, 'flags', flag], on);
+    .setIn(['players', animal.ownerId, 'continent', animalIndex, 'flags', flag], on);
+};
+
+
+export const traitSetValue = (game, {sourceAid, traitId, value}) => {
+  const {animal, animalIndex, traitIndex} = game.locateTrait(traitId, sourceAid);
+  return game
+    .setIn(['players', animal.ownerId, 'continent', animalIndex, 'traits', traitIndex, 'value'], value);
 };
 
 const traitNotify_Start_getTarget = {
@@ -314,6 +321,7 @@ export const reducer = createReducer(Map(), {
   , traitConvertFat: (state, data) => state.update(data.gameId, game => traitConvertFat(game, data))
   , traitGrazeFood: (state, data) => state.update(data.gameId, game => traitGrazeFood(game, data))
   , traitSetAnimalFlag: (state, data) => state.update(data.gameId, game => traitSetAnimalFlag(game, data))
+  , traitSetValue: (state, data) => state.update(data.gameId, game => traitSetValue(game, data))
   , gameAnimalStarve: (state, data) => state.update(data.gameId, game => gameAnimalStarve(game, data))
   , traitAnimalPoisoned: (state, data) => state.update(data.gameId, game => traitAnimalPoisoned(game, data))
   , traitNotify_Start: (state, data) => state.update(data.gameId, game => traitNotify_Start(game, data))

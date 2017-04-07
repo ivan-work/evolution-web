@@ -210,6 +210,16 @@ export class GameModel extends Record(GameModelData) {
     return this.getPlayer(pid).continent.get(index);
   }
 
+  someAnimalOnContinent(continent, cb) {
+    return this.players.some(player => player.continent.some(cb));
+  }
+
+  mapAnimalsOnContinent(continent, cb) {
+    return this
+      .update('players', players => players.map(player => player
+        .update('continent', continent => continent.map(cb))))
+  }
+
   locateAnimal(animalId) {
     // const start = clock();
     let playerId = null, animalIndex = -1;
@@ -223,13 +233,14 @@ export class GameModel extends Record(GameModelData) {
     const animal = playerId !== null ? this.getPlayer(playerId).getAnimal(animalIndex) : null;
     // locateAnimalTime += clock(start);
     // console.log(locateAnimalTime);
-    return {playerId, animalIndex, animal};
+    return {animalIndex, animal};
   }
 
-  locateTrait(traitId) {
+  locateTrait(traitId, animalId) {
     let playerId = null, animalIndex = -1, traitIndex = -1;
     traitId && this.players.some(player => {
       animalIndex = player.continent.findIndex(animal => {
+        if (!!animalId && (animalId !== animal.id)) return false; // faster searches if animal id provided
         traitIndex = animal.traits.findIndex(trait => trait.id === traitId);
         return ~traitIndex;
       });
@@ -239,7 +250,7 @@ export class GameModel extends Record(GameModelData) {
       }
     });
     const animal = playerId !== null ? this.getPlayer(playerId).getAnimal(animalIndex) : null;
-    return {animal, animalIndex, traitIndex, playerId};
+    return {animal, animalIndex, traitIndex};
   }
 
   locateCard(cardId) {

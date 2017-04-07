@@ -17,7 +17,7 @@ import {server$gameEndTurn, server$addTurnTimeout, makeTurnTimeoutId} from './ac
 import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
 
 import {PHASE, QuestionRecord} from '../models/game/GameModel';
-import {TraitCommunication, TraitCooperation, TraitViviparous, TraitCarnivorous} from '../models/game/evolution/traitTypes';
+import {TraitCommunication, TraitCooperation, TraitViviparous, TraitCarnivorous, TraitAmbush} from '../models/game/evolution/traitTypes';
 
 import {
   checkGameDefined
@@ -50,7 +50,9 @@ export const traitActivateRequest = (sourceAid, traitId, targetId) => (dispatch,
 });
 
 export const server$traitActivate = (game, sourceAnimal, trait, ...params) => (dispatch, getState) => {
-  dispatch(server$traitNotify_Start(game, sourceAnimal, trait, ...params));
+  if (!trait.getDataModel().transient) {
+    dispatch(server$traitNotify_Start(game, sourceAnimal, trait, ...params));
+  }
   logger.verbose('server$traitActivate:', sourceAnimal.id, trait.type);
   const traitData = trait.getDataModel();
   const result = dispatch(traitData.action(game, sourceAnimal, trait, ...params));
@@ -125,6 +127,14 @@ const traitSetAnimalFlag = (gameId, sourceAid, flag, on) => ({
 
 export const server$traitSetAnimalFlag = (game, sourceAnimal, flag, on = true) =>
   server$game(game.id, traitSetAnimalFlag(game.id, sourceAnimal.id, flag, on));
+
+const traitSetValue = (gameId, sourceAid, traitId, value) => ({
+  type: 'traitSetValue'
+  , data: {gameId, sourceAid, traitId, value}
+});
+
+export const server$traitSetValue = (game, sourceAnimal, trait, value) =>
+  server$game(game.id, traitSetValue(game.id, sourceAnimal.id, trait.id, value));
 
 const traitKillAnimal = (gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId) => ({
   type: 'traitKillAnimal'
@@ -349,8 +359,19 @@ export const traitClientToServer = {
     dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
     dispatch(server$game(gameId, startCooldown(gameId, TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
 
-    dispatch(server$startFeeding(gameId, animal, 1, 'GAME'));
-    dispatch(server$playerActed(gameId, userId));
+    const ambushed = game.someAnimalOnContinent('standard', (attackAnimal) => {
+      const ambush = attackAnimal.hasTrait(TraitAmbush);
+      const carnivorous = attackAnimal.hasTrait(TraitCarnivorous);
+      if (!ambush || !carnivorous) return;
+      const carnivorousData = carnivorous.getDataModel();
+      if (!carnivorous.checkAction(game, attackAnimal) || !carnivorousData.checkTarget(game, attackAnimal, animal)) return;
+      dispatch(server$traitActivate(game, attackAnimal, carnivorous, animal));
+      return true;
+    });
+    if (!ambushed) {
+      dispatch(server$startFeeding(gameId, animal, 1, 'GAME'));
+      dispatch(server$playerActed(gameId, userId));
+    }
   }
   , traitTakeShellRequest: ({gameId, animalId, traitId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
@@ -379,8 +400,9 @@ export const traitClientToServer = {
     checkGameDefined(game);
     checkGameHasUser(game, userId);
     checkGamePhase(game, PHASE.FEEDING);
-    checkPlayerCanAct(game, userId);
     const {sourceAnimal, trait, target} = checkTraitActivation(game, userId, sourceAid, traitId, targetId);
+    if (!trait.getDataModel().transient) checkPlayerCanAct(game, userId);
+
     const result = dispatch(server$traitActivate(game, sourceAnimal, trait, target));
     if (result === void 0) {
       throw new Error(`traitActivateRequest@Game(${gameId}): Animal(${sourceAid})-${trait.type}-Animal(${targetId}) result undefined`);
@@ -434,4 +456,6 @@ export const traitServerToClient = {
     traitTakeShell(gameId, continentId, animalId, TraitModel.fromServer(trait))
   , traitGiveBirth: ({gameId, sourceAid}) =>
     traitGiveBirth(gameId, sourceAid)
+  , traitSetValue: ({gameId, sourceAid, traitId, value}) =>
+    traitSetValue(gameId, sourceAid, traitId, value)
 };

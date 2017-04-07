@@ -52,8 +52,8 @@ export const checkPlayerHasCard = (game, userId, cardId) => {
 };
 
 export const checkPlayerHasAnimal = (game, userId, animalId) => {
-  const {playerId, animal} = game.locateAnimal(animalId);
-  if (playerId !== userId) {
+  const {animal} = game.locateAnimal(animalId);
+  if (animal.ownerId !== userId) {
     throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Animal#%s not found in Player#%s', animalId, userId);
   }
   return animal;
