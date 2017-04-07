@@ -524,7 +524,7 @@ export const gameServerToClient = {
     dispatch(gameInit(GameModelClient.fromServer(game, userId)));
     dispatch(redirectTo('/game'));
   }
-  
+
   , gameCreateSuccess: (({game}, currentUserId) => (dispatch) => {
     dispatch(gameCreateSuccess(GameModelClient.fromServer(game, currentUserId)));
     dispatch(redirectTo('/game'));

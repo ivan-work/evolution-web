@@ -27,7 +27,7 @@ import {
   , checkUserNotBanned
 } from './rooms.checks';
 
-const findRoomByUser = (getState, userId) => getState().get('rooms').find(room => !!~room.users.indexOf(userId) || !!~room.spectators.indexOf(userId));
+export const findRoomByUser = (getState, userId) => getState().get('rooms').find(room => !!~room.users.indexOf(userId) || !!~room.spectators.indexOf(userId));
 
 /**
  * Init
