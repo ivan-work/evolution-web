@@ -16,6 +16,7 @@ import {
   , server$traitGrazeFood
   , server$traitSetAnimalFlag
   , server$traitNotify_End
+  , server$traitConvertFat
 } from '../../../../actions/actions';
 
 import {getRandom} from '../../../../utils/randomGenerator';
@@ -26,7 +27,7 @@ import {checkAction} from '../TraitDataModel';
 import {TraitCarnivorous, endHunt} from './TraitCarnivorous';
 
 export {TraitCarnivorous};
-export * from './tft';
+export * from './ttf';
 
 export const TraitParasite = {
   type: 'TraitParasite'
@@ -37,6 +38,19 @@ export const TraitParasite = {
 export const TraitFatTissue = {
   type: 'TraitFatTissue'
   , multiple: true
+  , cooldowns: fromJS([
+    ['TraitFatTissue', TRAIT_COOLDOWN_PLACE.OTHER_ANIMALS, TRAIT_COOLDOWN_DURATION.ROUND]
+  ])
+  , addCooldowns: fromJS([
+    [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
+  ])
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  //, playerControllable: true
+  , action: (game, sourceAnimal, traitFatTissue) => (dispatch) => {
+    dispatch(server$traitConvertFat(game.id, sourceAnimal, traitFatTissue));
+    return true;
+  }
+  , $checkAction: (game, sourceAnimal) => !sourceAnimal.isFull()
 };
 
 //
@@ -64,7 +78,7 @@ export const TraitMimicry = {
     return game.getPlayer(mimicryAnimal.ownerId).continent.filter((animal) =>
       mimicryAnimal.id !== animal.id
       && attackAnimal.id !== animal.id
-      //&& !animal.hasTrait('TraitMimicry')
+        //&& !animal.hasTrait('TraitMimicry')
       && (!animal.hasTrait('TraitMimicry') || animal.hasTrait('TraitMimicry') && checkAction(game, TraitMimicry, animal))
       && attackTraitData.checkTarget(game, attackAnimal, animal)
     );
@@ -97,7 +111,7 @@ export const TraitPiracy = {
   }
   , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game)
   , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.food > 0
-    && !targetAnimal.isFull()
+  && !targetAnimal.isFull()
 };
 
 export const TraitTailLoss = {

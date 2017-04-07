@@ -10,7 +10,7 @@ import {PHASE} from '../../models/game/GameModel';
 import {makeGameSelectors} from '../../selectors';
 
 describe('TraitBurrowing:', () => {
-  it('Carnivore cant attack burrowing with fat', () => {
+  it('Carnivore can attack burrowing with fat', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 5 camo
@@ -28,7 +28,8 @@ players:
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
 
     expect(selectAnimal(User0, 0).getFood(), '$A food').equal(0);
-    expect(selectAnimal(User0, 1).getFood(), '$B food').equal(1);
+    expect(selectAnimal(User0, 1).getFood(), '$B food').equal(0);
+    expect(selectAnimal(User0, 1).getFat(), '$B fat').equal(1);
 
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
 
