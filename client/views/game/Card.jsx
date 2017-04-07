@@ -4,12 +4,15 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import { CardModel } from '~/shared/models/game/CardModel';
 import { DragSource } from 'react-dnd';
 
+export const CARD_SIZE = {
+  width: 60
+  , height: 80
+};
 
 export class Card extends React.Component {
   static propTypes = {
     model: React.PropTypes.instanceOf(CardModel).isRequired
     , index: React.PropTypes.number.isRequired
-    , draggable: React.PropTypes.bool
   };
 
   constructor(props) {
@@ -19,7 +22,7 @@ export class Card extends React.Component {
 
   render() {
     const model = this.props.model || {name: 'cardback'};
-    return <div className='Card'>
+    return <div className='Card' style={CARD_SIZE}>
       <div className='inner'>
         {this.props.index}
         <br/>{model.name}
@@ -32,6 +35,7 @@ export const DragCard = DragSource("Card"
   , {
     beginDrag: (props) => ({
       model: props.model
+      , position: props.position
     })
   }
   , (connect, monitor) => ({

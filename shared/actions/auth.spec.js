@@ -131,7 +131,7 @@ describe('Auth:', function () {
       serverStore.clearActions();
       clientStore1.clearActions();
 
-      clientStore0.getClient().disconnect();
+      clientStore0.disconnect();
 
       setTimeout(() => {
         expect(serverStore.getState().get('connections')).equal(Map({[clientStore1.getConnectionId()]: clientStore1.getConnection().socket}));
@@ -225,6 +225,19 @@ describe('Auth:', function () {
         }));
         done();
       }, 5);
+    });
+
+    it('Bug with stealing identity', () => {
+      const serverStore = mockServerStore();
+      const clientStore0 = mockClientStore().connect(serverStore);
+      const clientStore1 = mockClientStore().connect(serverStore);
+      clientStore0.dispatch(loginUserRequest('/test', 'User0', 'testPassword'));
+      const User0 = UserSpy.lastCall.returnValue;
+      clientStore1.dispatch(loginUserRequest('/test', 'User1', 'testPassword'));
+      const User1 = UserSpy.lastCall.returnValue;
+      clientStore1.disconnect();
+      clientStore1.connect(serverStore);
+      expect(clientStore1.getState().get('user').id).equal(User1.id);
     });
   });
 });

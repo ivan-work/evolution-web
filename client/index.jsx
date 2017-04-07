@@ -31,11 +31,10 @@ const reducer = combineReducers({
 
 const socketClient = makeSocketClient(location.host);
 
-const store = configureStore({
-  reducer
-  , router: appRouterMiddleware(browserHistory)
-  , socket: socketMiddleware(socketClient)
-});
+const store = configureStore(reducer, void 0, [
+  appRouterMiddleware(browserHistory)
+  , socketMiddleware(socketClient)
+], [DevTools.instrument()]);
 
 const history = syncHistoryWithStore(store, browserHistory);
 

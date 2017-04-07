@@ -41,7 +41,7 @@ export class CardCollection extends React.Component {
   //}
 
   render() {
-    return <div className="CardCollection">
+    return <div className={`CardCollection ${this.props.name}`}>
       {React.Children.map(this.props.children, (card, index) => {
         return <div className="CardPlace" key={index} style={{
           transform: `translate(${this.props.shift[0] * index}px,${this.props.shift[1] * index}px)`

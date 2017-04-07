@@ -2,27 +2,27 @@ import {Record, Range} from 'immutable';
 import uuid from 'node-uuid';
 
 export class CardModel extends Record({
-  id: 'UNKNOWN'
+  id: null
   , name: 'UNKNOWN CARD'
   , description: 'UNKNOWN CARD'
   , imageFront: ''
   , imageBack: ''
 }) {
-  static generate(count) {
-    return Range(0, count).map(i => CardModel.new(i)).toList();
-  }
-  static fromJS(js) {
-    //checkNotNull(js)
-    return new CardModel(js);
-  }
   static new(index) {
     return new CardModel({
-      id: index
+      id: uuid.v4().slice(0, 2)
       , name: 'Card#' + index
     });
   }
+  static generate(count) {
+    return Range(0, count).map(i => CardModel.new(i)).toList();
+  }
+  static fromServer(js) {
+    //checkNotNull(js)
+    return new CardModel(js);
+  }
   toString() {
-    return this.name;
+    return this.name + this.id
   }
 }
 

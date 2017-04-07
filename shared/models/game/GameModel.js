@@ -15,11 +15,12 @@ export class GameModel extends Record({
   , deck: null
   , players: Map()
   , board: Map()
+  , started: false
 }) {
   toClient(userId) {
     return this
       .set('deck', this.deck.size)
-      .set('players', this.players.map(player => player.id === userId ? player : player.toClient()))
+      .set('players', this.players.map(player => player.id === userId ? player : player.toOthers()))
   }
 
   static fromServer(js) {
@@ -50,17 +51,21 @@ export class GameModel extends Record({
 
 export class GameModelClient extends Record({
   id: null
+  , userId: null
   , roomId: null
   , deck: -1
+  , started: false
   , players: null
-  , board: null
-  , hand: List()
 }) {
   static fromServer(js, userId) {
     const game = GameModel.fromServer(js);
     return game == null
       ? null
       : new GameModelClient(game)
-        .set('hand', game.players.getIn([userId, 'hand'], List()));
+      .set('userId', userId);
+  }
+
+  getPlayer() {
+    return this.players.get(this.userId);
   }
 }

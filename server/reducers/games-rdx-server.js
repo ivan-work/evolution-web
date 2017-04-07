@@ -3,6 +3,7 @@ import {Map, List} from 'immutable';
 
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
+  , gameStart: (state, {gameId}) => state.setIn([gameId, 'started'], true)
   , roomExitSuccess: (state, {roomId, userId}) => {
     let game = state.find(game => game.roomId === roomId);
     if (!game) return state;

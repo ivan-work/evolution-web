@@ -34,9 +34,10 @@ export const socketStore = (socket, store) => {
   socket.on('action', (action) => {
     //console.log('Client:Receive', action.type);
     if (serverToClient[action.type]) {
-      const user = store.getState().get('user');
+      const currentUserId = store.getState().getIn(['user', 'id']);
       //console.log('user', user);
-      store.dispatch(serverToClient[action.type](action.data, user));
+      //action.user = user;
+      store.dispatch(serverToClient[action.type](action.data, currentUserId));
     } else {
       console.error('serverToClient action doesnt exist: ' + action.type);
     }
