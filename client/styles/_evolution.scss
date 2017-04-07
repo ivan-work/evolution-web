@@ -183,14 +183,28 @@ $CURRENT_TURN_BACKGROUND: #dfd;
 .Card {
   position: absolute;
   border: 1px solid #555;
-  background: gray;
-  word-wrap: break-word;
+  background: #ddd;
+  border-radius: .2em;
   &.Preview {
   }
   &.canDrag {
-    background: #797;
+    background: #dfd;
   }
   &.isDragging {
     opacity: 0;
+  }
+  .trait {
+    text-align: center;
+    font-size: 0.9em;
+    line-height: 1em;
+    padding: .3em;
+    font-family: 'Roboto';
+    word-wrap: break-word;
+  }
+  .trait1 {
+    margin-bottom: 1em;
+  }
+  .trait2 {
+    transform: rotate(.5turn);
   }
 }

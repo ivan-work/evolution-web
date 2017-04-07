@@ -10,6 +10,7 @@ export class CardModel extends Record({
   id: null
   , type: null
   , name: null
+  , name2: null
   , image: null
   , target: CARD_TARGET_TYPE.DROP_AS_ANIMAL
   , trait1type: null
