@@ -107,7 +107,7 @@ export const gameServerToClient = {
     dispatch(push('/game'));
   }
   ,
-  gamePlayerStatusChange: gamePlayerStatusChange
+  gamePlayerStatusChange: ({gameId, userId, status}) => gamePlayerStatusChange(gameId, userId, status)
   ,
   gameGiveCards: ({gameId, userId, cards}) => gameGiveCards(gameId, userId, List(cards).map(card => CardModel.fromJS(card)))
   ,

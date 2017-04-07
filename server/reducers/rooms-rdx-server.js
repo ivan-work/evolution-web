@@ -11,7 +11,7 @@ export const roomExitSuccess = (state, {roomId, userId}) => {
   const newRoom = room.leave(userId);
   return !newRoom
     ? state.remove(roomId)
-    : state.set(roomId, newRoom)
+    : state.set(roomId, newRoom);
 };
 
 export const gameCreateSuccess = (state, {game}) => state.update(game.roomId, room => room.set('gameId', game.id));

@@ -45,7 +45,8 @@ export class CardCollection extends React.Component {
     } else if (typeof nextProps.count === 'number') {
       this.state = CardModel.generate(nextProps.count)
     } else {
-      throw new Error(`CardCollection[${this.props.name}] doesnt have .cards or .count`)
+      console.error(`CardCollection[${this.props.name}] doesnt have .cards or .count`, this.props);
+      throw new Error(`CardCollection[${this.props.name}] doesnt have .cards or .count: ${JSON.stringify(this.props)}`)
     }
   }
 

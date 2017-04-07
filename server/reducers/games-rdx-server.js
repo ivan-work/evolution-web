@@ -1,11 +1,16 @@
 import {createReducer, ensureParameter} from '~/shared/utils';
 import {Map, List} from 'immutable';
-import {STATE_READY} from '~/shared/models/game/PlayerModel';
 
 export const reducer = createReducer(Map(), {
-  gameCreateSuccess: (state, {game}) => {
-    console.log('gameCreateSuccess')
-    return state.set(game.id, game)}
+  gameCreateSuccess: (state, {game}) => state.set(game.id, game)
+  , roomExitSuccess: (state, {roomId, userId}) => {
+    let game = state.find(game => game.roomId === roomId);
+    if (!game) return state;
+    const updGame = game.leave(userId);
+    return !updGame
+      ? state.remove(game.id)
+      : state.set(game.id, updGame);
+  }
   , gamePlayerStatusChange: (state, {gameId, userId, status}) => state.setIn([gameId, 'players', userId, 'status'], status)
   , gameGiveCards: (state, {gameId, userId, cards}) => {
     ensureParameter(gameId, 'string');

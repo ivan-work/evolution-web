@@ -5,6 +5,7 @@ import {RoomModel} from '../models/RoomModel';
 import {GameModel} from '../models/game/GameModel';
 import {CardModel} from '../models/game/CardModel';
 import {PlayerModel} from '../models/game/PlayerModel';
+import {selectGame} from '../selectors';
 
 import {SOCKET_DISCONNECT_NOW, roomCreateRequest, roomJoinRequest, gameCreateRequest, gameReadyRequest} from '../actions/actions';
 
@@ -42,14 +43,19 @@ describe('Game:', function () {
     expect(ServerGame().players.get(User0.id).hand.size).equal(6);
     expect(ServerGame().players.get(User1.id).hand.size).equal(6);
 
+    //console.log(ServerGame().toJS())
+
     expect(ClientGame0()).ok;
     expect(ClientGame0().id).equal(ServerGame().id);
     expect(ClientGame0().roomId).equal(roomId);
     expect(ClientGame0().deck, 'ClientGame0().deck').equal(DECK_SIZE - HAND_SIZE - HAND_SIZE);
     expect(ClientGame0().hand).ok;
     expect(ClientGame0().hand.size, 'clientGame0.hand.size').equal(6);
+    expect(ClientGame0().getIn(['players']).size).equal(2);
     expect(ClientGame0().getIn(['players', User0.id, 'hand'])).equal(ClientGame0().hand);
     expect(ClientGame0().getIn(['players', User1.id, 'hand'])).equal(6);
+
+    //console.log(ClientGame0().toJS())
 
     expect(ClientGame1()).ok;
     expect(ClientGame1().id).equal(ServerGame().id);
@@ -81,5 +87,25 @@ describe('Game:', function () {
 
     expect(ClientGame1()).ok;
     expect(ClientGame1().id).equal(gameId);
+  });
+
+  it('User0, User1 in Game, User0 disconnects, User1 disconnects', () => {
+    const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
+    clientStore0.dispatch(roomCreateRequest());
+    const roomId = serverStore.getState().get('rooms').first().id;
+    const ClientGame1 = () => clientStore1.getState().get('game');
+    clientStore0.dispatch(roomJoinRequest(roomId));
+    clientStore1.dispatch(roomJoinRequest(roomId));
+    clientStore0.dispatch(gameCreateRequest(roomId));
+    clientStore0.dispatch(gameReadyRequest());
+    clientStore1.dispatch(gameReadyRequest());
+    const gameId = serverStore.getState().get('games').first().id;
+    serverStore.clearActions();
+
+    clientStore0.disconnect(SOCKET_DISCONNECT_NOW);
+    //console.log(serverStore.getState().getIn(['games', gameId, 'players']).keySeq().toArray())
+    clientStore1.disconnect(SOCKET_DISCONNECT_NOW);
+
+    expect(serverStore.getState().get('games')).equal(Map());
   });
 });

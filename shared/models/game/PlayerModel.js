@@ -16,7 +16,7 @@ export class PlayerModel extends Record({
     return js == null
       ? null
       : new PlayerModel(js)
-      .set('hand', Array.isArray(js.hand)
+        .set('hand', Array.isArray(js.hand)
         ? List(js.hand).map(card => CardModel.fromJS(card))
         : js.hand);
   }

@@ -42,7 +42,7 @@ const CARD_POSITIONS = {
 export class Game extends React.Component {
   static propTypes = {
     user: React.PropTypes.instanceOf(UserModel).isRequired
-    , game: React.PropTypes.instanceOf(GameModelClient).isRequired
+    , game: React.PropTypes.instanceOf(GameModelClient)
   };
 
   constructor(props) {
