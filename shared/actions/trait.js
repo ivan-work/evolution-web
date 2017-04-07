@@ -19,7 +19,7 @@ import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
 import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
 import {TraitDataModel} from '../models/game/evolution/TraitDataModel';
 import {CooldownList} from '../models/game/CooldownList';
-import {TraitCommunication, TraitMimicry} from '../models/game/evolution/traitData';
+import {TraitCommunication, TraitCooperation, TraitCarnivorous} from '../models/game/evolution/traitData';
 
 import {
   checkGameDefined
@@ -59,6 +59,9 @@ export const server$traitActivate = (game, sourceAnimal, traitData, ...params) =
     case TRAIT_TARGET_TYPE.TRAIT:
       result = dispatch(server$traitActivate_Trait(game, sourceAnimal, traitData, ...params));
       break;
+    case TRAIT_TARGET_TYPE.NONE:
+      result = dispatch(server$traitActivate_None(game, sourceAnimal, traitData, ...params));
+      break;
     default:
       throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
         , 'Animal(%s):Trait(%s) unknown target type %s', sourceAnimal.id, traitData.type, traitData.targetType)
@@ -73,6 +76,20 @@ const server$traitActivate_Animal = (game, sourceAnimal, traitData, targetAnimal
 
 const server$traitActivate_Trait = (game, sourceAnimal, traitData, traitIndex, ...params) => {
   return traitData.action(game, sourceAnimal, traitIndex, ...params);
+};
+
+const server$traitActivate_None = (game, sourceAnimal, traitData, ...params) => {
+  return traitData.action(game, sourceAnimal, ...params);
+};
+
+
+const local$traitStartCooldown = (gameId, traitData, sourceAnimal) => (dispatch) => {
+  traitData.cooldowns.forEach(([link, place, duration]) => {
+    const placeId = (place === TRAIT_COOLDOWN_PLACE.PLAYER
+      ? sourceAnimal.ownerId
+      : sourceAnimal.id);
+    dispatch(startCooldown(gameId, link, duration, place, placeId));
+  });
 };
 
 export const server$traitStartCooldown = (gameId, traitData, sourceAnimal) => (dispatch) => {
@@ -97,6 +114,22 @@ const traitMoveFood = (gameId, animalId, amount, sourceType, sourceId) => ({
   type: 'traitMoveFood'
   , data: {gameId, animalId, amount, sourceType, sourceId}
 });
+
+const traitGrazeFood = (gameId, food, sourceAid) => ({
+  type: 'traitGrazeFood'
+  , data: {gameId, food, sourceAid}
+});
+
+export const server$traitGrazeFood = (gameId, food, sourceAnimal) =>
+  server$game(gameId, traitGrazeFood(gameId, food, sourceAnimal.id));
+
+const traitSetAnimalFlag = (gameId, sourceAid, flag, on) => ({
+  type: 'traitSetAnimalFlag'
+  , data: {gameId, sourceAid, flag, on}
+});
+
+export const server$traitSetAnimalFlag = (game, sourceAnimal, flag, on = true) =>
+  server$game(game.id, traitSetAnimalFlag(game.id, sourceAnimal.id, flag, on));
 
 const traitKillAnimal = (gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId) => ({
   type: 'traitKillAnimal'
@@ -148,8 +181,21 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
   // TODO bug with 2 amount on animal 2/3
   dispatch(server$game(gameId, traitMoveFood(gameId, animal.id, Math.min(amount, neededFood), sourceType, sourceId)));
 
-  // TODO mb move to traitData?
-  dispatch(startCooldown(gameId, TraitCommunication.type, TRAIT_COOLDOWN_DURATION.ACTIVATION, TRAIT_COOLDOWN_PLACE.ANIMAL, animal.id));
+  // Cooperation
+  if (sourceType === FOOD_SOURCE_TYPE.GAME) {
+    dispatch(local$traitStartCooldown(gameId, TraitCooperation, animal));
+    animal.traits.filter(trait => trait.type === TraitCooperation.type)
+      .forEach(trait => {
+        const game = selectGame(getState, gameId);
+        const {animal: linkedAnimal} = game.locateAnimal(trait.linkAnimalId);
+        if (TraitDataModel.checkAction(game, TraitCooperation, linkedAnimal)) {
+          dispatch(server$startFeeding(gameId, linkedAnimal, 1, FOOD_SOURCE_TYPE.GAME, animal.id));
+        }
+      });
+  }
+
+  // Communication
+  dispatch(local$traitStartCooldown(gameId, TraitCommunication, animal));
   animal.traits.filter(trait => trait.type === TraitCommunication.type)
     .forEach(trait => {
       const game = selectGame(getState, gameId);
@@ -163,13 +209,14 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
 
 // Cooldowns
 
-export const startCooldown = (gameId, link, duration, place, placeId) => ({
+// Cooldown to Server Only
+const startCooldown = (gameId, link, duration, place, placeId) => ({
   type: 'startCooldown'
   , data: {gameId, link, duration, place, placeId}
 });
 
-// TODO remove
-const server$startCooldown = (gameId, link, duration, place, placeId) => (dispatch, getState) => dispatch(
+// low level
+export const server$startCooldown = (gameId, link, duration, place, placeId) => (dispatch, getState) => dispatch(
   Object.assign(startCooldown(gameId, link, duration, place, placeId), {
     meta: {users: selectPlayers4Sockets(getState, gameId)}
   }));
@@ -246,7 +293,6 @@ export const server$traitDefenceAnswer = (gameId, questionId, traitType, targetI
   //return result;
 };
 
-
 //
 
 export const traitClientToServer = {
@@ -297,4 +343,8 @@ export const traitServerToClient = {
   , traitDefenceQuestion: ({gameId, questionId, traitTuple}, currentUserId) => traitDefenceQuestion(gameId, questionId, traitTuple)
   , traitDefenceAnswerSuccess: ({gameId, questionId}, currentUserId) => traitDefenceAnswerSuccess(gameId, questionId)
   , traitNotify: ({gameId, traitTuple}, currentUserId) => traitNotify(gameId, traitTuple)
+
+  , traitAnimalRemoveTrait: ({gameId, sourcePid, sourceAid, traitIndex}) => traitAnimalRemoveTrait(gameId, sourcePid, sourceAid, traitIndex)
+  , traitGrazeFood: ({gameId, food, sourceAid}) => traitGrazeFood(gameId, food, sourceAid)
+  , traitSetAnimalFlag: ({gameId, sourceAid, flag, on}) => traitSetAnimalFlag(gameId, sourceAid, flag, on)
 };

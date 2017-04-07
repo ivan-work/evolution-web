@@ -74,13 +74,15 @@ export const checkTraitActivation = (game, sourcePid, sourceAid, traitType, targ
     throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
       , 'Animal(%s):Trait(%s) checkAction failed', sourceAnimal.id, traitData.type)
   }
-  let target;
+  let target = null;
   switch (traitData.targetType) {
     case TRAIT_TARGET_TYPE.ANIMAL:
       target = checkTraitActivation_Animal(game, sourceAnimal, traitData, targetId);
       break;
     case TRAIT_TARGET_TYPE.TRAIT:
       target = checkTraitActivation_Trait(game, sourceAnimal, traitData, targetId);
+      break;
+    case TRAIT_TARGET_TYPE.NONE:
       break;
     default:
       throw new ActionCheckError(`server$traitActivate@Game(${game.id})`

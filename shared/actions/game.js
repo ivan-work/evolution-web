@@ -6,7 +6,7 @@ import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
 import {CardModel} from '../models/game/CardModel';
 import {AnimalModel} from '../models/game/evolution/AnimalModel';
 import {TraitModel} from '../models/game/evolution/TraitModel';
-import {CARD_TARGET_TYPE, CTT_PARAMETER, TRAIT_TARGET_TYPE} from '../models/game/evolution/constants';
+import {CARD_TARGET_TYPE, CTT_PARAMETER, TRAIT_TARGET_TYPE, TRAIT_ANIMAL_FLAG} from '../models/game/evolution/constants';
 
 import {actionError} from './generic';
 import {server$game} from './generic';
@@ -240,6 +240,11 @@ const gameStartDeploy = (gameId) => ({
   , data: {gameId}
 });
 
+const gameEventExtict = (gameId) => ({
+  type: 'gameEventExtict'
+  , data: {gameId}
+});
+
 export const server$gameExtict = (gameId) => (dispatch, getState) => {
   //console.log('server$gameExtinct')
   const game = selectGame(getState, gameId);
@@ -251,7 +256,7 @@ export const server$gameExtict = (gameId) => (dispatch, getState) => {
     cardGivePerPlayer[player.id] = 0;
     cardNeedToPlayer[player.id] = 1;
     player.continent.forEach((animal) => {
-      if (!animal.canSurvive()) {
+      if (!animal.canSurvive() || animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED)) {
         dispatch(server$game(gameId, animalStarve(gameId, animal.id)));
       } else {
         cardNeedToPlayer[player.id] += 1;

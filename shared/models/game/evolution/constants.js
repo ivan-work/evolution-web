@@ -26,6 +26,7 @@ export const FOOD_SOURCE_TYPE = {
 export const TRAIT_TARGET_TYPE = {
   ANIMAL: 'ANIMAL'
   , TRAIT: 'TRAIT'
+  , NONE: 'NONE'
 };
 
 export const TRAIT_COOLDOWN_PLACE = {
@@ -44,6 +45,12 @@ export const TRAIT_COOLDOWN_DURATION = {
 export const TRAIT_COOLDOWN_LINK = {
   EATING: 'EATING'
 };
+
+export const TRAIT_ANIMAL_FLAG = {
+  HIBERNATED: 'HIBERNATED'
+  , POISONED: 'POISONED'
+};
+
 
 //export const TRAIT_COOLDOWN_PLACE = (i => ({
 //  ANIMAL: 'ANIMAL'

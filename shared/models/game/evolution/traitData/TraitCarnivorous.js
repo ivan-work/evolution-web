@@ -9,6 +9,7 @@ import {
   server$traitKillAnimal
   , server$startFeeding
   , server$traitStartCooldown
+  , server$traitActivate
   , server$traitDefenceQuestion
   , server$traitDefenceQuestionInstant
   , server$traitDefenceAnswer
@@ -21,6 +22,7 @@ import {TraitMimicry
   , TraitRunning
   , TraitScavenger
   , TraitSymbiosis
+  , TraitPoisonous
   , TraitTailLoss} from './index';
 
 export const TraitCarnivorous = {
@@ -68,14 +70,6 @@ export const TraitCarnivorous = {
 
     // Check for running and get data for defence options
     if (killed) {
-      const attackParameter = {
-        sourcePid: sourceAnimal.ownerId
-        , sourceAid: sourceAnimal.id
-        , traitType: TraitCarnivorous.type
-        , targetPid: targetAnimal.ownerId
-        , targetAid: targetAnimal.id
-      };
-
       const defaultDefence = (questionId) => (dispatch, getState) => {
         if (traitTailLoss) {
           dispatch(server$traitDefenceAnswer(game.id
@@ -112,6 +106,9 @@ export const TraitCarnivorous = {
 
     if (killed) {
       dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
+      if (targetAnimal.hasTrait(TraitPoisonous.type)) {
+        dispatch(server$traitActivate(game, targetAnimal, TraitPoisonous, sourceAnimal));
+      }
 
       // Scavenge
       dispatch(server$startFeeding(game.id, sourceAnimal, 2, FOOD_SOURCE_TYPE.ANIMAL_HUNT, targetAnimal.id));

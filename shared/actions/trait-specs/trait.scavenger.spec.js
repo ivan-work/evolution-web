@@ -3,7 +3,6 @@ import {
   , gameEndTurnRequest
   , traitTakeFoodRequest
   , traitActivateRequest
-  , traitMimicryAnswerRequest
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
