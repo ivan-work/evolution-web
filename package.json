@@ -105,6 +105,7 @@
     "gulp-watch": "*",
     "html-loader": "*",
     "html-webpack-plugin": "*",
+    "ignore-styles": "^5.0.1",
     "jsdom": "*",
     "json-loader": "*",
     "mocha": "*",

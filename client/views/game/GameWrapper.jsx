@@ -19,7 +19,7 @@ import {GameModelClient} from '../../../shared/models/game/GameModel';
 
 import {DragDropContext} from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
-import MouseBackend from 'react-dnd-mouse-backend';
+import MouseBackend from './dnd/react-dnd-mouse-backend';
 import TestBackend from 'react-dnd-test-backend';
 
 export class GameWrapper extends React.Component {

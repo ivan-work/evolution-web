@@ -56,18 +56,19 @@ export class Card extends React.Component {
     if (card.image) {
       innerStyle.backgroundImage = `url(${card.image})`;
     }
-    return <div className={className} style={style} {...props}>
+
+    return <div className={className} style={style} {...props} id={card.id}>
       <div className='inner' style={innerStyle}>
         {card.traitsCount === 1
-          ? (<div className='trait trait-single'>{card.name}</div>)
+          ? (<div className='trait trait-single'>{card.trait1.type.replace('Trait', '')}</div>)
           : null}
 
         {card.traitsCount === 2
-          ? (<div className='trait trait1'>{card.name}</div>)
+          ? (<div className='trait trait1'>{card.trait1.type.replace('Trait', '')}</div>)
           : null}
 
         {card.traitsCount === 2
-          ? (<div className='trait trait2'>{card.name2}</div>)
+          ? (<div className='trait trait2'>{card.trait2.type.replace('Trait', '')}</div>)
           : null}
       </div>
     </div>
