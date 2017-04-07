@@ -5,12 +5,11 @@ export class UserRecord extends Record({
   id: null,
   name: null
 }) {
-
 }
 
-export function User(name) {
+export function User(id, name) {
   return new UserRecord({
-    id: new ObjectID()
+    id: id
     , name: name
   });
 }

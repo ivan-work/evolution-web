@@ -7,9 +7,10 @@ var http = require('http');
 var config = require('./config/config.js');
 
 import * as reducers from './reducers';
-import { createStore } from 'redux';
+import { createStore, compose, applyMiddleware } from 'redux'
+import thunk from 'redux-thunk';
 import { combineReducers } from 'redux-immutable';
-import socketServer from './socket';
+import {socketServer, socketStore, socketMiddleware} from './socket';
 
 /**
  * Create HTTP server and sockets.
@@ -19,9 +20,15 @@ const reducer = combineReducers({
 });
 
 const server = http.createServer(app);
-const store = createStore(reducer);
+const socket = socketServer(server);
+const store = createStore(
+  reducer
+  , compose(
+    applyMiddleware(thunk)
+    , applyMiddleware(socketMiddleware(socket))
+  ));
 
-socketServer(server, store);
+socketStore(socket, store);
 
 /**
  * Listen on provided port, on all network interfaces.

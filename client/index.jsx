@@ -7,11 +7,11 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { combineReducers } from 'redux-immutable';
 import { createStore, compose, applyMiddleware } from 'redux'
+import thunk from 'redux-thunk';
 import { Provider } from 'react-redux'
 import { Router, browserHistory } from 'react-router'
 import { syncHistoryWithStore, routerMiddleware, LOCATION_CHANGE } from 'react-router-redux'
 
-import thunk from 'redux-thunk';
 
 import * as reducers from './reducers'
 import routes from './routes';

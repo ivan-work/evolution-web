@@ -12,10 +12,10 @@ export const logout = function (state, userId) {
 
 export function reducer(state = Map(), action) {
   switch (action.type) {
-    case LOGIN_USER_REQUEST:
-      return login(state, action.username);
+    case LOGIN_USER_SUCCESS:
+      return login(state, action.data);
     case 'LOGOUT':
-      return logout(state, action.userId);
+      return logout(state, action.data);
     default:
       return state;
   }
