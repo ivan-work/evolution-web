@@ -36,7 +36,9 @@ export const socketMiddleware = io => store => next => action => {
   const state = store.getState();
   const stateConnections = state.get('connections');
   const stateUsers = state.get('users');
-  const nextResult = next(action);
+  const nextResult = (action.meta && action.meta.clientOnly
+    ? null
+    : next(action));
   //console.log(`Server:Prepare:${action.type}`, action.meta);
   if (action.meta) {
     let sockets = [];

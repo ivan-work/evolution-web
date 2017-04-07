@@ -28,18 +28,18 @@ export const roomJoinSuccess = (roomId, userId) => ({
   , data: {roomId, userId}
   , meta: {users: true}
 });
-export const roomJoinSuccessSelf = (roomId) => ({
-  type: 'roomJoinSuccessSelf'
-  , data: {roomId}
+export const roomJoinSuccessNotify = (roomId, userId) => ({
+  type: 'roomJoinSuccessNotify'
+  , data: {roomId, userId}
 });
 export const roomExitSuccess = (roomId, userId) => ({
   type: 'roomExitSuccess'
   , data: {roomId, userId}
   , meta: {users: true}
 });
-export const roomExitSuccessSelf = (roomId) => ({
-  type: 'roomExitSuccessSelf'
-  , data: {roomId}
+export const roomExitSuccessNotify = (roomId, userId) => ({
+  type: 'roomExitSuccessNotify'
+  , data: {roomId, userId}
 });
 
 export const roomsClientToServer = {
@@ -73,16 +73,16 @@ export const roomsClientToServer = {
 export const roomsServerToClient = {
   roomCreateSuccess: ({room}) => roomCreateSuccess(RoomModel.fromJS(room))
   , roomJoinSuccess: ({roomId, userId}, user) => (dispatch, getState) => {
-    dispatch(roomJoinSuccess(roomId, userId));
+    dispatch(roomJoinSuccessNotify(roomId, userId));
     if (user.id === userId) {
-      dispatch(roomJoinSuccessSelf(roomId));
+      dispatch(roomJoinSuccess(roomId));
       dispatch(push(`/room/${roomId}`));
     }
   }
   , roomExitSuccess: ({roomId, userId}, user) => (dispatch, getState) => {
-    dispatch(roomExitSuccess(roomId, userId));
+    dispatch(roomExitSuccessNotify(roomId, userId));
     if (user.id === userId) {
-      dispatch(roomExitSuccessSelf(roomId));
+      dispatch(roomExitSuccess(roomId));
       dispatch(push(`/`));
     }
   }

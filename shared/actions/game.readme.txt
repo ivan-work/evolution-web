@@ -1,0 +1,9 @@
+Client0, Client1;
+
+Client0.roomCreateRequest
+v
+Server.roomCreateSuccess > Client0, clients;
+
+Client0.roomJoinRequest
+v
+Server.roomJoinSuccess > Client0, Server.roomJoinSuccessNotify

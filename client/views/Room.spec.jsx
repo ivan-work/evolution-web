@@ -4,7 +4,7 @@ import {Room, RoomView} from './Room.jsx';
 
 import {UserModel} from '~/shared/models/UserModel';
 import {RoomModel} from '~/shared/models/RoomModel';
-import {SOCKET_DISCONNECT_NOW, roomCreateRequest, roomJoinRequest, gameStartRequest} from '../../shared/actions/actions';
+import {SOCKET_DISCONNECT_NOW, roomCreateRequest, roomJoinRequest, gameCreateRequest} from '../../shared/actions/actions';
 
 describe('Room', () => {
   it('UsersList', () => {
@@ -40,7 +40,7 @@ describe('Room', () => {
 
     const $Room = shallow(<RoomView store={clientStore0}/>).shallow();
     //clientStore1.dispatch(roomJoinRequest(roomId));
-    //clientStore0.dispatch(gameStartRequest(roomId));
+    //clientStore0.dispatch(gameCreateRequest(roomId));
     //clientStore0.dispatch(gameReadyRequest());
     //clientStore1.dispatch(gameReadyRequest());
 

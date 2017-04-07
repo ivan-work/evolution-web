@@ -3,7 +3,7 @@ import {List, Map, Range} from 'immutable';
 import {CardCollection} from './CardCollection.jsx';
 
 import {CardModel} from '../../../shared/models/game/CardModel';
-//import {roomCreateRequest, roomJoinRequest, gameStartRequest, gameReadyRequest} from '../../../shared/actions/actions';
+//import {roomCreateRequest, roomJoinRequest, gameCreateRequest, gameReadyRequest} from '../../../shared/actions/actions';
 
 describe('CardCollection', () => {
   it('Displays cards from list', () => {

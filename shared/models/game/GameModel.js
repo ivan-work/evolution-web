@@ -52,9 +52,4 @@ export class GameModelClient extends Record({
       : new GameModelClient(game)
         .set('hand', game.players.getIn([userId, 'hand'], List()));
   }
-
-  static fromGameModel(game, userId) {
-    return new GameModelClient(game)
-
-  }
 }

@@ -8,7 +8,7 @@ const initialState = Map();
 export const reducer = createReducer(initialState, {
   loginUserSuccess: (state, {rooms}) => rooms
   , roomCreateSuccess: (state, {room}) => state.set(room.id, room)
-  , roomJoinSuccess
-  , roomExitSuccess
+  , roomJoinSuccessNotify: roomJoinSuccess
+  , roomExitSuccessNotify: roomExitSuccess
   , clientDisconnectSelf: (state, data) => initialState
 });

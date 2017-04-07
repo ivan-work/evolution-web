@@ -14,8 +14,11 @@ export const roomExitSuccess = (state, {roomId, userId}) => {
     : state.set(roomId, newRoom)
 };
 
+export const gameCreateSuccess = (state, {game}) => state.update(game.roomId, room => room.set('gameId', game.id));
+
 export const reducer = createReducer(Map(), {
   roomCreateSuccess: (state, {room}) => state.set(room.id, room)
   , roomJoinSuccess
   , roomExitSuccess
+  , gameCreateSuccess
 });
