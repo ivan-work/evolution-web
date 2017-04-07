@@ -14,7 +14,7 @@ import {EnemyContinent} from './EnemyContinent.jsx';
 import {PlayerContinent} from './PlayerContinent.jsx';
 import {CardCollection} from './CardCollection.jsx';
 import {Card, UnknownCard, DragCard} from './Card.jsx';
-import {Animal, UnknownAnimal} from './Animal.jsx';
+import {DropTargetAnimal} from './Animal.jsx';
 
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
@@ -63,8 +63,8 @@ export class Game extends React.Component {
     if (this.props.game && !this.props.game.started) this.props.$ready();
   }
 
-  cardPlayed(model, cardPosition, animalPosition) {
-    this.props.$playCard(model.id, cardPosition, animalPosition);
+  cardPlayed(model, ...data) {
+    this.props.$playCard(model.id, ...data);
   }
 
   render() {
@@ -77,6 +77,9 @@ export class Game extends React.Component {
     //console.log('game', player.continent.toJS())
     //console.log('game', CARD_POSITIONS[game.players.size], game.players.size)
     return <div className="Game">
+
+      <!-- DECK-->
+
       <div className='DeckWrapper' style={CARD_POSITIONS[game.players.size].deck}>
         <CardCollection
           ref="Deck" name="Deck"
@@ -86,9 +89,11 @@ export class Game extends React.Component {
         </CardCollection>
       </div>
 
+      <!-- USER -->
+
       <div className='PlayerWrapper UserWrapper' style={CARD_POSITIONS[game.players.size].player}>
         <PlayerContinent onCardDropped={this.cardPlayed}>
-          {player.continent.toArray().map((animal, i) => <Animal index={i} key={i} model={animal}/>)}
+          {player.continent.toArray().map((animal, i) => <DropTargetAnimal index={i} key={i} model={animal} onCardDropped={this.cardPlayed}/>)}
         </PlayerContinent>
 
         <CardCollection
@@ -97,6 +102,8 @@ export class Game extends React.Component {
           {player.hand.toArray().map((cardModel, i) => <DragCard model={cardModel} key={cardModel} index={i}/>)}
         </CardCollection>
       </div>
+
+      <!-- ENEMIES -->
 
       {
         game.players.valueSeq()
@@ -109,7 +116,7 @@ export class Game extends React.Component {
               {enemy.hand.toArray().map((cardModel, i) => <Card model={cardModel} key={i} index={i}/>)}
             </CardCollection>
             <EnemyContinent>
-              {enemy.continent.toArray().map((animal, i) => <UnknownAnimal key={i} index={i}/>)}
+              {enemy.continent.toArray().map((animal, i) => <DropTargetAnimal key={i} index={i} onCardDropped={this.cardPlayed}/>)}
             </EnemyContinent>
           </div>
           })

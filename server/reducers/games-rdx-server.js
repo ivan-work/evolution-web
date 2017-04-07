@@ -1,3 +1,4 @@
+import logger from '~/shared/utils/logger';
 import {createReducer, ensureParameter} from '~/shared/utils';
 import {Map, List} from 'immutable';
 import {AnimalModel} from '~/shared/models/game/evolution/AnimalModel';
@@ -24,7 +25,6 @@ export const reducer = createReducer(Map(), {
     );
   }
   , gamePlayAnimal: (state, {gameId, userId, animal, animalPosition, cardPosition}, currentUserId) => {
-    console.log({gameId, userId, animal, animalPosition, cardPosition})
     ensureParameter(gameId, 'string');
     ensureParameter(userId, 'string');
     ensureParameter(animal, AnimalModel);
