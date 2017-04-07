@@ -59,7 +59,7 @@ export const checkTraitActivation = (game, sourcePid, sourceAid, traitType) => {
   checkGameDefined(game);
   const gameId = game.id;
   checkGameHasUser(game, sourcePid);
-  checkPlayerTurnAndPhase(game, sourcePid, PHASE.FEEDING);
+  //checkPlayerTurnAndPhase(game, sourcePid, PHASE.FEEDING); defence traits
   const sourceAnimal = checkPlayerHasAnimal(game, sourcePid, sourceAid);
   const trait = sourceAnimal.traits.find(trait => trait.type === traitType);
   if (!trait) {

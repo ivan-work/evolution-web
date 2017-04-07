@@ -1,14 +1,25 @@
+import logger from '~/shared/utils/logger';
 import {fromJS} from 'immutable';
-import {TRAIT_TARGET_TYPE, TRAIT_COOLDOWN_DURATION, TRAIT_COOLDOWN_PLACE, TRAIT_COOLDOWN_LINK} from '../constants';
+import {TRAIT_TARGET_TYPE, TRAIT_COOLDOWN_DURATION, TRAIT_COOLDOWN_PLACE, TRAIT_COOLDOWN_LINK
+  , TRAIT_RESPONSE_TIMEOUT} from '../constants';
 import {
   server$traitKillAnimal
   , server$startFeeding
   , server$startCooldown
   , server$traitActivate
   , server$traitStartCooldown
+  , server$traitDefenceQuestion
+  , server$traitDefenceAnswer
 } from '../../../../actions/actions';
+import {addTimeout} from '../../../../utils/reduxTimeout';
+
 import {GameModel} from '../../GameModel';
-import {TraitMimicry, TraitRunning, TraitScavenger, TraitSymbiosis} from './index';
+import {TraitDataModel} from '../TraitDataModel';
+import {TraitMimicry
+  , TraitRunning
+  , TraitScavenger
+  , TraitSymbiosis
+  , TraitTailLoss} from './index';
 
 export const TraitCarnivorous = {
   type: 'TraitCarnivorous'
@@ -20,19 +31,81 @@ export const TraitCarnivorous = {
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: (game, sourceAnimal, targetAnimal) => (dispatch, getState) => {
+    logger.silly('TraitCarnivorous:', sourceAnimal, targetAnimal);
     let success = true;
-    const traitMimicry = targetAnimal.hasTrait(TraitMimicry.type);
-    const traitRunning = targetAnimal.hasTrait(TraitRunning.type);
-    if (traitRunning) {
-      success = !TraitRunning.action();
-      if (!success) {
-        dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, sourceAnimal));
-        return true;
+    let needToAskTargetUser = false;
+    let traitMimicry, traitTailLoss;
+
+    success = !targetAnimal.traits.some((trait) => {
+      if (trait.type === TraitRunning.type) {
+        if (TraitRunning.action()) {
+          dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, sourceAnimal));
+          return true;
+        }
+      } else if (trait.type === TraitMimicry.type && TraitDataModel.checkAction(game, TraitMimicry, targetAnimal)) {
+        traitMimicry = game.getPlayer(targetAnimal.ownerId).continent.filter((animal) =>
+          targetAnimal.id !== animal.id
+          && TraitCarnivorous.checkTarget(game, sourceAnimal, animal)
+        );
+        if (traitMimicry.size === 0) {
+          traitMimicry = void 0;
+        } else if (traitMimicry.size === 1) {
+        } else {
+          needToAskTargetUser = true;
+        }
+      } else if (trait.type === TraitTailLoss.type && TraitDataModel.checkAction(game, TraitTailLoss, targetAnimal)) {
+        traitTailLoss = targetAnimal.traits;
+        if (traitTailLoss.size === 0) {
+          traitTailLoss = void 0;
+        } else if (traitTailLoss.size === 1) {
+        } else {
+          needToAskTargetUser = true;
+        }
       }
-    }
-    if (success && traitMimicry) {
-      //dispatch(server$traitActivate(game, sourceAnimal, TraitMimicry, targetAnimal.id))
-      success = !dispatch(server$traitActivate(game, targetAnimal, TraitMimicry, sourceAnimal.id, TraitCarnivorous))
+    });
+
+    if (success) {
+      const attackParameter = {
+        sourcePid: sourceAnimal.ownerId
+        , sourceAid: sourceAnimal.id
+        , traitType: TraitCarnivorous.type
+        , targetPid: targetAnimal.ownerId
+        , targetAid: targetAnimal.id
+      };
+
+      const defaultDefence = () => {
+        if (traitTailLoss) {
+          dispatch(server$traitDefenceAnswer(game.id
+            , attackParameter
+            , {
+              traitType: TraitMimicry.type
+              , targetIndex: traitTailLoss.size - 1
+            }
+          ));
+          return false;
+        } else if (traitMimicry) {
+          dispatch(server$traitDefenceAnswer(game.id
+            , attackParameter
+            , {
+              traitType: TraitMimicry.type
+              , targetPid: traitMimicry.get(0).ownerId
+              , targetAid: traitMimicry.get(0).id
+            }
+          ));
+          return false;
+        } else {
+          return true;
+        }
+      };
+      if (needToAskTargetUser) {
+        dispatch(addTimeout(TRAIT_RESPONSE_TIMEOUT, 'traitAnswer' + game.id, (dispatch, getState) => {
+          defaultDefence();
+        }));
+        dispatch(server$traitDefenceQuestion(game.id, attackParameter));
+        success = false;
+      } else {
+        success = defaultDefence();
+      }
     }
 
     if (success) {
@@ -50,8 +123,8 @@ export const TraitCarnivorous = {
       }));
 
       dispatch(server$startFeeding(game.id, sourceAnimal, 2));
-      return true;
     }
+    return true;
   }
   , $checkAction: (game, sourceAnimal) => {
     return sourceAnimal.canEat(game)
