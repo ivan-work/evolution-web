@@ -6,11 +6,12 @@ import * as MDL from 'react-mdl';
 import {Layout, Header, Navigation, Drawer, Content} from 'react-mdl';
 
 import {AdminPanelView} from './AdminPanel.jsx'
+import {ServicesContext} from '../services/ServicesContext';
 import {PortalsContext, PortalTarget} from '../views/utils/PortalTarget.jsx'
 
 //import '../styles/core.scss';
 
-export const App = PortalsContext(React.createClass({
+export const App = ServicesContext(PortalsContext(React.createClass({
   render: function () {
     const {dispatch} = this.props;
     const {socket} = this.props;
@@ -31,7 +32,7 @@ export const App = PortalsContext(React.createClass({
       </Layout>
     );
   }
-}));
+})));
 
 export const AppView = connect((state) => {
   return {

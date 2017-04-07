@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react';
 import RIP from 'react-immutable-proptypes';
 
-import {GameProvider} from '../providers/GameProvider';
+import {GameProvider} from '../providers/GameProvider.jsx';
 
 import {Button} from 'react-mdl';
 import {PlayersList} from './PlayersList.jsx';
