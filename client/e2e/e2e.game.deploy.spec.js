@@ -4,7 +4,7 @@ import {mountClient} from '~/shared/test/test-helpers.jsx'
 
 import {selectHID, selectCard, selectUser, selectUserAnimal, selectAnimal} from './test.selectors';
 
-describe.only('e2e Deploy', () => {
+describe('e2e Deploy', () => {
   it('Can deploy animal', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`

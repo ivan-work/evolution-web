@@ -37,14 +37,14 @@ class Food extends Component {
   }
 }
 
-class DragFoodBody extends Food {
+class DragFood_Body extends Food {
   render() {
     const {connectDragSource} = this.props;
     return connectDragSource(super.render());
   }
 }
-DragFoodBody.displayName = 'Food';
-DragFoodBody.propTypes = {
+DragFood_Body.displayName = 'Food';
+DragFood_Body.propTypes = {
   connectDragSource: PropTypes.func.isRequired
   , canDrag: PropTypes.bool.isRequired
   , isDragging: PropTypes.bool.isRequired
@@ -53,22 +53,20 @@ DragFoodBody.propTypes = {
 const DragFood = DragSource(DND_ITEM_TYPE.FOOD
   , {
     beginDrag: (props) => ({index: props.index})
-    , canDrag: (props, monitor) =>
-    props.isPlayerTurn
-    && !props.game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, props.currentUserId, null)
+    , canDrag: ({game}, monitor) =>
+    game.isPlayerTurn()
+    && !game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, game.getPlayer().id, null)
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource()
     , isDragging: monitor.isDragging()
     , canDrag: monitor.canDrag()
   })
-)(DragFoodBody);
+)(DragFood_Body);
 
 DragFood.propTypes = {
   // by GameProvider
   game: PropTypes.object.isRequired
-  , isPlayerTurn: PropTypes.bool.isRequired
-  , currentUserId: PropTypes.string.isRequired
 };
 
 const GameDragFood = GameProvider(DragFood);

@@ -77,28 +77,9 @@ let GameWrapperHOC = GameWrapper;
 const backend = !process.env.TEST ? MouseBackend : TestBackend;
 GameWrapperHOC = DragDropContext(backend)(GameWrapperHOC);
 
-import * as GameAnimations from './GameAnimations';
+import {createAnimationServiceConfig} from './animations';
 
-GameWrapperHOC = AnimationServiceContext({
-  animations: ({getRef}) => ({
-    gameGiveCards: (done, {game}, {cards}) => {
-      GameAnimations.gameGiveCards(done, game, cards, getRef('Deck'), getRef('Cards'));
-    }
-//, gameNextPlayer: (done, component, {cards}) => {
-    //  component.setState({
-    //    toastYourTurn: true
-    //  });
-    //  setTimeout(() => {
-    //    done();
-    //  }, 5000);
-    //}
-    //onlineUpdate: (done, component) => {
-    //  const {game} = component.props;
-    //  GameAnimations.gameGiveCards(done, game, game.getPlayer().hand, component.Deck, component.Cards);
-    //}
-    //,
-  })
-})(GameWrapperHOC);
+GameWrapperHOC = AnimationServiceContext(createAnimationServiceConfig())(GameWrapperHOC);
 
 
 GameWrapperHOC = connect(
