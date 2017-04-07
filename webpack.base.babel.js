@@ -4,6 +4,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
+import jsonImporter from 'node-sass-json-importer';
 
 module.exports = (options) => ({
   entry: {
@@ -24,7 +25,7 @@ module.exports = (options) => ({
       // Transform our own .css files with PostCSS and CSS-modules
       test: /(\.css|\.scss)$/,
       exclude: /node_modules/,
-      loader: options.cssLoaders,
+      loaders: options.cssLoaders,
     }, {
       // Do not transform vendor's CSS with CSS-modules
       // The point is that they remain in global scope.
@@ -46,10 +47,11 @@ module.exports = (options) => ({
     }, {
       test: /\.json$/,
       loader: 'json-loader',
-    }, {
-      test:  /\.yml$/,
-      loader: 'file?name=i18n/[path][name].json&context=./i18n/!yaml',
     }],
+  },
+  sassLoader: {
+    // Apply the JSON importer via sass-loader's options.
+    importer: jsonImporter
   },
   plugins: options.plugins.concat([
     new webpack.optimize.CommonsChunkPlugin('common.js'),
@@ -69,7 +71,7 @@ module.exports = (options) => ({
       },
     })
   ]),
-  postcss: () => options.postcssPlugins,
+  //postcss: () => options.postcssPlugins,
   resolve: {
     modulesDirectories: ['client', 'shared', 'node_modules'],
     extensions: [

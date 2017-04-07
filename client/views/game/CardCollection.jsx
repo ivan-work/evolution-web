@@ -1,7 +1,9 @@
 import React from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 
-import {CARD_SIZE} from './Card.jsx';
+import styles from '../../styles.json';
+const {CARD_WIDTH} = styles;
+
+import './CardCollection.scss';
 
 export class CardCollection extends React.Component {
   static propTypes = {
@@ -12,8 +14,8 @@ export class CardCollection extends React.Component {
   render() {
     const {children, name, isUser} = this.props;
     const cardsCount = React.Children.count(children);
-    const shift = isUser ? CARD_SIZE.width : 15;
-    const size = CARD_SIZE.width + shift * (cardsCount - 1);
+    const shift = isUser ? CARD_WIDTH : 15;
+    const size = CARD_WIDTH + shift * (cardsCount - 1);
     return <div style={{margin: '0 auto', width: `${size}px`}}
                 className={`CardCollection ${name}`}>
       {React.Children.map(children, (card, index) =>

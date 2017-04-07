@@ -1,7 +1,7 @@
 import {Record} from 'immutable';
 
 import jwt from 'jsonwebtoken';
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 
 export class UserModel extends Record({
   id: null

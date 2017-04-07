@@ -1,4 +1,4 @@
-import uuid from 'node-uuid';
+import uuid from 'uuid';
 import invariant from 'invariant';
 import {Map, List} from 'immutable';
 

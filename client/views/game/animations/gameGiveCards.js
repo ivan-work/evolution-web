@@ -6,8 +6,6 @@ import {CardUnknown} from '../../../../shared/models/game/evolution/cardData'
 export const gameGiveCards = (done, game, cards, getRef) => {
   const Deck = getRef('Deck');
   const DeckHtml = ReactDOM.findDOMNode(Deck);
-  done()
-  return true;
 
   cards.some((card, index) => {
     const CardComponent = getRef('Card#'+card.id);
@@ -25,7 +23,7 @@ export const gameGiveCards = (done, game, cards, getRef) => {
       , backgroundImage: childNode.style.backgroundImage
     };
     childNode.innerHTML = '';
-    childNode.style.backgroundImage = `url(${CardUnknown.image})`;
+    childNode.style.backgroundImage = `url('${CardUnknown.image}')`;
 
     Velocity(CardHtml, {
       translateX: -targetBbx.left + sourceBbx.left + deckOffset.x

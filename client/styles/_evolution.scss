@@ -1,12 +1,12 @@
 $CURRENT_TURN_BACKGROUND: #dfd;
 
-.enabled[draggable], .draggable.canDrag {
+.draggable.canDrag {
   cursor: -webkit-grab; /* Chrome 1-21, Safari 4+ */
   cursor: -moz-grab; /* Firefox 1.5-26 */
   cursor: grab; /* W3C standards syntax, should come least */
 }
 
-.enabled.drag, .draggable.isDragging, .bodyDragging {
+.draggable.isDragging, .bodyDragging {
   cursor: -webkit-grabbing; /* Chrome 1-21, Safari 4+ */
   cursor: -moz-grabbing; /* Firefox 1.5-26 */
   cursor: grabbing; /* W3C standards syntax, should come least */
@@ -70,47 +70,5 @@ $CURRENT_TURN_BACKGROUND: #dfd;
     display: inline-block;
     width: 4em;
     font-weight: bold;
-  }
-}
-
-.DeckWrapper {
-  margin-top: .5em;
-  .CardPlace {
-    position: absolute;
-  }
-}
-
-.Card {
-  position: absolute;
-  .inner {
-    transition: transform .5s;
-    background: #ddd;
-    border: 1px solid #555;
-    border-radius: .2em;
-    width: 100%;
-    height: 100%;
-  }
-  &.alternateTrait .inner {
-    transform: rotate(180deg);
-  }
-  &.canDrag .inner {
-    background: #dfd;
-  }
-  &.isDragging {
-    opacity: 0;
-  }
-  .trait {
-    text-align: center;
-    font-size: 0.9em;
-    line-height: 1em;
-    padding: .3em;
-    font-family: 'Roboto';
-    word-wrap: break-word;
-  }
-  .trait1 {
-    margin-bottom: 1em;
-  }
-  .trait2 {
-    transform: rotate(.5turn);
   }
 }

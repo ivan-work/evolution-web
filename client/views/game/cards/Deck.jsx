@@ -9,7 +9,7 @@ export default class Deck extends Component {
 
   getXYForCard(index) {
     return {
-      x: 2 * index
+      x: 1 * index
       , y: 1 * index
     }
   }
@@ -23,7 +23,9 @@ export default class Deck extends Component {
   renderCardPlace(card, index) {
     const transform = this.getXYForCard(index);
     return <div className="CardPlace" key={index} style={{
-          transform: `translate(${transform.x}px,${transform.y}px)`
+        left: transform.x + 'px'
+        , top: transform.y + 'px'
+          //transform: `translate(${transform.x}px,${transform.y}px)`
         }}>
       {card}
     </div>

@@ -20,7 +20,7 @@ const traitPropsMap = _.forIn({
     color: '#F00'
   }
   , TraitSymbiosis: {
-    color: '#090'
+    color: '#F0F'
     , markerEnd: 'url(#symbioticArrow)'
   }
   , default: {
@@ -62,7 +62,7 @@ export class AnimalLinkedTrait extends Component {
 
   tick() {
     if (this._isMounted) {
-      const {index, trait, angle} = this.props;
+      const {trait, angle} = this.props;
       if (this.targetTrait && this.targetTrait._isMounted) {
         const bbx1 = this.node.getBoundingClientRect();
         const bbx2 = this.targetTrait.node.getBoundingClientRect();
@@ -71,15 +71,12 @@ export class AnimalLinkedTrait extends Component {
         const x2 = bbx2.left + bbx2.width / 2;
         const y2 = bbx2.top + bbx2.height / 2;
 
-        const maxSize = 1600;
-        const xlen = (x2 - x1);
-        const ylen = (y2 - y1);
-        const dist = xlen * xlen + ylen * ylen;
+        const [px1, py1, px2, py2] = x1 < x2 || y1 > y2 ? [x1, y1, x2, y2] : [x2, y2, x1, y1];
 
-        const strokeWidth = 3 + .25 * Math.abs(dist / maxSize);
+        const strokeWidth = 4;
 
         this.setState({
-          d: `M${x1},${y1} A 2 1 ${angle || 0} 1 1 ${x2},${y2}`
+          d: `M${px1},${py1} A 1 1 ${angle || 0} 1 1 ${px2},${py2}`
           //d: `M${x1},${y1} ${x2},${y2}`
           , strokeWidth
         });
@@ -129,7 +126,6 @@ export class AnimalLinkedTrait extends Component {
 //<circle cx={this.state.cx1} cy={this.state.cy1} r='5' fill={color}/>
 //<circle cx={this.state.cx2} cy={this.state.cy2} r='5' fill={color}/>
 //<line  strokeWidth="5px" stroke="black" {...this.state}/>
-
 
 
 //if (this._isMounted) {

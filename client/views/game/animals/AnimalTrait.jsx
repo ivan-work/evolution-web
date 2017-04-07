@@ -1,4 +1,5 @@
 import React, {Component, PropTypes} from 'react';
+import T from 'i18n-react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
@@ -12,11 +13,6 @@ import { TraitModel } from '../../../../shared/models/game/evolution/TraitModel'
 import { checkAction } from '../../../../shared/models/game/evolution/TraitDataModel';
 
 import './AnimalTrait.scss';
-
-export const ANIMAL_TRAIT_SIZE = {
-  width: 60
-  , height: 30
-};
 
 class AnimalTrait extends Component {
   static defaultProps = {
@@ -42,7 +38,7 @@ class AnimalTrait extends Component {
       , draggable: connectDragSource
     });
 
-    return <div className={className}>{trait.type.replace('Trait', '')}</div>;
+    return <div className={className}>{T.translate('Game.Trait.' + trait.type)}</div>;
   }
 }
 
