@@ -83,12 +83,13 @@ export const TraitMimicry = {
 
 export const TraitScavenger = {
   type: 'TraitScavenger'
+  , checkTraitPlacement: (animal) => !animal.hasTrait('TraitCarnivorous')
 };
 
 //
 
 export const TraitSymbiosis = {
-  type: 'Symbiosis'
+  type: 'TraitSymbiosis'
   , cardTargetType: CARD_TARGET_TYPE.LINK_SELF_ONEWAY
 };
 

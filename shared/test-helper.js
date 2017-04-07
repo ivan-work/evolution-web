@@ -168,11 +168,30 @@ global.expectUnchanged = (cb, ...stores) => {
   logger.transports.console.level = LOG_LEVEL;
 };
 
+global.expectUnchangedMsg = (msg, cb, ...stores) => {
+  const LOG_LEVEL = logger.transports.console.level;
+  logger.transports.console.level = 'error';
+  let previousStates = stores.map(store => store.getState());
+  cb();
+  stores.forEach((store, i) => {
+    expect(store.getState().toJS(), 'msg').eql(previousStates[i].toJS());
+  });
+  logger.transports.console.level = LOG_LEVEL;
+};
+
 global.expectChanged = (cb, ...stores) => {
   let previousStates = stores.map(store => store.getState());
   cb();
   stores.forEach((store, i) => {
     expect(store.getState()).not.equal(previousStates[i]);
+  });
+};
+
+global.expectChangedMsg = (msg, cb, ...stores) => {
+  let previousStates = stores.map(store => store.getState());
+  cb();
+  stores.forEach((store, i) => {
+    expect(store.getState(), msg).not.equal(previousStates[i]);
   });
 };
 
