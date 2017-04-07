@@ -25,6 +25,7 @@ export const TRAIT_COOLDOWN_PLACE = {
   , PLAYER: 'PLAYER'
   , GAME: 'GAME'
   , OTHER_ANIMALS: 'OTHER_ANIMALS'
+  , TRAIT: 'TRAIT'
 };
 
 export const TRAIT_COOLDOWN_DURATION = {

@@ -20,7 +20,6 @@ import {
 } from '../../../../actions/actions';
 
 import {getRandom} from '../../../../utils/randomGenerator';
-import {checkAction} from '../TraitDataModel';
 
 //
 
@@ -39,16 +38,17 @@ export const TraitFatTissue = {
   type: 'TraitFatTissue'
   , multiple: true
   , cooldowns: fromJS([
-    ['TraitFatTissue', TRAIT_COOLDOWN_PLACE.OTHER_ANIMALS, TRAIT_COOLDOWN_DURATION.ROUND]
+    ['TraitFatTissue', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , cooldownsAddOnly: fromJS([
     [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
+    , ['TraitFatTissue', TRAIT_COOLDOWN_PLACE.OTHER_ANIMALS, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
   , action: (game, sourceAnimal, traitFatTissue) => (dispatch) => {
     dispatch(server$traitConvertFat(game.id, sourceAnimal, traitFatTissue));
-    dispatch(server$traitStartCooldown(game.id, TraitFatTissue, sourceAnimal));
+    dispatch(server$traitStartCooldown(game.id, traitFatTissue, sourceAnimal));
     return true;
   }
   , $checkAction: (game, sourceAnimal) => !sourceAnimal.isFull()
@@ -69,10 +69,10 @@ export const TraitMimicry = {
   type: 'TraitMimicry'
   , targetType: TRAIT_TARGET_TYPE.ANIMAL
   , cooldowns: fromJS([
-    ['TraitMimicry', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
+    ['TraitMimicry', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
-  , action: (game, mimicryAnimal, trait, newTargetAnimal, attackAnimal, attackTrait) => (dispatch, getState) => {
-    dispatch(server$traitStartCooldown(game.id, TraitMimicry, mimicryAnimal));
+  , action: (game, mimicryAnimal, traitMimicry, newTargetAnimal, attackAnimal, attackTrait) => (dispatch, getState) => {
+    dispatch(server$traitStartCooldown(game.id, traitMimicry, mimicryAnimal));
     return dispatch(server$traitActivate(game, attackAnimal, attackTrait, newTargetAnimal));
   }
   , getTargets: (game, attackAnimal, attackTraitData, mimicryAnimal) => {
@@ -80,7 +80,7 @@ export const TraitMimicry = {
       mimicryAnimal.id !== animal.id
       && attackAnimal.id !== animal.id
         //&& !animal.hasTrait('TraitMimicry')
-      && (!animal.hasTrait('TraitMimicry') || animal.hasTrait('TraitMimicry') && checkAction(game, TraitMimicry, animal))
+      && (!animal.hasTrait('TraitMimicry') || animal.hasTrait('TraitMimicry') && animal.hasTrait('TraitMimicry').checkAction(game, animal))
       && attackTraitData.checkTarget(game, attackAnimal, animal)
     );
   }
@@ -103,10 +103,10 @@ export const TraitPiracy = {
   , targetType: TRAIT_TARGET_TYPE.ANIMAL
   , playerControllable: true
   , cooldowns: fromJS([
-    ['TraitPiracy', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
+    ['TraitPiracy', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
   ])
-  , action: (game, sourceAnimal, trait, targetAnimal) => dispatch => {
-    dispatch(server$traitStartCooldown(game.id, TraitPiracy, sourceAnimal));
+  , action: (game, sourceAnimal, traitPiracy, targetAnimal) => dispatch => {
+    dispatch(server$traitStartCooldown(game.id, traitPiracy, sourceAnimal));
     dispatch(server$startFeeding(game.id, sourceAnimal, 1, 'TraitPiracy', targetAnimal.id));
     return true;
   }
@@ -119,7 +119,7 @@ export const TraitTailLoss = {
   type: 'TraitTailLoss'
   , targetType: TRAIT_TARGET_TYPE.TRAIT
   , cooldowns: fromJS([
-    ['TraitTailLoss', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ACTIVATION]
+    ['TraitTailLoss', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
   , action: (game, targetAnimal, trait, targetTrait, attackAnimal, attackTrait) => (dispatch, getState) => {
     dispatch(server$traitAnimalRemoveTrait(game.id, targetAnimal, targetTrait.id));
@@ -135,7 +135,7 @@ export const TraitCommunication = {
   type: 'TraitCommunication'
   , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
   , cooldowns: fromJS([
-    ['TraitCommunication', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ROUND]
+    ['TraitCommunication', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: () => true
 };
@@ -146,11 +146,11 @@ export const TraitGrazing = {
   type: 'TraitGrazing'
   , targetType: TRAIT_TARGET_TYPE.NONE
   , cooldowns: fromJS([
-    ['TraitGrazing', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ROUND]
+    ['TraitGrazing', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , playerControllable: true
-  , action: (game, sourceAnimal) => (dispatch) => {
-    dispatch(server$traitStartCooldown(game.id, TraitGrazing, sourceAnimal));
+  , action: (game, sourceAnimal, traitGrazing) => (dispatch) => {
+    dispatch(server$traitStartCooldown(game.id, traitGrazing, sourceAnimal));
     dispatch(server$traitGrazeFood(game.id, 1, sourceAnimal));
     return true;
   }
@@ -165,12 +165,12 @@ export const TraitMassive = {
 export const TraitHibernation = {
   type: 'TraitHibernation'
   , cooldowns: fromJS([
-    ['TraitHibernation', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TWO_TURNS]
+    ['TraitHibernation', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TWO_TURNS]
   ])
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
-  , action: (game, sourceAnimal) => (dispatch) => {
-    dispatch(server$traitStartCooldown(game.id, TraitHibernation, sourceAnimal));
+  , action: (game, sourceAnimal, traitHibernation) => (dispatch) => {
+    dispatch(server$traitStartCooldown(game.id, traitHibernation, sourceAnimal));
     dispatch(server$traitSetAnimalFlag(game, sourceAnimal, TRAIT_ANIMAL_FLAG.HIBERNATED));
     return false;
   }
@@ -192,9 +192,10 @@ export const TraitCooperation = {
   type: 'TraitCooperation'
   , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
   , cooldowns: fromJS([
-    ['TraitCooperation', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.ROUND]
+    ['TraitCooperation', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: () => true
+  , $checkAction: (game) => game.food > 0
 };
 
 export const TraitBurrowing = {

@@ -31,7 +31,7 @@ settings:
       clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$Z'));
     });
 
-    expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$A'])).size(1);
+    //expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$A'])).size(1);
     expect(selectPlayer(User0).acted).true;
     expect(selectAnimal(User1, 0).id).equal('$Z');
 
@@ -39,6 +39,9 @@ settings:
     clientStore1.dispatch(gameEndTurnRequest());
 
     replaceGetRandom(() => 0, () => {
+      expectUnchanged('Cooldown on $A', () =>
+          clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$Z'))
+        , serverStore, clientStore0, clientStore1);
       clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$Z'));
       expect(selectGame().question).ok;
       expect(ClientGame0().question).ok;
@@ -48,9 +51,9 @@ settings:
       expect(ClientGame0().question).null;
       expect(ClientGame1().question).null;
 
-      expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$A'])).size(1);
-      expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$B'])).size(2);
-      expect(selectGame().getIn(['cooldowns', 'PLAYER', User0.id])).size(1);
+      //expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$A'])).size(1);
+      //expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$B'])).size(2);
+      //expect(selectGame().getIn(['cooldowns', 'PLAYER', User0.id])).size(1);
       expect(selectPlayer(User0).acted).true;
       expect(selectAnimal(User1, 0).id).equal('$Z');
       expect(selectAnimal(User1, 0).traits).size(3);

@@ -23,7 +23,6 @@ import {
 import {selectGame} from '../../../../selectors';
 
 import {QuestionRecord} from '../../GameModel';
-import {checkAction} from '../TraitDataModel';
 import {
   TraitMimicry
   , TraitRunning
@@ -42,9 +41,9 @@ import {
   , TraitSwimming
 } from '../traitTypes/index';
 
-export const endHunt = (game, sourceAnimal, trait, targetAnimal) => (dispatch) => {
-  dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, sourceAnimal));
-  dispatch(server$traitNotify_End(game.id, sourceAnimal.id, trait, targetAnimal.id));
+export const endHunt = (game, sourceAnimal, traitCarnivorous, targetAnimal) => (dispatch) => {
+  dispatch(server$traitStartCooldown(game.id, traitCarnivorous, sourceAnimal));
+  dispatch(server$traitNotify_End(game.id, sourceAnimal.id, traitCarnivorous, targetAnimal.id));
 };
 
 export const TraitCarnivorous = {
@@ -69,17 +68,17 @@ export const TraitCarnivorous = {
           dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
           return true;
         }
-      } else if (defenseTrait.type === TraitMimicry.type && checkAction(game, TraitMimicry, targetAnimal)) {
+      } else if (defenseTrait.type === TraitMimicry.type && defenseTrait.checkAction(game, targetAnimal)) {
         traitMimicry = TraitMimicry.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
         if (traitMimicry.size === 0) traitMimicry = void 0;
         else if (traitMimicry.size === 1) possibleDefences += 1;
         else if (traitMimicry.size > 1) possibleDefences += traitMimicry.size;
-      } else if (defenseTrait.type === TraitTailLoss.type && checkAction(game, TraitTailLoss, targetAnimal)) {
+      } else if (defenseTrait.type === TraitTailLoss.type && defenseTrait.checkAction(game, targetAnimal)) {
         traitTailLoss = targetAnimal.traits;
         if (traitTailLoss.size === 0) traitTailLoss = void 0;
         else if (traitTailLoss.size === 1) possibleDefences += 1;
         else if (traitTailLoss.size > 1) possibleDefences += traitTailLoss.size;
-      } else if (defenseTrait.type === TraitShell.type && checkAction(game, TraitShell, targetAnimal)) {
+      } else if (defenseTrait.type === TraitShell.type && defenseTrait.checkAction(game, targetAnimal)) {
         traitShell = true;
         possibleDefences += 1;
       }

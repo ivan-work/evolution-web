@@ -56,7 +56,7 @@ const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
       game.isPlayerTurn()
       && game.isFeeding()
       && sourceAnimal.ownerId === game.userId
-      && trait.getDataModel().checkAction(game, sourceAnimal)
+      && trait.checkAction(game, sourceAnimal)
     )
   }
   , (connect, monitor) => ({
@@ -104,7 +104,7 @@ class ClickAnimalTrait extends AnimalTrait {
     const active = game.isPlayerTurn()
       && game.isFeeding()
       && sourceAnimal.ownerId === game.userId
-      && trait.getDataModel().checkAction(game, sourceAnimal);
+      && trait.checkAction(game, sourceAnimal);
     this.classNames = {
       pointer: active
       , active

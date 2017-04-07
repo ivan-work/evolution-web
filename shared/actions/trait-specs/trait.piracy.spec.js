@@ -147,7 +147,7 @@ deck: 20 camo
 phase: 2
 food: 4
 players:
-  - continent: $Q piracy +, $W +
+  - continent: $Q piracy +, $Waiter +
   - continent: $A ++ massive fat
 `);
     const {selectGame, selectPlayer, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
@@ -162,6 +162,7 @@ players:
 
     // Feeding
     clientStore1.dispatch(traitTakeFoodRequest('$A'));
+    clientStore1.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(traitActivateRequest('$Q', 'TraitPiracy', '$A'));
 
     expect(selectAnimal(User0, 0).getFoodAndFat(), 'Can steal from fat massive').equal(1);

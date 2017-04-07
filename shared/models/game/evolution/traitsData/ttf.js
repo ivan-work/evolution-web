@@ -32,7 +32,7 @@ export const TraitMetamorphose = {
   ])
   , action: (game, sourceAnimal, traitMetamorphose, targetTrait) => (dispatch, getState) => {
     dispatch(server$traitAnimalRemoveTrait(game.id, sourceAnimal, targetTrait.id));
-    dispatch(server$traitStartCooldown(game.id, TraitMetamorphose, sourceAnimal));
+    dispatch(server$traitStartCooldown(game.id, traitMetamorphose, sourceAnimal));
 
     const {animal} = selectGame(getState, game.id).locateAnimal(sourceAnimal.id, sourceAnimal.ownerId);
     dispatch(server$startFeeding(game.id, animal, 1, 'TraitMetamorphose'));
