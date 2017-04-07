@@ -59,7 +59,7 @@ export class Card extends React.Component {
           {card.traitsCount === 2
             && <div className={'trait trait1 ' + card.trait1}>{T.translate('Game.Trait.' + card.trait1)}</div>}
           {card.traitsCount === 2
-          && <div className={'trait trait2 ' + card.trait2}>{T.translate('Game.Trait.' + card.trait2)}</div>}
+            && <div className={'trait trait2 ' + card.trait2}>{T.translate('Game.Trait.' + card.trait2)}</div>}
         </div>
       </Tooltip>
     </div>
@@ -108,7 +108,8 @@ export const DragCard = DragSource(DND_ITEM_TYPE.CARD
       ...super.getClassNames()
       , isUser
       , draggable: true
-      , canDrag
+      , active: canDrag
+      , disabled: !canDrag
       , isDragging
     }
   }

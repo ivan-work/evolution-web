@@ -3,7 +3,7 @@ import React, {Component, PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 import T from 'i18n-react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
-import classnames from 'classnames';
+import cn from 'classnames';
 
 //import {Tooltip} from './../../utils/Tooltips.jsx';
 import {Tooltip} from './../../utils/Tooltips.jsx';
@@ -12,27 +12,6 @@ import {AnimalTrait} from './AnimalTrait.jsx';
 import AnimalTraitArrowMarker from './AnimalTraitArrowMarker.jsx';
 
 const AnimalLinkedTraits = [];
-
-const traitPropsMap = _.forIn({
-  TraitCommunication: {
-    color: '#00F'
-  }
-  , TraitCooperation: {
-    color: '#F00'
-  }
-  , TraitSymbiosis: {
-    color: '#F0F'
-    , marker: 'url(#symbioticArrow)'
-  }
-  , default: {
-    color: '#999'
-    , opacity: 1
-  }
-}, (obj) => _.defaults(obj, {
-  color: '#000'
-  , opacity: .75
-  , marker: 'none'
-}));
 
 export class AnimalLinkedTrait extends Component {
   constructor(props) {
@@ -105,7 +84,7 @@ export class AnimalLinkedTrait extends Component {
         this.setState({
           d: `M${x1},${y1} A 1 ${.5 + .5 * length} ${angle * 180 / Math.PI || 0} 1 1 ${x2},${y2}`
           , reversed
-          , debug: [(angleAnimal*180/Math.PI).toFixed(1) >= 0
+          , debug: [(angleAnimal * 180 / Math.PI).toFixed(1) >= 0
             , angleAnimal1 > angleAnimal2
             , x1 < x2
           ].join(',')
@@ -122,24 +101,27 @@ export class AnimalLinkedTrait extends Component {
 
   renderInPortal() {
     if (this.state === null) return <g/>;
-    const traitProps = traitPropsMap[this.props.trait.type] || traitPropsMap.default;
     //var color = "#" + (Math.random() * 0xFFFFFF << 0).toString(16);
+    const markerClassName = cn({
+      [this.props.trait.type]: true
+      , Marker: true
+    });
+    const linkClassName = cn({
+      [this.props.trait.type]: true
+      , Link: true
+      , MarkerStart: !this.state.reversed
+      , MarkerEnd: this.state.reversed
+    });
     return <g>
       <defs>
-        <AnimalTraitArrowMarker id='symbioticArrow' markerSize={4} style={{
-          fill: traitPropsMap.TraitSymbiosis.color
-        }}/>
+        <AnimalTraitArrowMarker id='symbioticArrow' className={markerClassName} markerSize={4}/>
       </defs>
       <Tooltip label={T.translate('Game.Trait.' + this.props.trait.type)}>
-        <path d={this.state.d} style={{
+        <path className={linkClassName} d={this.state.d} style={{
          strokeWidth: this.state.strokeWidth + 'px'
          , strokeLinecap: 'round'
-         , opacity: traitProps.opacity
-         , stroke: traitProps.color
          , fill: 'none'
          , pointerEvents: 'auto'
-         , markerStart: !this.state.reversed ? traitProps.marker : 'none'
-         , markerEnd: this.state.reversed ? traitProps.marker : 'none'
         }}/>
       </Tooltip>
     </g>

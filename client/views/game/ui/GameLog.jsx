@@ -5,7 +5,7 @@ import {DialogTitle, DialogContent} from 'react-mdl';
 import {Dialog} from '../../utils/Dialog.jsx';
 
 import User from '../../utils/User.jsx';
-import AnimalTextFull, {AnimalText} from '../animals/AnimalText.jsx';
+import AnimalText from '../animals/AnimalText.jsx';
 
 const DATA_REGEX = /!(\w+)/g;
 const VIEW_REGEX = /(\$[\w\-@]+)/g;
