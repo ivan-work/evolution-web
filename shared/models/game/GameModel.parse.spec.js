@@ -1,5 +1,5 @@
 import {List, Map} from 'immutable';
-import {GameModel, StatusRecord} from './GameModel';
+import {GameModel, PHASE, StatusRecord} from './GameModel';
 import {AnimalModel} from './evolution/AnimalModel';
 import {TraitModel} from './evolution/TraitModel';
 import * as cardData from './evolution/cardData';
@@ -124,5 +124,32 @@ players:
     expect(ServerGame().getIn(['players', User1.id, 'ready'])).true;
     expect(ServerGame().getIn(['players', User1.id, 'hand'])).equal(List());
     expect(ServerGame().getIn(['players', User1.id, 'continent'])).equal(List());
+  });
+
+  it('mockGame.ParseGame phase 0', () => {
+    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+    const gameId = ParseGame(`
+deck: 12 carnivorous, 6 sharp
+phase: 0
+food: 2
+players:
+  - hand: 2 carn
+    continent: carn sharp, sharp camo
+`);
+    expect(ServerGame().started).equal(true);
+    expect(ServerGame().food, 'ServerGame().food').equal(2);
+    expect(ServerGame().status).equal(new StatusRecord({
+      turn: 0
+      , round: 0
+      , player: 0
+      , phase: 1
+    }));
+    expect(ServerGame().deck.size).equal(6);
+    expect(ServerGame().getIn(['players', User0.id, 'ready'])).true;
+    expect(ServerGame().getIn(['players', User0.id, 'hand'])).size(8);
+    expect(ServerGame().getIn(['players', User0.id, 'continent'])).size(2);
+    expect(ServerGame().getIn(['players', User1.id, 'ready'])).true;
+    expect(ServerGame().getIn(['players', User1.id, 'hand'])).size(6);
+    expect(ServerGame().getIn(['players', User1.id, 'continent'])).size(0);
   });
 });

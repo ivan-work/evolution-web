@@ -186,9 +186,7 @@ export const startCooldown = (game, {link, duration, place, placeId}) =>
 export const gameEnd = (state, {game}) => game.end();
 
 export const gamePlayerLeft = (game, {userId}) => game
-  .removeIn(['players', userId])
-  .setIn(['leavers', userId], game.getPlayer(userId)
-    .set('playing', false));
+  .setIn(['players', userId, 'playing'], false);
 
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)

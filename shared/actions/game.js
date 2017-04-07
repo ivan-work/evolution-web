@@ -60,13 +60,13 @@ export const gameDestroy = (gameId) => ({
 
 export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
   logger.info('server$gameLeave')
-  const game = selectGame(getState, gameId);
   dispatch(server$game(gameId, gamePlayerLeft(gameId, userId)));
-  switch (game.players.size) {
-    case 1:
+  const game = selectGame(getState, gameId);
+  switch (game.players.filter(p => p.playing).size) {
+    case 0:
       dispatch(server$game(gameId, gameDestroy(gameId)));
       break;
-    case 2:
+    case 1:
       if (game.status.phase !== PHASE.FINAL) {
         dispatch(server$game(gameId, gameEnd(gameId, selectGame(getState, gameId).toClient())));
       }

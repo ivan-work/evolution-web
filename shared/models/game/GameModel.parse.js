@@ -67,12 +67,14 @@ export const parseFromRoom = (room, string = '') => {
 
   const deck = parseCardList(seed.deck || '').map(card => card.toClient());
 
+  if (seed.phase === void 0) seed.phase = 1;
+
   const players = room.users.reduce((result, id, index) => {
     const player = new PlayerModel({
       id
       , hand: parseCardList(seed.players && seed.players[index] && seed.players[index].hand || '')
       , continent: parseAnimalList(id, seed.players && seed.players[index] && seed.players[index].continent || '')
-      , ready: true
+      , ready: seed.phase !== 0
       , index
       , ended: false
     }).toClient();
@@ -84,9 +86,9 @@ export const parseFromRoom = (room, string = '') => {
     id: uuid.v4().slice(0, 4)
     , roomId: room.id
     , food: seed.food || 0
-    , started: true
+    , started: seed.phase !== 0
     , status: new StatusRecord({
-      phase: seed.phase || 1
+      phase: seed.phase
     })
     , deck
     , players

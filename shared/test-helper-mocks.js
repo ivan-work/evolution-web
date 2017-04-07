@@ -7,7 +7,7 @@ import {
 , roomJoinRequest
 , gameCreateSuccess
 , gameReadyRequest
-} from '~/shared/actions/actions';
+} from './actions/actions';
 
 //export default () => {
   global.mockStores = (count = 2, initialServerStore = void 0) => {
@@ -63,6 +63,10 @@ import {
         const clientStore = mockedStores[i + 1]['clientStore' + i];
         clientStore.disconnect();
         clientStore.connect(result[0].serverStore);
+      }
+      for (let i = 0; i < count; ++i) {
+        const clientStore = mockedStores[i + 1]['clientStore' + i];
+        clientStore.dispatch(gameReadyRequest());
       }
       return gameId;
     };

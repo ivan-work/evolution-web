@@ -46,7 +46,6 @@ const GameModelData = {
   , roomId: null
   , deck: null
   , players: Map()
-  , leavers: Map()
   , food: -1
   , started: false
   , status: new StatusRecord()
@@ -84,14 +83,12 @@ export class GameModel extends Record(GameModelData) {
     return this
       .set('deck', this.deck.map(card => card.toOthers()))
       .set('players', this.players.map(player => player.id === userId ? player : player.toOthers()))
-      .set('leavers', this.leavers.map(leaver => leaver.toOthers()))
   }
 
   toClient() {
     return this
       .set('deck', this.deck.map(card => card.toClient()))
-      .set('players', this.players.map(player => player.toClient()))
-      .set('leavers', this.leavers.map(leaver => leaver.toClient()))
+      .set('players', this.players.map(player => player.toClient()));
   }
 
   static fromServer(js) {
@@ -101,7 +98,6 @@ export class GameModel extends Record(GameModelData) {
       ...js
       , deck: List(js.deck).map(c => CardModel.fromServer(c))
       , players: Map(js.players).map(p => PlayerModel.fromServer(p))
-      , leavers: Map(js.leavers).map(p => PlayerModel.fromServer(p))
       , status: new StatusRecord(js.status)
       , cooldowns: CooldownList.fromServer(js.cooldowns)
     });
@@ -113,7 +109,7 @@ export class GameModel extends Record(GameModelData) {
     let maxScore = -1;
     this.players.forEach((player, playerId) => {
       const score = player.countScore();
-      if (score > maxScore) {
+      if (player.playing && score > maxScore) {
         winnerId = playerId;
         maxScore = score;
       }
@@ -176,10 +172,8 @@ export class GameModel extends Record(GameModelData) {
     let players = [];
     for (let i = 0, c = game.status.roundPlayer; i < game.players.size; ++i) {
       const player = game.players.find(p => p.index === c);
-      const leaver = game.leavers.find(p => p.index === c);
       if (player) players.push(player);
-      if (leaver) players.push(leaver);
-      c = (c + 1) % (game.players.size + game.leavers.size);
+      c = (c + 1) % (game.players.size);
     }
     return players;
   }
@@ -199,10 +193,10 @@ export class GameModelClient extends Record({
 
   getPlayer(pid) {
     return pid === void 0 || pid === null
-      ? (this.players.get(this.userId) || this.leavers.get(this.userId))
+      ? (this.players.get(this.userId))
       : pid.id
-      ? (this.players.get(pid.id) || this.leavers.get(pid.id))
-      : (this.players.get(pid) || this.leavers.get(pid));
+      ? (this.players.get(pid.id))
+      : (this.players.get(pid));
   }
 
   isPlayerTurn(userId) {
