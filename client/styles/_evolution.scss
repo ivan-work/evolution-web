@@ -49,7 +49,8 @@ $CURRENT_TURN_BACKGROUND: #dfd;
     flex: 1;
     flex-flow: column nowrap;
     .ChatWindow {
-      flex: 1;
+      flex-grow: 1;
+      flex-basis: 0;
       max-height: none;
     }
   }
