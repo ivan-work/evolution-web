@@ -41,6 +41,45 @@ App:
     ErrorBan: Вас забанили
 Game:
   Game: Игра
+  Phase:
+    1: Развитие
+    2: Кормление
+  UI:
+    EndTurn: Передать ход
+    EndPhase: Закончить фазу
+    Deck: Колода
+    Log:
+      Label: Лог действий
+      TakeFood: $player взял $F из кормовой базы.
+#      TraitCooperation:
+#      TraitCommunication:
+    Scores:
+      Label: Счет
+      Winner: Победитель
+      TablePlayer: Игрок
+      TableScoreNormal: Очки
+      TableScoreDead: Очки (за съеденных)
+    Status:
+      Turn: Ход
+      Phase: Фаза
+      Round: Раунд
+      Player: Игрок
+      Time: Время
+    TraitDefenceDialog:
+      Title: Защищайтесь!
+      Time: Осталось времени
+      Mimicry_Title: Мимикрировать
+      TailLoss_Title: Отбросить хвост
+  Log:
+    gameGiveCards     : Игрок $Player{0} получил карты ({1})
+    gameDeployAnimal  : Игрок $Player{0} выложил $A
+    gameDeployTrait   : Игрок $Player{0} выложил {1} на ${2}
+    gameEndTurn       :
+    gameStartEat      :
+    PhaseDeploy       :
+    gameNextPlayer    :
+    traitMoveFood     :
+    traitNotify_Start :
   Trait:
     TraitSymbiosis      : Симбиоз
     TraitCommunication  : Сотрудничество
@@ -74,6 +113,9 @@ Game:
     TraitSpecA          : Термосинтез
     TraitSpecB          : Фотосинтез
   TraitDesc:
+    $EAT: Активируется вместо взятия еды.
+    $CDRound: Можно использовать только один раз в раунд.
+    $CDTurn: Можно использовать только один раз в ход.
     TraitSymbiosis      : Сыграть одновременно на пару $A$A. Второе из $A указывается как "симбионт". Другое $A не может быть атаковано хищником, пока жив "симбионт", но может получать $F, только если "симбионт" уже НАКОРМЛЕН.
     TraitCommunication  : Сыграть одновременно на пару $A$A. Когда одно $A получает $F - второе $A сразу же получает ещё $F. $CDRound.
     TraitCooperation    : Сыграть одновременно на пару $A$A. Когда одно $A берет $F из "кормовой базы", другое $A берет $F вне очереди. $CDRound.
@@ -103,33 +145,5 @@ Game:
     TraitViviparous     : $A, став накормленным, производит новое $A - поместить верхнюю карту с колоды на поле как новое $A. В этот ход оно также считается накормленным.
     TraitAmbush         : Хищник с этим свойством может атаковать $A, когда оно получает $F из кормовой базы. Если атакованное $A съедено, $F остается в кормовой базе.
     TraitFlight         : $A с этим свойством не может быть атаковано хищником, у которого столько же или больше свойств.
-    TraitSpecA          : $BE. Получить $F из энергии тепла. Это свойство нельзя использовать, если на континенте в данный момент больше одного $A с данным свойством.
-    TraitSpecB          : $BE. Получить $F из энергии солнца. Это свойство нельзя использовать, если на континенте в данный момент больше одного $A с данным свойством.
-  Phase:
-    1: Развитие
-    2: Кормление
-  UI:
-    Log:
-      Label: Лог действий
-      TakeFood: $player взял $F из кормовой базы.
-#      TraitCooperation:
-#      TraitCommunication:
-    EndTurn: Закончить ход
-    EndPhase: Закончить фазу
-    Scores:
-      Label: Счет
-      Winner: Победитель
-      TablePlayer: Игрок
-      TableScoreNormal: Очки
-      TableScoreDead: Очки (за съеденных)
-    Status:
-      Turn: Ход
-      Phase: Фаза
-      Round: Раунд
-      Player: Игрок
-      Time: Время
-    TraitDefenceDialog:
-      Title: Защищайтесь!
-      Time: Осталось времени
-      Mimicry_Title: Мимикрировать
-      TailLoss_Title: Отбросить хвост
+    TraitSpecA          : $EAT. Получить $F из энергии тепла. Это свойство нельзя использовать, если на континенте в данный момент больше одного $A с данным свойством.
+    TraitSpecB          : $EAT. Получить $F из энергии солнца. Это свойство нельзя использовать, если на континенте в данный момент больше одного $A с данным свойством.

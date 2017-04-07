@@ -15,7 +15,7 @@
 
   transition: background .3s;
 
-  & > .inner {
+  & .inner {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -25,9 +25,7 @@
     line-height: 1em;
 
     word-wrap: break-word;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    @include ellipsis();
   }
 
   &.draggable.active {
@@ -39,5 +37,20 @@
 
   &.Animate {
     background-color: green !important;
+  }
+}
+
+.AnimalTraitDetails {
+  max-width: $ANIMAL_TRAIT_DETAILS_WIDTH;
+  & .icon {
+    width: 1.5em;
+    height: 1.5em;
+  }
+  & .icon.material-icons {
+    font-size: 18px;
+    vertical-align: middle;
+  }
+  & .mdl-card__supporting-text {
+    width: 80%;
   }
 }

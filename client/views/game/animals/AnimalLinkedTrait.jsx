@@ -130,7 +130,7 @@ export class AnimalLinkedTrait extends Component {
           fill: traitPropsMap.TraitSymbiosis.color
         }}/>
       </defs>
-      <Tooltip tip={/*T.translate('Game.Trait.' + this.props.trait.type)*/this.state.debug}>
+      <Tooltip label={T.translate('Game.Trait.' + this.props.trait.type)}>
         <path d={this.state.d} style={{
          strokeWidth: this.state.strokeWidth + 'px'
          , strokeLinecap: 'round'

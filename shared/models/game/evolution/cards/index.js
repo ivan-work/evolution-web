@@ -5,7 +5,6 @@ export * from './base';
 
 export const CardUnknown = {
   type: 'CardUnknown'
-  , image: 'http://evolive.ru/images/def.png'
 };
 
 export const CardCarnivorous = makeCard(traits.TraitCarnivorous);

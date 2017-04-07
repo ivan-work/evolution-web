@@ -5,7 +5,6 @@ import {
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
   , TRAIT_COOLDOWN_LINK
-  , FOOD_SOURCE_TYPE
 } from '../constants';
 import {
   server$traitKillAnimal
@@ -100,13 +99,13 @@ export const TraitCarnivorous = {
         }
 
         // Scavenge
-        dispatch(server$startFeeding(game.id, sourceAnimal, 2, FOOD_SOURCE_TYPE.ANIMAL_HUNT, targetAnimal.id));
+        dispatch(server$startFeeding(game.id, sourceAnimal, 2, 'TraitCarnivorous', targetAnimal.id));
 
         const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
         game.constructor.sortPlayersFromIndex(game, currentPlayerIndex).some(player => player.continent.some(animal => {
           const traitScavenger = animal.hasTrait(TraitScavenger);
           if (traitScavenger && animal.canEat(game) > 0) {
-            dispatch(server$startFeeding(game.id, animal, 1));
+            dispatch(server$startFeeding(game.id, animal, 1, 'TraitScavenger', sourceAnimal.id));
             return true;
           }
         }));

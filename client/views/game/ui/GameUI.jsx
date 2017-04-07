@@ -7,6 +7,7 @@ import {GameProvider} from '../providers/GameProvider.jsx';
 import {PortalTarget} from '../../utils/PortalTarget.jsx';
 import {Button} from 'react-mdl';
 import PlayersList from './PlayersList.jsx';
+import GameLog from './GameLog.jsx';
 import {GameStatusDisplay} from './GameStatusDisplay.jsx';
 import TraitDefenceDialog from './TraitDefenceDialog.jsx';
 import Chat from '../../Chat.jsx';
@@ -47,6 +48,7 @@ class _GameUI extends React.Component {
 
         <div> {/*Firefox fix =/*/}
           <div style={{height: '140px'}}>
+            <GameLog game={game}/>
             <PortalTarget name='deck'/>
           </div>
         </div>

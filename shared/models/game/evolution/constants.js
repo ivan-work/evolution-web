@@ -14,13 +14,6 @@ export const CARD_TARGET_TYPE = {
   , LINK_ENEMY: CTT_PARAMETER.ANIMAL + CTT_PARAMETER.ENEMY + CTT_PARAMETER.LINK
 };
 
-export const FOOD_SOURCE_TYPE = {
-  GAME: 'GAME'
-  , ANIMAL_TAKE: 'ANIMAL_TAKE' // Take food from animal
-  , ANIMAL_COPY: 'ANIMAL_COPY' // Copy food from animal (communication)
-  , ANIMAL_HUNT: 'ANIMAL_HUNT' // Hunt food from animal
-};
-
 export const TRAIT_TARGET_TYPE = {
   ANIMAL: 'ANIMAL'
   , TRAIT: 'TRAIT'

@@ -26,6 +26,7 @@ import {
   , traitAnimalRemoveTrait
   , traitGrazeFood
   , traitSetAnimalFlag
+  , traitNotify_Start
 } from '../../server/reducers/games-rdx-server';
 
 export const reducer = createReducer(null, {
@@ -54,4 +55,5 @@ export const reducer = createReducer(null, {
   , traitAnimalRemoveTrait
   , traitGrazeFood
   , traitSetAnimalFlag
+  , traitNotify_Start
 });

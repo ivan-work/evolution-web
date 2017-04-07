@@ -10,6 +10,7 @@ import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 import {TRAIT_ANIMAL_FLAG, TRAIT_TARGET_TYPE} from '../../../../shared/models/game/evolution/constants';
 
 import {Tooltip} from './../../utils/Tooltips.jsx';
+import AnimalTraitDetails from './AnimalTraitDetails.jsx';
 import {AnimalTrait, DragAnimalTrait, ClickAnimalTrait} from './AnimalTrait.jsx';
 import {AnimalLinkedTrait} from './AnimalLinkedTrait.jsx';
 import {DragAnimalSelectLink} from './AnimalSelectLink.jsx'
@@ -60,7 +61,6 @@ class Animal extends React.Component {
           })}
       </div>
       {this.renderSelectLink()}
-      <Tooltip tip='animal'>
         <div id={'AnimalBody'+model.id} className='inner'>
           {model.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) ?
           <span className='material-icons Flag Poisoned'>smoking_rooms</span> : null}
@@ -70,7 +70,6 @@ class Animal extends React.Component {
             {Array.from({length: model.food}).map((u, index) => <Food key={index}/>)}
           </div>
         </div>
-      </Tooltip>
     </div>);
   }
 }
@@ -154,7 +153,7 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
         return <AnimalLinkedTrait trait={trait} sourceAnimal={animal}/>;
       } else if (trait.getDataModel().playerControllable && trait.getDataModel().targetType === TRAIT_TARGET_TYPE.NONE) {
         return <ClickAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal} onClick={() => {
-          this.props.onTraitDropped(animal.id, trait.id);
+      {/*//     this.props.onTraitDropped(animal.id, trait.id);*/}
         }}/>;
       } else if (trait.getDataModel().playerControllable) {
         return <DragAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}/>;

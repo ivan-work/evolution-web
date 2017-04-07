@@ -70,15 +70,16 @@ export class PlayerWrapper extends Component {
       key='CardCollection'
       name={isUser ? 'Hand' : player.id}
       isUser={isUser}>
-      {player.hand.map((cardModel, i) => this.renderCard(cardModel, dragEnabled))}
+      {player.hand.map((cardModel, i) => this.renderCard(cardModel, dragEnabled, isUser))}
     </CardCollection>)
   }
 
-  renderCard(cardModel, dragEnabled) {
+  renderCard(cardModel, dragEnabled, isUser) {
     return (<DragCard
       key={cardModel.id}
       ref={this.props.connectRef('Card#' + cardModel.id)}
       card={cardModel}
+      isUser={isUser}
       dragEnabled={dragEnabled}/>);
   }
 
