@@ -18,16 +18,6 @@ export const gameGiveCards = (game, {userId, cards}) => {
     .updateIn(['players', userId, 'hand'], hand => hand.concat(cards));
 };
 
-export const gameNextPlayer = (game) => {
-  const currentPlayerIndex = game.getIn(['status', 'player']);
-  const totalPlayers = game.getIn(['players']).size;
-  return (currentPlayerIndex + 1) < totalPlayers
-    ? game.setIn(['status', 'player'], currentPlayerIndex + 1)
-    : game
-    .updateIn(['status', 'round'], round => round + 1)
-    .setIn(['status', 'player'], 0);
-};
-
 export const gameDeployAnimal = (game, {userId, animal, animalPosition, cardPosition}) => {
   ensureParameter(userId, 'string');
   ensureParameter(animal, AnimalModel);
@@ -47,6 +37,44 @@ export const gameDeployTrait = (game, {userId, animalId, card}) => {
     .updateIn(['players', userId, 'continent', animalIndex, 'cards'], cards => cards.push(card))
 };
 
+export const gameNextPlayer = (game) => {
+  let playerIndex = game.getIn(['status', 'player']);
+  let emergencyCount = game.players.size;
+  let totalPlayers = game.players.size;
+  let round = game.getIn(['status', 'round']);
+  do {
+    --emergencyCount;
+    ++playerIndex;
+    if (playerIndex >= totalPlayers) {
+      ++round;
+      playerIndex = 0;
+    }
+    const player = game.players.find(player => player.index === playerIndex);
+    if (player && !player.ended) {
+      break;
+    }
+  } while (emergencyCount >= 0);
+
+  return emergencyCount < 0 ? game : game
+    .setIn(['status', 'round'], round)
+    .setIn(['status', 'player'], playerIndex);
+};
+
+export const gameEndDeploy = (game, {userId}) => {
+  ensureParameter(userId, 'string');
+  return game
+    .setIn(['players', userId, 'ended'], true);
+};
+
+export const gameStartEat = (game, {food}) => {
+  ensureParameter(food, 'number');
+  return game
+    .setIn(['food'], food)
+    .setIn(['status', 'phase'], PHASE.EAT)
+    .setIn(['status', 'round'], 0)
+    .setIn(['status', 'player'], 0);
+};
+
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
   , roomExitSuccess: (state, {roomId, userId}) => {
@@ -63,4 +91,6 @@ export const reducer = createReducer(Map(), {
   , gameNextPlayer: (state, data) => state.update(data.gameId, game => gameNextPlayer(game, data))
   , gameDeployAnimal: (state, data) => state.update(data.gameId, game => gameDeployAnimal(game, data))
   , gameDeployTrait: (state, data) => state.update(data.gameId, game => gameDeployTrait(game, data))
+  , gameEndDeploy: (state, data) => state.update(data.gameId, game => gameEndDeploy(game, data))
+  , gameStartEat: (state, data) => state.update(data.gameId, game => gameStartEat(game, data))
 });
