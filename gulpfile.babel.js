@@ -22,6 +22,7 @@ const testWatch = (paths) => gulp.src(paths)
 
 gulp.task('test:server', () => {
   watching = true;
+  process.env.NODE_ENV = 'test';
   const paths = ['./shared/test-helper.js', 'shared/**/*.spec.js', 'server/**/*.spec.js'];
   testWatch(paths);
   return watch('{shared,server,client}/**/*.js*(x)', () => testWatch(paths));
@@ -29,6 +30,7 @@ gulp.task('test:server', () => {
 
 gulp.task('test:client', () => {
   watching = true;
+  process.env.NODE_ENV = 'test';
   const paths = ['./shared/test-helper.js', 'client/**/*.spec.js', 'client/**/*.spec.jsx'];
   testWatch(paths);
   return watch('{shared,server,client}/**/*.js*(x)', () => testWatch(paths));
@@ -36,6 +38,7 @@ gulp.task('test:client', () => {
 
 gulp.task('test:all', () => {
   watching = true;
+  process.env.NODE_ENV = 'test';
   const paths = ['./shared/test-helper.js', 'shared/**/*.spec.js', 'server/**/*.spec.js', 'client/**/*.spec.js', 'client/**/*.spec.jsx'];
   testWatch(paths);
   return watch('{shared,server,client}/**/*.js*(x)', () => testWatch(paths));

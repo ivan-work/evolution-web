@@ -1,4 +1,5 @@
 //require('source-map-support').install();
+if (!global._babelPolyfill) require('babel-polyfill');
 import polyfills from '../shared/utils/polyfills'
 import logger from '../shared/utils/logger';
 import chai from 'chai';
@@ -67,6 +68,7 @@ import { createStore, compose, applyMiddleware } from 'redux'
 import configureStore from '../client/configuration/configureStore'
 import thunk from 'redux-thunk';
 import { reduxTimeout } from './utils/reduxTimeout';
+import { reduxQuestion } from './utils/reduxQuestion';
 //import { reduxTimeout } from 'redux-timeout';
 import { combineReducers } from 'redux-immutable';
 import * as actions from './actions/actions';
@@ -85,7 +87,7 @@ import {errorMiddleware as serverErrorMiddleware} from '../server/middleware/err
 const mixinActions = (store => {
   store.actions = [];
   store.getActions = () => store.actions;
-  store.getActionTypes = () => store.getActions().map(a => a.type)
+  store.getActionTypes = () => store.getActions().map(a => a.type);
   store.clearActions = () => store.actions = [];
   store.getAction = (i) => store.getActions()[i];
   store.getActionType = (i) => store.getActions()[i].type;
@@ -94,7 +96,9 @@ const mixinActions = (store => {
 });
 
 global.mockServerStore = function (initialServerState) {
-  const errorInterceptor = () => {console.log('intercepted')};
+  const errorInterceptor = () => {
+    console.log('intercepted')
+  };
   const ioServer = syncSocketIOServer();
   const serverStore = createStore(
     combineReducers({...serverReducers})
@@ -102,6 +106,7 @@ global.mockServerStore = function (initialServerState) {
     , applyMiddleware(
       serverErrorMiddleware(errorInterceptor)
       , thunk
+      , reduxQuestion()
       , reduxTimeout()
       , store => next => action => {
         serverStore.actions.push(action);

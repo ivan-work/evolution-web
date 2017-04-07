@@ -30,13 +30,6 @@ export const server$game = (gameId, action) => (dispatch, getState) =>
   }));
 
 export const genericClientToServer = {
-  actionAnswer: ({id, data}) => (dispatch, getState) => {
-    if (globalPromiseStore[id]) {
-      const {resolve, reject} = globalPromiseStore[id];
-      delete globalPromiseStore[id];
-      resolve(data);
-    }
-  }
 };
 
 export const genericServerToClient = {
@@ -44,19 +37,4 @@ export const genericServerToClient = {
     logger.error('ERROR: ', data);
     return actionError(null, data.error);
   }
-  , debugQuestion: ({id, action}) => (dispatch, getState) => {
-    if (clientOnQuestion[action.type]) {
-      let answer = dispatch(clientOnQuestion[action.type](action.data));
-      if (!answer || typeof answer.then !== 'function') {
-        answer = Promise.resolve(answer);
-      }
-      answer.then((data) => dispatch(actionAnswer(id, data)));
-    } else {
-      logger.warn('clientOnQuestion action doesnt exist: ' + action.type);
-    }
-  }
-};
-
-const clientOnQuestion = {
-  testAction: (data) => (dispatch) => 'test' + data
 };
