@@ -7,6 +7,8 @@ import {roomExitSuccess} from './rooms';
 import {addTimeout, cancelTimeout} from '~/shared/utils/reduxTimeout';
 
 export const SOCKET_DISCONNECT_NOW = 'SOCKET_DISCONNECT_NOW';
+export const TIMEOUT = 2 * 60 * 1000;
+export const TIMEOUT_TEST = 1;
 
 export const socketConnect = (connectionId, socket) => ({
   type: 'socketConnect'
@@ -29,7 +31,7 @@ export const socketDisconnect = (connectionId, reason) => (dispatch, getState) =
   if (!!user) {
     if (reason !== SOCKET_DISCONNECT_NOW) {
       dispatch(addTimeout(
-        !process.env.TEST ? 5*60*10000 : 1
+        !process.env.TEST ? TIMEOUT : TIMEOUT_TEST
         , 'logoutUser' + user.id
         , logoutUser(user.id)));
     } else {
@@ -48,7 +50,7 @@ export const loginUserRequest = (redirect, login, password) => {
 };
 
 export const loginUserSuccess = (user, redirect) => (dispatch, getState) => {
-  const online = getState().get('users').toArray().map(u => u.toOthers());
+  const online = getState().get('users').map(u => u.toOthers());
   const rooms = getState().get('rooms');
   const games = getState().get('games');
   const room = rooms.find(room => ~room.users.indexOf(user.id)) || {id: null};
@@ -138,7 +140,7 @@ export const authServerToClient = {
       type: 'loginUserSuccess'
       , data: {
         user: user
-        , online: List(online.map(u => new UserModel(u).toOthers()))
+        , online: Map(online).map(u => new UserModel(u).toOthers())
         , rooms: Map(rooms).map(r => RoomModel.fromJS(r))
         , roomId
         , game: GameModelClient.fromServer(game, user.id)

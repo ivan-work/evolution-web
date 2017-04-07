@@ -20,7 +20,7 @@ const makeClientState = () => Map({
     id: null
     , userId: 'User0'
     , roomId: null
-    , deck: GameModel.generateDeck([[12, cardTypes.CardCarnivorous]])
+    , deck: GameModel.generateDeck([[12, cardTypes.CardCarnivorous.type]])
     , players: Map({
       User0: new PlayerModel({
         id: 'User0'
@@ -153,7 +153,7 @@ describe('Game: Deploying:', () => {
     const $endTurn = () => endTurn = true;
     const $Game = mount(<DnDContextGameWrapper {...makeClientState().toObject()} $endTurn={$endTurn}/>);
 
-    expect($Game.find('.EndTurn')).length(1);
+    expect($Game.find('.EndTurn'), '.EndTurn').length(1);
     $Game.find('.EndTurn').simulate('click');
     expect(endTurn).true;
   });

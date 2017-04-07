@@ -9,7 +9,7 @@ export const UsersList = React.createClass({
   mixins: [PureRenderMixin]
   , render: function () {
     return <ul className="UsersList">
-      {this.props.list.map((user) => <li key={user.id}>{user.login} ({user.status})</li>)}
+      {this.props.list.map((user) => <li key={user.id}>{user.login} ({user.status})</li>).toArray()}
     </ul>;
   }
 });

@@ -50,7 +50,6 @@ const server$roomJoinRequest = ({roomId}, {user: {id: userId}}) => (dispatch, ge
     return;
   }
   const userAlreadyInRoom = room.users.some(uid => uid === userId);
-  logger.debug('userAlreadyInRoom', userAlreadyInRoom);
   if (!userAlreadyInRoom) {
     const previousRoom = getState().get('rooms').find(room => {
       return room.users.some(uid => uid === userId);
@@ -58,8 +57,8 @@ const server$roomJoinRequest = ({roomId}, {user: {id: userId}}) => (dispatch, ge
     if (previousRoom) {
       dispatch(roomExitSuccess(previousRoom.id, userId));
     }
+    dispatch(roomJoinSuccess(roomId, userId));
   }
-  dispatch(roomJoinSuccess(roomId, userId));
 };
 
 export const roomsClientToServer = {

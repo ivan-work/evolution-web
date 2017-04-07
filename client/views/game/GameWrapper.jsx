@@ -62,7 +62,7 @@ export class GameWrapper extends React.Component {
       : <Game user={user}/>;
 
     return <div>
-      <MDL.Button className="EndTurn" raised
+      <MDL.Button className="ExitGame" raised
                   onClick={this.props.$exit}>Exit Game</MDL.Button>
       {gameView}
     </div>;
