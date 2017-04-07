@@ -48,7 +48,7 @@ deck: 12 camo
 phase: 2
 food: 12
 players:
-  - continent: $A fat carn, $B fat fat fat, $Waiter
+  - continent: $A fat carn, $B fat fat fat, $Waiter,  $C
     hand: 1 CardGrazingAndFatTissue
   - continent: $C, $D
 `);
@@ -100,6 +100,47 @@ players:
       expect(selectTrait(User0, 0, 3).value, '3').equal(false);
 
       expect(selectPlayer(User1).continent).size(0);
+    });
+
+    it.only('FatTissue activation', () => {
+      const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+      const gameId = ParseGame(`
+deck: 12 camo
+phase: 2
+food: 12
+players:
+  - continent: $A mass fat fat fat ++, $B fat +, $Waiter graz +
+`);
+      const {selectGame, selectCard, selectPlayer, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
+      clientStore0.dispatch(traitTakeFoodRequest('$B'));
+      clientStore0.dispatch(gameEndTurnRequest());
+      clientStore0.dispatch(traitTakeFoodRequest('$A'));
+      clientStore0.dispatch(gameEndTurnRequest());
+      clientStore0.dispatch(traitTakeFoodRequest('$A'));
+      clientStore0.dispatch(gameEndTurnRequest());
+      clientStore0.dispatch(traitTakeFoodRequest('$A'));
+
+      expect(selectAnimal(User0, 0).getFood()).equal(2);
+      expect(selectAnimal(User0, 0).getFat()).equal(3);
+      clientStore0.dispatch(gameEndTurnRequest());
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      expect(selectGame().status.turn, 'Turn 1').equal(1);
+      clientStore0.dispatch(gameEndTurnRequest());
+      expect(selectGame().status.phase, 'Turn 1').equal(PHASE.FEEDING);
+
+      expect(selectAnimal(User0, 0).getFood()).equal(0);
+      expect(selectAnimal(User0, 0).getFat()).equal(3);
+
+      clientStore0.dispatch(traitActivateRequest('$A', selectTraitId(User0, 0, 2)));
+
+      expect(selectAnimal(User0, 0).getFood()).equal(1);
+      expect(selectAnimal(User0, 0).getFat()).equal(2);
+
+      expectUnchanged('Animal $A cant take food now', () =>
+          clientStore0.dispatch(traitTakeFoodRequest('$A'))
+        , serverStore, clientStore0);
+
     });
   });
 });
