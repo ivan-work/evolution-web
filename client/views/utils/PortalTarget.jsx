@@ -70,24 +70,6 @@ export class PortalTarget extends Component {
   }
 
   render() {
-    //console.log(<span></span>)
-    //console.log(React.createElement(this.props.container))
-    //return <span>{
-    //  this.state.portals
-    //    .map(portal => React.cloneElement(portal.renderChildren(this.props.container), {
-    //    key: portal.id
-    //    }))
-    //  }
-    //</span>
-
-    //return React.createElement(this.props.container
-    //  , null
-    //  , [<div key='1'>1</div>, <div key='2'>2</div>])
-
-    //Object.keys(this.state.portals)
-    //  .map(portalId => this.state.portals[portalId])
-    //  .map(portal => <div key={portal.id}>hehe</div>)
-
     return React.createElement(this.props.container
       , null
       , this.state.portals

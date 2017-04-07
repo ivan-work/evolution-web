@@ -24,7 +24,6 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import MouseBackend from './dnd/react-dnd-mouse-backend';
 import TestBackend from 'react-dnd-test-backend';
 
-import {AnimationServiceContext} from '../../services/AnimationService';
 
 export class GameWrapper extends React.Component {
   static childContextTypes = {
@@ -70,8 +69,8 @@ let GameWrapperHOC = GameWrapper;
 const backend = !process.env.TEST ? MouseBackend : TestBackend;
 GameWrapperHOC = DragDropContext(backend)(GameWrapperHOC);
 
+import {AnimationServiceContext} from '../../services/AnimationService';
 import {createAnimationServiceConfig} from './animations';
-
 GameWrapperHOC = AnimationServiceContext(createAnimationServiceConfig())(GameWrapperHOC);
 
 GameWrapperHOC = connect(

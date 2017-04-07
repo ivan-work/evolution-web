@@ -12,16 +12,14 @@ import {PortalsContext, PortalTarget} from '../views/utils/PortalTarget.jsx'
 import {TranslationSwitchView} from './TranslationSwitch.jsx'
 
 //import '../styles/core.scss';
+import {TooltipsContext} from '../views/utils/Tooltips.jsx';
 
-export const App = ServicesContext(PortalsContext(React.createClass({
+export const App = ServicesContext(PortalsContext(TooltipsContext(React.createClass({
   render: function () {
     const {dispatch} = this.props;
     const {socket} = this.props;
     return (
       <Layout fixedHeader>
-        <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
-          <PortalTarget name='game-svg' container='g'/>
-        </svg>
         <Header title={`${T.translate('App.Name')} v${DEFINE_VERSION}`} hideSpacer={true}>
           <Navigation className='header'>
             <TranslationSwitchView/>
@@ -32,10 +30,16 @@ export const App = ServicesContext(PortalsContext(React.createClass({
           {this.props.children}
         </Content>
         <AdminPanelView location={this.props.location}/>
+        <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
+          <PortalTarget name='game-svg' container='g'/>
+        </svg>
+        <div width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
+          <PortalTarget name='tooltips'/>
+        </div>
       </Layout>
     );
   }
-})));
+}))));
 
 export const AppView = connect((state) => {
   return {

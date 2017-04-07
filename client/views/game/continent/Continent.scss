@@ -25,6 +25,7 @@ $VERTICAL_MARGIN: 2px;
     margin: $VERTICAL_MARGIN 2px;
     z-index: 4;
     position: relative;
+    align-self: flex-end;
   }
 
   .ContinentZone {

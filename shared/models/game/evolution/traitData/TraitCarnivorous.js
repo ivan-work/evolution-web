@@ -122,7 +122,7 @@ export const TraitCarnivorous = {
   }
   , checkTarget: (game, sourceAnimal, targetAnimal) => (
     (sourceAnimal.hasTrait('TraitSharpVision') || !targetAnimal.hasTrait('TraitCamouflage'))
-    && (!targetAnimal.traits.some(trait => trait.type === 'TraitSymbiosis' && trait.symbioticAid === targetAnimal.id))
+    && (!targetAnimal.traits.some(trait => trait.type === 'TraitSymbiosis' && trait.linkSource && trait.hostAnimalId === targetAnimal.id))
     && (sourceAnimal.hasTrait('TraitMassive') || !targetAnimal.hasTrait('TraitMassive'))
     && !(targetAnimal.canSurvive() && targetAnimal.hasTrait('TraitBurrowing'))
     && (
