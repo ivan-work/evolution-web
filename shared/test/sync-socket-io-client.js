@@ -61,10 +61,10 @@ class SyncSocketIOClient extends EventEmitter {
 
   disconnect(reason) {
     this.rooms.slice().forEach(room => {
-      this.leave(room)
+      this.leave(room, reason)
     });
 
-    this.socket.emitSelf('disconnect');
+    this.socket.emitSelf('disconnect', reason);
     this.emitSelf('disconnect');
 
     this.server = null;
@@ -83,9 +83,9 @@ class SyncSocketIOClient extends EventEmitter {
     return this;
   }
 
-  leave(namespace) {
+  leave(namespace, reason) {
     namespace = normalizeNamespace(namespace);
-    this.server.of(namespace).emitSelf('disconnect', this.socket);
+    this.server.of(namespace).emitSelf('disconnect', this.socket, reason);
     this.rooms = this.rooms.remove(namespace);
     return this;
   }

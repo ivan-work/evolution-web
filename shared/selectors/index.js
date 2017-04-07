@@ -1,0 +1,1 @@
+export const selectRoom = (store, roomId) => store.getState().getIn(['rooms', roomId]);

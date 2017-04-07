@@ -11,9 +11,9 @@ export const socketStore = (serverSocket, store) => {
 
     socket.emit('connectionId', socket.id);
 
-    socket.on('disconnect', () => {
-      //console.log('server:disconnect');
-      store.dispatch(socketDisconnect(socket.id));
+    socket.on('disconnect', (reason) => {
+      //console.log('server:disconnect', reason);
+      store.dispatch(socketDisconnect(socket.id, reason));
     });
 
     socket.on('action', (action) => {

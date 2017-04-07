@@ -5,12 +5,19 @@ import {push} from 'react-router-redux';
 import {roomsClientToServer} from './rooms';
 import {addTimeout, cancelTimeout} from '~/shared/utils/reduxTimeout';
 
+export const SOCKET_DISCONNECT_NOW = 'SOCKET_DISCONNECT_NOW';
+
 export const socketConnect = (connectionId, socket) => ({
   type: 'socketConnect'
   , data: {connectionId, socket}
 });
 
-export const socketDisconnect = (connectionId) => (dispatch, getState) => {
+export const clientSelfDisconnect = (reason) => ({
+  type: 'clientSelfDisconnect'
+  , data: {reason}
+});
+
+export const socketDisconnect = (connectionId, reason) => (dispatch, getState) => {
   const usersState = getState().get('users');
   let user = usersState.find((user) => user.connectionId == connectionId);
   dispatch({
@@ -18,10 +25,14 @@ export const socketDisconnect = (connectionId) => (dispatch, getState) => {
     , data: {connectionId}
   });
   if (!!user) {
-    dispatch(addTimeout(
-      !process.env.TEST ? 10000 : 10
-      , 'logoutUser' + user.id
-      , logoutUser(user.id)));
+    if (reason !== SOCKET_DISCONNECT_NOW) {
+      dispatch(addTimeout(
+        !process.env.TEST ? 10000 : 10
+        , 'logoutUser' + user.id
+        , logoutUser(user.id)));
+    } else {
+      dispatch(logoutUser(user.id));
+    }
   }
 };
 
