@@ -60,7 +60,7 @@ export const TraitMimicry = {
   , action: (game, mimicryAnimal, newTargetAnimal, attackAnimal, attackTraitData) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, TraitMimicry, mimicryAnimal));
     dispatch(server$traitNotify(game.id, mimicryAnimal, 'TraitMimicry', attackAnimal));
-    dispatch(server$traitActivate(game, attackAnimal, attackTraitData, newTargetAnimal.id));
+    dispatch(server$traitActivate(game, attackAnimal, attackTraitData, newTargetAnimal));
     return true;
   }
 };

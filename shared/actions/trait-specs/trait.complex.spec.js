@@ -20,7 +20,7 @@ players:
   - continent: $A carn, $B carn, $C carn, $D carn, $E
   - continent: $Z tailloss mimicry running fat, $X
 `);
-    const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectQuestionId, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
     replaceGetRandom(() => 1, () => {
       clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$Z'));
@@ -36,20 +36,9 @@ players:
     replaceGetRandom(() => 0, () => {
       clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$Z'));
 
-      expectUnchanged(`User1 can't affect $A`, () =>
-          clientStore1.dispatch(traitDefenceAnswerRequest({
-            sourcePid: User0.id, sourceAid: '$A'
-            , traitType: 'TraitCarnivorous'
-            , targetPid: User1.id, targetAid: '$Z'
-          }, {
-            traitType: 'TraitTailLoss'
-            , targetIndex: 2
-          }))
-        , serverStore, clientStore0, clientStore1);
+      clientStore1.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitTailLoss', 2));
 
-      console.log(selectGame().getIn(['cooldowns', 'ANIMAL']))
-
-      expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$B'])).size(1);
+      expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$B'])).size(2);
       expect(selectPlayer(User0).acted).true;
       expect(selectAnimal(User1, 0).id).equal('$Z');
       expect(selectAnimal(User1, 0).traits).size(3);

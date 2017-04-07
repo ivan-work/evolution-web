@@ -8,8 +8,6 @@ import {TRAIT_TARGET_TYPE
 import {
   server$traitKillAnimal
   , server$startFeeding
-  , server$startCooldown
-  , server$traitActivate
   , server$traitStartCooldown
   , server$traitDefenceQuestion
   , server$traitDefenceQuestionInstant
@@ -79,7 +77,6 @@ export const TraitCarnivorous = {
       };
 
       const defaultDefence = (questionId) => (dispatch, getState) => {
-        console.log(getState().getIn(['games', game.id, 'question']))
         if (traitTailLoss) {
           dispatch(server$traitDefenceAnswer(game.id
             , questionId

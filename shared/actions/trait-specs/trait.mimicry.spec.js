@@ -10,7 +10,7 @@ import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
 
-describe.only('TraitMimicry:', () => {
+describe('TraitMimicry:', () => {
   it('$A > $B ($C camo)', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
@@ -67,13 +67,14 @@ players:
   - continent: $A carn
   - continent: $B mimicry, $C, $D
 `);
-    const {selectGame, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectQuestionId, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
 
     expect(selectGame().question).ok;
     expect(selectGame().question.get('id')).ok;
-    const questionId = selectGame().question.get('id');
+    expect(selectQuestionId()).ok;
+    const questionId = selectQuestionId();
     expect(ClientGame0().question, 'ClientGame0().question').ok;
     expect(ClientGame1().question, 'ClientGame1().question').ok;
     expect(ClientGame0().question.get('id')).equal(null);
@@ -93,27 +94,13 @@ players:
   - continent: $A carn
   - continent: $B mimicry, $C mimicry, $D
 `);
-    const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectQuestionId, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
 
-    clientStore1.dispatch({
-      traitType: 'TraitMimicry'
-      , targetPid: User1.id
-      , targetAid: '$C'
-    });
+    clientStore1.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitMimicry', '$C'));
 
-    clientStore1.dispatch(traitDefenceAnswerRequest({
-      sourcePid: User0.id
-      , sourceAid: '$A'
-      , traitType: 'TraitCarnivorous'
-      , targetPid: User1.id
-      , targetAid: '$C'
-    }, {
-      traitType: 'TraitMimicry'
-      , targetPid: User1.id
-      , targetAid: '$B'
-    }));
+    clientStore1.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitMimicry', '$B'));
 
     expect(selectAnimal(User0, 0).getFood()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$C');
