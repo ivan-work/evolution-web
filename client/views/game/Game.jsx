@@ -13,7 +13,7 @@ import CustomDragLayer from './dnd/CustomDragLayer.jsx';
 import {DeckWrapper} from './cards/DeckWrapper.jsx';
 import GamePlayers from './GamePlayers.jsx';
 
-import {GameScoreboardFinalView} from './ui/GameScoreboardFinal.jsx';
+import GameScoreboardFinal from './ui/GameScoreboardFinal.jsx';
 
 //const MaxWidth
 
@@ -38,7 +38,7 @@ class Game extends React.Component {
       <Portal target='header'>
         <ControlGroup name='Game'>
           <Button id="Game$exit" onClick={this.context.gameActions.$exit}>Exit</Button>
-          <GameScoreboardFinalView/>
+          <GameScoreboardFinal game={game}/>
         </ControlGroup>
       </Portal>
 

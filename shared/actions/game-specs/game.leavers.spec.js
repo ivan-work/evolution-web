@@ -14,7 +14,7 @@ import {PHASE} from '../../../shared/models/game/GameModel';
 import {makeGameActionHelpers} from '../generic';
 import {makeGameSelectors} from '../../selectors';
 
-describe('Game (LEAVERS):', function () {
+describe.only('Game (LEAVERS):', function () {
   it('Deploy, User1 leaves', () => {
     const [{serverStore, ServerGame, ParseGame}
       , {clientStore0, User0, ClientGame0}

@@ -70,7 +70,7 @@ export const DragCard = DragSource(DND_ITEM_TYPE.CARD
     , isDragging: monitor.isDragging()
     , canDrag: monitor.canDrag()
   })
-)(class extends Card {
+)(class Card extends Card {
   static propTypes = {
     ...Card.propTypes
     , dragEnabled: React.PropTypes.bool

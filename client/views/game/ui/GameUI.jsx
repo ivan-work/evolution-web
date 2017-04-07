@@ -7,7 +7,7 @@ import {PortalTarget} from '../../utils/PortalTarget.jsx';
 import {Button} from 'react-mdl';
 import {PlayersList} from './PlayersList.jsx';
 import {GameStatusDisplay} from './GameStatusDisplay.jsx';
-import {TraitDefenceDialog} from './TraitDefenceDialog.jsx';
+import TraitDefenceDialog from './TraitDefenceDialog.jsx';
 
 class _GameUI extends React.Component {
   static displayName = 'GameUI';

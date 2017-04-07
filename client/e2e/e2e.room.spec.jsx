@@ -12,10 +12,8 @@ describe('e2e (rooms): ', () => {
     const $client0 = mountClient(clientStore0);
     const $client1 = mountClient(clientStore1);
 
-    expect($client0.find('#Rooms$create')).length(1);
-    $client0.find('#Rooms$create').simulate('click');
-    expect($client0.find('#RoomCreateDialog$ok'), 'RoomCreateDialog$ok').length(1);
-    $client0.find('#RoomCreateDialog$ok').simulate('click');
+    expect($client0.find('#Rooms$Create')).length(1);
+    $client0.find('#Rooms$Create').simulate('click');
 
     expect($client0.find('Room')).length(1);
     $client0.unmount();
@@ -30,15 +28,14 @@ describe('e2e (rooms): ', () => {
     clientStore0.dispatch(roomCreateRequest());
 
     expect($client0.find('Room'), '$client0.Room').length(1);
-    expect($client0.find('#Room$start').props().disabled, '$client0.#Room$start.disabled').true;
     expect($client1.find('Room'), '$client1.Room').length(0);
 
     $client1.find(`RoomsList`).find('a').first().simulate('click');
 
     expect($client0.find('Room'), '$client0.Room').length(1);
-    expect($client0.find('#Room$start').props().disabled, '$client0.#Room$start.disabled').false;
+    expect($client0.find('#Room$Start').props().disabled, '$client0.#Room$Start.disabled').false;
     expect($client1.find('Room'), '$client1.Room').length(1);
-    expect($client1.find('#Room$start').props().disabled, '$client1.#Room$start.disabled').true;
+    expect($client1.find('#Room$Start').props().disabled, '$client1.#Room$Start.disabled').true;
     
     $client0.unmount();
     $client1.unmount();

@@ -27,7 +27,7 @@ export const TooltipsContext = (WrappedComponent) => class TooltipsContext exten
   }
 
   render() {
-    return <div>
+    return <div className='TooltipsContext'>
       <Portal target='tooltips'>
         {this.state.component ? this.renderTooltip() : null}
       </Portal>
@@ -46,6 +46,19 @@ export const TooltipsContext = (WrappedComponent) => class TooltipsContext exten
     </div>
   }
 };
+
+export const TooltipsContextElement = class TooltipsContextElement extends TooltipsContext(({children}) => children) {
+  static propTypes = {
+    children: React.PropTypes.node.isRequired
+  };
+
+  render() {
+    return <div className='TooltipsContext'>
+      {this.props.children}
+      {/*this.state.component ? this.renderTooltip() : null*/}
+    </div>;
+  }
+}
 
 export class Tooltip extends Component {
   static propTypes = {
