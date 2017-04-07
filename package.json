@@ -12,15 +12,14 @@
   },
   "scripts": {
     "postinstall": "npm run build",
-    "start:version": "npm version patch --force && npm start",
     "start": "node_modules/.bin/nodemon server/index.js",
     "clean": "node_modules/.bin/rimraf dist",
-    "build": "npm run clean && npm run build:server && npm run build:client",
-    "clean:server": "node_modules/.bin/rimraf dist/server",
-    "build:server": "node_modules/.bin/webpack --config webpack.server.babel.js",
-    "start:server": "node dist/server/index.js",
-    "clean:client": "node_modules/.bin/rimraf dist/client",
-    "build:client": "node_modules/.bin/webpack --config webpack.client.babel.js --progress"
+    "build": "npm run clean && npm run server:build && npm run client:build",
+    "server:start": "node dist/server/index.js",
+    "server:build": "node_modules/.bin/webpack --config webpack.server.babel.js",
+    "client:build": "node_modules/.bin/webpack --config webpack.client.babel.js --progress",
+    "server:clean": "node_modules/.bin/rimraf dist/server",
+    "client:clean": "node_modules/.bin/rimraf dist/client"
   },
   "repository": {
     "type": "git",
