@@ -1,5 +1,6 @@
 import logger from '~/shared/utils/logger';
-import * as traitData from '../traitData';
+import * as traitData from '../traitData/index.js';
+console.log('CARD DATA LOADED')
 
 const makeCard = (trait1, trait2) => {
   const name = `Card${trait1.type}${trait2 ? 'And' + trait2.type : ''}`.replace(/Trait/g, '');

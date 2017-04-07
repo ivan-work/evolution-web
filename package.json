@@ -11,18 +11,17 @@
   },
   "scripts": {
     "start:version": "npm version patch --force && npm start",
-    "start": "node dist/server/index.js",
+    "start": "nodemon server/index.js",
     "clean": "rimraf dist",
 
+    "build": "npm run clean && npm run build:server && npm run build:client",
+
     "clean:server": "rimraf dist/server",
-    "build:server": "npm run clean:server && node_modules/.bin/webpack --config webpack.server.babel.js",
+    "build:server": "node_modules/.bin/webpack --config webpack.server.babel.js",
     "start:server": "node dist/server/index.js",
 
     "clean:client": "rimraf dist/client",
-    "build:client": "npm run clean:client && node_modules/.bin/webpack --config webpack.client.babel.js --progress",
-
-    "start:dev": "node_modules/.bin/babel-node index && nodemon server",
-    "start:server:dev": "nodemon server"
+    "build:client": "node_modules/.bin/webpack --config webpack.client.babel.js --progress"
   },
   "watch": {
     "test:shared:watch": "{shared}/*.spec.js"

@@ -144,6 +144,10 @@ describe('Rooms:', function () {
         , timeTurn: 3
         , timeTraitResponse: 1
       }));
+
+      // Can edit settings not full:
+      clientStore0.dispatch(roomEditSettingsRequest({}));
+
       expect(serverStore.getState().getIn(['rooms', RoomId, 'name']), 'Room Test');
       expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'maxPlayers']), 3);
       expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'timeTurn']), 3 * 6000);

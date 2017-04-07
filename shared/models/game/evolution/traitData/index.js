@@ -7,6 +7,8 @@ import {TRAIT_TARGET_TYPE
   , TRAIT_ANIMAL_FLAG
 } from '../constants';
 
+console.log('TRAIT DATA LOADED')
+
 import {
   server$startFeeding
   , server$traitActivate

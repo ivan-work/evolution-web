@@ -17,7 +17,6 @@ import {
 } from '../../../../actions/actions';
 import {addTimeout} from '../../../../utils/reduxTimeout';
 
-import {GameModel} from '../../GameModel';
 import {checkAction} from '../TraitDataModel';
 import {TraitMimicry
   , TraitRunning
@@ -106,7 +105,7 @@ export const TraitCarnivorous = {
       dispatch(server$startFeeding(game.id, sourceAnimal, 2, FOOD_SOURCE_TYPE.ANIMAL_HUNT, targetAnimal.id));
 
       const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
-      GameModel.sortPlayersFromIndex(game, currentPlayerIndex).some(player => player.continent.some(animal => {
+      game.constructor.sortPlayersFromIndex(game, currentPlayerIndex).some(player => player.continent.some(animal => {
         const traitScavenger = animal.hasTrait(TraitScavenger.type);
         if (traitScavenger && animal.canEat(game) > 0) {
           dispatch(server$startFeeding(game.id, animal, 1));

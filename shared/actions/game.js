@@ -22,6 +22,8 @@ import {
   , checkValidAnimalPosition
 } from './checks';
 
+import {checkComboRoomCanStart} from './rooms.checks';
+
 // Game Create
 export const gameCreateRequest = (roomId, seed) => ({
   type: 'gameCreateRequest'
@@ -304,15 +306,13 @@ export const gameClientToServer = {
     if (process.env.NODE_ENV === 'production') seed = null;
     const userId = meta.user.id;
     const room = getState().getIn(['rooms', roomId]);
-    const validation = room.validateCanStart(userId);
-    if (validation === true) {
-      const game = !seed
-        ? GameModel.new(room)
-        : GameModel.parse(room, seed);
-      dispatch(server$gameCreateSuccess(game));
-    } else {
-      dispatch(actionError(userId, validation));
-    }
+    checkComboRoomCanStart(room, userId);
+
+    const game = !seed
+      ? GameModel.new(room)
+      : GameModel.parse(room, seed);
+
+    dispatch(server$gameCreateSuccess(game));
   }
   , gameReadyRequest: ({gameId, ready}, {user: {id: userId}}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);

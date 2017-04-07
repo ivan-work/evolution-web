@@ -13,7 +13,8 @@ import {
   gameReadyRequest,
   gameDeployAnimalRequest,
   gameDeployTraitRequest,
-  gameEndTurnRequest
+  gameEndTurnRequest,
+  roomEditSettingsRequest
 } from '../actions';
 import {makeGameSelectors} from '../../selectors';
 
@@ -21,6 +22,7 @@ describe('Game:', function () {
   it('Game start', () => {
     const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
     clientStore0.dispatch(roomCreateRequest());
+    clientStore0.dispatch(roomEditSettingsRequest({decks: ['TEST']}));
     const roomId = serverStore.getState().get('rooms').first().id;
     clientStore1.dispatch(roomJoinRequest(roomId));
     clientStore0.dispatch(gameCreateRequest(roomId));

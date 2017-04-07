@@ -3,8 +3,7 @@ import {Record, Map, OrderedMap, Range, List} from 'immutable';
 import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
 import {CooldownList} from './CooldownList';
-import {SettingsRecord} from './GameSettings';
-import * as cardData from './evolution/cardData';
+import {SettingsRecord, Decks} from './GameSettings';
 
 import uuid from 'uuid';
 import {ensureParameter} from '../../utils';
@@ -64,7 +63,7 @@ const GameModelData = {
   , status: new StatusRecord()
   , cooldowns: CooldownList.new()
   , question: null
-  , settings: new SettingsRecord()
+  , settings: null
   , scoreboardFinal: null
   , winnerId: null
 };
@@ -82,15 +81,15 @@ export class GameModel extends Record(GameModelData) {
   }
 
   static new(room) {
+    const deck = room.settings.decks.reduce((result, deckName) => result.concat(Decks[deckName]), List());
+
+    //[24, cardData.CardCommunicationAndCarnivorous]
     return new GameModel({
       id: uuid.v4().slice(0, 4)
       , roomId: room.id
-      , deck: GameModel.generateDeck([
-        //[8, cardTypes.CardCamouflage]
-        [24, cardData.CardCommunicationAndCarnivorous]
-        //, [8, cardTypes.CardSharpVision]
-      ], true)
+      , deck: GameModel.generateDeck(deck, true)
       , players: room.users.reduce((result, userId, index) => result.set(userId, PlayerModel.new(userId, index)), Map())
+      , settings: room.settings
     })
   }
 
@@ -116,6 +115,7 @@ export class GameModel extends Record(GameModelData) {
       , players: OrderedMap(js.players).map(p => PlayerModel.fromServer(p)).sort((p1, p2) => p1.index > p2.index)
       , status: new StatusRecord(js.status)
       , cooldowns: CooldownList.fromServer(js.cooldowns)
+      , settings: SettingsRecord.fromJS(js.settings)
     });
   }
 

@@ -13,8 +13,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 export default {
   devtool: isDevelopment ? 'eval-source-map' : 'cheap-module-source-map'
   , entry: isDevelopment
-    ? ['webpack-dev-server/client?http://localhost:' + (+process.env.PORT - 1)
-    , 'webpack/hot/only-dev-server'
+    ? ['webpack-hot-middleware/client'
     , './client/index.jsx']
     : './client/index.jsx'
   , output: { // Compile into js/build.js
