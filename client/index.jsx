@@ -14,8 +14,8 @@ import * as reducers from './reducers'
 
 import routes from './routes';
 
-require("./styles/style.scss");
-require("./assets/materialize/materialize.min");
+import 'materialize-css/bin/materialize.css';
+import 'materialize-css/bin/materialize.js';
 
 const reducer = combineReducers({
   ...reducers,
