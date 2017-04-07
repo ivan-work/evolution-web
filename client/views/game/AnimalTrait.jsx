@@ -22,9 +22,19 @@ class _AnimalTrait extends React.Component {
 
   static propTypes = {
     trait: React.PropTypes.instanceOf(TraitModel).isRequired
-    , owner: React.PropTypes.object
+    , owner: React.PropTypes.object.isRequired
     , index: React.PropTypes.number.isRequired
+    // by DragSource
+    , connectDragSource: React.PropTypes.func
+    , connectDragPreview: React.PropTypes.func
+    , isDragging: React.PropTypes.bool
+    , canDrag: React.PropTypes.bool
+    // by GameProvider
+    , game: React.PropTypes.object.isRequired
     , isUserTurn: React.PropTypes.bool.isRequired
+    , currentUserId: React.PropTypes.string.isRequired
+    , isDeploy: React.PropTypes.bool.isRequired
+    , isFeeding: React.PropTypes.bool.isRequired
   };
 
   constructor(props) {
@@ -39,12 +49,12 @@ class _AnimalTrait extends React.Component {
   }
 
   render() {
-    const {trait, index, isUserTurn, connectDragSource, isDragging} = this.props;
+    const {trait, index, connectDragSource, isDragging, canDrag} = this.props;
 
     const className = classnames({
       AnimalTrait: true
-      , disabled: !isUserTurn
-      , enabled: isUserTurn
+      , disabled: !canDrag
+      , enabled: canDrag
       , isDragging: isDragging
     });
 
@@ -61,12 +71,16 @@ class _AnimalTrait extends React.Component {
 const _DraggableAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
   , {
     beginDrag: (props) => ({trait: props.trait, owner: props.owner})
-    , canDrag: (props, monitor) => props.isUserTurn && props.isFeeding && props.trait.dataModel.checkAction(props.game, props.owner)
+    , canDrag: (props, monitor) => props.isUserTurn
+      && props.owner.ownerId === props.currentUserId
+      && props.isFeeding
+      && props.trait.dataModel.checkAction(props.game, props.owner)
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource()
     , connectDragPreview: connect.dragPreview()
     , isDragging: monitor.isDragging()
+    , canDrag: monitor.canDrag()
   })
 )(_AnimalTrait);
 

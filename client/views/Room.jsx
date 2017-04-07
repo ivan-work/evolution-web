@@ -17,7 +17,7 @@ export const Room = React.createClass({
       <MDL.Button id="Room$back" raised onClick={this.props.$back}>back</MDL.Button>
       <MDL.Button id="Room$exit" raised onClick={this.props.$exit}>exit</MDL.Button>
       <MDL.Button id="Room$start" raised onClick={this.props.$start(this.props.room.id)}
-                  disabled={this.props.room.validateCanStart(this.props.user.id) !== true}>start</MDL.Button>
+                  disabled={!this.props.room.checkCanStart(this.props.user.id)}>start</MDL.Button>
       <div>Room {this.props.room.name}</div>
       <div>Online users: <UsersList list={this.props.online.toList()}/></div>
       <div className="Room-online">In this room: <UsersList list={this.props.room.users.map(userId => this.props.online.get(userId))}/></div>

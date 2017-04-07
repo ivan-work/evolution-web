@@ -26,7 +26,13 @@ export const TraitCarnivorous = {
       // dispatch(traitMimicryRequest)
       // dispatch(traitScavenger)
   }
-  , checkAction: (game, sourceAnimal) => sourceAnimal.canEat()
+  , checkAction: (game, sourceAnimal) => {
+    if (TraitCarnivorous.cooldowns.some(([link, place]) =>
+        game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id))) {
+      return false;
+    }
+    return sourceAnimal.canEat()
+  }
   , checkTarget: (game, sourceAnimal, targetAnimal) => (
     (sourceAnimal.hasTrait('TraitSharpVision') || !targetAnimal.hasTrait('TraitCamouflage'))
     //&& (sourceAnimal.hasTrait('TraitMassive') || !targetAnimal.hasTrait('TraitMassive'))

@@ -1,75 +1,47 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {Map, List, fromJS} from 'immutable';
-export class AdminPanel extends Component {
-  static contextTypes = {
-    location: React.PropTypes.object
-  };
 
+import {gameCreateRequest} from '~/shared/actions/actions';
+
+export class AdminPanel extends Component {
   constructor(props) {
     super(props);
-    this.onInput = this.onInput.bind(this);
     this.state = {
       visibility: Map({
         'Admin Panel': true
         , 'Room': true
       })
-      , gameSeed: Map({
-        deck: [[12, 'Carnivorous']]
-        , status: [0, 0, 0, 1]
-        , players: List([Map({
-          hand: [1]
-          , continent: [2]
-        }), Map({
-          hand: [3]
-          , continent: [4]
-        })])
-      })
-    }
-  }
-
-  validateInput(value) {
-    try {
-      JSON.parse(value);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  toInput(value) {
-    return typeof value === 'string' ? value : JSON.stringify(value);
-  }
-
-  onInput(...path) {
-    const gameSeed = this.state.gameSeed;
-    return (e) => {
-      let value = e.target.value;
-      try {
-        value = JSON.parse(value);
-      } catch (e) {
-      }
-      this.setState(({gameSeed}) => ({gameSeed: gameSeed.updateIn([...path], prev => value)}))
+      , gameSeed: `deck: 12 carnivorous, 6 sharp
+phase: 2
+food: 2
+players:
+  - hand: 1 sharp, 1 camo
+    continent: carn sharp, carn camo
+  - hand: 1 sharp, 1 camo
+    continent: carn sharp, carn camo
+`
     }
   }
 
   render() {
     return <div className="AdminPanel" style={{
       position: 'fixed'
-      , left: '40%'
+      , left: '240px'
       , top: 0
+      , zIndex: 1337
     }}>
-      {this.renderComponent('Admin Panel', <div>
-        {this.props.roomId ? this.renderComponent('Room', this.renderGameSeedForm()) : null}
+      {this.renderSection('Admin Panel', <div>
+        {this.props.showRoomSection ? this.renderSection('Room', this.renderGameSeedForm()) : null}
       </div>)}
     </div>
   }
 
-  renderComponent(name, body) {
+  renderSection(name, body) {
     return <div>
       <h6 className='pointer'
           onClick={() => this.setState(({visibility}) => ({visibility: visibility.update(name, value => !value)}))}>
-        {name} {this.state.visibility.get(name) ? '▲' : '▼'}
+        {name} {this.state.visibility.get(name) ? '▼' : '▲'}
       </h6>
       {this.state.visibility.get(name) ? body : null}
     </div>
@@ -77,53 +49,37 @@ export class AdminPanel extends Component {
 
   renderGameSeedForm() {
     return <div>
-      <h6 className="pointer" onClick={() => console.log('Game Seed: ', this.state.gameSeed.toJS())}>console.log(↯)</h6>
-      <table>
-        <tbody>
-        <tr>
-          <td>Deck:</td>
-          <td>{this.renderGameSeedTextarea('deck')}</td>
-        </tr>
-        <tr>
-          <td>Status:</td>
-          <td>{this.renderGameSeedTextarea('status')}</td>
-        </tr>
-        {this.props.roomUsers.map((userId, index) => [<tr key={userId + 'name'}>
-          <td>{userId}, {this.props.online.get(userId).login}</td><td></td>
-        </tr>, <tr key={userId + 'hand'}>
-          <td>Hand: </td>
-          <td>{this.renderGameSeedTextarea('players', index, 'hand')}</td>
-        </tr>, <tr key={userId + 'continent'}>
-          <td>Continent: </td>
-          <td>{this.renderGameSeedTextarea('players', index, 'continent')}</td>
-        </tr>]).toArray()}
-        </tbody>
-      </table>
+      {this.props.gameCanStart
+        ? <h6 className="pointer" onClick={this.props.$start(this.props.roomId, this.state.gameSeed)}>
+        Start Game ►
+      </h6>
+        : null
+        }
+      <div><textarea
+        rows={8} cols={40}
+        value={this.state.gameSeed}
+        style={{overflow: 'hidden'}}
+        onChange={(e) => this.setState({gameSeed: e.target.value})}/></div>
     </div>
-  }
-
-  renderGameSeedTextarea(...path) {
-    const gameSeed = this.state.gameSeed;
-    const value = this.toInput(gameSeed.getIn([...path]));
-    return <textarea
-      rows={1}
-      value={value}
-      style={{
-        overflow: 'hidden'
-        , background: (this.validateInput(value) ? '#afa' : '#faa')
-      }}
-      onChange={this.onInput(...path)}/>
   }
 }
 
 export const AdminPanelView = connect(
   (state) => {
+    const userId = state.getIn(['user', 'id'], '%USERNAME%');
     const roomId = state.get('room');
+    const room = state.getIn(['rooms', roomId]);
+    const gameCanStart = room ? room.checkCanStart(userId) : false;
     return {
       roomId
+      , userId
+      , showRoomSection: room && !room.gameId
+      , gameCanStart
       , roomUsers: state.getIn(['rooms', roomId, 'users'], List())
       , online: state.getIn(['online'], Map())
     }
   }
-  , (dispatch) => ({})
+  , (dispatch) => ({
+    $start: (roomId, seed) => () => dispatch(gameCreateRequest(roomId, seed))
+  })
 )(AdminPanel);

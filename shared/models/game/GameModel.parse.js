@@ -8,6 +8,7 @@ import {AnimalModel} from './evolution/AnimalModel';
 import {TraitModel} from './evolution/TraitModel';
 import {STATUS} from '../UserModel';
 import * as cardClasses from './evolution/cards';
+import yaml from 'yaml-js';
 
 const searchCardClasses = (name) => cardClasses[Object.keys(cardClasses)
   .find(cardClassName => ~cardClasses[cardClassName].type.toLowerCase().indexOf(name.toLowerCase()))];
@@ -37,22 +38,18 @@ export const parseAnimalList = (userId, string) => {
         TraitModel.parse(traitSeed)
       ))
     );
-}
+};
 
-export const parse = (room, seed) => {
-  const statusArray = seed.status.split(' ').map(x => +x);
-
-  invariant(statusArray.length === 4, `GameModel.parse Error: in seed.status`);
+export const parse = (room, string) => {
+  const seed = yaml.load(string);
 
   const deck = parseCardList(seed.deck);
-
-  invariant(room.users.size === seed.players.length, `GameModel.parse Error: room.users.size !== seed.players`);
 
   const players = room.users.reduce((result, id, index) => {
     const player = new PlayerModel({
       id
-      , hand: parseCardList(seed.players[index].hand || '')
-      , continent: parseAnimalList(id, seed.players[index].continent || '')
+      , hand: parseCardList(seed.players[index] && seed.players[index].hand || '')
+      , continent: parseAnimalList(id, seed.players[index] && seed.players[index].continent || '')
       , status: STATUS.READY
       , index
       , ended: false
@@ -66,10 +63,7 @@ export const parse = (room, seed) => {
     , food: seed.food
     , started: true
     , status: new StatusRecord({
-      turn: statusArray[0]
-      , round: statusArray[1]
-      , player: statusArray[2]
-      , phase: statusArray[3]
+      phase: seed.phase
     })
     , deck
     , players

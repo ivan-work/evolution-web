@@ -23,15 +23,15 @@ export class Animal extends React.Component {
 
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
   }
 
   render() {
-    const {model, connectDropTarget, isOver} = this.props;
+    const {model, connectDropTarget, isOver, canDrop} = this.props;
 
     const className = classnames({
       Animal: true
-      , highlight: isOver
+      , highlight: isOver && canDrop
     });
 
     const body = <div className={className}>
@@ -45,7 +45,7 @@ export class Animal extends React.Component {
       <div className='inner'>
         {model.id}
         <div className='food'>
-          {Array.from({length: model.food}).map((u, index) => <div key={index} className='AnimalFood'></div>)}
+          {Array.from({length: model.food}).map((u, index) => <div key={index} className='Food AnimalFood'></div>)}
         </div>
       </div>
     </div>;

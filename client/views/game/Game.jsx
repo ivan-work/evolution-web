@@ -5,7 +5,7 @@ import * as MDL from 'react-mdl';
 import {UserModel} from '~/shared/models/UserModel';
 import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 
-import {CARD_POSITIONS} from './CARD_POSITIONS';
+import {GAME_POSITIONS} from './GAME_POSITIONS';
 import {GameProvider} from './providers/GameProvider.jsx';
 import {CardCollection} from './CardCollection.jsx';
 import {Card, DragCard} from './Card.jsx';
@@ -47,7 +47,7 @@ class _Game extends React.Component {
 
     return <div className="Game">
       {/* DECK */}
-      <div className='DeckWrapper' style={CARD_POSITIONS[game.players.size].deck}>
+      <div className='DeckWrapper' style={GAME_POSITIONS[game.players.size].deck}>
         <div className="GameStatus">
           Turn: {game.status.turn}
           <br/> Phase: {game.status.phase}
@@ -66,12 +66,12 @@ class _Game extends React.Component {
         </CardCollection>
       </div>
 
-      {game.status.phase === PHASE.FEEDING ? <div className='GameFoodContainer'>
+      {game.status.phase === PHASE.FEEDING ? <div className='GameFoodContainer' style={GAME_POSITIONS[game.players.size].food}>
         {Array.from({length: game.food}).map((u, index) => <DragFood key={index} index={index} disabled={!isUserTurn}/>)}
       </div>: null}
 
       {/* USER */}
-      <div className='PlayerWrapper UserWrapper' style={CARD_POSITIONS[game.players.size].player}>
+      <div className='PlayerWrapper UserWrapper' style={GAME_POSITIONS[game.players.size].player}>
         <GameContinent
           isUserContinent={true}
           continent={player.continent}
@@ -92,7 +92,7 @@ class _Game extends React.Component {
           .filter(enemy => enemy.id !== player.id)
           .map((enemy, i) => {
           return <div className='PlayerWrapper EnemyWrapper' key={enemy.id}
-                      style={CARD_POSITIONS[game.players.size][i]}>
+                      style={GAME_POSITIONS[game.players.size][i]}>
             <CardCollection
               ref={enemy.id} name={enemy.id}
               shift={[20, 0]}>
