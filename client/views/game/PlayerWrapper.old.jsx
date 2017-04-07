@@ -7,7 +7,6 @@ import {CardCollection} from './CardCollection.jsx';
 import {Card, DragCard} from './Card.jsx';
 import {DropAnimal} from './animals/Animal.jsx';
 import Continent from './continent/Continent.jsx';
-import {PortalTarget} from '../utils/PortalTarget.jsx'
 
 import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 import {PlayerModel} from '../../../shared/models/game/PlayerModel';
@@ -54,9 +53,6 @@ export default class PlayerWrapper extends Component {
       <div className={cn({PlayerWrapper: true, UserWrapper: isUser, EnemyWrapper: !isUser})}
            data-player-id={player.id}>
         {upsideDown ? innerElements : innerElements.reverse()}
-        <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
-          <PortalTarget name={`svg-player-wrapper-${player.id}`} container='g'/>
-        </svg>
       </div>
     );
   }
@@ -91,15 +87,15 @@ export default class PlayerWrapper extends Component {
     </Continent>)
   }
 
-  renderAnimal(animal, isUserContinent, isDeploy, angle) {
+  renderAnimal(animal, isUserContinent, isDeploy) {
     const onTraitDropped = !isDeploy ? this.$traitActivate : this.$noop;
     const onFoodDropped = !isDeploy ? this.$traitTakeFood : this.$noop;
     const onCardDropped = isDeploy ? this.$deployTrait : this.$noop;
     const onAnimalLink = isDeploy ? this.$deployLinkedTrait : this.$noop;
+
     return <DropAnimal
       key={animal.id}
       model={animal}
-      angle={this.props.angle}
       isUserAnimal={isUserContinent}
       onTraitDropped={onTraitDropped}
       onFoodDropped={onFoodDropped}

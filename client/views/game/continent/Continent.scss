@@ -7,11 +7,8 @@ $VERTICAL_MARGIN: 2px;
   min-height: $ANIMAL_HEIGHT;
   background: #dfd;
   border: 1px solid #898;
-
-  .slice {
-    display: flex;
-    justify-content: center;
-  }
+  display: flex;
+  justify-content: center;
 
   &.EnemyContinent {
     //transform: rotate(180deg);

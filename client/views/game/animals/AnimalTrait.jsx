@@ -15,7 +15,7 @@ import './AnimalTrait.scss';
 
 export const ANIMAL_TRAIT_SIZE = {
   width: 60
-  , height: 20
+  , height: 30
 };
 
 class AnimalTrait extends Component {

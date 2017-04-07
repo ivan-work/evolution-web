@@ -16,11 +16,6 @@ import { DragAnimalSelectLink } from './AnimalSelectLink.jsx'
 import {GameProvider} from './../providers/GameProvider.jsx';
 import {Food} from './../food/Food.jsx';
 
-export const ANIMAL_SIZE = {
-  width: 40
-  , height: 60
-};
-
 import './Animal.scss';
 
 class Animal extends React.Component {
@@ -43,7 +38,7 @@ class Animal extends React.Component {
 
   renderTrait(trait, animal) {
     if (trait.isLinked()) {
-      return <AnimalLinkedTrait trait={trait} sourceAnimalId={animal.id}/>;
+      return <AnimalLinkedTrait trait={trait} angle={this.props.angle}/>;
     } else {
       return <AnimalTrait trait={trait} sourceAnimal={animal}/>;
     }
@@ -61,7 +56,6 @@ class Animal extends React.Component {
       <div className='traits'>
         {model.traits
           //.sort((t1, t2) => t1.isLinked() ? 1 : -1)
-          .toArray()
           .map((trait, index) =>{
           return <div key={trait.id}
                       style={{marginBottom: 1 + 'px'}}>
@@ -89,7 +83,7 @@ class DropAnimal_Body extends Animal {
 
   renderTrait(trait, animal) {
     if (trait.isLinked()) {
-      return <AnimalLinkedTrait trait={trait}/>;
+      return <AnimalLinkedTrait trait={trait} angle={this.props.angle}/>;
     } else if (trait.dataModel.playerControllable) {
       return <DragAnimalTrait trait={trait} sourceAnimal={animal}/>;
     } else {
@@ -172,10 +166,10 @@ DropAnimal.propTypes = {
   game: PropTypes.object.isRequired
   // by direct
   , isUserAnimal: React.PropTypes.bool
-  , onCardDropped: React.PropTypes.func
-  , onFoodDropped: React.PropTypes.func
-  , onTraitDropped: React.PropTypes.func
-  , onAnimalLink: React.PropTypes.func
+  , onCardDropped: React.PropTypes.func.isRequired
+  , onFoodDropped: React.PropTypes.func.isRequired
+  , onTraitDropped: React.PropTypes.func.isRequired
+  , onAnimalLink: React.PropTypes.func.isRequired
 };
 
 const GameDropAnimal = GameProvider(DropAnimal);
