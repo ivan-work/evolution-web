@@ -59,8 +59,8 @@ export class Game extends React.Component {
     const game = this.props.game;
     if (!user || !game) return <div>Loading</div>;
     this.ready = true;
-    console.log('GameRender: =====')
-    console.log('game', game.hand.toJS())
+    //console.log('GameRender: =====')
+    //console.log('game', game.hand.toJS())
     return <div className="Game">
       <CardCollection
         ref="Deck" name="Deck"

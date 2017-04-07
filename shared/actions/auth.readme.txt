@@ -1,0 +1,13 @@
+Client0.connect()
+
+Server.socket.on('connect')
+Server.socketConnect() > Server
+
+Client0.socket.on('connect')
+Client0$USER || Client0?hasUser
+Client0.loginUserRequest
+v
+Server.loginUserRequest
+> Server.cancelTimeout > Server
+> loginUserSuccess > Client0
+> onlineJoin > all
