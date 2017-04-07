@@ -9,7 +9,6 @@ import {UsersList} from './../UsersList.jsx';
 import RoomsList from './RoomsList.jsx';
 import {Portal} from './../utils/Portal.jsx';
 import {ControlGroup} from './../utils/ControlGroup.jsx';
-import {RoomCreateDialog} from './RoomCreateDialog.jsx';
 import RoomControlGroup from './RoomControlGroup.jsx';
 
 import {roomCreateRequest} from '../../../shared/actions/actions';

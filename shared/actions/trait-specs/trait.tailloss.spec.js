@@ -15,8 +15,9 @@ describe('TraitTailLoss:', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: 2
+food: 10
 players:
-  - continent: $A carn, $B carn
+  - continent: $A carn graz, $B carn
   - continent: $C tailloss carn
 `);
     const {selectGame, selectQuestionId, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);

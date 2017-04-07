@@ -64,7 +64,6 @@ players:
       //$A++ fat carn, $B fat fat
 
       clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$C'));
-      clientStore0.dispatch(gameEndTurnRequest());
       expect(selectPlayer(User1).continent).size(1);
 
       // selectAnimal(User0, 1)
@@ -87,7 +86,6 @@ players:
       clientStore0.dispatch(gameEndTurnRequest());
 
       expect(selectGame().status.phase, 'Turn 2, feed').equal(PHASE.FEEDING);
-      clientStore1.dispatch(gameEndTurnRequest());
       clientStore0.dispatch(gameEndTurnRequest());
 
       expect(selectGame().status.phase, 'Turn 3, deploy').equal(PHASE.DEPLOY);

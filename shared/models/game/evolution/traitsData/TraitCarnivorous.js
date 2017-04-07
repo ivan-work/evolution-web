@@ -18,6 +18,8 @@ import {
   , server$traitNotify_End
 } from '../../../../actions/actions';
 
+import {endTurnIfNoOptions} from '../../../../actions/ai';
+
 import {checkAction} from '../TraitDataModel';
 import {
   TraitMimicry
@@ -36,9 +38,9 @@ import {
   , TraitSwimming
 } from '../traitTypes/index';
 
-const endHunt = (game, sourceAnimal, targetAid) => (dispatch) => {
+const endHunt = (game, sourceAnimal, targetAnimal) => (dispatch) => {
   dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, sourceAnimal));
-  dispatch(server$traitNotify_End(game.id, sourceAnimal.id, TraitCarnivorous.type, targetAid));
+  dispatch(server$traitNotify_End(game.id, sourceAnimal.id, TraitCarnivorous.type, targetAnimal.id));
 };
 
 export const TraitCarnivorous = {
@@ -52,15 +54,14 @@ export const TraitCarnivorous = {
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: (game, sourceAnimal, targetAnimal) => (dispatch, getState) => {
-    let killed = true, acted = true, cooldown = true;
-    let needToAskTargetUser = false;
+    logger.debug(`TraitCarnivorous: ${sourceAnimal.id} > ${targetAnimal.id}`);
+    let needToAskTargetUser;
     let traitMimicry, traitTailLoss;
 
-    // Check for running and get data for defence options
-    !targetAnimal.traits.some((trait) => {
+    let ended = targetAnimal.traits.some((trait) => {
       if (trait.type === TraitRunning.type) {
         if (dispatch(TraitRunning.action(game, targetAnimal, sourceAnimal))) {
-          killed = false;
+          dispatch(endHunt(game, sourceAnimal, targetAnimal));
           return true;
         }
       } else if (trait.type === TraitMimicry.type && checkAction(game, TraitMimicry, targetAnimal)) {
@@ -74,63 +75,54 @@ export const TraitCarnivorous = {
       }
     });
 
-    // Check for running and get data for defence options
-    if (killed) {
-      const defaultDefence = (questionId) => (dispatch, getState) => {
-        if (traitTailLoss) {
-          dispatch(server$traitDefenceAnswer(game.id
-            , questionId
-            , TraitTailLoss.type
-            , traitTailLoss.size - 1
-          ));
-          killed = false;
-        } else if (traitMimicry) {
-          dispatch(server$traitDefenceAnswer(game.id
-            , questionId
-            , TraitMimicry.type
-            , traitMimicry.get(0).id
-          ));
-          acted = false;
-          killed = false;
-          cooldown = false;
-        }
-        dispatch(server$traitNotify_End(game.id, sourceAnimal.id, TraitCarnivorous.type, targetAnimal.id)); //TODO ПОЧЕМУ
-      };
+    if (ended) return true;
 
-      if (needToAskTargetUser) {
-        dispatch(server$traitDefenceQuestion(game.id, sourceAnimal, TraitCarnivorous.type, targetAnimal, defaultDefence));
-        acted = true;
-        killed = false;
-        cooldown = false;
+    const defaultDefence = (questionId) => (dispatch, getState) => {
+      if (traitTailLoss) {
+        dispatch(server$traitDefenceAnswer(game.id
+          , questionId
+          , TraitTailLoss.type
+          , traitTailLoss.size - 1
+        ));
+        return true;
+      } else if (traitMimicry) {
+        dispatch(server$traitDefenceAnswer(game.id
+          , questionId
+          , TraitMimicry.type
+          , traitMimicry.get(0).id
+        ));
+        return false;
       } else {
-        dispatch(server$traitDefenceQuestionInstant(game.id, sourceAnimal, TraitCarnivorous.type, targetAnimal, defaultDefence));
-      }
-    }
+        dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
 
-    if (cooldown) {
-      dispatch(server$traitStartCooldown(game.id, TraitCarnivorous, sourceAnimal));
-    }
-
-    if (killed) {
-      dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
-      if (targetAnimal.hasTrait(TraitPoisonous.type)) {
-        dispatch(server$traitActivate(game, targetAnimal, TraitPoisonous, sourceAnimal));
-      }
-
-      // Scavenge
-      dispatch(server$startFeeding(game.id, sourceAnimal, 2, FOOD_SOURCE_TYPE.ANIMAL_HUNT, targetAnimal.id));
-
-      const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
-      game.constructor.sortPlayersFromIndex(game, currentPlayerIndex).some(player => player.continent.some(animal => {
-        const traitScavenger = animal.hasTrait(TraitScavenger);
-        if (traitScavenger && animal.canEat(game) > 0) {
-          dispatch(server$startFeeding(game.id, animal, 1));
-          return true;
+        if (targetAnimal.hasTrait(TraitPoisonous.type)) {
+          dispatch(server$traitActivate(game, targetAnimal, TraitPoisonous, sourceAnimal));
         }
-      }));
+
+        // Scavenge
+        dispatch(server$startFeeding(game.id, sourceAnimal, 2, FOOD_SOURCE_TYPE.ANIMAL_HUNT, targetAnimal.id));
+
+        const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
+        game.constructor.sortPlayersFromIndex(game, currentPlayerIndex).some(player => player.continent.some(animal => {
+          const traitScavenger = animal.hasTrait(TraitScavenger);
+          if (traitScavenger && animal.canEat(game) > 0) {
+            dispatch(server$startFeeding(game.id, animal, 1));
+            return true;
+          }
+        }));
+
+        dispatch(endHunt(game, sourceAnimal, targetAnimal));
+        return true;
+      }
+      //dispatch(endTurnIfNoOptions())
+    };
+
+    if (needToAskTargetUser) {
+      dispatch(server$traitDefenceQuestion(game.id, sourceAnimal, TraitCarnivorous.type, targetAnimal, defaultDefence));
+      return false;
+    } else {
+      return dispatch(server$traitDefenceQuestionInstant(game.id, sourceAnimal, TraitCarnivorous.type, targetAnimal, defaultDefence));
     }
-    logger.silly('TraitCarnivorous:', sourceAnimal, targetAnimal, killed, acted);
-    return acted;
   }
   , $checkAction: (game, sourceAnimal) => {
     return sourceAnimal.canEat(game)

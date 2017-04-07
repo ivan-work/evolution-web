@@ -29,26 +29,9 @@ const formatter = function (options) {
 };
 
 export const consoleTransport = {
-  level: process.env.LOG_LEVEL || 'debug'
+  level: process.env.LOG_LEVEL || 'verbose'
   , handleExceptions: true
   , json: false
   , colorize: true
   , formatter
 };
-
-const filePath = path.resolve('./logs/production.log');
-
-if (!fs.existsSync(filePath)) {
-  fs.writeFileSync(filePath, '');
-}
-
-export const fileTransport = {
-  level: 'info'
-  , silent: !(process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'development')
-  , json: false
-  , filename: filePath
-  , maxsize: 5 * 1024 * 1024
-  , maxFiles: 1
-  , colorize: false
-};
-

@@ -132,25 +132,15 @@ players:
     const {selectGame, selectPlayer, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(traitActivateRequest('$0A', 'TraitCarnivorous', '$1C'));
-    clientStore0.dispatch(gameEndTurnRequest());
-
     clientStore1.dispatch(traitActivateRequest('$1A', 'TraitCarnivorous', '$0C'));
-    clientStore1.dispatch(gameEndTurnRequest());
-
     clientStore0.dispatch(traitActivateRequest('$0B', 'TraitCarnivorous', '$1D'));
-    clientStore0.dispatch(gameEndTurnRequest());
-
     clientStore1.dispatch(traitActivateRequest('$1B', 'TraitCarnivorous', '$0D'));
-    clientStore1.dispatch(gameEndTurnRequest());
 
     expect(selectPlayer(User0).continent).size(2);
     expect(selectPlayer(User1).continent).size(2);
 
-    clientStore0.dispatch(gameEndTurnRequest());
-    clientStore1.dispatch(gameEndTurnRequest());
-
+    expect(selectGame().getIn(['status', 'turn'])).equal(1);
     expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.DEPLOY);
-
 
     clientStore1.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(gameEndTurnRequest());

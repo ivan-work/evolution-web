@@ -25,18 +25,18 @@ export class Option extends Record({
 }
 
 export const endTurnIfNoOptions = (gameId, playerId) => (dispatch, getState) => {
-  // console.log('endTurnIfNoOptions');
+  //console.log('endTurnIfNoOptions');
   const game = selectGame(getState, gameId);
   const hasError = failsChecks(() => checkPlayerTurnAndPhase(game, playerId, PHASE.FEEDING));
   if (hasError) {
     // logger.warn(hasError.name + hasError.message, ...hasError.data);
   } else if (!doesOptionExist(game, playerId)) {
-    // logger.debug('AutoTurn for ', playerId);
+    logger.debug('AutoTurn for ' + playerId);
     dispatch(server$gameEndTurn(gameId, playerId));
   } else {
-    // const options = getOptions(selectGame(getState, gameId), playerId);
-    // if (options.length === 0) throw new Error('Options length = 0');
-    // console.log(options)
+    //const options = getOptions(selectGame(getState, gameId), playerId);
+    //if (options.length === 0) throw new Error('Options length = 0');
+    //console.log(options)
   }
 };
 
