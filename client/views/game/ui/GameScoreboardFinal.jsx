@@ -27,7 +27,7 @@ export class GameScoreboardFinal extends Component {
   }
 
   render() {
-    const {userId, game, online} = this.props;
+    const {game, online} = this.props;
 
     return <div>
       {game.status.phase === PHASE.FINAL
@@ -44,7 +44,9 @@ export class GameScoreboardFinal extends Component {
               <th>Player</th>
               <th>Score</th>
             </tr>
-            {game.scoreboardFinal && game.scoreboardFinal.map(({playerId, score}) => <tr key={playerId} className={cn({'bold': userId === playerId})}>
+            {game.scoreboardFinal && game.scoreboardFinal.map(({playerId, score}) =>
+            <tr key={playerId}
+                className={cn({'bold': game.getPlayer().id === playerId})}>
               <td>{online.get(playerId).login}</td>
               <td>{score}</td>
             </tr>)}
