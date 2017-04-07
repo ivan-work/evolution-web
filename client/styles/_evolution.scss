@@ -170,15 +170,12 @@ $CURRENT_TURN_BACKGROUND: #dfd;
   margin-top: .5em;
   .CardPlace {
     position: absolute;
-    .Card {
-      border-color: gray;
-    }
   }
 }
 
 .Card {
   position: absolute;
-  border: 1px solid black;
+  border: 1px solid #555;
   background: gray;
   word-wrap: break-word;
   &.enabled {

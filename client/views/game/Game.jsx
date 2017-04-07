@@ -52,8 +52,12 @@ class _Game extends React.Component {
     });
   }
 
+  //componentDidUpdate() {
+    //AnimationService.trigger('gameGiveCards', 'onlineUpdate');
+  //}
+
   componentWillUnmount() {
-    AnimationService.off('gameGiveCards');
+    AnimationService.off('gameGiveCards', 'onlineUpdate');
   }
 
   render() {
