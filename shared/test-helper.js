@@ -2,21 +2,42 @@ import chai from 'chai';
 import sinon from 'sinon';
 import chaiImmutable from 'chai-immutable';
 import jsdom from 'jsdom';
+import {shallow, mount} from 'enzyme';
+
 
 chai.use(chaiImmutable);
 
 global.sinon = sinon;
 global.expect = chai.expect;
+global.mount = mount;
+global.shallow = shallow;
+
+var exposedProperties = ['window', 'navigator', 'document', 'componentHandler'];
 
 global.document = jsdom.jsdom('<!doctype html><html><body></body></html>');
 global.window = document.defaultView;
-global.window.localStorage = require('./test/setup-local-storage-mock').default();
-
-Object.keys(window).forEach((key) => {
-  if (!(key in global)) {
-    global[key] = window[key];
+Object.keys(document.defaultView).forEach((property) => {
+  if (typeof global[property] === 'undefined') {
+    exposedProperties.push(property);
+    global[property] = document.defaultView[property];
   }
 });
+global.navigator = {
+  userAgent: 'node.js'
+};
+
+global.window.localStorage = require('./test/setup-local-storage-mock').default();
+
+//https://github.com/tleunen/react-mdl/issues/193
+require('react-mdl/extra/material');
+global.Element = global.window.Element;
+global.Event = global.window.Event;
+
+//Object.keys(window).forEach((key) => {
+//  if (!(key in global)) {
+//    global[key] = window[key];
+//  }
+//});
 
 Array.prototype.remove = function (argument) {
   const removeFn = (typeof argument === 'function'

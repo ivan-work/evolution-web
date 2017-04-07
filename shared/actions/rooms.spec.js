@@ -46,7 +46,7 @@ describe('Rooms:', function () {
       expect(clientStore.getActionType(2)).equal('roomJoinSuccess');
       expect(clientStore.getActionType(3)).equal('roomJoinSuccessSelf');
 
-      expect(clientStore.getState().get('room'), 'clientStore.room').equal(Room);
+      expect(clientStore.getState().get('room'), 'clientStore.room').equal(Room.id);
       expect(clientStore.getState().get('rooms'), 'clientStore.rooms').equal(Map({[Room.id]: Room}));
     });
 
@@ -86,7 +86,7 @@ describe('Rooms:', function () {
         , 'roomJoinSuccessSelf'
         , 'roomJoinSuccess']);
 
-      expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(Room);
+      expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(Room.id);
       expect(clientStore0.getState().get('rooms'), 'clientStore0.rooms').equal(Map({[Room.id]: Room}));
 
       expect(clientStore1.getActions().length).equal(5);
@@ -96,7 +96,7 @@ describe('Rooms:', function () {
       expect(clientStore1.getActionType(3)).equal('roomJoinSuccess');
       expect(clientStore1.getActionType(4)).equal('roomJoinSuccessSelf');
 
-      expect(clientStore1.getState().get('room'), 'clientStore0.room').equal(Room);
+      expect(clientStore1.getState().get('room'), 'clientStore0.room').equal(Room.id);
       expect(clientStore1.getState().get('rooms'), 'clientStore0.rooms').equal(Map({[Room.id]: Room}));
     });
 
