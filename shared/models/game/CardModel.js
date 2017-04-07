@@ -1,7 +1,7 @@
 import {Record, Range} from 'immutable';
 import uuid from 'node-uuid';
 
-export const TARGET_TYPE = (i => ({
+export const CARD_TARGET_TYPE = (i => ({
   DROP_AS_ANIMAL: 1 << i++
   , ANIMAL_SELF: 1 << i++
   , ANIMAL_ENEMY: 1 << i++
@@ -14,7 +14,7 @@ export class CardModel extends Record({
   , type: null
   , name: 'UNKNOWN CARD'
   , image: 'http://evolive.ru/images/def.png'
-  , target: TARGET_TYPE.DROP_AS_ANIMAL
+  , target: CARD_TARGET_TYPE.DROP_AS_ANIMAL
   , trait1type: null
   , trait2type: null
 }) {

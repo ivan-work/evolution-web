@@ -3,6 +3,7 @@ import {createReducer, ensureParameter, validateParameter} from '~/shared/utils'
 import {Map, List} from 'immutable';
 import {GameModel, PHASE} from '../../shared/models/game/GameModel';
 import {CardModel} from '../../shared/models/game/CardModel';
+import {CooldownsList} from '../../shared/models/game/CooldownModel';
 import {AnimalModel} from '../../shared/models/game/evolution/AnimalModel';
 import {TraitModel} from '../../shared/models/game/evolution/TraitModel';
 
@@ -46,11 +47,13 @@ export const gameNextPlayer = (game) => {
   let emergencyCount = game.players.size;
   let totalPlayers = game.players.size;
   let round = game.getIn(['status', 'round']);
+  let roundChanged = false;
   do {
     --emergencyCount;
     ++playerIndex;
     if (playerIndex >= totalPlayers) {
       ++round;
+      roundChanged = true;
       playerIndex = 0;
     }
     const player = game.players.find(player => player.index === playerIndex);
@@ -61,7 +64,8 @@ export const gameNextPlayer = (game) => {
 
   return emergencyCount < 0 ? game : game
     .setIn(['status', 'round'], round)
-    .setIn(['status', 'player'], playerIndex);
+    .setIn(['status', 'player'], playerIndex)
+    .update('cooldowns', cooldowns => cooldowns.eventNextPlayer(roundChanged));
 };
 
 export const gameEndTurn = (game, {userId}) => {
@@ -79,17 +83,16 @@ export const gameStartEat = (game, {food}) => {
     .setIn(['status', 'player'], 0);
 };
 
-export const gameGiveFood = (game, {animalIds}) => {
-  validateParameter(animalIds, Array.isArray(animalIds), 'Animals is not Array');
+export const traitGiveFood = (game, {animalId, amount}) => {
+  ensureParameter(animalId, 'string');
+  ensureParameter(amount, 'number');
+  const {playerId, animalIndex} = game.locateAnimal(animalId);
   return game
-    .update(game => {
-      return animalIds.reduce((game, animalId) => {
-        const {playerId, animalIndex} = game.locateAnimal(animalId);
-        return game.updateIn(['players', playerId, 'continent', animalIndex, 'food'], food => food + 1);
-      }, game)
-    })
-    .update('food', food => food - animalIds.length);
+    .updateIn(['players', playerId, 'continent', animalIndex, 'food'], food => food + amount)
+    .update('food', food => food - amount);
 };
+
+export const startCooldown = (game, {link, duration, place, placeId}) => CooldownsList.addCooldown(game, link, duration, place, placeId);
 
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
@@ -109,5 +112,6 @@ export const reducer = createReducer(Map(), {
   , gameDeployTrait: (state, data) => state.update(data.gameId, game => gameDeployTrait(game, data))
   , gameEndTurn: (state, data) => state.update(data.gameId, game => gameEndTurn(game, data))
   , gameStartEat: (state, data) => state.update(data.gameId, game => gameStartEat(game, data))
-  , gameGiveFood: (state, data) => state.update(data.gameId, game => gameGiveFood(game, data))
+  , traitGiveFood: (state, data) => state.update(data.gameId, game => traitGiveFood(game, data))
+  , startCooldown: (state, data) => state.update(data.gameId, game => startCooldown(game, data))
 });

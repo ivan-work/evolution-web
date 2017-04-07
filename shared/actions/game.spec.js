@@ -4,7 +4,6 @@ import {STATUS} from '../models/UserModel';
 import {GameModel, TEST_DECK_SIZE, TEST_HAND_SIZE} from '../models/game/GameModel';
 import {CardModel} from '../models/game/CardModel';
 import * as cardTypes from '../models/game/evolution/cards';
-import * as traits from '../models/game/evolution/traits';
 import {AnimalModel} from '../models/game/evolution/AnimalModel';
 import {TraitModel} from '../models/game/evolution/TraitModel';
 
@@ -220,8 +219,8 @@ describe('Game:', function () {
     });
 
     const cardSharpVision = ClientGame0().getPlayerCard(User0, 1);
-    const traitCamouflage = TraitModel.new(traits.TraitCamouflage);
-    const traitSharpVision = TraitModel.new(traits.TraitSharpVision);
+    const traitCamouflage = TraitModel.new('TraitCamouflage');
+    const traitSharpVision = TraitModel.new('TraitSharpVision');
 
     clientStore0.dispatch(
       gameDeployTraitRequest(
