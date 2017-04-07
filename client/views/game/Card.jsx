@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {CardModel} from '~/shared/models/game/CardModel';
 
@@ -6,11 +7,12 @@ export class Card extends React.Component {
   static propTypes = {
     model: React.PropTypes.instanceOf(CardModel).isRequired
     , index: React.PropTypes.number.isRequired
+    , draggable: React.PropTypes.bool
   };
 
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
   }
 
   render() {
