@@ -10,6 +10,7 @@ export class TraitDataModel extends Record({
   , cardTargetType: CARD_TARGET_TYPE.ANIMAL_SELF
   , targetType: null
   , cooldowns: null
+  , multiple: false
   , disableLastRound: false
   , action: null
   , checkAction: null

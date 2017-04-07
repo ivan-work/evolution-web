@@ -69,12 +69,12 @@ export const server$playerActed = (gameId, userId) => (dispatch, getState) => di
 // complexActions
 
 export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId) => (dispatch, getState) => {
-  const requiredAmount = (animal.getMaxFood() + animal.getMaxFat()) - (animal.getFood() + animal.getFat());
+  const neededFood = animal.needsFood();
   // TODO bug with 2 amount on animal 2/3
-  dispatch(server$game(gameId, traitMoveFood(gameId, animal.id, Math.min(amount, requiredAmount), sourceType, sourceId)));
+  dispatch(server$game(gameId, traitMoveFood(gameId, animal.id, Math.min(amount, neededFood), sourceType, sourceId)));
 
   // TODO mb move to traitData?
-  if (requiredAmount > 0) {
+  if (neededFood > 0) {
     dispatch(startCooldown(gameId, 'TraitCommunication', TRAIT_COOLDOWN_DURATION.ACTIVATION, TRAIT_COOLDOWN_PLACE.ANIMAL, animal.id));
     animal.traits.filter(trait => trait.type === 'TraitCommunication')
       .forEach(trait => {
@@ -135,7 +135,7 @@ export const traitClientToServer = {
     if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, userId, animalId)) {
       throw new ActionCheckError(`traitTakeFoodRequest@Game(${gameId})`, 'Cooldown active')
     }
-    if (!animal.canEat()) {
+    if (animal.needsFood() <= 0) {
       throw new ActionCheckError(`traitTakeFoodRequest@Game(${gameId})`, 'Animal(%s) full', animal)
     }
 

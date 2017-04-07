@@ -38,11 +38,11 @@ import {
     const mockedStores = mockStores(count, initialServerStore);
     const result = [{
       serverStore: mockedStores[0]
-      , ServerGame: () => mockedStores[0].getState().get('games').first()
+      , ServerGame: () => mockedStores[0].getState().get('games').last()
     }];
 
     mockedStores[1].clientStore0.dispatch(roomCreateRequest());
-    const roomId = result[0].serverStore.getState().get('rooms').first().id;
+    const roomId = result[0].serverStore.getState().get('rooms').last().id;
 
     for (let i = 0; i < count; ++i) {
       const clientStore = mockedStores[i + 1]['clientStore' + i];
@@ -53,16 +53,18 @@ import {
       })
     }
 
-    const room = result[0].serverStore.getState().get('rooms').first();
+    const room = result[0].serverStore.getState().get('rooms').last();
 
     result[0].ParseGame = (string) => {
       result[0].serverStore.dispatch(gameCreateSuccess(GameModel.parse(room, string)));
+      const gameId = result[0].serverStore.getState().get('games').last().id;
 
       for (let i = 0; i < count; ++i) {
         const clientStore = mockedStores[i + 1]['clientStore' + i];
         clientStore.disconnect();
         clientStore.connect(result[0].serverStore);
       }
+      return gameId;
     };
 
     return result;

@@ -104,9 +104,7 @@ export const gameStartDeploy = (game) => {
     .update('players', players => players.map(player => player
       .set('ended', false)
       .set('skipped', 0)
-      .update('continent', animal => animal.map(animal => animal
-        .set('food', 0)
-      ))
+      .update('continent', continent => continent.map(animal => animal.digestFood()))
     ))
     .setIn(['food'], 0)
     .setIn(['status', 'phase'], PHASE.DEPLOY)
@@ -152,7 +150,7 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
   ensureParameter(amount, 'number');
   const {playerId, animalIndex} = game.locateAnimal(animalId);
   const updatedGame = game
-    .updateIn(['players', playerId, 'continent', animalIndex, 'food'], food => food + amount);
+    .updateIn(['players', playerId, 'continent', animalIndex], animal => animal.receiveFood(amount));
 
   switch (sourceType) {
     case FOOD_SOURCE_TYPE.GAME:

@@ -238,7 +238,6 @@ const gameStartDeploy = (gameId) => ({
 export const server$gameExtict = (gameId) => (dispatch, getState) => {
   //console.log('server$gameExtinct')
   const game = selectGame(getState, gameId);
-  const actionsList = [];
   const cardNeedToPlayer = {};
   const cardGivePerPlayer = {};
   let deckSize = game.deck.size;
@@ -247,7 +246,7 @@ export const server$gameExtict = (gameId) => (dispatch, getState) => {
     cardGivePerPlayer[player.id] = 0;
     cardNeedToPlayer[player.id] = 1;
     player.continent.forEach((animal) => {
-      if (animal.getFood() < animal.getMaxFood()) {
+      if (!animal.canSurvive()) {
         dispatch(server$game(gameId, animalStarve(gameId, animal.id)));
       } else {
         cardNeedToPlayer[player.id] += 1;

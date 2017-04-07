@@ -3,6 +3,8 @@ import uuid from 'node-uuid';
 import {TraitModel} from './TraitModel';
 import {TraitDataModel} from './TraitDataModel';
 
+import {TraitFatTissue} from './traitData';
+
 export class AnimalModel extends Record({
   id: null
   , ownerId: null
@@ -45,23 +47,71 @@ export class AnimalModel extends Record({
   }
 
   getFood() {
-    return this.food;
+    return this.food + this.getFat();
   }
 
   getFat() {
-    return 0;
+    return this.traits.filter(trait => trait.type === TraitFatTissue.type && trait.value).size
   }
 
-  getMaxFood() {
+  sizeOfNormalFood() {
     return 1 + this.traits.reduce((result, trait) => result + trait.dataModel.food, 0);
   }
 
-  getMaxFat() {
-    return 0;
+  sizeOfFat() {
+    return this.traits.filter(trait => trait.type === TraitFatTissue.type).size
   }
 
-  canEat() {
-    return this.food < (this.getMaxFood() + this.getMaxFat());
+  needsFood() {
+    return this.sizeOfNormalFood() + this.sizeOfFat() - this.getFood();
+  }
+
+  canSurvive() {
+    return this.getFood() >= this.sizeOfNormalFood();
+  }
+
+  updateFirstTrait(filterFn, updateFn) {
+    const index = this.traits.findIndex(filterFn)
+    return (~index
+      ? this.updateIn(['traits', index], updateFn)
+      : this);
+  }
+
+  receiveFood(amount) {
+    let self = this;
+    let needOfNormalFood = this.sizeOfNormalFood() - this.food;
+    let needOfFat = this.sizeOfFat() - this.getFat();
+    while (amount > 0 && needOfNormalFood > 0) {
+      amount--;
+      needOfNormalFood--;
+      self = self.update('food', food => ++food)
+    }
+    while (amount > 0 && needOfFat > 0) {
+      amount--;
+      needOfFat--;
+      self = self.updateFirstTrait(
+        trait => trait.type === TraitFatTissue.type && !trait.value
+        , trait => trait.set('value', true)
+      );
+    }
+//    console.log(`${this.id} has ${self.getFood()} (${self.food}/${self.getFood() - self.food}).
+//Needs ${needOfNormalFood}/${needOfFat}`);
+    return self;
+  }
+
+  digestFood() {
+    let foodBalance = -this.needsFood(); // +1 - overeat, -1 ot ate
+    const fat = this.getFat();
+    let self = this;
+    while (foodBalance < 0 && self.getFat().size > 0) {
+      foodBalance++;
+      self = self.updateFirstTrait(
+        trait => trait.type === TraitFatTissue.type && trait.value
+        , trait => trait.set('value', false)
+      );
+    }
+    return self
+      .set('food', 0)
   }
 
   countScore() {
