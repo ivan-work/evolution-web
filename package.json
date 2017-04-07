@@ -115,6 +115,7 @@
     "postcss-focus": "*",
     "postcss-loader": "*",
     "postcss-reporter": "*",
+    "proxyquire": "^1.7.10",
     "react-addons-test-utils": "*",
     "react-dnd-test-backend": "*",
     "react-transform-hmr": "*",
