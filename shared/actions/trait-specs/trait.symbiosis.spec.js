@@ -8,7 +8,7 @@ import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
 
-describe.only('TraitSymbiosis:', () => {
+describe('TraitSymbiosis:', () => {
   describe('Deploy:', () => {
     it('friend > friend', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
@@ -46,7 +46,7 @@ players:
       expect(selectCard(User1, 7).trait1.type).equal('TraitSymbiosis');
       clientStore0.dispatch(gameEndTurnRequest());
       // A > B
-      expectChanged(() => clientStore1.dispatch(
+      expectChanged('A > B', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User1, 0).id, '$A', false, '$B')
       ), serverStore, clientStore0, clientStore1);
       expect(selectAnimal(User1, 0).traits).size(1);
@@ -55,7 +55,7 @@ players:
       expect(selectAnimal(User1, 3).traits).size(0);
 
       // B > C
-      expectChanged(() => clientStore1.dispatch(
+      expectChanged('B > C', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User1, 0).id, '$B', false, '$C')
       ), serverStore, clientStore0, clientStore1);
       expect(selectAnimal(User1, 0).traits).size(1);
@@ -64,7 +64,7 @@ players:
       expect(selectAnimal(User1, 3).traits).size(0);
 
       // C > D
-      expectChanged(() => clientStore1.dispatch(
+      expectChanged('C > D', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User1, 0).id, '$C', false, '$D')
       ), serverStore, clientStore0, clientStore1);
       expect(selectAnimal(User1, 0).traits).size(1);
@@ -73,7 +73,7 @@ players:
       expect(selectAnimal(User1, 3).traits).size(1);
 
       // A > D
-      expectChanged(() => clientStore1.dispatch(
+      expectChanged('A > D', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User1, 0).id, '$A', false, '$D')
       ), serverStore, clientStore0, clientStore1);
       expect(selectAnimal(User1, 0).traits).size(2);
@@ -82,7 +82,7 @@ players:
       expect(selectAnimal(User1, 3).traits).size(2);
 
       // C > A
-      expectChanged(() => clientStore1.dispatch(
+      expectChanged('C > A', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User1, 0).id, '$C', false, '$A')
       ), serverStore, clientStore0, clientStore1);
       expect(selectAnimal(User1, 0).traits).size(3);
@@ -91,22 +91,22 @@ players:
       expect(selectAnimal(User1, 3).traits).size(2);
 
       // fail B > A
-      expectUnchangedMsg('B > A', () => clientStore1.dispatch(
+      expectUnchanged('B > A', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User1, 0).id, '$B', false, '$A')
       ), serverStore, clientStore0, clientStore1);
 
       // fail B > B
-      expectUnchangedMsg('B > B', () => clientStore1.dispatch(
+      expectUnchanged('B > B', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User1, 0).id, '$B', false, '$B')
       ), serverStore, clientStore0, clientStore1);
 
       // fail B > C
-      expectUnchangedMsg('B > C', () => clientStore1.dispatch(
+      expectUnchanged('B > C', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User1, 0).id, '$B', false, '$C')
       ), serverStore, clientStore0, clientStore1);
 
       // B > D
-      expectChangedMsg('B > D', () => clientStore1.dispatch(
+      expectChanged('B > D', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User1, 0).id, '$B', false, '$D')
       ), serverStore, clientStore0, clientStore1);
       expect(selectAnimal(User1, 0).traits).size(3);
@@ -128,22 +128,22 @@ players:
       expect(selectCard(User1, 7).trait1.type).equal('TraitCommunication');
       clientStore0.dispatch(gameEndTurnRequest());
 
-      expectUnchanged(() => clientStore1.dispatch(gameDeployTraitRequest(
+      expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameDeployTraitRequest(
         selectCard(User1, 0).id
         , '$D', false, '$A'
       )), serverStore, clientStore0, clientStore1);
 
-      expectUnchanged(() => clientStore1.dispatch(gameDeployTraitRequest(
+      expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameDeployTraitRequest(
         selectCard(User1, 0).id
         , '$D', false, '$D'
       )), serverStore, clientStore0, clientStore1);
 
-      expectUnchanged(() => clientStore1.dispatch(gameDeployTraitRequest(
+      expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameDeployTraitRequest(
         selectCard(User1, 0).id
         , '$A', false, '$A'
       )), serverStore, clientStore0, clientStore1);
 
-      expectChanged(() => clientStore1.dispatch(gameDeployTraitRequest(
+      expectChanged('CHANGEIT', () => clientStore1.dispatch(gameDeployTraitRequest(
         selectCard(User1, 0).id
         , '$D', false, '$E'
       )), serverStore, clientStore0, clientStore1);

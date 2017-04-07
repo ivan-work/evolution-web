@@ -46,34 +46,34 @@ players:
       expect(selectCard(User1, 7).trait1.type).equal('TraitCommunication');
       clientStore0.dispatch(gameEndTurnRequest());
 
-      expectChanged(() => clientStore1.dispatch(
+      expectChanged('CHANGEIT', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User1, 0).id, '$A', false, '$B')
       ), serverStore, clientStore0, clientStore1);
       expect(selectAnimal(User1, 0).traits).size(1);
       expect(selectAnimal(User1, 1).traits).size(1);
       expect(selectAnimal(User1, 2).traits).size(0);
 
-      expectChanged(() => clientStore1.dispatch(
+      expectChanged('CHANGEIT', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User1, 0).id, '$B', false, '$C')
       ), serverStore, clientStore0, clientStore1);
       expect(selectAnimal(User1, 0).traits).size(1);
       expect(selectAnimal(User1, 1).traits).size(2);
       expect(selectAnimal(User1, 2).traits).size(1);
 
-      expectChanged(() => clientStore1.dispatch(
+      expectChanged('CHANGEIT', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User1, 0).id, '$C', false, '$A')
       ), serverStore, clientStore0, clientStore1);
       expect(selectAnimal(User1, 0).traits).size(2);
       expect(selectAnimal(User1, 1).traits).size(2);
       expect(selectAnimal(User1, 2).traits).size(2);
 
-      expectUnchanged(() => clientStore1.dispatch(
+      expectUnchanged('CHANGEIT', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User1, 0).id, '$B', false, '$C')
       ), serverStore, clientStore0, clientStore1);
-      expectUnchanged(() => clientStore1.dispatch(
+      expectUnchanged('CHANGEIT', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User1, 0).id, '$C', false, '$A')
       ), serverStore, clientStore0, clientStore1);
-      expectUnchanged(() => clientStore1.dispatch(
+      expectUnchanged('CHANGEIT', () => clientStore1.dispatch(
         gameDeployTraitRequest(selectCard(User1, 0).id, '$C', false, '$B')
       ), serverStore, clientStore0, clientStore1);
     });
@@ -91,22 +91,22 @@ players:
       expect(selectCard(User1, 7).trait1.type).equal('TraitCommunication');
       clientStore0.dispatch(gameEndTurnRequest());
 
-      expectUnchanged(() => clientStore1.dispatch(gameDeployTraitRequest(
+      expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameDeployTraitRequest(
         selectCard(User1, 0).id
         , '$D', false, '$A'
       )), serverStore, clientStore0, clientStore1);
 
-      expectUnchanged(() => clientStore1.dispatch(gameDeployTraitRequest(
+      expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameDeployTraitRequest(
         selectCard(User1, 0).id
         , '$D', false, '$D'
       )), serverStore, clientStore0, clientStore1);
 
-      expectUnchanged(() => clientStore1.dispatch(gameDeployTraitRequest(
+      expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameDeployTraitRequest(
         selectCard(User1, 0).id
         , '$A', false, '$A'
       )), serverStore, clientStore0, clientStore1);
 
-      expectChanged(() => clientStore1.dispatch(gameDeployTraitRequest(
+      expectChanged('CHANGEIT', () => clientStore1.dispatch(gameDeployTraitRequest(
         selectCard(User1, 0).id
         , '$D', false, '$E'
       )), serverStore, clientStore0, clientStore1);

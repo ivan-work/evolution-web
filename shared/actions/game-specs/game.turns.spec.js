@@ -30,7 +30,7 @@ deck: 50 camo
     expect(ServerGame().getIn(['status', 'phase'])).equal(PHASE.DEPLOY);
     expect(ServerGame().getIn(['status', 'currentPlayer'])).equal(1);
 
-    expectUnchanged(() => clientStore0.dispatch(gameEndTurnRequest())
+    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(gameEndTurnRequest())
       , serverStore, clientStore0, clientStore1);
 
     clientStore1.dispatch(gameEndTurnRequest());

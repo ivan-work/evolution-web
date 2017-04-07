@@ -33,24 +33,24 @@ describe('Hacking Game:', function () {
     clientStore2.dispatch(gameCreateSuccess(ServerGame()));
 
     // gameReadyRequest, wrong gameId
-    expectUnchanged(() => clientStore0.dispatch({
+    expectUnchanged('CHANGEIT', () => clientStore0.dispatch({
       type: 'gameReadyRequest'
       , data: {gameId: null}
       , meta: {server: true}
     }), serverStore, clientStore0);
 
     // gameReadyRequest, wrong user
-    expectUnchanged(() => clientStore2.dispatch(gameReadyRequest())
+    expectUnchanged('CHANGEIT', () => clientStore2.dispatch(gameReadyRequest())
       , serverStore, clientStore2);
 
     // gameReadyRequest, double user
     clientStore0.dispatch(gameReadyRequest());
-    expectUnchanged(() => clientStore0.dispatch(gameReadyRequest())
+    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(gameReadyRequest())
       , serverStore, clientStore0);
 
     // gameReadyRequest, double
     clientStore1.dispatch(gameReadyRequest());
-    expectUnchanged(() => clientStore1.dispatch(gameReadyRequest())
+    expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameReadyRequest())
       , serverStore, clientStore1);
   });
 
@@ -63,31 +63,31 @@ players:
 `);
 
     // gameDeployAnimalRequest empty
-    expectUnchanged(() => clientStore0.dispatch(gameDeployAnimalRequest())
+    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(gameDeployAnimalRequest())
       , serverStore, clientStore0);
 
     // gameDeployAnimalRequest (0:0:0) User1 not in turn
-    expectUnchanged(() => clientStore1.dispatch(gameDeployAnimalRequest(ClientGame1().getPlayerCard(User1, 0).id, 0)), serverStore, clientStore1);
+    expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameDeployAnimalRequest(ClientGame1().getPlayerCard(User1, 0).id, 0)), serverStore, clientStore1);
     // gameDeployAnimalRequest (0:0:0) User0 turn, wrong ID
-    expectUnchanged(() => clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id, null)), serverStore, clientStore0);
+    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id, null)), serverStore, clientStore0);
     // gameDeployAnimalRequest (0:0:0) User0 turn, wrong ID
-    expectUnchanged(() => clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id, -2)), serverStore, clientStore0);
+    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id, -2)), serverStore, clientStore0);
 
     // gameDeployAnimalRequest (0:0:0) User0 turn
-    expectChanged(() => clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id, 0)), serverStore, clientStore0);
+    expectChanged('CHANGEIT', () => clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id, 0)), serverStore, clientStore0);
     expect(ServerGame().status.currentPlayer, 'ServerGame().status.currentPlayer').equal(1);
 
     // gameDeployAnimalRequest (0:0:1) User0 second try
-    expectUnchanged(() => clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id, 0))
+    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id, 0))
       , serverStore, clientStore0);
 
     // gameDeployAnimalRequest (0:0:1) User1 turn
-    expectChanged(() => clientStore1.dispatch(gameDeployAnimalRequest(ClientGame1().getPlayerCard(User1, 1).id, 0)), serverStore, clientStore1);
+    expectChanged('CHANGEIT', () => clientStore1.dispatch(gameDeployAnimalRequest(ClientGame1().getPlayerCard(User1, 1).id, 0)), serverStore, clientStore1);
     expect(ServerGame().status.round, 'ServerGame().status.currentPlayer').equal(1);
     expect(ServerGame().status.currentPlayer, 'ServerGame().status.currentPlayer').equal(0);
 
     // gameDeployAnimalRequest (0:1:0) User1 second try
-    expectUnchanged(() => clientStore1.dispatch(gameDeployAnimalRequest(ClientGame1().getPlayerCard(User1, 0).id, 0))
+    expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameDeployAnimalRequest(ClientGame1().getPlayerCard(User1, 0).id, 0))
       , serverStore, clientStore1);
   });
 
@@ -102,23 +102,23 @@ players:
 `);
 
     // gameDeployTraitRequest empty
-    expectUnchanged(() => clientStore0.dispatch(gameDeployTraitRequest())
+    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(gameDeployTraitRequest())
       , serverStore, clientStore0);
 
     // gameDeployTraitRequest invalid card
-    expectUnchanged(() => clientStore0.dispatch(gameDeployTraitRequest(
+    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(gameDeployTraitRequest(
       '123'
       , ClientGame0().getPlayer().getAnimal(0).id))
       , serverStore, clientStore0);
 
     // gameDeployTraitRequest invalid animal
-    expectUnchanged(() => clientStore0.dispatch(gameDeployTraitRequest(
+    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(gameDeployTraitRequest(
       ClientGame0().getPlayer().getCard(0).id
       , '123'))
       , serverStore, clientStore0);
 
     // gameDeployTraitRequest valid card, valid animal
-    expectChanged(() => clientStore0.dispatch(gameDeployTraitRequest(
+    expectChanged('CHANGEIT', () => clientStore0.dispatch(gameDeployTraitRequest(
       ClientGame0().getPlayer().getCard(0).id
       , ClientGame0().getPlayer().getAnimal(0).id))
       , serverStore, clientStore0);
@@ -127,7 +127,7 @@ players:
     clientStore1.dispatch(gameDeployTraitRequest(ClientGame1().getPlayer().getCard(0).id, ClientGame1().getPlayer().getAnimal(0).id));
 
     // gameDeployTraitRequest already has trait, valid animal
-    expectUnchanged(() => clientStore0.dispatch(gameDeployTraitRequest(
+    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(gameDeployTraitRequest(
       ClientGame0().getPlayer().getCard(0).id
       , ClientGame0().getPlayer().getAnimal(0).id))
       , serverStore, clientStore0);
