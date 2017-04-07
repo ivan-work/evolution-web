@@ -71,19 +71,18 @@ players:
   - continent: $A carn
   - continent: $B mimicry, $C, $D
 `);
-    const {selectGame, selectQuestionId, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
 
     expect(selectGame().question).ok;
-    expect(selectGame().question.get('id')).ok;
-    expect(selectQuestionId()).ok;
-    const questionId = selectQuestionId();
+    expect(selectGame().question.id).ok;
+    const questionId = selectGame().question.id;
     expect(ClientGame0().question, 'ClientGame0().question').ok;
     expect(ClientGame1().question, 'ClientGame1().question').ok;
     expect(ClientGame0().question.get('id'), 'User0 shouldnt know questionId').equal(null);
     expect(ClientGame1().question.get('id')).equal(questionId);
-    clientStore1.dispatch(traitDefenceAnswerRequest(questionId, 'TraitMimicry', '$C'));
+    clientStore1.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$C'));
     expect(selectAnimal(User0, 0).getFood()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$B');
     expect(selectAnimal(User1, 1).id).equal('$D');
@@ -99,16 +98,16 @@ players:
   - continent: $A carn
   - continent: $B mimicry, $C mimicry, $D
 `);
-    const {selectGame, selectQuestionId, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
 
-    clientStore1.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitMimicry', '$C'));
+    clientStore1.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$C'));
 
     //console.log(selectGame().status)
     //console.log(selectGame().cooldowns)
 
-    clientStore1.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitMimicry', '$B'));
+    clientStore1.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$B'));
 
     expect(selectAnimal(User0, 0).getFood()).equal(2);
     expect(selectAnimal(User1, 0).id).equal('$C');
@@ -153,9 +152,9 @@ deck: 20 camo
 players:
   - continent: $A carn, $B mimi carn, $C, $D
 `);
-    const {selectGame, selectQuestionId, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
-    clientStore0.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitMimicry', '$C'));
+    clientStore0.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$C'));
 
     expect(selectPlayer(User0).continent).size(3);
     expect(selectAnimal(User0, 0).id).equal('$A');

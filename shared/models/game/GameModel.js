@@ -82,6 +82,7 @@ const GameModelData = {
   , deck: null
   , players: OrderedMap()
   , observers: List()
+  , log: List()
   , food: -1
   , status: new StatusRecord()
   , cooldowns: CooldownList.new()
@@ -138,6 +139,7 @@ export class GameModel extends Record(GameModelData) {
       , status: new StatusRecord(js.status)
       , cooldowns: CooldownList.fromServer(js.cooldowns)
       , settings: SettingsRecord.fromJS(js.settings)
+      , log: List(js.log)
     });
   }
 

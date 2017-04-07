@@ -25,7 +25,7 @@ players:
 settings:
   timeTraitResponse: 10
 `);
-    const {selectGame, selectQuestionId, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
     replaceGetRandom(() => 1, () => {
       clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$Z'));
@@ -43,7 +43,7 @@ settings:
       expect(selectGame().question).ok;
       expect(ClientGame0().question).ok;
       expect(ClientGame1().question).ok;
-      clientStore1.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitTailLoss', 2));
+      clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 2));
       expect(selectGame().question).null;
       expect(ClientGame0().question).null;
       expect(ClientGame1().question).null;
@@ -75,7 +75,7 @@ settings:
     expect(selectGame().question).ok;
     expect(ClientGame0().question).ok;
     expect(ClientGame1().question).ok;
-    clientStore1.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitMimicry', '$X'));
+    clientStore1.dispatch(traitDefenceAnswerRequest('TraitMimicry', '$X'));
     expect(selectGame().question).null;
     expect(ClientGame0().question).null;
     expect(ClientGame1().question).null;
@@ -86,7 +86,7 @@ settings:
     clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$E', 'TraitCarnivorous', '$Z'));
-    clientStore1.dispatch(traitDefenceAnswerRequest(selectQuestionId(), 'TraitTailLoss', 0));
+    clientStore1.dispatch(traitDefenceAnswerRequest('TraitTailLoss', 0));
     expect(selectAnimal(User1, 0).traits).size(1);
     expect(selectAnimal(User1, 0).traits.get(0).type).equal('TraitMimicry');
     clientStore0.dispatch(gameEndTurnRequest());

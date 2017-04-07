@@ -67,11 +67,6 @@ export const gamePlayerLeft = (gameId, userId) => ({
   , data: {gameId, userId}
 });
 
-export const gamePlayerLeftNotification = (gameId, userId) => ({
-  type: 'gamePlayerLeftNotification'
-  , data: {gameId, userId}
-});
-
 export const gameDestroy = (gameId) => ({
   type: 'gameDestroy'
   , data: {gameId}
@@ -242,9 +237,9 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
 };
 
 // gameNextPlayer
-const gameNextPlayer = (gameId, nextPlayerIndex, roundChanged, playerHasOptions) => ({
+const gameNextPlayer = (gameId, nextPlayerId, nextPlayerIndex, roundChanged, playerHasOptions) => ({
   type: 'gameNextPlayer'
-  , data: {gameId, nextPlayerIndex, roundChanged, playerHasOptions}
+  , data: {gameId, nextPlayerId, nextPlayerIndex, roundChanged, playerHasOptions}
 });
 
 const gameNextPlayerNotify = (gameId, userId) => ({
@@ -293,10 +288,11 @@ const server$gameNextPlayer = (gameId, nextPlayer, roundChanged) => (dispatch, g
 
   const currentPlayerIndex = selectGame(getState, gameId).getIn(['status', 'currentPlayer']);
 
-  dispatch(server$game(gameId, gameNextPlayer(gameId, nextPlayer.index, roundChanged)));
+  dispatch(server$game(gameId, gameNextPlayer(gameId, nextPlayer.id, nextPlayer.index, roundChanged)));
 
   const playerHasOptions = doesPlayerHasOptions(selectGame(getState, gameId), nextPlayer.id);
   if (playerHasOptions) {
+    //dispatch(gameLogNotify)
     dispatch(server$addTurnTimeout(gameId, nextPlayer.id, selectGame(getState, gameId).settings.timeTurn));
     if (currentPlayerIndex !== nextPlayer.index) {
       dispatch(server$game(gameId, gameNextPlayerNotify(gameId, nextPlayer.id)))
@@ -395,7 +391,9 @@ const server$gameDistributeCards = (gameId) => (dispatch, getState) => {
       }
     });
   }
-  Object.keys(mapPlayersGiveCards).forEach((playerId) => {
+  Object.keys(mapPlayersGiveCards)
+    .sort((p1, p2) => game.getPlayer(p1).index - game.getPlayer(p2).index)
+    .forEach((playerId) => {
     dispatch(server$gameGiveCards(gameId, playerId, mapPlayersGiveCards[playerId]));
   });
 };
@@ -550,19 +548,13 @@ export const gameServerToClient = {
     gameDeployTrait(gameId, cardId, traits.map(trait => TraitModel.fromServer(trait)))
   ,  gameAddTurnTimeout: ({gameId, turnStartTime, turnDuration}) =>
     gameAddTurnTimeout(gameId, turnStartTime, turnDuration)
-  ,  gameNextPlayer: ({gameId, nextPlayerIndex, roundChanged}) =>
-    gameNextPlayer(gameId, nextPlayerIndex, roundChanged)
+  ,  gameNextPlayer: ({gameId, nextPlayerId, nextPlayerIndex, roundChanged}) =>
+    gameNextPlayer(gameId, nextPlayerId, nextPlayerIndex, roundChanged)
   ,  gameNextPlayerNotify: ({gameId, userId}, currentUserId) => (dispatch) =>
     (userId === currentUserId && dispatch(gameNextPlayerNotify(gameId, userId)))
   ,  gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
   ,  gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
-  ,  gamePlayerLeft: ({gameId, userId}, currentUserId) => (dispatch, getState) => {
-    dispatch(gamePlayerLeftNotification(gameId, userId));
-    if (currentUserId === userId) {
-      dispatch(gamePlayerLeft(gameId, userId));
-      dispatch(redirectTo(`/`));
-    }
-  }
+  ,  gamePlayerLeft: ({gameId, userId}) => gamePlayerLeft(gameId, userId)
   ,  animalStarve: ({gameId, animalId}) => animalStarve(gameId, animalId)
 };
 

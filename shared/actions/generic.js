@@ -1,5 +1,5 @@
 import logger from '../utils/logger';
-import {selectPlayers4Sockets, selectCard, selectAnimal} from '../selectors';
+import {selectPlayers4Sockets} from '../selectors';
 import {gameDeployAnimalRequest, traitActivateRequest} from './actions';
 
 export const actionError = (error) => ({

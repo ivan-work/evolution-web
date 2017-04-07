@@ -13,23 +13,18 @@ export const selectPlayers4Sockets = (getState, gameId) => {
   );
 };
 
-export const selectPlayer = (getState, gameId, user) =>
-  selectGame(getState, gameId).getPlayer(user);
-
-export const selectCard = (getState, gameId, user, cardIndex) =>
-  selectGame(getState, gameId).getPlayer(user).getCard(cardIndex);
-
-export const selectAnimal = (getState, gameId, user, animalIndex) =>
-  selectGame(getState, gameId).getPlayer(user).getAnimal(animalIndex);
-
-export const selectTrait = (getState, gameId, user, animalIndex, traitIndex) =>
-  selectGame(getState, gameId).getPlayer(user).getAnimal(animalIndex).getIn(['traits', traitIndex]);
-
 export const makeGameSelectors = (getState, gameId) => ({
   selectGame: () => selectGame(getState, gameId)
-  , selectPlayer: (user) => selectPlayer(getState, gameId, user)
-  , selectCard: (user, cardIndex) => selectCard(getState, gameId, user, cardIndex)
-  , selectAnimal: (user, animalIndex) => selectAnimal(getState, gameId, user, animalIndex)
-  , selectTrait: (user, animalIndex, traitIndex) => selectTrait(getState, gameId, user, animalIndex, traitIndex)
-  , selectQuestionId: () => getState().getIn(['games', gameId, 'question', 'id'])
+  , selectPlayer: (user) => selectGame(getState, gameId).getPlayer(user)
+  , selectCard: (user, cardIndex) => selectGame(getState, gameId).getPlayer(user).getCard(cardIndex)
+  , selectAnimal: (user, animalIndex) => selectGame(getState, gameId).getPlayer(user).getAnimal(animalIndex)
+  , selectTrait: (user, animalIndex, traitIndex) => selectGame(getState, gameId).getPlayer(user).getAnimal(animalIndex).getIn(['traits', traitIndex])
+});
+
+export const makeClientGameSelectors = (getState, gameId, i) => ({
+  ['selectGame'+i]: () => getState().get('game')
+  , ['selectPlayer'+i]: () => getState().get('game').getPlayer()
+  , ['selectCard'+i]: (cardIndex) => getState().get('game').getPlayer().getCard(cardIndex)
+  , ['selectAnimal'+i]: (animalIndex) => getState().get('game').getPlayer().getAnimal(animalIndex)
+  , ['selectTrait'+i]: (animalIndex, traitIndex) => getState().get('game').getPlayer().getAnimal(animalIndex).getIn(['traits', traitIndex])
 });
