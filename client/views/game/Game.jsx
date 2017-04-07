@@ -25,7 +25,9 @@ import {GameScoreboardFinalView} from './ui/GameScoreboardFinal.jsx';
 
 import {AnimationServiceContext, AnimationServiceRef} from '../../services/AnimationService';
 
-class _Game extends React.Component {
+class ReactGame extends React.Component {
+  static displayName = 'Game';
+
   static contextTypes = {
     gameActions: React.PropTypes.object
   };
@@ -101,7 +103,7 @@ class _Game extends React.Component {
       ? GAME_POSITIONS[game.players.size].player
       : GAME_POSITIONS[game.players.size][index]);
 
-    return <div className={playerWrapperClassName} style={playerWrapperStyle} key={player.id}>
+    return <div className={playerWrapperClassName} style={playerWrapperStyle} key={player.id} data-player-id={player.id}>
       <GameContinent
         isUserContinent={isUser}
         continent={player.continent}
@@ -122,4 +124,4 @@ class _Game extends React.Component {
   }
 }
 
-export const Game = GameProvider(AnimationServiceRef(_Game));
+export const Game = GameProvider(AnimationServiceRef(ReactGame));

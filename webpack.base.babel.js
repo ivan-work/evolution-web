@@ -4,7 +4,6 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const WebpackAutoInject = require('webpack-auto-inject-version');
 
 module.exports = (options) => ({
   entry: options.entry.concat([path.join(process.cwd(), 'client/index.jsx')]),

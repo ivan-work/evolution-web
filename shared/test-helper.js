@@ -44,7 +44,8 @@ global.window.matchMedia = window.matchMedia || (() => ({
 require('react-mdl/extra/material');
 global.Element = global.window.Element;
 global.CustomEvent = global.window.CustomEvent;
-global.Event = global.window.Event;
+global.HTMLElement = global.window.HTMLElement;
+//global.Event = global.window.Event;
 global.NodeList = global.window.NodeList;
 global.Node = global.window.Node;
 

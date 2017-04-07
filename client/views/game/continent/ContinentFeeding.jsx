@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {Continent} from './Continent.jsx'
-import {DroppableAnimal} from '../Animal.jsx';
+import {GameDroppableAnimal} from '../Animal.jsx';
 
 export class ContinentFeeding extends Continent {
   getClassName() {
@@ -18,7 +18,7 @@ export class ContinentFeeding extends Continent {
   }
 
   renderAnimal(animal, index) {
-    return <DroppableAnimal
+    return <GameDroppableAnimal
       key={animal.id}
       model={animal}
       isUserAnimal={this.props.isUserContinent}

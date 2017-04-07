@@ -46,11 +46,15 @@ export class TraitModel extends Record({
       .set('hostAnimalId', animal.id);
   }
 
-  static LinkBetween(traitType, animal1, animal2, oneWay) {
-    if (animal1.hasTrait(traitType)
+  static LinkBetweenCheck(traitType, animal1, animal2) {
+    return (animal1.hasTrait(traitType)
       && animal2.hasTrait(traitType)
       && animal1.traits.some((trait) => trait.type === traitType && (trait.hostAnimalId === animal2.id || trait.linkAnimalId === animal2.id))
-    ) {
+    );
+  }
+
+  static LinkBetween(traitType, animal1, animal2, oneWay) {
+    if (this.LinkBetweenCheck(traitType, animal1, animal2, oneWay)) {
       throw new ActionCheckError(`TraitModelValidation`, `Animal#%s already has LinkedTrait(%s) on Animal#%s`, animal1.id, traitType, animal2.id);
     }
     const trait1 = TraitModel.new(traitType);

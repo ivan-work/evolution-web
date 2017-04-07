@@ -73,6 +73,10 @@ export class GameWrapper extends React.Component {
 
 let GameWrapperHOC = GameWrapper;
 
+//const backend = !process.env.TEST ? HTML5Backend : TestBackend;
+const backend = !process.env.TEST ? MouseBackend : TestBackend;
+GameWrapperHOC = DragDropContext(backend)(GameWrapperHOC);
+
 import * as GameAnimations from './GameAnimations';
 
 GameWrapperHOC = AnimationServiceContext({
@@ -95,10 +99,6 @@ GameWrapperHOC = AnimationServiceContext({
     //,
   })
 })(GameWrapperHOC);
-
-//const backend = !process.env.TEST ? HTML5Backend : TestBackend;
-const backend = !process.env.TEST ? MouseBackend : TestBackend;
-GameWrapperHOC = DragDropContext(backend)(GameWrapperHOC);
 
 
 GameWrapperHOC = connect(

@@ -23,14 +23,14 @@ export class AnimalLinkedTrait extends Component {
     this._isMounted = true;
     this.node = ReactDOM.findDOMNode(this);
     AnimalLinkedTraits.push(this);
-    requestAnimationFrame(this.tick)
+    window.requestAnimationFrame(this.tick)
   }
 
   componentWillUnmount() {
     this._isMounted = false;
     AnimalLinkedTraits.remove(this);
     this.targetTrait = null;
-    cancelAnimationFrame(this.tick)
+    window.cancelAnimationFrame(this.tick)
   }
 
   tick() {
@@ -81,7 +81,7 @@ export class AnimalLinkedTrait extends Component {
             && trait.linkAnimalId === alt.props.sourceAnimalId
         })
       }
-      requestAnimationFrame(this.tick);
+      window.requestAnimationFrame(this.tick);
     }
   }
 

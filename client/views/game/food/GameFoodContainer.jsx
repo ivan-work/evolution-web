@@ -2,16 +2,10 @@ import React from 'react';
 
 import {DragFood, Food} from './Food.jsx';
 
-const la2xy = (p, a) => {
-  return {
-    x: p * Math.cos(a)
-    , y: p * Math.sin(a)
-  }
-};
 
 export const GameFoodContainer = ({food}) => (<div className='GameFoodContainer'>
   {Array.from({length: food}).map((u, index) => <DragFood key={index}/>)}
-  </div>);
+</div>);
 
 
 //export const GameFoodContainer = ({food}) => {
