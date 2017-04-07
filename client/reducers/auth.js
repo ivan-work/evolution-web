@@ -2,6 +2,7 @@ import {createReducer} from '~/shared/utils';
 //import {pushState} from 'redux-router';
 //import jwtDecode from 'jwt-decode';
 import {Map} from 'immutable';
+import {UserRecord} from '../../shared/models/User';
 
 const initialState = Map({
   token: null,
@@ -18,15 +19,14 @@ export const auth = createReducer(initialState, {
       'statusText': null
     }));
   }
-  , loginUserSuccess: (state, payload) => {
+  , loginUserSuccess: (state, data) => {
+    console.log('loginUserSuccess', state, data);
     return state.merge(Map({
       'isAuthenticating': false,
       'isAuthenticated': true,
       //'token': payload.token,
       //'userName': jwtDecode(payload.token).userName,
-      'user': Map({
-        name: payload.username
-      }),
+      'user': new UserRecord(data),
       'statusText': 'You have been successfully logged in.'
     }));
 
