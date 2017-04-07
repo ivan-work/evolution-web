@@ -20,7 +20,7 @@ export const Login = React.createClass({
     this.props.actions.loginUserRequest(this.state.redirectTo, this.state.login, this.state.password);
   }
   , render: function () {
-    console.log('Rendering login', this.props)
+    //console.log('Rendering login', this.props.location)
     const loginLink = this.linkState('login');
     var handleChange = (e) => loginLink.requestChange(e.target.value);
 

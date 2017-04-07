@@ -1,12 +1,14 @@
 import React from 'react';
 import {Route, IndexRoute} from 'react-router';
-import {App} from '../components/app/App';
-import {LoginView, RoomsView} from '../views/index';
+import {App} from '../components/app/App.jsx';
+import {LoginView, RoomsView, RoomView} from '../views/index';
 
 const MakeAuthCheck = (getState) => (nextState, replace) => {
   //console.log('getState', getState().toJS());
+  console.log('Auth check!');
   const userExists = getState().get('user') != null;
   if (!userExists) {
+    console.log('replace');
     //replace('/login?redirect=/rooms')
     replace('/login')
   }
@@ -15,8 +17,10 @@ const MakeAuthCheck = (getState) => (nextState, replace) => {
 export default (getState) => {
   const AuthCheck = MakeAuthCheck(getState);
   return <Route path='/' component={App}>
+    <IndexRoute component={RoomsView} onEnter={AuthCheck}/>
     <Route path='login' component={LoginView}/>
+    <Route path='room/*' component={RoomView} onEnter={AuthCheck}/>
   </Route>
 }
 //<Route path='login' component={LoginView}/>
-//<IndexRoute component={RoomsView} onEnter={AuthCheck}/>
+//
