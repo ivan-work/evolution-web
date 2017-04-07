@@ -40,6 +40,7 @@ import {
   , TraitMassive
   , TraitBurrowing
   , TraitSwimming
+  , TraitFlight
 } from '../traitTypes/index';
 
 export const endHunt = (game, sourceAnimal, traitCarnivorous, targetAnimal) => (dispatch) => {
@@ -167,7 +168,20 @@ export const TraitCarnivorous = {
       (sourceAnimal.hasTrait(TraitSwimming) && targetAnimal.hasTrait(TraitSwimming))
       || (!sourceAnimal.hasTrait(TraitSwimming) && !targetAnimal.hasTrait(TraitSwimming))
     )
-    // TFT
+      // TFT
     && !targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL)
+      //&& !(targetAnimal.hasTrait(TraitFlight) && (sourceAnimal.traits.size >= targetAnimal.traits.size))
+    && test(sourceAnimal, targetAnimal)
   )
 };
+const test = (sourceAnimal, targetAnimal) => {
+  console.log(
+    targetAnimal.hasTrait(TraitFlight)
+    , sourceAnimal.traits.size >= targetAnimal.traits.size
+    , sourceAnimal.traits.size
+    , targetAnimal.traits.size
+    , targetAnimal.hasTrait(TraitFlight) && (sourceAnimal.traits.size >= targetAnimal.traits.size)
+    , !(targetAnimal.hasTrait(TraitFlight) && (sourceAnimal.traits.size >= targetAnimal.traits.size))
+  )
+  return !(targetAnimal.hasTrait(TraitFlight) && (sourceAnimal.traits.size >= targetAnimal.traits.size))
+}

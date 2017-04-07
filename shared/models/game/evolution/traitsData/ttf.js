@@ -61,8 +61,6 @@ export const TraitShell = {
   }
 };
 
-export const TraitIntellect = {type: 'TraitIntellect'};
-export const TraitAnglerfish = {type: 'TraitAnglerfish'};
 export const TraitTrematode = {
   type: 'TraitTrematode'
   , cardTargetType: CARD_TARGET_TYPE.LINK_ENEMY
@@ -80,8 +78,48 @@ export const TraitInkCloud = {
     return true;
   }
 };
+
+export const TraitSpecA = {
+  type: 'TraitSpecA'
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , playerControllable: true
+  , cooldowns: fromJS([
+    ['TraitSpecA', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+    , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
+  ])
+  , action: (game, animal, trait) => (dispatch, getState) => {
+    dispatch(server$traitStartCooldown(game.id, trait, animal));
+    dispatch(server$startFeeding(game.id, animal, 1, 'TraitSpecA'));
+    return true;
+  }
+  , $checkAction: (game, animal, traitSpec) => (animal.canEat(game)
+  && !game.players.some(player =>
+    player.continent.some(animal =>
+      animal.traits.some(trait => trait.id !== traitSpec.id && trait.type === traitSpec.type))))
+};
+
+export const TraitSpecB = {
+  type: 'TraitSpecB'
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , playerControllable: true
+  , cooldowns: fromJS([
+    ['TraitSpecB', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+    , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
+  ])
+  , action: (game, animal, trait) => (dispatch, getState) => {
+    dispatch(server$traitStartCooldown(game.id, trait, animal));
+    dispatch(server$startFeeding(game.id, animal, 1, 'TraitSpecA'));
+    return true;
+  }
+  , $checkAction: (game, animal, traitSpec) => (animal.canEat(game)
+  && !game.players.some(player =>
+    player.continent.some(animal =>
+      animal.traits.some(trait => trait.id !== traitSpec.id && trait.type === traitSpec.type))))
+};
+
+export const TraitFlight = {type: 'TraitFlight'};
+
 export const TraitViviparous = {type: 'TraitViviparous'};
 export const TraitAmbush = {type: 'TraitAmbush'};
-export const TraitFlight = {type: 'TraitFlight'};
-export const TraitSpecA = {type: 'TraitSpecA'};
-export const TraitSpecB = {type: 'TraitSpecB'};
+export const TraitIntellect = {type: 'TraitIntellect'};
+export const TraitAnglerfish = {type: 'TraitAnglerfish'};
