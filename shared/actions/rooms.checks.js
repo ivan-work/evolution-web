@@ -4,50 +4,75 @@ import Validator from 'validatorjs';
 
 import {ActionCheckError} from '../models/ActionCheckError';
 
-export const checkRoomExists = (getState, roomId) => {
-  if (!getState().getIn(['rooms', roomId]))
-    throw new ActionCheckError('checkRoomExists', `Room(%s) doesnt exists`, roomId);
+/**
+ * Check/Select
+ * */
+
+export const checkSelectRoom = (getState, roomId) => {
+  const room = getState().getIn(['rooms', roomId]);
+  if (room == void 0)
+    throw new ActionCheckError('checkRoomExists', `Room(%s) doesn't exist`, roomId);
+  return room;
 };
 
-export const checkRoomSize = (getState, roomId) => {
-  const room = getState().getIn(['rooms', roomId]);
-  if (room.settings.maxPlayers <= room.users.size)
-    throw new ActionCheckError('checkRoomSize', `Room(%s) already have max`, roomId);
+/**
+ * Checks/Combined
+ * */
+
+export const checkComboRoomCanStart = (room, userId) => {
+  checkUserInRoom(room, userId);
+  checkUserIsHost(room, userId);
+  checkRoomMinSize(room);
+  checkRoomMaxSize(room);
+  checkRoomIsNotInGame(room);
 };
 
+/**
+ * Checks/Simple
+ * */
 
-export const checkRoomIsValid = (getState, roomId) => {
-  const room = getState().getIn(['rooms', roomId]);
+export const checkRoomMinSize = (room) => {
+  if (room.users.size < (process.env.NODE_ENV === 'production' ? 2 : 1))
+    throw new ActionCheckError('checkRoomMinSize', `Room(%s) doesn't have min players`, room.id);
+};
+
+export const checkRoomMaxSize = (room, adding) => {
+  // Adding = true means we check with joining player. Adding = false means we check existing room for start.
+  if (room.users.size + (adding ? 1 : 0) > room.settings.maxPlayers)
+    throw new ActionCheckError('checkRoomMaxSize', `Room(%s) already has too much players`, room.id);
+};
+
+export const checkRoomIsNotInGame = (room) => {
   if (room.gameId !== null)
-    throw new ActionCheckError('checkRoomIsValid', `Room(%s) is not valid`, roomId);
+    throw new ActionCheckError('checkRoomIsValid', `Room(%s) is in game (%s)`, room.id, room.gameId);
 };
 
-export const checkUserInRoom = (getState, roomId, userId) => {
-  if (!getState().getIn(['rooms', roomId, 'users']).some(roomUserId => roomUserId === userId))
-    throw new ActionCheckError('checkUserInRoom', 'Room(%s) doesnt have User(%s)', roomId, userId);
+export const checkUserInRoom = (room, userId) => {
+  if (!~room.users.indexOf(userId))
+    throw new ActionCheckError('checkUserInRoom', 'Room(%s) doesnt have User(%s)', room.id, userId);
 };
 
-export const checkUserNotInRoom = (getState, roomId, userId) => {
-  if (getState().getIn(['rooms', roomId, 'users']).some(roomUserId => roomUserId === userId))
-    throw new ActionCheckError('checkUserNotInRoom', 'Room(%s) has User(%s)', roomId, userId);
+export const checkUserNotInRoom = (room, userId) => {
+  if (~room.users.indexOf(userId))
+    throw new ActionCheckError('checkUserNotInRoom', 'Room(%s) has User(%s)', room.id, userId);
 };
 
-export const checkUserIsHost = (getState, roomId, userId) => {
-  if (getState().getIn(['rooms', roomId, 'users', 0]) !== userId)
-    throw new ActionCheckError('checkUserIsHost', 'Room(%s) have User(%s) as not host', roomId, userId);
+export const checkUserIsHost = (room, userId) => {
+  if (room.users.get(0) !== userId)
+    throw new ActionCheckError('checkUserIsHost', 'Room(%s) have User(%s) as not host', room.id, userId);
 };
 
-export const checkValidate = (getState, data, rules) => {
+export const checkValidate = (data, rules) => {
   const validation = new Validator(data, rules);
-  if (validation.fails()) throw new ActionCheckError('roomEditSettingsRequest', 'validation failed: %s', validation);
+  if (validation.fails()) throw new ActionCheckError('roomEditSettingsRequest', 'validation failed: %s', JSON.stringify(validation.errors.all()));
 };
 
-export const checkUserNotBanned = (getState, roomId, userId) => {
-  if (~getState().getIn(['rooms', roomId, 'banlist']).indexOf(userId))
-    throw new ActionCheckError('checkUserNotBanned', `Room(%s) have User(%s) banned`, roomId, userId);
+export const checkUserNotBanned = (room, userId) => {
+  if (~room.banlist.indexOf(userId))
+    throw new ActionCheckError('checkUserNotBanned', `Room(%s) have User(%s) banned`, room.id, userId);
 };
 
-export const checkUserBanned = (getState, roomId, userId) => {
-  if (!~getState().getIn(['rooms', roomId, 'banlist']).indexOf(userId))
-    throw new ActionCheckError('checkUserBanned', `Room(%s) don't have User(%s) banned`, roomId, userId);
+export const checkUserBanned = (room, userId) => {
+  if (!~room.banlist.indexOf(userId))
+    throw new ActionCheckError('checkUserBanned', `Room(%s) doesn't have User(%s) banned`, room.id, userId);
 };

@@ -33,10 +33,11 @@ export default class GamePlayers extends Component {
     const anglePerPlayer = Math.PI * 2 / game.players.size;
     return (<Measure onMeasure={(dimensions) => this.setState({dimensions})}>
       <div className='GamePlayers'>
+        {/*JSON.stringify({width, height})*/}
         {GameModel.sortPlayersFromIndex(game, player.index)
           .map((player, index) => {
           const angle = angleInitial + anglePerPlayer * index;
-          const length = (width * height) / (Math.sqrt(Math.pow(width*Math.cos(angle), 2) + Math.pow(height*Math.sin(angle),2))) / 2 - 10
+          const length = (width * height) / (Math.sqrt(Math.pow(width*Math.cos(angle), 2) + Math.pow(height*Math.sin(angle),2))) / 2 - 50;
           const upsideDown = (angle > Math.PI * .5 && angle < Math.PI * 1.5 ? -1 : +1);
 
           return <div key={player.id}

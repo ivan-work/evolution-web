@@ -15,11 +15,19 @@ const MakeAuthCheck = (getState) => (nextState, replace) => {
   }
 };
 
+const MakeLoginCheck = (getState) => (nextState, replace) => {
+  //console.log('getState', getState().toJS());
+  //console.log('Auth check');
+  const userExists = getState().get('user') != null;
+  if (userExists) replace('/')
+};
+
 export default (getState) => {
   const AuthCheck = MakeAuthCheck(getState);
+  const LoginCheck = MakeLoginCheck(getState);
   return <Route path='/' component={App}>
     <IndexRoute component={RoomsView} onEnter={AuthCheck}/>
-    <Route path='login' component={LoginView}/>
+    <Route path='login' component={LoginView} onEnter={LoginCheck}/>
     <Route path='room/*' component={Room} onEnter={AuthCheck}/>
     <Route path='game' component={GameWrapperView} onEnter={AuthCheck}/>
     <Route path='test' component={Test}/>

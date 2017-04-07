@@ -39,13 +39,13 @@ export class Card extends React.Component {
     return <div className={classNames} onClick={this.onCardClick}>
       <div className='inner' style={{backgroundImage: `url('${card.image}')`}}>
         {card.traitsCount === 1
-          ? (<div className='trait trait-single'>{T.translate('Game.Trait.' + card.trait1.type)}</div>)
+          ? (<div className={'trait trait-single ' + card.trait1}>{T.translate('Game.Trait.' + card.trait1)}</div>)
           : null}
         {card.traitsCount === 2
-          ? (<div className='trait trait1'>{T.translate('Game.Trait.' + card.trait1.type)}</div>)
+          ? (<div className={'trait trait1 ' + card.trait1}>{T.translate('Game.Trait.' + card.trait1)}</div>)
           : null}
         {card.traitsCount === 2
-          ? (<div className='trait trait2'>{T.translate('Game.Trait.' + card.trait2.type)}</div>)
+          ? (<div className={'trait trait2 ' + card.trait2}>{T.translate('Game.Trait.' + card.trait2)}</div>)
           : null}
       </div>
     </div>
@@ -70,7 +70,7 @@ export const DragCard = DragSource(DND_ITEM_TYPE.CARD
     , isDragging: monitor.isDragging()
     , canDrag: monitor.canDrag()
   })
-)(class extends Card {
+)(class Card extends Card {
   static propTypes = {
     ...Card.propTypes
     , dragEnabled: React.PropTypes.bool

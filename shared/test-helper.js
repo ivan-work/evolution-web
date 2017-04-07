@@ -48,6 +48,11 @@ global.HTMLElement = global.window.HTMLElement;
 //global.Event = global.window.Event;
 global.NodeList = global.window.NodeList;
 global.Node = global.window.Node;
+// for react-measure
+global.ResizeObserver = function () {
+  this.observe = () => {};
+  this.disconnect = () => {};
+};
 
 // https://stackoverflow.com/questions/26867535/calling-setstate-in-jsdom-based-tests-causing-cannot-render-markup-in-a-worker
 require('fbjs/lib/ExecutionEnvironment').canUseDOM = true;
@@ -57,14 +62,6 @@ require('fbjs/lib/ExecutionEnvironment').canUseDOM = true;
 //    global[key] = window[key];
 //  }
 //});
-
-global.DEFINE_VERSION = '0.0.0';
-process.env.TEST = true;
-process.env.DEBUG = '*';
-process.env.JWT_SECRET = 'secret';
-
-const TEST_PORT = 5000;
-const TEST_URL = 'http://localhost:' + TEST_PORT;
 
 import { createStore, compose, applyMiddleware } from 'redux'
 import configureStore from '../client/configuration/configureStore'
@@ -102,6 +99,7 @@ global.mockServerStore = function (initialServerState) {
     console.log('intercepted')
   };
   const ioServer = syncSocketIOServer();
+  const timeouts = {};
   const serverStore = createStore(
     combineReducers({...serverReducers})
     , initialServerState
@@ -109,7 +107,7 @@ global.mockServerStore = function (initialServerState) {
       serverErrorMiddleware(errorInterceptor)
       , thunk
       , reduxQuestion()
-      , reduxTimeout()
+      , reduxTimeout(timeouts)
       , store => next => action => {
         serverStore.actions.push(action);
         return next(action);
@@ -120,6 +118,8 @@ global.mockServerStore = function (initialServerState) {
   socketServerStore(ioServer, serverStore);
 
   serverStore.getSocket = () => ioServer;
+
+  serverStore.getTimeouts = () => timeouts;
 
   serverStore.errorInterceptor = errorInterceptor;
 

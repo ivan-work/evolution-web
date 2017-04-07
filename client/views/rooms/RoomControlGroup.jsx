@@ -30,9 +30,9 @@ export class RoomControlGroup extends Component {
     if (!room) return null;
 
     return <ControlGroup name={T.translate('App.Room.Room')}>
-      <Button id="Room$back" onClick={() => this.back()}>{T.translate('App.Room.$Back')}</Button>
-      <Button id="Room$exit" onClick={this.props.$exit}>{T.translate('App.Room.$Exit')}</Button>
-      <Button id="Room$start" onClick={this.props.$start(room.id)}
+      <Button id="Room$Back" onClick={() => this.back()}>{T.translate('App.Room.$Back')}</Button>
+      <Button id="Room$Exit" onClick={this.props.$exit}>{T.translate('App.Room.$Exit')}</Button>
+      <Button id="Room$Start" onClick={this.props.$start(room.id)}
               disabled={!room.checkCanStart(userId)}>{T.translate('App.Room.$Start')}</Button>
     </ControlGroup>
   }

@@ -1,20 +1,22 @@
 import {List, Map} from 'immutable';
 import {GameModel, PHASE, StatusRecord} from './GameModel';
+import {SettingsRecord} from './GameSettings';
 import {AnimalModel} from './evolution/AnimalModel';
 import {TraitModel} from './evolution/TraitModel';
-import * as cardData from './evolution/cardData';
-import * as traitData from './evolution/traitData';
+import * as cardsData from './evolution/cards/index';
+import * as traitTypes from './evolution/traitTypes/index';
 
 describe('GameModel.parse', () => {
   it('parseCardList', () => {
     const list = GameModel.parseCardList('  1 carn, 1 sharp, Parasite  ');
     expect(list.size).equal(3);
-    expect(list.get(0).type).equal(cardData.CardCarnivorous.type);
-    expect(list.get(0).trait1.type).equal(traitData.TraitCarnivorous.type);
-    expect(list.get(1).type).equal(cardData.CardSharpVision.type);
-    expect(list.get(1).trait1.type).equal(traitData.TraitSharpVision.type);
-    expect(list.get(2).type).equal(cardData.CardParasiteAndCarnivorous.type);
-    expect(list.get(2).trait1.type).equal(traitData.TraitParasite.type);
+    expect(list.get(0).type).equal(cardsData.CardCarnivorous.type);
+    expect(list.get(0).trait1).equal(traitTypes.TraitCarnivorous);
+    expect(list.get(1).type).equal(cardsData.CardSharpVision.type);
+    expect(list.get(1).trait1).equal(traitTypes.TraitSharpVision);
+    expect(list.get(2).type).equal(cardsData.CardParasiteAndCarnivorous.type);
+    expect(list.get(2).trait1).equal(traitTypes.TraitParasite);
+    expect(list.get(2).trait2).equal(traitTypes.TraitCarnivorous);
 
     expect(GameModel.parseCardList(''), 'parseCardList(empty)').equal(List());
   });
@@ -81,8 +83,7 @@ players:
     }));
     expect(parsed.deck.size).equal(18);
     expect(parsed.deck.first().type).equal('CardCarnivorous');
-    expect(parsed.deck.first().trait1, 'CardCarnivorous has TraitCarnivorous').ok;
-    expect(parsed.deck.first().trait1.type).equal('TraitCarnivorous');
+    expect(parsed.deck.first().trait1).equal('TraitCarnivorous');
     expect(parsed.deck.last().type).equal('CardSharpVision');
     expect(parsed.getIn(['players', 'u0', 'ready'])).equal(true);
     expect(parsed.getIn(['players', 'u0', 'hand']).size).equal(2);
@@ -131,6 +132,34 @@ players:
     expect(ServerGame().getIn(['players', User1.id, 'continent'])).equal(List());
   });
 
+  it('mockGame.ParseGame settings', () => {
+    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+    const gameId = ParseGame(`
+settings:
+  timeTraitResponse: 10
+  timeTurn: 20
+  decks: TEST
+`);
+    expect(ServerGame().settings).equal(new SettingsRecord({
+      timeTurn: 20
+      , timeTraitResponse: 10
+      , decks: List(['TEST'])
+    }))
+  });
+
+  it('mockGame.ParseGame settings without decks', () => {
+    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+    const gameId = ParseGame(`
+settings:
+  timeTraitResponse: 10
+  timeTurn: 20
+`);
+    expect(ServerGame().settings).equal(new SettingsRecord({
+      timeTurn: 20
+      , timeTraitResponse: 10
+    }))
+  });
+
   it('mockGame.ParseGame phase 0', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
@@ -143,12 +172,12 @@ players:
 `);
     expect(ServerGame().started).equal(true);
     expect(ServerGame().food, 'ServerGame().food').equal(2);
-    expect(ServerGame().status).equal(new StatusRecord({
-      turn: 0
-      , round: 0
-      , player: 0
-      , phase: 1
-    }));
+    expect(ServerGame().status.turn, 'turn').equal(0);
+    expect(ServerGame().status.round, 'round').equal(0);
+    expect(ServerGame().status.currentPlayer, 'currentPlayer').equal(0);
+    expect(ServerGame().status.roundPlayer, 'roundPlayer').equal(0);
+    expect(ServerGame().status.phase, 'phase').equal(1);
+    expect(ServerGame().status.turnTime, 'turnTime').above(0);
     expect(ServerGame().deck.size).equal(6);
     expect(ServerGame().getIn(['players', User0.id, 'ready'])).true;
     expect(ServerGame().getIn(['players', User0.id, 'hand'])).size(8);

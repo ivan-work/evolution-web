@@ -1,9 +1,6 @@
 import {Record} from 'immutable';
-import * as traitData from './traitData'
+import * as traitsData from './traitsData/index'
 import {CARD_TARGET_TYPE} from './constants';
-
-//import {}
-//import {selectGame} from '../../../selectors'
 
 export class TraitDataModel extends Record({
   type: null
@@ -20,17 +17,24 @@ export class TraitDataModel extends Record({
   , checkTarget: null
 }) {
   static new(traitType) {
-    if (!(traitType in traitData)) throw Error(`traitData[${traitType}] not found`);
+    if (!(traitType in traitsData)) throw Error(`traitData[${traitType}] not found`);
+    const traitData = traitsData[traitType];
     return new TraitDataModel({
-      ...traitData[traitType]
+      ...traitData
     });
+  }
+
+  checkAction(game, sourceAnimal) {
+    return checkAction(game, this, sourceAnimal);
   }
 }
 
 export const checkAction = (game, traitData, sourceAnimal) => {
+  if (!traitData.action) return false;
   if (traitData.cooldowns && traitData.cooldowns.some(([link, place]) =>
       game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id))) {
     return false;
   }
+  // Either no $checkAction or it is passing
   return !traitData.$checkAction || traitData.$checkAction(game, sourceAnimal);
 };

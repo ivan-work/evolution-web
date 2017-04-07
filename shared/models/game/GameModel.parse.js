@@ -7,13 +7,11 @@ import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
 import {AnimalModel} from './evolution/AnimalModel';
 import {TraitModel} from './evolution/TraitModel';
-import * as cardData from './evolution/cardData';
+import * as cardsData from './evolution/cards/index';
 import yaml from 'yaml-js';
 
-const searchCardClasses = (name) => Object.keys(cardData)
-  .filter(cardClassName => cardData[cardClassName])
-  .map(cardClassName => cardData[cardClassName])
-  .find(cardClass => ~cardClass.type.toLowerCase().indexOf(name.toLowerCase()));
+const searchCardClasses = (name) => Object.keys(cardsData)
+  .find(cardType => ~cardType.toLowerCase().indexOf(name.toLowerCase()));
 
 export const parseCardList = string => {
   invariant(typeof string === 'string', `GameModel.parseCardList: bad string: (${string})`)
@@ -93,6 +91,10 @@ export const parseFromRoom = (room, string = '') => {
     })
     , deck
     , players
+    , settings: {
+      ...seed.settings
+      , decks: seed.settings && seed.settings.decks && seed.settings.decks.split(' ') || ['Base']
+    }
   });
 };
 

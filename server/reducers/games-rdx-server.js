@@ -76,23 +76,20 @@ export const gameStartEat = (game, {food}) => {
   ensureParameter(food, 'number');
   return game
     .update('players', players => players.map(player => player
-      .set('ended', false)
+      .set('ended', !player.playing)
       .set('skipped', 0)
     ))
     .setIn(['food'], food)
     .setIn(['status', 'phase'], PHASE.FEEDING)
     .setIn(['status', 'round'], 0)
-    .setIn(['status', 'currentPlayer'], game.getIn(['status', 'roundPlayer']));
 };
 
 export const gameStartDeploy = (game) => {
   const roundPlayer = game.status.roundPlayer;
-  const nextRoundPlayer = roundPlayer + 1 >= game.players.size
-    ? 0
-    : roundPlayer + 1;
+  const nextRoundPlayer = (roundPlayer + 1) % game.players.size;
   return game
     .update('players', players => players.map(player => player
-      .set('ended', false)
+      .set('ended', !player.playing)
       .set('skipped', 0)
       .update('continent', continent => continent.map(animal => animal
         .set('flags', Map())
@@ -104,37 +101,14 @@ export const gameStartDeploy = (game) => {
     .updateIn(['status', 'turn'], turn => ++turn)
     .setIn(['status', 'round'], 0)
     .setIn(['status', 'roundPlayer'], nextRoundPlayer)
-    .setIn(['status', 'currentPlayer'], nextRoundPlayer)
     .update('cooldowns', cooldowns => cooldowns.eventNextTurn());
 };
 
-export const gameNextPlayer = (game) => {
-  //console.log('gameNextPlayer', game.players.toJS());
-  const roundPlayer = game.getIn(['status', 'roundPlayer']);
-  let currentPlayer = game.getIn(['status', 'currentPlayer']);
-  const totalPlayers = game.players.size;
-  let emergencyCount = game.players.size;
-  let round = game.getIn(['status', 'round']);
-  let roundChanged = false;
-  do {
-    --emergencyCount;
-    ++currentPlayer;
-    if (currentPlayer >= totalPlayers) {
-      currentPlayer = 0;
-    }
-    if (currentPlayer === roundPlayer) {
-      ++round;
-      roundChanged = true;
-    }
-    const player = game.players.find(player => player.index === currentPlayer && player.playing);
-    if (player && !player.ended) {
-      break;
-    }
-  } while (emergencyCount >= 0);
-  if (emergencyCount < 0) throw new Error('emergency count');
+export const gameNextPlayer = (game, {round, nextPlayerIndex, roundChanged, turnTime}) => {
   return game
-    .setIn(['status', 'round'], round)
-    .setIn(['status', 'currentPlayer'], currentPlayer)
+    .updateIn(['status', 'round'], round => roundChanged ? round + 1 : round)
+    .setIn(['status', 'currentPlayer'], nextPlayerIndex)
+    .setIn(['status', 'turnTime'], turnTime)
     .update('cooldowns', cooldowns => cooldowns.eventNextPlayer(roundChanged));
 };
 
@@ -196,7 +170,8 @@ export const startCooldown = (game, {link, duration, place, placeId}) =>
 export const gameEnd = (state, {game}) => game.end();
 
 export const gamePlayerLeft = (game, {userId}) => game
-  .setIn(['players', userId, 'playing'], false);
+  .setIn(['players', userId, 'playing'], false)
+  .setIn(['players', userId, 'ended'], true);
 
 export const traitDefenceQuestion = (game, {questionId, traitTuple}) => game
   .set('question', new QuestionRecord({id: questionId, ...traitTuple, time: Date.now()}));
@@ -216,7 +191,6 @@ export const traitSetAnimalFlag = (game, {sourceAid, flag, on}) => {
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
   , gameDestroy: (state, data) => state.remove(data.gameId)
-  , gameLeave: (state, data) => state.update(data.gameId, game => gameLeave(game, data))
   , gameStart: (state, data) => state.update(data.gameId, game => gameStart(game, data))
   , gamePlayerReadyChange: (state, data) => state.update(data.gameId, game => gamePlayerReadyChange(game, data))
   , gameGiveCards: (state, data) => state.update(data.gameId, game => gameGiveCards(game, data))

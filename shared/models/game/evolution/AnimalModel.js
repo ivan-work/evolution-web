@@ -1,9 +1,8 @@
 import {Record, List, Map} from 'immutable';
 import uuid from 'uuid';
 import {TraitModel} from './TraitModel';
-import {TraitDataModel} from './TraitDataModel';
 
-import {TraitFatTissue, TraitSymbiosis} from './traitData';
+import {TraitFatTissue, TraitSymbiosis} from './traitTypes/index';
 import {TRAIT_ANIMAL_FLAG} from './constants';
 
 export class AnimalModel extends Record({
@@ -58,22 +57,22 @@ export class AnimalModel extends Record({
   }
 
   getFat() {
-    return this.traits.filter(trait => trait.type === TraitFatTissue.type && trait.value).size
+    return this.traits.filter(trait => trait.type === TraitFatTissue && trait.value).size
   }
 
   sizeOfNormalFood() {
-    return 1 + this.traits.reduce((result, trait) => result + trait.dataModel.food, 0);
+    return 1 + this.traits.reduce((result, trait) => result + trait.getDataModel().food, 0);
   }
 
   sizeOfFat() {
-    return this.traits.filter(trait => trait.type === TraitFatTissue.type).size
+    return this.traits.filter(trait => trait.type === TraitFatTissue).size
   }
 
   canEat(game) {
     return this.needsFood() > 0
       && !this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
       && !this.traits
-        .filter(trait => trait.type === TraitSymbiosis.type && trait.linkSource && trait.hostAnimalId === this.id)
+        .filter(trait => trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === this.id)
         .some(trait => {
           //console.log(`${this.id} is living on ${trait.linkAnimalId}`);
           const {animal: hostAnimal} = game.locateAnimal(trait.linkAnimalId);
@@ -90,8 +89,8 @@ export class AnimalModel extends Record({
     return this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) || this.getFood() >= this.sizeOfNormalFood();
   }
 
-  updateFirstTrait(filterFn, updateFn) {
-    const index = this.traits.findIndex(filterFn)
+  updateTrait(filterFn, updateFn, direction = true) {
+    const index = this.traits[direction ? 'findIndex' : 'findLastIndex'](filterFn);
     return (~index
       ? this.updateIn(['traits', index], updateFn)
       : this);
@@ -109,8 +108,8 @@ export class AnimalModel extends Record({
     while (amount > 0 && needOfFat > 0) {
       amount--;
       needOfFat--;
-      self = self.updateFirstTrait(
-        trait => trait.type === TraitFatTissue.type && !trait.value
+      self = self.updateTrait(
+        trait => trait.type === TraitFatTissue && !trait.value
         , trait => trait.set('value', true)
       );
     }
@@ -120,13 +119,18 @@ export class AnimalModel extends Record({
   }
 
   digestFood() {
-    let foodBalance = -this.needsFood(); // +1 means animal overate, -1 means to generate from fat
+    let foodBalance = this.food - this.sizeOfNormalFood(); // +1 means animal overate, -1 means to generate from fat
     let self = this;
-    while (foodBalance < 0 && self.getFat().size > 0) {
+//    console.log(`${this.id} ${this.sizeOfNormalFood()} + ${this.sizeOfFat()} - ${this.getFood()}.
+//foodBalance ${foodBalance}
+//fat size: ${self.getFat()}
+//`);
+    while (foodBalance < 0 && self.getFat() > 0) {
       foodBalance++;
-      self = self.updateFirstTrait(
-        trait => trait.type === TraitFatTissue.type && trait.value
+      self = self.updateTrait(
+        trait => trait.type === TraitFatTissue && trait.value
         , trait => trait.set('value', false)
+        , false
       );
     }
     return self
@@ -134,6 +138,6 @@ export class AnimalModel extends Record({
   }
 
   countScore() {
-    return 2 + this.traits.reduce((result, trait) => result + 1 + trait.dataModel.food, 0);
+    return 2 + this.traits.reduce((result, trait) => result + 1 + trait.getDataModel().food, 0);
   }
 }

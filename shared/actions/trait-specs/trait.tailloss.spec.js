@@ -65,6 +65,8 @@ players:
   - continent: $A carn, $B carn, $C carn
   - hand: CardSymb, CardCommu
     continent: $Z tailloss, $X
+settings:
+  timeTraitResponse: 1
 `);
     const {selectGame, selectQuestionId, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     clientStore0.dispatch(gameEndTurnRequest());

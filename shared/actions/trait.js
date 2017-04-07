@@ -18,7 +18,7 @@ import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
 import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
 import {checkAction} from '../models/game/evolution/TraitDataModel';
 import {CooldownList} from '../models/game/CooldownList';
-import {TraitCommunication, TraitCooperation, TraitCarnivorous} from '../models/game/evolution/traitData';
+import {TraitCommunication, TraitCooperation, TraitCarnivorous} from '../models/game/evolution/traitsData/index';
 
 import {
   checkGameDefined
@@ -26,11 +26,9 @@ import {
   , checkPlayerHasCard
   , checkPlayerHasAnimal
   , checkPlayerTurnAndPhase
-  , checkValidAnimalPosition
-  , checkTraitActivation
-  , checkTraitActivation_Animal
-  , checkTraitActivation_Trait
 } from './checks';
+
+import {checkAnimalCanEat, checkTraitActivation} from './trait.checks';
 
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 
@@ -256,6 +254,8 @@ export const server$traitDefenceQuestionInstant = (gameId, attackAnimal, traitTy
   dispatch(server$traitDefenceAnswerSuccess(gameId, questionId));
 };
 
+const makeTraitDefenceQuestionTimeout = (gameId, questionId) => `traitDefenceQuestion#${gameId}#${questionId}`;
+
 export const server$traitDefenceQuestion = (gameId, attackAnimal, traitType, defenceAnimal, defaultDefence) => (dispatch, getState) => {
   const questionId = uuid.v4();
   const game = selectGame(getState, gameId);
@@ -263,7 +263,9 @@ export const server$traitDefenceQuestion = (gameId, attackAnimal, traitType, def
   dispatch(
     Object.assign(traitDefenceQuestion(gameId, null, makeTraitTuple(attackAnimal, traitType, defenceAnimal))
       , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId)}}));
-  dispatch(addTimeout(game.settings.timeTraitResponse, 'traitAnswer' + questionId, defaultDefence(questionId)));
+  dispatch(addTimeout(game.settings.timeTraitResponse
+    , makeTraitDefenceQuestionTimeout(game.id, questionId)
+    , defaultDefence(questionId)));
   dispatch(
     Object.assign(traitDefenceQuestion(gameId, questionId, makeTraitTuple(attackAnimal, traitType, defenceAnimal))
       , {meta: {userId: defenceAnimal.ownerId}}));
@@ -281,7 +283,7 @@ export const traitDefenceAnswerSuccess = (gameId, questionId) => ({
 });
 
 export const server$traitDefenceAnswerSuccess = (gameId, questionId) => (dispatch, getState) => {
-  dispatch(cancelTimeout('traitAnswer' + questionId));
+  dispatch(cancelTimeout(makeTraitDefenceQuestionTimeout(gameId, questionId)));
   dispatch(Object.assign(traitDefenceAnswerSuccess(gameId, questionId)
     , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
 };
@@ -323,15 +325,7 @@ export const traitClientToServer = {
     checkGameHasUser(game, userId);
     checkPlayerTurnAndPhase(game, userId, PHASE.FEEDING);
     const animal = checkPlayerHasAnimal(game, userId, animalId);
-    if (game.food < 1) {
-      throw new ActionCheckError(`traitTakeFoodRequest@Game(${gameId})`, 'Not enough food (%s)', game.food)
-    }
-    if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, userId, animalId)) {
-      throw new ActionCheckError(`traitTakeFoodRequest@Game(${gameId})`, 'Cooldown active')
-    }
-    if (!animal.canEat(game)) {
-      throw new ActionCheckError(`traitTakeFoodRequest@Game(${gameId})`, `Animal(%s) can't eat`, animal)
-    }
+    checkAnimalCanEat(game, animal);
 
     dispatch(server$startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId));
     dispatch(server$startCooldown(gameId, 'TraitCarnivorous', TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId));

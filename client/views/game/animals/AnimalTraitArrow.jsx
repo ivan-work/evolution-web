@@ -4,7 +4,7 @@ import cn from 'classnames';
 import {AnimalTraitArrowMarker} from './AnimalTraitArrowMarker.jsx';
 
 import styles from '../../../styles.json'
-const {ANIMAL_TRAIT_WIDTH, ANIMAL_TRAIT_HEIGHT} = styles;
+const {ANIMAL_WIDTH, ANIMAL_TRAIT_HEIGHT} = styles;
 
 export class AnimalTraitArrow extends React.Component {
   constructor(props) {
@@ -16,7 +16,7 @@ export class AnimalTraitArrow extends React.Component {
     if (!offset) return null;
     const { x, y } = offset;
 
-    const x1 = initialOffset.x + ANIMAL_TRAIT_WIDTH / 2;
+    const x1 = initialOffset.x + ANIMAL_WIDTH / 2;
     const y1 = initialOffset.y + ANIMAL_TRAIT_HEIGHT / 2;
     const length = Math.sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1));
     const lineWidth = length / 20;
