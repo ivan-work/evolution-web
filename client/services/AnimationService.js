@@ -1,62 +1,91 @@
+import React, {Component} from 'react';
+
+class QueueItem {
+  constructor(action, next) {
+    this.action = action;
+    this.next = next;
+    this.processedBy = [];
+    this.completedBy = [];
+  }
+}
+
 class AnimationServiceClass {
   constructor() {
-    this.$actions = {};
+    this.$hooks = {};
     this.$queue = [];
-    this.animationInProgress = false;
+    this.currentAnimation = null;
   }
 
-  after(actionType, callback) {
-    if (this.$actions[actionType]) {
-      throw 'multiple action NYI' + actionType;
+  componentSubscribe(component, actionType, callback) {
+    if (!this.$hooks[actionType]) {
+      this.$hooks[actionType] = {
+        subscribers: []
+      };
     }
-    this.$actions[actionType] = {
-      callback
-    };
+    this.$hooks[actionType].subscribers.push({
+      component, actionType, callback
+    })
   }
 
-  off (actionType) {
-    delete this.$actions[actionType];
+  componentUpdated(updatedComponent) {
+    // If has queue
+    if (this.currentAnimation) {
+      const currentAction = this.currentAnimation;
+      const hook = this.$hooks[currentAction.action.type];
+      if (hook) { // have hook on this type of action
+        const hookSubscriber = hook.subscribers.find(({component}) =>
+          component === updatedComponent // that hook has updated component as subscriber
+          && !~currentAction.processedBy.indexOf(component) // is not processed yet by updated component
+        );
+        if (hookSubscriber) {
+          const {action} = currentAction;
+          const {component, actionType, callback} = hookSubscriber;
+          currentAction.processedBy.push(component); // start processing;
+          callback.call(component, this.makeCallbackExecutedFn(currentAction, hook, component), component.wrappedComponent, action.data)
+        }
+      }
+    }
   }
 
-  has (actionType) {
-    return this.$actions[actionType];
+  componentUnmount(unmountingComponent) {
+    //Object.keys(this.$hooks).forEach((actionType) => {
+    //  this.$hooks[actionType].subscribers = this.$hooks[actionType].subscribers
+    //    .filter(({component, actionType, callback}) => component !== unmountingComponent);
+    //this.$hooks[actionType].subscribers.push({
+    //  component, actionType, callback
+    //})
+    //});
+  }
+
+  makeCallbackExecutedFn(currentAction, hook, component) {
+    return () => {
+      // One of the components has done it's animations!
+      currentAction.completedBy.push(component);
+      // Mark it as completed
+      if (currentAction.completedBy.length === hook.subscribers.length) {
+        this.$queue = this.$queue.slice(1);
+        if (this.$queue.length > 0) {
+          this.currentAnimation = this.$queue[0];
+          this.currentAnimation.next(this.currentAnimation.action);
+        } else {
+          this.currentAnimation = null;
+        }
+      }
+    }
   }
 
   processAction(next, action) {
-    if (this.animationInProgress) {
-      this.$queue.push({next, action})
-    } else if (this.has(action.type)) {
-      this.animateAction(next, action);
+    if (this.currentAnimation) {
+      console.log('currentAnimation', this.currentAnimation.action.type)
+      // If something is animating = add action to the queue
+      this.$queue.push(new QueueItem(action, next));
     } else {
-      next(action);
-    }
-  }
-
-  animateAction(next, action) {
-    this.animationInProgress = true;
-
-    next(action);
-
-    const doneFn = () => {
-      this.nextInQueue();
-    };
-
-    console.log('animate action', action.type);
-    this.$actions[action.type].callback(doneFn, action);
-  }
-
-  nextInQueue() {
-    const nextQueueItem = this.$queue[0];
-    if (nextQueueItem) {
-      this.$queue = this.$queue.slice(1);
-      if (this.has(nextQueueItem.action.type)) {
-        this.animateAction(nextQueueItem.next, nextQueueItem.action);
-      } else {
-        nextQueueItem.next(nextQueueItem.action);
-        this.nextInQueue();
+      // If not - check if we should animate this action
+      if (this.$hooks[action.type] && this.$hooks[action.type].subscribers.length > 0) {
+        this.currentAnimation = new QueueItem(action);
       }
-    } else {
-      this.animationInProgress = false;
+      // dispatch
+      next(action);
     }
   }
 }
@@ -65,4 +94,28 @@ export const AnimationService = new AnimationServiceClass();
 
 export const animationMiddleware = () => ({dispatch, getState}) => next => action => {
   AnimationService.processAction(next, action);
+};
+
+export const AnimationServiceHOC = ({animations}) => (WrappedComponentClass) => class AnimationServiceHOC extends Component {
+  componentDidMount() {
+    Object.keys(animations).forEach((actionType) => {
+      const callback = animations[actionType];
+      AnimationService.componentSubscribe(this, actionType, callback);
+    });
+  }
+
+  componentDidUpdate() {
+    AnimationService.componentUpdated(this)
+  }
+
+  componentWillUnmount() {
+    AnimationService.componentUnmount(this)
+  }
+
+  render() {
+    return React.createElement(WrappedComponentClass, {
+      ref: (component) => this.wrappedComponent = component
+      , ...this.props
+    });
+  }
 };

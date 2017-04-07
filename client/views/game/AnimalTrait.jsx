@@ -43,9 +43,9 @@ class _AnimalTrait extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.connectDragPreview && !process.env.TEST) {
-      this.props.connectDragPreview(getEmptyImage());
-    }
+    //if (this.props.connectDragPreview && !process.env.TEST) {
+    //  this.props.connectDragPreview(getEmptyImage());
+    //}
   }
 
   render() {
@@ -53,9 +53,9 @@ class _AnimalTrait extends React.Component {
 
     const className = classnames({
       AnimalTrait: true
-      , disabled: !canDrag
-      , enabled: canDrag
-      , isDragging: isDragging
+      , canDrag
+      , isDragging
+      , draggable: connectDragSource
     });
 
     const body = <div className={className} style={{
@@ -72,9 +72,9 @@ const _DraggableAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
   , {
     beginDrag: (props) => ({trait: props.trait, owner: props.owner})
     , canDrag: (props, monitor) => props.isPlayerTurn
-      && props.owner.ownerId === props.currentUserId
-      && props.isFeeding
-      && props.trait.dataModel.checkAction(props.game, props.owner)
+    && props.owner.ownerId === props.currentUserId
+    && props.isFeeding
+    && props.trait.dataModel.checkAction(props.game, props.owner)
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource()

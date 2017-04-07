@@ -3,6 +3,7 @@ import { DragLayer } from 'react-dnd';
 import { DND_ITEM_TYPE } from './DND_ITEM_TYPE';
 import { Card, DragCardPreview } from '../Card.jsx';
 import { AnimalTraitArrow } from '../AnimalTraitArrow.jsx';
+import { Food } from '../Food.jsx';
 
 const layerStyles = {
   position: 'fixed',
@@ -27,6 +28,8 @@ class CustomDragLayer extends React.Component {
         return <DragCardPreview card={item.card} {...dragProps}/>;
       case DND_ITEM_TYPE.TRAIT:
         return <AnimalTraitArrow trait={item.trait} {...dragProps}/>;
+      case DND_ITEM_TYPE.TRAIT:
+        return <Food {...dragProps}/>;
     }
   }
 
@@ -34,12 +37,21 @@ class CustomDragLayer extends React.Component {
     const { item, itemType, isDragging } = this.props;
     const offset = this.props.getClientOffset;
     const initialOffset = this.props.getInitialSourceClientOffset;
+    console.log(offset);
+    console.log(initialOffset);
 
     this.animationCounter = item ? ++this.animationCounter : 0;
 
     const MAX_VELOCITY = 60;
-    const VELOCITY = 6;
+    const VELOCITY = 8;
     const velocity = {x: 0, y: 0};
+    //if (offset) {
+    //  document.body.style.cursor = 'grabbing';
+    //  document.body.style.cursor = '-webkit-grabbing';
+    //  document.body.style.cursor = 'grabbing';
+    //} else {
+    //  document.body.style.cursor = '';
+    //}
     if (offset) {
       if (this.previousOffset) {
         velocity.x = offset.x - this.previousOffset.x;
@@ -105,9 +117,9 @@ export default DragLayer((monitor) => ({
   item: monitor.getItem()
   , itemType: monitor.getItemType()
   , isDragging: monitor.isDragging()
-  , getInitialClientOffset: monitor.getInitialClientOffset()
+  //, getInitialClientOffset: monitor.getInitialClientOffset()
   , getInitialSourceClientOffset: monitor.getInitialSourceClientOffset()
   , getClientOffset: monitor.getClientOffset()
-  , getDifferenceFromInitialOffset: monitor.getDifferenceFromInitialOffset()
-  , getSourceClientOffset: monitor.getSourceClientOffset()
+  //, getDifferenceFromInitialOffset: monitor.getDifferenceFromInitialOffset()
+  //, getSourceClientOffset: monitor.getSourceClientOffset()
 }))(CustomDragLayer);

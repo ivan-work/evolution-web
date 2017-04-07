@@ -21,7 +21,7 @@ import {GameScoreboardFinalView} from './ui/GameScoreboardFinal.jsx';
 import {GameStatusDisplay} from './ui/GameStatusDisplay.jsx';
 import {PlayersList} from './ui/PlayersList.jsx';
 
-import {AnimationService} from '../../services/AnimationService';
+import {AnimationService, AnimationServiceHOC} from '../../services/AnimationService';
 import * as GameAnimations from './GameAnimations';
 
 class _Game extends React.Component {
@@ -40,24 +40,6 @@ class _Game extends React.Component {
     this.Cards = {};
     this.CardCollections = {};
     //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
-
-  componentDidMount() {
-    const {game} = this.props;
-    AnimationService.after('onlineUpdate', (done) => {
-      GameAnimations.gameGiveCards(done, game, game.getPlayer().hand, this.Deck, this.Cards);
-    });
-    AnimationService.after('gameGiveCards', (done, {data: {cards}}) => {
-      GameAnimations.gameGiveCards(done, game, cards, this.Deck, this.Cards);
-    });
-  }
-
-  //componentDidUpdate() {
-    //AnimationService.trigger('gameGiveCards', 'onlineUpdate');
-  //}
-
-  componentWillUnmount() {
-    AnimationService.off('gameGiveCards', 'onlineUpdate');
   }
 
   render() {
@@ -104,8 +86,7 @@ class _Game extends React.Component {
 
         <CustomDragLayer />
       </div>
-    </div>
-      ;
+    </div>;
   }
 
   renderDeck(game) {
@@ -169,4 +150,15 @@ class _Game extends React.Component {
   }
 }
 
-export const Game = GameProvider(_Game);
+export const Game = GameProvider(AnimationServiceHOC({
+  animations: {
+    onlineUpdate: (done, component) => {
+      const {game} = component.props;
+      GameAnimations.gameGiveCards(done, game, game.getPlayer().hand, component.Deck, component.Cards);
+    }
+    , gameGiveCards: (done, component, {cards}) => {
+      const {game} = component.props;
+      GameAnimations.gameGiveCards(done, game, cards, component.Deck, component.Cards);
+    }
+  }
+})(_Game));

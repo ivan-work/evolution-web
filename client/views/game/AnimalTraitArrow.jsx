@@ -34,9 +34,6 @@ export class AnimalTraitArrow extends React.Component {
     const angle = Math.atan2(y - y1, x - x1);
     const x2 = x1 + Math.cos(angle) * (length - lineWidth);
     const y2 = y1 + Math.sin(angle) * (length - lineWidth);
-    const opacity = length > lineWidth * 2
-      ? .75
-      : .0;
 
     return <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0'}}>
       <defs>
@@ -49,8 +46,6 @@ export class AnimalTraitArrow extends React.Component {
       <path d={`M${x1},${y1} L${x2},${y2}`}
             style={{
               stroke: 'red'
-              , transition: 'opacity .2s, strokeWidth 1s'
-              , opacity
               , strokeWidth: lineWidth + 'px'
               , fill: 'none'
               , markerEnd: 'url(#arrow)'

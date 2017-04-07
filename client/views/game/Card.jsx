@@ -30,18 +30,18 @@ export class Card extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.connectDragPreview && !process.env.TEST)
-      this.props.connectDragPreview(getEmptyImage());
+    //if (this.props.connectDragPreview && !process.env.TEST)
+    //  this.props.connectDragPreview(getEmptyImage());
   }
 
   render() {
-    const {card, disabled, connectDragSource, isDragging} = this.props;
+    const {card, canDrag, connectDragSource, isDragging} = this.props;
 
     const className = classnames({
       Card: true
-      , disabled: disabled
-      , enabled: !disabled
+      , canDrag: canDrag
       , isDragging: isDragging
+      , draggable: connectDragSource
     });
 
     const style = {
@@ -64,7 +64,7 @@ export const DragCardPreview = ({offset, velocity, afterStart, card, animationCo
   if (!offset) return null;
   const {x, y} = offset;
   const translate = afterStart ? `translate(${-CARD_SIZE.width / 2}px, ${-CARD_SIZE.height / 2}px)` : '';
-  return <div className='Card' style={{
+  return <div className='Card Preview' style={{
     ...CARD_SIZE
     //, transform: `translate(${x}px, ${y}px) perspective(400px) rotateY(${velocity.x * VELOCITY}deg) rotateX(${-velocity.y * VELOCITY}deg)`
     , left: x + 'px'
@@ -73,6 +73,7 @@ export const DragCardPreview = ({offset, velocity, afterStart, card, animationCo
     , transform: `${translate} perspective(400px) rotateY(${velocity.x}deg) rotateX(${-velocity.y}deg)`
     , transition: 'box-shadow .5s, transform .2s'
     , boxShadow: afterStart ? '5px 5px 5px black' : ''
+    , pointerEvents: 'none'
     }}>
     <div className='inner'>
       {card.name} {velocity.x} {velocity.y}
@@ -83,11 +84,12 @@ export const DragCardPreview = ({offset, velocity, afterStart, card, animationCo
 export const DragCard = DragSource(DND_ITEM_TYPE.CARD
   , {
     beginDrag: (props) => ({card: props.card})
-    , canDrag: (props, monitor) => !props.disabled
+    , canDrag: (props, monitor) => true
   }
   , (connect, monitor) => ({
     connectDragSource: connect.dragSource()
     , connectDragPreview: connect.dragPreview()
     , isDragging: monitor.isDragging()
+    , canDrag: monitor.canDrag()
   })
 )(Card);
