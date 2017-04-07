@@ -1,5 +1,5 @@
-import {User} from '../../shared/models/User';
-import {Map, fromJS} from 'immutable';
+import {User, UserRecord} from '../../shared/models/User';
+import {Map} from 'immutable';
 import {login, logout} from './auth';
 
 const user0 = User('user0');
@@ -9,21 +9,26 @@ describe('auth', () => {
   describe('.login', () => {
     it('valid/empty', () => {
       const state = Map();
-      const nextState = login(state, 'user0');
-      expect(nextState).to.equal(fromJS({[user0.id]: user0}));
+      const [nextState, user0] = login(state, 'user0');
+      expect(nextState).to.equal(
+        state.set(user0.id, user0)
+      );
     });
     it('valid/many', () => {
-      const state = fromJS({[user0.id]: user0});
-      const nextState = login(state, 'user1');
-      expect(nextState).to.equal(fromJS({
-        [user0.id]: user0
-        , [user1.id]: user1
-      }));
+      const state = Map().set(user0.id, user0);
+      const [nextState, user1] = login(state, 'user1');
+      expect(nextState).to.equal(
+        state
+          .set(user0.id, user0)
+          .set(user1.id, user1)
+      );
     });
     it('valid/same', () => {
-      const state = fromJS({[user0.id]: user0});
-      const nextState = login(state, 'user0');
-      expect(nextState).to.equal(fromJS({[user0.id]: user0}));
+      const state = Map().set(user0.id, user0);
+      const [nextState, userNew] = login(state, 'user0');
+      expect(nextState).to.equal(
+        state.set(user0.id, user0)
+      );
     });
   });
   describe('.logout', () => {
@@ -33,19 +38,17 @@ describe('auth', () => {
       expect(nextState).to.equal(Map());
     });
     it('valid/one', () => {
-      const state = fromJS({[user0.id]: user0});
-      const nextState = logout(state, 'user0');
+      const state = Map().set(user0.id, user0);
+      const nextState = logout(state, user0.id);
       expect(nextState).to.equal(Map());
     });
     it('valid/many', () => {
-      const state = fromJS({
-        [user0.id]: user0
-        , [user1.id]: user1
-      });
-      const nextState = logout(state, 'user0');
-      expect(nextState).to.equal(fromJS({
-        [user1.id]: user1
-      }));
+      const state = Map()
+        .set(user0.id, user0)
+        .set(user1.id, user1);
+      const nextState = logout(state, user0.id);
+      expect(nextState).to.equal(Map()
+        .set(user1.id, user1));
     });
   });
 });
