@@ -51,6 +51,6 @@ export class Timer extends Component {
   }
 
   renderTime(time) {
-    return TimeService.formatTime(time);
+    return TimeService.formatTimeOfTimer(time);
   }
 }

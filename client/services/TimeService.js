@@ -19,7 +19,7 @@ export class TimeService {
       .then(offset => this.getRawTime() + offset)
   }
 
-  formatTime(time) {
+  getHMSMS(time) {
     let ms = time % 1000;
     time = (time - ms) / 1000;
     let s = time % 60;
@@ -30,11 +30,22 @@ export class TimeService {
     if (h < 10) h = '0' + h;
     if (m < 10) m = '0' + m;
     if (s < 10) s = '0' + s;
+    return {h, m, s, ms}
+  }
+
+  formatTimeOfTimer(time) {
+    const {h, m, s, ms} = this.getHMSMS(time);
     return (h != '00' ? h + ':' : '') + m + ':' + s;
   }
 
+  formatTimeFull(time) {
+    const {h, m, s, ms} = this.getHMSMS(time);
+    return h + ':' + m + ':' + s;
+  }
+
   formatTimeOfDay(timestamp, offset) {
-    return this.formatTime((timestamp + offset) % (24 * 60 * 60 * 1000));
+    const {h, m, s, ms} = this.getHMSMS((timestamp + offset) % (24 * 60 * 60 * 1000));
+    return h + ':' + m + ':' + s;
   }
 }
 

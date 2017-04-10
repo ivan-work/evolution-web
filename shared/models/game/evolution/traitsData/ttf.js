@@ -104,6 +104,7 @@ export const TraitSpecA = {
   type: tt.TraitSpecA
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
+  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitSpecB)
   , cooldowns: fromJS([
     [tt.TraitSpecA, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
@@ -123,6 +124,7 @@ export const TraitSpecB = {
   type: tt.TraitSpecB
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
+  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitSpecA)
   , cooldowns: fromJS([
     [tt.TraitSpecB, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]

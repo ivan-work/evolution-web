@@ -20,7 +20,9 @@ import {TraitFatTissue, TraitShell, TraitAnglerfish} from '../../shared/models/g
 
 const addToGameLog = (message) => (game) => game.update('log', log => log.push(message));
 
-const logAnimal = animal => animal && ['$Animal'].concat(animal.traits.map(trait => trait.type).toArray());
+const logAnimal = animal => animal && ['$Animal'].concat(animal.traits.toArray()
+  .filter(trait => !trait.hidden)
+  .map(trait => trait.type));
 
 const logAnimalById = (game, animalId) => {
   const {animal} = game.locateAnimal(animalId);

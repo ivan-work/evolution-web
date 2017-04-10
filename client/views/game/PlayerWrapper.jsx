@@ -43,7 +43,7 @@ export class PlayerWrapper extends Component {
       if (trait.type === TraitMetamorphose) {
         this.setState({
           traitActivateQuestion: {
-            traits: trait.getDataModel().getTargets(null, animal, trait)
+            traits: trait.getDataModel().getTargets(props.game, animal, trait)
             , onSelectTrait: (targetTraitId) => {
               !!targetTraitId && this.context.gameActions.$traitActivate(animal.id, trait.id, targetTraitId);
               this.setState(INITIAL_STATE)

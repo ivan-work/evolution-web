@@ -203,15 +203,21 @@ export const TraitCarnivorous = {
       // default intellect found, need to ask
       const unavoidableDefenses = countUnavoidableDefenses(game, sourceAnimal, targetAnimal);
       const staticDefenses = getStaticDefenses(game, sourceAnimal, targetAnimal)
-      //logger.debug(`${sourceAnimal.id} activates Intellect`);
-      //logger.debug(`UnavoidableDefenses: ${unavoidableDefenses}`);
-      //logger.debug(`StaticDefenses: ${staticDefenses.map(t => t.type)}`);
+      logger.debug(`${sourceAnimal.id} activates Intellect`);
+      logger.debug(`unavoidableDefenses: ${unavoidableDefenses}`);
+      logger.debug(`staticDefenses: ${staticDefenses.map(t => t.type)}`);
+      logger.debug(`possibleDefenses: ${possibleDefenses.map(t => t.type)}`);
       if (unavoidableDefenses === 0 && staticDefenses.length === 0) {
         const affectiveDefenses = getAffectiveDefenses(game, sourceAnimal, targetAnimal);
+        logger.debug(`affectiveDefenses: ${affectiveDefenses.map(t => t.type)}`);
 
         if (possibleDefenses.length === 0 && affectiveDefenses.length === 0) {
         } //do nothing
-        else if (possibleDefenses.length === 1 && affectiveDefenses.length === 0) disabledTid = possibleDefenses[0].id;
+        else if (possibleDefenses.length === 1 && affectiveDefenses.length === 0) {
+          disabledTid = possibleDefenses[0].id;
+          possibleDefenses.splice(0, 1);
+          possibleDefenseTargets = 0;
+        }
         else if (possibleDefenses.length === 0 && affectiveDefenses.length === 1) disabledTid = affectiveDefenses[0].id;
         else {
           const defaultIntellect = (questionId) => {

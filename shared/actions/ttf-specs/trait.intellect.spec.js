@@ -143,4 +143,22 @@ players:
     expect(selectAnimal(User0, 0).getFood()).equal(3);
     expect(selectAnimal(User0, 1)).undefined;
   });
+
+  it.only('BUG: Intellect should ignore carn + tailloss', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: 2
+food: 10
+players:
+  - continent: $Q carn int, $W carn tail
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$W'));
+    clientStore0.dispatch(traitAnswerRequest('TraitTailLoss', 'TraitCarnivorous'));
+
+    expect(selectAnimal(User0, 0).getFood()).equal(2);
+    expect(selectAnimal(User0, 1)).undefined;
+  });
 });
