@@ -118,8 +118,12 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
     switch (monitor.getItemType()) {
       case DND_ITEM_TYPE.CARD:
       {
-        const {card} = monitor.getItem();
-        return !card.getTraitDataModel().hidden;
+        const {model: animal} = props;
+        const {card, alternateTrait} = monitor.getItem();
+        const traitData = card.getTraitDataModel(alternateTrait);
+        return !card.getTraitDataModel(alternateTrait).hidden
+
+          && (!traitData.checkTraitPlacement || traitData.checkTraitPlacement(animal));
       }
       case DND_ITEM_TYPE.FOOD:
         const {index} = monitor.getItem();
