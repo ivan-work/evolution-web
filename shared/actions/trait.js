@@ -78,7 +78,7 @@ export const traitTakeShellRequest = (animalId, traitId) => (dispatch, getState)
  */
 
 // Transport action
-const startCooldown = (gameId, link, duration, place, placeId) => ({
+export const startCooldown = (gameId, link, duration, place, placeId) => ({
   type: 'startCooldown'
   , data: {gameId, link, duration, place, placeId}
 });
@@ -301,8 +301,10 @@ export const server$takeFoodRequest = (gameId, playerId, animalId) => (dispatch,
 
   logger.debug('traitTakeFoodRequest:', playerId, animalId);
 
+  // Beware, this was copied to TraitInkCloud
   dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, playerId)));
   dispatch(server$game(gameId, startCooldown(gameId, TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, playerId)));
+
   dispatch(server$startFeedingFromGame(game.id, animal.id, 1));
 };
 

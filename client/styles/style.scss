@@ -56,6 +56,9 @@ a[disabled] {
   //height: 100%;
 }
 
+// fix for header
+.mdl-navigation.header {flex-grow: 1;}
+
 // fix for header ControlGroup colors
 .mdl-navigation.header .mdl-button {color: white; &[disabled] {color: gray;}}
 

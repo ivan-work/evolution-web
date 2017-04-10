@@ -34,7 +34,7 @@ export class TimeService {
   }
 
   formatTimeOfDay(timestamp, offset) {
-    return (timestamp + offset) % (24 * 60 * 60 * 1000);
+    return this.formatTime((timestamp + offset) % (24 * 60 * 60 * 1000));
   }
 }
 

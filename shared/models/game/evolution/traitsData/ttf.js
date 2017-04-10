@@ -21,20 +21,21 @@ import {
   , server$traitSetValue
   , server$traitNotify_End
   , server$game
+  , startCooldown
   , gameDeployAnimalFromDeck
 } from '../../../../actions/actions';
 
 import {selectGame} from '../../../../selectors';
 
 import {endHunt, endHuntNoCd, getStaticDefenses, getActiveDefenses, getAffectiveDefenses} from './TraitCarnivorous';
-import {TraitCarnivorous} from '../traitTypes';
+import * as tt from '../traitTypes';
 
 export const TraitMetamorphose = {
-  type: 'TraitMetamorphose'
+  type: tt.TraitMetamorphose
   , targetType: TRAIT_TARGET_TYPE.TRAIT
   , playerControllable: true
   , cooldowns: fromJS([
-    ['TraitMetamorphose', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+    [tt.TraitMetamorphose, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: (game, sourceAnimal, traitMetamorphose, targetTrait) => (dispatch, getState) => {
@@ -42,7 +43,7 @@ export const TraitMetamorphose = {
     dispatch(server$traitStartCooldown(game.id, traitMetamorphose, sourceAnimal));
 
     const {animal} = selectGame(getState, game.id).locateAnimal(sourceAnimal.id, sourceAnimal.ownerId);
-    dispatch(server$startFeeding(game.id, animal, 1, 'TraitMetamorphose'));
+    dispatch(server$startFeeding(game.id, animal, 1, tt.TraitMetamorphose));
     return true;
   }
   , $checkAction: (game, sourceAnimal) => sourceAnimal.getWantedFood() > 0 && sourceAnimal.getEatingBlockers(game).length <= 1
@@ -63,10 +64,10 @@ export const TraitMetamorphose = {
 };
 
 export const TraitShell = {
-  type: 'TraitShell'
+  type: tt.TraitShell
   , targetType: TRAIT_TARGET_TYPE.NONE
   , cooldowns: fromJS([
-    ['TraitShell', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
+    [tt.TraitShell, TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
   ])
   , action: (game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, defenceTrait, defenceAnimal));
@@ -80,17 +81,19 @@ export const TraitShell = {
 };
 
 export const TraitTrematode = {
-  type: 'TraitTrematode'
+  type: tt.TraitTrematode
   , cardTargetType: CARD_TARGET_TYPE.LINK_ENEMY
   , food: 1
 };
 export const TraitInkCloud = {
-  type: 'TraitInkCloud'
+  type: tt.TraitInkCloud
   , targetType: TRAIT_TARGET_TYPE.NONE
   , cooldowns: fromJS([
-    ['TraitInkCloud', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+    [tt.TraitInkCloud, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
   ])
   , action: (game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait) => (dispatch) => {
+    dispatch(server$game(game.id, startCooldown(game.id, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, attackAnimal.ownerId)));
+    dispatch(server$game(game.id, startCooldown(game.id, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, attackAnimal.ownerId)));
     dispatch(server$traitStartCooldown(game.id, defenceTrait, defenceAnimal));
     dispatch(endHuntNoCd(game.id, attackAnimal, attackTrait, defenceAnimal));
     return true;
@@ -98,16 +101,16 @@ export const TraitInkCloud = {
 };
 
 export const TraitSpecA = {
-  type: 'TraitSpecA'
+  type: tt.TraitSpecA
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
   , cooldowns: fromJS([
-    ['TraitSpecA', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+    [tt.TraitSpecA, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: (game, animal, trait) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, trait, animal));
-    dispatch(server$startFeeding(game.id, animal, 1, 'TraitSpecA'));
+    dispatch(server$startFeeding(game.id, animal, 1, tt.TraitSpecA));
     return true;
   }
   , $checkAction: (game, animal, traitSpec) => (animal.canEat(game)
@@ -117,16 +120,16 @@ export const TraitSpecA = {
 };
 
 export const TraitSpecB = {
-  type: 'TraitSpecB'
+  type: tt.TraitSpecB
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
   , cooldowns: fromJS([
-    ['TraitSpecB', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+    [tt.TraitSpecB, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: (game, animal, trait) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, trait, animal));
-    dispatch(server$startFeeding(game.id, animal, 1, 'TraitSpecA'));
+    dispatch(server$startFeeding(game.id, animal, 1, tt.TraitSpecA));
     return true;
   }
   , $checkAction: (game, animal, traitSpec) => (animal.canEat(game)
@@ -135,14 +138,14 @@ export const TraitSpecB = {
       animal.traits.some(trait => trait.id !== traitSpec.id && trait.type === traitSpec.type))))
 };
 
-export const TraitFlight = {type: 'TraitFlight'};
+export const TraitFlight = {type: tt.TraitFlight};
 
 export const TraitViviparous = {
-  type: 'TraitViviparous'
+  type: tt.TraitViviparous
   , targetType: TRAIT_TARGET_TYPE.NONE
   , food: 1
   , cooldowns: fromJS([
-    ['TraitViviparous', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+    [tt.TraitViviparous, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
   ])
   , action: (game, sourceAnimal, trait) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, trait, sourceAnimal));
@@ -153,18 +156,18 @@ export const TraitViviparous = {
 };
 
 export const TraitAmbush = {
-  type: 'TraitAmbush'
+  type: tt.TraitAmbush
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
   , transient: true
-  , $checkAction: (game, animal, traitSpec) => animal.hasTrait(TraitCarnivorous)
+  , $checkAction: (game, animal, traitSpec) => animal.hasTrait(tt.TraitCarnivorous)
   , action: (game, sourceAnimal, trait) => (dispatch) => {
     dispatch(server$traitSetValue(game, sourceAnimal, trait, !trait.value));
     return false;
   }
 };
 export const TraitIntellect = {
-  type: 'TraitIntellect'
+  type: tt.TraitIntellect
   , food: 1
   , getTargets: (game) => {
     const {animal: sourceAnimal} = game.locateAnimal(game.question.sourceAid);
@@ -176,7 +179,7 @@ export const TraitIntellect = {
   }
 };
 export const TraitAnglerfish = {
-  type: 'TraitAnglerfish'
+  type: tt.TraitAnglerfish
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
   , transient: true

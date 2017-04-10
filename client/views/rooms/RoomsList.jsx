@@ -7,6 +7,7 @@ import {connect} from 'react-redux';
 import {List, ListItem, IconButton} from 'react-mdl';
 
 import {roomJoinRequestSoft, roomSpectateRequestSoft} from '../../../shared/actions/actions';
+import {PHASE} from '../../../shared/models/game/GameModel';
 
 import {failsChecks} from '../../../shared/actions/checks';
 import {checkCanJoinRoomToPlay, checkCanJoinRoomToSpectate} from '../../../shared/actions/rooms.checks';
@@ -32,7 +33,7 @@ export class RoomsList extends React.Component {
     //console.log(this.props.rooms.map((room, roomId) => roomId).valueSeq().toArray())
     return <List className="RoomsList">
       {rooms.map(room =>
-        <ListItem key={room.id}>
+      <ListItem key={room.id}>
           <span>
             <a href="#"
                disabled={failsChecks(() => checkCanJoinRoomToPlay(room, userId))}
@@ -44,7 +45,7 @@ export class RoomsList extends React.Component {
                               disabled={failsChecks(() => checkCanJoinRoomToSpectate(room, userId))}
                               onClick={() => $roomSpectate(room.id)}/>
           </span>
-        </ListItem>)}
+      </ListItem>)}
     </List>;
   }
 }
@@ -56,7 +57,16 @@ export default connect(
       room: state.get('room')
       , userId: state.getIn(['user', 'id'])
       , rooms: state.getIn(['rooms'])
-        .sort((r1, r2) => r1.gameId !== null)
+        .filter((room) => {
+          if (!room.gameId) return true;
+          const phase = state.getIn(['games', room.gameId, 'status', 'phase']);
+          return (phase !== PHASE.FINAL);
+        })
+        .sort((r1, r2) => {
+          if (r1.gameId && !r2.gameId) return 1;
+          if (!r1.gameId && r2.gameId) return -1;
+          return r2.timeCreate - r1.timeCreate;
+        })
         .toList()
     }
   }

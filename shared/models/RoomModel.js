@@ -15,6 +15,7 @@ export class RoomModel extends Record({
   , gameId: null
   , banlist: List()
   , chat: ChatModel.new()
+  , timeCreate: 0
 }) {
   static fromJS(js) {
     return js == null
@@ -35,6 +36,7 @@ export class RoomModel extends Record({
       id: id
       , name: 'Room ' + id.slice(0, 4)
       , users: List()
+      , timeCreate: Date.now()
     })
   }
 

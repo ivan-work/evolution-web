@@ -62,17 +62,19 @@ export const chatClientToServer = {
       timestamp: Date.now(), to, toType, from: userId, text: validText
       , fromLogin: getState().getIn(['users', userId, 'login'], 'unknown')
     });
-    loggerChat.info(`${message.fromLogin}: ${message.text}`, {type: toType, toString: () => toType});
     switch (toType) {
       case CHAT_TARGET_TYPE.GLOBAL:
+        loggerChat.info(`${message.fromLogin}: ${message.text}`, {});
         dispatch(to$({users: true}, chatMessageGlobal(message)));
         break;
       case CHAT_TARGET_TYPE.ROOM:
         const room = getState().getIn(['rooms', to]);
         if (!room) throw new ActionCheckError('chatMessageRequest', 'Invalid parameters');
+        loggerChat.info(`${message.fromLogin}: ${message.text}`, {room: room.name});
         dispatch(to$({users: room.users.concat(room.spectators).toArray()}, chatMessageRoom(message)));
         break;
       case CHAT_TARGET_TYPE.USER:
+        loggerChat.info(`${message.fromLogin}: ${message.text}`, {type: toType});
         const user = getState().getIn(['users', to]);
         if (!user) throw new ActionCheckError('chatMessageRequest', 'User offline');
         dispatch(to$({userId: user.id}, chatMessageUser(message)));

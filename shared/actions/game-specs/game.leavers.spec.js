@@ -9,6 +9,8 @@ import {
   , SOCKET_DISCONNECT_NOW
 } from '../actions';
 
+import {replaceGetRandom} from '../../utils/randomGenerator';
+
 import {PHASE} from '../../../shared/models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
@@ -98,6 +100,7 @@ players:
     expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.FEEDING);
     expect(selectGame().getIn(['status', 'currentPlayer'])).equal(0);
 
+    //replaceGetRandom(() => )
     clientStore0.disconnect(SOCKET_DISCONNECT_NOW);
     expect(selectPlayer(User0).hand, 'empties hand after leave').size(0);
     expect(selectGame().getIn(['status', 'currentPlayer'])).equal(1);

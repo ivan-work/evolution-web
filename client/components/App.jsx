@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 //import {logoutAndRedirect} from 'actions';
 import T from 'i18n-react';
 
-import {Layout, Header, Navigation, Content, IconButton} from 'react-mdl';
+import {Layout, Header, Navigation, Content, IconButton, Spacer} from 'react-mdl';
 
 import {AdminPanelView} from './AdminPanel.jsx'
 import {ServicesContext} from '../services/ServicesContext';
@@ -23,6 +23,8 @@ export const App = ServicesContext(PortalsContext(TooltipsContext(
         <TranslationSwitchView/>
         <IconButton name={sound ? 'volume_up' : 'volume_off'} onClick={() => appChangeSound(!sound)}/>
         <PortalTarget name='header'/>
+        <Spacer/>
+        <a target="blank" href="https://github.com/ivan-work/evolution-web/blob/master/changelog.md">{T.translate('App.Changelog')}</a>
       </Navigation>
     </Header>
     <ErrorReporter/>

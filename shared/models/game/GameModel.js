@@ -89,6 +89,8 @@ const ContinentsAddon = Map({});
 const rollDice = () => getRandom(1, 6);
 
 const FOOD_TABLE = [
+// chosen by fair dice roll
+// guaranteed to be random
   () => 10
   , () => 10
   , () => rollDice() + 2
@@ -131,7 +133,7 @@ export class GameModel extends Record({
   }
 
   generateFood() {
-    return FOOD_TABLE[this.players.size]();
+    return FOOD_TABLE[this.getActualPlayers().size]();
   }
 
   static new(room) {
@@ -197,6 +199,10 @@ export class GameModel extends Record({
       .set('scoreboardFinal', scoreboardFinal)
       .set('winnerId', scoreboardFinal[0].playerId)
       .setIn(['status', 'phase'], PHASE.FINAL);
+  }
+
+  getActualPlayers() {
+    return this.players.filter(p => p.playing);
   }
 
   getPlayer(pid) {

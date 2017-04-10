@@ -27,7 +27,7 @@ export class GameStatusDisplay extends Component {
     const {game} = this.props;
     const {status, players, settings, question} = game;
     return (<ul className="GameStatus">
-      <h6>Game Status:</h6>
+      <h6>{T.translate('Game.UI.Status.Title')}:</h6>
       <li className='line'>
         <span className='key'>{T.translate('Game.UI.Status.Turn')}:</span>
         <span className='value'>{status.turn}</span>
