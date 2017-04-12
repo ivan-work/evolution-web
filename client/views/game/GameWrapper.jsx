@@ -72,8 +72,8 @@ export class GameWrapper extends React.Component {
 let GameWrapperHOC = GameWrapper;
 
 //const backend = !process.env.TEST ? HTML5Backend : TestBackend;
-const backend = !process.env.TEST ? MouseBackend : TestBackend;
-//const backend = !process.env.TEST ? TouchBackend({ enableMouseEvents: true }) : TestBackend;
+//const backend = !process.env.TEST ? MouseBackend : TestBackend;
+const backend = !process.env.TEST ? TouchBackend({ enableMouseEvents: true }) : TestBackend;
 GameWrapperHOC = DragDropContext(backend)(GameWrapperHOC);
 
 import {AnimationServiceContext} from '../../services/AnimationService';
