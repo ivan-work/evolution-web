@@ -71,7 +71,7 @@ export class Textfield extends React.Component {
     const {model, validation} = this.context.form.state;
     return (<MDL.Textfield floatingLabel
                            label={T.translate(i18nPath + '.' + name)}
-                           value={model[name]}
+                           value={model[name] || ''}
                            disabled={disabled}
                            error={validation.errors.errors[name]}
                            onChange={({target}) => onChange(name, target.value)}/>)

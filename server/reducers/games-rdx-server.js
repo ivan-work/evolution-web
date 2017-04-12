@@ -18,7 +18,11 @@ import {TraitFatTissue, TraitShell, TraitAnglerfish} from '../../shared/models/g
  * LOGGING
  * */
 
-const addToGameLog = (message) => (game) => game.update('log', log => log.push(message));
+//const addToGameLog = (message) => (game) => game.update('log', log => log.push(message));
+const addToGameLog = (message) => (game) => game.update('log', log => log.push({
+  timestamp: Date.now()
+  , message
+}));
 
 const logAnimal = animal => animal && ['$Animal'].concat(animal.traits.toArray()
   .filter(trait => !trait.getDataModel().hidden)

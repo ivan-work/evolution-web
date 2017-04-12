@@ -57,11 +57,7 @@ export default connect(
       room: state.get('room')
       , userId: state.getIn(['user', 'id'])
       , rooms: state.getIn(['rooms'])
-        .filter((room) => {
-          if (!room.gameId) return true;
-          const phase = state.getIn(['games', room.gameId, 'status', 'phase']);
-          return (phase !== PHASE.FINAL);
-        })
+        //.filter((room) => !room.gameFinished)
         .sort((r1, r2) => {
           if (r1.gameId && !r2.gameId) return 1;
           if (!r1.gameId && r2.gameId) return -1;

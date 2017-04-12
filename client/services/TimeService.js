@@ -47,6 +47,10 @@ export class TimeService {
     const {h, m, s, ms} = this.getHMSMS((timestamp + offset) % (24 * 60 * 60 * 1000));
     return h + ':' + m + ':' + s;
   }
+
+  promiseTimeOfDay(timestamp) {
+    return this.offset.then(offset => this.formatTimeOfDay(timestamp, offset))
+  }
 }
 
 export default new TimeService();

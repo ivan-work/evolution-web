@@ -305,6 +305,7 @@ export const roomsClientToServer = {
     const room = checkSelectRoom(getState, roomId);
     checkRoomIsNotInGame(room);
     checkUserIsHost(room, userId);
+    if (settings.name) settings.name = settings.name.trim();
     checkValidate(settings, SettingsRules);
     settings.timeTurn *= 60000;
     settings.timeTraitResponse *= 60000;

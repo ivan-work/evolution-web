@@ -24,7 +24,8 @@ export const App = ServicesContext(PortalsContext(TooltipsContext(
         <IconButton name={sound ? 'volume_up' : 'volume_off'} onClick={() => appChangeSound(!sound)}/>
         <PortalTarget name='header'/>
         <Spacer/>
-        <a target="blank" href="https://github.com/ivan-work/evolution-web/blob/master/changelog.md">{T.translate('App.Changelog')}</a>
+        <a target="blank" href="https://vk.com/evolveonline">{T.translate('App.Misc.VKGroup')}</a>
+        <a target="blank" href="https://github.com/ivan-work/evolution-web/blob/master/changelog.md">{T.translate('App.Misc.Changelog')}</a>
       </Navigation>
     </Header>
     <ErrorReporter/>

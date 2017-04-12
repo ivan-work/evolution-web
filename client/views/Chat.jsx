@@ -7,6 +7,7 @@ import {connect} from 'react-redux';
 import {Textfield} from 'react-mdl';
 
 import TimeService from '../services/TimeService';
+import Promise from './utils/Promise.jsx';
 
 import {MessageModel, CHAT_TARGET_TYPE} from '../../shared/models/ChatModel';
 import {chatMessageRequest} from '../../shared/actions/actions';
@@ -29,17 +30,6 @@ export class Chat extends React.Component {
     this.renderMessage = this.renderMessage.bind(this);
     this.setupWindow = this.setupWindow.bind(this);
     this.state = {message: '', offset: 0, atBottom: true}
-  }
-
-  componentDidMount() {
-    this.$isMounted = true;
-    TimeService.offset.then(offset => {
-      if (this.$isMounted) this.setState({offset});
-    })
-  }
-
-  componentWillUnmount() {
-    this.$isMounted = false;
   }
 
   onMessageChange(message) {
@@ -91,7 +81,7 @@ export class Chat extends React.Component {
   renderMessage({timestamp, from, fromLogin, to, toType, text}) {
     return (<div key={timestamp + from}>
       <div className='ChatTime'>
-        <span>[{TimeService.formatTimeOfDay(timestamp, this.state.offset)}]</span>
+        <span>[<Promise>{TimeService.promiseTimeOfDay(timestamp)}</Promise>]</span>
       </div>
       <div className='ChatMessage'>
         <strong>{fromLogin}: </strong>

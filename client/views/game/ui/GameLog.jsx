@@ -7,11 +7,16 @@ import {Dialog} from '../../utils/Dialog.jsx';
 import User from '../../utils/User.jsx';
 import AnimalText from '../animals/AnimalText.jsx';
 
+import TimeService from '../../../services/TimeService';
+import Promise from '../../utils/Promise.jsx';
+
 const DATA_REGEX = /!(\w+)/g;
 const VIEW_REGEX = /(\$[\w\-@]+)/g;
 
 const format = (str, arr) => str.replace(DATA_REGEX, (match, number) => typeof arr[number] != 'undefined' ? arr[number] : match);
 import replace from 'react-string-replace';
+
+import './GameLog.scss';
 
 const customLog = {
   gameGiveCards: (message, values) => {
@@ -85,9 +90,12 @@ export default class GameLog extends React.Component {
       <Button raised onClick={this.showLog}>{T.translate('Game.UI.Log.Label')}</Button>
       <Dialog onBackdropClick={this.hideLog} show={this.state.showLog}>
         <DialogTitle>{T.translate('Game.UI.Log.Label')}</DialogTitle>
-        <DialogContent>
+        <DialogContent className='GameLog'>
           {game.log.map((logItem, index) => (
-            <div key={index}>{GameLog.LogItemToText(logItem)}</div>))}
+          <div className='LogItem' key={index}>
+            <span className='LogTime'>[<Promise>{TimeService.promiseTimeOfDay(logItem.timestamp)}</Promise>]</span>&nbsp;
+            <span className='LogMessage'>{GameLog.LogItemToText(logItem.message)}</span>
+          </div>))}
         </DialogContent>
       </Dialog>
     </div>);

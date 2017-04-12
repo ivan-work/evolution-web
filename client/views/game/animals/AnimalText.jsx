@@ -7,14 +7,11 @@ import {connect} from 'react-redux';
 
 import gecko from '../../../assets/gfx/gecko.svg';
 
-const style = {
-  width: '1em'
-  , height: '1em'
-};
+import './AnimalText.scss';
 
 export const AnimalText = ({animal, select}) =>(
   <span>
-    <img style={style} className='AnimalText' src={gecko}/>
+    <img className='AnimalText' src={gecko}/>
     {!!animal && <span>
       ({animal.slice(1)
         .map((trait, index) => (

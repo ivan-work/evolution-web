@@ -1,0 +1,12 @@
+.GameLog {
+  .LogItem {
+    font-size: .8em;
+    line-height: 1.1em;
+    font-family: monospace;
+    .LogTime {
+      font-size: .8em;
+    }
+    .LogMessage {
+    }
+  }
+}

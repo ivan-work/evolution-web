@@ -8,6 +8,7 @@ import database from './database';
 import frontendDevelopment from './frontend.development';
 import frontendProduction from './frontend.production';
 import webpackConfig from '../webpack.client.babel';
+import 'source-map-support/register'
 
 database.ready.then(() => {
   logger.info('NODE_ENV =', process.env.NODE_ENV);

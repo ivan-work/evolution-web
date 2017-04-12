@@ -81,7 +81,7 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
   const leaver = game.getPlayer(userId);
   // Can't place cancelTimeout here because
   // we don't want timer drop when someone leaves in a valid game
-  switch (game.players.filter(p => p.playing).size) {
+  switch (game.getActualPlayers().size) {
     case 0:
       dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
       break;

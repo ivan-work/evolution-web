@@ -8,7 +8,9 @@ App:
     Twitter: Войти через Twitter
   Name: Эволюция
   Online: Онлайн
-  Changelog: Список изменений
+  Misc:
+    VKGroup: Группа ВК
+    Changelog: Список изменений
   Chat:
     Label: Чат
     EnterMessage: ...

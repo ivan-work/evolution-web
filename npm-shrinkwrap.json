@@ -4709,6 +4709,11 @@
       "resolved": "https://registry.npmjs.org/react-dnd-test-backend/-/react-dnd-test-backend-1.0.2.tgz",
       "dev": true
     },
+    "react-dnd-touch-backend": {
+      "version": "0.3.6",
+      "from": "react-dnd-touch-backend@latest",
+      "resolved": "https://registry.npmjs.org/react-dnd-touch-backend/-/react-dnd-touch-backend-0.3.6.tgz"
+    },
     "react-dock": {
       "version": "0.2.3",
       "from": "react-dock@>=0.2.1 <0.3.0",
@@ -5458,14 +5463,12 @@
     "source-map": {
       "version": "0.5.6",
       "from": "source-map@>=0.5.0 <0.6.0",
-      "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.5.6.tgz",
-      "dev": true
+      "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.5.6.tgz"
     },
     "source-map-support": {
       "version": "0.4.11",
-      "from": "source-map-support@*",
-      "resolved": "https://registry.npmjs.org/source-map-support/-/source-map-support-0.4.11.tgz",
-      "dev": true
+      "from": "https://registry.npmjs.org/source-map-support/-/source-map-support-0.4.11.tgz",
+      "resolved": "https://registry.npmjs.org/source-map-support/-/source-map-support-0.4.11.tgz"
     },
     "sparkles": {
       "version": "1.0.0",

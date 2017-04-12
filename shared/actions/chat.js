@@ -58,6 +58,9 @@ export const chatClientToServer = {
     if (validText.length === 0) {
       throw new ActionCheckError('chatMessageRequest not valid');
     }
+    if (validText === '/error') {
+      throw new Error('chat error');
+    }
     const message = MessageModel.fromJS({
       timestamp: Date.now(), to, toType, from: userId, text: validText
       , fromLogin: getState().getIn(['users', userId, 'login'], 'unknown')
