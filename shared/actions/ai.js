@@ -3,7 +3,7 @@ import {Record} from 'immutable';
 import {PHASE} from '../models/game/GameModel';
 import {TRAIT_TARGET_TYPE} from '../models/game/evolution/constants';
 import {passesChecks, failsChecks, checkGamePhase, checkPlayerCanAct} from './checks';
-import {checkAnimalCanEat, checkTraitActivation_Animal} from './trait.checks';
+import {checkAnimalCanEat, checkTraitActivation_Animal, checkAnimalCanTakeShell} from './trait.checks';
 import {selectGame} from '../selectors';
 import {server$gameEndTurn} from './actions';
 
@@ -49,6 +49,11 @@ export const doesOptionExist = (game, playerId) => {
   return game.getPlayer(playerId).continent.some((animal) => {
     if (passesChecks(() => checkAnimalCanEat(game, animal))) return true;
 
+    if (game.getContinent().shells.size > 0
+      && passesChecks(() => checkAnimalCanTakeShell(game, animal)))
+      return true;
+    if (passesChecks(() => checkAnimalCanEat(game, animal))) return true;
+
     return animal.traits.some((trait) => {
       const traitData = trait.getDataModel();
 
@@ -81,6 +86,9 @@ export const getFeedingOption = (game, playerId) => {
 export const getOptions = (game, playerId) => {
   const allAnimals = game.players.reduce((result, player) => result.concat(player.continent.map(animal => animal.id).toArray()), []);
   return game.getPlayer(playerId).continent.reduce((result, animal) => {
+    if (game.getContinent().shells.size > 0
+      && passesChecks(() => checkAnimalCanTakeShell(game, animal)))
+      result.push(Option.new('traitTakeShellRequest', animal.id));
     if (passesChecks(() => checkAnimalCanEat(game, animal)))
       result.push(Option.new('traitTakeFoodRequest', animal.id));
 

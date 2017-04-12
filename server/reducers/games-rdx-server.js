@@ -21,7 +21,7 @@ import {TraitFatTissue, TraitShell, TraitAnglerfish} from '../../shared/models/g
 const addToGameLog = (message) => (game) => game.update('log', log => log.push(message));
 
 const logAnimal = animal => animal && ['$Animal'].concat(animal.traits.toArray()
-  .filter(trait => !trait.hidden)
+  .filter(trait => !trait.getDataModel().hidden)
   .map(trait => trait.type));
 
 const logAnimalById = (game, animalId) => {

@@ -63,7 +63,7 @@ Game:
       Winner: Победитель
       TablePlayer: Игрок
       TableScoreNormal: Очки
-      TableScoreDead: Очки (за съеденных)
+      TableScoreDead: Очки (за ископаемых)
     Status:
       Title: Игра
       Turn: Ход

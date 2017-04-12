@@ -10,7 +10,9 @@ export const roomJoin = (state, {roomId, userId}) => state.update(roomId, (room)
 export const roomSpectate = (state, {roomId, userId}) => state.update(roomId, (room) =>
   room.update('spectators', (spectators) => spectators.push(userId)));
 
-export const roomExit = (state, {roomId, userId}) => state.update(roomId, (room) => room
+export const roomExit = (state, {roomId, userId}) => !state.get(roomId)
+  ? state
+  : state.update(roomId, (room) => room
   .update('users', users => users.filterNot(u => u === userId))
   .update('spectators', spectators => spectators.filterNot(u => u === userId))
 );

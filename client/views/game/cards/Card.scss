@@ -6,15 +6,16 @@
   border: 1px solid #999;
 
   &.cover {
-    border: 2px solid #040;
+    border: 1px solid #040;
     border-top-color: #484;
     border-right-color: #484;
-    border-radius: 5px;
+    border-radius: 8px;
+    box-sizing: border-box;
   }
 
   &.cover .inner {
     background-size: $CARD_WIDTH / 4 * 3;
-    border: solid $CARD_WIDTH / 10 #080;
+    border: 6px solid #080;
     border-radius: 5px;
     box-sizing: border-box;
     background: #dfd url(../../../assets/gfx/gecko-080.svg) no-repeat 50% 50%;

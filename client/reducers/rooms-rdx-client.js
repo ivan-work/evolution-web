@@ -18,7 +18,8 @@ const roomJoinSelf = (state, {roomId, userId, room}) => state.set(roomId, room);
 
 const roomSpectateSelf = (state, {roomId, userId, room}) => state.set(roomId, room);
 
-const roomExitSelf = (state, {roomId, userId}) => state.update(roomId, (room) => room.remove('chat'));
+const roomExitSelf = (state, {roomId, userId}) => !state.get(roomId) ? state
+  : state.update(roomId, (room) => room.remove('chat'));
 
 export const reducer = createReducer(Map(), {
   roomsInit: (state, {rooms}) => rooms

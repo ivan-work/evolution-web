@@ -144,7 +144,7 @@ players:
     expect(selectAnimal(User0, 1)).undefined;
   });
 
-  it.only('BUG: Intellect should ignore carn + tailloss', () => {
+  it('BUG: Intellect should ignore carn + tailloss', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 10 camo

@@ -23,6 +23,7 @@ import {GameModelClient} from '../../../shared/models/game/GameModel';
 import {DragDropContext} from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import MouseBackend from './dnd/react-dnd-mouse-backend';
+import TouchBackend from 'react-dnd-touch-backend';
 import TestBackend from 'react-dnd-test-backend';
 
 import './GameWrapper.scss';
@@ -71,7 +72,7 @@ export class GameWrapper extends React.Component {
 let GameWrapperHOC = GameWrapper;
 
 //const backend = !process.env.TEST ? HTML5Backend : TestBackend;
-const backend = !process.env.TEST ? MouseBackend : TestBackend;
+const backend = !process.env.TEST ? TouchBackend({ enableMouseEvents: true }) : TestBackend;
 GameWrapperHOC = DragDropContext(backend)(GameWrapperHOC);
 
 import {AnimationServiceContext} from '../../services/AnimationService';

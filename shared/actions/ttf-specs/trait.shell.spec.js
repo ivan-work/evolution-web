@@ -53,17 +53,13 @@ players:
     const gameId = ParseGame(`
 deck: 5 shell
 phase: 2
-food: 2
+food: 
 players:
-  - continent: $A carn, $B shell, $C + graz
+  - continent: $A shell, $B shell +, $C +
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
-    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
     clientStore0.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(traitTakeFoodRequest('$A'));
-    clientStore0.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(traitTakeFoodRequest('$A'));
 
     expect(selectGame().status.turn, 'turn deploy').equal(1);
     expect(selectGame().status.phase).equal(PHASE.DEPLOY);
@@ -73,8 +69,13 @@ players:
 
     expect(selectGame().getContinent().shells).size(1);
 
-    clientStore0.dispatch(traitTakeShellRequest('$A', selectGame().getContinent().shells.first().id))
+    expectUnchanged('$B cant take shell', () => {
+      clientStore0.dispatch(traitTakeShellRequest('$B', selectGame().getContinent().shells.first().id));
+    }, serverStore, clientStore0);
 
-    expect(selectAnimal(User0, 0).traits).size(2);
+    clientStore0.dispatch(traitTakeShellRequest('$C', selectGame().getContinent().shells.first().id));
+
+    expect(selectAnimal(User0, 0).traits).size(1);
+    expect(selectAnimal(User0, 1).traits).size(1);
   });
 });

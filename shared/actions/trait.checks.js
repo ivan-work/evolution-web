@@ -82,6 +82,13 @@ export const checkAnimalCanEat = (game, animal) => {
     throw new ActionCheckError(`traitTakeFoodRequest@Game(${game.id})`, `Animal(%s) can't eat`, animal)
 };
 
+export const checkAnimalCanTakeShell = (game, animal) => {
+  if (animal.hasTrait('TraitShell'))
+    throw new ActionCheckError(`traitTakeShellRequest@Game(${game.id})`, 'Multiple trait disabled');
+  if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, animal.ownerId, animal.id))
+    throw new ActionCheckError(`traitTakeFoodRequest@Game(${game.id})`, 'Cooldown active');
+};
+
 export const checkIfTraitDisabledByIntellect = (attackAnimal, defenseTrait) => {
   const traitIntellect = attackAnimal.hasTrait('TraitIntellect');
   return traitIntellect && (traitIntellect.value === defenseTrait.id || traitIntellect.value === defenseTrait.type);

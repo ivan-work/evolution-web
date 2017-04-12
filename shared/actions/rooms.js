@@ -140,20 +140,25 @@ const roomSpectateSelf = (roomId, userId, room, game) => ({
 
 // Exit
 
-export const roomExitRequest = () => (dispatch, getState) => dispatch({
-  type: 'roomExitRequest'
-  , data: {roomId: selectClientRoomId(getState)}
-  , meta: {server: true}
-});
+export const roomExitRequest = () => (dispatch, getState) => {
+  const roomId = selectClientRoomId(getState);
+  dispatch({
+    type: 'roomExitRequest'
+    , data: {roomId}
+    , meta: {server: true}
+  });
+  dispatch(roomExitSelf());
+  dispatch(redirectTo(`/`));
+};
 
 const roomExit = (roomId, userId) => ({
   type: 'roomExit'
   , data: {roomId, userId}
 });
 
-const roomExitSelf = (roomId, userId) => ({
+const roomExitSelf = () => ({
   type: 'roomExitSelf'
-  , data: {roomId, userId}
+  , data: {}
 });
 
 export const server$roomExit = (roomId, userId, checkForDestroy = true) => (dispatch, getState) => {
@@ -349,8 +354,9 @@ export const roomsServerToClient = {
   , roomExit: ({roomId, userId}, currentUserId) => (dispatch, getState) => {
     dispatch(roomExit(roomId, userId));
     if (currentUserId === userId) {
-      dispatch(roomExitSelf(roomId, userId));
-      dispatch(redirectTo(`/`));
+      dispatch(roomExitSelf());
+      if (getState().getIn(['routing', 'locationBeforeTransitions', 'pathname']) === '/room/' + roomId)
+        dispatch(redirectTo(`/`));
     }
   }
   , roomDestroy: ({roomId}) => roomDestroy(roomId)

@@ -32,7 +32,7 @@ import {
 import {
   checkAnimalCanEat
   , checkTraitActivation
-  , checkTraitActivation_Animal
+  , checkAnimalCanTakeShell
   , checkIfTraitDisabledByIntellect
 } from './trait.checks';
 
@@ -493,12 +493,11 @@ export const traitClientToServer = {
 
     const animal = checkPlayerHasAnimal(game, userId, animalId);
 
+    checkAnimalCanTakeShell(game, animal);
+
     const trait = game.getContinent().shells.get(traitId);
     if (!trait)
-      throw new ActionCheckError(`server$traitDefenceAnswer@Game(${game.id})`, 'Game doesnt have Trait(%s)', traitId);
-
-    if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, animal.ownerId, animal.id))
-      throw new ActionCheckError(`traitTakeFoodRequest@Game(${game.id})`, 'Cooldown active');
+      throw new ActionCheckError(`traitTakeShellRequest@Game(${game.id})`, 'Game doesnt have Trait(%s)', traitId);
 
     dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
     dispatch(server$game(gameId, traitTakeShell(gameId, 'standard', animalId, trait)));
