@@ -76,6 +76,7 @@ export class AnimalModel extends Record({
         .set('traits', traits)
         .set('foodSize', foodSize)
         .set('fatSize', fatSize)
+        .set('food', Math.min(this.food, foodSize))
     );
   }
 

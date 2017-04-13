@@ -94,6 +94,7 @@ export const TraitInkCloud = {
   , action: (game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait) => (dispatch) => {
     dispatch(server$game(game.id, startCooldown(game.id, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, attackAnimal.ownerId)));
     dispatch(server$game(game.id, startCooldown(game.id, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, attackAnimal.ownerId)));
+    dispatch(server$game(game.id, startCooldown(game.id, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.ANIMAL, attackAnimal.id)));
     dispatch(server$traitStartCooldown(game.id, defenceTrait, defenceAnimal));
     dispatch(endHuntNoCd(game.id, attackAnimal, attackTrait, defenceAnimal));
     return true;

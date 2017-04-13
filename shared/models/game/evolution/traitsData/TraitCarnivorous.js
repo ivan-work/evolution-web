@@ -67,15 +67,14 @@ export const endHunt = (game, sourceAnimal, traitCarnivorous, targetAnimal) => (
 
 export const endHuntNoCd = (gameId, sourceAnimal, traitCarnivorous, targetAnimal) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
+  if (traitCarnivorous.value) dispatch(server$traitSetValue(game, sourceAnimal, traitCarnivorous, false)); // TODO WTF
+  dispatch(server$traitNotify_End(game.id, sourceAnimal.id, traitCarnivorous, targetAnimal.id));
   if (game.huntingCallbacks.size > 0) {
     dispatch(traitClearHuntingCallbacks(game.id));
     game.huntingCallbacks.forEach((callback) => {
       dispatch(callback(game, sourceAnimal, traitCarnivorous, targetAnimal))
     });
   }
-  // TODO WTF
-  if (traitCarnivorous.value) dispatch(server$traitSetValue(game, sourceAnimal, traitCarnivorous, false));
-  dispatch(server$traitNotify_End(game.id, sourceAnimal.id, traitCarnivorous, targetAnimal.id));
 };
 
 const countUnavoidableDefenses = (game, sourceAnimal, targetAnimal) => {
@@ -276,7 +275,6 @@ export const TraitCarnivorous = {
         return false;
       } else {
         dispatch(server$traitAnswerSuccess(game.id, questionId));
-        dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
 
         const poisonous = targetAnimal.hasTrait(TraitPoisonous);
         if (poisonous && disabledTid !== poisonous.id) {
@@ -297,6 +295,8 @@ export const TraitCarnivorous = {
             return true;
           }
         }));
+
+        dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
         return true;
       }
     };

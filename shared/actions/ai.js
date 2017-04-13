@@ -24,7 +24,7 @@ export class Option extends Record({
 }
 
 export const doesPlayerHasOptions = (game, playerId) => {
-  logger.debug('?doesPlayerHasOptions:', playerId, hasError);
+  logger.debug('?doesPlayerHasOptions:', playerId, hasError,  game.getPlayer(playerId).acted);
   const hasError = failsChecks(() => {
     checkGamePhase(game, PHASE.FEEDING);
     checkPlayerCanAct(game, playerId);

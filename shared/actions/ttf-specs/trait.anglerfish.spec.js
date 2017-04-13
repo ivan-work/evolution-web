@@ -67,9 +67,9 @@ players:
     const gameId = ParseGame(`
 deck: 10 camo
 phase: 2
-food: 10
+food: 0
 players:
-  - continent: $Q carn tail camo graz, $W carn camo mass, $E carn tail mimi, $E2 tail
+  - continent: $Q carn tail camo graz, $W carn camo mass, $E carn tail mimi wait, $E2 tail
   - continent: $A angler +, $S angler +, $D angler +
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
@@ -93,9 +93,10 @@ players:
     expect(selectAnimal(User0, 1).id).equal('$W');
     expect(selectAnimal(User0, 2).id).equal('$E');
     expect(selectAnimal(User0, 3)).undefined;
-    expect(selectAnimal(User1, 0).getFood()).equal(2);
-    expect(selectAnimal(User1, 1).getFood()).equal(1);
-    expect(selectAnimal(User1, 2).getFood()).equal(2);
+    expect(selectAnimal(User1, 0).getFood(), '$A food').equal(2);
+    expect(selectAnimal(User1, 1).getFood(), '$S food').equal(1);
+    //console.log(selectAnimal(User1, 2), selectAnimal(User1, 2).traits)
+    expect(selectAnimal(User1, 2).getFood(), '$D food').equal(2);
   });
 
   it('Tailloss shouldnt be able to lose Angler', () => {

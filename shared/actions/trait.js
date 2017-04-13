@@ -211,9 +211,13 @@ const playerActed = (gameId, userId) => ({
 });
 
 export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
-  dispatch(server$game(gameId, playerActed(gameId, userId)));
-  if (!doesPlayerHasOptions(selectGame(getState, gameId), userId))
-    dispatch(server$gameEndTurn(gameId, userId));
+  const game = selectGame(getState, gameId);
+  //console.log(userId, game.getPlayer(userId).index, game.status)
+  //if (game.getPlayer(userId).index === game.status.currentPlayer) {
+    dispatch(server$game(gameId, playerActed(gameId, userId)));
+    if (!doesPlayerHasOptions(selectGame(getState, gameId), userId))
+      dispatch(server$gameEndTurn(gameId, userId));
+  //}
 };
 
 /**
@@ -244,7 +248,7 @@ export const server$traitNotify_End = (gameId, sourceAid, trait, targetId) => {
 // complexActions
 
 export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId) => (dispatch, getState) => {
-  logger.debug(`server$startFeeding: ${sourceId} feeds ${animal.id} through ${sourceType}`);
+  logger.debug(`server$startFeeding: ${sourceId} feeds ${animal.id} through ${sourceType} with (${amount})`);
   if (!animal.canEat(selectGame(getState, gameId))) return false;
 
   // TODO bug with 2 amount on animal 2/3
@@ -311,6 +315,7 @@ export const server$takeFoodRequest = (gameId, playerId, animalId) => (dispatch,
 export const server$startFeedingFromGame = (gameId, animalId, amount) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   const {animal} = game.locateAnimal(animalId);
+  const ownerId = animal.ownerId;
   const ambushed = game.someAnimalOnContinent('standard', (attackAnimal) => {
     if (attackAnimal.ownerId === animal.ownerId) return;
     const ambush = attackAnimal.hasTrait(TraitAmbush);
@@ -323,10 +328,14 @@ export const server$startFeedingFromGame = (gameId, animalId, amount) => (dispat
 
     if (!carnivorousData.$checkAction(game, attackAnimal) || !carnivorousData.checkTarget(game, attackAnimal, animal)) return;
 
-    dispatch(clearCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, attackAnimal.ownerId));
+    logger.verbose(`${animalId} is ambushed by ${attackAnimal.id}`)
+    //dispatch(clearCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, attackAnimal.ownerId));
     dispatch(traitAddHuntingCallback(gameId, (game) => (dispatch) => {
       const {animal} = game.locateAnimal(animalId);
+
       if (animal) dispatch(server$startFeedingFromGame(game.id, animal.id, 1));
+
+      dispatch(server$playerActed(gameId, ownerId));
     }));
     dispatch(server$traitActivate(game, attackAnimal, carnivorous, animal));
     return true;
@@ -415,7 +424,7 @@ export const server$traitDefenceAnswer = (gameId, questionId, traitId, targetId)
   const attackTrait = attackAnimal.hasTrait(question.traitId);
   if (!attackTrait) {
     throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s) doesnt have Trait(%s)', question.sourceAid, traitId)
-  };
+  }
 
   const {sourceAnimal: defenceAnimal, trait: defenceTrait, target} =
     checkTraitActivation(game, question.targetPid, question.targetAid, traitId, targetId);
@@ -426,8 +435,13 @@ export const server$traitDefenceAnswer = (gameId, questionId, traitId, targetId)
 
   dispatch(server$traitAnswerSuccess(game.id, questionId));
   const result = dispatch(server$traitActivate(game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait));
-  logger.debug('server$traitDefenceAnswer result:', attackTrait.type, defenceTrait.type, result);
-  if (result) dispatch(server$playerActed(gameId, attackAnimal.ownerId));
+  logger.debug('server$traitDefenceAnswer result:', attackTrait.type, defenceTrait.type, result, game.status.toJS());
+
+  // TODO line below possibly belongs to somewhere else
+  // Because player should not get "acted" if it happens in another players turns
+  if (game.getPlayer(attackAnimal.ownerId).index === game.status.currentPlayer)
+    if (result)
+      dispatch(server$playerActed(gameId, attackAnimal.ownerId));
   return result;
 };
 
@@ -458,7 +472,7 @@ export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetI
   const attackTrait = attackAnimal.hasTrait(question.traitId);
   if (!attackTrait) {
     throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s) doesnt have Trait(%s)', question.sourceAid, traitId)
-  };
+  }
   const targetAnimal = checkPlayerHasAnimal(game, question.targetPid, question.targetAid);
 
   const traitIntellect = attackAnimal.hasTrait(TraitIntellect);

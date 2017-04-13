@@ -60,7 +60,7 @@ export class TraitDefenceDialog extends Component {
             && this.renderMimicry(targetsMimicry, $traitAnswer.bind(null, traitMimicry.id))
             }
           {otherTraits.length > 0
-            && this.renderOther(attackAnimal, otherTraits, $traitAnswer.bind(null))}
+            && this.renderOther(otherTraits, $traitAnswer.bind(null))}
           <h1>
             <T.span text='Game.UI.TraitDefenceDialog.Time'/>:
             <Timer start={time} duration={game.settings.timeTraitResponse}/>

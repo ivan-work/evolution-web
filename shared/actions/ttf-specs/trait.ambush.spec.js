@@ -164,4 +164,80 @@ players:
     expect(selectAnimal(User1, 1).getFoodAndFat(), '$C should get food').equal(1);
     expect(selectAnimal(User1, 2).getFoodAndFat(), '$D should get food').equal(2);
   });
+
+  it('Intellect testing', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1, clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: 2
+food: 4
+players:
+  - continent: $Q swim, $W flight
+  - continent: $A ambush=true carn int, $S ambush=true carn int
+`);
+
+    //- continent: $Q swim, $W flight, $E tail, $R camo
+    //- continent: $A ambush=true carn int, $S ambush=true carn int, $D ambush=true carn int, $F ambush=true carn int
+
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+    expect(selectGame().food).equal(4);
+    clientStore0.dispatch(traitTakeFoodRequest('$W'));
+    clientStore1.dispatch(gameEndTurnRequest());
+    expect(selectGame().food).equal(3);
+
+    clientStore0.dispatch(traitTakeFoodRequest('$W'));
+    expect(selectGame().food).equal(3);
+    expect(selectPlayer(User0).continent).size(0);
+  });
+
+  it('Ink Cloud vs Ambush', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1, clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: 2
+food: 4
+players:
+  - continent: $Q ink fat
+  - continent: $A ambush=true carn wait
+`);
+
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+    expect(selectPlayer(User0).continent).size(1);
+    expect(selectGame().food).equal(3);
+    clientStore1.dispatch(traitTakeFoodRequest('$A'));
+    clientStore1.dispatch(gameEndTurnRequest());
+    expect(selectGame().food).equal(2);
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+    expect(selectPlayer(User0).continent).size(0);
+    expect(selectGame().food).equal(2);
+  });
+
+  it('Ink Cloud + TailLoss vs Ambush + Intellect', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1, clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: 2
+food: 4
+players:
+  - continent: $Q ink fat tail
+  - continent: $A ambush=true carn int wait
+`);
+
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+    clientStore1.dispatch(traitAnswerRequest('TraitIntellect', 'TraitTailLoss'));
+    expect(selectPlayer(User0).continent).size(1);
+    expect(selectGame().food).equal(3);
+    clientStore1.dispatch(traitTakeFoodRequest('$A'));
+    clientStore1.dispatch(gameEndTurnRequest());
+    expect(selectGame().food).equal(2);
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+    expect(selectPlayer(User0).continent).size(0);
+    expect(selectGame().food).equal(2);
+  });
 });
