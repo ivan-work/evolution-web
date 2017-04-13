@@ -29,7 +29,7 @@ export class TraitModel extends Record({
   static fromServer(js) {
     return js == null
       ? null
-      : new TraitModel(js)
+      : new TraitModel(js);
     //.set('dataModel', TraitDataModel.new(js.type));
   }
 

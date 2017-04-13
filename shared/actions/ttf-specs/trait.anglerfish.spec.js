@@ -152,12 +152,24 @@ players:
 
     expect(selectGame().question.type).equal(QuestionRecord.INTELLECT);
     clientStore0.dispatch(traitAnswerRequest('TraitIntellect', 'TraitTailLoss'));
+  });
 
-    //expect(selectGame().question.type).equal(QuestionRecord.DEFENSE);
-    //clientStore0.dispatch(traitAnswerRequest('TraitInkCloud'));
+  it('bug Flight+Carn+Camo dies from Anglerfish', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: 2
+food: 10
+players:
+  - continent: $Q fli carn camo, $W angler
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
-    //question.ans
-    //expect(selectAnimal(User0, 0)).ok;
-    //expect(selectAnimal(User0, 0).getFood()).equal(1);
+    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$W'));
+
+    expect(selectGame().question).not.ok;
+    clientStore0.dispatch(traitAnswerRequest('TraitIntellect', 'TraitTailLoss'));
+
+    expect(selectAnimal(User0, 0).id).equal('$W');
   });
 });

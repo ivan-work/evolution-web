@@ -10,7 +10,7 @@ import {makeGameSelectors} from '../../selectors';
 
 describe('TraitGrazing:', () => {
   it('Grazes', () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 12 camo
 phase: 2
@@ -27,7 +27,7 @@ players:
     expect(selectPlayer(User0).acted, 'User acted').equal(true);
     expectUnchanged('Grazing on cooldown', () =>
         clientStore0.dispatch(traitActivateRequest('$A', 'TraitGrazing'))
-      , serverStore, clientStore0, clientStore1);
+      , serverStore, clientStore0);
     clientStore0.dispatch(traitActivateRequest('$B', 'TraitGrazing'));
     expect(selectPlayer(User0).acted).equal(true);
     expect(selectGame().food).equal(5);
@@ -36,7 +36,6 @@ players:
     expect(selectGame().food).equal(4);
 
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
-    clientStore1.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
     clientStore0.dispatch(gameEndTurnRequest());
@@ -45,21 +44,16 @@ players:
     // Turn1, deploy
     expect(selectGame().status.turn, 'PHASE.DEPLOY').equal(1);
     expect(selectGame().status.phase, 'PHASE.DEPLOY').equal(PHASE.DEPLOY);
-    clientStore1.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(gameEndTurnRequest());
-    clientStore1.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(gameEndTurnRequest());
 
     // Turn1, action
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
-    clientStore1.dispatch(gameEndTurnRequest());
 
-    let gameFood = selectGame().food;
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitGrazing'));
-    expect(selectGame().food).equal(--gameFood);
+    expect(selectGame().food).equal(9);
     clientStore0.dispatch(traitActivateRequest('$B', 'TraitGrazing'));
-    expect(selectGame().food).equal(--gameFood);
+    expect(selectGame().food).equal(8);
     clientStore0.dispatch(traitActivateRequest('$C', 'TraitGrazing'));
-    expect(selectGame().food).equal(--gameFood);
+    expect(selectGame().food).equal(7);
   });
 });

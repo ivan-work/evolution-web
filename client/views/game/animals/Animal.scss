@@ -4,6 +4,12 @@
   position: relative;
   width: $ANIMAL_WIDTH;
 
+  .SelectLink {
+    text-align: center;
+    font-size: .75em;
+    line-height: 1.1em;
+  }
+
   & > .inner {
     width: 100%;
     height: $ANIMAL_HEIGHT;

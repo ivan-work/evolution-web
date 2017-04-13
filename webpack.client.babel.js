@@ -40,6 +40,7 @@ export default {
     , new HtmlWebpackPlugin({
       template: 'client/index.html'
       , inject: true
+      , favicon: 'favicon.ico'
       , minify: isDevelopment ? null : {
         removeComments: true
         , collapseWhitespace: true

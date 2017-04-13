@@ -23,7 +23,6 @@ export default class Promise extends React.Component {
   }
 
   render() {
-    console.log(this.state.resolved)
     return <span>{this.state.resolved}</span>;
   }
 }

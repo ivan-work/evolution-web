@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
-import classnames from 'classnames';
+import T from 'i18n-react';
 
 import { DragSource } from 'react-dnd';
 import { DND_ITEM_TYPE } from './../dnd/DND_ITEM_TYPE';
@@ -47,9 +47,7 @@ class AnimalSelectLink extends React.Component {
     //  , draggable: connectDragSource
     //});
 
-    return connectDragSource(<div>
-      selectLink
-    </div>);
+    return connectDragSource(<div className="SelectLink">{T.translate('Game.UI.SelectLink')}</div>);
   }
 }
 

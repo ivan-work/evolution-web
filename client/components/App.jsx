@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 //import {logoutAndRedirect} from 'actions';
 import T from 'i18n-react';
 
-import {Layout, Header, Navigation, Content, IconButton, Spacer} from 'react-mdl';
+import {Layout, Header, Navigation, Content, IconButton, Button, Spacer} from 'react-mdl';
 
 import {AdminPanelView} from './AdminPanel.jsx'
 import {ServicesContext} from '../services/ServicesContext';
@@ -24,8 +24,14 @@ export const App = ServicesContext(PortalsContext(TooltipsContext(
         <IconButton name={sound ? 'volume_up' : 'volume_off'} onClick={() => appChangeSound(!sound)}/>
         <PortalTarget name='header'/>
         <Spacer/>
-        <a target="blank" href="https://vk.com/evolveonline">{T.translate('App.Misc.VKGroup')}</a>
-        <a target="blank" href="https://github.com/ivan-work/evolution-web/blob/master/changelog.md">{T.translate('App.Misc.Changelog')}</a>
+        <span>
+        <Button target="blank" raised accent href="https://vk.com/evolveonline">
+          {T.translate('App.Misc.VKGroup')}
+        </Button>
+        <Button target="blank" href="https://github.com/ivan-work/evolution-web/blob/master/changelog.md">
+          {T.translate('App.Misc.Changelog')}
+        </Button>
+        </span>
       </Navigation>
     </Header>
     <ErrorReporter/>

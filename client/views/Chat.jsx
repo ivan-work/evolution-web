@@ -49,12 +49,21 @@ export class Chat extends React.Component {
     if (chatWindow) {
       this.chatWindow.addEventListener('scroll', (e) => {
         const target = e.currentTarget;
+        console.log(target.scrollHeight, target.scrollTop, target.offsetHeight)
         this.setState({atBottom: Math.abs(target.scrollHeight - target.scrollTop - target.offsetHeight) < 5});
       });
     }
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidMount() {
+    this.componentRendered()
+  }
+
+  componentDidUpdate() {
+    this.componentRendered()
+  }
+
+  componentRendered() {
     if (this.state.atBottom && this.chatWindow) {
       this.chatWindow.scrollTop = this.chatWindow.scrollHeight - this.chatWindow.offsetHeight;
     }

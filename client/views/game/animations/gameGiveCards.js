@@ -4,7 +4,8 @@ import Velocity from 'velocity-animate'
 import {CardUnknown} from '../../../../shared/models/game/evolution/cards/index'
 
 export const gameGiveCards = (done, game, cards, getRef) => {
-  const DELAY = 300;
+  const DELAY = 200;
+  const DURATION = 400;
 
   const Deck = getRef('Deck');
   const DeckHtml = ReactDOM.findDOMNode(Deck);
@@ -31,7 +32,7 @@ export const gameGiveCards = (done, game, cards, getRef) => {
 
     Velocity(CardHtml, {translateX: -targetBbx.left + 200, translateY: -targetBbx.top + 200, rotateY: 90}
       , {
-        duration: 800
+        duration: DURATION
         , delay: (cards.size - index + 1) * DELAY
         , easing: 'easeOutCubic'
         , complete: () => {
@@ -42,7 +43,7 @@ export const gameGiveCards = (done, game, cards, getRef) => {
 
     Velocity(CardHtml, {translateX: 0, translateY: 0, rotateY: 0}
       , {
-        duration: 800
+        duration: DURATION
         , easing: 'easeInOutCubic'
       });
   });

@@ -11,7 +11,6 @@ import {
 import {
   server$traitKillAnimal
   , server$startFeeding
-  , server$startFeedingFromGame
   , server$traitStartCooldown
   , server$traitActivate
   , traitQuestion
@@ -28,10 +27,12 @@ import {
   , traitClearHuntingCallbacks
   , server$traitSetValue
 } from '../../../../actions/actions';
+
 import {
   checkTraitActivation
   , checkIfTraitDisabledByIntellect
 } from '../../../../actions/trait.checks';
+
 import {selectGame} from '../../../../selectors';
 
 import {TraitModel} from '../TraitModel';
@@ -131,6 +132,7 @@ export const TraitCarnivorous = {
     ).get(0);
 
     if (animalAnglerfish) {
+      const traitAnglerfish = animalAnglerfish.traits.first();
       const newTraitCarnivorous = TraitModel.new('TraitCarnivorous');
       const newTraitIntellect = TraitModel.new(TraitIntellect);
 
@@ -138,14 +140,13 @@ export const TraitCarnivorous = {
 
       dispatch(server$traitAnimalAttachTrait(game, animalAnglerfish, newTraitCarnivorous));
       dispatch(server$traitAnimalAttachTrait(game, animalAnglerfish, newTraitIntellect));
+      dispatch(server$traitAnimalRemoveTrait(game, animalAnglerfish, traitAnglerfish));
       const reselectedGame = selectGame(getState, game.id);
       const {animal: revealledAnglerfish} = reselectedGame.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
       if (TraitCarnivorous.checkTarget(reselectedGame, revealledAnglerfish, sourceAnimal)) {
         dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
           const {animal} = reselectedGame.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
           if (animal) {
-            const traitAnglerfish = animal.hasTrait(TraitAnglerfish);
-            if (traitAnglerfish) dispatch(server$traitAnimalRemoveTrait(game, animal, traitAnglerfish));
             const traitIntellect = animal.hasTrait(TraitIntellect);
             if (traitIntellect) dispatch(server$traitAnimalRemoveTrait(game, animal, traitIntellect));
           }
