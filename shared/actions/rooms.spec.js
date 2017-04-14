@@ -9,7 +9,7 @@ import {
   , roomEditSettingsRequest
   , roomKickRequest
   , roomSpectateRequest
-  , gameCreateRequest
+  , gameStartRequest
   , roomBanRequest
 } from '../actions/actions';
 import {selectRoom} from '../selectors';
@@ -251,6 +251,18 @@ describe('Rooms:', function () {
       expect(Room0.id).not.equal(Room1id);
       const Room1 = serverStore.getState().getIn(['rooms', Room1id]);
       expect(serverStore.getState().get('rooms')).equal(Map({[Room1id]: Room1}))
+    });
+  });
+
+  describe.only('Start game:', function () {
+    it('Starting game', () => {
+      const [serverStore, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockStores(3);
+      clientStore0.dispatch(roomCreateRequest());
+      const Room = serverStore.getState().get('rooms').first();
+      clientStore1.dispatch(roomJoinRequest(Room.id));
+      clientStore2.dispatch(roomJoinRequest(Room.id));
+
+      clientStore0.dispatch(roomStartRequest());
     });
   });
 });
