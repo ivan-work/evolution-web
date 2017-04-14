@@ -14,7 +14,7 @@ import {server$game} from './generic';
 import {doesPlayerHasOptions} from './ai';
 import {server$gameEndTurn, server$addTurnTimeout, makeTurnTimeoutId} from './actions';
 
-import {selectRoom, selectGame, selectPlayers4Sockets} from '../selectors';
+import {selectRoom, selectGame, selectUsersInGame} from '../selectors';
 
 import {PHASE, QuestionRecord} from '../models/game/GameModel';
 import {TraitCommunication, TraitCooperation, TraitViviparous, TraitCarnivorous, TraitAmbush, TraitIntellect} from '../models/game/evolution/traitTypes';
@@ -158,7 +158,7 @@ export const server$traitKillAnimal = (gameId, sourceAnimal, targetAnimal) => (d
   Object.assign(traitKillAnimal(gameId
     , sourceAnimal.ownerId, sourceAnimal.id
     , targetAnimal.ownerId, targetAnimal.id)
-    , {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
+    , {meta: {users: selectUsersInGame(getState, gameId)}}));
 
 const traitAnimalRemoveTrait = (gameId, sourcePid, sourceAid, traitId) => ({
   type: 'traitAnimalRemoveTrait'
@@ -377,7 +377,7 @@ export const server$traitQuestion = (gameId, userId, questionType, attackAnimal,
   logger.verbose('server$traitDefenceQuestion', question.toJS());
   // Notify all users
   dispatch(Object.assign(traitQuestion(gameId, question.set('id', null))
-    , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId)}}));
+    , {meta: {clientOnly: true, users: selectUsersInGame(getState, gameId)}}));
   // Add timeout to response
   dispatch(addTimeout(timeTraitResponse
     , makeTraitQuestionTimeout(gameId, question.id)

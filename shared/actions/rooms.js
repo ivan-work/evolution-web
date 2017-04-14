@@ -7,12 +7,10 @@ import {SettingsRules} from '../models/game/GameSettings';
 import {ActionCheckError} from '../models/ActionCheckError';
 
 import {gameInit, server$gameLeave, gameDestroy} from './actions';
-import {toUser$Client} from './generic';
+import {toUser$Client, server$toRoom} from './generic';
 
 import {redirectTo} from '../utils';
 import {selectRoom, selectGame} from '../selectors';
-
-const selectClientRoomId = (getState) => getState().get('room');
 
 import {
   checkSelectRoom
@@ -27,7 +25,10 @@ import {
   , checkUserNotBanned
   , checkCanJoinRoomToPlay
   , checkCanJoinRoomToSpectate
+  , checkComboRoomCanStart
 } from './rooms.checks';
+
+const selectClientRoomId = (getState) => getState().get('room');
 
 export const findRoomByUser = (getState, userId) => getState().get('rooms').find(room => !!~room.users.indexOf(userId) || !!~room.spectators.indexOf(userId));
 
@@ -138,7 +139,23 @@ const roomSpectateSelf = (roomId, userId, room, game) => ({
   , data: {roomId, userId, room, game}
 });
 
-// Exit
+/**
+ * Ready
+ * */
+
+const roomReadyRequest = (roomId) => ({
+  type: 'roomReadyRequest'
+  , data: {roomId}
+});
+
+const roomStartRequest = (roomId) => ({
+  type: 'roomStartRequest'
+  , data: {roomId}
+});
+
+/**
+ * Exit
+ */
 
 export const roomExitRequest = () => (dispatch, getState) => {
   const roomId = selectClientRoomId(getState);
@@ -295,6 +312,23 @@ export const roomsClientToServer = {
       clientOnly: true,
       meta: {userId}
     }));
+  }
+  , roomStartRequest: ({roomId}, {userId}) => (dispatch, getState) => {
+    const room = getState().getIn(['rooms', roomId]);
+    checkComboRoomCanStart(room, userId);
+    dispatch(server$toRoom(roomId, roomStart(roomId)));
+    dispatch(server$toRoom(roomId, roomStartReady(roomId, userId, true)));
+  }
+  , roomStartCancelRequest: ({roomId}, {userId}) => (dispatch, getState) => {
+    const room = getState().getIn(['rooms', roomId]);
+    checkComboRoomCanStart(room, userId);
+    dispatch(server$toRoom(roomId, roomStart(roomId)));
+    dispatch(server$toRoom(roomId, roomStartReady(roomId, userId, false)));
+  }
+  , roomStartReadyRequest: ({roomId, ready}, {userId}) => (dispatch, getState) => {
+    const room = checkSelectRoom(getState, roomId);
+    checkUserInRoom(room, userId);
+    dispatch(server$toRoom(roomId, roomStartReady(roomId, userId, ready)));
   }
   , roomExitRequest: ({roomId}, {userId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);

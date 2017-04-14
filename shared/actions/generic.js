@@ -1,5 +1,5 @@
 import logger from '../utils/logger';
-import {selectPlayers4Sockets} from '../selectors';
+import {selectUsersInRoom, selectUsersInGame} from '../selectors';
 import {gameDeployAnimalRequest, traitActivateRequest} from './actions';
 
 export const actionError = (error) => ({
@@ -17,14 +17,19 @@ export const testHackGame = (gameId, callback) => ({
   , data: {gameId, callback}
 });
 
-export const server$game = (gameId, action) => (dispatch, getState) =>
-  dispatch(Object.assign(action, {meta: {users: selectPlayers4Sockets(getState, gameId)}}));
-
 export const to$ = (meta, action) => Object.assign(action, {meta});
 
 export const toUser$Client = (userId, action) => to$({clientOnly: true, userId}, action);
 
-export const genericClientToServer = {};
+export const server$game = (gameId, action) => (dispatch, getState) =>
+  dispatch(to$({users: selectUsersInGame(getState, gameId)}, action));
+
+export const server$toRoom = (roomId, action) => (dispatch, getState) =>
+  dispatch(to$({users: selectUsersInRoom(getState, roomId)}, action));
+
+export const genericClientToServer = {
+
+};
 
 export const genericServerToClient = {
   actionError: ({error}) => actionError(error)

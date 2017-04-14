@@ -18,7 +18,7 @@ import {server$game} from './generic';
 import {doesPlayerHasOptions, getFeedingOption} from './ai';
 import {server$tryViviparous, server$takeFoodRequest} from './actions';
 import {redirectTo} from '../utils';
-import {selectGame, selectPlayers4Sockets} from '../selectors';
+import {selectGame, selectUsersInGame} from '../selectors';
 
 import {
   checkGameDefined
@@ -57,7 +57,7 @@ export const server$gameCreateSuccess = (game) => (dispatch, getState) => {
   dispatch(gameCreateSuccess(game));
   dispatch(Object.assign(gameCreateNotify(game.roomId, game.id)
     , {meta: {users: true}}));
-  selectPlayers4Sockets(getState, game.id).forEach(userId => {
+  selectUsersInGame(getState, game.id).forEach(userId => {
     dispatch(Object.assign(gameCreateSuccess(game.toOthers(userId).toClient())
       , {meta: {userId, clientOnly: true}}));
   });
@@ -138,7 +138,7 @@ export const server$gameGiveCards = (gameId, userId, count) => (dispatch, getSta
   ));
   dispatch(Object.assign(
     gameGiveCards(gameId, userId, cards.map(card => card.toOthers().toClient()))
-    , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId).filter(uid => uid !== userId)}}
+    , {meta: {clientOnly: true, users: selectUsersInGame(getState, gameId).filter(uid => uid !== userId)}}
   ));
 };
 
@@ -164,7 +164,7 @@ export const server$gameDeployAnimalFromHand = (gameId, userId, animal, animalPo
   ));
   dispatch(Object.assign(
     gameDeployAnimalFromHand(gameId, userId, animal.toOthers().toClient(), animalPosition, cardId)
-    , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId).filter(uid => uid !== userId)}}
+    , {meta: {clientOnly: true, users: selectUsersInGame(getState, gameId).filter(uid => uid !== userId)}}
   ));
 };
 
@@ -191,7 +191,7 @@ export const server$gameDeployTrait = (gameId, cardId, traits) => (dispatch, get
   dispatch(gameDeployTrait(gameId, cardId, traits));
   dispatch(Object.assign(
     gameDeployTrait(gameId, cardId, traits.map(trait => trait.toOthers().toClient()))
-    , {meta: {clientOnly: true, users: selectPlayers4Sockets(getState, gameId)}}
+    , {meta: {clientOnly: true, users: selectUsersInGame(getState, gameId)}}
   ));
 };
 

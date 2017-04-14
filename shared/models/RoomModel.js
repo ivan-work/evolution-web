@@ -12,8 +12,9 @@ export class RoomModel extends Record({
   , settings: new SettingsRecord()
   , users: List()
   , spectators: List()
-  , gameId: null
   , banlist: List()
+  , ready: Map()
+  , gameId: null
   , chat: ChatModel.new()
   , timeCreate: 0
 }) {
