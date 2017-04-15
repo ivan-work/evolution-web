@@ -39,7 +39,11 @@ export class RoomStartVotingDialog extends React.Component {
     return (<DialogContent>
       <UsersList list={room.users}>
         {(user) => {
-          return <ListItem key={user.id} className='small'>{this.renderVoteState(user.id)} {user.login}</ListItem>
+          return <ListItem key={user.id} className='small'>
+            <div>
+              {this.renderVoteState(user.id)} {user.login}
+            </div>
+          </ListItem>
         }}
       </UsersList>
       <div style={{display: 'flex', justifyContent: 'space-around'}}>

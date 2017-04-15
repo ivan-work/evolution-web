@@ -162,9 +162,9 @@ export const roomStartVoteEnd = () => (dispatch, getState) => dispatch({
   , data: {roomId: selectClientRoomId(getState)}
 });
 
-const roomStartVoting = (roomId) => ({
+const roomStartVoting = (roomId, timestamp) => ({
   type: 'roomStartVoting'
-  , data: {roomId}
+  , data: {roomId, timestamp}
 });
 
 export const roomStartVoteActionRequest = (vote) => (dispatch, getState) => dispatch({
@@ -357,7 +357,7 @@ export const roomsClientToServer = {
   , roomStartVotingRequest: ({roomId}, {userId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
     checkComboRoomCanStart(room, userId);
-    dispatch(server$toRoom(roomId, roomStartVoting(roomId)));
+    dispatch(server$toRoom(roomId, roomStartVoting(roomId, Date.now())));
     dispatch(server$roomStartVoteAction(roomId, userId, true));
   }
   , roomStartVoteActionRequest: ({roomId, vote}, {userId}) => (dispatch, getState) => {
@@ -451,8 +451,8 @@ export const roomsServerToClient = {
   , roomKick: ({roomId, userId}) => roomKick(roomId, userId)
   , roomBan: ({roomId, userId}) => roomBan(roomId, userId)
   , roomUnban: ({roomId, userId}) => roomUnban(roomId, userId)
-  , roomStartVoting: ({roomId}) => (dispatch) => {
-    dispatch(roomStartVoting(roomId));
+  , roomStartVoting: ({roomId, timestamp}) => (dispatch) => {
+    dispatch(roomStartVoting(roomId, timestamp));
     dispatch(appPlaySound('START_D2'));
   }
   , roomStartVoteAction: ({roomId, userId, vote}) => roomStartVoteAction(roomId, userId, vote)

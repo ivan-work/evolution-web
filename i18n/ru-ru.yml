@@ -22,7 +22,7 @@ App:
     $Create: Создать
     $Watch: смотреть
   Room:
-    StartVoting: ГотовЫ?
+    StartVoting: Готовы?
     Room: Комната
     Settings:
       name: Название

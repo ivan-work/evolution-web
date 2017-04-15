@@ -28,7 +28,7 @@ export default {
   , plugins: [
     isDevelopment ? new webpack.BannerPlugin('require("source-map-support").install();', {raw: true, entryOnly: false}) : null
     //, isDevelopment ? new webpack.HotModuleReplacementPlugin({quiet: false}) : null
-    //, new webpack.IgnorePlugin(/\.(css|less)$/)
+    , new webpack.IgnorePlugin(/\.(css|less|mp3)$/)
   ].filter(p => p !== null)
   , externals: nodeModules
   , module: {
