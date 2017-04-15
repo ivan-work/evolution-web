@@ -2,8 +2,6 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {Map, List, fromJS} from 'immutable';
 
-import {gameCreateRequest} from '~/shared/actions/actions';
-
 export class GameSection extends Component {
   constructor(props) {
     super(props);

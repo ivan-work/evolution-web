@@ -1,50 +1,12 @@
 import {
   roomCreateRequest,
   roomJoinRequest,
-  gameCreateRequest,
-  gameReadyRequest,
+  roomStartVotingRequest,
   gameDeployAnimalRequest,
   gameDeployTraitRequest,
 } from '../actions';
 
 describe('Hacking Game:', function () {
-  it('gameReadyRequest', () => {
-    const [serverStore, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockStores(3);
-    clientStore0.dispatch(roomCreateRequest());
-    const roomId = serverStore.getState().get('rooms').first().id;
-    clientStore0.dispatch(roomJoinRequest(roomId));
-    clientStore1.dispatch(roomJoinRequest(roomId));
-    clientStore0.dispatch(gameCreateRequest(roomId));
-    const ServerGame = () => serverStore.getState().get('games').first();
-    const ClientGame0 = () => clientStore0.getState().get('game');
-    const ClientGame1 = () => clientStore1.getState().get('game');
-
-    // gameReadyRequest, wrong gameId
-    expectUnchanged('CHANGEIT', () => clientStore0.dispatch({
-      type: 'gameReadyRequest'
-      , data: {gameId: null}
-      , meta: {server: true}
-    }), serverStore, clientStore0);
-
-    // gameReadyRequest, wrong user
-    expectUnchanged('CHANGEIT', () => clientStore2.dispatch({
-        type: 'gameReadyRequest'
-        , data: {gameId: ServerGame().id, ready: true}
-        , meta: {server: true}
-      })
-      , serverStore, clientStore2);
-
-    // gameReadyRequest, double user
-    clientStore0.dispatch(gameReadyRequest());
-    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(gameReadyRequest())
-      , serverStore, clientStore0);
-
-    // gameReadyRequest, double
-    clientStore1.dispatch(gameReadyRequest());
-    expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameReadyRequest())
-      , serverStore, clientStore1);
-  });
-
   it('gameDeployAnimalRequest', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     ParseGame(`

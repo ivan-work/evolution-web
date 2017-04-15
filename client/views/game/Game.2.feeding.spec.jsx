@@ -77,7 +77,6 @@
 //      , phase: PHASE.FEEDING
 //    })
 //  })
-//  , $ready: () => 0
 //  , $deployAnimal: () => 0
 //  , $deployTrait: () => 0
 //  , $traitTakeFood: () => 0

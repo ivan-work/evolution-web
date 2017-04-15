@@ -17,6 +17,7 @@ import {
 import {server$game} from './generic';
 import {doesPlayerHasOptions, getFeedingOption} from './ai';
 import {server$tryViviparous, server$takeFoodRequest} from './actions';
+import {appPlaySound} from '../../client/actions/app';
 import {redirectTo} from '../utils';
 import {selectGame, selectUsersInGame} from '../selectors';
 
@@ -29,8 +30,6 @@ import {
   , checkValidAnimalPosition
 } from './checks';
 
-import {checkComboRoomCanStart} from './rooms.checks';
-
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 
 /**
@@ -40,11 +39,6 @@ import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 export const gameInit = (game, userId) => ({type: 'gameInit', data: {game, userId}});
 
 // Game Create
-export const gameCreateRequest = (roomId, seed) => ({
-  type: 'gameCreateRequest'
-  , data: {roomId, seed}
-  , meta: {server: true}
-});
 const gameCreateSuccess = (game) => ({
   type: 'gameCreateSuccess'
   , data: {game}
@@ -53,7 +47,13 @@ const gameCreateNotify = (roomId, gameId) => ({
   type: 'gameCreateNotify'
   , data: {roomId, gameId}
 });
-export const server$gameCreateSuccess = (game) => (dispatch, getState) => {
+export const server$gameCreateSuccess = (room) => (dispatch, getState) => {
+  const seed = room.settings.seed;
+  const game = (seed === null
+    ? GameModel.new(room)
+    : GameModel.parse(room, seed));
+  const gameId = game.id;
+
   dispatch(gameCreateSuccess(game));
   dispatch(Object.assign(gameCreateNotify(game.roomId, game.id)
     , {meta: {users: true}}));
@@ -61,6 +61,12 @@ export const server$gameCreateSuccess = (game) => (dispatch, getState) => {
     dispatch(Object.assign(gameCreateSuccess(game.toOthers(userId).toClient())
       , {meta: {userId, clientOnly: true}}));
   });
+
+  if (!game.status.started) {
+    dispatch(server$game(gameId, gameStart(gameId)));
+    dispatch(server$gameDistributeCards(gameId));
+    dispatch(server$gamePlayerStart(gameId));
+  }
 };
 
 // Game Leave
@@ -100,26 +106,9 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
 };
 
 // Game Start
-export const server$gameStart = (gameId) => (dispatch, getState) => {
-  dispatch(server$game(gameId, gameStart(gameId)));
-  dispatch(server$gameDistributeCards(gameId));
-  dispatch(server$gamePlayerStart(gameId));
-};
-
 export const gameStart = (gameId) => ({
   type: 'gameStart'
   , data: {gameId}
-});
-
-// Game Ready Request
-export const gameReadyRequest = (ready = true) => (dispatch, getState) => dispatch({
-  type: 'gameReadyRequest'
-  , data: {gameId: getState().get('game').id, ready}
-  , meta: {server: true}
-});
-export const gamePlayerReadyChange = (gameId, userId, ready) => ({
-  type: 'gamePlayerReadyChange'
-  , data: {gameId, userId, ready}
 });
 
 // Game Give Cards
@@ -459,31 +448,7 @@ const server$gameEnd = (gameId) => (dispatch, getState) => {
 };
 
 export const gameClientToServer = {
-  gameCreateRequest: ({roomId, seed = null}, {userId}) => (dispatch, getState) => {
-    //if (process.env.NODE_ENV === 'production') seed = null;
-    const room = getState().getIn(['rooms', roomId]);
-    checkComboRoomCanStart(room, userId);
-
-    const game = seed === null
-      ? GameModel.new(room)
-      : GameModel.parse(room, seed);
-
-    dispatch(server$gameCreateSuccess(game));
-  }
-  , gameReadyRequest: ({gameId, ready}, {userId}) => (dispatch, getState) => {
-    const game = selectGame(getState, gameId);
-    checkGameDefined(game);
-    checkGameHasUser(game, userId);
-    dispatch(server$game(gameId, gamePlayerReadyChange(gameId, userId, ready)));
-    /**
-     * Actual starting
-     * */
-    const newGame = selectGame(getState, gameId);
-    if (!newGame.status.started && newGame.players.every(player => player.ready)) {
-      dispatch(server$gameStart(gameId));
-    }
-  }
-  , gameEndTurnRequest: ({gameId}, {userId}) => (dispatch, getState) => {
+  gameEndTurnRequest: ({gameId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
@@ -595,20 +560,22 @@ export const gameServerToClient = {
   , gameStartDeploy: ({gameId}) => gameStartDeploy(gameId)
   , gameStartExtinct: ({gameId}) => gameStartExtinct(gameId)
   , gameStartEat: ({gameId, food}) => gameStartEat(gameId, food)
-  , gamePlayerReadyChange: ({gameId, userId, ready}) => gamePlayerReadyChange(gameId, userId, ready)
   , gameGiveCards: ({gameId, userId, cards}) =>
     gameGiveCards(gameId, userId, List(cards).map(card => CardModel.fromServer(card)))
   , gameDeployAnimalFromHand: ({gameId, userId, animal, animalPosition, cardId}) =>
     gameDeployAnimalFromHand(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardId)
-  , gameDeployAnimalFromDeck: ({gameId, animal, sourceAid}) => gameDeployAnimalFromDeck(gameId, AnimalModel.fromServer(animal), sourceAid)
+  , gameDeployAnimalFromDeck: ({gameId, animal, sourceAid}) =>
+    gameDeployAnimalFromDeck(gameId, AnimalModel.fromServer(animal), sourceAid)
   , gameDeployTrait: ({gameId, cardId, traits}) =>
     gameDeployTrait(gameId, cardId, traits.map(trait => TraitModel.fromServer(trait)))
   , gameAddTurnTimeout: ({gameId, turnStartTime, turnDuration}) =>
     gameAddTurnTimeout(gameId, turnStartTime, turnDuration)
   , gameNextPlayer: ({gameId, nextPlayerId, nextPlayerIndex, roundChanged}) =>
     gameNextPlayer(gameId, nextPlayerId, nextPlayerIndex, roundChanged)
-  , gameNextPlayerNotify: ({gameId, userId}, currentUserId) => (dispatch) =>
-    (userId === currentUserId && dispatch(gameNextPlayerNotify(gameId, userId)))
+  , gameNextPlayerNotify: ({gameId, userId}, currentUserId) => (dispatch) => {
+    if (userId === currentUserId) dispatch(gameNextPlayerNotify(gameId, userId));
+    dispatch(appPlaySound('NOTIFICATION'))
+  }
   , gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
   , gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
   , gamePlayerLeft: ({gameId, userId}) => gamePlayerLeft(gameId, userId)

@@ -1,5 +1,6 @@
 import {createReducer} from '~/shared/utils';
 import {Map} from 'immutable';
+import {VotingModel} from '../../shared/models/RoomModel';
 import {SettingsRecord} from '../../shared/models/game/GameSettings';
 
 export const roomCreate = (state, {room}) => state.set(room.id, room);
@@ -32,6 +33,14 @@ export const gameCreateNotify = (state, {roomId, gameId}) => state.update(roomId
 
 export const chatMessageRoom = (rooms, {message}) => rooms.updateIn([message.to, 'chat'], chat => chat.receiveMessage(message));
 
+/**
+ * Start/Ready
+ */
+
+export const roomStartVoting = (rooms, {roomId}) => rooms.setIn([roomId, 'votingForStart'], VotingModel.new());
+
+export const roomStartVoteAction = (rooms, {roomId, userId, vote}) => rooms.setIn([roomId, 'votingForStart', 'votes', userId], vote);
+
 export const reducer = createReducer(Map(), {
   roomCreate
   , roomJoin
@@ -43,4 +52,6 @@ export const reducer = createReducer(Map(), {
   , roomEditSettings
   , gameCreateNotify
   , chatMessageRoom
+  , roomStartVoting
+  , roomStartVoteAction
 });

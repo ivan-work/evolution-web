@@ -1,12 +1,18 @@
 import logger from '~/shared/utils/logger';
 import {Map} from 'immutable';
 
-import {RoomModel} from '../models/RoomModel';
-import {GameModelClient} from '../models/game/GameModel';
+import {RoomModel, VotingModel} from '../models/RoomModel';
+import {GameModel, GameModelClient} from '../models/game/GameModel';
 import {SettingsRules} from '../models/game/GameSettings';
 import {ActionCheckError} from '../models/ActionCheckError';
 
-import {gameInit, server$gameLeave, gameDestroy} from './actions';
+import {
+  gameInit
+  , server$gameLeave
+  , gameDestroy
+  , server$gameCreateSuccess
+} from './actions';
+import {appPlaySound} from '../../client/actions/app';
 import {toUser$Client, server$toRoom} from './generic';
 
 import {redirectTo} from '../utils';
@@ -26,6 +32,8 @@ import {
   , checkCanJoinRoomToPlay
   , checkCanJoinRoomToSpectate
   , checkComboRoomCanStart
+  , checkStartVotingCanStart
+  , checkStartVotingIsInProgress
 } from './rooms.checks';
 
 const selectClientRoomId = (getState) => getState().get('room');
@@ -140,18 +148,45 @@ const roomSpectateSelf = (roomId, userId, room, game) => ({
 });
 
 /**
- * Ready
+ * Voting
  * */
 
-const roomReadyRequest = (roomId) => ({
-  type: 'roomReadyRequest'
+export const roomStartVotingRequest = () => (dispatch, getState) => dispatch({
+  type: 'roomStartVotingRequest'
+  , data: {roomId: selectClientRoomId(getState)}
+  , meta: {server: true}
+});
+
+export const roomStartVoteEnd = () => (dispatch, getState) => dispatch({
+  type: 'roomStartVoteEnd'
+  , data: {roomId: selectClientRoomId(getState)}
+});
+
+const roomStartVoting = (roomId) => ({
+  type: 'roomStartVoting'
   , data: {roomId}
 });
 
-const roomStartRequest = (roomId) => ({
-  type: 'roomStartRequest'
-  , data: {roomId}
+export const roomStartVoteActionRequest = (vote) => (dispatch, getState) => dispatch({
+  type: 'roomStartVoteActionRequest'
+  , data: {roomId: selectClientRoomId(getState), vote}
+  , meta: {server: true}
 });
+
+const roomStartVoteAction = (roomId, userId, vote) => ({
+  type: 'roomStartVoteAction'
+  , data: {roomId, userId, vote}
+});
+
+const server$roomStartVoteAction = (roomId, userId, vote) => (dispatch, getState) => {
+  dispatch(server$toRoom(roomId, roomStartVoteAction(roomId, userId, vote)));
+  const room = selectRoom(getState, roomId);
+  const voting = room.votingForStart;
+  if (!voting) return;
+  if (voting.votes.size === room.users.size && voting.votes.every((v, k) => v)) {
+    dispatch(server$gameCreateSuccess(room))
+  }
+};
 
 /**
  * Exit
@@ -206,6 +241,12 @@ export const server$roomDestroy = (roomId) => (dispatch, getState) => {
 
 // Settings
 
+export const roomSetSeedRequest = (seed) => (dispatch, getState) => dispatch({
+  type: 'roomSetSeedRequest'
+  , data: {roomId: selectClientRoomId(getState), seed}
+  , meta: {server: true}
+});
+
 export const roomEditSettingsRequest = (settings) => (dispatch, getState) => dispatch({
   type: 'roomEditSettingsRequest'
   , data: {roomId: selectClientRoomId(getState), settings}
@@ -258,9 +299,9 @@ const roomBan = (roomId, userId) => ({
 });
 
 const server$roomBan = (roomId, userId) => (dispatch, getState) => {
+  dispatch(server$roomKick(roomId, userId));
   dispatch(Object.assign(roomBan(roomId, userId)
     , {meta: {users: true}}));
-  dispatch(server$roomKick(roomId, userId));
 };
 
 // Unban
@@ -313,22 +354,19 @@ export const roomsClientToServer = {
       meta: {userId}
     }));
   }
-  , roomStartRequest: ({roomId}, {userId}) => (dispatch, getState) => {
-    const room = getState().getIn(['rooms', roomId]);
+  , roomStartVotingRequest: ({roomId}, {userId}) => (dispatch, getState) => {
+    const room = checkSelectRoom(getState, roomId);
     checkComboRoomCanStart(room, userId);
-    dispatch(server$toRoom(roomId, roomStart(roomId)));
-    dispatch(server$toRoom(roomId, roomStartReady(roomId, userId, true)));
+    dispatch(server$toRoom(roomId, roomStartVoting(roomId)));
+    dispatch(server$roomStartVoteAction(roomId, userId, true));
   }
-  , roomStartCancelRequest: ({roomId}, {userId}) => (dispatch, getState) => {
-    const room = getState().getIn(['rooms', roomId]);
-    checkComboRoomCanStart(room, userId);
-    dispatch(server$toRoom(roomId, roomStart(roomId)));
-    dispatch(server$toRoom(roomId, roomStartReady(roomId, userId, false)));
-  }
-  , roomStartReadyRequest: ({roomId, ready}, {userId}) => (dispatch, getState) => {
+  , roomStartVoteActionRequest: ({roomId, vote}, {userId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
     checkUserInRoom(room, userId);
-    dispatch(server$toRoom(roomId, roomStartReady(roomId, userId, ready)));
+    checkUserNotSpectatingRoom(room, userId);
+    checkStartVotingIsInProgress(room);
+    checkRoomIsNotInGame(room);
+    dispatch(server$roomStartVoteAction(roomId, userId, vote));
   }
   , roomExitRequest: ({roomId}, {userId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
@@ -345,11 +383,18 @@ export const roomsClientToServer = {
     settings.timeTraitResponse *= 60000;
     dispatch(server$roomEditSettings(roomId, settings));
   }
+  , roomSetSeedRequest: ({roomId, seed}, {userId}) => (dispatch, getState) => {
+    const room = checkSelectRoom(getState, roomId);
+    checkRoomIsNotInGame(room);
+    checkUserIsHost(room, userId);
+    dispatch(server$roomEditSettings(roomId, {seed}));
+  }
   , roomKickRequest: ({roomId, userId}, {userId: hostId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
     checkRoomIsNotInGame(room);
     checkUserIsHost(room, hostId);
     checkUserInRoom(room, userId);
+    checkStartVotingCanStart(room);
     dispatch(server$roomKick(roomId, userId));
   }
   , roomBanRequest: ({roomId, userId}, {userId: hostId}) => (dispatch, getState) => {
@@ -357,6 +402,7 @@ export const roomsClientToServer = {
     checkRoomIsNotInGame(room);
     checkUserIsHost(room, hostId);
     checkUserNotBanned(room, userId);
+    checkStartVotingCanStart(room);
     dispatch(server$roomBan(roomId, userId));
   }
   , roomUnbanRequest: ({roomId, userId}, {userId: hostId}) => (dispatch, getState) => {
@@ -371,7 +417,13 @@ export const roomsClientToServer = {
 export const roomsServerToClient = {
   roomsInit: ({roomId, rooms}) => roomsInit(roomId, Map(rooms).map(r => RoomModel.fromJS(r)))
   , roomCreate: ({room}) => roomCreate(RoomModel.fromJS(room))
-  , roomJoin: ({roomId, userId}) => roomJoin(roomId, userId)
+  , roomJoin: ({roomId, userId}, currentUserId) => (dispatch, getState) => {
+    dispatch(roomJoin(roomId, userId));
+    const room = selectRoom(getState, roomId);
+    if (room.users.size == +room.settings.maxPlayers && room.users.first() === currentUserId) {
+      dispatch(appPlaySound('NOTIFICATION'));
+    }
+  }
   , roomJoinSelf: ({roomId, userId, room}, currentUserId) => (dispatch, getState) => {
     dispatch(roomJoinSelf(roomId, userId, RoomModel.fromJS(room)));
     dispatch(redirectTo(`/room/${roomId}`));
@@ -399,4 +451,9 @@ export const roomsServerToClient = {
   , roomKick: ({roomId, userId}) => roomKick(roomId, userId)
   , roomBan: ({roomId, userId}) => roomBan(roomId, userId)
   , roomUnban: ({roomId, userId}) => roomUnban(roomId, userId)
+  , roomStartVoting: ({roomId}) => (dispatch) => {
+    dispatch(roomStartVoting(roomId));
+    dispatch(appPlaySound('START_D2'));
+  }
+  , roomStartVoteAction: ({roomId, userId, vote}) => roomStartVoteAction(roomId, userId, vote)
 };

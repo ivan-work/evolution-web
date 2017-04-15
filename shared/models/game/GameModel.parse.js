@@ -93,7 +93,6 @@ export const parseFromRoom = (room, string = '') => {
       id
       , hand: parseCardList(seed.players && seed.players[index] && seed.players[index].hand || '')
       , continent: parseAnimalList(id, seed.players && seed.players[index] && seed.players[index].continent || '')
-      , ready: seed.phase !== 0
       , index
       , ended: false
     }).toClient();

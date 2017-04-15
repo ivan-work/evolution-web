@@ -1,10 +1,13 @@
 import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
+import RIP from 'react-immutable-proptypes';
 import {connect} from 'react-redux';
 import {List, ListItem} from 'react-mdl';
 
 export class UsersList extends React.Component {
-  static propTypes = {};
+  static propTypes = {
+    users: RIP.listOf(React.PropTypes.object)
+  };
 
   constructor(props) {
     super(props);
@@ -29,5 +32,9 @@ export const UsersListView = connect(
     return {users};
   }
 )(UsersList);
+
+UsersListView.propTypes = {
+  list: RIP.listOf(React.PropTypes.string)
+};
 
 export default UsersListView;

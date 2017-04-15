@@ -8,7 +8,7 @@ import {RoomModel} from '../../../shared/models/RoomModel';
 import {redirectTo} from '../../../shared/utils';
 import {
   roomExitRequest,
-  gameCreateRequest,
+  roomStartVotingRequest,
   roomJoinRequest,
   roomSpectateRequest
 } from '../../../shared/actions/actions';
@@ -73,7 +73,7 @@ export const RoomControlGroupView = connect(
   , (dispatch) => ({
     $redirectTo: (location) => dispatch(redirectTo(location))
     , $exit: () => dispatch(roomExitRequest())
-    , $start: (roomId) => dispatch(gameCreateRequest(roomId))
+    , $start: (roomId) => dispatch(roomStartVotingRequest())
     , $roomJoin: (roomId) => dispatch(roomJoinRequest(roomId))
     , $roomSpectate: (roomId) => dispatch(roomSpectateRequest(roomId))
   })

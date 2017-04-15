@@ -11,6 +11,8 @@ App:
   Misc:
     VKGroup: Группа ВК
     Changelog: Список изменений
+    Agree: Да # Yes: Да => true: Да WTF???
+    Disagree: Нет # Yes: Да => true: Да WTF???
   Chat:
     Label: Чат
     EnterMessage: ...
@@ -20,6 +22,7 @@ App:
     $Create: Создать
     $Watch: смотреть
   Room:
+    StartVoting: ГотовЫ?
     Room: Комната
     Settings:
       name: Название

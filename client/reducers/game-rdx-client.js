@@ -5,7 +5,6 @@ import {AnimalModel} from '~/shared/models/game/evolution/AnimalModel';
 
 import {
   gameStart
-  , gamePlayerReadyChange
   , gameGiveCards
   , gameNextPlayer
   , gameAddTurnTimeout
@@ -41,7 +40,6 @@ export const reducer = createReducer(null, {
   , gameCreateSuccess: (state, {game}) => game
   , roomExitSelf: (state) => null
   , gameStart
-  , gamePlayerReadyChange
   , gameGiveCards
   , gameNextPlayer
   , gameAddTurnTimeout

@@ -49,9 +49,6 @@ export const gameStart = game => game
   .setIn(['status', 'round'], 0);
 //.setIn(['status', 'currentPlayer'], 0); // TODO RANDOMIZE
 
-export const gamePlayerReadyChange = (game, {userId, ready}) => game
-  .setIn(['players', userId, 'ready'], ready);
-
 export const gameGiveCards = (game, {userId, cards}) => {
   ensureParameter(userId, 'string');
   ensureParameter(cards, List);
@@ -318,7 +315,6 @@ export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
   , gameDestroy: (state, data) => state.remove(data.gameId)
   , gameStart: (state, data) => state.update(data.gameId, game => gameStart(game, data))
-  , gamePlayerReadyChange: (state, data) => state.update(data.gameId, game => gamePlayerReadyChange(game, data))
   , gameGiveCards: (state, data) => state.update(data.gameId, game => gameGiveCards(game, data))
   , gameNextPlayer: (state, data) => state.update(data.gameId, game => gameNextPlayer(game, data))
   , gameAddTurnTimeout: (state, data) => state.update(data.gameId, game => gameAddTurnTimeout(game, data))

@@ -11,7 +11,7 @@ import {
   ListItemContent
 } from 'react-mdl';
 
-import {RoomModel} from '../../../shared/models/RoomModel';
+import {RoomModel, VotingModel} from '../../../shared/models/RoomModel';
 
 import {Portal} from './../utils/Portal.jsx';
 
@@ -20,6 +20,7 @@ import UsersList from './../UsersList.jsx';
 
 import RoomControlGroup from './RoomControlGroup.jsx';
 import RoomSettings from './RoomSettings.jsx';
+import RoomStartVotingDialog from './RoomStartVotingDialog.jsx';
 
 import {redirectTo} from '~/shared/utils'
 import {
@@ -28,6 +29,8 @@ import {
   roomBanRequest,
   roomUnbanRequest
 } from '../../../shared/actions/actions';
+import {passesChecks} from '../../../shared/actions/checks';
+import {checkStartVotingIsInProgress} from '../../../shared/actions/rooms.checks';
 
 export class Room extends Component {
   static propTypes = {
@@ -38,41 +41,21 @@ export class Room extends Component {
 
   constructor(props) {
     super(props);
-    const {room, userId, $Kick, $Ban, $Unban} = this.props;
-    const isHost = room.users.get(0) === userId;
-    this.renderUser = (user => <ListItem key={user.id} className='small'>
-      <ListItemContent>{user.login}</ListItemContent>
-      <ListItemAction>
-        {user.id !== userId && isHost && <Tooltip label={T.translate('App.Room.$Kick')}>
-          <IconButton name='clear' onClick={() => $Kick(user.id)}/>
-        </Tooltip>}
-        {user.id !== userId && isHost && <Tooltip label={T.translate('App.Room.$Ban')}>
-          <IconButton name='block' onClick={() => $Ban(user.id)}/>
-        </Tooltip>}
-      </ListItemAction>
-    </ListItem>);
-    this.renderBannedUser = (user => <ListItem key={user.id} className='small'>
-      <ListItemContent>{user.login}</ListItemContent>
-      <ListItemAction>
-        {user.id !== userId && isHost && <Tooltip label={T.translate('App.Room.$Unban')}>
-          <IconButton name='remove_circle_outline' onClick={() => $Unban(user.id)}/>
-        </Tooltip>}
-      </ListItemAction>
-    </ListItem>);
-  }
-
-  componentWillReceiveProps(props) {
-
+    this.renderUser = this.renderUser.bind(this);
+    this.renderBannedUser = this.renderBannedUser.bind(this);
   }
 
   render() {
     const {room, roomId, userId} = this.props;
+
+    const showStartVoting = passesChecks(() => checkStartVotingIsInProgress(room));
 
     return (<div className='Room'>
       <Portal target='header'>
         <RoomControlGroup inRoom={true}/>
       </Portal>
       <h1>{T.translate('App.Room.Room')} «{room.name}»</h1>
+      <RoomStartVotingDialog show={showStartVoting}/>
       <div className='flex-row'>
         <Card className='RoomSettings'>
           <CardText>
@@ -99,6 +82,35 @@ export class Room extends Component {
         </Card>
       </div>
     </div>);
+  }
+
+  renderUser(user) {
+    const {room, userId, $Kick, $Ban, $Unban} = this.props;
+    const isHost = room.users.get(0) === userId;
+    return (<ListItem key={user.id} className='small'>
+      <ListItemContent>{user.login}</ListItemContent>
+      <ListItemAction>
+        {user.id !== userId && isHost && <Tooltip label={T.translate('App.Room.$Kick')}>
+          <IconButton name='clear' onClick={() => $Kick(user.id)}/>
+        </Tooltip>}
+        {user.id !== userId && isHost && <Tooltip label={T.translate('App.Room.$Ban')}>
+          <IconButton name='block' onClick={() => $Ban(user.id)}/>
+        </Tooltip>}
+      </ListItemAction>
+    </ListItem>);
+  }
+
+  renderBannedUser(user) {
+    const {room, userId, $Kick, $Ban, $Unban} = this.props;
+    const isHost = room.users.get(0) === userId;
+    return (<ListItem key={user.id} className='small'>
+      <ListItemContent>{user.login}</ListItemContent>
+      <ListItemAction>
+        {user.id !== userId && isHost && <Tooltip label={T.translate('App.Room.$Unban')}>
+          <IconButton name='remove_circle_outline' onClick={() => $Unban(user.id)}/>
+        </Tooltip>}
+      </ListItemAction>
+    </ListItem>);
   }
 }
 

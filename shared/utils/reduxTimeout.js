@@ -40,6 +40,11 @@ export const cancelTimeout = (name) => ({
   data: {name}
 });
 
+export const checkTimeout = (name) => ({
+  type: '@@reduxTimeoutMiddleware/checkTimeout',
+  data: {name}
+});
+
 export const reduxTimeoutMiddleware = (timeouts = {}) => ({dispatch, getState}) => next => action => {
   if (action.type === '@@reduxTimeoutMiddleware/addTimeout') {
     const {duration, name, callback} = action.data;
@@ -61,6 +66,9 @@ export const reduxTimeoutMiddleware = (timeouts = {}) => ({dispatch, getState}) 
       delete timeouts[nameToClear];
       return remaining;
     }
+  } else if (action.type === '@@reduxTimeoutMiddleware/checkTimeout') {
+    const nameToClear = action.data.name;
+    return (!!timeouts[nameToClear]);
   } else {
     return next(action);
   }

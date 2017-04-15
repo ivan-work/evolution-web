@@ -8,7 +8,6 @@ export class PlayerModel extends Record({
   , hand: List()
   , continent: List()
   , index: -1
-  , ready: false // on preparing game
   , playing: true
   , ended: false
   , acted: false

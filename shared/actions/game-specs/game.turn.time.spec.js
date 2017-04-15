@@ -2,13 +2,6 @@ import {Map, List} from 'immutable';
 
 import {
   gameEndTurnRequest
-  , gameDeployAnimalRequest
-  , traitTakeFoodRequest
-  , roomCreateRequest
-  , roomEditSettingsRequest
-  , roomJoinRequest
-  , gameCreateRequest
-  , gameReadyRequest
   , SOCKET_DISCONNECT_NOW
 } from '../actions';
 

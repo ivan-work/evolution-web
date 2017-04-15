@@ -9,8 +9,9 @@ import {
   , roomEditSettingsRequest
   , roomKickRequest
   , roomSpectateRequest
-  , gameStartRequest
   , roomBanRequest
+  , roomStartVotingRequest
+  , roomStartVoteActionRequest
 } from '../actions/actions';
 import {selectRoom} from '../selectors';
 
@@ -88,7 +89,7 @@ describe('Rooms:', function () {
       expect(clientStore1.getState().get('rooms')).equal(Map());
     });
 
-    it('User0, User1 in Room, User0 disconnects, User1 disconnects', async () => {
+    it('User0, User1 in Room, User0 disconnects, User1 disconnects', async() => {
       const Room = RoomModel.new();
       const [serverStore, {clientStore0, User0}, {clientStore1, User1}]= mockStores(2, Map({rooms: Map({[Room.id]: Room})}));
       clientStore0.dispatch(roomJoinRequest(Room.id));
@@ -108,7 +109,7 @@ describe('Rooms:', function () {
       expect(serverStore.getState().get('rooms')).equal(Map());
     });
 
-    it('User0, User1 in Room, User0 disconnects, User0 rejoins', async () => {
+    it('User0, User1 in Room, User0 disconnects, User0 rejoins', async() => {
       const Room = RoomModel.new();
       const [serverStore, {clientStore0, User0}, {clientStore1, User1}]= mockStores(2, Map({rooms: Map({[Room.id]: Room})}));
       clientStore0.dispatch(roomJoinRequest(Room.id));
@@ -152,9 +153,6 @@ describe('Rooms:', function () {
         , timeTurn: 3
         , timeTraitResponse: 1
       }));
-
-      // Can edit settings not full:
-      clientStore0.dispatch(roomEditSettingsRequest({}));
 
       expect(serverStore.getState().getIn(['rooms', RoomId, 'name']), 'Room Test');
       expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'maxPlayers']), 3);
@@ -216,7 +214,9 @@ describe('Rooms:', function () {
       const Room = RoomModel.new();
       const [serverStore, {clientStore0, User0}]= mockStores(1, Map({rooms: Map({[Room.id]: Room})}));
       clientStore0.dispatch(roomJoinRequest(Room.id));
-      clientStore0.dispatch(roomJoinRequest(Room.id));
+      expectUnchanged(`Can't join same room`, () => {
+        clientStore0.dispatch(roomJoinRequest(Room.id));
+      }, serverStore, clientStore0);
       const newRoom = serverStore.getState().getIn(['rooms', Room.id]);
       expect(newRoom.users).equal(List.of(User0.id));
     });
@@ -254,15 +254,51 @@ describe('Rooms:', function () {
     });
   });
 
-  describe.only('Start game:', function () {
-    it('Starting game', () => {
-      const [serverStore, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockStores(3);
-      clientStore0.dispatch(roomCreateRequest());
-      const Room = serverStore.getState().get('rooms').first();
-      clientStore1.dispatch(roomJoinRequest(Room.id));
-      clientStore2.dispatch(roomJoinRequest(Room.id));
+  describe('Voting', () => {
+    it('Voting', async() => {
+      const [serverStore
+        , {clientStore0, User0}
+        , {clientStore1, User1}
+        , {clientStore2, User2}
+        , {clientStore3, User3}
+      ] = mockStores(4);
 
-      clientStore0.dispatch(roomStartRequest());
+      clientStore0.dispatch(roomCreateRequest());
+      const roomId = serverStore.getState().get('rooms').first().id;
+      clientStore1.dispatch(roomJoinRequest(roomId));
+      clientStore2.dispatch(roomJoinRequest(roomId));
+
+      const selectVote = (store) => selectRoom(store.getState, roomId).votingForStart;
+
+      expectUnchanged(`Voting isn't going on`, () => {
+        clientStore0.dispatch(roomStartVoteActionRequest(true));
+        clientStore1.dispatch(roomStartVoteActionRequest(true));
+        clientStore2.dispatch(roomStartVoteActionRequest(true));
+        clientStore3.dispatch(roomStartVoteActionRequest(true));
+      }, serverStore, clientStore0, clientStore1, clientStore2, clientStore3);
+
+      expectUnchanged(`Can't start the vote`, () => {
+        clientStore1.dispatch(roomStartVotingRequest());
+        clientStore2.dispatch(roomStartVotingRequest());
+        clientStore3.dispatch(roomStartVotingRequest());
+      }, serverStore, clientStore0, clientStore1, clientStore2, clientStore3);
+
+      clientStore0.dispatch(roomStartVotingRequest());
+      expect(selectVote(serverStore), 'Voting started').ok;
+      const timestamp = selectVote(serverStore).timestamp;
+      expect(selectVote(serverStore).getIn(['votes', User0.id])).true;
+
+      expectUnchanged(`User0 can't start again and User 3 can't do a shit`, () => {
+        clientStore0.dispatch(roomStartVotingRequest());
+        clientStore3.dispatch(roomStartVoteActionRequest(true));
+        clientStore3.dispatch(roomJoinRequest(roomId));
+      }, serverStore, clientStore0, clientStore1, clientStore2, clientStore3);
+
+      clientStore1.dispatch(roomStartVoteActionRequest(true));
+      expect(selectRoom(serverStore.getState, roomId).gameId).null;
+      expect(selectVote(serverStore).getIn(['votes', User1.id])).true;
+      clientStore2.dispatch(roomStartVoteActionRequest(true));
+      expect(selectVote(serverStore).getIn(['votes', User2.id])).true;
     });
   });
 });

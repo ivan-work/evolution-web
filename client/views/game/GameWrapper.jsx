@@ -7,7 +7,6 @@ import {Map} from 'immutable';
 import {
   roomExitRequest
   , gameEndTurnRequest
-  , gameReadyRequest
   , gameDeployAnimalRequest
   , gameDeployTraitRequest
   , traitTakeFoodRequest
@@ -47,15 +46,6 @@ export class GameWrapper extends React.Component {
     //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this)
   }
 
-  componentDidMount() {
-    if (!this.ready && this.props.game) {
-      this.ready = true;
-      if (this.props.game.userId) {
-        this.props.gameActions.$ready();
-      }
-    }
-  }
-
   render() {
     const {game, user} = this.props;
 
@@ -93,8 +83,6 @@ GameWrapperHOC = connect(
       // GLOBAL
       $endTurn: () => dispatch(gameEndTurnRequest())
       , $exit: () => dispatch(roomExitRequest())
-      // PHASE.PREPARE
-      , $ready: () => dispatch(gameReadyRequest())
       // PHASE.DEPLOY
       , $deployAnimal: (...args) => dispatch(gameDeployAnimalRequest(...args))
       , $deployTrait: (...args) => dispatch(gameDeployTraitRequest(...args))

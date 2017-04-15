@@ -12,14 +12,16 @@ import {
   , roomEditSettings
   , gameCreateNotify
   , chatMessageRoom
+  , roomStartVoting
+  , roomStartVoteAction
 } from '../../server/reducers/rooms-rdx-server';
 
-const roomJoinSelf = (state, {roomId, userId, room}) => state.set(roomId, room);
+const roomJoinSelf = (rooms, {roomId, userId, room}) => rooms.set(roomId, room);
 
-const roomSpectateSelf = (state, {roomId, userId, room}) => state.set(roomId, room);
+const roomSpectateSelf = (rooms, {roomId, userId, room}) => rooms.set(roomId, room);
 
-const roomExitSelf = (state, {roomId, userId}) => !state.get(roomId) ? state
-  : state.update(roomId, (room) => room.remove('chat'));
+const roomExitSelf = (rooms, {roomId, userId}) => !rooms.get(roomId) ? rooms
+  : rooms.removeIn([roomId, 'chat']);
 
 export const reducer = createReducer(Map(), {
   roomsInit: (state, {rooms}) => rooms
@@ -36,4 +38,8 @@ export const reducer = createReducer(Map(), {
   , roomEditSettings
   , gameCreateNotify
   , chatMessageRoom
+  , roomStartVoting
+  , roomStartVoteAction
+  , roomStartVoteEnd: (rooms, {roomId}) => !rooms.get(roomId) ? rooms
+    : rooms.removeIn([roomId, 'votingForStart'])
 });

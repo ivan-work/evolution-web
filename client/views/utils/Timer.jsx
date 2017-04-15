@@ -18,7 +18,7 @@ export class Timer extends Component {
   }
 
   updateTime(nextProps) {
-    const {start, duration} = nextProps || this.props;
+    const {start, duration, onEnd} = nextProps || this.props;
     TimeService.getTime()
       .then((timestamp) => {
         if (this.$isMounted) {
@@ -28,6 +28,7 @@ export class Timer extends Component {
             window.setTimeout(this.updateTime, 500)
           } else {
             this.setState({time: 0});
+            if (onEnd) onEnd();
           }
         }
       });

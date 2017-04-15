@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {Map, List, fromJS} from 'immutable';
 
-import {gameCreateRequest} from '~/shared/actions/actions';
+import {roomSetSeedRequest, roomStartVotingRequest} from '../../../shared/actions/actions';
 
 const defaultGameSeed = `deck: 12 carnivorous, 6 sharp
 phase: 2
@@ -57,6 +57,9 @@ export const RoomSectionView = connect(
     }
   }
   , (dispatch) => ({
-    $start: (roomId, seed) => () => dispatch(gameCreateRequest(roomId, seed))
+    $start: (roomId, seed) => () => {
+      dispatch(roomSetSeedRequest(seed));
+      dispatch(roomStartVotingRequest());
+    }
   })
 )(RoomSection);

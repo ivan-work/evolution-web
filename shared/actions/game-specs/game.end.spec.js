@@ -14,8 +14,9 @@ import {
   , gameDeployAnimalRequest
   , roomJoinRequest
   , roomSpectateRequest
-  , gameCreateRequest
-  , gameReadyRequest
+  , roomSetSeedRequest
+  , roomStartVotingRequest
+  , roomStartVoteActionRequest
 
   , SOCKET_DISCONNECT_NOW
 } from '../actions';
@@ -40,7 +41,10 @@ players:
     const {selectGame, selectPlayer, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
     // User0: $A +, $B, $C, $D carn +, $E
 
+    console.log(selectGame().status);
+    console.log(selectPlayer(User0).continent);
     clientStore0.dispatch(gameEndTurnRequest()); // Q can't have AutoFood
+    console.log(selectPlayer(User0).continent);
     expect(selectPlayer(User0).ended, 'User0.ended 0').equal(true);
 
     clientStore1.dispatch(traitActivateRequest('$A', 'TraitFatTissue')); // A used fat
@@ -151,18 +155,20 @@ players:
   it('Spectators can exit after finish', () => {
     const [serverStore, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockStores(3);
     clientStore0.dispatch(roomCreateRequest());
+
     const roomId = serverStore.getState().get('rooms').first().id;
+
     clientStore1.dispatch(roomJoinRequest(roomId));
     clientStore2.dispatch(roomSpectateRequest(roomId));
-    clientStore0.dispatch(gameCreateRequest(roomId, `
+    clientStore0.dispatch(roomSetSeedRequest(`
 deck: 2 camo
 phase: 0
-`))
-    const gameId = serverStore.getState().get('rooms').first().gameId;
-    clientStore0.dispatch(gameReadyRequest());
-    clientStore1.dispatch(gameReadyRequest());
+`));
+    clientStore0.dispatch(roomStartVotingRequest());
+    clientStore1.dispatch(roomStartVoteActionRequest(true));
 
-    const {selectGame, selectCard} = makeGameSelectors(serverStore.getState, gameId);
+    const gameId = serverStore.getState().get('rooms').first().gameId;
+    const {selectGame, selectPlayer, selectCard} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id, 0));
     clientStore1.dispatch(gameDeployAnimalRequest(selectCard(User1, 0).id, 0));
@@ -172,14 +178,14 @@ phase: 0
 
     expect(selectGame().status.phase).equal(PHASE.FINAL);
 
-    clientStore0.dispatch(roomExitRequest(roomId));
-    clientStore1.dispatch(roomExitRequest(roomId));
+    clientStore0.dispatch(roomExitRequest());
+    clientStore1.dispatch(roomExitRequest());
 
     expect(clientStore0.getState().get('game')).null;
     expect(clientStore1.getState().get('game')).null;
     expect(clientStore2.getState().get('game')).ok;
 
-    clientStore2.dispatch(roomExitRequest(roomId));
+    clientStore2.dispatch(roomExitRequest());
 
     expect(clientStore2.getState().get('game')).null;
     expect(clientStore2.getState().get('room')).null;

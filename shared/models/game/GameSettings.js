@@ -28,6 +28,7 @@ export class SettingsRecord extends Record({
   , addon_continents: false
   , addon_bonus: false
   , addon_plantarium: false
+  , seed: null
 }) {
   static fromJS(js) {
     return js == null
@@ -47,6 +48,7 @@ export class SettingsRecord extends Record({
         case 'addon_continents':
         case 'addon_bonus':
         case 'addon_plantarium':
+        case 'seed':
           return next;
         default:
           return Number.isInteger(+next) ? next : prev;

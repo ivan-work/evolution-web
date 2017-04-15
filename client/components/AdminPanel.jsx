@@ -2,8 +2,6 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {Map, List, fromJS} from 'immutable';
 
-//import {gameCreateRequest} from '~/shared/actions/actions';
-
 import {RoomSectionView} from './AdminPanelSections/RoomSection.jsx';
 import {GameSectionView} from './AdminPanelSections/GameSection.jsx';
 

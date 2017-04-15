@@ -61,7 +61,7 @@ export default connect(
         .sort((r1, r2) => {
           if (r1.gameId && !r2.gameId) return 1;
           if (!r1.gameId && r2.gameId) return -1;
-          return r2.timeCreate - r1.timeCreate;
+          return r2.timestamp - r1.timestamp;
         })
         .toList()
     }

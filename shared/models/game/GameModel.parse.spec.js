@@ -122,7 +122,6 @@ players:
     expect(parsed.deck.first().type).equal('CardCarnivorous');
     expect(parsed.deck.first().trait1).equal('TraitCarnivorous');
     expect(parsed.deck.last().type).equal('CardSharpVision');
-    expect(parsed.getIn(['players', 'u0', 'ready'])).equal(true);
     expect(parsed.getIn(['players', 'u0', 'hand']).size).equal(2);
     expect(parsed.getIn(['players', 'u0', 'hand']).first().type).equal('CardCarnivorous');
     expect(parsed.getIn(['players', 'u0', 'hand']).last().type).equal('CardCarnivorous');
@@ -136,7 +135,6 @@ players:
     expect(parsedContinent.last().traits.first().type).equal('TraitSharpVision');
     expect(parsedContinent.last().traits.last().type).equal('TraitCamouflage');
 
-    expect(parsed.getIn(['players', 'u1', 'ready'])).true;
     expect(parsed.getIn(['players', 'u1', 'hand'])).equal(List());
     expect(parsed.getIn(['players', 'u1', 'continent'])).equal(List());
   });
@@ -161,10 +159,8 @@ players:
       , started: true
     }));
     expect(ServerGame().deck.size).equal(18);
-    expect(ServerGame().getIn(['players', User0.id, 'ready'])).true;
     expect(ServerGame().getIn(['players', User0.id, 'hand']).size).equal(2);
     expect(ServerGame().getIn(['players', User0.id, 'continent']).size).equal(2);
-    expect(ServerGame().getIn(['players', User1.id, 'ready'])).true;
     expect(ServerGame().getIn(['players', User1.id, 'hand'])).equal(List());
     expect(ServerGame().getIn(['players', User1.id, 'continent'])).equal(List());
   });
@@ -216,10 +212,8 @@ players:
     // console.log(ServerGame().getIn(['players', User1.id, 'hand']).size)
     // console.log(ServerGame().getIn(['players', User0.id, 'hand']).size)
     expect(ServerGame().deck.size, 'deck.size').equal(9);
-    expect(ServerGame().getIn(['players', User0.id, 'ready'])).true;
     expect(ServerGame().getIn(['players', User0.id, 'hand'])).size(5);
     expect(ServerGame().getIn(['players', User0.id, 'continent'])).size(2);
-    expect(ServerGame().getIn(['players', User1.id, 'ready'])).true;
     expect(ServerGame().getIn(['players', User1.id, 'hand'])).size(6);
     expect(ServerGame().getIn(['players', User1.id, 'continent'])).size(0);
   });

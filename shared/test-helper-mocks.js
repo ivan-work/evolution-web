@@ -5,8 +5,9 @@ import {loginUserFormRequest} from '~/shared/actions/actions';
 import {
   roomCreateRequest
 , roomJoinRequest
-, gameCreateRequest
-, gameReadyRequest
+, roomSetSeedRequest
+, roomStartVotingRequest
+, roomStartVoteActionRequest
 } from './actions/actions';
 
 //export default () => {
@@ -54,19 +55,21 @@ import {
     }
 
     result[0].ParseGame = (seed) => {
-      mockedStores[1].clientStore0.dispatch(gameCreateRequest(roomId, seed));
+      mockedStores[1].clientStore0.dispatch(roomSetSeedRequest(seed));
+      mockedStores[1].clientStore0.dispatch(roomStartVotingRequest());
+      for (let i = 0; i < count; ++i) {
+        const clientStore = mockedStores[i + 1]['clientStore' + i];
+        clientStore.dispatch(roomStartVoteActionRequest(true));
+      }
+
       const game = result[0].serverStore.getState().get('games').last();
       const gameId = game.id;
 
-      for (let i = 0; i < count; ++i) {
-        const clientStore = mockedStores[i + 1]['clientStore' + i];
-        clientStore.disconnect();
-        clientStore.connect(result[0].serverStore);
-      }
-      for (let i = 0; i < count; ++i) {
-        const clientStore = mockedStores[i + 1]['clientStore' + i];
-        clientStore.dispatch(gameReadyRequest());
-      }
+      // for (let i = 0; i < count; ++i) {
+      //   const clientStore = mockedStores[i + 1]['clientStore' + i];
+      //   clientStore.disconnect();
+      //   clientStore.connect(result[0].serverStore);
+      // }
       logger.info(`Parsed game#${gameId} with ${game.players.toArray().map(p => p.id).join(', ')}`);
       return gameId;
     };

@@ -47,7 +47,6 @@
 //      , phase: PHASE.DEPLOY
 //    })
 //  })
-//  , $ready: () => 0
 //  , $deployAnimal: () => 0
 //  , $deployTrait: () => 0
 //  , $endTurn: () => 0

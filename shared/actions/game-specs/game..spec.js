@@ -9,12 +9,11 @@ import {
   SOCKET_DISCONNECT_NOW,
   roomCreateRequest,
   roomJoinRequest,
-  gameCreateRequest,
-  gameReadyRequest,
+  roomStartVotingRequest,
+  roomStartVoteActionRequest,
   gameDeployAnimalRequest,
   gameDeployTraitRequest,
-  gameEndTurnRequest,
-  roomEditSettingsRequest
+  gameEndTurnRequest
 } from '../actions';
 import {makeGameSelectors} from '../../selectors';
 
@@ -22,10 +21,10 @@ describe('Game:', function () {
   it('Game start', () => {
     const [serverStore, {clientStore0, User0}, {clientStore1, User1}] = mockStores(2);
     clientStore0.dispatch(roomCreateRequest());
-    clientStore0.dispatch(roomEditSettingsRequest({}));
     const roomId = serverStore.getState().get('rooms').first().id;
     clientStore1.dispatch(roomJoinRequest(roomId));
-    clientStore0.dispatch(gameCreateRequest(roomId));
+    clientStore0.dispatch(roomStartVotingRequest());
+    clientStore1.dispatch(roomStartVoteActionRequest(true));
 
     const ServerGame = () => serverStore.getState().get('games').first();
     const ClientGame0 = () => clientStore0.getState().get('game');
@@ -41,18 +40,6 @@ describe('Game:', function () {
     expect(ClientGame0(), 'clientStore0.get(game)').ok;
     expect(ClientGame0().id, 'clientStore0.get(game).id').ok;
 
-    clientStore0.dispatch(gameReadyRequest());
-
-    expect(ServerGame().players.get(User0.id).ready, 'Game.players.get(User0).ready').true;
-    expect(ServerGame().players.get(User1.id).ready, 'Game.players.get(User1).ready').false;
-
-    expect(ServerGame().players.get(User0.id).hand.size).equal(0);
-    expect(ServerGame().players.get(User1.id).hand.size).equal(0);
-
-    clientStore1.dispatch(gameReadyRequest());
-
-    expect(ServerGame().players.get(User0.id).ready, 'Game.players.get(0).status 2').true;
-    expect(ServerGame().players.get(User1.id).ready, 'Game.players.get(1).status 2').true;
     expect(ServerGame().deck.size).equal(TEST_DECK_SIZE - TEST_HAND_SIZE - TEST_HAND_SIZE);
     expect(ServerGame().players.get(User0.id).hand.size).equal(TEST_HAND_SIZE);
     expect(ServerGame().players.get(User1.id).hand.size).equal(TEST_HAND_SIZE);
@@ -85,7 +72,8 @@ describe('Game:', function () {
     clientStore0.dispatch(roomCreateRequest());
     const roomId = serverStore.getState().get('rooms').first().id;
     clientStore1.dispatch(roomJoinRequest(roomId));
-    clientStore0.dispatch(gameCreateRequest(roomId));
+    clientStore0.dispatch(roomStartVotingRequest());
+    clientStore1.dispatch(roomStartVoteActionRequest(true));
 
     expectUnchanged(`Can't join started game`, () =>
         clientStore2.dispatch(roomJoinRequest(roomId))
@@ -277,9 +265,8 @@ players:
     const ClientGame1 = () => clientStore1.getState().get('game');
     clientStore0.dispatch(roomJoinRequest(roomId));
     clientStore1.dispatch(roomJoinRequest(roomId));
-    clientStore0.dispatch(gameCreateRequest(roomId));
-    clientStore0.dispatch(gameReadyRequest());
-    clientStore1.dispatch(gameReadyRequest());
+    clientStore0.dispatch(roomStartVotingRequest());
+    clientStore1.dispatch(roomStartVoteActionRequest(true));
     const gameId = serverStore.getState().get('games').first().id;
 
     clientStore1.disconnect();
@@ -297,9 +284,8 @@ players:
     const ClientGame1 = () => clientStore1.getState().get('game');
     clientStore0.dispatch(roomJoinRequest(roomId));
     clientStore1.dispatch(roomJoinRequest(roomId));
-    clientStore0.dispatch(gameCreateRequest(roomId));
-    clientStore0.dispatch(gameReadyRequest());
-    clientStore1.dispatch(gameReadyRequest());
+    clientStore0.dispatch(roomStartVotingRequest());
+    clientStore1.dispatch(roomStartVoteActionRequest(true));
     const gameId = serverStore.getState().get('games').first().id;
     serverStore.clearActions();
 

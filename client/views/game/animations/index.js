@@ -8,15 +8,6 @@ import * as localTraits from './traits';
 // [actionName]: (done, actionData, getState, componentProps)
 export const createAnimationServiceConfig = () => ({
   animations: ({subscribe, getRef}) => {
-    if (process.env.NODE_ENV !== 'test' && window.Audio) {
-      const audio = new window.Audio(require('../../../assets/sound/notification-02.mp3'));
-      subscribe('gameNextPlayerNotify', (done, {userId}, getState) => {
-        const sound = getState().getIn(['app', 'sound']);
-        if (sound) audio.play();
-        done();
-      });
-    }
-
     subscribe('gameGiveCards', (done, {cards}, getState) =>
       gameGiveCards(done, getState().get('game'), cards, getRef));
 

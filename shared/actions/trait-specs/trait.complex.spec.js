@@ -1,6 +1,5 @@
 import {
   gameDeployTraitRequest
-  , roomEditSettingsRequest
   , gameEndTurnRequest
   , traitTakeFoodRequest
   , traitActivateRequest
