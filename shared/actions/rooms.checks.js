@@ -42,23 +42,23 @@ export const checkCanJoinRoomToSpectate = (room, userId) => checkUserNotBanned(r
  * Checks/Simple
  * */
 
-export const checkStartVotingCanStart = (room) => {
-  if (room.votingForStart && isStartVotingOnCooldown(room)) {
+export const checkStartVotingCanStart = (room, timestamp) => {
+  if (room.votingForStart && isStartVotingOnCooldown(room, timestamp)) {
     throw new ActionCheckError('checkStartVotingCanStart')
   }
 };
 
-export const checkStartVotingIsInProgress = (room) => {
-  if (!room.votingForStart || !isStartVotingOnCooldown(room)) {
+export const checkStartVotingIsInProgress = (room, timestamp) => {
+  if (!room.votingForStart || !isStartVotingOnCooldown(room, timestamp)) {
     throw new ActionCheckError('checkStartVotingIsInProgress')
   }
 };
 
-const isStartVotingOnCooldown = (room) => {
+const isStartVotingOnCooldown = (room, timestamp) => {
   // console.log(`${((Date.now() - room.votingForStart.timestamp) / 1000).toFixed(3)}s passed`);
   // console.log(`${((room.votingForStart.timestamp + VotingModel.START_VOTING_TIMEOUT - Date.now()) / 1000).toFixed(3)}s remains`);
   // console.log(`Is on cooldown? ${room.votingForStart.timestamp + VotingModel.START_VOTING_TIMEOUT >= Date.now()}`);
-  return (room.votingForStart.timestamp + VotingModel.START_VOTING_TIMEOUT >= Date.now());
+  return (room.votingForStart.timestamp + VotingModel.START_VOTING_TIMEOUT >= (timestamp || Date.now()));
 }
 
 export const checkRoomMinSize = (room) => {

@@ -29,5 +29,5 @@ export const reducer = createReducer(getInitialState(), {
   appChangeLanguage: (state, data) => state.set('lang', saveValue('lang', data))
   , appChangeSound: (state, data) => state.set('sound', saveValue('sound', data))
   , appShowAdminPanel: (state, data) => state.set('showAdminPanel', !state.get('showAdminPanel'))
-  , socketConnect: (state, {connectionId}) => state.set('connectionId', connectionId)
+  , socketConnectClient: (state, {connectionId}) => state.set('connectionId', connectionId)
 });

@@ -14,6 +14,7 @@ import {
   , chatMessageRoom
   , roomStartVoting
   , roomStartVoteAction
+  , roomStartVoteEnd
 } from '../../server/reducers/rooms-rdx-server';
 
 const roomJoinSelf = (rooms, {roomId, userId, room}) => rooms.set(roomId, room);
@@ -40,6 +41,7 @@ export const reducer = createReducer(Map(), {
   , chatMessageRoom
   , roomStartVoting
   , roomStartVoteAction
-  , roomStartVoteEnd: (rooms, {roomId}) => !rooms.get(roomId) ? rooms
-    : rooms.removeIn([roomId, 'votingForStart'])
+  , roomStartVoteHide: (rooms, {roomId}) => !rooms.get(roomId) ? rooms
+    : rooms.setIn([roomId, 'votingForStart', 'showOnClient'], false)
+  , roomStartVoteEnd
 });

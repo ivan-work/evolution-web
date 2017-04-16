@@ -1,7 +1,7 @@
 import logger from '~/shared/utils/logger';
 import io from 'socket.io';
 import jwt from 'jsonwebtoken';
-import {socketConnect, server$socketDisconnect, clientToServer, actionError} from '../shared/actions/actions'
+import {socketConnect, socketConnectClient, server$socketDisconnect, clientToServer, actionError} from '../shared/actions/actions'
 
 export const socketServer = (server, options) => io(server, {});
 
@@ -11,7 +11,7 @@ export const socketStore = (serverSocket, store) => {
   serverSocket.on('connect', (socket) => {
     logger.silly('server:connect');
     store.dispatch(socketConnect(socket.id, (action) => socket.emit('action', action), socket.ip));
-    socket.emit('action', socketConnect(socket.id));
+    socket.emit('action', socketConnectClient(socket.id, Date.now()));
 
     socket.on('disconnect', (reason) => {
       logger.silly('Server DISCONNECT:', reason);

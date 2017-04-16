@@ -7,7 +7,6 @@ import {connect} from 'react-redux';
 import {Textfield} from 'react-mdl';
 
 import TimeService from '../services/TimeService';
-import Promise from './utils/Promise.jsx';
 
 import {MessageModel, CHAT_TARGET_TYPE} from '../../shared/models/ChatModel';
 import {chatMessageRequest} from '../../shared/actions/actions';
@@ -90,7 +89,7 @@ export class Chat extends React.Component {
   renderMessage({timestamp, from, fromLogin, to, toType, text}) {
     return (<div key={timestamp + from}>
       <div className='ChatTime'>
-        <span>[<Promise>{TimeService.promiseTimeOfDay(timestamp)}</Promise>]</span>
+        <span>[{TimeService.formatTimeOfDay(timestamp)}]</span>
       </div>
       <div className='ChatMessage'>
         <strong>{fromLogin}: </strong>

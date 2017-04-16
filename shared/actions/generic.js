@@ -30,6 +30,8 @@ export const server$game = (gameId, action) => (dispatch, getState) =>
 export const server$toRoom = (roomId, action) => (dispatch, getState) =>
   dispatch(to$({users: selectUsersInRoom(getState, roomId)}, action));
 
+export const server$toUsers = (roomId, action) => to$({users: true}, action);
+
 export const genericClientToServer = {};
 
 export const genericServerToClient = {

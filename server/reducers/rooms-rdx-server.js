@@ -41,6 +41,9 @@ export const roomStartVoting = (rooms, {roomId, timestamp}) => rooms.setIn([room
 
 export const roomStartVoteAction = (rooms, {roomId, userId, vote}) => rooms.setIn([roomId, 'votingForStart', 'votes', userId], vote);
 
+export const roomStartVoteEnd = (rooms, {roomId}) => !rooms.get(roomId) ? rooms
+  : rooms.setIn([roomId, 'votingForStart', 'timestamp'], 0);
+
 export const reducer = createReducer(Map(), {
   roomCreate
   , roomJoin
@@ -54,4 +57,5 @@ export const reducer = createReducer(Map(), {
   , chatMessageRoom
   , roomStartVoting
   , roomStartVoteAction
+  , roomStartVoteEnd
 });

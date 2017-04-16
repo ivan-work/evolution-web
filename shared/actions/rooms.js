@@ -13,7 +13,7 @@ import {
   , server$gameCreateSuccess
 } from './actions';
 import {appPlaySound} from '../../client/actions/app';
-import {toUser$Client, to$, server$toRoom} from './generic';
+import {toUser$Client, server$toUsers, server$toRoom} from './generic';
 
 import {redirectTo} from '../utils';
 import {selectRoom, selectGame, selectUsersInRoom} from '../selectors';
@@ -39,6 +39,8 @@ import {
 const selectClientRoomId = (getState) => getState().get('room');
 
 export const findRoomByUser = (getState, userId) => getState().get('rooms').find(room => !!~room.users.indexOf(userId) || !!~room.spectators.indexOf(userId));
+
+import {addTimeout} from '../utils/reduxTimeout';
 
 /**
  * Init
@@ -157,7 +159,11 @@ export const roomStartVotingRequest = () => (dispatch, getState) => dispatch({
   , meta: {server: true}
 });
 
-export const client$roomStartVoteEnd = () => (dispatch, getState) => dispatch(roomStartVoteEnd(selectClientRoomId(getState)));
+const roomStartVoteHide = (roomId) => ({
+  type: 'roomStartVoteHide'
+  , data: {roomId}
+});
+
 
 const roomStartVoteEnd = (roomId) => ({
   type: 'roomStartVoteEnd'
@@ -176,7 +182,7 @@ export const roomStartVoteActionRequest = (vote) => (dispatch, getState) => {
     , data: {roomId, vote}
     , meta: {server: true}
   });
-  if (vote === false) dispatch(roomStartVoteEnd(roomId));
+  if (vote === false) dispatch(roomStartVoteHide(roomId));
 };
 
 const roomStartVoteAction = (roomId, userId, vote) => ({
@@ -365,7 +371,10 @@ export const roomsClientToServer = {
   , roomStartVotingRequest: ({roomId}, {userId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
     checkComboRoomCanStart(room, userId);
-    dispatch(server$toRoom(roomId, roomStartVoting(roomId, Date.now())));
+    dispatch(server$toUsers(roomId, roomStartVoting(roomId, Date.now())));
+    dispatch(addTimeout(VotingModel.START_VOTING_TIMEOUT, roomId, (dispatch) => {
+      dispatch(server$toUsers(roomId, roomStartVoteEnd(roomId)))
+    }));
     dispatch(server$roomStartVoteAction(roomId, userId, true));
   }
   , roomStartVoteActionRequest: ({roomId, vote}, {userId}) => (dispatch, getState) => {
@@ -464,4 +473,5 @@ export const roomsServerToClient = {
     dispatch(appPlaySound('START_D2'));
   }
   , roomStartVoteAction: ({roomId, userId, vote}) => roomStartVoteAction(roomId, userId, vote)
+  , roomStartVoteEnd: ({roomId}) => roomStartVoteEnd(roomId)
 };

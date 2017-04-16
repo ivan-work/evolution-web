@@ -1,7 +1,6 @@
 import React, {Component, PropTypes} from 'react';
 
 // function for testing wrong client time;
-const getDate = () => Date.now() - 10 * 60 * 1000;
 import TimeService from '../../services/TimeService';
 
 export class Timer extends Component {
@@ -19,19 +18,16 @@ export class Timer extends Component {
 
   updateTime(nextProps) {
     const {start, duration, onEnd} = nextProps || this.props;
-    TimeService.getTime()
-      .then((timestamp) => {
-        if (this.$isMounted) {
-          const time = start + duration - timestamp;
-          if (time > 0) {
-            this.setState({time});
-            window.setTimeout(this.updateTime, 500)
-          } else {
-            this.setState({time: 0});
-            if (onEnd) onEnd();
-          }
-        }
-      });
+    if (this.$isMounted) {
+      const time = start + duration - TimeService.getServerTimestamp();
+      if (time > 0) {
+        this.setState({time});
+        window.setTimeout(this.updateTime, 500)
+      } else if (time < 0) {
+        this.setState({time: 0});
+        if (onEnd) onEnd();
+      }
+    }
   }
 
   componentWillReceiveProps(nextProps) {

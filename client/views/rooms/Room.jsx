@@ -20,7 +20,7 @@ import UsersList from './../UsersList.jsx';
 
 import RoomControlGroup from './RoomControlGroup.jsx';
 import RoomSettings from './RoomSettings.jsx';
-import RoomStartVotingDialog from './RoomStartVotingDialog.jsx';
+import RoomStartVotingDialog, {RoomStartVotingTimer} from './RoomStartVotingDialog.jsx';
 
 import {redirectTo} from '~/shared/utils'
 import {
@@ -29,8 +29,6 @@ import {
   roomBanRequest,
   roomUnbanRequest
 } from '../../../shared/actions/actions';
-import {passesChecks} from '../../../shared/actions/checks';
-import {checkStartVotingIsInProgress} from '../../../shared/actions/rooms.checks';
 
 export class Room extends Component {
   static propTypes = {
@@ -48,14 +46,12 @@ export class Room extends Component {
   render() {
     const {room, roomId, userId} = this.props;
 
-    const showStartVoting = passesChecks(() => checkStartVotingIsInProgress(room));
-
     return (<div className='Room'>
       <Portal target='header'>
         <RoomControlGroup inRoom={true}/>
       </Portal>
-      <h1>{T.translate('App.Room.Room')} «{room.name}»</h1>
-      <RoomStartVotingDialog show={showStartVoting}/>
+      <h1>{T.translate('App.Room.Room')} «{room.name}» <RoomStartVotingTimer room={room}/></h1>
+      <RoomStartVotingDialog/>
       <div className='flex-row'>
         <Card className='RoomSettings'>
           <CardText>
