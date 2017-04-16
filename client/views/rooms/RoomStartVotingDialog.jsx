@@ -8,7 +8,7 @@ import {Timer} from '../utils/Timer.jsx';
 import UsersList from '../UsersList.jsx';
 
 import {VotingModel} from '../../../shared/models/RoomModel.js';
-import {roomStartVoteActionRequest, roomStartVoteEnd} from '../../../shared/actions/actions';
+import {roomStartVoteActionRequest, client$roomStartVoteEnd} from '../../../shared/actions/actions';
 import {isUserInPlayers} from '../../../shared/actions/rooms.checks';
 
 export class RoomStartVotingDialog extends React.Component {
@@ -88,7 +88,7 @@ export const RoomStartVotingDialogView = connect(
   }
   , (dispatch, props) => ({
     $vote: (vote) => () => dispatch(roomStartVoteActionRequest(vote))
-    , $voteEnd: () => dispatch(roomStartVoteEnd())
+    , $voteEnd: () => dispatch(client$roomStartVoteEnd())
   })
 )(RoomStartVotingDialog);
 

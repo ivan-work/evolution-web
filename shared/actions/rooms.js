@@ -13,10 +13,10 @@ import {
   , server$gameCreateSuccess
 } from './actions';
 import {appPlaySound} from '../../client/actions/app';
-import {toUser$Client, server$toRoom} from './generic';
+import {toUser$Client, to$, server$toRoom} from './generic';
 
 import {redirectTo} from '../utils';
-import {selectRoom, selectGame} from '../selectors';
+import {selectRoom, selectGame, selectUsersInRoom} from '../selectors';
 
 import {
   checkSelectRoom
@@ -157,9 +157,11 @@ export const roomStartVotingRequest = () => (dispatch, getState) => dispatch({
   , meta: {server: true}
 });
 
-export const roomStartVoteEnd = () => (dispatch, getState) => dispatch({
+export const client$roomStartVoteEnd = () => (dispatch, getState) => dispatch(roomStartVoteEnd(selectClientRoomId(getState)));
+
+const roomStartVoteEnd = (roomId) => ({
   type: 'roomStartVoteEnd'
-  , data: {roomId: selectClientRoomId(getState)}
+  , data: {roomId}
 });
 
 const roomStartVoting = (roomId, timestamp) => ({
@@ -183,9 +185,11 @@ const server$roomStartVoteAction = (roomId, userId, vote) => (dispatch, getState
   const room = selectRoom(getState, roomId);
   const voting = room.votingForStart;
   if (!voting) return;
-  if (voting.votes.size === room.users.size && voting.votes.every((v, k) => v)) {
-    dispatch(server$gameCreateSuccess(room))
-  }
+  if (voting.votes.size === room.users.size) {
+    if (voting.votes.every((v, k) => v === true)) {
+      dispatch(server$gameCreateSuccess(room));
+    }
+  };
 };
 
 /**
