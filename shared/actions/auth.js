@@ -16,9 +16,9 @@ import {server$roomsInit, server$roomExit, findRoomByUser} from './rooms';
 export const SOCKET_DISCONNECT_NOW = 'SOCKET_DISCONNECT_NOW';
 export const TIMEOUT = 30 * 1000;
 
-export const socketConnect = (connectionId, sendToClient) => ({
+export const socketConnect = (connectionId, sendToClient, ip) => ({
   type: 'socketConnect'
-  , data: {connectionId, sendToClient}
+  , data: {connectionId, sendToClient, ip}
 });
 
 export const socketDisconnect = (connectionId, reason) => ({

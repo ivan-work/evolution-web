@@ -169,11 +169,15 @@ const roomStartVoting = (roomId, timestamp) => ({
   , data: {roomId, timestamp}
 });
 
-export const roomStartVoteActionRequest = (vote) => (dispatch, getState) => dispatch({
-  type: 'roomStartVoteActionRequest'
-  , data: {roomId: selectClientRoomId(getState), vote}
-  , meta: {server: true}
-});
+export const roomStartVoteActionRequest = (vote) => (dispatch, getState) => {
+  const roomId = selectClientRoomId(getState);
+  dispatch({
+    type: 'roomStartVoteActionRequest'
+    , data: {roomId, vote}
+    , meta: {server: true}
+  });
+  if (vote === false) dispatch(roomStartVoteEnd(roomId));
+};
 
 const roomStartVoteAction = (roomId, userId, vote) => ({
   type: 'roomStartVoteAction'
@@ -189,7 +193,7 @@ const server$roomStartVoteAction = (roomId, userId, vote) => (dispatch, getState
     if (voting.votes.every((v, k) => v === true)) {
       dispatch(server$gameCreateSuccess(room));
     }
-  };
+  }
 };
 
 /**

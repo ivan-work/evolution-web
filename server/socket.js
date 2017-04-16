@@ -10,7 +10,7 @@ const UNPROTECTED = ['loginUserFormRequest', 'loginUserTokenRequest'];
 export const socketStore = (serverSocket, store) => {
   serverSocket.on('connect', (socket) => {
     logger.silly('server:connect');
-    store.dispatch(socketConnect(socket.id, (action) => socket.emit('action', action)));
+    store.dispatch(socketConnect(socket.id, (action) => socket.emit('action', action), socket.ip));
     socket.emit('action', socketConnect(socket.id));
 
     socket.on('disconnect', (reason) => {
@@ -78,7 +78,7 @@ export const socketMiddleware = io => store => next => action => {
     //console.log('Server:Send', action.type, action.meta, sockets);
     sockets
       .filter(connectionId => stateConnections.has(connectionId))
-      .map(connectionId => stateConnections.get(connectionId))
+      .map(connectionId => stateConnections.getIn([connectionId, 'sendToClient']))
       .forEach((sendToClient) => sendToClient(Object.assign({}, {
         type: action.type
         , data: action.data
