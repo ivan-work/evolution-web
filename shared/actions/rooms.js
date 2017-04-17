@@ -34,6 +34,7 @@ import {
   , checkComboRoomCanStart
   , checkStartVotingCanStart
   , checkStartVotingIsInProgress
+  , isUserInPlayers
 } from './rooms.checks';
 
 const selectClientRoomId = (getState) => getState().get('room');
@@ -224,7 +225,9 @@ export const server$roomExit = (roomId, userId, checkForDestroy = true) => (disp
     dispatch(server$roomDestroy(roomId));
 };
 
-// Destroy
+/**
+ * Destroy
+ */
 
 export const roomDestroy = (roomId) => ({
   type: 'roomDestroy'
@@ -239,7 +242,9 @@ export const server$roomDestroy = (roomId) => (dispatch, getState) => {
     , {meta: {users: true}}));
 };
 
-// Settings
+/**
+ * Settings
+ */
 
 export const roomSetSeedRequest = (seed) => (dispatch, getState) => dispatch({
   type: 'roomSetSeedRequest'
@@ -266,7 +271,9 @@ const server$roomEditSettings = (roomId, settings) => (dispatch, getState) => {
   }
 };
 
-// Kick
+/**
+ * Kick
+ */
 
 export const roomKickRequest = (userId) => (dispatch, getState) => dispatch({
   type: 'roomKickRequest'
@@ -285,7 +292,9 @@ const server$roomKick = (roomId, userId) => (dispatch, getState) => {
     , {meta: {userId}}));
 };
 
-// Ban
+/**
+ * Ban
+ */
 
 export const roomBanRequest = (userId) => (dispatch, getState) => dispatch({
   type: 'roomBanRequest'
@@ -304,7 +313,9 @@ const server$roomBan = (roomId, userId) => (dispatch, getState) => {
     , {meta: {users: true}}));
 };
 
-// Unban
+/**
+ * Unban
+ */
 
 export const roomUnbanRequest = (userId) => (dispatch, getState) => dispatch({
   type: 'roomUnbanRequest'
@@ -320,6 +331,23 @@ const roomUnban = (roomId, userId) => ({
 const server$roomUnban = (roomId, userId) => (dispatch, getState) =>
   dispatch(Object.assign(roomUnban(roomId, userId)
     , {meta: {users: true}}));
+
+/**
+ * Dead hosts
+ */
+
+const DEAD_TIMEOUT = 5 * 60e3;
+export const server$checkDeadHosts = () => (dispatch, getState) => {
+  getState().get('rooms').forEach((room) => {
+    if (room.gameId) return;
+    //const hostId = room.users.first();
+    //if (!room.chat.some((message) => {
+    //    //if (message)
+    //  })) {
+    //  dispatch(chatMessageRoom())
+    //}
+  })
+};
 
 export const roomsClientToServer = {
   roomCreateRequest: (data, {userId}) => (dispatch, getState) => {
@@ -414,6 +442,8 @@ export const roomsClientToServer = {
   }
 };
 
+const isUserRouterInGame = (getState, roomId) => getState().getIn(['routing', 'locationBeforeTransitions', 'pathname']) === '/room/' + roomId;
+
 export const roomsServerToClient = {
   roomsInit: ({roomId, rooms}) => roomsInit(roomId, Map(rooms).map(r => RoomModel.fromJS(r)))
   , roomCreate: ({room}) => roomCreate(RoomModel.fromJS(room))
@@ -442,7 +472,7 @@ export const roomsServerToClient = {
     dispatch(roomExit(roomId, userId));
     if (currentUserId === userId) {
       dispatch(roomExitSelf());
-      if (getState().getIn(['routing', 'locationBeforeTransitions', 'pathname']) === '/room/' + roomId)
+      if (isUserRouterInGame(getState, roomId))
         dispatch(redirectTo(`/`));
     }
   }
@@ -451,9 +481,14 @@ export const roomsServerToClient = {
   , roomKick: ({roomId, userId}) => roomKick(roomId, userId)
   , roomBan: ({roomId, userId}) => roomBan(roomId, userId)
   , roomUnban: ({roomId, userId}) => roomUnban(roomId, userId)
-  , roomStartVoting: ({roomId}) => (dispatch) => {
+  , roomStartVoting: ({roomId}, currentUserId) => (dispatch, getState) => {
     dispatch(roomStartVoting(roomId));
-    dispatch(appPlaySound('START_D2'));
+    if (isUserInPlayers(selectRoom(getState, roomId), currentUserId)) {
+      if (isUserRouterInGame(getState, roomId)) {
+        dispatch(redirectTo(`/room/${roomId}`));
+      }
+      dispatch(appPlaySound('START_D2'));
+    }
   }
   , roomStartVoteAction: ({roomId, userId, vote}) => roomStartVoteAction(roomId, userId, vote)
 };

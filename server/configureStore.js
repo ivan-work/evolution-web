@@ -48,5 +48,9 @@ export default (server, app) => {
 
   app.set('store', store);
 
+  //setTimeout(() => {
+  //  store.dispatch(check)
+  //})
+
   socketStore(socket, store);
 }

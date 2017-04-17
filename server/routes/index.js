@@ -44,7 +44,8 @@ module.exports = (app, passport) => {
 
       const replacer = (key, value) => (
         key === 'connections' ? void 0
-          : key === 'chat' ? void 0
+          : key === 'chat' ? 'REPLACED'
+          : key === 'log' ? 'REPLACED'
           : value);
 
       const format = (str) => `<pre>${str}</pre>`;
