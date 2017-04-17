@@ -37,9 +37,12 @@ export const chatMessageRoom = (rooms, {message}) => rooms.updateIn([message.to,
  * Start/Ready
  */
 
-export const roomStartVoting = (rooms, {roomId}) => rooms.setIn([roomId, 'votingForStart'], VotingModel.new());
+export const roomStartVoting = (rooms, {roomId, timestamp}) => rooms.setIn([roomId, 'votingForStart'], VotingModel.new(timestamp));
 
 export const roomStartVoteAction = (rooms, {roomId, userId, vote}) => rooms.setIn([roomId, 'votingForStart', 'votes', userId], vote);
+
+export const roomStartVoteEnd = (rooms, {roomId}) => !rooms.get(roomId) ? rooms
+  : rooms.setIn([roomId, 'votingForStart', 'timestamp'], 0);
 
 export const reducer = createReducer(Map(), {
   roomCreate
@@ -54,4 +57,5 @@ export const reducer = createReducer(Map(), {
   , chatMessageRoom
   , roomStartVoting
   , roomStartVoteAction
+  , roomStartVoteEnd
 });

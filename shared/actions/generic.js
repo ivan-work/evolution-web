@@ -17,7 +17,10 @@ export const testHackGame = (gameId, callback) => ({
   , data: {gameId, callback}
 });
 
-export const to$ = (meta, action) => Object.assign(action, {meta});
+export const to$ = (meta, action) => {
+  if (typeof action === 'function') throw new Error(`Cannot to$(function)`);
+  return Object.assign(action, {meta});
+};
 
 export const toUser$Client = (userId, action) => to$({clientOnly: true, userId}, action);
 
@@ -27,9 +30,9 @@ export const server$game = (gameId, action) => (dispatch, getState) =>
 export const server$toRoom = (roomId, action) => (dispatch, getState) =>
   dispatch(to$({users: selectUsersInRoom(getState, roomId)}, action));
 
-export const genericClientToServer = {
+export const server$toUsers = (roomId, action) => to$({users: true}, action);
 
-};
+export const genericClientToServer = {};
 
 export const genericServerToClient = {
   actionError: ({error}) => actionError(error)

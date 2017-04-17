@@ -14,12 +14,13 @@ export const ROOM_STATUS = {
 
 export class VotingModel extends Record({
   votes: Map()
+  , showOnClient: true
   , timestamp: null
 }) {
   static START_VOTING_TIMEOUT = !process.env.TEST ? 15 * 1000 : 500;
 
-  static new() {
-    return new VotingModel({timestamp: Date.now()})
+  static new(timestamp) {
+    return new VotingModel({timestamp: timestamp})
   }
 
   static fromJS(js) {

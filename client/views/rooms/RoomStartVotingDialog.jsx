@@ -4,12 +4,17 @@ import {connect} from 'react-redux';
 import {Dialog} from '../utils/Dialog.jsx';
 import {DialogTitle, DialogContent, Button, Icon, ListItem} from 'react-mdl';
 
+import TimeService from '../../services/TimeService';
 import {Timer} from '../utils/Timer.jsx';
 import UsersList from '../UsersList.jsx';
 
 import {VotingModel} from '../../../shared/models/RoomModel.js';
-import {roomStartVoteActionRequest, roomStartVoteEnd} from '../../../shared/actions/actions';
-import {isUserInPlayers} from '../../../shared/actions/rooms.checks';
+import {roomStartVoteActionRequest} from '../../../shared/actions/actions';
+import {passesChecks} from '../../../shared/actions/checks';
+import {isUserInPlayers, checkStartVotingIsInProgress} from '../../../shared/actions/rooms.checks';
+
+const shouldShow = (room, userId) => (isUserInPlayers(room, userId)
+&& passesChecks(() => checkStartVotingIsInProgress(room, TimeService.getServerTimestamp())));
 
 export class RoomStartVotingDialog extends React.Component {
   static propTypes = {};
@@ -20,14 +25,18 @@ export class RoomStartVotingDialog extends React.Component {
   }
 
   render() {
-    const {room, show, $voteEnd} = this.props;
+    const {room, userId} = this.props;
+
+    const show = room.votingForStart && room.votingForStart.showOnClient
+      && shouldShow(room, userId);
+
     return (
       <div>
         <Dialog show={show}>
           <DialogTitle>
-            {T.translate('App.Room.StartVoting')}&nbsp;
+            {T.translate('App.Room.StartVoting_Title')}&nbsp;
             {room.votingForStart &&
-            <Timer start={room.votingForStart.timestamp} duration={VotingModel.START_VOTING_TIMEOUT} onEnd={$voteEnd}/>}
+            <Timer start={room.votingForStart.timestamp} duration={VotingModel.START_VOTING_TIMEOUT}/>}
           </DialogTitle>
           {show && room.votingForStart && this.renderDialogContent()}
         </Dialog>
@@ -39,7 +48,11 @@ export class RoomStartVotingDialog extends React.Component {
     return (<DialogContent>
       <UsersList list={room.users}>
         {(user) => {
-          return <ListItem key={user.id} className='small'>{this.renderVoteState(user.id)} {user.login}</ListItem>
+          return <ListItem key={user.id} className='small'>
+            <div>
+              {this.renderVoteState(user.id)} {user.login}
+            </div>
+          </ListItem>
         }}
       </UsersList>
       <div style={{display: 'flex', justifyContent: 'space-around'}}>
@@ -73,19 +86,25 @@ export class RoomStartVotingDialog extends React.Component {
 }
 
 export const RoomStartVotingDialogView = connect(
-  (state, props) => {
-    const roomId = state.get('room');
-    //if (!roomId) throw new Error('Room ID is invalid');
-    return {
-      roomId
-      , room: state.getIn(['rooms', roomId])
-      , userId: state.getIn(['user', 'id'])
-    }
-  }
+  (state, props) => ({
+    room: state.getIn(['rooms', state.get('room')])
+    , userId: state.getIn(['user', 'id'])
+  })
   , (dispatch, props) => ({
     $vote: (vote) => () => dispatch(roomStartVoteActionRequest(vote))
-    , $voteEnd: () => dispatch(roomStartVoteEnd())
   })
 )(RoomStartVotingDialog);
+
+export class RoomStartVotingTimer extends React.Component {
+  render() {
+    const {room} = this.props;
+    const show = passesChecks(() => checkStartVotingIsInProgress(room, TimeService.getServerTimestamp()));
+    if (!show) return null;
+    return (<span>
+      {T.translate('App.Room.StartVoting_InProgress')}&nbsp;
+      <Timer start={room.votingForStart.timestamp} duration={VotingModel.START_VOTING_TIMEOUT}/>
+      </span>);
+  }
+}
 
 export default RoomStartVotingDialogView;

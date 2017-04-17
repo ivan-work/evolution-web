@@ -300,5 +300,30 @@ describe('Rooms:', function () {
       clientStore2.dispatch(roomStartVoteActionRequest(true));
       expect(selectVote(serverStore).getIn(['votes', User2.id])).true;
     });
+
+    it.skip('Voting End', async() => {
+      const [serverStore
+        , {clientStore0, User0}
+        , {clientStore1, User1}
+        , {clientStore2, User2}
+      ] = mockStores(4);
+
+      clientStore0.dispatch(roomCreateRequest());
+      const roomId = serverStore.getState().get('rooms').first().id;
+      clientStore1.dispatch(roomJoinRequest(roomId));
+      clientStore2.dispatch(roomJoinRequest(roomId));
+
+      const selectVote = (store) => selectRoom(store.getState, roomId).votingForStart;
+
+      clientStore0.dispatch(roomStartVotingRequest());
+      expect(selectVote(serverStore), 'Voting started').ok;
+      expect(selectVote(serverStore).getIn(['votes', User0.id])).true;
+
+      clientStore0.dispatch(roomStartVoteActionRequest(false));
+      clientStore1.dispatch(roomStartVoteActionRequest(false));
+      clientStore2.dispatch(roomStartVoteActionRequest(false));
+
+      expect(selectVote(serverStore)).null;
+    });
   });
 });

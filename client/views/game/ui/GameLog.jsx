@@ -93,7 +93,7 @@ export default class GameLog extends React.Component {
         <DialogContent className='GameLog'>
           {game.log.map((logItem, index) => (
           <div className='LogItem' key={index}>
-            <span className='LogTime'>[<Promise>{TimeService.promiseTimeOfDay(logItem.timestamp)}</Promise>]</span>&nbsp;
+            <span className='LogTime'>[{TimeService.formatTimeOfDay(logItem.timestamp)}]</span>&nbsp;
             <span className='LogMessage'>{GameLog.LogItemToText(logItem.message)}</span>
           </div>))}
         </DialogContent>

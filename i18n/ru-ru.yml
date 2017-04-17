@@ -22,7 +22,8 @@ App:
     $Create: Создать
     $Watch: смотреть
   Room:
-    StartVoting: ГотовЫ?
+    StartVoting_Title: Готовы?
+    StartVoting_InProgress: Идет голосование
     Room: Комната
     Settings:
       name: Название

@@ -14,7 +14,7 @@ import {
   TRAIT_ANIMAL_FLAG
 } from '../models/game/evolution/constants';
 
-import {server$game} from './generic';
+import {server$game, to$} from './generic';
 import {doesPlayerHasOptions, getFeedingOption} from './ai';
 import {server$tryViviparous, server$takeFoodRequest} from './actions';
 import {appPlaySound} from '../../client/actions/app';
@@ -317,7 +317,7 @@ const server$gameNextPlayer = (gameId, nextPlayer, roundChanged) => (dispatch, g
     //dispatch(gameLogNotify)
     dispatch(server$addTurnTimeout(gameId, nextPlayer.id, selectGame(getState, gameId).settings.timeTurn));
     if (currentPlayerIndex !== nextPlayer.index) {
-      dispatch(server$game(gameId, gameNextPlayerNotify(gameId, nextPlayer.id)))
+      dispatch(to$({clientOnly: true, userId: nextPlayer.id}, gameNextPlayerNotify(gameId, nextPlayer.id)))
     }
   } else {
     dispatch(server$gameEndTurn(gameId, nextPlayer.id));
@@ -572,10 +572,7 @@ export const gameServerToClient = {
     gameAddTurnTimeout(gameId, turnStartTime, turnDuration)
   , gameNextPlayer: ({gameId, nextPlayerId, nextPlayerIndex, roundChanged}) =>
     gameNextPlayer(gameId, nextPlayerId, nextPlayerIndex, roundChanged)
-  , gameNextPlayerNotify: ({gameId, userId}, currentUserId) => (dispatch) => {
-    if (userId === currentUserId) dispatch(gameNextPlayerNotify(gameId, userId));
-    dispatch(appPlaySound('NOTIFICATION'))
-  }
+  , gameNextPlayerNotify: ({gameId, userId}, currentUserId) => (appPlaySound('NOTIFICATION'))
   , gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
   , gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
   , gamePlayerLeft: ({gameId, userId}) => gamePlayerLeft(gameId, userId)

@@ -23,7 +23,14 @@ export default (reducer, initialState, middleware = [], appliedMiddleware = []) 
   , new ClientRecord(initialState)
   , compose(
     applyMiddleware(
-      thunk
+      store => next => action => {
+        try {
+          return next(action);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+      , thunk
       , reduxTimeoutMiddleware()
       , ...middleware
     )

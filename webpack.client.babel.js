@@ -11,7 +11,7 @@ import globals from './globals';
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 export default {
-  devtool: isDevelopment ? 'eval-source-map' : 'source-map'
+  devtool: isDevelopment ? 'eval' : 'source-map'
   , entry: isDevelopment
     ? ['webpack-hot-middleware/client'
     , './client/index.jsx']

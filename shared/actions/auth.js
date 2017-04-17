@@ -16,9 +16,16 @@ import {server$roomsInit, server$roomExit, findRoomByUser} from './rooms';
 export const SOCKET_DISCONNECT_NOW = 'SOCKET_DISCONNECT_NOW';
 export const TIMEOUT = 30 * 1000;
 
-export const socketConnect = (connectionId, sendToClient) => ({
+import TimeService from '../../client/services/TimeService';
+
+export const socketConnect = (connectionId, sendToClient, ip) => ({
   type: 'socketConnect'
-  , data: {connectionId, sendToClient}
+  , data: {connectionId, sendToClient, ip}
+});
+
+export const socketConnectClient = (connectionId, timestamp) => ({
+  type: 'socketConnectClient'
+  , data: {connectionId, timestamp}
 });
 
 export const socketDisconnect = (connectionId, reason) => ({
@@ -166,7 +173,7 @@ export const authClientToServer = {
 };
 
 export const authServerToClient = {
-  loginUser: ({user, redirect = '/', online, rooms, roomId, game}) => (dispatch) => {
+  loginUser: ({user, redirect = '/', online}) => (dispatch) => {
     user = UserModel.fromJS(user);
     dispatch(loginUser({
       user: user
@@ -180,7 +187,10 @@ export const authServerToClient = {
   }
   , onlineUpdate: ({user}) => onlineUpdate(UserModel.fromJS(user).toOthers())
   , logoutUser: ({userId}) => logoutUser(userId)
-  , socketConnect: ({connectionId}) => socketConnect(connectionId)
+  , socketConnectClient: ({connectionId, timestamp}) => {
+    TimeService.setOffset(timestamp);
+    return socketConnectClient(connectionId);
+  }
 };
 
 export const redirectToLogin = (getState, redirectTo) => {
