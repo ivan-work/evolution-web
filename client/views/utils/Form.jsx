@@ -102,14 +102,14 @@ export class Checkbox extends React.Component {
   static contextTypes = {form: React.PropTypes.object.isRequired};
 
   render() {
-    const {name} = this.props;
+    const {name, disabled: thisDisabled} = this.props;
     const onChange = this.context.form.onChange;
-    const {i18nPath, disabled} = this.context.form.props;
+    const {i18nPath, disabled: formDisabled} = this.context.form.props;
     const {model, validation} = this.context.form.state;
     return (<MDL.Checkbox checked={model[name]}
                           label={T.translate(i18nPath + '.' + name)}
                           value={name}
-                          disabled={disabled}
+                          disabled={thisDisabled || formDisabled}
                           onChange={({target}) => onChange(name, target.checked)}/>)
   }
 }

@@ -30,6 +30,7 @@ App:
       timeTurn: Время хода (В минутах)
       timeTraitResponse: Время реагирования на атаку
       halfDeck: Половина колоды
+      addon_base: База
       addon_timeToFly: Время Летать
       addon_continents: Континенты
       addon_bonus: Бонусные
