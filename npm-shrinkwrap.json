@@ -1,6 +1,6 @@
 {
   "name": "cards3",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "dependencies": {
     "abab": {
       "version": "1.0.3",
