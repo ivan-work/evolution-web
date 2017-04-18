@@ -1,8 +1,11 @@
 import logger from '~/shared/utils/logger';
 import {Map} from 'immutable';
 
+export const ROOM_AFK_HOST_PERIOD = 5 * 60e3;
+
 import {RoomModel, VotingModel} from '../models/RoomModel';
 import {GameModel, GameModelClient} from '../models/game/GameModel';
+import {CHAT_TARGET_TYPE} from '../models/ChatModel';
 import {SettingsRules} from '../models/game/GameSettings';
 import {ActionCheckError} from '../models/ActionCheckError';
 
@@ -11,6 +14,7 @@ import {
   , server$gameLeave
   , gameDestroy
   , server$gameCreateSuccess
+  , server$chatMessage
 } from './actions';
 import {appPlaySound} from '../../client/actions/app';
 import {toUser$Client, server$toUsers, server$toRoom} from './generic';
@@ -20,7 +24,6 @@ import {selectRoom, selectGame, selectUsersInRoom} from '../selectors';
 
 import {
   checkSelectRoom
-  , checkRoomMaxSize
   , checkRoomIsNotInGame
   , checkUserInRoom
   , checkUserNotInPlayers
@@ -350,16 +353,37 @@ const server$roomUnban = (roomId, userId) => (dispatch, getState) =>
  * Dead hosts
  */
 
-const DEAD_TIMEOUT = 5 * 60e3;
-export const server$checkDeadHosts = () => (dispatch, getState) => {
+const roomAfkHost = (roomId, afkHost) => ({
+  type: 'roomAfkHost'
+  , data: {roomId, afkHost}
+});
+
+export const server$roomAfkHosts = () => (dispatch, getState) => {
   getState().get('rooms').forEach((room) => {
-    if (room.gameId) return;
-    //const hostId = room.users.first();
-    //if (!room.chat.some((message) => {
-    //    //if (message)
-    //  })) {
-    //  dispatch(chatMessageRoom())
-    //}
+    try {
+      if (room.gameId) return;
+      if (Date.now() - room.timestamp < ROOM_AFK_HOST_PERIOD) return;
+      const hostId = room.users.first();
+
+      if (Date.now() - room.hostActivity > ROOM_AFK_HOST_PERIOD) {
+        if (room.afkHost) {
+          dispatch(server$chatMessage(room.id, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.AfkHostKick', 0));
+          dispatch(roomAfkHost(room.id, false));
+          // Watch out, this should be the last action as it could destroy room
+          dispatch(server$roomKick(room.id, hostId));
+        } else {
+          dispatch(roomAfkHost(room.id, true));
+          dispatch(server$chatMessage(room.id, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.AfkHostRequest', 0));
+        }
+      } else {
+        if (room.afkHost) {
+          dispatch(roomAfkHost(room.id, false));
+          dispatch(server$chatMessage(room.id, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.AfkHostNormal', 0));
+        }
+      }
+    } catch (e) {
+      console.error(e)
+    }
   })
 };
 
@@ -399,9 +423,10 @@ export const roomsClientToServer = {
   , roomStartVotingRequest: ({roomId}, {userId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
     checkComboRoomCanStart(room, userId);
-    dispatch(server$toUsers(roomId, roomStartVoting(roomId, Date.now())));
+    dispatch(server$toUsers(roomStartVoting(roomId, Date.now())));
     dispatch(addTimeout(VotingModel.START_VOTING_TIMEOUT, roomId, (dispatch) => {
-      dispatch(server$toUsers(roomId, roomStartVoteEnd(roomId)))
+      checkSelectRoom(getState, roomId);
+      dispatch(server$toUsers(roomStartVoteEnd(roomId)))
     }));
     dispatch(server$roomStartVoteAction(roomId, userId, true));
   }
@@ -498,10 +523,10 @@ export const roomsServerToClient = {
   , roomKick: ({roomId, userId}) => roomKick(roomId, userId)
   , roomBan: ({roomId, userId}) => roomBan(roomId, userId)
   , roomUnban: ({roomId, userId}) => roomUnban(roomId, userId)
-  , roomStartVoting: ({roomId}, currentUserId) => (dispatch, getState) => {
-    dispatch(roomStartVoting(roomId));
+  , roomStartVoting: ({roomId, timestamp}, currentUserId) => (dispatch, getState) => {
+    dispatch(roomStartVoting(roomId, timestamp));
     if (isUserInPlayers(selectRoom(getState, roomId), currentUserId)) {
-      if (isUserRouterInGame(getState, roomId)) {
+      if (!isUserRouterInGame(getState, roomId)) {
         dispatch(redirectTo(`/room/${roomId}`));
       }
       dispatch(appPlaySound('START_D2'));

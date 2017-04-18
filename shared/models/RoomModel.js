@@ -40,6 +40,8 @@ export class RoomModel extends Record({
   , chat: ChatModel.new()
   , timestamp: null
   , status: ROOM_STATUS.LOBBY
+  , afkHost: false
+  , hostActivity: Date.now()
   // Voting
   , votingForStart: null
 }) {

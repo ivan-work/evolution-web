@@ -97,6 +97,19 @@ export class Chat extends React.Component {
       </div>
     </div>);
   }
+
+  renderMessage({timestamp, from, fromLogin, to, toType, text}) {
+    if (from === 0) text = T.translate(text);
+    return (<div key={timestamp + from}>
+      <div className='ChatTime'>
+        <span>[{TimeService.formatTimeOfDay(timestamp)}]</span>
+      </div>
+      <div className='ChatMessage'>
+        <strong>{fromLogin}: </strong>
+        <span>{text}</span>
+      </div>
+    </div>);
+  }
 }
 
 export default connect((state, props) => {

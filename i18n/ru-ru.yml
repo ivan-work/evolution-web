@@ -50,6 +50,10 @@ App:
     $Unban: Разбанить
     ErrorKick: Вас кикнули
     ErrorBan: Вас забанили
+    Messages:
+      AfkHostRequest: Привет, хост! Пожалуйста, напиши что-нибудь в чат.
+      AfkHostKick: Хост кикнут за АФК.
+      AfkHostNormal: Хост не АФК.
 Game:
   Game: Игра
   Phase:

@@ -14,6 +14,8 @@ import {combineReducers} from 'redux-immutable';
 import {socketServer, socketStore, socketMiddleware} from './socket';
 import {errorMiddleware} from './middleware/error';
 
+import {ROOM_AFK_HOST_PERIOD, server$roomAfkHosts} from '../shared/actions/actions';
+
 export class ServerRecord extends Record({
   connections: void 0
   , games: void 0
@@ -48,9 +50,13 @@ export default (server, app) => {
 
   app.set('store', store);
 
-  //setTimeout(() => {
-  //  store.dispatch(check)
-  //})
+  const timeoutForAfkHosts = () => setTimeout(() => {
+    store.dispatch(server$roomAfkHosts());
+    timeoutForAfkHosts();
+  }, ROOM_AFK_HOST_PERIOD);
+
+  if (!process.env.TEST)
+    timeoutForAfkHosts();
 
   socketStore(socket, store);
 }

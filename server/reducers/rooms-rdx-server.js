@@ -31,7 +31,11 @@ export const roomUnban = (state, {roomId, userId}) => state.updateIn([roomId, 'b
 export const gameCreateNotify = (state, {roomId, gameId}) => state.update(roomId, room => room
   .set('gameId', gameId));
 
-export const chatMessageRoom = (rooms, {message}) => rooms.updateIn([message.to, 'chat'], chat => chat.receiveMessage(message));
+export const chatMessageRoom = (rooms, {message}) => rooms
+  .update(message.to, room => room
+    .update('chat', chat => chat.receiveMessage(message))
+    .update('hostActivity', hostActivity => message.from === room.users.first() ? message.timestamp : hostActivity)
+  );
 
 /**
  * Start/Ready
@@ -58,4 +62,5 @@ export const reducer = createReducer(Map(), {
   , roomStartVoting
   , roomStartVoteAction
   , roomStartVoteEnd
+  , roomAfkHost: (rooms, {roomId, afkHost}) => (rooms.setIn([roomId, 'afkHost'], afkHost))
 });

@@ -30,13 +30,6 @@ module.exports = (app, passport) => {
     }
   });
 
-  /**
-   * Time Service
-   * */
-  router.get('/time', function (req, res, next) {
-    res.status(200).json(Date.now());
-  });
-
   //if (process.env.NODE_ENV !== 'production') {
   router.get('/state', function (req, res, next) {
     const state = app.get('store').getState()

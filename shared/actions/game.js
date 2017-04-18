@@ -30,6 +30,12 @@ import {
   , checkValidAnimalPosition
 } from './checks';
 
+import {
+  checkRoomMinSize
+  , checkRoomMaxSize
+  , checkRoomIsNotInGame
+} from './rooms.checks';
+
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 
 /**
@@ -48,6 +54,9 @@ const gameCreateNotify = (roomId, gameId) => ({
   , data: {roomId, gameId}
 });
 export const server$gameCreateSuccess = (room) => (dispatch, getState) => {
+  checkRoomMinSize(room);
+  checkRoomMaxSize(room);
+  checkRoomIsNotInGame(room);
   const seed = room.settings.seed;
   const game = (seed === null
     ? GameModel.new(room)
