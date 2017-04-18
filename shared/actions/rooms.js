@@ -1,7 +1,7 @@
 import logger from '~/shared/utils/logger';
 import {Map} from 'immutable';
 
-export const ROOM_AFK_HOST_PERIOD = 5 * 60e3;
+export const ROOM_AFK_HOST_PERIOD = 10 * 60e3;
 
 import {RoomModel, VotingModel} from '../models/RoomModel';
 import {GameModel, GameModelClient} from '../models/game/GameModel';
@@ -360,29 +360,27 @@ const roomAfkHost = (roomId, afkHost) => ({
 
 export const server$roomAfkHosts = () => (dispatch, getState) => {
   getState().get('rooms').forEach((room) => {
-    try {
-      if (room.gameId) return;
-      if (Date.now() - room.timestamp < ROOM_AFK_HOST_PERIOD) return;
-      const hostId = room.users.first();
+    // console.log('Check', room.gameId, Date.now() - room.timestamp, ROOM_AFK_HOST_PERIOD, Date.now() - room.timestamp < ROOM_AFK_HOST_PERIOD)
+    if (room.gameId) return;
+    if (Date.now() - room.timestamp < ROOM_AFK_HOST_PERIOD) return;
+    const hostId = room.users.first();
 
-      if (Date.now() - room.hostActivity > ROOM_AFK_HOST_PERIOD) {
-        if (room.afkHost) {
-          dispatch(server$chatMessage(room.id, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.AfkHostKick', 0));
-          dispatch(roomAfkHost(room.id, false));
-          // Watch out, this should be the last action as it could destroy room
-          dispatch(server$roomKick(room.id, hostId));
-        } else {
-          dispatch(roomAfkHost(room.id, true));
-          dispatch(server$chatMessage(room.id, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.AfkHostRequest', 0));
-        }
+    // console.log('Check2', Date.now() - room.hostActivity, ROOM_AFK_HOST_PERIOD, Date.now() - room.hostActivity > ROOM_AFK_HOST_PERIOD)
+    if (Date.now() - room.hostActivity > ROOM_AFK_HOST_PERIOD) {
+      if (room.afkHost) {
+        dispatch(server$chatMessage(room.id, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.AfkHostKick', 0));
+        dispatch(roomAfkHost(room.id, false));
+        // Watch out, this should be the last action as it could destroy room
+        dispatch(server$roomKick(room.id, hostId));
       } else {
-        if (room.afkHost) {
-          dispatch(roomAfkHost(room.id, false));
-          dispatch(server$chatMessage(room.id, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.AfkHostNormal', 0));
-        }
+        dispatch(roomAfkHost(room.id, true));
+        dispatch(server$chatMessage(room.id, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.AfkHostRequest', 0));
       }
-    } catch (e) {
-      console.error(e)
+    } else {
+      if (room.afkHost) {
+        dispatch(roomAfkHost(room.id, false));
+        dispatch(server$chatMessage(room.id, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.AfkHostNormal', 0));
+      }
     }
   })
 };
