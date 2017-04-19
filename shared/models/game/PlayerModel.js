@@ -8,9 +8,11 @@ export class PlayerModel extends Record({
   , hand: List()
   , continent: List()
   , index: -1
-  , playing: true
-  , ended: false
-  , acted: false
+  , playing: true // Has he active in the game
+  , ended: false // Has he ended a phase
+  , acted: false // Has he acted in a phase
+  , timedOut: false // Has he ended his turn via timeout
+  , wantsPause: false // Does he want a pause
   , scoreDead: 0
 }) {
   toOthers() {

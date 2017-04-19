@@ -18,14 +18,14 @@ export const checkSelectRoom = (getState, roomId) => {
  * Checks/Combined
  * */
 
-export const checkComboRoomCanStart = (room, userId) => {
+export const checkComboRoomCanStart = (room, userId, timestamp) => {
   if (!room) throw new ActionCheckError('checkRoomExists', `Room(%s) doesn't exist`, room);
   checkUserInRoom(room, userId);
   checkUserIsHost(room, userId);
   checkRoomMinSize(room);
   checkRoomMaxSize(room);
   checkRoomIsNotInGame(room);
-  checkStartVotingCanStart(room);
+  checkStartVotingCanStart(room, timestamp);
 };
 
 

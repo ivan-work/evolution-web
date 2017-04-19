@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import T from 'i18n-react';
 import {connect} from 'react-redux';
+
+import TimeService from '../../services/TimeService';
 import {ControlGroup} from './../utils/ControlGroup.jsx';
 import {Button} from 'react-mdl';
 import {RoomModel} from '../../../shared/models/RoomModel';
@@ -54,7 +56,7 @@ export class RoomControlGroup extends Component {
       && <Button id="Room$Spectate"
                  onClick={this.$roomSpectate}>{T.translate('App.Room.$Spectate')}</Button>}
       <Button id="Room$Start"
-              disabled={!room.checkCanStart(userId)}
+              disabled={!room.checkCanStart(userId, TimeService.getServerTimestamp())}
               onClick={this.$start}>{T.translate('App.Room.$Start')}</Button>
     </ControlGroup>
   }

@@ -77,7 +77,7 @@ export class RoomModel extends Record({
     return this.remove('chat');
   }
 
-  checkCanStart(userId) {
-    return passesChecks(() => checkComboRoomCanStart(this, userId));
+  checkCanStart(userId, timestamp) {
+    return passesChecks(() => checkComboRoomCanStart(this, userId, timestamp));
   }
 }

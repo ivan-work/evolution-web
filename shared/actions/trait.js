@@ -12,7 +12,7 @@ import {
 
 import {server$game} from './generic';
 import {doesPlayerHasOptions} from './ai';
-import {server$gameEndTurn, server$addTurnTimeout, makeTurnTimeoutId} from './actions';
+import {server$gameEndTurn, server$addTurnTimeout, server$gameCancelTurnTimeout} from './actions';
 
 import {selectRoom, selectGame, selectUsersInGame} from '../selectors';
 
@@ -278,6 +278,7 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
     .map(traitCommunication => {
       if (!traitCommunication.checkAction(selectGame(getState, gameId), animal)) return;
       const {animal: linkedAnimal} = game.locateAnimal(traitCommunication.linkAnimalId);
+      if (!linkedAnimal) logger.error('linkedAnimal not found', {game, 'select': selectGame(getState, gameId)});
       const linkedTrait = linkedAnimal.traits.find(trait => trait.id === traitCommunication.linkId);
 
       traitMakeCooldownActions(gameId, traitCommunication, animal)
@@ -369,7 +370,7 @@ export const server$traitQuestion = (gameId, userId, questionType, attackAnimal,
   const game = selectGame(getState, gameId);
 
   const timeTraitResponse = game.settings.timeTraitResponse;
-  const turnRemainingTime = dispatch(cancelTimeout(makeTurnTimeoutId(gameId))) || 0;
+  const turnRemainingTime = dispatch(server$gameCancelTurnTimeout(gameId)) || 0;
   const turnUserId = game.players.find(p => p.index === game.status.currentPlayer).id;
 
   const question = QuestionRecord.new(questionType, attackAnimal, trait.id, defenceAnimal, turnUserId, turnRemainingTime);

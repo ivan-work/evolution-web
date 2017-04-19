@@ -30,6 +30,7 @@ export const StatusRecord = Record({
   , phase: PHASE.PREPARE
   , turnStartTime: null
   , turnDuration: null
+  , turnUserId: null
   , started: false
 });
 

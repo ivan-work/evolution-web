@@ -183,6 +183,13 @@ export const gameAddTurnTimeout = (game, {turnStartTime, turnDuration}) => game
   .setIn(['status', 'turnStartTime'], turnStartTime)
   .setIn(['status', 'turnDuration'], turnDuration);
 
+export const gameSetUserTimedOut = (game, {playerId, timedOut}) => game.setIn(['players', playerId, 'timedOut'], timedOut);
+export const gameSetUserWantsPause = (game, {playerId, timedOut}) => game.setIn(['players', playerId, 'wantsPause'], wantsPause);
+
+/**
+ * Traits
+ * */
+
 export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) => {
   ensureParameter(animalId, 'string');
   ensureParameter(amount, 'number');
@@ -327,6 +334,8 @@ export const reducer = createReducer(Map(), {
   , gameStartEat: (state, data) => state.update(data.gameId, game => gameStartEat(game, data))
   , gameStartDeploy: (state, data) => state.update(data.gameId, game => gameStartDeploy(game, data))
   , gameStartExtinct: (state, data) => state.update(data.gameId, game => gameStartExtinct(game, data))
+  , gameSetUserTimedOut: (state, data) => state.update(data.gameId, game => gameSetUserTimedOut(game, data))
+  , gameSetUserWantsPause: (state, data) => state.update(data.gameId, game => gameSetUserWantsPause(game, data))
   , playerActed: (state, data) => state.update(data.gameId, game => playerActed(game, data))
   , traitMoveFood: (state, data) => state.update(data.gameId, game => traitMoveFood(game, data))
   , startCooldown: (state, data) => state.update(data.gameId, game => startCooldown(game, data))

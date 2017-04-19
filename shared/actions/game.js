@@ -2,6 +2,7 @@ import logger, {loggerOnline} from '~/shared/utils/logger';
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import {List} from 'immutable';
 
+import {SETTINGS_TIMED_OUT_TURN_TIME} from '../models/game/GameSettings';
 import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
 import {CardModel} from '../models/game/CardModel';
 import {AnimalModel} from '../models/game/evolution/AnimalModel';
@@ -24,6 +25,7 @@ import {selectGame, selectUsersInGame} from '../selectors';
 import {
   checkGameDefined
   , checkGameHasUser
+  , checkPlayerTurn
   , checkPlayerHasCard
   , checkPlayerCanAct
   , checkGamePhase
@@ -36,7 +38,7 @@ import {
   , checkRoomIsNotInGame
 } from './rooms.checks';
 
-import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
+import {addTimeout, cancelTimeout, checkTimeout} from '../utils/reduxTimeout';
 
 /**
  * Init
@@ -94,18 +96,10 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
   dispatch(server$game(gameId, gamePlayerLeft(gameId, userId)));
   const game = selectGame(getState, gameId);
   const leaver = game.getPlayer(userId);
-  // Can't place cancelTimeout here because
-  // we don't want timer drop when someone leaves in a valid game
   switch (game.getActualPlayers().size) {
     case 0:
-      dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
-      break;
     case 1:
-      dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
-      if (game.status.phase !== PHASE.FINAL) {
-        loggerOnline.info(`Game left ${game.players.map(p => getState().getIn(['users', p.id, 'login'])).join(', ')}`);
-        dispatch(server$game(gameId, gameEnd(gameId, selectGame(getState, gameId).toClient())));
-      }
+      if (game.status.phase !== PHASE.FINAL) dispatch(server$gameEnd(gameId));
       break;
     default:
       if (game.status.currentPlayer === leaver.index) {
@@ -143,7 +137,7 @@ export const server$gameGiveCards = (gameId, userId, count) => (dispatch, getSta
 // ===== DEPLOY!
 
 // gameDeployAnimal
-export const gameDeployAnimalRequest = (cardId, animalPosition) => (dispatch, getState) =>dispatch({
+export const gameDeployAnimalRequest = (cardId, animalPosition) => (dispatch, getState) => dispatch({
   type: 'gameDeployAnimalRequest'
   , data: {gameId: getState().get('game').id, cardId, animalPosition}
   , meta: {server: true}
@@ -241,7 +235,7 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
   const isAutoTurn = !!dispatch(server$autoTurn(gameId, userId));
   if (isAutoTurn) return;
   logger.debug('server$gameEndTurn:', userId);
-  dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
+  dispatch(server$gameCancelTurnTimeout(gameId));
   dispatch(server$game(gameId, gameEndTurn(gameId, userId)));
 
   const game = selectGame(getState, gameId);
@@ -267,7 +261,10 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
   }
 };
 
-// gameNextPlayer
+/**
+ * gameNextPlayer
+ * */
+
 const gameNextPlayer = (gameId, nextPlayerId, nextPlayerIndex, roundChanged, playerHasOptions) => ({
   type: 'gameNextPlayer'
   , data: {gameId, nextPlayerId, nextPlayerIndex, roundChanged, playerHasOptions}
@@ -278,21 +275,56 @@ const gameNextPlayerNotify = (gameId, userId) => ({
   , data: {gameId, userId}
 });
 
-export const makeTurnTimeoutId = (gameId) => `turnTimeTimeout#${gameId}`;
+/**
+ * Timeout
+ * */
+
+const makeTurnTimeoutId = (gameId) => `turnTimeTimeout#${gameId}`;
 
 const gameAddTurnTimeout = (gameId, turnStartTime, turnDuration) => ({
   type: 'gameAddTurnTimeout'
   , data: {gameId, turnStartTime, turnDuration}
 });
 
+const gameCancelTurnTimeout = (gameId, userId) => ({
+  type: 'gameCancelTurnTimeout'
+  , data: {gameId, userId}
+});
+
+export const gameSetUserTimedOutRequest = () => (dispatch, getState) => dispatch({
+  type: 'gameSetUserTimedOutRequest'
+  , data: {gameId: getState().getIn(['game', 'id'])}
+  , meta: {server: true}
+});
+
+const gameSetUserTimedOut = (gameId, playerId, timedOut) => ({
+  type: 'gameSetUserTimedOut'
+  , data: {gameId, playerId, timedOut}
+});
+
 export const server$addTurnTimeout = (gameId, userId, turnTime) => (dispatch, getState) => {
-  if (turnTime === void 0) throw new Error('turnTime === undefined');
+  if (turnTime === void 0) {
+    const game = selectGame(getState, gameId);
+    turnTime = !game.getPlayer(userId).timedOut ? game.settings.timeTurn : SETTINGS_TIMED_OUT_TURN_TIME;
+  }
+  dispatch(server$game(gameId, gameAddTurnTimeout(gameId, Date.now(), turnTime)));
   dispatch(addTimeout(turnTime, makeTurnTimeoutId(gameId, userId), (dispatch, getState) => {
     logger.info(`Turn Timeout:`, `${gameId}: ${userId}`);
+    dispatch(server$game(gameId, gameSetUserTimedOut(gameId, userId, true)));
     dispatch(server$gameEndTurn(gameId, userId))
   }));
-  dispatch(server$game(gameId, gameAddTurnTimeout(gameId, Date.now(), turnTime)));
 };
+
+export const server$gameCancelTurnTimeout = (gameId) => (dispatch, getState) => {
+  // logger.info(`Turn Timeout:`, `${gameId}: ${userId}`);
+  // dispatch(server$game(gameId, gameCancelTurnTimeout(gameId)));
+  dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
+  dispatch(gameCancelTurnTimeout(gameId));
+};
+
+/**
+ * Player Start/Continue
+ * */
 
 export const server$gamePlayerStart = (gameId) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
@@ -315,7 +347,7 @@ export const server$gamePlayerContinue = (gameId, previousUserId) => (dispatch, 
 
 const server$gameNextPlayer = (gameId, nextPlayer, roundChanged) => (dispatch, getState) => {
   logger.debug('server$gameNextPlayer:', nextPlayer.id, !!roundChanged);
-  dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
+  dispatch(server$gameCancelTurnTimeout(gameId));
 
   const currentPlayerIndex = selectGame(getState, gameId).getIn(['status', 'currentPlayer']);
 
@@ -324,10 +356,10 @@ const server$gameNextPlayer = (gameId, nextPlayer, roundChanged) => (dispatch, g
   const playerHasOptions = doesPlayerHasOptions(selectGame(getState, gameId), nextPlayer.id);
   if (playerHasOptions) {
     //dispatch(gameLogNotify)
-    dispatch(server$addTurnTimeout(gameId, nextPlayer.id, selectGame(getState, gameId).settings.timeTurn));
     if (currentPlayerIndex !== nextPlayer.index) {
       dispatch(to$({clientOnly: true, userId: nextPlayer.id}, gameNextPlayerNotify(gameId, nextPlayer.id)))
     }
+    dispatch(server$addTurnTimeout(gameId, nextPlayer.id));
   } else {
     dispatch(server$gameEndTurn(gameId, nextPlayer.id));
   }
@@ -451,9 +483,10 @@ const gameEnd = (gameId, game) => ({
 
 const server$gameEnd = (gameId) => (dispatch, getState) => {
   logger.debug('server$gameEnd', gameId);
+  dispatch(server$gameCancelTurnTimeout(gameId));
   const game = selectGame(getState, gameId);
   loggerOnline.info(`Game finished ${game.players.map(p => getState().getIn(['users', p.id, 'login'])).join(', ')}`);
-  dispatch(server$game(gameId, gameEnd(gameId, game)));
+  dispatch(server$game(gameId, gameEnd(gameId, game.toClient())));
 };
 
 export const gameClientToServer = {
@@ -551,6 +584,17 @@ export const gameClientToServer = {
     dispatch(server$gameDeployTrait(gameId, cardId, traits));
     dispatch(server$gameDeployNext(gameId, userId));
   }
+  , gameSetUserTimedOutRequest: ({gameId}, {userId}) => (dispatch, getState) => {
+    const game = selectGame(getState, gameId);
+    checkGameDefined(game);
+    checkGameHasUser(game, userId);
+    if (!game.getPlayer(userId).timedOut) throw new ActionCheckError(`User(%s) is not timedOut`, userId);
+    dispatch(server$game(gameId, gameSetUserTimedOut(gameId, userId, false)));
+    if (game.status.currentPlayer === game.getPlayer(userId).index && checkTimeout(makeTurnTimeoutId(gameId))) {
+      dispatch(server$gameCancelTurnTimeout(gameId));
+      dispatch(server$addTurnTimeout(gameId, userId))
+    }
+  }
 };
 
 // gameServerToClient
@@ -586,6 +630,8 @@ export const gameServerToClient = {
   , gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
   , gamePlayerLeft: ({gameId, userId}) => gamePlayerLeft(gameId, userId)
   , gameAnimalStarve: ({gameId, animalId}) => gameAnimalStarve(gameId, animalId)
+  , gameSetUserTimedOut: ({gameId, playerId, timedOut}) => gameSetUserTimedOut(gameId, playerId, timedOut)
+  // , gameSetUserWantsPause: ({gameId, playerId, wantsPause}) => gameSetUserWantsPause(gameId, playerId, wantsPause)
   , traitAnimalPoisoned: ({gameId, animalId}) => traitAnimalPoisoned(gameId, animalId)
 };
 

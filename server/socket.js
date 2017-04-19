@@ -9,8 +9,10 @@ const UNPROTECTED = ['loginUserFormRequest', 'loginUserTokenRequest'];
 
 export const socketStore = (serverSocket, store) => {
   serverSocket.on('connect', (socket) => {
-    logger.silly('server:connect', socket.handshake.address, Object.keys(socket));
-    store.dispatch(socketConnect(socket.id, (action) => socket.emit('action', action), socket.handshake.address));
+    const ipAddress = socket.handshake && socket.handshake.headers && socket.handshake.headers['x-forwarded-for']
+      || socket.handshake && socket.handshake.address;
+    logger.silly('server:connect', ipAddress);
+    store.dispatch(socketConnect(socket.id, (action) => socket.emit('action', action), ipAddress));
     socket.emit('action', socketConnectClient(socket.id, Date.now()));
 
     socket.on('disconnect', (reason) => {

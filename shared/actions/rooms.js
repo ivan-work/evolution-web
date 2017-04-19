@@ -44,7 +44,7 @@ const selectClientRoomId = (getState) => getState().get('room');
 
 export const findRoomByUser = (getState, userId) => getState().get('rooms').find(room => !!~room.users.indexOf(userId) || !!~room.spectators.indexOf(userId));
 
-import {addTimeout} from '../utils/reduxTimeout';
+import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 
 /**
  * Init
@@ -201,6 +201,7 @@ const server$roomStartVoteAction = (roomId, userId, vote) => (dispatch, getState
   if (!voting) return;
   if (voting.votes.size === room.users.size) {
     if (voting.votes.every((v, k) => v === true)) {
+      dispatch(cancelTimeout(`roomStartVoteEnd#${roomId}`));
       dispatch(server$gameCreateSuccess(room));
     }
   }
@@ -422,7 +423,7 @@ export const roomsClientToServer = {
     const room = checkSelectRoom(getState, roomId);
     checkComboRoomCanStart(room, userId);
     dispatch(server$toUsers(roomStartVoting(roomId, Date.now())));
-    dispatch(addTimeout(VotingModel.START_VOTING_TIMEOUT, roomId, (dispatch) => {
+    dispatch(addTimeout(VotingModel.START_VOTING_TIMEOUT, `roomStartVoteEnd#${roomId}`, (dispatch) => {
       checkSelectRoom(getState, roomId);
       dispatch(server$toUsers(roomStartVoteEnd(roomId)))
     }));

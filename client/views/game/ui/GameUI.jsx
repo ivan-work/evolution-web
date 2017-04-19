@@ -9,6 +9,7 @@ import PlayersList from './PlayersList.jsx';
 import {GameStatusDisplay} from './GameStatusDisplay.jsx';
 import TraitDefenceDialog from './TraitDefenceDialog.jsx';
 import TraitActivateDialog from './TraitActivateDialog.jsx';
+import GameTimedOutDialog from './GameTimedOutDialog.jsx';
 
 import {TraitIntellect} from '../../../../shared/models/game/evolution/traitsData';
 import {QuestionRecord} from '../../../../shared/models/game/GameModel.js';
@@ -43,6 +44,8 @@ class _GameUI extends React.Component {
     }
     return (
       <div className='GameUI'>
+        {game.getPlayer() && <GameTimedOutDialog show={game.getPlayer().timedOut}/>}
+
         <TraitDefenceDialog game={game} $traitAnswer={this.context.gameActions.$traitAnswer}/>
 
         <TraitActivateDialog game={game} {...intellectQuestion}/>

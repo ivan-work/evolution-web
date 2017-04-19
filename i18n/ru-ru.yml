@@ -65,6 +65,9 @@ Game:
     EndTurn: Передать ход
     EndPhase: Закончить фазу
     Deck: Колода
+    TimedOut_Title: Анти-АФК система
+    TimedOut_Desc: Игра определила что вы АФК, пожалуйста подтвердите что это не так.
+    TimedOut_Action: Я не АФК!
     Log:
       Label: Лог
       TakeFood: $player взял $F из кормовой базы.

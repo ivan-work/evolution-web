@@ -1,12 +1,10 @@
 import moment from 'moment';
 
 export class TimeService {
-  offset = 5000;
+  offset = 0;
 
   setOffset(serverTime) {
-    console.log('setting offset', this.getLocalTimestamp(), serverTime, this.getLocalTimestamp() - serverTime);
     this.offset = serverTime - this.getLocalTimestamp();
-    console.log('so, serverTime is ', this.getServerTimestamp());
   }
 
   getLocalTimestamp() {

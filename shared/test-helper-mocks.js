@@ -57,7 +57,7 @@ import {
     result[0].ParseGame = (seed) => {
       mockedStores[1].clientStore0.dispatch(roomSetSeedRequest(seed));
       mockedStores[1].clientStore0.dispatch(roomStartVotingRequest());
-      for (let i = 0; i < count; ++i) {
+      for (let i = 1; i < count; ++i) {
         const clientStore = mockedStores[i + 1]['clientStore' + i];
         clientStore.dispatch(roomStartVoteActionRequest(true));
       }
