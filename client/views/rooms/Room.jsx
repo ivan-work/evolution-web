@@ -2,21 +2,22 @@ import React, {Component} from 'react';
 import T from 'i18n-react';
 import {connect} from 'react-redux';
 import {
-  IconButton,
-  Card,
-  CardText,
-  Tooltip,
-  ListItem,
-  ListItemAction,
-  ListItemContent
+  IconButton
+  , Card
+  , CardText
+  , Tooltip
+  , List
+  , ListItem
+  , ListItemAction
+  , ListItemContent
 } from 'react-mdl';
 
 import {RoomModel, VotingModel} from '../../../shared/models/RoomModel';
 
 import {Portal} from './../utils/Portal.jsx';
 
-import Chat from './../Chat.jsx';
-import UsersList from './../UsersList.jsx';
+import Chat from '../Chat.jsx';
+import UsersList from '../utils/UsersList.jsx';
 
 import RoomControlGroup from './RoomControlGroup.jsx';
 import RoomSettings from './RoomSettings.jsx';

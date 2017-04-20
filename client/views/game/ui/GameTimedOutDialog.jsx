@@ -2,7 +2,7 @@ import React from 'react';
 import T from 'i18n-react';
 import {connect} from 'react-redux';
 import {Dialog} from '../../utils/Dialog.jsx';
-import {DialogTitle, DialogActions, Button} from 'react-mdl';
+import {DialogTitle, DialogContent, DialogActions, Button} from 'react-mdl';
 
 import {gameSetUserTimedOutRequest} from '../../../../shared/actions/actions';
 
@@ -19,10 +19,11 @@ export class GameTimedOutDialog extends React.Component {
       <div>
         <Dialog show={show} onBackdropClick={$timedOutRequest}>
           <DialogTitle>
-            {T.translate('Game.UI.TimedOut_Title')}x
+            {T.translate('Game.UI.TimedOut_Title')}
           </DialogTitle>
+          <DialogContent></DialogContent>
           <DialogActions fullWidth>
-            <Button raised primary onClick={$timedOutRequest}>{T.translate('Game.UI.TimedOut_Agree')}</Button>
+            <Button raised primary onClick={$timedOutRequest}>{T.translate('Game.UI.TimedOut_Action')}</Button>
           </DialogActions>
         </Dialog>
       </div>);

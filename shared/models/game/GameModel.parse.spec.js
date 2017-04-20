@@ -116,7 +116,6 @@ players:
       , round: 0
       , player: 0
       , phase: 1
-      , started: true
     }));
     expect(parsed.deck.size).equal(18);
     expect(parsed.deck.first().type).equal('CardCarnivorous');
@@ -156,7 +155,6 @@ players:
       , round: 0
       , player: 0
       , phase: 2
-      , started: true
     }));
     expect(ServerGame().deck.size).equal(18);
     expect(ServerGame().getIn(['players', User0.id, 'hand']).size).equal(2);
@@ -201,7 +199,6 @@ players:
   - hand: 2 carn
     continent: carn sharp, sharp camo
 `);
-    expect(ServerGame().status.started).equal(true);
     expect(ServerGame().food, 'ServerGame().food').equal(2);
     expect(ServerGame().status.turn, 'turn').equal(0);
     expect(ServerGame().status.round, 'round').equal(0);

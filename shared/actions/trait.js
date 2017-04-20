@@ -3,6 +3,7 @@ import uuid from 'uuid';
 import {ActionCheckError} from '../models/ActionCheckError';
 import {TraitModel} from '../models/game/evolution/TraitModel';
 
+import {SETTINGS_TIMED_OUT_TURN_TIME} from '../models/game/GameSettings';
 import {
   TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_DURATION
@@ -366,26 +367,37 @@ export const traitAnswerSuccess = (gameId, questionId) => ({
   , data: {gameId, questionId}
 });
 
-export const server$traitQuestion = (gameId, userId, questionType, attackAnimal, trait, defenceAnimal, defaultDefence) => (dispatch, getState) => {
+export const server$traitQuestion = (gameId, userId, questionType, attackAnimal, trait, defenceAnimal, defaultAction) => (dispatch, getState) => {
+  const turnRemainingTime = dispatch(server$gameCancelTurnTimeout(gameId));
+
+  const question = QuestionRecord.new(questionType
+    , userId
+    , attackAnimal, trait.id, defenceAnimal
+    , turnRemainingTime
+    , defaultAction
+  );
+
+  dispatch(server$questionResumeTimeout(gameId, question))
+};
+
+const server$traitQuestionDefaultAction = (gameId, questionId) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
-
-  const timeTraitResponse = game.settings.timeTraitResponse;
-  const turnRemainingTime = dispatch(server$gameCancelTurnTimeout(gameId)) || 0;
-  const turnUserId = game.players.find(p => p.index === game.status.currentPlayer).id;
-
-  const question = QuestionRecord.new(questionType, attackAnimal, trait.id, defenceAnimal, turnUserId, turnRemainingTime);
-
-  logger.verbose('server$traitDefenceQuestion', question.toJS());
-  // Notify all users
-  dispatch(Object.assign(traitQuestion(gameId, question.set('id', null))
-    , {meta: {clientOnly: true, users: selectUsersInGame(getState, gameId)}}));
-  // Add timeout to response
-  dispatch(addTimeout(timeTraitResponse
-    , makeTraitQuestionTimeout(gameId, question.id)
-    , defaultDefence(question.id)));
-  // Notify defending user
-  dispatch(Object.assign(traitQuestion(gameId, question)
-    , {meta: {userId}}));
+  if (!game) {
+    logger.error('NO GAME');
+    logger.error('NO GAME', getState().toJS());
+    return;
+  }
+  if (!game.question) {
+    // logger.error('NO QUESTION');
+    logger.error('NO QUESTION', getState().toJS());
+    return;
+  }
+  if (game.question.id !== questionId) {
+    logger.error('QUESTION WRONG ID', game.question.id, questionId);
+    return;
+  }
+  const defaultAction = game.getIn(['question', 'defaultAction']);
+  if (defaultAction) dispatch(defaultAction(questionId));
 };
 
 export const server$traitAnswerSuccess = (gameId, questionId) => (dispatch, getState) => {
@@ -393,19 +405,51 @@ export const server$traitAnswerSuccess = (gameId, questionId) => (dispatch, getS
   if (question) {
     dispatch(cancelTimeout(makeTraitQuestionTimeout(gameId, questionId)));
     dispatch(server$game(gameId, traitAnswerSuccess(gameId, questionId)));
-    if (question.turnUserId)
-      dispatch(server$addTurnTimeout(gameId, question.turnUserId, question.turnRemainingTime));
+    dispatch(server$addTurnTimeout(gameId, void 0, question.turnRemainingTime));
   }
+};
+
+export const server$questionPauseTimeout = (game) => (dispatch, getState) => {
+  const gameId = game.id;
+  if (!!game.question && !!game.question.id) {
+    dispatch(cancelTimeout(makeTraitQuestionTimeout(gameId, game.question.id)));
+  }
+};
+
+export const server$questionResumeTimeout = (gameId, question) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+
+  const userId = question.userId;
+  const player = game.getPlayer(userId);
+
+  const timeTraitResponse = !player.timedOut ? game.settings.timeTraitResponse : SETTINGS_TIMED_OUT_TURN_TIME;
+
+  question = question.set('time', Date.now());
+
+  logger.verbose('server$traitDefenceQuestion', question.toJS());
+
+  dispatch(traitQuestion(gameId, question));
+  // Notify all users
+  dispatch(Object.assign(traitQuestion(gameId, question.toOthers().toClient())
+    , {meta: {clientOnly: true, users: selectUsersInGame(getState, gameId)}}));
+  // Notify defending user
+  dispatch(Object.assign(traitQuestion(gameId, question.toClient())
+    , {meta: {clientOnly: true, userId}}));
+
+  if (game.status.paused) return;
+  dispatch(addTimeout(timeTraitResponse
+    , makeTraitQuestionTimeout(gameId, question.id)
+    , server$traitQuestionDefaultAction(gameId, question.id)));
 };
 
 /**
  * Defence
  */
 
-export const server$traitDefenceQuestion = (gameId, attackAnimal, trait, defenceAnimal, defaultDefence) =>
+export const server$traitDefenceQuestion = (gameId, attackAnimal, trait, defenceAnimal, defaultAction) =>
   server$traitQuestion(gameId, defenceAnimal.ownerId
     , QuestionRecord.DEFENSE, attackAnimal, trait, defenceAnimal
-    , defaultDefence
+    , defaultAction
   );
 
 export const server$traitDefenceAnswer = (gameId, questionId, traitId, targetId) => (dispatch, getState) => {
@@ -450,10 +494,10 @@ export const server$traitDefenceAnswer = (gameId, questionId, traitId, targetId)
  * Intellect
  */
 
-export const server$traitIntellectQuestion = (gameId, attackAnimal, trait, defenceAnimal, defaultDefence) =>
+export const server$traitIntellectQuestion = (gameId, attackAnimal, trait, defenceAnimal, defaultAction) =>
   server$traitQuestion(gameId, attackAnimal.ownerId
     , QuestionRecord.INTELLECT, attackAnimal, trait, defenceAnimal
-    , defaultDefence
+    , defaultAction
   );
 
 export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetId) => (dispatch, getState) => {

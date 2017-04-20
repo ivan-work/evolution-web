@@ -1,6 +1,6 @@
 import React from 'react'
 import T from 'i18n-react'
-import {Button} from 'react-mdl';
+import {IconButton, Tooltip} from 'react-mdl';
 import {DialogTitle, DialogContent} from 'react-mdl';
 import {Dialog} from '../../utils/Dialog.jsx';
 
@@ -70,7 +70,7 @@ export default class GameLog extends React.Component {
         return <AnimalText key={index} animal={values[valueIndex]}/>;
       } else if (/\$Trait@(\d)/.test(match)) {
         const valueIndex = match.slice(7, 8);
-        const [,traitIndex, ...traits] = values[valueIndex];
+        const [, traitIndex, ...traits] = values[valueIndex];
         return <AnimalText key={index} animal={[, ...traits]} select={traitIndex}/>;
       } else if (/\$(Trait\w+)/.test(match)) {
         return T.translate('Game.Trait.' + match.slice(1))
@@ -87,15 +87,19 @@ export default class GameLog extends React.Component {
   render() {
     const {game} = this.props;
     return (<div>
-      <Button raised onClick={this.showLog}>{T.translate('Game.UI.Log.Label')}</Button>
+      <Tooltip label={T.translate('Game.Log.Label')}>
+        <IconButton raised
+                    onClick={this.showLog}
+                    name={'list'}/>
+      </Tooltip>
       <Dialog onBackdropClick={this.hideLog} show={this.state.showLog}>
-        <DialogTitle>{T.translate('Game.UI.Log.Label')}</DialogTitle>
+        <DialogTitle>{T.translate('Game.Log.Label')}</DialogTitle>
         <DialogContent className='GameLog'>
           {game.log.map((logItem, index) => (
-          <div className='LogItem' key={index}>
-            <span className='LogTime'>[{TimeService.formatTimeOfDay(logItem.timestamp)}]</span>&nbsp;
-            <span className='LogMessage'>{GameLog.LogItemToText(logItem.message)}</span>
-          </div>))}
+            <div className='LogItem' key={index}>
+              <span className='LogTime'>[{TimeService.formatTimeOfDay(logItem.timestamp)}]</span>&nbsp;
+              <span className='LogMessage'>{GameLog.LogItemToText(logItem.message)}</span>
+            </div>))}
         </DialogContent>
       </Dialog>
     </div>);

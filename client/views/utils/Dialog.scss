@@ -42,6 +42,7 @@ $transition: 200ms;
     overflow: auto;
     display: inline-block;
     width: auto;
+
     @mixin visible {
       background: white;
       transition: $transition margin-top, $transition transform;

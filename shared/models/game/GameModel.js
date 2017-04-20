@@ -30,12 +30,12 @@ export const StatusRecord = Record({
   , phase: PHASE.PREPARE
   , turnStartTime: null
   , turnDuration: null
-  , turnUserId: null
-  , started: false
+  , paused: false
 });
 
 export class QuestionRecord extends Record({
   id: null
+  , userId: null
   , type: null
   , time: null
   , sourcePid: null
@@ -43,21 +43,22 @@ export class QuestionRecord extends Record({
   , traitId: null
   , targetPid: null
   , targetAid: null
-  , turnUserId: null
   , turnRemainingTime: null
+  , defaultAction: null
 }) {
-  static new(type, sourceAnimal, traitId, targetAnimal, turnUserId, turnRemainingTime) {
+  static new(type, userId, sourceAnimal, traitId, targetAnimal, turnRemainingTime, defaultAction) {
     return new QuestionRecord({
       id: uuid.v4()
       , type
+      , userId
       , sourcePid: sourceAnimal.ownerId
       , sourceAid: sourceAnimal.id
       , traitId
       , targetPid: targetAnimal.ownerId
       , targetAid: targetAnimal.id
       , time: Date.now()
-      , turnUserId
       , turnRemainingTime
+      , defaultAction
     });
   }
 
@@ -66,6 +67,14 @@ export class QuestionRecord extends Record({
 
   static fromJS(js) {
     return js == null ? null : new QuestionRecord(js);
+  }
+
+  toOthers() {
+    return this.set('id', null);
+  }
+
+  toClient() {
+    return this.set('defaultAction', null);
   }
 }
 
@@ -78,9 +87,9 @@ export class ContinentRecord extends Record({
     return js == null
       ? null
       : new ContinentRecord({
-      ...js
-      , shells: Map(js.shells).map(shell => TraitModel.fromServer(shell))
-    });
+        ...js
+        , shells: Map(js.shells).map(shell => TraitModel.fromServer(shell))
+      });
   }
 }
 
@@ -168,17 +177,17 @@ export class GameModel extends Record({
     return js == null
       ? null
       : new GameModel({
-      ...js
-      , deck: List(js.deck).map(c => CardModel.fromServer(c))
-      , players: OrderedMap(js.players).map(PlayerModel.fromServer).sort((p1, p2) => p1.index > p2.index)
-      , continents: Map(js.continents).map(ContinentRecord.fromJS)
-      , status: new StatusRecord(js.status)
-      , question: QuestionRecord.fromJS(js.question)
-      , cooldowns: CooldownList.fromServer(js.cooldowns)
-      , settings: SettingsRecord.fromJS(js.settings)
-      , log: List(js.log)
-      , huntingCallbacks: List()
-    });
+        ...js
+        , deck: List(js.deck).map(c => CardModel.fromServer(c))
+        , players: OrderedMap(js.players).map(PlayerModel.fromServer).sort((p1, p2) => p1.index > p2.index)
+        , continents: Map(js.continents).map(ContinentRecord.fromJS)
+        , status: new StatusRecord(js.status)
+        , question: QuestionRecord.fromJS(js.question)
+        , cooldowns: CooldownList.fromServer(js.cooldowns)
+        , settings: SettingsRecord.fromJS(js.settings)
+        , log: List(js.log)
+        , huntingCallbacks: List()
+      });
   }
 
   end() {
@@ -193,8 +202,8 @@ export class GameModel extends Record({
       !p1.playing ? 1
         : !p2.playing ? -1
         : p2.scoreNormal != p1.scoreNormal ? p2.scoreNormal - p1.scoreNormal
-        : p1.scoreDead != p2.scoreDead ? p2.scoreDead - p1.scoreDead
-        : 1 - Math.round(Math.random()) * 2);
+          : p1.scoreDead != p2.scoreDead ? p2.scoreDead - p1.scoreDead
+            : 1 - Math.round(Math.random()) * 2);
 
     return this
       .set('scoreboardFinal', scoreboardFinal)
@@ -298,15 +307,15 @@ export class GameModelClient extends Record({
     return game == null
       ? null
       : new GameModelClient(game)
-      .set('userId', userId);
+        .set('userId', userId);
   }
 
   getPlayer(pid) {
     return pid === void 0 || pid === null
       ? (this.players.get(this.userId))
       : pid.id
-      ? (this.players.get(pid.id))
-      : (this.players.get(pid));
+        ? (this.players.get(pid.id))
+        : (this.players.get(pid));
   }
 
   isPlayerTurn(userId) {

@@ -1,22 +1,19 @@
 import React from 'react';
 import {connect} from 'react-redux';
 
-const User = {
-  name: ({login}) => <span>{login}</span>
-  , string: ({login}) => login
-};
+import {ListItem} from 'react-mdl';
 
-const UserView = connect((state, {id}) => ({
-  login: state.getIn(['online', id, 'login'], '---')
-}))((props) => User[props.output](props));
+const UserView = connect((state, {id, children}) => ({
+  id
+  , login: state.getIn(['online', id, 'login'], '---')
+  , output: children || ((user) => <span>{user.login}</span>)
+}))((props) => props.output(props));
 
 UserView.propTypes = {
-  id: React.PropTypes.string
-  , output: React.PropTypes.oneOf(Object.keys(User)).isRequired
+  id: React.PropTypes.string.isRequired
+  , children: React.PropTypes.func
 };
 
-UserView.defaultProps = {
-  output: 'name'
-};
+UserView.asListItem = ({id, login}) => (<ListItem className='small'>{login}</ListItem>);
 
 export default UserView;

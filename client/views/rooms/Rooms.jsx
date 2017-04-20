@@ -5,7 +5,7 @@ import {connect} from 'react-redux';
 import {Map} from 'immutable';
 
 import {Button, Card, CardTitle, CardText} from 'react-mdl';
-import UsersList from './../UsersList.jsx';
+import UsersList from '../utils/UsersList.jsx';
 import RoomsList from './RoomsList.jsx';
 import Chat from './../Chat.jsx';
 import {Portal} from './../utils/Portal.jsx';
@@ -46,7 +46,7 @@ export class Rooms extends React.Component {
         <Card shadow={0} className='list-online'>
           <CardTitle><h4>{T.translate('App.Online')}:</h4></CardTitle>
           <CardText>
-            <UsersList/>
+            <UsersList list={this.props.online}/>
           </CardText>
         </Card>
       </div>
@@ -56,10 +56,11 @@ export class Rooms extends React.Component {
 
 export const RoomsView = connect(
   (state) => {
-    //console.log(state.toJS());
+    // console.log(state.get('online').keySeq().toList().toJS());
     return {
       username: state.getIn(['user', 'login'], '%USERNAME%')
       , room: state.get('room')
+      , online: state.get('online').keySeq().toList()
     }
   }
   , (dispatch) => ({

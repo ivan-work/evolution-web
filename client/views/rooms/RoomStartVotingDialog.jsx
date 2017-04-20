@@ -6,7 +6,7 @@ import {DialogTitle, DialogContent, Button, Icon, ListItem} from 'react-mdl';
 
 import TimeService from '../../services/TimeService';
 import {Timer} from '../utils/Timer.jsx';
-import UsersList from '../UsersList.jsx';
+import UsersList from '../utils/UsersList.jsx';
 
 import {VotingModel} from '../../../shared/models/RoomModel.js';
 import {roomStartVoteActionRequest} from '../../../shared/actions/actions';
@@ -47,13 +47,9 @@ export class RoomStartVotingDialog extends React.Component {
     const {room, userId} = this.props;
     return (<DialogContent>
       <UsersList list={room.users}>
-        {(user) => {
-          return <ListItem key={user.id} className='small'>
-            <div>
-              {this.renderVoteState(user.id)} {user.login}
-            </div>
-          </ListItem>
-        }}
+        {(user) => (<ListItem className='small'>
+          <div>{this.renderVoteState(user.id)} {user.login}</div>
+        </ListItem>)}
       </UsersList>
       <div style={{display: 'flex', justifyContent: 'space-around'}}>
         <Button raised primary disabled={!isUserInPlayers(room, userId)}

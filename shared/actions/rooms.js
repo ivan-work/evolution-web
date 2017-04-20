@@ -38,6 +38,7 @@ import {
   , checkStartVotingCanStart
   , checkStartVotingIsInProgress
   , isUserInPlayers
+  , isUserInSpecatators
 } from './rooms.checks';
 
 const selectClientRoomId = (getState) => getState().get('room');
@@ -305,9 +306,9 @@ const roomKick = (roomId, userId) => ({
 });
 
 const server$roomKick = (roomId, userId) => (dispatch, getState) => {
-  dispatch(server$roomExit(roomId, userId));
   dispatch(Object.assign(roomKick(roomId, userId)
     , {meta: {userId}}));
+  dispatch(server$roomExit(roomId, userId));
 };
 
 /**
@@ -326,9 +327,9 @@ const roomBan = (roomId, userId) => ({
 });
 
 const server$roomBan = (roomId, userId) => (dispatch, getState) => {
-  dispatch(server$roomKick(roomId, userId));
   dispatch(Object.assign(roomBan(roomId, userId)
     , {meta: {users: true}}));
+  dispatch(server$roomKick(roomId, userId));
 };
 
 /**
@@ -460,18 +461,23 @@ export const roomsClientToServer = {
   }
   , roomKickRequest: ({roomId, userId}, {userId: hostId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
-    checkRoomIsNotInGame(room);
     checkUserIsHost(room, hostId);
     checkUserInRoom(room, userId);
-    checkStartVotingCanStart(room);
+    if (isUserInPlayers(room, userId)) {
+      checkRoomIsNotInGame(room);
+      checkStartVotingCanStart(room);
+    }
     dispatch(server$roomKick(roomId, userId));
   }
   , roomBanRequest: ({roomId, userId}, {userId: hostId}) => (dispatch, getState) => {
     const room = checkSelectRoom(getState, roomId);
-    checkRoomIsNotInGame(room);
     checkUserIsHost(room, hostId);
+    checkUserInRoom(room, userId);
     checkUserNotBanned(room, userId);
-    checkStartVotingCanStart(room);
+    if (isUserInPlayers(room, userId)) {
+      checkRoomIsNotInGame(room);
+      checkStartVotingCanStart(room);
+    }
     dispatch(server$roomBan(roomId, userId));
   }
   , roomUnbanRequest: ({roomId, userId}, {userId: hostId}) => (dispatch, getState) => {

@@ -41,10 +41,7 @@ players:
     const {selectGame, selectPlayer, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
     // User0: $A +, $B, $C, $D carn +, $E
 
-    console.log(selectGame().status);
-    console.log(selectPlayer(User0).continent);
     clientStore0.dispatch(gameEndTurnRequest()); // Q can't have AutoFood
-    console.log(selectPlayer(User0).continent);
     expect(selectPlayer(User0).ended, 'User0.ended 0').equal(true);
 
     clientStore1.dispatch(traitActivateRequest('$A', 'TraitFatTissue')); // A used fat

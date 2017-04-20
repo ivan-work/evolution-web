@@ -63,6 +63,9 @@ settings:
     clientStore1.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$C', 'TraitCarnivorous', '$Z'));
+    expect(selectGame().question).ok;
+    expect(ClientGame0().question).ok;
+    expect(ClientGame1().question).ok;
 
     await new Promise(resolve => setTimeout(resolve, 12));
 

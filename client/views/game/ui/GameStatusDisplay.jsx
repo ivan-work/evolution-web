@@ -20,7 +20,7 @@ export class GameStatusDisplay extends Component {
 
   getPlayerNameByIndex(players, index) {
     const playerId = players.findKey(player => player.index === index);
-    return <UserView id={playerId} output='name'/>;
+    return <UserView id={playerId}/>;
   }
 
   render() {
@@ -43,14 +43,15 @@ export class GameStatusDisplay extends Component {
       <li className='line'>
         <span className='key'>{T.translate('Game.UI.Status.Player')}:</span>
         <span className='value'>
-          {question ? <span>(<UserView id={question.targetPid} output='name'/>)</span>
+          {question ? <UserView id={question.targetPid} output='name'/>
             : this.getPlayerNameByIndex(players, status.currentPlayer)}
         </span>
       </li>
       <li className='line'>
         <span className='key'>{T.translate('Game.UI.Status.Time')}:</span>
         <span className='value'>
-          {(question ? <Timer start={question.time} duration={settings.timeTraitResponse}/>
+          {(game.status.paused ? <span>{T.translate('Game.UI.Status.Pause')}</span>
+            : !!question ? <Timer start={question.time} duration={settings.timeTraitResponse}/>
             : status.turnStartTime != null ? <Timer start={status.turnStartTime} duration={status.turnDuration}/>
             : '-')}
           </span>

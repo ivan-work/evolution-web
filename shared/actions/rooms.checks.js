@@ -79,8 +79,10 @@ export const checkRoomIsNotInGame = (room) => {
 
 export const isUserInPlayers = (room, userId) => !!~room.users.indexOf(userId);
 
+export const isUserInSpecatators = (room, userId) => !!~room.spectators.indexOf(userId);
+
 export const checkUserInRoom = (room, userId) => {
-  if (!isUserInPlayers(room, userId) && !~room.spectators.indexOf(userId))
+  if (!isUserInPlayers(room, userId) && !isUserInSpecatators(room, userId))
     throw new ActionCheckError('checkUserInRoom', 'Room(%s) doesnt have User(%s)', room.id, userId);
 };
 

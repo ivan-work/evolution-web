@@ -17,7 +17,7 @@ import {
 
 import {server$game, to$} from './generic';
 import {doesPlayerHasOptions, getFeedingOption} from './ai';
-import {server$tryViviparous, server$takeFoodRequest} from './actions';
+import {server$tryViviparous, server$takeFoodRequest, server$questionPauseTimeout, server$questionResumeTimeout} from './actions';
 import {appPlaySound} from '../../client/actions/app';
 import {redirectTo} from '../utils';
 import {selectGame, selectUsersInGame} from '../selectors';
@@ -73,7 +73,7 @@ export const server$gameCreateSuccess = (room) => (dispatch, getState) => {
       , {meta: {userId, clientOnly: true}}));
   });
 
-  if (!game.status.started) {
+  if (game.status.phase === 0) {
     dispatch(server$game(gameId, gameStart(gameId)));
     dispatch(server$gameDistributeCards(gameId));
     dispatch(server$gamePlayerStart(gameId));
@@ -119,6 +119,7 @@ export const gameGiveCards = (gameId, userId, cards) => ({
   type: 'gameGiveCards'
   , data: {gameId, userId, cards}
 });
+
 export const server$gameGiveCards = (gameId, userId, count) => (dispatch, getState) => {
   const cards = selectGame(getState, gameId).deck.take(count);
   dispatch(Object.assign(
@@ -132,6 +133,49 @@ export const server$gameGiveCards = (gameId, userId, count) => (dispatch, getSta
     gameGiveCards(gameId, userId, cards.map(card => card.toOthers().toClient()))
     , {meta: {clientOnly: true, users: selectUsersInGame(getState, gameId).filter(uid => uid !== userId)}}
   ));
+};
+
+/**
+ * Pause
+ */
+
+export const gameSetUserWantsPauseRequest = (wantsPause) => (dispatch, getState) => dispatch({
+  type: 'gameSetUserWantsPauseRequest'
+  , data: {gameId: getState().getIn(['game', 'id']), wantsPause}
+  , meta: {server: true}
+});
+
+const gameSetUserWantsPause = (gameId, userId, wantsPause) => ({
+  type: 'gameSetUserWantsPause'
+  , data: {gameId, userId, wantsPause}
+});
+
+const gameSetPaused = (gameId, paused) => ({
+  type: 'gameSetPaused'
+  , data: {gameId, paused}
+});
+
+const server$gameSetUserWantsPause = (gameId, userId, wantsPause) => (dispatch, getState) => {
+  dispatch(server$game(gameId, gameSetUserWantsPause(gameId, userId, wantsPause)));
+  const game = selectGame(getState, gameId);
+  if (!game.status.paused) {
+    if (game.getActualPlayers().every(p => p.wantsPause)) {
+      dispatch(server$game(gameId, gameSetPaused(gameId, true)));
+      dispatch(server$gameCancelTurnTimeout(gameId));
+      dispatch(server$questionPauseTimeout(game));
+    }
+  } else {
+    const playersCount = game.getActualPlayers().size;
+    const needToUnpause = Math.ceil(playersCount / 2);
+    if (game.getActualPlayers().filter(p => !p.wantsPause).size > needToUnpause) {
+      dispatch(server$game(gameId, gameSetPaused(gameId, false)));
+      if (game.question) {
+        dispatch(server$questionResumeTimeout(gameId, game.question));
+      } else {
+        dispatch(server$addTurnTimeout(gameId,));
+      }
+    }
+  }
 };
 
 // ===== DEPLOY!
@@ -303,8 +347,13 @@ const gameSetUserTimedOut = (gameId, playerId, timedOut) => ({
 });
 
 export const server$addTurnTimeout = (gameId, userId, turnTime) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  if (game.status.paused) return;
+
+  if (userId === void 0) {
+    userId = game.players.find(p => p.index === game.status.currentPlayer).id
+  }
   if (turnTime === void 0) {
-    const game = selectGame(getState, gameId);
     turnTime = !game.getPlayer(userId).timedOut ? game.settings.timeTurn : SETTINGS_TIMED_OUT_TURN_TIME;
   }
   dispatch(server$game(gameId, gameAddTurnTimeout(gameId, Date.now(), turnTime)));
@@ -595,6 +644,12 @@ export const gameClientToServer = {
       dispatch(server$addTurnTimeout(gameId, userId))
     }
   }
+  , gameSetUserWantsPauseRequest: ({gameId, wantsPause}, {userId}) => (dispatch, getState) => {
+    const game = selectGame(getState, gameId);
+    checkGameDefined(game);
+    checkGameHasUser(game, userId);
+    dispatch(server$gameSetUserWantsPause(gameId, userId, wantsPause));
+  }
 };
 
 // gameServerToClient
@@ -631,7 +686,8 @@ export const gameServerToClient = {
   , gamePlayerLeft: ({gameId, userId}) => gamePlayerLeft(gameId, userId)
   , gameAnimalStarve: ({gameId, animalId}) => gameAnimalStarve(gameId, animalId)
   , gameSetUserTimedOut: ({gameId, playerId, timedOut}) => gameSetUserTimedOut(gameId, playerId, timedOut)
-  // , gameSetUserWantsPause: ({gameId, playerId, wantsPause}) => gameSetUserWantsPause(gameId, playerId, wantsPause)
+  , gameSetUserWantsPause: ({gameId, userId, wantsPause}) => gameSetUserWantsPause(gameId, userId, wantsPause)
+  , gameSetPaused: ({gameId, paused}) => gameSetPaused(gameId, paused)
   , traitAnimalPoisoned: ({gameId, animalId}) => traitAnimalPoisoned(gameId, animalId)
 };
 

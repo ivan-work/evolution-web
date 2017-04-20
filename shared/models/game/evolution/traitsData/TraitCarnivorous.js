@@ -310,7 +310,7 @@ export const TraitCarnivorous = {
       dispatch(server$traitDefenceQuestion(game.id, sourceAnimal, trait, targetAnimal, defaultDefence));
       return false;
     } else {
-      const question = QuestionRecord.new(QuestionRecord.DEFENSE, sourceAnimal, trait.id, targetAnimal);
+      const question = QuestionRecord.new(QuestionRecord.DEFENSE, targetAnimal.ownerId, sourceAnimal, trait.id, targetAnimal);
       logger.debug('server$traitDefenceQuestionInstant', question.id, sourceAnimal.id, trait.id, targetAnimal.id);
       dispatch(traitQuestion(game.id, question));
       return dispatch(defaultDefence(question.id));

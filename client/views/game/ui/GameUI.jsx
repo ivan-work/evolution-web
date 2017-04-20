@@ -10,6 +10,7 @@ import {GameStatusDisplay} from './GameStatusDisplay.jsx';
 import TraitDefenceDialog from './TraitDefenceDialog.jsx';
 import TraitActivateDialog from './TraitActivateDialog.jsx';
 import GameTimedOutDialog from './GameTimedOutDialog.jsx';
+import Pause from './Pause.jsx';
 
 import {TraitIntellect} from '../../../../shared/models/game/evolution/traitsData';
 import {QuestionRecord} from '../../../../shared/models/game/GameModel.js';
@@ -69,6 +70,7 @@ class _GameUI extends React.Component {
           <div className='DeckWrapper'>
             <Deck deck={game.deck}/>
             <GameLog game={game}/>
+            <Pause/>
           </div>
         </div>
 

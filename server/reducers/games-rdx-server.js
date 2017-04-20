@@ -44,7 +44,6 @@ const logTrait = (game, traitId) => {
  */
 
 export const gameStart = game => game
-  .setIn(['status', 'started'], true)
   .setIn(['status', 'phase'], PHASE.DEPLOY)
   .setIn(['status', 'round'], 0);
 //.setIn(['status', 'currentPlayer'], 0); // TODO RANDOMIZE
@@ -82,8 +81,8 @@ export const gameDeployAnimalFromDeck = (game, {animal, sourceAid}) => {
   return game
     .update(game => !ending ? game
       : game
-      .update('players', players => players.map(player => player
-        .update('continent', continent => continent.map(animal => animal.setIn(['flags', TRAIT_ANIMAL_FLAG.HIBERNATED], false))))))
+        .update('players', players => players.map(player => player
+          .update('continent', continent => continent.map(animal => animal.setIn(['flags', TRAIT_ANIMAL_FLAG.HIBERNATED], false))))))
     .update('deck', deck => deck.skip(1))
     .update(gameDeployAnimal(animal, card, animalIndex + 1))
     .update(addToGameLog(['traitGiveBirth', logAnimal(parent)]));
@@ -184,7 +183,10 @@ export const gameAddTurnTimeout = (game, {turnStartTime, turnDuration}) => game
   .setIn(['status', 'turnDuration'], turnDuration);
 
 export const gameSetUserTimedOut = (game, {playerId, timedOut}) => game.setIn(['players', playerId, 'timedOut'], timedOut);
-export const gameSetUserWantsPause = (game, {playerId, timedOut}) => game.setIn(['players', playerId, 'wantsPause'], wantsPause);
+
+export const gameSetUserWantsPause = (game, {userId, wantsPause}) => game.setIn(['players', userId, 'wantsPause'], wantsPause);
+
+export const gameSetPaused = (game, {paused}) => game.setIn(['status', 'paused'], paused);
 
 /**
  * Traits
@@ -203,7 +205,7 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
 
   return sourceType === 'GAME' ? updatedGame.update('food', food => food - amount)
     : sourceType === 'TraitPiracy' ? updatedGame.updateIn(['players', another.ownerId, 'continent', takenFromAix, 'food'], food => Math.max(food - amount, 0))
-    : updatedGame;
+      : updatedGame;
 };
 
 const animalDies = (playerId, animalIndex, animal) => (game) => {
@@ -336,6 +338,7 @@ export const reducer = createReducer(Map(), {
   , gameStartExtinct: (state, data) => state.update(data.gameId, game => gameStartExtinct(game, data))
   , gameSetUserTimedOut: (state, data) => state.update(data.gameId, game => gameSetUserTimedOut(game, data))
   , gameSetUserWantsPause: (state, data) => state.update(data.gameId, game => gameSetUserWantsPause(game, data))
+  , gameSetPaused: (state, data) => state.update(data.gameId, game => gameSetPaused(game, data))
   , playerActed: (state, data) => state.update(data.gameId, game => playerActed(game, data))
   , traitMoveFood: (state, data) => state.update(data.gameId, game => traitMoveFood(game, data))
   , startCooldown: (state, data) => state.update(data.gameId, game => startCooldown(game, data))

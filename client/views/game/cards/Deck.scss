@@ -1,6 +1,9 @@
 .DeckWrapper {
   margin: 0 0 15px;
   display: flex;
+  .mdl-button--icon {
+    margin-left: 10px;
+  }
   .Deck {
     position: relative;
     display: inline-block;

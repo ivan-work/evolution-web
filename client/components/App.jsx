@@ -4,6 +4,7 @@ import {connect} from 'react-redux';
 import T from 'i18n-react';
 
 import {Layout, Header, Navigation, Content, IconButton, Button, Spacer} from 'react-mdl';
+import ReactTooltip from 'react-tooltip'
 
 import {AdminPanelView} from './AdminPanel.jsx'
 import {ServicesContext} from '../services/ServicesContext';
@@ -18,6 +19,9 @@ import {appChangeSound} from '../actions/app';
 
 export const App = ServicesContext(PortalsContext(TooltipsContext(
   ({children, location, sound, appChangeSound}) => (<Layout fixedHeader>
+    <ReactTooltip html
+                  delayHide={1000}
+    />
     <Header title={`${T.translate('App.Name')} v${GLOBAL_VERSION}`} hideSpacer={true}>
       <Navigation className='header'>
         <TranslationSwitchView/>
