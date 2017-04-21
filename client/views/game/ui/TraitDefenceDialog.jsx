@@ -3,7 +3,6 @@ import T from 'i18n-react';
 import {Dialog} from '../../utils/Dialog.jsx';
 import {DialogTitle, DialogContent} from 'react-mdl';
 
-import {TooltipsContextElement} from '../../utils/Tooltips.jsx';
 import {Timer} from '../../utils/Timer.jsx';
 import {Animal} from '../animals/Animal.jsx';
 import {AnimalTrait} from '../animals/AnimalTrait.jsx';
@@ -38,10 +37,15 @@ export class TraitDefenceDialog extends Component {
     const {animal: targetAnimal} = game.locateAnimal(targetAid);
 
     const traitTailLoss = targetAnimal.hasTrait(TraitTailLoss.type);
-    const targetsTailLoss = traitTailLoss && TraitTailLoss.getTargets(game, attackAnimal, TraitCarnivorous, targetAnimal);
+    const targetsTailLoss = traitTailLoss
+      && !checkIfTraitDisabledByIntellect(attackAnimal, traitTailLoss)
+      && TraitTailLoss.getTargets(game, attackAnimal, TraitCarnivorous, targetAnimal);
 
     const traitMimicry = targetAnimal.hasTrait(TraitMimicry.type);
-    const targetsMimicry = traitMimicry && TraitMimicry.getTargets(game, attackAnimal, TraitCarnivorous, targetAnimal);
+    const targetsMimicry = traitMimicry
+      && traitMimicry.checkAction(game, targetAnimal)
+      && !checkIfTraitDisabledByIntellect(attackAnimal, traitMimicry)
+      && TraitMimicry.getTargets(game, attackAnimal, TraitCarnivorous, targetAnimal);
 
     const otherTraits = [
       targetAnimal.hasTrait(TraitShell)
@@ -51,22 +55,20 @@ export class TraitDefenceDialog extends Component {
       && !checkIfTraitDisabledByIntellect(attackAnimal, t) // And it's not blocked by attacking intellect
     );
     return (<DialogContent>
-      <TooltipsContextElement>
         <div className='TraitDefenceDialog'>
-          {traitTailLoss && targetsTailLoss.size > 0 && !checkIfTraitDisabledByIntellect(attackAnimal, traitTailLoss)
+          {traitTailLoss && targetsTailLoss.size > 0
             && this.renderTailLoss(targetsTailLoss, $traitAnswer.bind(null, traitTailLoss.id))
             }
-          {traitMimicry && targetsMimicry.size > 0 && !checkIfTraitDisabledByIntellect(attackAnimal, traitMimicry)
+          {traitMimicry && targetsMimicry.size > 0
             && this.renderMimicry(targetsMimicry, $traitAnswer.bind(null, traitMimicry.id))
             }
           {otherTraits.length > 0
             && this.renderOther(otherTraits, $traitAnswer.bind(null))}
           <h1>
-            <T.span text='Game.UI.TraitDefenceDialog.Time'/>:
+            <T.span text='Game.UI.TraitDefenceDialog.Time'/>:&nbsp;
             <Timer start={time} duration={game.settings.timeTraitResponse}/>
           </h1>
         </div>
-      </TooltipsContextElement>
     </DialogContent>);
   }
 

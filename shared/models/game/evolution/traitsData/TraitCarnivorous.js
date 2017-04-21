@@ -305,12 +305,12 @@ export const TraitCarnivorous = {
      * Now we determine if we need to ask user at all
      * */
 
-    logger.debug(`possibleDefences: ${possibleDefenses.length}/${possibleDefenseTargets}`);
-    if (possibleDefenseTargets > 1) {
+    logger.debug(`Should I ask question? ${possibleDefenses.map(t => t.type)} / ${possibleDefenseTargets}`);
+    if (possibleDefenses.length > 1 || possibleDefenseTargets > 1) {
       dispatch(server$traitDefenceQuestion(game.id, sourceAnimal, trait, targetAnimal, defaultDefence));
       return false;
     } else {
-      const question = QuestionRecord.new(QuestionRecord.DEFENSE, targetAnimal.ownerId, sourceAnimal, trait.id, targetAnimal);
+      const question = QuestionRecord.new(QuestionRecord.DEFENSE, targetAnimal.ownerId, sourceAnimal, trait.id, targetAnimal, 0);
       logger.debug('server$traitDefenceQuestionInstant', question.id, sourceAnimal.id, trait.id, targetAnimal.id);
       dispatch(traitQuestion(game.id, question));
       return dispatch(defaultDefence(question.id));

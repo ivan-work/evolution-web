@@ -80,7 +80,7 @@ export class PlayerWrapper extends Component {
     return (
       <div className={cn({PlayerWrapper: true, UserWrapper: isUser, EnemyWrapper: !isUser})}
            data-player-id={player.id}>
-        <TraitActivateDialog {...this.state.traitActivateQuestion}/>
+        <TraitActivateDialog game={game} {...this.state.traitActivateQuestion}/>
         {upsideDown ? innerElements : innerElements.reverse()}
         <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
           <PortalTarget name={`svg-player-wrapper-${player.id}`} container='g'/>

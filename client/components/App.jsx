@@ -11,12 +11,10 @@ import {PortalsContext, PortalTarget} from '../views/utils/PortalTarget.jsx'
 import {TranslationSwitchView} from './TranslationSwitch.jsx'
 import ErrorReporter from './ErrorReporter.jsx';
 
-import {TooltipsContext} from '../views/utils/Tooltips.jsx';
-
 import {appChangeSound} from '../actions/app';
 
 
-export const App = ServicesContext(PortalsContext(TooltipsContext(
+export const App = ServicesContext(PortalsContext(
   ({children, location, sound, appChangeSound}) => (<Layout fixedHeader>
     <Header title={`${T.translate('App.Name')} v${GLOBAL_VERSION}`} hideSpacer={true}>
       <Navigation className='header'>
@@ -48,7 +46,7 @@ export const App = ServicesContext(PortalsContext(TooltipsContext(
       <PortalTarget name='tooltips'/>
     </div>
   </Layout>)
-)));
+));
 
 export const AppView = connect(
   (state) => ({

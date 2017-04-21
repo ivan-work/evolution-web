@@ -36,10 +36,10 @@ class _GameUI extends React.Component {
 
   render() {
     const {game} = this.props;
-    let intellectQuestion = {};
+    let traits, onSelectTrait;
     if (game.question && game.question.id && game.question.type === QuestionRecord.INTELLECT) {
-      intellectQuestion.traits = TraitIntellect.getTargets(game, game.question.sourceAid, game.question.targetAid);
-      intellectQuestion.onSelectTrait = (targetId) => {
+      traits = TraitIntellect.getTargets(game, game.question.sourceAid, game.question.targetAid);
+      onSelectTrait = (targetId) => {
         this.context.gameActions.$traitAnswer(game.question.traitId, targetId)
       }
     }
@@ -49,7 +49,7 @@ class _GameUI extends React.Component {
 
         <TraitDefenceDialog game={game} $traitAnswer={this.context.gameActions.$traitAnswer}/>
 
-        <TraitActivateDialog game={game} {...intellectQuestion}/>
+        <TraitActivateDialog game={game} traits={traits} onSelectTrait={onSelectTrait}/>
 
         <PlayersList game={game}/>
 

@@ -5,8 +5,7 @@ import T from 'i18n-react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import cn from 'classnames';
 
-//import {Tooltip} from './../../utils/Tooltips.jsx';
-import {Tooltip} from './../../utils/Tooltips.jsx';
+import Tooltip from 'rc-tooltip';
 import {Portal} from '../../utils/Portal.jsx';
 import {AnimalTrait} from './AnimalTrait.jsx';
 import AnimalTraitArrowMarker from './AnimalTraitArrowMarker.jsx';
@@ -116,7 +115,11 @@ export class AnimalLinkedTrait extends Component {
       <defs>
         <AnimalTraitArrowMarker id='symbioticArrow' className={markerClassName} markerSize={4}/>
       </defs>
-      <Tooltip label={T.translate('Game.Trait.' + this.props.trait.type)}>
+      <Tooltip
+        placement='top'
+        mouseEnterDelay={.1}
+        destroyTooltipOnHide
+        overlay={<span>{T.translate('Game.Trait.' + this.props.trait.type)}</span>}>
         <path className={linkClassName} d={this.state.d} style={{
          strokeWidth: this.state.strokeWidth + 'px'
          , strokeLinecap: 'round'

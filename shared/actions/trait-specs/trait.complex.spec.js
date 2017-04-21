@@ -6,7 +6,7 @@ import {
   , traitAnswerRequest
 } from '../actions';
 
-import {PHASE} from '../../models/game/GameModel';
+import {PHASE, QuestionRecord} from '../../models/game/GameModel';
 import {replaceGetRandom} from '../../utils/randomGenerator';
 
 import {makeGameSelectors} from '../../selectors';
@@ -167,6 +167,38 @@ players:
     expectChanged('User1 can only answer', () => {
       clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', selectTraitId(User1, 0, 1)));
     }, serverStore, clientStore0, clientStore1);
+  });
+
+  it('Intellect defence mimicry', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: 2
+food: 4
+players:
+  - continent: $Q comm$A int carn wait, $A tail mimi ink shell, $B tail mimi ink shell, $C tail mimi ink shell
+`);
+    const {selectGame, selectPlayer, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$A'));
+    expect(selectGame().question).ok;
+    expect(selectGame().question.type).equal(QuestionRecord.INTELLECT);
+    clientStore0.dispatch(traitAnswerRequest('TraitIntellect', 'TraitTailLoss'));
+    expect(selectGame().question).ok;
+    expect(selectGame().question.type).equal(QuestionRecord.DEFENSE);
+    expect(selectGame().question.targetAid).equal('$A');
+    clientStore0.dispatch(traitAnswerRequest('TraitMimicry', '$B'));
+    expect(selectGame().question).ok;
+    expect(selectGame().question.type).equal(QuestionRecord.DEFENSE);
+    expect(selectGame().question.targetAid).equal('$B');
+    clientStore0.dispatch(traitAnswerRequest('TraitMimicry', '$A'));
+    expect(selectGame().question).ok;
+    expect(selectGame().question.type).equal(QuestionRecord.DEFENSE);
+    expect(selectGame().question.targetAid).equal('$A');
+    expectUnchanged('Cannot mimicry', () => {
+      clientStore0.dispatch(traitAnswerRequest('TraitMimicry', '$B'));
+    }, serverStore, clientStore0);
+    clientStore0.dispatch(traitAnswerRequest('TraitInkCloud'));
   });
 });
 
