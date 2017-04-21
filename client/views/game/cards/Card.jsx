@@ -9,10 +9,8 @@ import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 import {CardModel} from '../../../../shared/models/game/CardModel';
 import './Card.scss';
 
-import {Tooltip} from './../../utils/Tooltips.jsx';
+import Tooltip from 'rc-tooltip';
 import AnimalTraitDetails from '../animals/AnimalTraitDetails.jsx';
-
-import gecko from '../../../assets/gfx/gecko-080.svg';
 
 export class Card extends React.Component {
   static propTypes = {
@@ -44,22 +42,28 @@ export class Card extends React.Component {
     const classNames = classnames(this.getClassNames());
 
     return <div id={'Card' + card.id} className={classNames} onClick={this.onCardClick}>
-      <Tooltip label={
-        card.traitsCount === 1 ? <AnimalTraitDetails trait={TraitModel.new(card.trait1)}/>
-          : card.traitsCount === 2 ? <div style={{display: 'flex'}}>
-          <AnimalTraitDetails trait={TraitModel.new(card.trait1)}/>
-          <AnimalTraitDetails trait={TraitModel.new(card.trait2)}/>
+      <Tooltip
+        mouseEnterDelay={.5}
+        placement="top"
+        destroyTooltipOnHide={true}
+        overlay={
+        <div>
+          {card.traitsCount === 1 ? <AnimalTraitDetails trait={TraitModel.new(card.trait1)}/>
+            : card.traitsCount === 2 ? <div style={{display: 'flex'}}>
+              <AnimalTraitDetails trait={TraitModel.new(card.trait1)}/>
+              <AnimalTraitDetails trait={TraitModel.new(card.trait2)}/>
+            </div>
+              : null}
         </div>
-          : null
       }>
         <div className='inner'>
           {card.traitsCount === 1
             ? (<div className={'trait trait-single ' + card.trait1}>{T.translate('Game.Trait.' + card.trait1)}</div>)
             : null}
           {card.traitsCount === 2
-            && <div className={'trait trait1 ' + card.trait1}>{T.translate('Game.Trait.' + card.trait1)}</div>}
+          && <div className={'trait trait1 ' + card.trait1}>{T.translate('Game.Trait.' + card.trait1)}</div>}
           {card.traitsCount === 2
-            && <div className={'trait trait2 ' + card.trait2}>{T.translate('Game.Trait.' + card.trait2)}</div>}
+          && <div className={'trait trait2 ' + card.trait2}>{T.translate('Game.Trait.' + card.trait2)}</div>}
         </div>
       </Tooltip>
     </div>

@@ -1,14 +1,11 @@
 import React, {Component, PropTypes} from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
-import {BodyPortal} from './BodyPortal.jsx';
+import {Portal} from './Portal.jsx';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-import {Provider} from 'react-redux';
 
 import './Dialog.scss';
 
 export class Dialog extends Component {
-  static contextTypes = {store: React.PropTypes.object.isRequired};
-
   static propTypes = {show: PropTypes.bool, onBackdropClick: PropTypes.func};
 
   static defaultProps = {show: false, onBackdropClick: () => null};
@@ -16,15 +13,14 @@ export class Dialog extends Component {
   constructor(props, context) {
     super(props);
     this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-    this.store = context.store;
   }
 
   render() {
-    const {show, onBackdropClick} = this.props;
+    const {show, onBackdropClick, children} = this.props;
     if (process.env.TEST) {
-      return <span>{show && this.props.children}</span>;
+      return <span>{show && children}</span>;
     }
-    return <BodyPortal>
+    return <Portal target='body'>
       <ReactCSSTransitionGroup
         transitionName='transition'
         transitionEnterTimeout={200}
@@ -32,15 +28,13 @@ export class Dialog extends Component {
         { show &&
         <div className='DialogContainer'>
           <div className='Backdrop' onClick={onBackdropClick}>
-            <Provider store={this.store}>
-              <div className='Dialog mdl-dialog' onClick={(e) => e.stopPropagation()}>
-                {this.props.children}
-              </div>
-            </Provider>
+            <div className='Dialog mdl-dialog' onClick={(e) => e.stopPropagation()}>
+              {children}
+            </div>
           </div>
         </div>}
       </ReactCSSTransitionGroup>
-    </BodyPortal>;
+    </Portal>;
   }
 }
 

@@ -5,8 +5,6 @@ import classnames from 'classnames';
 
 import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 
-import * as MDL from 'react-mdl';
-
 import gecko from '../../../assets/gfx/gecko.svg';
 
 export default class AnimalTraitDetails extends Component {
@@ -23,12 +21,11 @@ export default class AnimalTraitDetails extends Component {
     const {trait} = this.props;
 
     const text = T.translate('Game.TraitDesc.' + trait.type)
-      .replace(/\$A/g, `<img class='icon' src='${gecko}'/>`)
-      .replace(/\$F/g, `<i class='icon material-icons'>spa</i>`)
       .replace(/\$EAT/g, T.translate('Game.TraitDesc.$EAT'))
       .replace(/\$CDRound/g, T.translate('Game.TraitDesc.$CDRound'))
       .replace(/\$CDTurn/g, T.translate('Game.TraitDesc.$CDTurn'))
-      .replace(/\$Trait\w+/g, x => '"' + T.translate('Game.Trait.' + x.slice(1)) + '"')
+      .replace(/\$A/g, `<img class='icon' src='${gecko}'/>`)
+      .replace(/\$F/g, `<i class='icon material-icons'>spa</i>`)
 
     const className = classnames({
       AnimalTraitDetails: true
@@ -36,13 +33,11 @@ export default class AnimalTraitDetails extends Component {
       , value: trait.value
     });
 
-    return <MDL.Card className={className} shadow={2}>
-      <MDL.CardTitle className='Title'>
-        <span>
-          {T.translate('Game.Trait.' + trait.type)}&nbsp;{trait.getDataModel().food > 0 && ('+' + trait.getDataModel().food)}
-        </span>
-      </MDL.CardTitle>
-      <MDL.CardText className='Text'><span dangerouslySetInnerHTML={{__html: text}}/></MDL.CardText>
-    </MDL.Card>;
+    return <div className={className}>
+      <div className='Title'>
+        {T.translate('Game.Trait.' + trait.type)}&nbsp;{trait.getDataModel().food > 0 && ('+' + trait.getDataModel().food)}
+      </div>
+      <div className='Text'><span dangerouslySetInnerHTML={{__html: text}}/></div>
+    </div>;
   }
 }

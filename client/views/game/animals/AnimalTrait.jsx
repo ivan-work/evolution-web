@@ -10,11 +10,7 @@ import {AnimalModel} from '../../../../shared/models/game/evolution/AnimalModel'
 import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 
 import AnimalTraitDetails from './AnimalTraitDetails.jsx';
-import {Tooltip} from '../../utils/Tooltips.jsx';
-// import {Tooltip} from 'react-mdl';
-// import {Tooltip2 as Tooltip} from '../../utils/Tooltips';
-// import Tooltip from 'reactjs-mappletooltip';
-
+import Tooltip from 'rc-tooltip';
 
 import './AnimalTrait.scss';
 
@@ -40,7 +36,11 @@ class AnimalTrait extends Component {
     }));
 
     return (<div id={'AnimalTrait' + trait.id} className={className}>
-      <Tooltip label={<AnimalTraitDetails trait={trait}/>}>
+      <Tooltip
+        overlay={<AnimalTraitDetails trait={trait}/>}
+        mouseEnterDelay={.5}
+        destroyTooltipOnHide={true}
+      >
         <div className='inner'>
           <div className='name'>{T.translate('Game.Trait.' + trait.type)}</div>
           <div className='food'>{trait.getDataModel().food > 0 ? ' +' + trait.getDataModel().food : null}</div>

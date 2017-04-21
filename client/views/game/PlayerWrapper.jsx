@@ -5,10 +5,10 @@ import cn from 'classnames';
 
 import {CardCollection} from './CardCollection.jsx';
 import DragCard from './cards/Card.jsx';
-import {DropAnimal} from './animals/Animal.jsx';
+import {DropAnimal, Animal} from './animals/Animal.jsx';
 import Continent from './continent/Continent.jsx';
 import {PortalTarget} from '../utils/PortalTarget.jsx'
-import { AnimationServiceRef } from '../../services/AnimationService';
+import {AnimationServiceRef} from '../../services/AnimationService';
 
 import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 import {PlayerModel} from '../../../shared/models/game/PlayerModel';
@@ -17,6 +17,7 @@ import {CTT_PARAMETER} from '../../../shared/models/game/evolution/constants';
 import {TraitMetamorphose} from '../../../shared/models/game/evolution/traitTypes';
 
 import TraitActivateDialog from './ui/TraitActivateDialog.jsx';
+import Tooltip from "rc-tooltip";
 
 const INITIAL_STATE = {
   traitActivateQuestion: null

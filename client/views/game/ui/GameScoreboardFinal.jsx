@@ -22,10 +22,6 @@ export default class GameScoreboardFinal extends Component {
     game: React.PropTypes.instanceOf(GameModelClient).isRequired
   };
 
-  static contextTypes = {
-    store: React.PropTypes.object.isRequired
-  };
-
   componentDidUpdate() {
     if (!this.showedOnce && this.props.game.status.phase === PHASE.FINAL) {
       this.showedOnce = true;
@@ -34,7 +30,6 @@ export default class GameScoreboardFinal extends Component {
   }
 
   render() {
-    const {store} = this.context;
     const {game} = this.props;
 
     return <span>
@@ -46,7 +41,7 @@ export default class GameScoreboardFinal extends Component {
       }
       <Dialog show={this.state.show}>
         {this.state.show && <MDL.DialogTitle>
-          {T.translate('Game.UI.Scores.Winner')}: <strong><User store={store} id={game.winnerId}/></strong>
+          {T.translate('Game.UI.Scores.Winner')}: <strong><User id={game.winnerId}/></strong>
         </MDL.DialogTitle>}
         <MDL.DialogContent>{this.renderDialogContent()}</MDL.DialogContent>
         <DialogActions>
@@ -57,7 +52,6 @@ export default class GameScoreboardFinal extends Component {
   }
 
   renderDialogContent() {
-    const {store} = this.context;
     const {game} = this.props;
 
     return (
@@ -71,7 +65,7 @@ export default class GameScoreboardFinal extends Component {
         {game.scoreboardFinal.map(({playerId, playing, scoreNormal, scoreDead}) =>
           <tr key={playerId}
               className={cn({'bold': game.winnerId === playerId})}>
-            <td className='mdl-data-table__cell--non-numeric'><User store={store} id={playerId}/></td>
+            <td className='mdl-data-table__cell--non-numeric'><User id={playerId}/></td>
             <td>{scoreNormal}</td>
             <td>{scoreDead}</td>
           </tr>)}

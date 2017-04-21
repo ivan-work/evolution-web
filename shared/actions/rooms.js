@@ -489,7 +489,11 @@ export const roomsClientToServer = {
   }
 };
 
-const isUserRouterInGame = (getState, roomId) => getState().getIn(['routing', 'locationBeforeTransitions', 'pathname']) === '/room/' + roomId;
+// TODO make it normal. relocate, add selectPath, url contruction to function.
+const isUserRouterInGame = (getState, roomId) => {
+  const pathname = getState().getIn(['routing', 'locationBeforeTransitions', 'pathname']);
+  return pathname === '/room/' + roomId || pathname === '/game';
+};
 
 export const roomsServerToClient = {
   roomsInit: ({roomId, rooms}) => roomsInit(roomId, Map(rooms).map(r => RoomModel.fromJS(r)))

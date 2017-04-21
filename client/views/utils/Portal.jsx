@@ -10,25 +10,18 @@ export class Portal extends Component {
   };
 
   componentDidMount() {
-    this.id = Math.floor(Math.random() * 0xFFFFFF);
-    this.target = this.context.portalsContext[this.props.target];
-    if (this.target) {
-      this.target.add(this);
-    } else {
-      throw new Error('Cannot find target' + this.props.target)
-    }
+    const portalContext = this.context.portalsContext;
+    this.id = portalContext.mountPortal(this);
   }
 
   componentWillUnmount() {
-    if (this.target) {
-      this.target.remove(this);
-    }
+    const portalContext = this.context.portalsContext;
+    portalContext.unmountPortal(this);
   }
 
   componentDidUpdate() {
-    if (this.target) {
-      this.target.update();
-    }
+    const portalContext = this.context.portalsContext;
+    portalContext.updatePortal(this);
   }
 
   renderChildren(container) {
@@ -38,6 +31,6 @@ export class Portal extends Component {
   }
 
   render() {
-    return <span></span>
+    return <span/>
   }
 }

@@ -11,8 +11,6 @@ import {AnimalModel} from '../../../../shared/models/game/evolution/AnimalModel'
 import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 import {TRAIT_ANIMAL_FLAG, TRAIT_TARGET_TYPE} from '../../../../shared/models/game/evolution/constants';
 
-import {Tooltip} from './../../utils/Tooltips.jsx';
-import AnimalTraitDetails from './AnimalTraitDetails.jsx';
 import {AnimalTrait, DragAnimalTrait, ClickAnimalTrait} from './AnimalTrait.jsx';
 import {AnimalLinkedTrait} from './AnimalLinkedTrait.jsx';
 import {DragAnimalSelectLink} from './AnimalSelectLink.jsx'
@@ -20,6 +18,7 @@ import {GameProvider} from './../providers/GameProvider.jsx';
 import {Food} from './../food/Food.jsx';
 
 import './Animal.scss';
+import Tooltip from "rc-tooltip";
 
 class Animal extends React.Component {
   static propTypes = {
@@ -45,7 +44,7 @@ class Animal extends React.Component {
   renderFoodStatus(animal) {
     return (animal.isFull() ? <Icon name='sentiment_very_satisfied'/>
       : animal.canSurvive() ? <Icon name='sentiment_neutral'/>
-      : <Icon name='sentiment_very_dissatisfied'/>);
+        : <Icon name='sentiment_very_dissatisfied'/>);
   }
 
   render() {
@@ -62,20 +61,30 @@ class Animal extends React.Component {
           .reverse()
           //.sort((t1, t2) => t1.isLinked() ? 1 : -1)
           .map((trait, index) =>
-          (<div key={trait.id}
-                style={{marginBottom: '-5px'}}>
-            {this.renderTrait(trait, model)}
-          </div>))}
+            (<div key={trait.id}
+                  style={{marginBottom: '-5px'}}>
+              {this.renderTrait(trait, model)}
+            </div>))}
       </div>
       {this.renderSelectLink()}
-      <div id={'AnimalBody'+model.id} className='inner'>
-        {game && game.isFeeding() && this.renderFoodStatus(model, game)}
-        {model.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) && <span className='material-icons Flag Poisoned'>smoking_rooms</span>}
-        {model.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && <span className='material-icons Flag Hibernated'>snooze</span>}
-        {model.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <span className='material-icons Flag Shell'>lock</span>}
-        <div className='AnimalFoodContainer'>
-          {Array.from({length: model.food}).map((u, index) => <Food key={index}/>)}
-        </div>
+      {!game && this.renderAnimalBody(model, game)}
+      {!!game && <Tooltip
+        mouseEnterDelay={.5}
+        destroyTooltipOnHide={true}
+        overlay={<Animal model={model}/>}>
+        {this.renderAnimalBody(model, game)}
+      </Tooltip>}
+    </div>);
+  }
+
+  renderAnimalBody(animal, game) {
+    return (<div id={'AnimalBody' + animal.id} className='inner'>
+      {game && game.isFeeding() && this.renderFoodStatus(animal, game)}
+      {animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) && <span className='material-icons Flag Poisoned'>smoking_rooms</span>}
+      {animal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && <span className='material-icons Flag Hibernated'>snooze</span>}
+      {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <span className='material-icons Flag Shell'>lock</span>}
+      <div className='AnimalFoodContainer'>
+        {Array.from({length: animal.food}).map((u, index) => <Food key={index}/>)}
       </div>
     </div>);
   }
@@ -92,21 +101,18 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
         const {index} = monitor.getItem();
         props.onFoodDropped(props.model, index);
         break;
-      case DND_ITEM_TYPE.TRAIT:
-      {
+      case DND_ITEM_TYPE.TRAIT: {
         const {trait, sourceAnimal} = monitor.getItem();
         props.onTraitDropped(sourceAnimal, trait, props.model.id);
         break;
       }
-      case DND_ITEM_TYPE.TRAIT_SHELL:
-      {
+      case DND_ITEM_TYPE.TRAIT_SHELL: {
         const {model: animal} = props;
         const {trait} = monitor.getItem();
         props.onTraitShellDropped(animal, trait);
         break;
       }
-      case DND_ITEM_TYPE.ANIMAL_LINK:
-      {
+      case DND_ITEM_TYPE.ANIMAL_LINK: {
         const {model: targetAnimal} = props;
         const {animal: sourceAnimal} = monitor.getItem();
         props.onAnimalLink(monitor.getItem().card, sourceAnimal, monitor.getItem().alternateTrait, targetAnimal);
@@ -116,8 +122,7 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
   }
   , canDrop(props, monitor) {
     switch (monitor.getItemType()) {
-      case DND_ITEM_TYPE.CARD:
-      {
+      case DND_ITEM_TYPE.CARD: {
         const {model: animal} = props;
         const {card, alternateTrait} = monitor.getItem();
         const traitData = card.getTraitDataModel(alternateTrait);
@@ -128,20 +133,17 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
       case DND_ITEM_TYPE.FOOD:
         const {index} = monitor.getItem();
         return props.isUserAnimal && props.model.canEat(props.game);
-      case DND_ITEM_TYPE.TRAIT:
-      {
+      case DND_ITEM_TYPE.TRAIT: {
         const {trait, sourceAnimal} = monitor.getItem();
         const targetCheck = !trait.getDataModel().checkTarget || trait.getDataModel().checkTarget(props.game, sourceAnimal, props.model);
         return sourceAnimal.id !== props.model.id && targetCheck;
       }
-      case DND_ITEM_TYPE.TRAIT_SHELL:
-      {
+      case DND_ITEM_TYPE.TRAIT_SHELL: {
         const {model: animal} = props;
         const {trait} = monitor.getItem();
         return trait.checkAttach(animal);
       }
-      case DND_ITEM_TYPE.ANIMAL_LINK:
-      {
+      case DND_ITEM_TYPE.ANIMAL_LINK: {
         const {model: targetAnimal} = props;
         const {card, animal: sourceAnimal, alternateTrait} = monitor.getItem();
         if (card && targetAnimal) {

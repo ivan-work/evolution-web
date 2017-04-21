@@ -25,6 +25,7 @@ import './styles/reset.scss';
 import 'react-mdl/extra/css/material.teal-indigo.min.css'
 import 'react-mdl/extra/material.min.js'
 import './styles/style.scss';
+import 'rc-tooltip/assets/bootstrap_white.css'
 
 // Services
 import {animationMiddleware} from './services/AnimationService';

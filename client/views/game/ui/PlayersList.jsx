@@ -9,14 +9,14 @@ import {GameModel, GameModelClient} from '../../../../shared/models/game/GameMod
 import {
   Icon
   , Badge
-  , Tooltip
+  , Tooltip as MDLTooltip
   , IconButton
   , ListItem
   , ListItemAction
   , ListItemContent
 } from 'react-mdl';
 
-import {Tooltip as CustomTooltip} from '../../utils/Tooltips';
+import Tooltip from 'rc-tooltip';
 import User from '../../utils/User.jsx';
 import UsersList from '../../utils/UsersList.jsx';
 
@@ -49,8 +49,9 @@ export class PlayersList extends Component {
   render() {
     const {game} = this.props;
     return <ul className='PlayersList'>
-      <h6 style={{display: 'inline-block'}}
-          data-tip='hey hey'>{T.translate('App.Room.Players')}: </h6>
+      <h6 style={{display: 'inline-block'}}>
+        {T.translate('App.Room.Players')}:
+      </h6>
       {this.renderSpectators()}
       {GameModel.sortPlayersFromIndex(game)
         .map(player => this.renderPlayer(game, player))}
@@ -59,14 +60,15 @@ export class PlayersList extends Component {
 
   renderSpectators() {
     const spectatorsList = this.props.spectatorsList;
-    // return (spectatorsList.size > 0 && <CustomTooltip label={this.renderSpectatorsList()}>
-    //   <span>
-    //     <Badge text={spectatorsList.size}>&nbsp;</Badge>
-    //   </span>
-    // </CustomTooltip>)
-    return (spectatorsList.size > 0 && <span>
+    return (spectatorsList.size > 0 && <Tooltip
+      overlay={this.renderSpectatorsList()}>
+      <span>
         <Badge text={spectatorsList.size}>&nbsp;</Badge>
-      </span>)
+      </span>
+    </Tooltip>)
+    // return (spectatorsList.size > 0 && <span>
+    //     <Badge text={spectatorsList.size}>&nbsp;</Badge>
+    //   </span>)
   }
 
   renderSpectatorsList() {
@@ -79,12 +81,12 @@ export class PlayersList extends Component {
           <ListItem className='small'>
             <ListItemContent>{user.login}</ListItemContent>
             <ListItemAction>
-              {isHost && <Tooltip label={T.translate('App.Room.$Kick')}>
+              {isHost && <MDLTooltip label={T.translate('App.Room.$Kick')}>
                 <IconButton name='clear' onClick={() => $Kick(user.id)}/>
-              </Tooltip>}
-              {isHost && <Tooltip label={T.translate('App.Room.$Ban')}>
+              </MDLTooltip>}
+              {isHost && <MDLTooltip label={T.translate('App.Room.$Ban')}>
                 <IconButton name='block' onClick={() => $Ban(user.id)}/>
-              </Tooltip>}
+              </MDLTooltip>}
             </ListItemAction>
           </ListItem>)}
       </UsersList>

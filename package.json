@@ -53,6 +53,7 @@
     "mongodb": "*",
     "morgan": "*",
     "node-sass-json-importer": "^3.0.0",
+    "rc-tooltip": "^3.4.3",
     "react": "*",
     "react-addons-css-transition-group": "*",
     "react-addons-pure-render-mixin": "*",
