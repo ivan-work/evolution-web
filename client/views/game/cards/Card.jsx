@@ -62,15 +62,6 @@ export class Card extends React.Component {
           <div className={'trait trait2 ' + card.trait2}>{T.translate('Game.Trait.' + card.trait2)}</div>
         </Tooltip>)}
       </div>
-      {/*<Tooltip*/}
-      {/*overlay={card.traitsCount === 1 ? <AnimalTraitDetails trait={TraitModel.new(card.trait1)}/>*/}
-      {/*: card.traitsCount === 2 ? <div style={{display: 'flex'}}>*/}
-      {/*<AnimalTraitDetails trait={TraitModel.new(card.trait1)}/>*/}
-      {/*<AnimalTraitDetails trait={TraitModel.new(card.trait2)}/>*/}
-      {/*</div>*/}
-      {/*: null*/}
-      {/*}>*/}
-      {/*</Tooltip>*/}
     </div>
   }
 }

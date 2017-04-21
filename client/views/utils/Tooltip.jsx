@@ -7,7 +7,7 @@ export default ({
                   , placement
                   , mouseEnterDelay = .5
                   , mouseLeaveDelay = 0
-                }) => (children === null ? null
+                }) => (overlay === null ? null
   : <Tooltip
     mouseEnterDelay={mouseEnterDelay}
     mouseLeaveDelay={mouseLeaveDelay}
