@@ -9,7 +9,7 @@ import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 import {CardModel} from '../../../../shared/models/game/CardModel';
 import './Card.scss';
 
-import Tooltip from 'rc-tooltip';
+import Tooltip from '../../utils/Tooltip.jsx';
 import AnimalTraitDetails from '../animals/AnimalTraitDetails.jsx';
 
 export class Card extends React.Component {
@@ -41,31 +41,36 @@ export class Card extends React.Component {
 
     const classNames = classnames(this.getClassNames());
 
+    const tooltipProps = {
+      placement: 'top'
+      , mouseLeaveDelay: 0
+    };
+
     return <div id={'Card' + card.id} className={classNames} onClick={this.onCardClick}>
-      <Tooltip
-        mouseEnterDelay={.5}
-        placement="top"
-        destroyTooltipOnHide={true}
-        overlay={
-        <div>
-          {card.traitsCount === 1 ? <AnimalTraitDetails trait={TraitModel.new(card.trait1)}/>
-            : card.traitsCount === 2 ? <div style={{display: 'flex'}}>
-              <AnimalTraitDetails trait={TraitModel.new(card.trait1)}/>
-              <AnimalTraitDetails trait={TraitModel.new(card.trait2)}/>
-            </div>
-              : null}
-        </div>
-      }>
-        <div className='inner'>
-          {card.traitsCount === 1
-            ? (<div className={'trait trait-single ' + card.trait1}>{T.translate('Game.Trait.' + card.trait1)}</div>)
-            : null}
-          {card.traitsCount === 2
-          && <div className={'trait trait1 ' + card.trait1}>{T.translate('Game.Trait.' + card.trait1)}</div>}
-          {card.traitsCount === 2
-          && <div className={'trait trait2 ' + card.trait2}>{T.translate('Game.Trait.' + card.trait2)}</div>}
-        </div>
-      </Tooltip>
+      <div className='inner'>
+        {card.traitsCount === 1
+          ? (<Tooltip {...tooltipProps} overlay={<AnimalTraitDetails trait={TraitModel.new(card.trait1)}/>}>
+            <div className={'trait trait-single ' + card.trait1}>{T.translate('Game.Trait.' + card.trait1)}</div>
+          </Tooltip>)
+          : null}
+        {card.traitsCount === 2
+        && (<Tooltip {...tooltipProps} overlay={<AnimalTraitDetails trait={TraitModel.new(card.trait1)}/>}>
+          <div className={'trait trait1 ' + card.trait1}>{T.translate('Game.Trait.' + card.trait1)}</div>
+        </Tooltip>)}
+        {card.traitsCount === 2
+        && (<Tooltip {...tooltipProps} overlay={<AnimalTraitDetails trait={TraitModel.new(card.trait2)}/>}>
+          <div className={'trait trait2 ' + card.trait2}>{T.translate('Game.Trait.' + card.trait2)}</div>
+        </Tooltip>)}
+      </div>
+      {/*<Tooltip*/}
+      {/*overlay={card.traitsCount === 1 ? <AnimalTraitDetails trait={TraitModel.new(card.trait1)}/>*/}
+      {/*: card.traitsCount === 2 ? <div style={{display: 'flex'}}>*/}
+      {/*<AnimalTraitDetails trait={TraitModel.new(card.trait1)}/>*/}
+      {/*<AnimalTraitDetails trait={TraitModel.new(card.trait2)}/>*/}
+      {/*</div>*/}
+      {/*: null*/}
+      {/*}>*/}
+      {/*</Tooltip>*/}
     </div>
   }
 }

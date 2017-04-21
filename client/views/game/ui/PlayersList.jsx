@@ -1,3 +1,4 @@
+import {List} from 'immutable';
 import React, {Component} from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import T from 'i18n-react';
@@ -97,11 +98,10 @@ export class PlayersList extends Component {
 const PlayersListView = connect((state, {game}) => {
     const userId = state.getIn(['user', 'id']);
     const roomId = state.get('room');
-    const room = state.getIn(['rooms', roomId]);
-    const isHost = room.users.get(0) === userId;
+    const isHost = state.getIn(['rooms', roomId, 'users', 0]) === userId;
     return {
       isHost
-      , spectatorsList: room.spectators
+      , spectatorsList: state.getIn(['rooms', roomId, 'spectators'], List())
     }
   }
   , (dispatch) => ({

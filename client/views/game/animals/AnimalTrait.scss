@@ -45,6 +45,7 @@
 .AnimalTraitDetails {
   max-width: $ANIMAL_TRAIT_DETAILS_WIDTH + 16px * 2; // + card padding
   font-size: 16px;
+  background: white !important;
 
   .Title {
     //padding: 1em 1em 0;

@@ -22,7 +22,6 @@ export default class TraitActivateDialog extends React.Component {
 
   render() {
     const {traits, onSelectTrait} = this.props;
-    console.log(traits)
     const onBackdropClick = !onSelectTrait ? () => 0
       : () => onSelectTrait(null);
     return (<Dialog show={!!traits} onBackdropClick={onBackdropClick}>

@@ -21,6 +21,7 @@ export default class AnimalTraitDetails extends Component {
     const {trait} = this.props;
 
     const text = T.translate('Game.TraitDesc.' + trait.type)
+      .replace(/\$Trait\w+/g, x => '"' + T.translate('Game.Trait.' + x.slice(1)) + '"')
       .replace(/\$EAT/g, T.translate('Game.TraitDesc.$EAT'))
       .replace(/\$CDRound/g, T.translate('Game.TraitDesc.$CDRound'))
       .replace(/\$CDTurn/g, T.translate('Game.TraitDesc.$CDTurn'))
