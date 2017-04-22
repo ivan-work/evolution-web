@@ -34,7 +34,7 @@ export const PauseView = connect(
     const player = state.get('game').getPlayer(userId);
     return {
       isPlayer: !!player
-      , wantsPause: player && player.wantsPause
+      , wantsPause: player && player.getWantsPause()
       , gamePaused: state.get('game').status.paused
     }
   }

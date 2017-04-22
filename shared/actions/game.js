@@ -155,11 +155,10 @@ const gameSetPaused = (gameId, paused) => ({
   , data: {gameId, paused}
 });
 
-const server$gameSetUserWantsPause = (gameId, userId, wantsPause) => (dispatch, getState) => {
-  dispatch(server$game(gameId, gameSetUserWantsPause(gameId, userId, wantsPause)));
+const server$gameCheckForPause = (gameId) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   if (!game.status.paused) {
-    if (game.getActualPlayers().every(p => p.wantsPause)) {
+    if (game.getActualPlayers().every(p => p.getWantsPause())) {
       dispatch(server$game(gameId, gameSetPaused(gameId, true)));
       dispatch(server$gameCancelTurnTimeout(gameId));
       dispatch(server$questionPauseTimeout(game));
@@ -167,7 +166,7 @@ const server$gameSetUserWantsPause = (gameId, userId, wantsPause) => (dispatch, 
   } else {
     const playersCount = game.getActualPlayers().size;
     const needToUnpause = Math.ceil(playersCount / 2);
-    if (game.getActualPlayers().filter(p => !p.wantsPause).size > needToUnpause) {
+    if (game.getActualPlayers().filter(p => !p.getWantsPause()).size > needToUnpause) {
       dispatch(server$game(gameId, gameSetPaused(gameId, false)));
       if (game.question) {
         dispatch(server$questionResumeTimeout(gameId, game.question));
@@ -346,6 +345,11 @@ const gameSetUserTimedOut = (gameId, playerId, timedOut) => ({
   , data: {gameId, playerId, timedOut}
 });
 
+const server$gameSetUserTimedOut = (gameId, userId, timedOut) => (dispatch, getState) => {
+  dispatch(server$game(gameId, gameSetUserTimedOut(gameId, userId, timedOut)));
+  dispatch(server$gameCheckForPause(gameId));
+}
+
 export const server$addTurnTimeout = (gameId, userId, turnTime) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   if (game.status.paused) return;
@@ -359,7 +363,7 @@ export const server$addTurnTimeout = (gameId, userId, turnTime) => (dispatch, ge
   dispatch(server$game(gameId, gameAddTurnTimeout(gameId, Date.now(), turnTime)));
   dispatch(addTimeout(turnTime, makeTurnTimeoutId(gameId, userId), (dispatch, getState) => {
     logger.info(`Turn Timeout:`, `${gameId}: ${userId}`);
-    dispatch(server$game(gameId, gameSetUserTimedOut(gameId, userId, true)));
+    dispatch(server$gameSetUserTimedOut(gameId, userId, true));
     dispatch(server$gameEndTurn(gameId, userId))
   }));
 };
@@ -638,7 +642,7 @@ export const gameClientToServer = {
     checkGameDefined(game);
     checkGameHasUser(game, userId);
     if (!game.getPlayer(userId).timedOut) throw new ActionCheckError(`User(%s) is not timedOut`, userId);
-    dispatch(server$game(gameId, gameSetUserTimedOut(gameId, userId, false)));
+    dispatch(server$gameSetUserTimedOut(gameId, userId, false));
     if (game.status.currentPlayer === game.getPlayer(userId).index && checkTimeout(makeTurnTimeoutId(gameId))) {
       dispatch(server$gameCancelTurnTimeout(gameId));
       dispatch(server$addTurnTimeout(gameId, userId))
@@ -648,7 +652,8 @@ export const gameClientToServer = {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
-    dispatch(server$gameSetUserWantsPause(gameId, userId, wantsPause));
+    dispatch(server$game(gameId, gameSetUserWantsPause(gameId, userId, wantsPause)));
+    dispatch(server$gameCheckForPause(gameId));
   }
 };
 

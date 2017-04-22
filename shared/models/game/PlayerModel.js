@@ -15,6 +15,10 @@ export class PlayerModel extends Record({
   , wantsPause: false // Does he want a pause
   , scoreDead: 0
 }) {
+  getWantsPause() {
+    return this.wantsPause || this.timedOut;
+  }
+
   toOthers() {
     return this
       .update('hand', hand => hand.map((card) => card.toOthers()))

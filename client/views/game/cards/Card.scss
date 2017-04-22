@@ -11,14 +11,24 @@
     border-right-color: #484;
     border-radius: 8px;
     box-sizing: border-box;
-  }
 
-  &.cover .inner {
-    background-size: $CARD_WIDTH / 4 * 3;
-    border: 6px solid #080;
-    border-radius: 5px;
-    box-sizing: border-box;
-    background: #dfd url(../../../assets/gfx/gecko-080.svg) no-repeat 50% 50%;
+    .cover-inner {
+      display: block;
+      width: 100%;
+      height: $CARD_HEIGHT;
+      border: 6px solid #080;
+      border-radius: 5px;
+      box-sizing: border-box;
+      background-size: $CARD_WIDTH / 4 * 3;
+      background: #dfd url(../../../assets/gfx/gecko-080.svg) no-repeat 50% 50%;
+    }
+
+    .inner {
+      display: none;
+    }
+  }
+  .cover-inner {
+    display: none;
   }
 
   .inner {

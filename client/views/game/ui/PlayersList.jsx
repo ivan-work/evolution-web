@@ -43,7 +43,7 @@ export class PlayersList extends Component {
       , ended: player.ended
     });
     return <li key={player.id} className={className}>
-      <User id={player.id}/> {player.wantsPause && <Icon name='pause'/>}
+      <User id={player.id}/> {player.getWantsPause() && <Icon name='pause'/>}
     </li>
   }
 

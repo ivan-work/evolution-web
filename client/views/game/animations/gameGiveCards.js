@@ -10,8 +10,8 @@ export const gameGiveCards = (done, game, cards, getRef) => {
   const Deck = getRef('Deck');
   const DeckHtml = ReactDOM.findDOMNode(Deck);
 
-  cards.some((card, index) => {
-    const CardHtml = document.getElementById('Card'+card.id);
+  cards.map((card, index) => {
+    const CardHtml = document.getElementById('Card' + card.id);
 
     //console.log(`index ${index}`, `deck pos ${game.deck.size - cards.size + index}`, cards.map(c => c.id).toArray());
 
@@ -19,33 +19,29 @@ export const gameGiveCards = (done, game, cards, getRef) => {
     const deckOffset = Deck.getXYForCard(game.deck.size - cards.size + index);
     const targetBbx = CardHtml.getBoundingClientRect();
 
-    const childNode = CardHtml.childNodes[0];
     CardHtml.classList.add('cover');
-    const innerHTML = childNode.innerHTML;
-    childNode.innerHTML = '';
 
-    Velocity(CardHtml, {
+    return Velocity(CardHtml, {
       translateX: -targetBbx.left + sourceBbx.left + deckOffset.x
       , translateY: -targetBbx.top + sourceBbx.top + deckOffset.y
       , rotateY: 0
-    }, 0);
-
-    Velocity(CardHtml, {translateX: -targetBbx.left + 200, translateY: -targetBbx.top + 200, rotateY: 90}
-      , {
-        duration: DURATION
-        , delay: (cards.size - index + 1) * DELAY
-        , easing: 'easeOutCubic'
-        , complete: () => {
-          childNode.innerHTML = innerHTML;
-          if (CardHtml.classList.contains('isUser')) CardHtml.classList.remove('cover');
-        }
-      });
-
-    Velocity(CardHtml, {translateX: 0, translateY: 0, rotateY: 0}
-      , {
-        duration: DURATION
-        , easing: 'easeInOutCubic'
-      });
+    }, 0)
+      .then(() =>
+        Velocity(CardHtml, {translateX: -targetBbx.left + 200, translateY: -targetBbx.top + 200, rotateY: 90}
+          , {
+            duration: DURATION
+            , delay: (cards.size - index + 1) * DELAY
+            , easing: 'easeOutCubic'
+            , complete: () => {
+              if (CardHtml.classList.contains('isUser')) CardHtml.classList.remove('cover');
+            }
+          }))
+      .then(() =>
+        Velocity(CardHtml, {translateX: 0, translateY: 0, rotateY: 0}
+          , {
+            duration: DURATION
+            , easing: 'easeInOutCubic'
+          }))
   });
   setTimeout(() => done(), (cards.size + 1) * DELAY);
 };

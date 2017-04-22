@@ -47,6 +47,7 @@ export class Card extends React.Component {
     };
 
     return <div id={'Card' + card.id} className={classNames} onClick={this.onCardClick}>
+      <div className='cover-inner'>&nbsp;</div>
       <div className='inner'>
         {card.traitsCount === 1
           ? (<Tooltip {...tooltipProps} overlay={<AnimalTraitDetails trait={TraitModel.new(card.trait1)}/>}>
