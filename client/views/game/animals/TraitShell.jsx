@@ -11,33 +11,6 @@ import {TRAIT_COOLDOWN_LINK} from '../../../../shared/models/game/evolution/cons
 
 import AnimalTraitIcon from './AnimalTraitIcon.jsx';
 
-//class GameTrait extends React.Component {
-//  static propTypes = {
-//    trait: React.PropTypes.instanceOf(TraitModel).isRequired
-//  };
-//
-//  static defaultProps = {classNames: {}};
-//
-//  constructor(props) {
-//    super(props);
-//    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-//  }
-//
-//  render() {
-//    const {trait} = this.props;
-//
-//    //const className = classnames(Object.assign(this.classNames || {}, {
-//    //  AnimalTrait: true
-//    //  , [trait.type]: true
-//    //  , value: trait.value
-//    //}));
-//
-//    return (<div id={'AnimalTrait' + trait.id} className={className}>
-//      <AnimalTraitIcon trait={trait}/>
-//    </div>);
-//  }
-//}
-
 const DragTraitShell = DragSource(DND_ITEM_TYPE.TRAIT_SHELL
   , {
     beginDrag: ({trait}) => ({trait})

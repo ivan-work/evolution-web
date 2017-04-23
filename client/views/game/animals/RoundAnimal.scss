@@ -1,0 +1,38 @@
+@import '../../../styles/variables';
+
+.RoundAnimal {
+  position: relative;
+  width: $ANIMAL_WIDTH;
+
+  .RoundAnimalBody {
+    width: 100%;
+    height: $ANIMAL_WIDTH;
+    text-align: center;
+    word-wrap: break-word;
+
+    border: 1px #bbb;
+    border-radius: 50%;
+    box-sizing: border-box;
+
+    background: #fff;
+  }
+
+  &.highlight .RoundAnimalBody {
+    box-shadow: 0px 0px 15px 15px yellow;
+  }
+
+  .Flag {
+    font-size: 1.5em;
+    &.Poisoned {
+      color: #f00;
+    }
+    &.Hibernated {
+      color: #66f;
+    }
+  }
+
+  .Food {
+    color: #966;
+    font-size: 1.1em;
+  }
+}

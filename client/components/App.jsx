@@ -11,15 +11,16 @@ import {PortalsContext, PortalTarget} from '../views/utils/PortalTarget.jsx'
 import {TranslationSwitchView} from './TranslationSwitch.jsx'
 import ErrorReporter from './ErrorReporter.jsx';
 
-import {appChangeSound} from '../actions/app';
+import {appChangeSound, appSetUI} from '../actions/app';
 
 
 export const App = ServicesContext(PortalsContext(
-  ({children, location, sound, appChangeSound}) => (<Layout fixedHeader>
+  ({children, location, sound, newUI, appChangeSound, appSetUI}) => (<Layout fixedHeader>
     <Header title={`${T.translate('App.Name')} v${GLOBAL_VERSION}`} hideSpacer={true}>
       <Navigation className='header'>
         <TranslationSwitchView/>
         <IconButton name={sound ? 'volume_up' : 'volume_off'} onClick={() => appChangeSound(!sound)}/>
+        <IconButton name={newUI ? 'trending_up' : 'trending_down'} onClick={() => appSetUI(!newUI)}/>
         <PortalTarget name='header'/>
         <Spacer/>
         <span>
@@ -51,9 +52,11 @@ export const App = ServicesContext(PortalsContext(
 export const AppView = connect(
   (state) => ({
     sound: state.getIn(['app', 'sound'])
+    , newUI: state.getIn(['app', 'newUI'])
   })
   , (dispatch) => ({
     appChangeSound: (value) => dispatch(appChangeSound(value))
+    , appSetUI: (value) => dispatch(appSetUI(value))
   })
 )(App);
 

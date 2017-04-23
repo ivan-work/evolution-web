@@ -1,4 +1,4 @@
-import React, {PropTypes} from 'react';
+import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 import {Icon} from 'react-mdl';
@@ -17,24 +17,21 @@ import {DragAnimalSelectLink} from './AnimalSelectLink.jsx'
 import {GameProvider} from './../providers/GameProvider.jsx';
 import {Food} from './../food/Food.jsx';
 
-import './Animal.scss';
+import './RoundAnimal.scss';
 import Tooltip from '../../utils/Tooltip.jsx';
 
-class Animal extends React.Component {
+class RoundAnimal extends React.Component {
   static propTypes = {
-    model: React.PropTypes.instanceOf(AnimalModel).isRequired
+    animal: React.PropTypes.instanceOf(AnimalModel).isRequired
   };
 
   constructor(props) {
     super(props);
-    this.state = {};
-    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
   }
 
-  renderSelectLink() {
-    if (this.state.selectLink) {
-      return <DragAnimalSelectLink onEndDrag={() => this.setState({selectLink: null})} {...this.state.selectLink}/>;
-    }
+  getClassNames() {
+    return {RoundAnimal: true}
   }
 
   renderTrait(trait, animal) {
@@ -44,41 +41,35 @@ class Animal extends React.Component {
   renderFoodStatus(animal) {
     return (animal.isFull() ? <Icon name='sentiment_very_satisfied'/>
       : animal.canSurvive() ? <Icon name='sentiment_neutral'/>
-        : <Icon name='sentiment_very_dissatisfied'/>);
+      : <Icon name='sentiment_very_dissatisfied'/>);
   }
 
   render() {
-    const {model, isOver, canDrop, game} = this.props;
+    const animal = this.props.animal;
 
-    const className = classnames({
-      Animal: true
-      , highlight: isOver && canDrop
-    });
+    const className = classnames(this.getClassNames());
 
-    return (<div id={'Animal' + model.id} className={className}>
+    return (<div id={'Animal' + animal.id} className={className}>
       <div className='traits'>
-        {model.traits
+        {animal.traits
           .reverse()
           //.sort((t1, t2) => t1.isLinked() ? 1 : -1)
           .map((trait, index) =>
             (<div key={trait.id}
                   style={{marginBottom: '-5px'}}>
-              {this.renderTrait(trait, model)}
+              {this.renderTrait(trait, animal)}
             </div>))}
       </div>
-      {this.renderSelectLink()}
-      {!game && this.renderAnimalBody(model, game)}
-      {!!game && <Tooltip
-        overlay={<Animal model={model}/>}>
-        {this.renderAnimalBody(model, game)}
-      </Tooltip>}
+      {this.renderAnimalBody()}
     </div>);
   }
 
-  renderAnimalBody(animal, game) {
-    return (<div id={'AnimalBody' + animal.id} className='inner'>
+  renderAnimalBody() {
+    const {animal, game} = this.props;
+    return (<div id={'AnimalBody' + animal.id} className='RoundAnimalBody'>
       {game && game.isFeeding() && this.renderFoodStatus(animal, game)}
-      {animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) && <span className='material-icons Flag Poisoned'>smoking_rooms</span>}
+      {animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) &&
+      <span className='material-icons Flag Poisoned'>smoking_rooms</span>}
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && <span className='material-icons Flag Hibernated'>snooze</span>}
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <span className='material-icons Flag Shell'>lock</span>}
       <div className='AnimalFoodContainer'>
@@ -88,30 +79,30 @@ class Animal extends React.Component {
   }
 }
 
-const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT, DND_ITEM_TYPE.TRAIT_SHELL, DND_ITEM_TYPE.ANIMAL_LINK], {
+const DropRoundAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT, DND_ITEM_TYPE.TRAIT_SHELL, DND_ITEM_TYPE.ANIMAL_LINK], {
   drop(props, monitor, component) {
     switch (monitor.getItemType()) {
       case DND_ITEM_TYPE.CARD:
         const {card, alternateTrait} = monitor.getItem();
-        props.onCardDropped(card, props.model, alternateTrait, component);
+        props.onCardDropped(card, props.animal, alternateTrait, component);
         break;
       case DND_ITEM_TYPE.FOOD:
         const {index} = monitor.getItem();
-        props.onFoodDropped(props.model, index);
+        props.onFoodDropped(props.animal, index);
         break;
       case DND_ITEM_TYPE.TRAIT: {
         const {trait, sourceAnimal} = monitor.getItem();
-        props.onTraitDropped(sourceAnimal, trait, props.model.id);
+        props.onTraitDropped(sourceAnimal, trait, props.animal.id);
         break;
       }
       case DND_ITEM_TYPE.TRAIT_SHELL: {
-        const {model: animal} = props;
+        const {animal} = props;
         const {trait} = monitor.getItem();
         props.onTraitShellDropped(animal, trait);
         break;
       }
       case DND_ITEM_TYPE.ANIMAL_LINK: {
-        const {model: targetAnimal} = props;
+        const {animal: targetAnimal} = props;
         const {animal: sourceAnimal} = monitor.getItem();
         props.onAnimalLink(monitor.getItem().card, sourceAnimal, monitor.getItem().alternateTrait, targetAnimal);
         break;
@@ -121,7 +112,7 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
   , canDrop(props, monitor) {
     switch (monitor.getItemType()) {
       case DND_ITEM_TYPE.CARD: {
-        const {model: animal} = props;
+        const {animal} = props;
         const {card, alternateTrait} = monitor.getItem();
         const traitData = card.getTraitDataModel(alternateTrait);
         return !card.getTraitDataModel(alternateTrait).hidden
@@ -130,19 +121,19 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
       }
       case DND_ITEM_TYPE.FOOD:
         const {index} = monitor.getItem();
-        return props.isUserAnimal && props.model.canEat(props.game);
+        return props.game.userId === props.animal.ownerId && props.animal.canEat(props.game);
       case DND_ITEM_TYPE.TRAIT: {
         const {trait, sourceAnimal} = monitor.getItem();
-        const targetCheck = !trait.getDataModel().checkTarget || trait.getDataModel().checkTarget(props.game, sourceAnimal, props.model);
-        return sourceAnimal.id !== props.model.id && targetCheck;
+        const targetCheck = !trait.getDataModel().checkTarget || trait.getDataModel().checkTarget(props.game, sourceAnimal, props.animal);
+        return sourceAnimal.id !== props.animal.id && targetCheck;
       }
       case DND_ITEM_TYPE.TRAIT_SHELL: {
-        const {model: animal} = props;
+        const {animal} = props;
         const {trait} = monitor.getItem();
         return trait.checkAttach(animal);
       }
       case DND_ITEM_TYPE.ANIMAL_LINK: {
-        const {model: targetAnimal} = props;
+        const {animal: targetAnimal} = props;
         const {card, animal: sourceAnimal, alternateTrait} = monitor.getItem();
         if (card && targetAnimal) {
           return !TraitModel.LinkBetweenCheck(!alternateTrait ? card.trait1 : card.trait2, sourceAnimal, targetAnimal);
@@ -158,23 +149,29 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
   connectDropTarget: connect.dropTarget(),
   isOver: monitor.isOver(),
   canDrop: monitor.canDrop()
-}))(class extends Animal {
+}))(class extends RoundAnimal {
     static displayName = 'Animal';
     static propTypes = {
       // by GameProvider
-      game: PropTypes.object.isRequired
+      game: React.PropTypes.object.isRequired
       // by DnD
-      , connectDropTarget: PropTypes.func.isRequired
-      , isOver: PropTypes.bool.isRequired
-      , canDrop: PropTypes.bool.isRequired
+      , connectDropTarget: React.PropTypes.func.isRequired
+      , isOver: React.PropTypes.bool.isRequired
+      , canDrop: React.PropTypes.bool.isRequired
       // by direct
-      , isUserAnimal: React.PropTypes.bool
-      , onCardDropped: React.PropTypes.func.isRequired
-      , onFoodDropped: React.PropTypes.func.isRequired
-      , onTraitDropped: React.PropTypes.func.isRequired
-      , onTraitShellDropped: React.PropTypes.func.isRequired
-      , onAnimalLink: React.PropTypes.func.isRequired
+      // , onCardDropped: React.PropTypes.func.isRequired
+      // , onFoodDropped: React.PropTypes.func.isRequired
+      // , onTraitDropped: React.PropTypes.func.isRequired
+      // , onTraitShellDropped: React.PropTypes.func.isRequired
+      // , onAnimalLink: React.PropTypes.func.isRequired
     };
+
+    getClassNames() {
+      const {isOver, canDrop} = this.props;
+      return Object.assign(super.getClassNames(), {
+        highlight: isOver && canDrop
+      })
+    }
 
     renderTrait(trait, animal) {
       if (trait.isLinked()) {
@@ -195,10 +192,7 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
   }
 );
 
-const GameDropAnimal = GameProvider(DropAnimal);
-
 export {
-  Animal
-  , DropAnimal as _DropAnimal
-  , GameDropAnimal as DropAnimal
+  RoundAnimal
+  , DropRoundAnimal
 };

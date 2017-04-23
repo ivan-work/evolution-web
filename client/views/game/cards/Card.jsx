@@ -43,7 +43,6 @@ export class Card extends React.Component {
 
     const tooltipProps = {
       placement: 'top'
-      , mouseLeaveDelay: 0
     };
 
     return <div id={'Card' + card.id} className={classNames} onClick={this.onCardClick}>

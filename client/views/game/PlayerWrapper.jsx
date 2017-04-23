@@ -1,11 +1,14 @@
 import React, {Component} from 'react';
 import RIP from 'react-immutable-proptypes';
+import {connect} from 'react-redux'
+import {compose} from 'redux'
 
 import cn from 'classnames';
 
 import {CardCollection} from './CardCollection.jsx';
 import DragCard from './cards/Card.jsx';
 import {DropAnimal, Animal} from './animals/Animal.jsx';
+import {DropRoundAnimal} from './animals/RoundAnimal.jsx';
 import Continent from './continent/Continent.jsx';
 import {PortalTarget} from '../utils/PortalTarget.jsx'
 import {AnimationServiceRef} from '../../services/AnimationService';
@@ -82,7 +85,8 @@ export class PlayerWrapper extends Component {
            data-player-id={player.id}>
         <TraitActivateDialog game={game} {...this.state.traitActivateQuestion}/>
         {upsideDown ? innerElements : innerElements.reverse()}
-        <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
+        <svg width="100%" height="100%"
+             style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
           <PortalTarget name={`svg-player-wrapper-${player.id}`} container='g'/>
         </svg>
       </div>
@@ -116,17 +120,32 @@ export class PlayerWrapper extends Component {
       key='Continent'
       isActive={game.isPlayerTurn(player)}
       isUserContinent={isUser}>
-      {player.continent.map(animal => this.renderAnimal(animal, isUser, game.isDeploy()))}
+      {player.continent.map(animal => this.renderAnimal(animal, isUser))}
     </Continent>)
   }
 
-  renderAnimal(animal, isUserContinent, isDeploy) {
+  renderAnimal(animal, isUserContinent) {
+    const {newUI, game} = this.props;
+    const isDeploy = game.isDeploy();
     const isFeeding = !isDeploy; // Just easier to read
     const onTraitDropped = isFeeding ? this.$traitActivate : this.$noop;
     const onTraitShellDropped = isFeeding ? this.$traitTakeShell : this.$noop;
     const onFoodDropped = isFeeding ? this.$traitTakeFood : this.$noop;
     const onCardDropped = isDeploy ? this.$deployTrait : this.$noop;
     const onAnimalLink = isDeploy ? this.$deployLinkedTrait : this.$noop;
+
+    if (newUI) {
+      return <DropRoundAnimal
+        ref={this.props.connectRef('Animal#' + animal.id)}
+        key={animal.id}
+        animal={animal}
+        game={game}
+        onTraitDropped={onTraitDropped}
+        onTraitShellDropped={onTraitShellDropped}
+        onFoodDropped={onFoodDropped}
+        onCardDropped={onCardDropped}
+        onAnimalLink={onAnimalLink}/>
+    }
     return <DropAnimal
       ref={this.props.connectRef('Animal#' + animal.id)}
       key={animal.id}
@@ -140,4 +159,7 @@ export class PlayerWrapper extends Component {
   }
 }
 
-export default AnimationServiceRef(PlayerWrapper);
+export default compose(
+  AnimationServiceRef
+  , connect((store) => ({newUI: store.getIn(['app', 'newUI'])}))
+)(PlayerWrapper)

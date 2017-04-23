@@ -23,6 +23,14 @@ export const appChangeSound = (value) => ({
   , data: value
 });
 
+export const appSetUI = (value) => (dispatch) => {
+  dispatch({
+    type: 'appSetUI'
+    , data: value
+  });
+  window.location.reload();
+};
+
 const SHOULD_PLAY_AUDIO = GLOBAL_BROWSER && process.env.NODE_ENV !== 'test' && window && window.Audio;
 
 const AUDIO_FILES = {};
@@ -31,6 +39,7 @@ const loadAudioFiles = () => {
   AUDIO_FILES.NOTIFICATION = new window.Audio(require('../assets/sound/notification-02.mp3'));
   AUDIO_FILES.START_D2 = new window.Audio(require('../assets/sound/dota-ready.mp3'));
 };
+
 if (SHOULD_PLAY_AUDIO) loadAudioFiles();
 
 export const appPlaySound = (soundName) => (dispatch, getState) => {
