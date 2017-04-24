@@ -49,7 +49,7 @@ class _GameUI extends React.Component {
 
         <TraitDefenceDialog game={game} $traitAnswer={this.context.gameActions.$traitAnswer}/>
 
-        <TraitActivateDialog game={game} traits={traits} onSelectTrait={onSelectTrait}/>
+        <TraitActivateDialog game={game} traits={traits} onSelectTrait={onSelectTrait} allowNothing/>
 
         <PlayersList game={game}/>
 

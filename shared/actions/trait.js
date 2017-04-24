@@ -426,7 +426,7 @@ export const server$questionResumeTimeout = (gameId, question) => (dispatch, get
 
   question = question.set('time', Date.now());
 
-  logger.verbose('server$traitDefenceQuestion', question.toJS());
+  logger.verbose('server$traitQuestion', question.toJS());
 
   dispatch(traitQuestion(gameId, question));
   // Notify all users
@@ -525,13 +525,18 @@ export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetI
   if (!targetId) {
     throw new ActionCheckError(`server$traitIntellectAnswer@Game(${game.id})`, 'Wrong target trait')
   }
-  dispatch(server$traitSetValue(game, attackAnimal, traitIntellect, targetId));
+  if (!traitIntellect.checkAction(game, attackAnimal)) {
+    throw new ActionCheckError(`server$traitIntellectAnswer@Game(${game.id})`, 'Intellect has cooldown')
+  }
+
+  dispatch(server$traitActivate(game, attackAnimal, traitIntellect, targetId));
   dispatch(server$traitAnswerSuccess(game.id, questionId));
 
   // Reselecting animal from new game to refresh intellect value
-  const {animal: sourceAnimal} = selectGame(getState, gameId).locateAnimal(attackAnimal.id);
+  const newGame = selectGame(getState, gameId);
+  const {animal: sourceAnimal} = newGame.locateAnimal(attackAnimal.id);
 
-  const result = dispatch(server$traitActivate(game, sourceAnimal, attackTrait, targetAnimal));
+  const result = dispatch(server$traitActivate(newGame, sourceAnimal, attackTrait, targetAnimal));
   logger.debug('server$traitIntellectAnswer result:', attackTrait.type, result);
   if (result) dispatch(server$playerActed(gameId, attackAnimal.ownerId));
   return result;

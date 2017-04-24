@@ -261,12 +261,12 @@ export class GameModel extends Record({
     return {animalIndex, animal};
   }
 
-  locateTrait(traitId, animalId) {
-    let playerId = null, animalIndex = -1, traitIndex = -1;
+  locateTrait(traitId, animalId, playerId = null) {
+    let animalIndex = -1, traitIndex = -1;
     traitId && this.players.some(player => {
       animalIndex = player.continent.findIndex(animal => {
         if (!!animalId && (animalId !== animal.id)) return false; // faster searches if animal id provided
-        traitIndex = animal.traits.findIndex(trait => trait.id === traitId);
+        traitIndex = animal.traits.findIndex(trait => trait.isEqual(traitId));
         return ~traitIndex;
       });
       if (~animalIndex) {
