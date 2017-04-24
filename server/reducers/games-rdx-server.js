@@ -154,6 +154,9 @@ export const gameStartDeploy = (game) => {
       .update('continent', continent => continent.map(animal => animal
         .set('food', 0)
         .set('flags', Map())
+        .update('traits', traits => traits.map(trait =>
+          trait.type === 'TraitIntellect' ? trait.set('value', false) : trait
+        ))
       ))
     ))
     .setIn(['food'], 0)
@@ -295,12 +298,11 @@ const traitNotify_Start_getTarget = {
   , 'TraitCooperation': logAnimalById
   , 'TraitPoisonous': logAnimalById
   , [TRAIT_TARGET_TYPE.ANIMAL]: logAnimalById
-  , [TRAIT_TARGET_TYPE.TRAIT]: (game, targetId) => {
-    return logTrait(game, targetId);
-  }
+  , [TRAIT_TARGET_TYPE.TRAIT]: (game, targetId) => logTrait(game, targetId)
 };
 
 export const traitNotify_Start = (game, {sourceAid, traitId, traitType, targetId}) => {
+  if (targetId === true) return game;
   const {animal} = game.locateAnimal(sourceAid);
   const targetType = TraitDataModel.new(traitType).targetType;
   const getTarget = traitNotify_Start_getTarget[traitType] || traitNotify_Start_getTarget[targetType];

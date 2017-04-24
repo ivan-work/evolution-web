@@ -67,6 +67,10 @@ export class TraitModel extends Record({
     ];
   }
 
+  isEqual(id) {
+    return this.id === id || this.type === id;
+  }
+
   //TODO move to AnimalModel
   checkAttach(animal) {
     return (this.getDataModel().multiple || !animal.hasTrait(this.type));
@@ -128,6 +132,6 @@ export class TraitModel extends Record({
   }
 
   toString() {
-    return `Trait#${this.id}#${this.type}`;
+    return `Trait#${this.id}#${this.type}(${this.value || ''})`;
   }
 }

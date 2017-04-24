@@ -67,7 +67,8 @@ export const endHunt = (game, sourceAnimal, traitCarnivorous, targetAnimal) => (
 
 export const endHuntNoCd = (gameId, sourceAnimal, traitCarnivorous, targetAnimal) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
-  if (traitCarnivorous.value) dispatch(server$traitSetValue(game, sourceAnimal, traitCarnivorous, false)); // TODO WTF
+  const traitIntellect = sourceAnimal.hasTrait('TraitIntellect');
+  if (!!traitIntellect && traitIntellect.value === true) dispatch(server$traitSetValue(game, sourceAnimal, traitIntellect, false));
   dispatch(server$traitNotify_End(game.id, sourceAnimal.id, traitCarnivorous, targetAnimal.id));
   if (game.huntingCallbacks.size > 0) {
     dispatch(traitClearHuntingCallbacks(game.id));
@@ -167,11 +168,13 @@ export const TraitCarnivorous = {
     let traitMimicry, traitMimicryTargets, traitTailLoss, traitTailLossTargets, traitRunning, traitShell, traitInkCloud;
 
     const traitIntellect = sourceAnimal.hasTrait(TraitIntellect);
-    let disabledTid = traitIntellect && traitIntellect.value;
+    const canUseIntellect = traitIntellect && traitIntellect.checkAction(game, sourceAnimal);
+    const disabledTid = !!traitIntellect && traitIntellect.value;
+    logger.debug(`traitIntellect: ${traitIntellect}; ${canUseIntellect}; ${disabledTid}`);
 
     getActiveDefenses(game, sourceAnimal, targetAnimal)
       .forEach((defenseTrait) => {
-        if (defenseTrait.id === disabledTid || defenseTrait.type === disabledTid) return;
+        if (defenseTrait.isEqual(disabledTid)) return;
 
         if (defenseTrait.type === TraitRunning.type) {
           traitRunning = defenseTrait;
@@ -197,35 +200,29 @@ export const TraitCarnivorous = {
 
     /**
      * Get Intellect info
-     * After defenses because we need to know, if it will be useful to use intellect.
+     * After defences because we need to know, if it will be useful to use intellect.
+     * disabledTid = string ID | 'Ignore' | false
      */
-    if (traitIntellect && !disabledTid) {
+    if (canUseIntellect && !disabledTid) {
       // default intellect found, need to ask
       const unavoidableDefenses = countUnavoidableDefenses(game, sourceAnimal, targetAnimal);
       const staticDefenses = getStaticDefenses(game, sourceAnimal, targetAnimal)
       logger.debug(`${sourceAnimal.id} activates Intellect`);
       logger.debug(`unavoidableDefenses: ${unavoidableDefenses}`);
-      logger.debug(`staticDefenses: ${staticDefenses.map(t => t.type)}`);
-      logger.debug(`possibleDefenses: ${possibleDefenses.map(t => t.type)}`);
+      logger.debug(`staticDefenses: ${staticDefenses.map(t => t.type) || []}`);
       if (unavoidableDefenses === 0 && staticDefenses.length === 0) {
+        logger.debug(`possibleDefenses: ${possibleDefenses.map(t => t.type)}`);
         const affectiveDefenses = getAffectiveDefenses(game, sourceAnimal, targetAnimal);
         logger.debug(`affectiveDefenses: ${affectiveDefenses.map(t => t.type)}`);
 
-        if (possibleDefenses.length === 0 && affectiveDefenses.length === 0) {
-        } //do nothing
-        else if (possibleDefenses.length === 1 && affectiveDefenses.length === 0) {
-          disabledTid = possibleDefenses[0].id;
-          possibleDefenses.splice(0, 1);
-          possibleDefenseTargets = 0;
-        }
-        else if (possibleDefenses.length === 0 && affectiveDefenses.length === 1) disabledTid = affectiveDefenses[0].id;
-        else {
-          const defaultIntellect = (questionId) => {
-            const targetId = (possibleDefenses.length > 0 ? possibleDefenses[0].id
-              : affectiveDefenses.length > 0 ? affectiveDefenses[0].id
+        const defaultIntellect = (questionId) => {
+          const targetId = (possibleDefenses.length > 0 ? possibleDefenses[0].id
+            : affectiveDefenses.length > 0 ? affectiveDefenses[0].id
               : true);
-            return server$traitIntellectAnswer(game.id, questionId, traitIntellect.id, targetId);
-          };
+          return server$traitIntellectAnswer(game.id, questionId, traitIntellect.id, targetId);
+        };
+
+        if (possibleDefenses.length !== 0 || affectiveDefenses.length !== 0) {
           dispatch(server$traitIntellectQuestion(game.id, sourceAnimal, trait, targetAnimal, defaultIntellect));
           return false;
         }
@@ -235,7 +232,7 @@ export const TraitCarnivorous = {
      * Actual attack started - check for running first
      * */
 
-    if (traitRunning && !!TraitRunning.action() && traitRunning.id !== disabledTid) {
+    if (traitRunning && !!TraitRunning.action() && !traitRunning.isEqual(disabledTid)) {
       dispatch(server$traitNotify_Start(game, targetAnimal, traitRunning, sourceAnimal));
       dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
       return true;
@@ -244,68 +241,68 @@ export const TraitCarnivorous = {
     /**
      * Make function for default defense
      * */
-    // if user has no options or if user didn't respond - outcome will be the same, so we DRY
+      // if user has no options or if user didn't respond - outcome will be the same, so we DRY
 
     const defaultDefence = (questionId) => (dispatch, getState) => {
-      if (traitTailLoss && traitTailLossTargets.size > 0 && traitTailLoss.id !== disabledTid && disabledTid !== true) {
-        dispatch(server$traitDefenceAnswer(game.id
-          , questionId
-          , TraitTailLoss.type
-          , traitTailLossTargets.last().id
-        ));
-        return false;
-      } else if (traitMimicry && traitMimicryTargets.size > 0 && traitMimicry.id !== disabledTid && disabledTid !== true) {
-        dispatch(server$traitDefenceAnswer(game.id
-          , questionId
-          , TraitMimicry.type
-          , traitMimicryTargets.get(0).id
-        ));
-        return false;
-      } else if (traitShell && traitShell.id !== disabledTid && disabledTid !== true) {
-        dispatch(server$traitDefenceAnswer(game.id
-          , questionId
-          , traitShell.id
-        ));
-        return false;
-      } else if (traitInkCloud && traitInkCloud.id !== disabledTid && disabledTid !== true) {
-        dispatch(server$traitDefenceAnswer(game.id
-          , questionId
-          , traitInkCloud.id
-        ));
-        return false;
-      } else {
-        dispatch(server$traitAnswerSuccess(game.id, questionId));
+        if (traitTailLoss && traitTailLossTargets.size > 0 && !traitTailLoss.isEqual(disabledTid)) {
+          dispatch(server$traitDefenceAnswer(game.id
+            , questionId
+            , TraitTailLoss.type
+            , traitTailLossTargets.last().id
+          ));
+          return false;
+        } else if (traitMimicry && traitMimicryTargets.size > 0 && !traitMimicry.isEqual(disabledTid)) {
+          dispatch(server$traitDefenceAnswer(game.id
+            , questionId
+            , TraitMimicry.type
+            , traitMimicryTargets.get(0).id
+          ));
+          return false;
+        } else if (traitShell && !traitShell.isEqual(disabledTid)) {
+          dispatch(server$traitDefenceAnswer(game.id
+            , questionId
+            , traitShell.id
+          ));
+          return false;
+        } else if (traitInkCloud && !traitInkCloud.isEqual(disabledTid)) {
+          dispatch(server$traitDefenceAnswer(game.id
+            , questionId
+            , traitInkCloud.id
+          ));
+          return false;
+        } else {
+          dispatch(server$traitAnswerSuccess(game.id, questionId));
 
-        const poisonous = targetAnimal.hasTrait(TraitPoisonous);
-        if (poisonous && disabledTid !== poisonous.id) {
-          dispatch(server$traitActivate(game, targetAnimal, poisonous, sourceAnimal));
-        }
-
-        dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
-
-        dispatch(server$startFeeding(game.id, sourceAnimal, 2, 'TraitCarnivorous'));
-
-        // Scavenge
-        const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
-        // Selecing new game to not touch killed animal
-        game.constructor.sortPlayersFromIndex(selectGame(getState, game.id), currentPlayerIndex).some(player => player.continent.some(animal => {
-          const traitScavenger = animal.hasTrait(TraitScavenger);
-          if (traitScavenger && animal.canEat(game) > 0) {
-            dispatch(server$startFeeding(game.id, animal, 1, 'TraitScavenger', sourceAnimal.id));
-            return true;
+          const poisonous = targetAnimal.hasTrait(TraitPoisonous);
+          if (poisonous && !poisonous.isEqual(disabledTid)) {
+            dispatch(server$traitActivate(game, targetAnimal, poisonous, sourceAnimal));
           }
-        }));
 
-        dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
-        return true;
-      }
-    };
+          dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
+
+          dispatch(server$startFeeding(game.id, sourceAnimal, 2, 'TraitCarnivorous'));
+
+          // Scavenge
+          const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
+          // Selecing new game to not touch killed animal
+          game.constructor.sortPlayersFromIndex(selectGame(getState, game.id), currentPlayerIndex).some(player => player.continent.some(animal => {
+            const traitScavenger = animal.hasTrait(TraitScavenger);
+            if (traitScavenger && animal.canEat(game) > 0) {
+              dispatch(server$startFeeding(game.id, animal, 1, 'TraitScavenger', sourceAnimal.id));
+              return true;
+            }
+          }));
+
+          dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
+          return true;
+        }
+      };
 
     /**
      * Now we determine if we need to ask user at all
      * */
 
-    logger.debug(`Should I ask question? ${possibleDefenses.map(t => t.type)} / ${possibleDefenseTargets}`);
+    logger.debug(`Should ask DEFENCE question? ${possibleDefenses.map(t => t.type)} / ${possibleDefenseTargets} = ${(possibleDefenses.length > 1 || possibleDefenseTargets > 1)}`);
     if (possibleDefenses.length > 1 || possibleDefenseTargets > 1) {
       dispatch(server$traitDefenceQuestion(game.id, sourceAnimal, trait, targetAnimal, defaultDefence));
       return false;

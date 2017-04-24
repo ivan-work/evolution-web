@@ -18,7 +18,7 @@ import {GameProvider} from './../providers/GameProvider.jsx';
 import {Food} from './../food/Food.jsx';
 
 import './Animal.scss';
-import Tooltip from "rc-tooltip";
+import Tooltip from '../../utils/Tooltip.jsx';
 
 class Animal extends React.Component {
   static propTypes = {
@@ -69,8 +69,6 @@ class Animal extends React.Component {
       {this.renderSelectLink()}
       {!game && this.renderAnimalBody(model, game)}
       {!!game && <Tooltip
-        mouseEnterDelay={.5}
-        destroyTooltipOnHide={true}
         overlay={<Animal model={model}/>}>
         {this.renderAnimalBody(model, game)}
       </Tooltip>}

@@ -75,7 +75,7 @@ export const TraitShell = {
     dispatch(endHunt(game, attackAnimal, attackTrait, defenceAnimal));
     return true;
   }
-  , onRemove: (game, animal) => {
+  , onRemove: (game, animal) => (dispatch) => {
     dispatch(server$traitSetAnimalFlag(game, animal, TRAIT_ANIMAL_FLAG.SHELL, false));
   }
 };
@@ -171,6 +171,7 @@ export const TraitAmbush = {
 };
 export const TraitIntellect = {
   type: tt.TraitIntellect
+  , targetType: TRAIT_TARGET_TYPE.TRAIT
   , food: 1
   , getTargets: (game) => {
     const {animal: sourceAnimal} = game.locateAnimal(game.question.sourceAid);
@@ -179,6 +180,16 @@ export const TraitIntellect = {
       getStaticDefenses(game, sourceAnimal, targetAnimal)
       , getActiveDefenses(game, sourceAnimal, targetAnimal)
       , getAffectiveDefenses(game, sourceAnimal, targetAnimal));
+  }
+  , cooldowns: fromJS([
+    [tt.TraitIntellect, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+  ])
+  , action: (game, sourceAnimal, traitIntellect, targetTrait) => (dispatch, getState) => {
+    dispatch(server$traitSetValue(game, sourceAnimal, traitIntellect, targetTrait));
+    if (targetTrait !== true) {
+      dispatch(server$traitStartCooldown(game.id, traitIntellect, sourceAnimal));
+    }
+    return false;
   }
 };
 export const TraitAnglerfish = {
