@@ -2,15 +2,14 @@
 
 .RoundAnimal {
   position: relative;
-  width: $ANIMAL_WIDTH;
 
   .RoundAnimalBody {
-    width: 100%;
-    height: $ANIMAL_WIDTH;
+    width: $ANIMAL_SIZE;
+    height: $ANIMAL_SIZE;
     text-align: center;
     word-wrap: break-word;
 
-    border: 1px #bbb;
+    border: 1px solid #bbb;
     border-radius: 50%;
     box-sizing: border-box;
 

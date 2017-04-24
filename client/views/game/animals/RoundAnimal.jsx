@@ -11,7 +11,7 @@ import {AnimalModel} from '../../../../shared/models/game/evolution/AnimalModel'
 import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 import {TRAIT_ANIMAL_FLAG, TRAIT_TARGET_TYPE} from '../../../../shared/models/game/evolution/constants';
 
-import {AnimalTrait, DragAnimalTrait, ClickAnimalTrait} from './AnimalTrait.jsx';
+import {RoundAnimalTrait, DragRoundAnimalTrait, ClickRoundAnimalTrait} from './RoundAnimalTrait.jsx';
 import {AnimalLinkedTrait} from './AnimalLinkedTrait.jsx';
 import {DragAnimalSelectLink} from './AnimalSelectLink.jsx'
 import {GameProvider} from './../providers/GameProvider.jsx';
@@ -19,6 +19,9 @@ import {Food} from './../food/Food.jsx';
 
 import './RoundAnimal.scss';
 import Tooltip from '../../utils/Tooltip.jsx';
+
+import styles from '../../../styles.json';
+const {ANIMAL_SIZE, ANIMAL_TRAIT_SIZE} = styles;
 
 class RoundAnimal extends React.Component {
   static propTypes = {
@@ -41,7 +44,25 @@ class RoundAnimal extends React.Component {
   renderFoodStatus(animal) {
     return (animal.isFull() ? <Icon name='sentiment_very_satisfied'/>
       : animal.canSurvive() ? <Icon name='sentiment_neutral'/>
-      : <Icon name='sentiment_very_dissatisfied'/>);
+        : <Icon name='sentiment_very_dissatisfied'/>);
+  }
+
+  getTraitPosition(i) {
+    let c = ANIMAL_SIZE / 2;
+    let d = ANIMAL_TRAIT_SIZE * 1.3;
+    let a = Math.PI - Math.PI * 2 / 8 * i;
+
+    if (i >= 8) {
+      i = i - 8;
+      d = ANIMAL_TRAIT_SIZE * 2.3;
+      a = Math.PI - Math.PI * 2 / 16 * i
+    }
+
+    return {
+      top: c + d * Math.cos(a) + 'px'
+      , left: c + d * Math.sin(a) + 'px'
+      // , background: i
+    }
   }
 
   render() {
@@ -49,14 +70,28 @@ class RoundAnimal extends React.Component {
 
     const className = classnames(this.getClassNames());
 
-    return (<div id={'Animal' + animal.id} className={className}>
+    let style = {};
+    const margin = 1.1 * ANIMAL_TRAIT_SIZE;
+    if (animal.traits.size > 9) {
+      style.marginRight = `${2 * margin}px`
+      style.marginLeft = `${margin}px`
+    } else
+    if (animal.traits.size > 5) {
+      style.marginRight = `${margin}px`
+      style.marginLeft = `${margin}px`
+    } else if (animal.traits.size > 1) {
+      style.marginRight = `${margin}px`
+    }
+
+    return (<div id={'Animal' + animal.id} className={className} style={style}>
       <div className='traits'>
         {animal.traits
-          .reverse()
+          // .reverse()
           //.sort((t1, t2) => t1.isLinked() ? 1 : -1)
           .map((trait, index) =>
             (<div key={trait.id}
-                  style={{marginBottom: '-5px'}}>
+                  className='RoundAnimalTraitPlace'
+                  style={this.getTraitPosition(index)}>
               {this.renderTrait(trait, animal)}
             </div>))}
       </div>
@@ -177,12 +212,12 @@ const DropRoundAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_
       if (trait.isLinked()) {
         return <AnimalLinkedTrait trait={trait} sourceAnimal={animal}/>;
       } else if (trait.getDataModel().playerControllable && trait.getDataModel().targetType === TRAIT_TARGET_TYPE.ANIMAL) {
-        return <DragAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}/>;
+        return <DragRoundAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}/>;
       } else if (trait.getDataModel().playerControllable) {
-        return <ClickAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}
-                                 onClick={() => this.props.onTraitDropped(animal, trait)}/>;
+        return <ClickRoundAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}
+                                      onClick={() => this.props.onTraitDropped(animal, trait)}/>;
       } else {
-        return <AnimalTrait trait={trait}/>;
+        return <RoundAnimalTrait trait={trait}/>;
       }
     }
 

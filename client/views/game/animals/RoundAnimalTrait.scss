@@ -1,0 +1,98 @@
+@import '../../../styles/variables';
+
+.RoundAnimalTraitPlace {
+  position: absolute;
+  transform: translate(-$ANIMAL_TRAIT_SIZE/2, -$ANIMAL_TRAIT_SIZE/2);
+}
+
+.RoundAnimalTrait {
+  width: $ANIMAL_TRAIT_SIZE;
+  height: $ANIMAL_TRAIT_SIZE;
+
+  //font-family: monospace;
+  font-size: 10px;
+
+  border: 1px solid gray;
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: background .2s;
+
+  .RoundAnimalTraitImage {
+    width: $ANIMAL_TRAIT_SIZE;
+    height: $ANIMAL_TRAIT_SIZE;
+  }
+  .RoundAnimalTraitBody {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    text-align: center;
+
+    //padding: .3em .05em;
+    line-height: 8px;
+    //
+    //display: flex;
+  }
+
+  .name {
+    word-wrap: break-word;
+    width: $ANIMAL_TRAIT_SIZE * .8;
+    //@include ellipsis();
+  }
+
+  &.draggable.active, &.pointer.active {
+    background: $TRAIT_ACTIVE_BACK;
+  }
+
+  &.Animate {
+    background-color: green !important;
+  }
+}
+
+.AnimalTraitDetails {
+  max-width: $ANIMAL_TRAIT_DETAILS_WIDTH + 16px * 2; // + card padding
+  font-size: 16px;
+  background: white !important;
+
+  .Title {
+    //padding: 1em 1em 0;
+    text-align: center;
+    span {
+      margin: 0 auto;
+    }
+  }
+  .Text {
+    color: black;
+    padding: 0 1em;
+    max-width: $ANIMAL_TRAIT_DETAILS_WIDTH;
+    font-size: .75em;
+    & .icon {
+      width: 1.0em;
+      height: 1.0em;
+    }
+    & .icon.material-icons {
+      font-size: 16px;
+      vertical-align: text-bottom;
+    }
+    & .mdl-card__supporting-text {
+      width: 80%;
+    }
+  }
+}
+
+.AnimalTraitIcon {
+  padding: .3em;
+  font-weight: bold;
+  text-align: center;
+}
+
+//.AnimalLinkedTrait {
+//  @include traits();
+//}
