@@ -1,7 +1,7 @@
 import React from 'react';
-import T from 'i18n-react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
+import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes';
+import T from 'i18n-react';
 import {connect} from 'react-redux';
 
 import {List, ListItem, IconButton} from 'react-mdl';
@@ -15,18 +15,13 @@ import {checkCanJoinRoomToPlay, checkCanJoinRoomToSpectate} from '../../../share
 export class RoomsList extends React.Component {
   static propTypes = {
     rooms: RIP.listOf(RIP.record).isRequired
-    , $roomJoin: React.PropTypes.func.isRequired
-    , $roomSpectate: React.PropTypes.func.isRequired
+    , $roomJoin: PropTypes.func.isRequired
+    , $roomSpectate: PropTypes.func.isRequired
   };
 
   static defaultProps = {
     onRoomClick: () => null
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
 
   render() {
     const {rooms, userId, $roomJoin, $roomSpectate} = this.props;

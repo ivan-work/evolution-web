@@ -1,5 +1,4 @@
 import React from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import T from 'i18n-react';
 import {connect} from 'react-redux';
 import {Button, Textfield} from 'react-mdl';
@@ -11,10 +10,9 @@ import {RulesLoginPassword} from '../../shared/models/UserModel';
 import LocationService from '../services/LocationService';
 import VKAPILogin from './auth/VKAPILogin.jsx';
 
-export class Login extends React.Component {
+export class Login extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     this.login = this.login.bind(this);
     this.state = {};
     this.state.form = {};

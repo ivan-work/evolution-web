@@ -1,8 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types'
 
 export default class Promise extends React.Component {
   static propTypes = {
-    children: React.PropTypes.object.isRequired
+    children: PropTypes.object.isRequired
   };
 
   constructor(props) {

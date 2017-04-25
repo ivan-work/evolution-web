@@ -1,9 +1,10 @@
-import React, {Component} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types'
 import './ControlGroup.scss';
 
-export class ControlGroup extends Component {
+export class ControlGroup extends React.Component {
   static propTypes = {
-    name: React.PropTypes.string.isRequired
+    name: PropTypes.string.isRequired
   };
 
   constructor(props) {

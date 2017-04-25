@@ -1,19 +1,14 @@
-import React, {Component, PropTypes} from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
+import React from 'react';
+import PropTypes from 'prop-types';
 import {Portal} from './Portal.jsx';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import './Dialog.scss';
 
-export class Dialog extends Component {
+export class Dialog extends React.PureComponent {
   static propTypes = {show: PropTypes.bool, onBackdropClick: PropTypes.func};
 
   static defaultProps = {show: false, onBackdropClick: () => null};
-
-  constructor(props, context) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
 
   render() {
     const {show, onBackdropClick, children} = this.props;

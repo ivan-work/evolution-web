@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types'
 import T from 'i18n-react';
 import classnames from 'classnames';
 
@@ -14,8 +15,8 @@ import AnimalTraitDetails from '../animals/AnimalTraitDetails.jsx';
 
 export class Card extends React.Component {
   static propTypes = {
-    card: React.PropTypes.instanceOf(CardModel).isRequired
-    , alternateTrait: React.PropTypes.bool
+    card: PropTypes.instanceOf(CardModel).isRequired
+    , alternateTrait: PropTypes.bool
   };
 
   constructor(props, context) {
@@ -88,8 +89,8 @@ export const DragCard = DragSource(DND_ITEM_TYPE.CARD
 )(class Card extends Card {
   static propTypes = {
     ...Card.propTypes
-    , dragEnabled: React.PropTypes.bool
-    , isUser: React.PropTypes.bool
+    , dragEnabled: PropTypes.bool
+    , isUser: PropTypes.bool
   };
 
   onCardClick() {

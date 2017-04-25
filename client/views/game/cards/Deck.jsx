@@ -1,5 +1,5 @@
 import React from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
+import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes';
 
 // Validation
@@ -10,12 +10,7 @@ import {Card} from './Card.jsx';
 
 import './Deck.scss';
 
-export class Deck extends React.Component {
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
-
+export class Deck extends React.PureComponent {
   getXYForCard(index) {
     return {
       x: .25 * index
@@ -49,7 +44,7 @@ export const DeckWrapper = AnimationServiceRef(({deck, connectRef}) => (
 ));
 
 DeckWrapper.propTypes = {
-  deck: RIP.listOf(React.PropTypes.instanceOf(CardModel)).isRequired
+  deck: RIP.listOf(PropTypes.instanceOf(CardModel)).isRequired
   //, connectRef: PropTypes.func.isRequired
 };
 

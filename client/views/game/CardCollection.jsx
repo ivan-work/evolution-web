@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types'
 
 import styles from '../../styles.json';
 const {CARD_WIDTH} = styles;
@@ -7,8 +8,8 @@ import './CardCollection.scss';
 
 export class CardCollection extends React.Component {
   static propTypes = {
-    name: React.PropTypes.string.isRequired
-    , isUser: React.PropTypes.bool.isRequired
+    name: PropTypes.string.isRequired
+    , isUser: PropTypes.bool.isRequired
   };
 
   render() {

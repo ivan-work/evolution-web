@@ -1,8 +1,6 @@
 import React from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
-import * as MDL from 'react-mdl';
+import PropTypes from 'prop-types'
 import {connect} from 'react-redux';
-import {Map} from 'immutable';
 
 import {
   roomExitRequest
@@ -20,8 +18,8 @@ import Game from './Game.jsx';
 import {GameModelClient} from '../../../shared/models/game/GameModel';
 
 import {DragDropContext} from 'react-dnd';
-import HTML5Backend from 'react-dnd-html5-backend';
-import MouseBackend from './dnd/react-dnd-mouse-backend';
+// import HTML5Backend from 'react-dnd-html5-backend';
+// import MouseBackend from './dnd/react-dnd-mouse-backend';
 import TouchBackend from 'react-dnd-touch-backend';
 import TestBackend from 'react-dnd-test-backend';
 
@@ -30,8 +28,8 @@ import './GameWrapper.scss';
 
 export class GameWrapper extends React.Component {
   static childContextTypes = {
-    game: React.PropTypes.instanceOf(GameModelClient)
-    , gameActions: React.PropTypes.object
+    game: PropTypes.instanceOf(GameModelClient)
+    , gameActions: PropTypes.object
   };
 
   getChildContext() {
@@ -39,11 +37,6 @@ export class GameWrapper extends React.Component {
       game: this.props.game
       , gameActions: this.props.gameActions
     };
-  }
-
-  constructor(props) {
-    super(props);
-    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this)
   }
 
   render() {

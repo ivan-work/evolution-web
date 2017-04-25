@@ -1,6 +1,7 @@
 import React from 'react';
-import T from 'i18n-react';
+import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes';
+import T from 'i18n-react';
 import {Dialog} from '../../utils/Dialog.jsx';
 import {DialogTitle, DialogContent, Button} from 'react-mdl';
 import AnimalTraitIcon from '../animals/AnimalTraitIcon.jsx';
@@ -13,12 +14,12 @@ import './TraitActivateDialog.scss';
 
 export default class TraitActivateDialog extends React.Component {
   static propTypes = {
-    traits: React.PropTypes.oneOf([
-      RIP.listOf(React.PropTypes.instanceOf(TraitModel))
-      , React.PropTypes.arrayOf(React.PropTypes.instanceOf(TraitModel))
+    traits: PropTypes.oneOf([
+      RIP.listOf(PropTypes.instanceOf(TraitModel))
+      , PropTypes.arrayOf(PropTypes.instanceOf(TraitModel))
     ])
-    , allowNothing: React.PropTypes.bool
-    , onSelectTrait: React.PropTypes.func
+    , allowNothing: PropTypes.bool
+    , onSelectTrait: PropTypes.func
   };
 
   render() {

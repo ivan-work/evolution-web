@@ -1,6 +1,6 @@
-import React, {Component, PropTypes} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types'
 import T from 'i18n-react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
 import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
@@ -23,7 +23,7 @@ const AnimalTraitIcon = ({trait}) => {
 };
 
 AnimalTraitIcon.propTypes = {
-  trait: React.PropTypes.instanceOf(TraitModel).isRequired
+  trait: PropTypes.instanceOf(TraitModel).isRequired
 };
 
 export default AnimalTraitIcon;

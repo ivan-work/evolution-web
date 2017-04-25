@@ -1,13 +1,12 @@
-import React, {Component, PropTypes} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 
 import {Portal} from '../../utils/Portal.jsx'
 
-export class ArrowPreview extends React.Component {
+export class ArrowPreview extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     this.setupMarker = (marker) => {
       if (!marker) return;
       var markerNode = ReactDOM.findDOMNode(marker);

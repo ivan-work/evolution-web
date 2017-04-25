@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes';
 
 import cn from 'classnames';
@@ -25,14 +26,14 @@ const INITIAL_STATE = {
 
 export class PlayerWrapper extends Component {
   static contextTypes = {
-    gameActions: React.PropTypes.object.isRequired
+    gameActions: PropTypes.object.isRequired
   };
 
   static propTypes = {
-    game: React.PropTypes.instanceOf(GameModelClient).isRequired
-    , player: React.PropTypes.instanceOf(PlayerModel).isRequired
-    , upsideDown: React.PropTypes.bool.isRequired
-    , connectRef: React.PropTypes.func.isRequired
+    game: PropTypes.instanceOf(GameModelClient).isRequired
+    , player: PropTypes.instanceOf(PlayerModel).isRequired
+    , upsideDown: PropTypes.bool.isRequired
+    , connectRef: PropTypes.func.isRequired
   };
 
   constructor(props, context) {

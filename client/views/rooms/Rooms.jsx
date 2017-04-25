@@ -1,8 +1,6 @@
 import React from 'react';
 import T from 'i18n-react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
-import {Map} from 'immutable';
 
 import {Button, Card, CardTitle, CardText} from 'react-mdl';
 import UsersList from '../utils/UsersList.jsx';

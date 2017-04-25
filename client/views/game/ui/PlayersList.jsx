@@ -1,6 +1,6 @@
 import {List} from 'immutable';
-import React, {Component} from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
+import React from 'react';
+import PropTypes from 'prop-types';
 import T from 'i18n-react';
 import cn from 'classnames';
 import {connect} from 'react-redux';
@@ -26,15 +26,10 @@ import {
   roomBanRequest
 } from '../../../../shared/actions/actions';
 
-export class PlayersList extends Component {
+export class PlayersList extends React.PureComponent {
   static propTypes = {
-    game: React.PropTypes.instanceOf(GameModelClient).isRequired
+    game: PropTypes.instanceOf(GameModelClient).isRequired
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
 
   renderPlayer(game, player) {
     const className = cn({

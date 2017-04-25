@@ -1,6 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types'
 import T from 'i18n-react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import cn from 'classnames';
 
 import {DragSource} from 'react-dnd';
@@ -10,33 +10,6 @@ import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 import {TRAIT_COOLDOWN_LINK} from '../../../../shared/models/game/evolution/constants';
 
 import AnimalTraitIcon from './AnimalTraitIcon.jsx';
-
-//class GameTrait extends React.Component {
-//  static propTypes = {
-//    trait: React.PropTypes.instanceOf(TraitModel).isRequired
-//  };
-//
-//  static defaultProps = {classNames: {}};
-//
-//  constructor(props) {
-//    super(props);
-//    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-//  }
-//
-//  render() {
-//    const {trait} = this.props;
-//
-//    //const className = classnames(Object.assign(this.classNames || {}, {
-//    //  AnimalTrait: true
-//    //  , [trait.type]: true
-//    //  , value: trait.value
-//    //}));
-//
-//    return (<div id={'AnimalTrait' + trait.id} className={className}>
-//      <AnimalTraitIcon trait={trait}/>
-//    </div>);
-//  }
-//}
 
 const DragTraitShell = DragSource(DND_ITEM_TYPE.TRAIT_SHELL
   , {
@@ -52,23 +25,18 @@ const DragTraitShell = DragSource(DND_ITEM_TYPE.TRAIT_SHELL
     , isDragging: monitor.isDragging()
     , canDrag: monitor.canDrag()
   })
-)(class extends React.Component {
+)(class extends React.PureComponent {
   static displayName = 'TraitShell';
   static propTypes = {
     // by parent
-    trait: React.PropTypes.instanceOf(TraitModel).isRequired
+    trait: PropTypes.instanceOf(TraitModel).isRequired
     // by life
-    , game: React.PropTypes.object.isRequired
+    , game: PropTypes.object.isRequired
     // by DnD
-    , connectDragSource: React.PropTypes.func.isRequired
-    , canDrag: React.PropTypes.bool.isRequired
-    , isDragging: React.PropTypes.bool.isRequired
+    , connectDragSource: PropTypes.func.isRequired
+    , canDrag: PropTypes.bool.isRequired
+    , isDragging: PropTypes.bool.isRequired
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
 
   render() {
     const {trait, connectDragSource, canDrag, isDragging} = this.props;

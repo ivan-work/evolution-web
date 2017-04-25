@@ -1,22 +1,16 @@
 import React from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
+import PropTypes from 'prop-types'
 import classnames from 'classnames';
 
 import { DropTarget } from 'react-dnd';
 import { DND_ITEM_TYPE } from '../dnd/DND_ITEM_TYPE';
 
-export class ContinentZone extends React.Component {
+export class ContinentZone extends React.PureComponent {
   static propTypes = {
-    index: React.PropTypes.number.isRequired
-    //, width: React.PropTypes.string.isRequired
-    , onCardDropped: React.PropTypes.func.isRequired
+    index: PropTypes.number.isRequired
+    //, width: PropTypes.string.isRequired
+    , onCardDropped: PropTypes.func.isRequired
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
-
   render() {
     const {isOver} = this.props;
     return this.props.connectDropTarget(<div className={classnames({

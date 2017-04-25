@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types'
 import T from 'i18n-react';
 import {connect} from 'react-redux';
 import {Button, IconButton, Tooltip} from 'react-mdl';
@@ -7,7 +8,7 @@ import {gameSetUserWantsPauseRequest} from '../../../../shared/actions/actions';
 
 export class Pause extends React.Component {
   static propTypes = {
-    $wantsPauseRequest: React.PropTypes.func.isRequired
+    $wantsPauseRequest: PropTypes.func.isRequired
   };
 
   render() {

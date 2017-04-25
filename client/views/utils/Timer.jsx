@@ -1,9 +1,10 @@
-import React, {Component, PropTypes} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types'
 
 // function for testing wrong client time;
 import TimeService from '../../services/TimeService';
 
-export class Timer extends Component {
+export class Timer extends React.Component {
   static propTypes = {
     start: PropTypes.number.isRequired
     , duration: PropTypes.number.isRequired

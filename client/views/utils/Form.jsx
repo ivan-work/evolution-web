@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types'
 import T from 'i18n-react';
 import * as MDL from 'react-mdl'
 import Validator from 'validatorjs';
@@ -6,13 +7,13 @@ import shallowEqual from 'fbjs/lib/shallowEqual'
 
 export default class Form extends React.Component {
   static propTypes = {
-    i18nPath: React.PropTypes.string.isRequired
-    , model: React.PropTypes.object.isRequired
-    , onSubmit: React.PropTypes.func.isRequired
-    , disabled: React.PropTypes.bool
+    i18nPath: PropTypes.string.isRequired
+    , model: PropTypes.object.isRequired
+    , onSubmit: PropTypes.func.isRequired
+    , disabled: PropTypes.bool
   };
 
-  static childContextTypes = {form: React.PropTypes.object};
+  static childContextTypes = {form: PropTypes.object};
 
   getChildContext() {
     return {form: this};
@@ -60,9 +61,9 @@ export default class Form extends React.Component {
 }
 
 export class Textfield extends React.Component {
-  static propTypes = {name: React.PropTypes.string.isRequired};
+  static propTypes = {name: PropTypes.string.isRequired};
 
-  static contextTypes = {form: React.PropTypes.object.isRequired};
+  static contextTypes = {form: PropTypes.object.isRequired};
 
   render() {
     const {name} = this.props;
@@ -79,9 +80,9 @@ export class Textfield extends React.Component {
 }
 
 export class RadioGroup extends React.Component {
-  static propTypes = {name: React.PropTypes.string.isRequired};
+  static propTypes = {name: PropTypes.string.isRequired};
 
-  static contextTypes = {form: React.PropTypes.object.isRequired};
+  static contextTypes = {form: PropTypes.object.isRequired};
 
   render() {
     const {name} = this.props;
@@ -97,9 +98,9 @@ export class RadioGroup extends React.Component {
 }
 
 export class Checkbox extends React.Component {
-  static propTypes = {name: React.PropTypes.string.isRequired};
+  static propTypes = {name: PropTypes.string.isRequired};
 
-  static contextTypes = {form: React.PropTypes.object.isRequired};
+  static contextTypes = {form: PropTypes.object.isRequired};
 
   render() {
     const {name, disabled: thisDisabled} = this.props;
@@ -115,9 +116,9 @@ export class Checkbox extends React.Component {
 }
 
 export class Submit extends React.Component {
-  static propTypes = {id: React.PropTypes.string.isRequired};
+  static propTypes = {id: PropTypes.string.isRequired};
 
-  static contextTypes = {form: React.PropTypes.object.isRequired};
+  static contextTypes = {form: PropTypes.object.isRequired};
 
   render() {
     const {children, id} = this.props;

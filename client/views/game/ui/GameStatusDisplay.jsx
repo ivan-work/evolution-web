@@ -1,6 +1,6 @@
-import React, {Component, PropTypes} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import T from 'i18n-react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 
 import {GameModelClient, PHASE} from '../../../../shared/models/game/GameModel';
 
@@ -8,15 +8,10 @@ import UserView from '../../utils/User.jsx'
 
 import {Timer} from '../../utils/Timer.jsx';
 
-export class GameStatusDisplay extends Component {
+export class GameStatusDisplay extends React.PureComponent {
   static propTypes = {
     game: PropTypes.instanceOf(GameModelClient).isRequired
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
 
   getPlayerNameByIndex(players, index) {
     const playerId = players.findKey(player => player.index === index);

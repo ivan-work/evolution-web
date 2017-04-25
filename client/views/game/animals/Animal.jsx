@@ -1,5 +1,5 @@
-import React, {Component, PropTypes} from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
+import React from 'react';
+import PropTypes from 'prop-types'
 import classnames from 'classnames';
 import {Icon} from 'react-mdl';
 
@@ -22,13 +22,12 @@ import Tooltip from '../../utils/Tooltip.jsx';
 
 class Animal extends React.Component {
   static propTypes = {
-    model: React.PropTypes.instanceOf(AnimalModel).isRequired
+    model: PropTypes.instanceOf(AnimalModel).isRequired
   };
 
   constructor(props) {
     super(props);
     this.state = {};
-    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
   }
 
   renderSelectLink() {
@@ -168,12 +167,12 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
       , isOver: PropTypes.bool.isRequired
       , canDrop: PropTypes.bool.isRequired
       // by direct
-      , isUserAnimal: React.PropTypes.bool
-      , onCardDropped: React.PropTypes.func.isRequired
-      , onFoodDropped: React.PropTypes.func.isRequired
-      , onTraitDropped: React.PropTypes.func.isRequired
-      , onTraitShellDropped: React.PropTypes.func.isRequired
-      , onAnimalLink: React.PropTypes.func.isRequired
+      , isUserAnimal: PropTypes.bool
+      , onCardDropped: PropTypes.func.isRequired
+      , onFoodDropped: PropTypes.func.isRequired
+      , onTraitDropped: PropTypes.func.isRequired
+      , onTraitShellDropped: PropTypes.func.isRequired
+      , onAnimalLink: PropTypes.func.isRequired
     };
 
     renderTrait(trait, animal) {

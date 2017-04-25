@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types'
 import T from 'i18n-react';
 import {connect} from 'react-redux';
 
@@ -21,11 +22,11 @@ import {checkCanJoinRoomToPlay} from '../../../shared/actions/rooms.checks';
  * RoomControlGroup
  * */
 
-export class RoomControlGroup extends Component {
+export class RoomControlGroup extends React.Component {
   static propTypes = {
-    room: React.PropTypes.instanceOf(RoomModel)
-    , userId: React.PropTypes.string.isRequired
-    , inRoom: React.PropTypes.bool
+    room: PropTypes.instanceOf(RoomModel)
+    , userId: PropTypes.string.isRequired
+    , inRoom: PropTypes.bool
   };
 
   constructor(props) {

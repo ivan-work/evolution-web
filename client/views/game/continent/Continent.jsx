@@ -1,5 +1,5 @@
 import React from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
+import PropTypes from 'prop-types'
 import classnames from 'classnames';
 
 import RIP from 'react-immutable-proptypes';
@@ -10,12 +10,12 @@ import './Continent.scss';
 
 export default class Continent extends React.Component {
   static contextTypes = {
-    gameActions: React.PropTypes.object
+    gameActions: PropTypes.object
   };
 
   static propTypes = {
-    isUserContinent: React.PropTypes.bool.isRequired
-    , children: RIP.listOf(React.PropTypes.node)
+    isUserContinent: PropTypes.bool.isRequired
+    , children: RIP.listOf(PropTypes.node)
   };
 
   constructor(props, context) {

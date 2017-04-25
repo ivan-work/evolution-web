@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import React, {Component, PropTypes} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types'
 import ReactDOM from 'react-dom';
 import T from 'i18n-react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import cn from 'classnames';
 
 import Tooltip from 'rc-tooltip';
@@ -12,10 +12,9 @@ import AnimalTraitArrowMarker from './AnimalTraitArrowMarker.jsx';
 
 const AnimalLinkedTraits = [];
 
-export class AnimalLinkedTrait extends Component {
+export class AnimalLinkedTrait extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     this.tick = this.tick.bind(this);
   }
 

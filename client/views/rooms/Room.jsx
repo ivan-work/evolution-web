@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types'
 import T from 'i18n-react';
 import {connect} from 'react-redux';
 import {
@@ -31,11 +32,11 @@ import {
   roomUnbanRequest
 } from '../../../shared/actions/actions';
 
-export class Room extends Component {
+export class Room extends React.Component {
   static propTypes = {
-    room: React.PropTypes.instanceOf(RoomModel)
-    , userId: React.PropTypes.string.isRequired
-    , $roomEditSettings: React.PropTypes.func.isRequired
+    room: PropTypes.instanceOf(RoomModel)
+    , userId: PropTypes.string.isRequired
+    , $roomEditSettings: PropTypes.func.isRequired
   };
 
   constructor(props) {

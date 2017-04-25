@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types'
 import T from 'i18n-react';
 import {Button, Radio, Checkbox, Tooltip, Icon} from 'react-mdl';
 
@@ -31,11 +32,11 @@ const propsToForm = (props) => ({
   , addon_plantarium: props.room.settings.addon_plantarium
 });
 
-export default class RoomSettings extends Component {
+export default class RoomSettings extends React.Component {
   static propTypes = {
-    room: React.PropTypes.instanceOf(RoomModel)
-    , userId: React.PropTypes.string.isRequired
-    , $roomEditSettings: React.PropTypes.func.isRequired
+    room: PropTypes.instanceOf(RoomModel)
+    , userId: PropTypes.string.isRequired
+    , $roomEditSettings: PropTypes.func.isRequired
   };
 
   constructor(props) {

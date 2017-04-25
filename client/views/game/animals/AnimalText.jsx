@@ -1,6 +1,5 @@
-import React, {Component, PropTypes} from 'react';
+import React from 'react';
 import T from 'i18n-react'
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
 import {connect} from 'react-redux';

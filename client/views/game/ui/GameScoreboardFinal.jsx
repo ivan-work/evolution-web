@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types'
 import T from 'i18n-react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import * as MDL from 'react-mdl';
 
 import cn from 'classnames';
@@ -10,16 +10,15 @@ import {Dialog, DialogActions} from '../../utils/Dialog.jsx';
 
 import User from '../../utils/User.jsx'
 
-export default class GameScoreboardFinal extends Component {
+export default class GameScoreboardFinal extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
     this.state = {show: false};
     this.showedOnce = false;
   }
 
   static propTypes = {
-    game: React.PropTypes.instanceOf(GameModelClient).isRequired
+    game: PropTypes.instanceOf(GameModelClient).isRequired
   };
 
   componentDidUpdate() {

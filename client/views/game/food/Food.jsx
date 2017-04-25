@@ -1,5 +1,5 @@
-import React, {Component, PropTypes} from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
+import React from 'react';
+import PropTypes from 'prop-types';
 import classnames from 'classnames';
 
 import './Food.scss';
@@ -16,12 +16,7 @@ import {TRAIT_COOLDOWN_LINK} from '../../../../shared/models/game/evolution/cons
 //  , '&#127821;', '&#127822;', '&#127823;', '&#127824;', '&#127825;', '&#127826;', '&#127827;'];*/
 //const getGraphics = () => graphics[Math.floor(Math.random() * graphics.length)];
 
-class Food extends Component {
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
-
+class Food extends React.PureComponent {
   render() {
     const {canDrag, connectDragSource, isDragging} = this.props;
 

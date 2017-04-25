@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types'
 import T from 'i18n-react';
 import {Dialog} from '../../utils/Dialog.jsx';
 import {DialogTitle, DialogContent} from 'react-mdl';
@@ -15,7 +16,7 @@ import {checkIfTraitDisabledByIntellect} from '../../../../shared/actions/trait.
 
 import './TraitDefenceDialog.scss';
 
-export class TraitDefenceDialog extends Component {
+export class TraitDefenceDialog extends React.Component {
   static propTypes = {
     $traitAnswer: PropTypes.func.isRequired
   };

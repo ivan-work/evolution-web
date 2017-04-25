@@ -1,12 +1,13 @@
-import React, {Component} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types'
 
-export class Portal extends Component {
+export class Portal extends React.Component {
   static propTypes = {
-    target: React.PropTypes.string.isRequired
+    target: PropTypes.string.isRequired
   };
 
   static contextTypes = {
-    portalsContext: React.PropTypes.object.isRequired
+    portalsContext: PropTypes.object.isRequired
   };
 
   componentDidMount() {

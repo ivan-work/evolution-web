@@ -1,6 +1,6 @@
 import {List} from 'immutable';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes';
 import T from 'i18n-react';
 import {connect} from 'react-redux';
@@ -15,11 +15,11 @@ import './Chat.scss';
 
 export class Chat extends React.Component {
   static propTypes = {
-    chatTargetType: React.PropTypes.oneOf([CHAT_TARGET_TYPE.GLOBAL, CHAT_TARGET_TYPE.ROOM]).isRequired
-    , roomId: React.PropTypes.string
+    chatTargetType: PropTypes.oneOf([CHAT_TARGET_TYPE.GLOBAL, CHAT_TARGET_TYPE.ROOM]).isRequired
+    , roomId: PropTypes.string
     // @connect
-    , messages: RIP.listOf(React.PropTypes.instanceOf(MessageModel)).isRequired
-    , $chatMessage: React.PropTypes.func.isRequired
+    , messages: RIP.listOf(PropTypes.instanceOf(MessageModel)).isRequired
+    , $chatMessage: PropTypes.func.isRequired
   };
 
   constructor(props) {

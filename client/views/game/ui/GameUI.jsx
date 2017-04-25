@@ -1,6 +1,7 @@
-import React, {PropTypes} from 'react';
-import T from 'i18n-react';
+import React from 'react';
+import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes';
+import T from 'i18n-react';
 
 import {GameProvider} from '../providers/GameProvider.jsx';
 import {PortalTarget} from '../../utils/PortalTarget.jsx';
@@ -26,13 +27,8 @@ class _GameUI extends React.Component {
   static displayName = 'GameUI';
 
   static contextTypes = {
-    gameActions: React.PropTypes.object
+    gameActions: PropTypes.object
   };
-
-  constructor(props) {
-    super(props);
-    //this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
 
   render() {
     const {game} = this.props;

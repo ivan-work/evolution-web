@@ -1,6 +1,6 @@
-import React, {Component, PropTypes} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types'
 import T from 'i18n-react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
 import {DragSource} from 'react-dnd';
@@ -14,17 +14,12 @@ import Tooltip from 'rc-tooltip';
 
 import './AnimalTrait.scss';
 
-class AnimalTrait extends Component {
+class AnimalTrait extends React.PureComponent {
   static propTypes = {
-    trait: React.PropTypes.instanceOf(TraitModel).isRequired
+    trait: PropTypes.instanceOf(TraitModel).isRequired
   };
 
   static defaultProps = {classNames: {}};
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
 
   render() {
     const {trait} = this.props;
@@ -69,10 +64,10 @@ const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
   static displayName = 'AnimalTrait';
   static propTypes = {
     // by parent
-    trait: React.PropTypes.instanceOf(TraitModel).isRequired
+    trait: PropTypes.instanceOf(TraitModel).isRequired
     // by life
     , game: PropTypes.object.isRequired
-    , sourceAnimal: React.PropTypes.instanceOf(AnimalModel).isRequired
+    , sourceAnimal: PropTypes.instanceOf(AnimalModel).isRequired
     // by DnD
     , connectDragSource: PropTypes.func.isRequired
     , canDrag: PropTypes.bool.isRequired
@@ -93,11 +88,11 @@ const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
 class ClickAnimalTrait extends AnimalTrait {
   static propTypes = {
     // by parent
-    trait: React.PropTypes.instanceOf(TraitModel).isRequired
+    trait: PropTypes.instanceOf(TraitModel).isRequired
     // by life
     , game: PropTypes.object.isRequired
-    , sourceAnimal: React.PropTypes.instanceOf(AnimalModel).isRequired
-    , onClick: React.PropTypes.func.isRequired
+    , sourceAnimal: PropTypes.instanceOf(AnimalModel).isRequired
+    , onClick: PropTypes.func.isRequired
   };
 
   render() {

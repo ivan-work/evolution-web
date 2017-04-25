@@ -1,7 +1,7 @@
-import React, {Component} from 'react';
-//import PureRenderMixin from 'react-addons-pure-render-mixin';
+import React from 'react';
+import PropTypes from 'prop-types'
 
-export const PortalsContext = (WrappedComponent) => class PortalsContext extends Component {
+export const PortalsContext = (WrappedComponent) => class PortalsContext extends React.PureComponent {
   constructor(props) {
     super(props);
     this.portalIds = 0;
@@ -12,7 +12,7 @@ export const PortalsContext = (WrappedComponent) => class PortalsContext extends
   }
 
   static childContextTypes = {
-    portalsContext: React.PropTypes.object.isRequired
+    portalsContext: PropTypes.object.isRequired
   };
 
   getChildContext() {
@@ -88,14 +88,14 @@ export const PortalsContext = (WrappedComponent) => class PortalsContext extends
   }
 };
 
-export class PortalTarget extends Component {
+export class PortalTarget extends React.PureComponent {
   static contextTypes = {
-    portalsContext: React.PropTypes.object.isRequired
+    portalsContext: PropTypes.object.isRequired
   };
 
   static propTypes = {
-    name: React.PropTypes.string.isRequired
-    , container: React.PropTypes.string
+    name: PropTypes.string.isRequired
+    , container: PropTypes.string
   };
 
   static defaultProps = {

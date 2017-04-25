@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types'
 import Measure from 'react-measure';
 
 import {GameModel, GameModelClient} from '../../../shared/models/game/GameModel';
@@ -9,9 +10,9 @@ import './GamePlayers.scss';
 
 const r2g = (r) => r / Math.PI * 180;
 
-export default class GamePlayers extends Component {
+export default class GamePlayers extends React.Component {
   static propTypes = {
-    game: React.PropTypes.instanceOf(GameModelClient).isRequired
+    game: PropTypes.instanceOf(GameModelClient).isRequired
   };
 
   constructor(props, context) {

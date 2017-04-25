@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types'
 import T from 'i18n-react';
 import {Button} from 'react-mdl';
 
@@ -15,17 +16,12 @@ import GameScoreboardFinal from './ui/GameScoreboardFinal.jsx';
 
 class Game extends React.Component {
   static contextTypes = {
-    gameActions: React.PropTypes.object
+    gameActions: PropTypes.object
   };
 
   static propTypes = {
-    game: React.PropTypes.instanceOf(GameModelClient).isRequired
+    game: PropTypes.instanceOf(GameModelClient).isRequired
   };
-
-  constructor(props) {
-    super(props);
-    //this.shouldCmponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
 
   render() {
     const {game} = this.props;

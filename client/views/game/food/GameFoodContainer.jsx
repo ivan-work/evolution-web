@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types'
 
 import {DragFood, Food} from './Food.jsx';
 
@@ -28,5 +29,5 @@ export const GameFoodContainer = ({food}) => (<div className='GameFoodContainer'
 //}
 
 GameFoodContainer.propTypes = {
-  food: React.PropTypes.number.isRequired
+  food: PropTypes.number.isRequired
 };

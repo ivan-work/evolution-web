@@ -1,6 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types'
 import ReactDOM from 'react-dom';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import T from 'i18n-react';
 
 import { DragSource } from 'react-dnd';
@@ -12,23 +12,18 @@ function triggerMouseEvent(node, eventType) {
   node.dispatchEvent (clickEvent);
 }
 
-class AnimalSelectLink extends React.Component {
+class AnimalSelectLink extends React.PureComponent {
   static propTypes = {
     // by DragSource
-    connectDragSource: React.PropTypes.func
-    , isDragging: React.PropTypes.bool
-    , canDrag: React.PropTypes.bool
+    connectDragSource: PropTypes.func
+    , isDragging: PropTypes.bool
+    , canDrag: PropTypes.bool
     // self
-    , onEndDrag: React.PropTypes.func.isRequired
-    , card: React.PropTypes.object
-    , animal: React.PropTypes.object
-    , alternateTrait: React.PropTypes.bool
+    , onEndDrag: PropTypes.func.isRequired
+    , card: PropTypes.object
+    , animal: PropTypes.object
+    , alternateTrait: PropTypes.bool
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
 
   componentDidMount() {
     const node = ReactDOM.findDOMNode(this);

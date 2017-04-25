@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types'
 import T from 'i18n-react';
 import {connect} from 'react-redux';
 import {Dialog} from '../../utils/Dialog.jsx';
@@ -8,8 +9,8 @@ import {gameSetUserTimedOutRequest} from '../../../../shared/actions/actions';
 
 export class GameTimedOutDialog extends React.Component {
   static propTypes = {
-    show: React.PropTypes.bool.isRequired
-    , $timedOutRequest: React.PropTypes.func.isRequired
+    show: PropTypes.bool.isRequired
+    , $timedOutRequest: PropTypes.func.isRequired
   };
 
   render() {
@@ -38,7 +39,7 @@ export const GameTimedOutDialogView = connect(
 )(GameTimedOutDialog);
 
 GameTimedOutDialogView.propTypes = {
-  show: React.PropTypes.bool.isRequired
+  show: PropTypes.bool.isRequired
 };
 
 export default GameTimedOutDialogView;

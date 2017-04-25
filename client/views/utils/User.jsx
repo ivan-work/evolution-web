@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types'
 import {connect} from 'react-redux';
 
 import {ListItem} from 'react-mdl';
@@ -10,8 +11,8 @@ const UserView = connect((state, {id, children}) => ({
 }))((props) => props.output(props));
 
 UserView.propTypes = {
-  id: React.PropTypes.string.isRequired
-  , children: React.PropTypes.func
+  id: PropTypes.string.isRequired
+  , children: PropTypes.func
 };
 
 UserView.asListItem = ({id, login}) => (<ListItem className='small'>{login}</ListItem>);

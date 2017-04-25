@@ -26,21 +26,17 @@ export default {
     __dirname: true
   }
   , plugins: [
-    isDevelopment ? new webpack.BannerPlugin('require("source-map-support").install();', {raw: true, entryOnly: false}) : null
+    isDevelopment ? new webpack.BannerPlugin({banner: 'require("source-map-support").install();', raw: true, entryOnly: false}) : null
     //, isDevelopment ? new webpack.HotModuleReplacementPlugin({quiet: false}) : null
     , new webpack.IgnorePlugin(/\.(css|less|mp3)$/)
   ].filter(p => p !== null)
   , externals: nodeModules
   , module: {
-    loaders: [{
+    rules: [{
       test: /\.js$/, // Transform all .js files required somewhere with Babel
       loader: 'babel-loader',
       exclude: /node_modules/
-      //,
       //query: ['es2015', 'stage-0']
-    }, {
-      test: /\.json$/,
-      loader: 'json-loader'
     }]
   }
 };

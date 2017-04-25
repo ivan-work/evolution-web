@@ -1,8 +1,9 @@
-import React, {Component} from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 
-export const ServicesContext = (WrappedComponentClass) => class ServicesContext extends Component {
+export const ServicesContext = (WrappedComponentClass) => class ServicesContext extends React.Component {
   static contextTypes = {
-    store: React.PropTypes.object.isRequired
+    store: PropTypes.object.isRequired
   };
 
   static childContextTypes = {

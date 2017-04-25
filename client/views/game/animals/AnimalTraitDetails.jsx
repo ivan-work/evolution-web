@@ -1,21 +1,16 @@
-import React, {Component, PropTypes} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types'
 import T from 'i18n-react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import classnames from 'classnames';
 
 import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 
 import gecko from '../../../assets/gfx/gecko.svg';
 
-export default class AnimalTraitDetails extends Component {
+export default class AnimalTraitDetails extends React.PureComponent {
   static propTypes = {
-    trait: React.PropTypes.instanceOf(TraitModel).isRequired
+    trait: PropTypes.instanceOf(TraitModel).isRequired
   };
-
-  constructor(props) {
-    super(props);
-    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
-  }
 
   render() {
     const {trait} = this.props;

@@ -1,9 +1,9 @@
-import React, {Component} from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
+import React from 'react';
+import PropTypes from 'prop-types'
 
-export const AnimationServiceRef = (WrappedComponentClass) => class AnimationServiceRef extends Component {
+export const AnimationServiceRef = (WrappedComponentClass) => class AnimationServiceRef extends React.Component {
   static contextTypes = {
-    animationServiceContext: React.PropTypes.object
+    animationServiceContext: PropTypes.object
   };
 
   constructor(props, context) {
