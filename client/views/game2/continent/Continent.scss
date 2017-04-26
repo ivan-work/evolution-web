@@ -1,14 +1,12 @@
 @import '../../../styles/variables';
 
 $VERTICAL_MARGIN: 2px;
-.Game {
+
+.Game2 {
   .Continent {
     position: relative;
-    min-width: 200px;
     height: $ANIMAL_HEIGHT + $ANIMAL_MARGIN;
-    border: 1px solid #898;
     display: flex;
-    justify-content: center;
 
     &.isActive {
       background: $CURRENT_TURN_BACKGROUND;

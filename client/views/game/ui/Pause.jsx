@@ -2,9 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types'
 import T from 'i18n-react';
 import {connect} from 'react-redux';
-import {Button, IconButton, Tooltip} from 'react-mdl';
+import {Button, IconButton} from 'react-mdl';
 
 import {gameSetUserWantsPauseRequest} from '../../../../shared/actions/actions';
+
+import Tooltip from '../../utils/Tooltip.jsx';
 
 export class Pause extends React.Component {
   static propTypes = {
@@ -16,10 +18,12 @@ export class Pause extends React.Component {
 
     return (
       <div>
-        <Tooltip label={
-          T.translate(wantsPause ? 'Game.UI.Pause' : 'Game.UI.Unpause')
-          + ' ' + T.translate(!gamePaused ? 'Game.UI.Pause_Desc' : 'Game.UI.Unpause_Desc')
-        }>
+        <Tooltip overlay={(
+          <span>
+            {T.translate(wantsPause ? 'Game.UI.Pause' : 'Game.UI.Unpause')}
+            <br/>
+            {T.translate(!gamePaused ? 'Game.UI.Pause_Desc' : 'Game.UI.Unpause_Desc')}
+          </span>)}>
           <IconButton raised
                       disabled={!isPlayer}
                       onClick={$wantsPauseRequest(!wantsPause)}

@@ -194,10 +194,7 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
   }
 );
 
-const GameDropAnimal = GameProvider(DropAnimal);
-
 export {
   Animal
-  , DropAnimal as _DropAnimal
-  , GameDropAnimal as DropAnimal
+  , DropAnimal
 };

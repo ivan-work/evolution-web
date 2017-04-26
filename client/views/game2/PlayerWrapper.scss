@@ -1,0 +1,24 @@
+@import '../../styles/variables';
+
+.Game2 {
+  .PlayerStickerCard {
+    padding: 0;
+    .PlayerSticker {
+      overflow-y: hidden;
+      overflow-x: scroll;
+      height:100%;
+      .PlayerWrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        height:100%;
+        .Animal {
+          flex: 0 0 $ANIMAL_WIDTH;
+        }
+        .CardCollection {
+          height: $CARD_HEIGHT;
+        }
+      }
+    }
+  }
+}

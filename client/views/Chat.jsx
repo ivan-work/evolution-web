@@ -28,6 +28,7 @@ export class Chat extends React.Component {
     this.onMessageSend = this.onMessageSend.bind(this);
     this.renderMessage = this.renderMessage.bind(this);
     this.setupWindow = this.setupWindow.bind(this);
+    this.handleScroll = this.handleScroll.bind(this);
     this.state = {message: '', offset: 0, atBottom: true}
   }
 
@@ -45,14 +46,14 @@ export class Chat extends React.Component {
 
   setupWindow(chatWindow) {
     this.chatWindow = chatWindow;
-    if (chatWindow) {
-      this.chatWindow.addEventListener('scroll', (e) => {
-        const target = e.currentTarget;
-        // console.log(target.scrollHeight, target.scrollTop, target.offsetHeight)
-        this.setState({atBottom: Math.abs(target.scrollHeight - target.scrollTop - target.offsetHeight) < 5});
-      });
-    }
   }
+
+  handleScroll(e) {
+    if (this.chatWindow) {
+      const target = this.chatWindow;
+      this.setState({atBottom: Math.abs(target.scrollHeight - target.scrollTop - target.offsetHeight) < 1});
+    }
+  };
 
   componentDidMount() {
     this.componentRendered()
@@ -71,7 +72,7 @@ export class Chat extends React.Component {
   render() {
     const {messages} = this.props;
     return (<div className='Chat'>
-      <div className='ChatWindow' ref={this.setupWindow}>
+      <div className='ChatWindow' ref={this.setupWindow} onScroll={this.handleScroll}>
         {messages.map(this.renderMessage)}
       </div>
       <div className='ChatInput'>
@@ -82,18 +83,6 @@ export class Chat extends React.Component {
           maxLength={127}
           onChange={({target}) => this.onMessageChange(target.value)}
           onKeyUp={this.onMessageSend}/>
-      </div>
-    </div>);
-  }
-
-  renderMessage({timestamp, from, fromLogin, to, toType, text}) {
-    return (<div key={timestamp + from}>
-      <div className='ChatTime'>
-        <span>[{TimeService.formatTimeOfDay(timestamp)}]</span>
-      </div>
-      <div className='ChatMessage'>
-        <strong>{fromLogin}: </strong>
-        <span>{text}</span>
       </div>
     </div>);
   }

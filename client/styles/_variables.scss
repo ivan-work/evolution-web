@@ -17,6 +17,10 @@ $TRAIT_ACTIVE_TEXT: #000;
 
 $CURRENT_TURN_BACKGROUND: #dfd;
 
+// No idea how to get it from MDL. Using https://material.io/guidelines/style/color.html#color-color-palette
+$MDL_PRIMARY_COLOR: #009688; // Teal
+$MDL_ACCENT_COLOR: #3F51B5; // Indigo
+
 @mixin selection() {
   box-shadow: 0px 0px .5em .5em yellow;
 }

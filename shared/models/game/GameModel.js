@@ -336,6 +336,7 @@ GameModel.parse = parseFromRoom;
 GameModel.parseCardList = parseCardList;
 GameModel.parseAnimalList = parseAnimalList;
 GameModelClient.prototype.end = GameModel.prototype.end;
+GameModelClient.prototype.getActualPlayers = GameModel.prototype.getActualPlayers;
 GameModelClient.prototype.getPlayerCard = GameModel.prototype.getPlayerCard;
 GameModelClient.prototype.getPlayerAnimal = GameModel.prototype.getPlayerAnimal;
 GameModelClient.prototype.locateAnimal = GameModel.prototype.locateAnimal;

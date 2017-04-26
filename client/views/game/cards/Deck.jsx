@@ -37,15 +37,15 @@ export class Deck extends React.PureComponent {
   }
 }
 
-export const DeckWrapper = AnimationServiceRef(({deck, connectRef}) => (
+export const DeckView = AnimationServiceRef(({deck, connectRef}) => (
   <Deck ref={connectRef('Deck')}>
     {deck.map((cardModel, i) => <Card key={i} card={cardModel}/>)}
   </Deck>
 ));
 
-DeckWrapper.propTypes = {
+DeckView.propTypes = {
   deck: RIP.listOf(PropTypes.instanceOf(CardModel)).isRequired
   //, connectRef: PropTypes.func.isRequired
 };
 
-export default DeckWrapper;
+export default DeckView;

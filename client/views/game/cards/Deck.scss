@@ -4,12 +4,13 @@
   .mdl-button--icon {
     margin-left: 10px;
   }
-  .Deck {
-    position: relative;
+}
+.Deck {
+  position: relative;
+  display: inline-block;
+  flex-grow: 1;
+  box-shadow: 1px 1px 2px 1px black;
+  .CardPlace {
     display: inline-block;
-    flex-grow: 1;
-    .CardPlace {
-      display: inline-block;
-    }
   }
 }

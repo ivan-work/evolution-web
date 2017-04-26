@@ -1,0 +1,17 @@
+.DeckSticker {
+  .size {
+    text-align: center;
+  }
+  .deck {
+    margin: 5px 15px 15px 0;
+  }
+  .controls {
+    display: flex;
+    justify-content: space-around;
+  }
+  .line {
+    .key {
+      font-weight: bold;
+    }
+  }
+}

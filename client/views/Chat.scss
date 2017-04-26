@@ -1,19 +1,27 @@
 .Chat {
   font-size: 0.85em;
   //line-height: 1.3em;
+
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
   .ChatWindow {
+    flex: 1 1 0;
     min-height: 10em;
     max-height: 40em;
     overflow-x: hidden;
     overflow-y: auto;
   }
   .ChatTime {
-    font-size: 10px;
+    font-size: .70em;
     vertical-align: top;
     color: #999;
     line-height: .8em;
   }
-  .ChatMessage {
-    margin-bottom: .3em;
+  .ChatInput {
+    .mdl-textfield {
+      padding: 0;
+    }
   }
 }

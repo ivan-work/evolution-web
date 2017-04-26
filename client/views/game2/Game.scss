@@ -1,0 +1,45 @@
+@import '../../styles/variables';
+
+$MARGIN: .25em;
+
+.Game2-wrapper {
+  width: 100%;
+  min-height: 100%;
+
+  display: flex;
+  flex: 1 0 0;
+
+  background: lighten($MDL_ACCENT_COLOR, 10%);
+
+  border: $MARGIN solid $MDL_ACCENT_COLOR; // Jerky "margin" =\
+  box-sizing: border-box;
+}
+
+.Game2 {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  .row {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: row;
+    &:first-child {
+      max-height: 250px;
+    }
+  }
+  .mdl-card {
+    flex: 1 1 0;
+    margin: $MARGIN;
+    font-size: 14px;
+    padding: .5em;
+    width: auto;
+  }
+
+  .Short {
+    flex: 0 1 auto;
+  }
+
+  .Chat {
+    font-size: .75em;
+  }
+}

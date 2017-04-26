@@ -20,6 +20,8 @@
 }
 
 .PlayersList {
+  font-size: 0.9em;
+  line-height: 1.6em;
   .Player {
     @include ellipsis();
   }
@@ -35,8 +37,8 @@
   }
 }
 
+
 .GameStatus {
-  margin-top: .5em;
   .line {
     white-space: nowrap;
   }

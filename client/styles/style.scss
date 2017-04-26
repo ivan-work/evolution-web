@@ -41,6 +41,10 @@ a[disabled] {
   padding: 2em;
 }
 
+.flex {
+  flex: 1 1 0;
+}
+
 .flex-row {
   display: flex;
   flex-direction: row;

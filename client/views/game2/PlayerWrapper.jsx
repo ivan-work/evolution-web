@@ -1,12 +1,23 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes';
-
+import T from 'i18n-react';
 import cn from 'classnames';
 
-import {CardCollection} from './CardCollection.jsx';
-import DragCard from './cards/Card.jsx';
-import {DropAnimal} from './animals/Animal.jsx';
+import {connect} from 'react-redux';
+import {compose} from 'redux';
+
+
+import {
+  gameDeployTraitRequest
+  , traitTakeFoodRequest
+  , traitActivateRequest
+  , traitTakeShellRequest
+} from '../../../shared/actions/actions';
+
+import {CardCollection} from '../game/CardCollection.jsx';
+import DragCard from '../game/cards/Card.jsx';
+import {DropAnimal} from '../game/animals/Animal.jsx';
 import Continent from './continent/Continent.jsx';
 import {PortalTarget} from '../utils/PortalTarget.jsx'
 import {AnimationServiceRef} from '../../services/AnimationService';
@@ -17,75 +28,77 @@ import {CTT_PARAMETER} from '../../../shared/models/game/evolution/constants';
 
 import {TraitMetamorphose} from '../../../shared/models/game/evolution/traitTypes';
 
-import TraitActivateDialog from './ui/TraitActivateDialog.jsx';
-import Tooltip from "rc-tooltip";
+import TraitActivateDialog from '../game/ui/TraitActivateDialog.jsx';
+
+import './PlayerWrapper.scss';
 
 const INITIAL_STATE = {
   traitActivateQuestion: null
 };
 
 export class PlayerWrapper extends Component {
-  static contextTypes = {
-    gameActions: PropTypes.object.isRequired
-  };
-
   static propTypes = {
     game: PropTypes.instanceOf(GameModelClient).isRequired
     , player: PropTypes.instanceOf(PlayerModel).isRequired
-    , upsideDown: PropTypes.bool.isRequired
     , connectRef: PropTypes.func.isRequired
   };
 
-  constructor(props, context) {
-    super(props, context);
+  constructor(props) {
+    super(props);
+    const {
+      $deployTrait
+      , $traitTakeFood
+      , $traitActivate
+      , $traitTakeShell
+    } = props.gameActions;
     this.state = INITIAL_STATE;
     this.$noop = () => null;
-    this.$traitTakeFood = (animal) => context.gameActions.$traitTakeFood(animal.id);
+    this.$traitTakeFood = (animal) => $traitTakeFood(animal.id);
     this.$traitActivate = (animal, trait, targetId) => {
       if (trait.type === TraitMetamorphose) {
         this.setState({
           traitActivateQuestion: {
             traits: trait.getDataModel().getTargets(props.game, animal, trait)
             , onSelectTrait: (targetTraitId) => {
-              !!targetTraitId && this.context.gameActions.$traitActivate(animal.id, trait.id, targetTraitId);
+              !!targetTraitId && $traitActivate(animal.id, trait.id, targetTraitId);
               this.setState(INITIAL_STATE)
             }
           }
         });
       } else {
-        this.context.gameActions.$traitActivate(animal.id, trait.id, targetId);
+        $traitActivate(animal.id, trait.id, targetId);
       }
     };
+
     this.$deployTrait = (card, animal, alternateTrait, component) => {
       if (card.getTraitDataModel(alternateTrait).cardTargetType & CTT_PARAMETER.LINK) {
         component.setState({selectLink: {card, animal, alternateTrait}});
       } else {
-        this.context.gameActions.$deployTrait(card.id, animal.id, alternateTrait);
+        $deployTrait(card.id, animal.id, alternateTrait);
       }
     };
-    this.$deployLinkedTrait = (card, animal, alternateTrait, linkedAnimal) => {
-      this.context.gameActions.$deployTrait(card.id, animal.id, alternateTrait, linkedAnimal.id);
-    };
-    this.$traitTakeShell = (animal, trait) => {
-      this.context.gameActions.$traitTakeShell(animal.id, trait.id);
-    };
+
+    this.$deployLinkedTrait = (card, animal, alternateTrait, linkedAnimal) =>
+      $deployTrait(card.id, animal.id, alternateTrait, linkedAnimal.id);
+
+
+    this.$traitTakeShell = (animal, trait) => $traitTakeShell(animal.id, trait.id);
   }
 
   render() {
-    const {game, player, upsideDown} = this.props;
+    const {game, player} = this.props;
     const isUser = game.userId === player.id;
-    const innerElements = [
-      this.renderContinent(game, player, isUser)
-      , this.renderCardCollection(game, player, isUser)
-    ];
     return (
       <div className={cn({PlayerWrapper: true, UserWrapper: isUser, EnemyWrapper: !isUser})}
            data-player-id={player.id}>
-        <TraitActivateDialog game={game} {...this.state.traitActivateQuestion}/>
-        {upsideDown ? innerElements : innerElements.reverse()}
-        <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
-          <PortalTarget name={`svg-player-wrapper-${player.id}`} container='g'/>
-        </svg>
+        <div>
+          <TraitActivateDialog game={game} {...this.state.traitActivateQuestion}/>
+          <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
+            <PortalTarget name={`svg-player-wrapper-${player.id}`} container='g'/>
+          </svg>
+        </div>
+        {this.renderContinent(game, player, isUser)}
+        {this.renderCardCollection(game, player, isUser)}
       </div>
     );
   }
@@ -144,4 +157,19 @@ export class PlayerWrapper extends Component {
   }
 }
 
-export default AnimationServiceRef(PlayerWrapper);
+export const PlayerWrapperView = compose(
+  connect((state) => ({})
+    , (dispatch) => ({
+      gameActions: {
+        // PHASE.DEPLOY
+        $deployTrait: (...args) => dispatch(gameDeployTraitRequest(...args))
+        // PHASE.FEEDING
+        , $traitTakeFood: (...args) => dispatch(traitTakeFoodRequest(...args))
+        , $traitActivate: (...args) => dispatch(traitActivateRequest(...args))
+        , $traitTakeShell: (...args) => dispatch(traitTakeShellRequest(...args))
+      }
+    }))
+  , AnimationServiceRef
+)(PlayerWrapper);
+
+export default PlayerWrapperView;
