@@ -3,6 +3,9 @@ import deepForceUpdate from 'react-deep-force-update';
 
 import RootService from '../services/RootService';
 
+import {selectClientRoute} from '../../shared/selectors';
+import {redirectTo} from '../../shared/utils';
+
 export const appChangeLanguage = (langCode) => (dispatch) => {
   //console.log('fetching', langCode);
   window.fetch(`/api/i18n/${langCode}`)
@@ -22,6 +25,16 @@ export const appChangeSound = (value) => ({
   type: 'appChangeSound'
   , data: value
 });
+
+export const appSwitchUI = () => (dispatch, getState) => {
+  const roomId = getState().get('room');
+  const route = selectClientRoute(getState);
+  if (route === '/game') {
+    dispatch(redirectTo(`/game/${roomId}`))
+  } else {
+    dispatch(redirectTo(`/game`))
+  }
+};
 
 const SHOULD_PLAY_AUDIO = GLOBAL_BROWSER && process.env.NODE_ENV !== 'test' && window && window.Audio;
 

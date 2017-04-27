@@ -7,7 +7,9 @@ import {compose} from 'redux';
 import * as MDL from 'react-mdl'
 
 // shared
+import {GameModel, PHASE} from '../../../shared/models/game/GameModel';
 import {traitAnswerRequest, roomExitRequest} from '../../../shared/actions/actions';
+import {appSwitchUI} from '../../actions/app';
 
 // Animations
 import {AnimationServiceContext} from '../../services/AnimationService';
@@ -25,10 +27,11 @@ import CustomDragLayer from '../game/dnd/CustomDragLayer.jsx';
 import './Game.scss'
 
 // Components
+import User from '../utils/User.jsx';
 import {Portal} from '../utils/Portal.jsx';
 import {ControlGroup} from '../utils/ControlGroup.jsx';
-// import {GameFoodContainer} from './food/GameFoodContainer.jsx';
-// import TraitShell from './animals/TraitShell.jsx';
+import {GameFoodContainer} from './food/GameFoodContainer.jsx';
+import TraitShell from './animals/TraitShell.jsx';
 
 import GameScoreboardFinal from '../game/ui/GameScoreboardFinal.jsx';
 
@@ -43,16 +46,22 @@ import GameSticker from './ui/GameSticker.jsx';
 import Chat from '../Chat.jsx';
 import PlayerSticker from "./PlayerSticker.jsx";
 
+const SHADOW = 2;
+
 export class Game extends React.Component {
   render() {
-    const {game, $traitAnswer, $exit} = this.props;
-    const shadow = 2;
+    const {game, $traitAnswer, $exit, $switchUI} = this.props;
+
+    const playerIndex = game.getPlayer() && game.getPlayer().index;
+    const players = GameModel.sortActualPlayersFromIndex(game, playerIndex);
+
     return <div className="Game2-wrapper">
       <GameTimedOutDialog game={game}/>
       <TraitIntellectDialog game={game} $traitAnswer={$traitAnswer}/>
       <TraitDefenceDialog game={game} $traitAnswer={$traitAnswer}/>
 
       <Portal target='header'>
+        <MDL.IconButton id="Game$switchUI" onClick={$switchUI} name="swap_vert"/>
         <ControlGroup name={T.translate('Game.Game')}>
           <MDL.Button id="Game$Exit" onClick={$exit}>{T.translate('App.Room.$Exit')}</MDL.Button>
           <GameScoreboardFinal game={game}/>
@@ -61,46 +70,52 @@ export class Game extends React.Component {
 
       <div className='Game2'>
         <div className='row'>
-          <MDL.Card shadow={shadow} className='GameStickerCard Short'>
+          <MDL.Card shadow={SHADOW} className='GameStickerCard Short'>
             <GameSticker game={game}/>
           </MDL.Card>
-          <MDL.Card shadow={shadow} className='DeckStickerCard Short'>
+          <MDL.Card shadow={SHADOW} className='DeckStickerCard Short'>
             <DeckSticker game={game}/>
           </MDL.Card>
-          <MDL.Card shadow={shadow}>Food</MDL.Card>
-          <MDL.Card shadow={shadow}>
+          <MDL.Card shadow={SHADOW}>
+            <h6>{T.translate('Game.UI.FoodBase')} ({game.food}):</h6>
+            {game.status.phase === PHASE.FEEDING && <GameFoodContainer game={game} food={game.food}/>}
+            <div className='GameShellContainer'>
+              {game.continents.get('standard').shells.map((shell) => <TraitShell key={shell.id} game={game} trait={shell}/>).toList()}
+            </div>
+          </MDL.Card>
+          <MDL.Card shadow={SHADOW}>
             <h6>{T.translate('App.Chat.Label')}:</h6>
             <Chat chatTargetType='ROOM' roomId={game.roomId}/>
           </MDL.Card>
         </div>
         <div className='row'>
-          <MDL.Card shadow={shadow} className='PlayerStickerCard'>
-            <PlayerSticker game={game}/>
-          </MDL.Card>
-          <MDL.Card shadow={shadow}>Player4</MDL.Card>
-          <MDL.Card shadow={shadow}>Player6</MDL.Card>
-          <MDL.Card shadow={shadow}>Player8</MDL.Card>
+          <MDL.Card shadow={SHADOW}>Player</MDL.Card>
+          {this.renderPlayer(game, players, 0)}
+          {this.renderPlayer(game, players, 3)}
+          {this.renderPlayer(game, players, 5)}
+          {this.renderPlayer(game, players, 7)}
+          <MDL.Card shadow={SHADOW}>Player6</MDL.Card>
         </div>
         <div className='row'>
-          <MDL.Card shadow={shadow}>Player2</MDL.Card>
-          <MDL.Card shadow={shadow}>Player3</MDL.Card>
-          <MDL.Card shadow={shadow}>Player5</MDL.Card>
-          <MDL.Card shadow={shadow}>Player7</MDL.Card>
+          {this.renderPlayer(game, players, 1)}
+          {this.renderPlayer(game, players, 2)}
+          {this.renderPlayer(game, players, 4)}
+          {this.renderPlayer(game, players, 6)}
         </div>
-          {/*{game.getActualPlayers().size > 3 && <MDL.Card shadow={shadow}>Player4</MDL.Card>}*/}
-          {/*{game.getActualPlayers().size > 5 && <MDL.Card shadow={shadow}>Player6</MDL.Card>}*/}
-          {/*{game.getActualPlayers().size > 7 && <MDL.Card shadow={shadow}>Player8</MDL.Card>}*/}
-        {/*</div>*/}
-        {/*<div className='row'>*/}
-          {/*{game.getActualPlayers().size > 1 && <MDL.Card shadow={shadow}>Player2</MDL.Card>}*/}
-          {/*{game.getActualPlayers().size > 2 && <MDL.Card shadow={shadow}>Player3</MDL.Card>}*/}
-          {/*{game.getActualPlayers().size > 4 && <MDL.Card shadow={shadow}>Player5</MDL.Card>}*/}
-          {/*{game.getActualPlayers().size > 6 && <MDL.Card shadow={shadow}>Player7</MDL.Card>}*/}
-        {/*</div>*/}
       </div>
 
       <CustomDragLayer />
     </div>
+  }
+
+  renderPlayer(game, players, index) {
+    const player = players.get(index);
+    if (!player) return null;
+    return (
+      <MDL.Card shadow={SHADOW} className='PlayerStickerCard'>
+        <div style={{position: 'absolute', top: '.5em', left: '.5em', zIndex: 100}}><User id={player.id}/></div>
+        <PlayerSticker game={game} player={player}/>
+      </MDL.Card>);
   }
 }
 
@@ -117,6 +132,7 @@ export const GameView = compose(
     , (dispatch) => ({
       $traitAnswer: (...args) => dispatch(traitAnswerRequest(...args))
       , $exit: () => dispatch(roomExitRequest())
+      , $switchUI: () => dispatch(appSwitchUI())
     })
   ))(Game);
 

@@ -1,0 +1,84 @@
+@import '../../../styles/variables';
+
+.AnimalTrait {
+  width: 100%;
+  height: $ANIMAL_TRAIT_HEIGHT;
+
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-size: 10px;
+
+  border: 1px solid gray;
+  border-radius: 1px;
+  //box-sizing: border-box;
+  background: #fff;
+
+  text-align: center;
+
+  transition: background .2s;
+
+  .inner {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    padding: .3em .05em;
+    line-height: 1em;
+
+    display: flex;
+  }
+
+  .name {
+    flex: 1 0 0;
+    @include ellipsis();
+  }
+
+  &.draggable.active, &.pointer.active {
+    background: $TRAIT_ACTIVE_BACK;
+  }
+
+  &.Animate {
+    background-color: green !important;
+  }
+}
+
+.AnimalTraitDetails {
+  max-width: $ANIMAL_TRAIT_DETAILS_WIDTH + 16px * 2; // + card padding
+  font-size: 16px;
+  background: white !important;
+
+  .Title {
+    //padding: 1em 1em 0;
+    text-align: center;
+    span {
+      margin: 0 auto;
+    }
+  }
+  .Text {
+    color: black;
+    padding: 0 1em;
+    max-width: $ANIMAL_TRAIT_DETAILS_WIDTH;
+    font-size: .75em;
+    & .icon {
+      width: 1.0em;
+      height: 1.0em;
+    }
+    & .icon.material-icons {
+      font-size: 16px;
+      vertical-align: text-bottom;
+    }
+    & .mdl-card__supporting-text {
+      width: 80%;
+    }
+  }
+}
+
+.AnimalTraitIcon {
+  padding: .3em;
+  font-weight: bold;
+  text-align: center;
+}
+
+//.AnimalLinkedTrait {
+//  @include traits();
+//}

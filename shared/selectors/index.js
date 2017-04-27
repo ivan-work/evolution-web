@@ -31,12 +31,11 @@ export const makeGameSelectors = (getState, gameId) => ({
 
 export const makeClientGameSelectors = (getState, gameId, i) => ({
   ['selectGame' + i]: () => getState().get('game')
-  ,
-  ['selectPlayer' + i]: () => getState().get('game').getPlayer()
-  ,
-  ['selectCard' + i]: (cardIndex, user) => getState().get('game').getPlayer(user).getCard(cardIndex)
-  ,
-  ['selectAnimal' + i]: (animalIndex, user) => getState().get('game').getPlayer(user).getAnimal(animalIndex)
-  ,
-  ['selectTrait' + i]: (animalIndex, traitIndex, user) => getState().get('game').getPlayer(user).getAnimal(animalIndex).getIn(['traits', traitIndex])
+  , ['selectPlayer' + i]: () => getState().get('game').getPlayer()
+  , ['selectCard' + i]: (cardIndex, user) => getState().get('game').getPlayer(user).getCard(cardIndex)
+  , ['selectAnimal' + i]: (animalIndex, user) => getState().get('game').getPlayer(user).getAnimal(animalIndex)
+  , ['selectTrait' + i]: (animalIndex, traitIndex, user) => getState().get('game')
+    .getPlayer(user).getAnimal(animalIndex).getIn(['traits', traitIndex])
 });
+
+export const selectClientRoute = (getState) => getState().getIn(['routing', 'locationBeforeTransitions', 'pathname']);

@@ -14,7 +14,8 @@ export class ContinentZone extends React.PureComponent {
     index: PropTypes.number.isRequired
   };
 
-  componentDidMount() {
+  constructor(props) {
+    super(props);
     this.className = 'ContinentZone'
   }
 

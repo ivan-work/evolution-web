@@ -4,6 +4,8 @@ import RIP from 'react-immutable-proptypes';
 import T from 'i18n-react';
 import cn from 'classnames';
 
+import * as MDL from 'react-mdl';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import {connect} from 'react-redux';
 import {compose} from 'redux';
 
@@ -17,7 +19,7 @@ import {
 
 import {CardCollection} from '../game/CardCollection.jsx';
 import DragCard from '../game/cards/Card.jsx';
-import {DropAnimal} from '../game/animals/Animal.jsx';
+import {DropAnimal} from './animals/Animal.jsx';
 import Continent from './continent/Continent.jsx';
 import {PortalTarget} from '../utils/PortalTarget.jsx'
 import {AnimationServiceRef} from '../../services/AnimationService';
@@ -29,6 +31,7 @@ import {CTT_PARAMETER} from '../../../shared/models/game/evolution/constants';
 import {TraitMetamorphose} from '../../../shared/models/game/evolution/traitTypes';
 
 import TraitActivateDialog from '../game/ui/TraitActivateDialog.jsx';
+import PlayerSVG from './PlayerSVG.jsx'
 
 import './PlayerWrapper.scss';
 
@@ -43,6 +46,12 @@ export class PlayerWrapper extends Component {
     , connectRef: PropTypes.func.isRequired
   };
 
+  static childContextTypes = {svgContext: PropTypes.object.isRequired};
+
+  getChildContext() {
+    return {svgContext: this.promiseSVGContext};
+  }
+
   constructor(props) {
     super(props);
     const {
@@ -51,6 +60,12 @@ export class PlayerWrapper extends Component {
       , $traitActivate
       , $traitTakeShell
     } = props.gameActions;
+    this.promiseSVGContext = new Promise((resolve, reject) => {
+      this.promiseSVGContextResolve = resolve;
+    });
+    this.setSvgContext = (c) => {
+      if (!!c) this.promiseSVGContextResolve(c);
+    };
     this.state = INITIAL_STATE;
     this.$noop = () => null;
     this.$traitTakeFood = (animal) => $traitTakeFood(animal.id);
@@ -81,24 +96,21 @@ export class PlayerWrapper extends Component {
     this.$deployLinkedTrait = (card, animal, alternateTrait, linkedAnimal) =>
       $deployTrait(card.id, animal.id, alternateTrait, linkedAnimal.id);
 
-
     this.$traitTakeShell = (animal, trait) => $traitTakeShell(animal.id, trait.id);
   }
 
   render() {
-    const {game, player} = this.props;
+    const {game, player, showCards} = this.props;
     const isUser = game.userId === player.id;
     return (
       <div className={cn({PlayerWrapper: true, UserWrapper: isUser, EnemyWrapper: !isUser})}
+           id={`PlayerWrapper${player.id}`}
            data-player-id={player.id}>
-        <div>
-          <TraitActivateDialog game={game} {...this.state.traitActivateQuestion}/>
-          <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
-            <PortalTarget name={`svg-player-wrapper-${player.id}`} container='g'/>
-          </svg>
-        </div>
+        <div className='flex'/>
+        <TraitActivateDialog game={game} {...this.state.traitActivateQuestion}/>
+        <PlayerSVG ref={this.setSvgContext}/>
         {this.renderContinent(game, player, isUser)}
-        {this.renderCardCollection(game, player, isUser)}
+        {showCards && this.renderCardCollection(game, player, isUser)}
       </div>
     );
   }

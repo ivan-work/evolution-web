@@ -17,18 +17,20 @@ export class CardCollection extends React.Component {
     const cardsCount = React.Children.count(children);
     const shift = isUser ? CARD_WIDTH : 15;
     const size = CARD_WIDTH + shift * (cardsCount - 1);
-    return <div style={{margin: '0 auto', width: `${size}px`}}
-                className={`CardCollection ${name}`}>
+    return <div className={`CardCollection ${name}`}>
       {React.Children.map(children, (card, index) =>
         this.renderCardPlace(card, shift * index))}
     </div>;
   }
 
   renderCardPlace(card, shift) {
-    return <div className="CardPlace" key={card.id} style={{
-          transform: `translate(${shift}px,0px)`
-        }}>
+    return <div className="CardPlace" key={card.id}>
       {card}
     </div>
+    // return <div className="CardPlace" key={card.id} style={{
+    //       transform: `translate(${shift}px,0px)`
+    //     }}>
+    //   {card}
+    // </div>
   }
 }

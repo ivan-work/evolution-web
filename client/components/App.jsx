@@ -13,7 +13,6 @@ import ErrorReporter from './ErrorReporter.jsx';
 
 import {appChangeSound} from '../actions/app';
 
-
 export const App = ServicesContext(PortalsContext(
   ({children, location, sound, appChangeSound}) => (<Layout fixedHeader>
     <Header title={`${T.translate('App.Name')} v${GLOBAL_VERSION}`} hideSpacer={true}>

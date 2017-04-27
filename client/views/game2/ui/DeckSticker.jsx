@@ -8,16 +8,17 @@ import GameLog from '../../game/ui/GameLog.jsx';
 import Pause from '../../game/ui/Pause.jsx';
 
 import GameEndTurnButton from './GameEndTurnButton.jsx';
+import {Timer} from '../../utils/Timer.jsx';
 
 import './DeckSticker.scss';
 
 export default ({game}) => {
   const {status, settings, question} = game;
   return (<div className='DeckSticker'>
-    <h6 className='size'>{T.translate('Game.UI.Deck')}: ({game.deck.size})</h6>
+    <h6 className='size'>{T.translate('Game.UI.Deck')} ({game.deck.size}):</h6>
     <div className='content'>
       <div className='deck'>
-        <Deck deck={game.deck}/>
+        {game.deck.size > 0 && <Deck deck={game.deck}/>}
       </div>
       <div className='controls'>
         <GameLog game={game}/>

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import T from 'i18n-react';
-import {Button} from 'react-mdl';
+import {Button, IconButton} from 'react-mdl';
 
 import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 
@@ -32,6 +32,7 @@ class Game extends React.Component {
 
     return <div className='Game'>
       <Portal target='header'>
+        <IconButton id="Game$switchUI" onClick={this.context.gameActions.$switchUI} name="swap_vert"/>
         <ControlGroup name={T.translate('Game.Game')}>
           <Button id="Game$Exit" onClick={this.context.gameActions.$exit}>{T.translate('App.Room.$Exit')}</Button>
           <GameScoreboardFinal game={game}/>

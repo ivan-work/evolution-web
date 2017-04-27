@@ -296,6 +296,12 @@ export class GameModel extends Record({
     const playersList = game.players.toList();
     return playersList.slice(index).concat(playersList.slice(0, index));
   }
+
+  static sortActualPlayersFromIndex(game, index) {
+    if (index === void 0) index = game.status.roundPlayer;
+    const playersList = game.players.toList().filter(p => p.playing);
+    return playersList.slice(index).concat(playersList.slice(0, index));
+  }
 }
 
 export class GameModelClient extends Record({
@@ -320,7 +326,7 @@ export class GameModelClient extends Record({
 
   isPlayerTurn(userId) {
     return !!((userId || this.userId) && this.getPlayer(userId) && this.getPlayer(userId).index === this.status.currentPlayer
-      && (this.status.phase === PHASE.DEPLOY || this.status.phase === PHASE.FEEDING));
+    && (this.status.phase === PHASE.DEPLOY || this.status.phase === PHASE.FEEDING));
   }
 
   isDeploy() {

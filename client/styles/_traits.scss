@@ -16,17 +16,20 @@
 .TraitCommunication {
   color: #99F;
   &.Link {stroke: #99F;}
+  &.AnimalLinkedTrait--Link {stroke: #99F;}
 }
 
 .TraitCooperation {
   color: #090;
   &.Link {stroke: #090;}
+  &.AnimalLinkedTrait--Link {stroke: #090;}
 }
 
 .TraitSymbiosis {
   $color: #F06;
   color: $color;
   &.Link {stroke: $color;}
+  &.AnimalLinkedTrait--Link {stroke: $color;}
   &.Marker {fill: $color;}
   &.MarkerStart {marker-start: url(#symbioticArrow);}
   &.MarkerEnd {marker-end: url(#symbioticArrow);}
@@ -36,6 +39,7 @@
   $color: #909;
   color: $color;
   &.Link {stroke: $color;}
+  &.AnimalLinkedTrait--Link {stroke: $color;}
 }
 
 .TraitParasite {color: #60c;}

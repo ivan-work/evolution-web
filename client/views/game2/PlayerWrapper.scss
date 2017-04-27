@@ -3,20 +3,35 @@
 .Game2 {
   .PlayerStickerCard {
     padding: 0;
-    .PlayerSticker {
-      overflow-y: hidden;
-      overflow-x: scroll;
-      height:100%;
-      .PlayerWrapper {
+    .CardCollectionIcon {
+      width: 100%;
+      text-align: center;
+      .material-icons {
+        vertical-align: middle;
+      }
+    }
+    .PlayerStickerControls {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      .PlayerSticker {
+        overflow: hidden;
+        //overflow: scroll;
         display: flex;
         flex-direction: column;
-        justify-content: flex-end;
-        height:100%;
-        .Animal {
-          flex: 0 0 $ANIMAL_WIDTH;
-        }
-        .CardCollection {
-          height: $CARD_HEIGHT;
+        flex: 1 1 0;
+        .PlayerWrapper {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          flex: 0 0 100%;
+          margin: 0 auto;
+          .Animal {
+            flex: 0 0 $ANIMAL_WIDTH;
+          }
+          .CardCollection {
+            height: $CARD_HEIGHT + 10px;
+          }
         }
       }
     }

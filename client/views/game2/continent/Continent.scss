@@ -5,8 +5,9 @@ $VERTICAL_MARGIN: 2px;
 .Game2 {
   .Continent {
     position: relative;
-    height: $ANIMAL_HEIGHT + $ANIMAL_MARGIN;
     display: flex;
+    flex: 0 0 120%;
+    justify-content: center;
 
     &.isActive {
       background: $CURRENT_TURN_BACKGROUND;

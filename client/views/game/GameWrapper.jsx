@@ -16,6 +16,7 @@ import {
 import {GameUI} from './ui/GameUI.jsx';
 import Game from './Game.jsx';
 import {GameModelClient} from '../../../shared/models/game/GameModel';
+import {appSwitchUI} from '../../actions/app';
 
 import {DragDropContext} from 'react-dnd';
 // import HTML5Backend from 'react-dnd-html5-backend';
@@ -76,6 +77,7 @@ GameWrapperHOC = connect(
       // GLOBAL
       $endTurn: () => dispatch(gameEndTurnRequest())
       , $exit: () => dispatch(roomExitRequest())
+      , $switchUI: () => dispatch(appSwitchUI())
       // PHASE.DEPLOY
       , $deployAnimal: (...args) => dispatch(gameDeployAnimalRequest(...args))
       , $deployTrait: (...args) => dispatch(gameDeployTraitRequest(...args))

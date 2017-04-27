@@ -4,6 +4,10 @@
   }
   .deck {
     margin: 5px 15px 15px 0;
+    .Deck {
+      background: black;
+      box-shadow: 1px 1px 2px 1px black;
+    }
   }
   .controls {
     display: flex;
