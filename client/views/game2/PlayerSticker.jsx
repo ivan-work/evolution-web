@@ -17,11 +17,13 @@ export default class PlayerSticker extends React.Component {
     this.setupContainer = this.setupContainer.bind(this);
     this.scrollContainer = this.scrollContainer.bind(this);
     this.trackScroll = this.trackScroll.bind(this);
-    this.stopTrackScroll = this.stopTrackScroll.bind(this);
     this.onCardCollectionIconClick = this.onCardCollectionIconClick.bind(this);
     this.x = 0;
+    this.waitingCounter = 0;
+    const {game, player} = this.props;
+    const isUser = game.userId === player.id;
     this.state = {
-      showCards: false
+      showCards: isUser
     }
   }
 
@@ -44,6 +46,7 @@ export default class PlayerSticker extends React.Component {
       const bbx = this.div.getBoundingClientRect();
       // console.log(x, bbx.top, bbx.bottom, y >= bbx.top && y <= bbx.bottom)
       if (x >= bbx.left && y >= bbx.top && x <= bbx.left + bbx.width && y <= bbx.bottom) {
+        this.waitingCounter = 0;
         const startX = bbx.left;
         const stepX = bbx.width / 5;
         const scrollX = this.div.scrollLeft;
@@ -54,17 +57,20 @@ export default class PlayerSticker extends React.Component {
           this.div.scrollLeft = scrollX + speedR;
         }
         const startY = bbx.top;
-        const stepY = bbx.height / 3;
+        const stepY = bbx.height / 5;
         const scrollY = this.div.scrollTop;
         if (startY <= y && y <= startY + stepY) {
           this.div.scrollTop = scrollY - speed;
-        } else if (1 * stepY + startY <= y && y <= 2 * stepY + startY) {
-          this.div.scrollTop = scrollY + speed;
-        } else if (2 * stepY + startY <= y && y <= 3 * stepY + startY) {
+        } else if (1 * stepY + startY <= y && y <= 4 * stepY + startY) {
+        } else if (4 * stepY + startY <= y && y <= 5 * stepY + startY) {
           this.div.scrollTop = scrollY + speed;
         }
       } else {
-        this.div.scrollTop += speed;
+        if (this.waitingCounter > 100) {
+          this.div.scrollTop += speed;
+        } else {
+          this.waitingCounter++;
+        }
       }
       window.requestAnimationFrame(this.scrollContainer);
     }
@@ -75,17 +81,14 @@ export default class PlayerSticker extends React.Component {
     this.y = e.pageY;
   }
 
-  stopTrackScroll(e) {
-    this.x = -1;
-    this.y = -1;
-  }
-
   componentDidMount() {
     this.$isMounted = true;
+    document.addEventListener('mousemove', this.trackScroll, false);
     window.requestAnimationFrame(this.scrollContainer)
   }
 
   componentWillUnmount() {
+    document.removeEventListener('mousemove', this.trackScroll);
     this.$isMounted = false;
   }
 
@@ -95,8 +98,6 @@ export default class PlayerSticker extends React.Component {
     return (<div className='PlayerStickerControls'>
       <div className='PlayerSticker'
            id={`PlayerSticker${player.id}`}
-           onMouseMove={this.trackScroll}
-           onMouseLeave={this.stopTrackScroll}
            ref={this.setupContainer}>
         <PlayerWrapper game={game} player={player} showCards={this.state.showCards}/>
       </div>

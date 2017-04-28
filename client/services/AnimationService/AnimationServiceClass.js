@@ -31,7 +31,7 @@ export class AnimationServiceClass {
   processAction(dispatch, getState, next, action) {
     this.$log(`AnimationService:PA(${action.type}) Startx`, this.$subscriptions);
     const subscriptionsForAction = this.$subscriptions[action.type];
-    if (!!this.currentAnimation) {
+    if (this.currentAnimation) {
       this.$log(`AnimationService:PA(${action.type})`, 'END: Push to queue');
       // if already animating something - push to queue
       //let nextAction;

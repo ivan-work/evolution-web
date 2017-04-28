@@ -9,6 +9,8 @@ $VERTICAL_MARGIN: 2px;
     flex: 0 0 120%;
     justify-content: center;
 
+    background: $CURRENT_TURN_BACKGROUND;
+
     &.isActive {
       background: $CURRENT_TURN_BACKGROUND;
     }
@@ -44,6 +46,7 @@ $VERTICAL_MARGIN: 2px;
         flex: 1;
         .inner {
           margin: 0 auto;
+          width: $ANIMAL_WIDTH;
         }
       }
 

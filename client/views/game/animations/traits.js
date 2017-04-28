@@ -1,57 +1,31 @@
-export const pingTrait = (done, traitId) => {
+export const pingTrait = (traitId) => {
   const TraitHtml = document.getElementById('AnimalTrait' + traitId);
-  if (TraitHtml) {
-    TraitHtml.classList.add('Animate');
-    setTimeout(() => {
-      const TraitHtml = document.getElementById('AnimalTrait' + traitId);
-      if (TraitHtml) TraitHtml.classList.remove('Animate');
-      done();
-    }, 500);
-  } else {
-    done();
-  }
+  if (!TraitHtml) return;
+  TraitHtml.classList.add('Animate');
+  return new Promise((resolve) => setTimeout(() => {
+    const TraitHtml = document.getElementById('AnimalTrait' + traitId);
+    if (TraitHtml) TraitHtml.classList.remove('Animate');
+    resolve();
+  }, 500));
 };
 
-export const TraitCarnivorous_Start = (done, {sourceAid, targetId}) => {
+export const TraitCarnivorous_Start = ({sourceAid, targetId}) => {
   const SourceAnimalHtml = document.getElementById('Animal' + sourceAid);
   const TargetAnimalHtml = document.getElementById('Animal' + targetId);
 
-  Velocity(SourceAnimalHtml, {
+  return Velocity(SourceAnimalHtml, {
     translateX: 0
     , translateY: -25
-  }, 1200)
-    .then(() => {
-      done();
-    })
+  }, 1200);
 };
 
-export const TraitCarnivorous_End = (done, {sourceAid, targetId}) => {
+export const TraitCarnivorous_End = ({sourceAid, targetId}) => {
   const SourceAnimalHtml = document.getElementById('Animal' + sourceAid);
   const TargetAnimalHtml = document.getElementById('Animal' + targetId);
   console.log('TraitCarnivorous_End');
 
-  Velocity(SourceAnimalHtml, {
+  return Velocity(SourceAnimalHtml, {
     translateX: 0
     , translateY: 0
   }, 500)
-    .then(() => {
-      done();
-    });
 };
-
-//export const TraitCooperation_Start = (done, {sourceAid, targetId}) => {
-//  //pingTrait(done)
-//};
-//
-//export const TraitCommunication_Start = (done, {sourceAid, targetId}) => {
-//  const SourceAnimalHtml = document.getElementById('Animal' + sourceAid);
-//  const TargetAnimalHtml = document.getElementById('Animal' + targetId);
-//
-//  Velocity(SourceAnimalHtml, {
-//    translateX: 0
-//    , translateY: -25
-//  }, 1200)
-//    .then(() => {
-//      done();
-//    })
-//};

@@ -5,10 +5,8 @@ import T from 'i18n-react';
 import cn from 'classnames';
 
 import * as MDL from 'react-mdl';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import {connect} from 'react-redux';
 import {compose} from 'redux';
-
 
 import {
   gameDeployTraitRequest
@@ -21,7 +19,6 @@ import {CardCollection} from '../game/CardCollection.jsx';
 import DragCard from '../game/cards/Card.jsx';
 import {DropAnimal} from './animals/Animal.jsx';
 import Continent from './continent/Continent.jsx';
-import {PortalTarget} from '../utils/PortalTarget.jsx'
 import {AnimationServiceRef} from '../../services/AnimationService';
 
 import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
@@ -100,7 +97,7 @@ export class PlayerWrapper extends Component {
   }
 
   render() {
-    const {game, player, showCards} = this.props;
+    const {game, player} = this.props;
     const isUser = game.userId === player.id;
     return (
       <div className={cn({PlayerWrapper: true, UserWrapper: isUser, EnemyWrapper: !isUser})}
@@ -110,12 +107,13 @@ export class PlayerWrapper extends Component {
         <TraitActivateDialog game={game} {...this.state.traitActivateQuestion}/>
         <PlayerSVG ref={this.setSvgContext}/>
         {this.renderContinent(game, player, isUser)}
-        {showCards && this.renderCardCollection(game, player, isUser)}
+        {this.renderCardCollection(game, player, isUser)}
       </div>
     );
   }
 
   renderCardCollection(game, player, isUser) {
+    const {showCards} = this.props;
     const dragEnabled = isUser
       && game.status.phase === PHASE.DEPLOY
       && game.isPlayerTurn();
@@ -123,6 +121,7 @@ export class PlayerWrapper extends Component {
     return (<CardCollection
       key='CardCollection'
       name={isUser ? 'Hand' : player.id}
+      visible={showCards && player.hand.size > 0}
       isUser={isUser}>
       {player.hand.map((cardModel, i) => this.renderCard(cardModel, dragEnabled, isUser))}
     </CardCollection>)

@@ -27,13 +27,11 @@ export const appChangeSound = (value) => ({
 });
 
 export const appSwitchUI = () => (dispatch, getState) => {
-  const roomId = getState().get('room');
-  const route = selectClientRoute(getState);
-  if (route === '/game') {
-    dispatch(redirectTo(`/game/${roomId}`))
-  } else {
-    dispatch(redirectTo(`/game`))
-  }
+  const value = getState().getIn(['app', 'newUI']);
+  dispatch({
+    type: 'appSwitchUI'
+    , data: !value
+  });
 };
 
 const SHOULD_PLAY_AUDIO = GLOBAL_BROWSER && process.env.NODE_ENV !== 'test' && window && window.Audio;

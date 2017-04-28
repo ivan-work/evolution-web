@@ -20,11 +20,11 @@
         display: flex;
         flex-direction: column;
         flex: 1 1 0;
+        align-items: center;
+        justify-content: flex-end;
         .PlayerWrapper {
           display: flex;
           flex-direction: column;
-          height: 100%;
-          flex: 0 0 100%;
           margin: 0 auto;
           .Animal {
             flex: 0 0 $ANIMAL_WIDTH;

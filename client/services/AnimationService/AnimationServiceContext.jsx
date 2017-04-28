@@ -26,7 +26,10 @@ class Subscription {
     return new Promise((resolve, reject) => this.$resolveUpdate = resolve)
       .then(props => (props === null
         ? Promise.resolve()
-        : new Promise((resolve) => this.callback(() => resolve(true), actionData, getState, props))))
+        : this.callback(actionData, getState, props)))
+      .catch((err) => {
+        console.error(err);
+      })
   }
 
   componentUpdated(props) {
@@ -40,9 +43,7 @@ export const AnimationServiceContext = ({animations}) => (WrappedComponentClass)
   };
 
   getChildContext() {
-    return {
-      animationServiceContext: this
-    }
+    return {animationServiceContext: this};
   };
 
   constructor(props) {

@@ -77,7 +77,7 @@ export class Game extends React.Component {
             <DeckSticker game={game}/>
           </MDL.Card>
           <MDL.Card shadow={SHADOW}>
-            <h6>{T.translate('Game.UI.FoodBase')} ({game.food}):</h6>
+            <h6>{T.translate('Game.UI.FoodBase')}{game.status.phase === PHASE.FEEDING && <span> ({game.food})</span>}:</h6>
             {game.status.phase === PHASE.FEEDING && <GameFoodContainer game={game} food={game.food}/>}
             <div className='GameShellContainer'>
               {game.continents.get('standard').shells.map((shell) => <TraitShell key={shell.id} game={game} trait={shell}/>).toList()}
@@ -89,18 +89,20 @@ export class Game extends React.Component {
           </MDL.Card>
         </div>
         <div className='row'>
-          <MDL.Card shadow={SHADOW}>Player</MDL.Card>
+          {/*<MDL.Card shadow={SHADOW}>Player</MDL.Card>*/}
           {this.renderPlayer(game, players, 0)}
           {this.renderPlayer(game, players, 3)}
           {this.renderPlayer(game, players, 5)}
           {this.renderPlayer(game, players, 7)}
-          <MDL.Card shadow={SHADOW}>Player6</MDL.Card>
+          {/*<MDL.Card shadow={SHADOW}>Player6</MDL.Card>*/}
         </div>
         <div className='row'>
+          {/*<MDL.Card shadow={SHADOW}>Player6</MDL.Card>*/}
           {this.renderPlayer(game, players, 1)}
           {this.renderPlayer(game, players, 2)}
           {this.renderPlayer(game, players, 4)}
           {this.renderPlayer(game, players, 6)}
+          {/*<MDL.Card shadow={SHADOW}>Player6</MDL.Card>*/}
         </div>
       </div>
 

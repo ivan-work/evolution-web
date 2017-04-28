@@ -26,8 +26,7 @@ export default (store) => {
     <IndexRoute component={RoomsView} onEnter={AuthCheck}/>
     <Route path='login' component={LoginView} onEnter={LoginCheck}/>
     <Route path='room/:roomId' component={Room} onEnter={AuthCheck}/>
-    <Route path='game' component={GameWrapperView} onEnter={AuthCheck}/>
-    <Route path='game/:roomId' component={GamePage} onEnter={AuthCheck}/>
+    <Route path='game' component={GamePage} onEnter={AuthCheck}/>
     <Route path='test' component={Test}/>
   </Route>
 }

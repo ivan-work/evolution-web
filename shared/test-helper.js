@@ -19,14 +19,15 @@ global.fastCheck = false;
 
 var exposedProperties = ['window', 'navigator', 'document', 'componentHandler'];
 
-global.document = jsdom.jsdom('<!doctype html><html><body></body></html>');
-global.window = document.defaultView;
-Object.keys(document.defaultView).forEach((property) => {
-  if (typeof global[property] === 'undefined') {
-    exposedProperties.push(property);
-    global[property] = document.defaultView[property];
-  }
-});
+const dom = new jsdom.JSDOM('<!doctype html><html><body></body></html>');
+global.window = dom.window;
+global.document = dom.window.document;
+// Object.keys(document.defaultView).forEach((property) => {
+//   if (typeof global[property] === 'undefined') {
+//     exposedProperties.push(property);
+//     global[property] = document.defaultView[property];
+//   }
+// });
 global.navigator = {
   userAgent: 'node.js'
 };

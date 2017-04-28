@@ -18,6 +18,7 @@ const testWatch = (paths) => gulp.src(paths)
   .pipe(mocha({
     bail: true
     , require: ['source-map-support/register', 'ignore-styles', './shared/test-helper.js']
+    // , require: ['source-map-support/register', 'ignore-styles', './shared/test-helper.js']
   }))
   .on('error', function (e) {
     gutil.log(e);

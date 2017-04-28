@@ -14,7 +14,7 @@ import './TraitActivateDialog.scss';
 
 export default class TraitActivateDialog extends React.Component {
   static propTypes = {
-    traits: PropTypes.oneOf([
+    traits: PropTypes.oneOfType([
       RIP.listOf(PropTypes.instanceOf(TraitModel))
       , PropTypes.arrayOf(PropTypes.instanceOf(TraitModel))
     ])

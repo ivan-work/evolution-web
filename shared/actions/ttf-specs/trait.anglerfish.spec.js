@@ -20,7 +20,7 @@ phase: 1
 players:
   - hand: angler
 `);
-    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     const {selectGame0, selectAnimal0, selectTrait0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
     const {selectGame1, selectAnimal1, selectTrait1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
 
@@ -28,6 +28,9 @@ players:
     expect(selectAnimal(User0, 0).traits, `Server can see anglerfish`).size(1);
     expect(selectAnimal0(0).traits, `User0 can see anglerfish`).size(1);
     expect(selectAnimal1(0, User0).traits, `User1 can't see anglerfish`).size(0);
+    clientStore1.dispatch(gameEndTurnRequest());
+    expect(selectTrait(User0, 0, 0).id).equal(selectTrait0(0, 0).id);
+    clientStore0.dispatch(traitActivateRequest(selectAnimal0(0).id, selectTrait0(0, 0).id));
   });
 
   it('Cannot deploy as a trait', () => {

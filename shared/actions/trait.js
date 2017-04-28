@@ -11,14 +11,21 @@ import {
   , TRAIT_COOLDOWN_LINK
 } from '../models/game/evolution/constants';
 
-import {server$game} from './generic';
+import {server$game, to$} from './generic';
 import {doesPlayerHasOptions} from './ai';
 import {server$gameEndTurn, server$addTurnTimeout, server$gameCancelTurnTimeout} from './actions';
 
 import {selectRoom, selectGame, selectUsersInGame} from '../selectors';
 
 import {PHASE, QuestionRecord} from '../models/game/GameModel';
-import {TraitCommunication, TraitCooperation, TraitViviparous, TraitCarnivorous, TraitAmbush, TraitIntellect} from '../models/game/evolution/traitTypes';
+import {
+  TraitCommunication,
+  TraitCooperation,
+  TraitViviparous,
+  TraitCarnivorous,
+  TraitAmbush,
+  TraitIntellect
+} from '../models/game/evolution/traitTypes';
 
 import {
   checkGameDefined
@@ -95,7 +102,7 @@ const traitMakeCooldownActions = (gameId, trait, sourceAnimal) => {
   return traitData.cooldowns.map(([link, place, duration]) => {
     const placeId = (place === TRAIT_COOLDOWN_PLACE.PLAYER ? sourceAnimal.ownerId
       : place === TRAIT_COOLDOWN_PLACE.TRAIT ? trait.id
-      : sourceAnimal.id);
+        : sourceAnimal.id);
     return startCooldown(gameId, link, duration, place, placeId);
   }).toArray();
 };
@@ -147,8 +154,14 @@ const traitSetValue = (gameId, sourceAid, traitId, value) => ({
 });
 
 // TODO Remove and rewrite calls to traitSetValue with IDs. Because this one is bad fn =\
-export const server$traitSetValue = (game, sourceAnimal, trait, value) =>
-  server$game(game.id, traitSetValue(game.id, sourceAnimal.id, trait.id, value));
+export const server$traitSetValue = (game, sourceAnimal, trait, value) => (dispatch) => {
+  const action = traitSetValue(game.id, sourceAnimal.id, trait.id, value);
+  if (trait.getDataModel().transient) {
+    dispatch(to$({userId: sourceAnimal.ownerId}, action));
+  } else {
+    dispatch(server$game(game.id, action));
+  }
+};
 
 const traitKillAnimal = (gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId) => ({
   type: 'traitKillAnimal'
@@ -215,9 +228,9 @@ export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   //console.log(userId, game.getPlayer(userId).index, game.status)
   //if (game.getPlayer(userId).index === game.status.currentPlayer) {
-    dispatch(server$game(gameId, playerActed(gameId, userId)));
-    if (!doesPlayerHasOptions(selectGame(getState, gameId), userId))
-      dispatch(server$gameEndTurn(gameId, userId));
+  dispatch(server$game(gameId, playerActed(gameId, userId)));
+  if (!doesPlayerHasOptions(selectGame(getState, gameId), userId))
+    dispatch(server$gameEndTurn(gameId, userId));
   //}
 };
 

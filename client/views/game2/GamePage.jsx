@@ -4,12 +4,14 @@ import RIP from 'react-immutable-proptypes'
 import {connect} from 'react-redux';
 
 import Game from './Game.jsx'
+import {GameWrapperView as GameWrapper} from '../game/GameWrapper.jsx'
 
 export class GamePage extends React.Component {
   render() {
-    const {game} = this.props;
+    const {game, newUI} = this.props;
     if (!game) return null;
-    return <Game/>
+    if (newUI) return <Game/>;
+    return <GameWrapper/>;
   }
 }
 
@@ -19,7 +21,8 @@ export const GamePageView = connect(
     const user = state.get('user');
     const roomId = state.get('room');
     const room = state.getIn(['rooms', roomId]);
-    return {game, user, roomId, room}
+    const newUI = state.getIn(['app', 'newUI']);
+    return {game, user, roomId, room, newUI}
   }
   , (dispatch) => ({})
 )(GamePage);

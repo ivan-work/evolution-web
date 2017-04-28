@@ -1,45 +1,36 @@
 import ReactDOM from 'react-dom';
 import Velocity from 'velocity-animate'
 
-import {gameGiveCards} from './gameGiveCards';
+import {gameGiveCards, gameGiveCardsOther} from './gameGiveCards';
 
 import * as localTraits from './traits';
 
 // [actionName]: (done, actionData, getState, componentProps)
 export const createAnimationServiceConfig = () => ({
   animations: ({subscribe, getRef}) => {
-    subscribe('gameGiveCards', (done, {cards}, getState) =>
-      gameGiveCards(done, getState().get('game'), cards, getRef));
+    subscribe('gameGiveCards', ({userId, cards}, getState) => {
+      const game = getState().get('game');
+      const newUI = getState().getIn(['app', 'newUI']);
+      if (!newUI || game.userId === userId)
+        return gameGiveCards(game, cards, getRef);
+      else
+        return gameGiveCardsOther(userId, game.deck.size, cards, getRef)
+    });
 
-    subscribe('traitNotify_Start', (done, actionData, getState) => {
+    subscribe('traitNotify_Start', (actionData, getState) => {
       const {sourceAid, traitId, traitType, targetId} = actionData;
       if (localTraits[traitType + '_Start']) {
-        localTraits[traitType + '_Start'](done, actionData);
+        return localTraits[traitType + '_Start'](actionData);
       } else {
-        localTraits.pingTrait(done, traitId);
+        return localTraits.pingTrait(traitId);
       }
     });
 
-    subscribe('traitNotify_End', (done, actionData, getState) => {
+    subscribe('traitNotify_End', (actionData, getState) => {
       const {sourceAid, traitId, traitType, targetId} = actionData;
       if (localTraits[traitType + '_End']) {
-        localTraits[traitType + '_End'](done, actionData);
-      } else {
-        done();
+        return localTraits[traitType + '_End'](actionData);
       }
     });
-//, gameNextPlayer: (done, component, {cards}) => {
-//  component.setState({
-//    toastYourTurn: true
-//  });
-//  setTimeout(() => {
-//    done();
-//  }, 5000);
-//}
-//onlineUpdate: (done, component) => {
-//  const {game} = component.props;
-//  GameAnimations.gameGiveCards(done, game, game.getPlayer().hand, component.Deck, component.Cards);
-//}
-//,
   }
 });

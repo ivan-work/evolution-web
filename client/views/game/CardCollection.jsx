@@ -13,11 +13,11 @@ export class CardCollection extends React.Component {
   };
 
   render() {
-    const {children, name, isUser} = this.props;
+    const {children, name, isUser, visible = true} = this.props;
     const cardsCount = React.Children.count(children);
     const shift = isUser ? CARD_WIDTH : 15;
     const size = CARD_WIDTH + shift * (cardsCount - 1);
-    return <div className={`CardCollection ${name}`}>
+    return <div className={`CardCollection ${name} ${visible ? '' : 'hidden'}`}>
       {React.Children.map(children, (card, index) =>
         this.renderCardPlace(card, shift * index))}
     </div>;

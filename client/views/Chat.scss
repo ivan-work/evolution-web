@@ -17,7 +17,11 @@
     font-size: .70em;
     vertical-align: top;
     color: #999;
-    line-height: .8em;
+    line-height: 1em;
+    margin-top: .5em;
+  }
+  .ChatMessage {
+    line-height: 1.2em;
   }
   .ChatInput {
     .mdl-textfield {

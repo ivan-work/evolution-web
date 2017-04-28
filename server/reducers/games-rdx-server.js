@@ -8,7 +8,7 @@ import {AnimalModel} from '../../shared/models/game/evolution/AnimalModel';
 import {TraitModel} from '../../shared/models/game/evolution/TraitModel';
 import {TraitDataModel} from '../../shared/models/game/evolution/TraitDataModel';
 import {CTT_PARAMETER, TRAIT_TARGET_TYPE, TRAIT_ANIMAL_FLAG} from '../../shared/models/game/evolution/constants';
-import {TraitFatTissue, TraitShell, TraitAnglerfish} from '../../shared/models/game/evolution/traitTypes';
+import {TraitFatTissue, TraitShell} from '../../shared/models/game/evolution/traitTypes';
 
 /**
  * TRAITS
@@ -59,9 +59,6 @@ export const gameGiveCards = (game, {userId, cards}) => {
 
 const gameDeployAnimal = (animal, card, position) => (game) => {
   //console.log('gameDeployAnimal', animal)
-  if (card.trait1 === TraitAnglerfish) {
-    animal = animal.traitAttach(TraitModel.new(TraitAnglerfish))
-  }
   return game
     .updateIn(['players', animal.ownerId, 'continent'], continent => continent.splice(position, 0, animal))
 };

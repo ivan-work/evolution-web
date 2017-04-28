@@ -3,45 +3,107 @@ import Velocity from 'velocity-animate'
 
 import {CardUnknown} from '../../../../shared/models/game/evolution/cards/index'
 
-export const gameGiveCards = (done, game, cards, getRef) => {
-  const DELAY = 200;
-  const DURATION = 400;
+export const gameGiveCards = (game, cards, getRef) => {
+  const DELAY = 100;
+  const DURATION = 800;
 
   const Deck = getRef('Deck');
   const DeckHtml = ReactDOM.findDOMNode(Deck);
 
-  cards.map((card, index) => {
-    const CardHtml = document.getElementById('Card' + card.id);
+  return Promise.all(cards.map((card, index) => Promise.resolve()
+    .then(() => {
+      const CardHtml = document.getElementById('Card' + card.id);
+      const CardClone = CardHtml.cloneNode(true);
+      CardClone.style.position = 'absolute';
+      CardClone.style.top = '0px';
+      CardClone.style.left = '0px';
+      CardClone.style.zIndex = '100';
+      window.document.body.appendChild(CardClone);
 
-    //console.log(`index ${index}`, `deck pos ${game.deck.size - cards.size + index}`, cards.map(c => c.id).toArray());
+      const sourceBbx = DeckHtml.getBoundingClientRect();
+      const deckOffset = Deck.getXYForCard(game.deck.size - cards.size + index);
+      const targetBbx = CardHtml.getBoundingClientRect();
 
-    const sourceBbx = DeckHtml.getBoundingClientRect();
-    const deckOffset = Deck.getXYForCard(game.deck.size - cards.size + index);
-    const targetBbx = CardHtml.getBoundingClientRect();
+      CardHtml.classList.add('invisible');
+      CardClone.classList.add('cover');
 
-    CardHtml.classList.add('cover');
-
-    return Velocity(CardHtml, {
-      translateX: -targetBbx.left + sourceBbx.left + deckOffset.x
-      , translateY: -targetBbx.top + sourceBbx.top + deckOffset.y
-      , rotateY: 0
-    }, 0)
-      .then(() =>
-        Velocity(CardHtml, {translateX: -targetBbx.left + 200, translateY: -targetBbx.top + 200, rotateY: 90}
-          , {
-            duration: DURATION
-            , delay: (cards.size - index + 1) * DELAY
-            , easing: 'easeOutCubic'
-            , complete: () => {
-              if (CardHtml.classList.contains('isUser')) CardHtml.classList.remove('cover');
+      return Promise.resolve()
+        .then(() =>
+          Velocity(CardClone, {
+            translateX: sourceBbx.left + deckOffset.x
+            , translateY: sourceBbx.top + deckOffset.y
+          }, 0))
+        .then(() => new Promise(resolve => setTimeout(resolve, DELAY * index)))
+        .then(() => {
+          if (CardHtml.classList.contains('isUser')) // For old UI
+            Velocity(CardClone, {rotateY: 90}
+              , {duration: DURATION / 2, queue: false})
+              .then(() => CardClone.classList.remove('cover'))
+              .then(() => Velocity(CardClone, {rotateY: 0}
+                , {duration: DURATION / 2, queue: false}));
+          return Velocity(CardClone, {
+              translateX: targetBbx.left
+              , translateY: targetBbx.top
             }
-          }))
-      .then(() =>
-        Velocity(CardHtml, {translateX: 0, translateY: 0, rotateY: 0}
-          , {
-            duration: DURATION
-            , easing: 'easeInOutCubic'
-          }))
-  });
-  setTimeout(() => done(), (cards.size + 1) * DELAY);
+            , DURATION)
+        })
+        .then(() => {
+          window.document.body.removeChild(CardClone);
+          CardHtml.classList.remove('invisible');
+        })
+        .catch(() => {
+          window.document.body.removeChild(CardClone);
+        })
+    })
+  ));
+};
+
+export const gameGiveCardsOther = (userId, deckSize, cards, getRef) => {
+  const DELAY = 100;
+  const DURATION = 800;
+
+  const Deck = getRef('Deck');
+  const DeckHtml = ReactDOM.findDOMNode(Deck);
+
+  return Promise.all(cards.map((card, index) => Promise.resolve()
+    .then(() => {
+      const CardHtml = document.getElementById('Card' + card.id);
+      const StickerHtml = document.getElementById('PlayerSticker' + userId);
+      const CardClone = CardHtml.cloneNode(true);
+      CardClone.style.position = 'absolute';
+      CardClone.style.top = '0px';
+      CardClone.style.left = '0px';
+      CardClone.style.zIndex = '100';
+      window.document.body.appendChild(CardClone);
+
+      const sourceBbx = DeckHtml.getBoundingClientRect();
+      const deckOffset = Deck.getXYForCard(deckSize - cards.size + index);
+      const targetBbx = StickerHtml.getBoundingClientRect();
+
+      CardHtml.classList.add('invisible');
+      CardClone.classList.add('cover');
+      return Promise.resolve()
+        .then(() =>
+          Velocity(CardClone, {
+            translateX: sourceBbx.left + deckOffset.x
+            , translateY: sourceBbx.top + deckOffset.y
+          }, 0))
+        .then(() => new Promise(resolve => setTimeout(resolve, DELAY * index)))
+        .then(() => {
+          return Velocity(CardClone, {
+              translateX: targetBbx.left
+              , translateY: targetBbx.top + targetBbx.height * .9
+              , rotateX: 90
+            }
+            , DURATION)
+        })
+        .then(() => {
+          window.document.body.removeChild(CardClone);
+          CardHtml.classList.remove('invisible');
+        })
+        .catch(() => {
+          window.document.body.removeChild(CardClone);
+        })
+    })
+  ));
 };

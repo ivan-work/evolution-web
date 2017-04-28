@@ -66,7 +66,7 @@ export const parseAnimalList = (userId, string) => {
           const value = prop.split('=')[1];
           return animal.traitAttach(TraitModel.new(TraitModel.parse(type)).set('value', value));
         }
-      }, AnimalModel.new(userId)))
+      }, AnimalModel.new(userId, null)))
     .reduce((result, animal) => result.set(animal.id, animal), Map());
   links.forEach(([a1id, prop, a2id]) => {
     invariant(animalsMap.has(a1id), 'invalid linkable trait ' + [a1id, prop, a2id]);

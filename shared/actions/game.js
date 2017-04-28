@@ -258,8 +258,9 @@ export const server$autoTurn = (gameId, userId) => (dispatch, getState) => {
   const player = game.getPlayer(userId);
   if (game.status.phase === PHASE.DEPLOY) {
     if (player.continent.size === 0 && player.hand.size > 0) {
-      const animal = AnimalModel.new(userId);
-      dispatch(server$gameDeployAnimalFromHand(gameId, userId, animal, 0, player.hand.get(0).id));
+      const card = player.hand.first();
+      const animal = AnimalModel.new(userId, card.trait1);
+      dispatch(server$gameDeployAnimalFromHand(gameId, userId, animal, 0, card.id));
       dispatch(server$gameDeployNext(gameId, userId));
       return true;
     }
@@ -558,8 +559,9 @@ export const gameClientToServer = {
     checkGamePhase(game, PHASE.DEPLOY);
     checkPlayerCanAct(game, userId);
     checkValidAnimalPosition(game, userId, animalPosition);
-    checkPlayerHasCard(game, userId, cardId);
-    const animal = AnimalModel.new(userId);
+    const cardIndex = checkPlayerHasCard(game, userId, cardId);
+    const card = game.getPlayer(userId).getCard(cardIndex);
+    const animal = AnimalModel.new(userId, card.trait1);
     logger.verbose('selectGame > gameDeployAnimalRequest:', cardId);
     // console.timeEnd('gameDeployAnimalRequest body');
     // console.time('server$gameDeployAnimal');

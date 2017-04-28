@@ -2,7 +2,7 @@ import {Record, List, Map} from 'immutable';
 import uuid from 'uuid';
 import {TraitModel} from './TraitModel';
 
-import {TraitFatTissue, TraitSymbiosis, TraitShell, TraitHibernation} from './traitTypes/index';
+import {TraitFatTissue, TraitSymbiosis, TraitShell, TraitHibernation, TraitAnglerfish} from './traitTypes/index';
 import {TRAIT_ANIMAL_FLAG, CTT_PARAMETER} from './constants';
 
 export class AnimalModel extends Record({
@@ -14,19 +14,21 @@ export class AnimalModel extends Record({
   , traits: List()
   , flags: Map()
 }) {
-  static new(ownerId) {
-    return new AnimalModel({
+  static new(ownerId, trait) {
+    let animal = new AnimalModel({
       id: uuid.v4()
       , ownerId
     });
+    return trait !== TraitAnglerfish ? animal
+      : animal.traitAttach(TraitModel.new(TraitAnglerfish));
   }
 
   static fromServer(js) {
     return js == null
       ? null
       : new AnimalModel(js)
-      .set('traits', List(js.traits).map(trait => TraitModel.fromServer(trait)))
-      .set('flags', Map(js.flags));
+        .set('traits', List(js.traits).map(trait => TraitModel.fromServer(trait)))
+        .set('flags', Map(js.flags));
   }
 
   toClient() {
