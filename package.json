@@ -11,6 +11,7 @@
     "./shared/utils/logger/index.js": "./shared/utils/logger/logger-browser.js"
   },
   "scripts": {
+    "heroku-postbuild": "npm run build",
     "start": "node_modules/.bin/nodemon server/index.js",
     "clean": "node_modules/.bin/rimraf dist",
     "build": "npm run clean && npm run server:build && npm run client:build",
