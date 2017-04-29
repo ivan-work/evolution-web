@@ -24,9 +24,7 @@ class Subscription {
 
   waitForUpdate(actionData, getState) {
     return new Promise((resolve, reject) => this.$resolveUpdate = resolve)
-      .then(props => (props === null
-        ? Promise.resolve()
-        : this.callback(actionData, getState, props)))
+      .then(props => (props && this.callback(actionData, getState, props)))
       .catch((err) => {
         console.error(err);
       })

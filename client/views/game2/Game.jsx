@@ -11,10 +11,6 @@ import {GameModel, PHASE} from '../../../shared/models/game/GameModel';
 import {traitAnswerRequest, roomExitRequest} from '../../../shared/actions/actions';
 import {appSwitchUI} from '../../actions/app';
 
-// Animations
-import {AnimationServiceContext} from '../../services/AnimationService';
-import {createAnimationServiceConfig} from '../game/animations';
-
 // DnD
 import {DragDropContext} from 'react-dnd';
 import TouchBackend from 'react-dnd-touch-backend';
@@ -123,7 +119,6 @@ export class Game extends React.Component {
 
 export const GameView = compose(
   DragDropContext(backend)
-  , AnimationServiceContext(createAnimationServiceConfig())
   , connect((state, props) => {
       const game = state.get('game');
       const user = state.get('user');

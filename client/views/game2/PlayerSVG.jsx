@@ -119,6 +119,8 @@ export default class PlayerSVG extends React.Component {
         <AnimalTraitArrowMarker id='symbioticArrow' className='TraitSymbiosis Marker' markerSize={4}/>
       </defs>
       {links.map(([trait1id, trait2id]) => {
+        if (!this.linkedTraits[trait1id]) return;
+        if (!this.linkedTraits[trait2id]) return;
         const linkClassName = cn({
           [this.linkedTraits[trait1id].props.trait.type]: true
           , 'AnimalLinkedTrait--Link': true

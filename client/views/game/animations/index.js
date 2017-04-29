@@ -17,16 +17,17 @@ export const createAnimationServiceConfig = () => ({
         return gameGiveCardsOther(userId, game.deck.size, cards, getRef)
     });
 
-    subscribe('traitNotify_Start', (actionData, getState) => {
+    subscribe('traitNotify_Start', ((actionData, getState) => {
       const {sourceAid, traitId, traitType, targetId} = actionData;
       if (localTraits[traitType + '_Start']) {
         return localTraits[traitType + '_Start'](actionData);
       } else {
         return localTraits.pingTrait(traitId);
       }
-    });
+    }));
 
     subscribe('traitNotify_End', (actionData, getState) => {
+      console.log('traitNotify_End', actionData);
       const {sourceAid, traitId, traitType, targetId} = actionData;
       if (localTraits[traitType + '_End']) {
         return localTraits[traitType + '_End'](actionData);

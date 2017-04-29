@@ -12,6 +12,7 @@ export const pingTrait = (traitId) => {
 export const TraitCarnivorous_Start = ({sourceAid, targetId}) => {
   const SourceAnimalHtml = document.getElementById('Animal' + sourceAid);
   const TargetAnimalHtml = document.getElementById('Animal' + targetId);
+  console.log('TraitCarnivorous_Start');
 
   return Velocity(SourceAnimalHtml, {
     translateX: 0

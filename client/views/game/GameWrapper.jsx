@@ -60,10 +60,6 @@ let GameWrapperHOC = GameWrapper;
 const backend = !process.env.TEST ? TouchBackend({ enableMouseEvents: true }) : TestBackend;
 GameWrapperHOC = DragDropContext(backend)(GameWrapperHOC);
 
-import {AnimationServiceContext} from '../../services/AnimationService';
-import {createAnimationServiceConfig} from './animations';
-GameWrapperHOC = AnimationServiceContext(createAnimationServiceConfig())(GameWrapperHOC);
-
 GameWrapperHOC = connect(
   (state) => {
     const game = state.get('game');
