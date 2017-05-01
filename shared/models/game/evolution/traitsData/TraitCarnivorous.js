@@ -128,7 +128,10 @@ export const TraitCarnivorous = {
       animal.traits.size === 1
       && animal.traits.get(0).type === TraitAnglerfish
       && animal.traits.get(0).checkAction(game, animal)
-      && (targetAnimal === animal || animal.traits.get(0).value === true)
+      && (targetAnimal === animal || (
+        animal.traits.get(0).value === true
+        && targetAnimal.traits.size === 0
+      ))
     ).get(0);
 
     if (animalAnglerfish) {
@@ -218,7 +221,7 @@ export const TraitCarnivorous = {
         const defaultIntellect = (questionId) => {
           const targetId = (possibleDefenses.length > 0 ? possibleDefenses[0].id
             : affectiveDefenses.length > 0 ? affectiveDefenses[0].id
-              : true);
+            : true);
           return server$traitIntellectAnswer(game.id, questionId, traitIntellect.id, targetId);
         };
 
