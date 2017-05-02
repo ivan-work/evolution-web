@@ -92,7 +92,7 @@ export const getStaticDefenses = (game, sourceAnimal, targetAnimal) =>
     || (trait.type === TraitMassive && !sourceAnimal.hasTrait(TraitMassive))
     || (trait.type === TraitBurrowing && targetAnimal.isSaturated())
     || (trait.type === TraitSwimming && !sourceAnimal.hasTrait(TraitSwimming))
-    || (trait.type === TraitShell && targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL))
+    || (trait.type === TraitShell.type && targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL))
     || (trait.type === TraitFlight && (sourceAnimal.traits.size >= targetAnimal.traits.size))
   ).toArray();
 

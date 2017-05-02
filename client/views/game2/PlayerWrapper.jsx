@@ -28,7 +28,6 @@ import {CTT_PARAMETER} from '../../../shared/models/game/evolution/constants';
 import {TraitMetamorphose} from '../../../shared/models/game/evolution/traitTypes';
 
 import TraitActivateDialog from '../game/ui/TraitActivateDialog.jsx';
-import PlayerSVG from './PlayerSVG.jsx'
 
 import './PlayerWrapper.scss';
 
@@ -43,12 +42,6 @@ export class PlayerWrapper extends Component {
     , connectRef: PropTypes.func.isRequired
   };
 
-  static childContextTypes = {svgContext: PropTypes.object.isRequired};
-
-  getChildContext() {
-    return {svgContext: this.promiseSVGContext};
-  }
-
   constructor(props) {
     super(props);
     const {
@@ -57,12 +50,6 @@ export class PlayerWrapper extends Component {
       , $traitActivate
       , $traitTakeShell
     } = props.gameActions;
-    this.promiseSVGContext = new Promise((resolve, reject) => {
-      this.promiseSVGContextResolve = resolve;
-    });
-    this.setSvgContext = (c) => {
-      if (!!c) this.promiseSVGContextResolve(c);
-    };
     this.state = INITIAL_STATE;
     this.$noop = () => null;
     this.$traitTakeFood = (animal) => $traitTakeFood(animal.id);
@@ -105,7 +92,6 @@ export class PlayerWrapper extends Component {
            data-player-id={player.id}>
         <div className='flex'/>
         <TraitActivateDialog game={game} {...this.state.traitActivateQuestion}/>
-        <PlayerSVG ref={this.setSvgContext}/>
         {this.renderContinent(game, player, isUser)}
         {this.renderCardCollection(game, player, isUser)}
       </div>

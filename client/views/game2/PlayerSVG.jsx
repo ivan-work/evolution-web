@@ -8,7 +8,7 @@ import cn from 'classnames';
 import AnimalTraitArrowMarker from './animals/AnimalTraitArrowMarker.jsx';
 
 const linkedTraitPathStyle = {
-  strokeWidth: '4px'
+  strokeWidth: '3px'
   , strokeLinecap: 'round'
   , fill: 'none'
   , pointerEvents: 'auto'

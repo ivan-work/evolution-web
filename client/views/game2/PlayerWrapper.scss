@@ -26,11 +26,14 @@
           display: flex;
           flex-direction: column;
           margin: 0 auto;
+          position: relative;
+          transition: transform .25s;
           .Animal {
             flex: 0 0 $ANIMAL_WIDTH;
           }
           .CardCollection {
-            height: $CARD_HEIGHT + 10px;
+            height: $CARD_HEIGHT;
+            margin-bottom: 10px;
           }
         }
       }

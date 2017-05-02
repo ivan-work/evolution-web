@@ -6,7 +6,8 @@ $VERTICAL_MARGIN: 2px;
   .Continent {
     position: relative;
     display: flex;
-    flex: 0 0 120%;
+    flex: 0 0 100%;
+    margin-top: $ANIMAL_TRAIT_HEIGHT;
     justify-content: center;
 
     background: $CURRENT_TURN_BACKGROUND;

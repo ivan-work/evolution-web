@@ -17,7 +17,7 @@ describe('TraitShell:', () => {
 phase: 2
 food: 2
 players:
-  - continent: $A carn comm$D, $B carn, $C shell tail piracy, $D shell + fat, $Waiter graz
+  - continent: $A carn comm$D wait, $B carn, $C shell tail piracy, $D shell + fat
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
 
@@ -30,6 +30,11 @@ players:
 
     expectUnchanged('$C cant eat', () =>
         clientStore0.dispatch(traitTakeFoodRequest('$C'))
+      , serverStore, clientStore0);
+
+    clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$C'))
+    expectUnchanged('$B cant attack $C', () =>
+      clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$C'))
       , serverStore, clientStore0);
 
     clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$D'));

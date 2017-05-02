@@ -23,7 +23,6 @@ import CustomDragLayer from '../game/dnd/CustomDragLayer.jsx';
 import './Game.scss'
 
 // Components
-import User from '../utils/User.jsx';
 import {Portal} from '../utils/Portal.jsx';
 import {ControlGroup} from '../utils/ControlGroup.jsx';
 import {GameFoodContainer} from './food/GameFoodContainer.jsx';
@@ -111,7 +110,6 @@ export class Game extends React.Component {
     if (!player) return null;
     return (
       <MDL.Card shadow={SHADOW} className='PlayerStickerCard'>
-        <div style={{position: 'absolute', top: '.5em', left: '.5em', zIndex: 100}}><User id={player.id}/></div>
         <PlayerSticker game={game} player={player}/>
       </MDL.Card>);
   }
