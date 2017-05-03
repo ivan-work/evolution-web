@@ -37,11 +37,14 @@ export default class PlayerSVG extends React.Component {
   }
 
   mountLinkedTrait(linkedTrait) {
-    const trait = linkedTrait.props.trait;
-    this.linkedTraits[trait.id] = linkedTrait;
+    const trait1 = linkedTrait.props.trait;
+    this.linkedTraits[trait1.id] = linkedTrait;
     const links = this.state.links;
-    if (this.$isMounted && this.linkedTraits[trait.linkId] && !links.some(link => this.isTraitInLink(link, trait.id))) {
-      links.push([trait.id, trait.linkId]);
+    if (this.$isMounted
+      && this.linkedTraits[trait1.linkId]
+      && !links.some(link => this.isTraitInLink(link, trait1.id))
+    ) {
+      links.push(trait1.linkSource ? [trait1.id, trait1.linkId] : [trait1.linkId, trait1.id]);
       this.setState(links)
     }
   }
@@ -87,7 +90,6 @@ export default class PlayerSVG extends React.Component {
         let y1 = link1bbx.height / 3 + link1bbx.top - basebbx.top;
         let x2 = link2bbx.width / 2 + link2bbx.left - basebbx.left;
         let y2 = link2bbx.height / 3 + link2bbx.top - basebbx.top;
-
         const reversed = x1 < x2;
 
         [x1, y1, x2, y2] = (reversed
@@ -97,9 +99,11 @@ export default class PlayerSVG extends React.Component {
         const angle = Math.atan2(y1 - y2, x1 - x2);
 
         svgElement.setAttribute('d', `M${x1},${y1} A 1 0.2 ${angle * 180 / Math.PI || 0} 1 1 ${x2},${y2}`);
+        // console.log(reversed)
         if (reversed) {
           svgElement.classList.remove('MarkerStart');
           svgElement.classList.add('MarkerEnd');
+          svgElement.classList.add('reversed');
         } else {
           svgElement.classList.add('MarkerStart');
           svgElement.classList.remove('MarkerEnd');
@@ -116,7 +120,7 @@ export default class PlayerSVG extends React.Component {
 
     return (<svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
       <defs>
-        <AnimalTraitArrowMarker id='symbioticArrow' className='TraitSymbiosis Marker' markerSize={4}/>
+        <AnimalTraitArrowMarker id='symbioticArrow' className='TraitSymbiosis' markerSize={4}/>
       </defs>
       {links.map(([trait1id, trait2id]) => {
         if (!this.linkedTraits[trait1id]) return;

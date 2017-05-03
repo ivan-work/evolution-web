@@ -1,5 +1,9 @@
 @import './variables';
 
+.AnimalTraitArrow.Marker {
+  fill: red;
+}
+
 .TraitFatTissue {
   color: #d60;
   &.value {background: #ff0;}

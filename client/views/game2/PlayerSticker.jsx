@@ -12,7 +12,7 @@ import PlayerSVG from './PlayerSVG.jsx'
 
 const speedL = 6;
 const speedR = 6.5; // You won't believe, but they're different. No idea why =(
-const speed = 2;
+const speed = 5;
 
 export default class PlayerSticker extends React.Component {
 
@@ -37,7 +37,7 @@ export default class PlayerSticker extends React.Component {
     const isUser = game.userId === player.id;
     this.state = {
       showCards: isUser
-      , zoom: false
+      , zoom: true
     };
 
     this.x = 0;
@@ -62,10 +62,14 @@ export default class PlayerSticker extends React.Component {
   scrollContainer() {
     const x = this.x;
     const y = this.y;
-    if (this.div && !this.state.zoom) {
+    if (this.div) {
       const bbx = this.div.getBoundingClientRect();
       // console.log(x, bbx.top, bbx.bottom, y >= bbx.top && y <= bbx.bottom)
-      if (x >= bbx.left && y >= bbx.top && x <= bbx.left + bbx.width && y <= bbx.bottom) {
+      const isInside = x >= bbx.left && y >= bbx.top && x <= bbx.left + bbx.width && y <= bbx.bottom;
+      if (this.state.zoom) {
+        this.calcScale();
+      } else if (isInside) {
+        this.inner.style.transform = `scale(1)`;
         this.waitingCounter = 0;
         const startX = bbx.left;
         const stepX = bbx.width / 5;
@@ -93,26 +97,19 @@ export default class PlayerSticker extends React.Component {
         }
       }
     }
-    if (this.div && this.inner) {
-      if (this.state.zoom) {
-        const outerW = this.div.offsetWidth;
-        const outerH = this.div.offsetHeight;
-        const innerW = this.inner.scrollWidth;
-        const innerH = this.inner.scrollHeight + 20;
-        const scaleW = Math.min(1, Math.ceil((outerW / innerW) * 100) / 100);
-        const scaleH = Math.min(1, Math.ceil((outerH / innerH) * 100) / 100);
-        console.log(this.inner.offsetHeight, this.inner.scrollHeight);
-        // const scale = Math.min(1, scaleH);
-        const scale = Math.min(scaleW, scaleH);
-        this.inner.style.transform = `scale(${scale})`;
-        // this.inner.style.width = `${scaleW * 100}%`;
-        // this.inner.style.height = `${scaleH * 100}%`;
-        this.div.scrollTop += this.div.scrollHeight;
-      } else {
-        this.inner.style.transform = `scale(1)`;
-      }
-    }
     if (this.$isMounted) window.requestAnimationFrame(this.scrollContainer);
+  }
+
+  calcScale() {
+    const outerW = this.div.offsetWidth;
+    const outerH = this.div.offsetHeight;
+    const innerW = this.inner.scrollWidth;
+    const innerH = this.inner.scrollHeight + 20;
+    const scaleW = Math.min(1, Math.ceil((outerW / innerW) * 100) / 100);
+    const scaleH = Math.min(1, Math.ceil((outerH / innerH) * 100) / 100);
+    const scale = Math.min(scaleW, scaleH);
+    this.inner.style.transform = `scale(${scale})`;
+    this.div.scrollTop += this.div.scrollHeight;
   }
 
   trackScroll(e) {
@@ -142,8 +139,8 @@ export default class PlayerSticker extends React.Component {
     const isUser = game.userId === player.id;
     return (<div className='PlayerStickerControls'>
       <div style={{position: 'absolute', top: '.5em', left: '.5em', zIndex: 100}}>
-        <User id={player.id}/>
         <MDL.IconButton name={this.state.zoom ? 'zoom_out' : 'zoom_in'} onClick={this.switchZoom}/>
+        <User id={player.id}/>
       </div>
       <div className='PlayerSticker'
            id={`PlayerSticker${player.id}`}

@@ -43,39 +43,10 @@ describe('Auth:', function () {
 
       const clientStore1 = mockClientStore(clientStore0.getState()).connect(serverStore);
 
-      expect(clientStore0.getState().user, 'clientStore0.user').ok;
-      expect(clientStore0.getState().user.token).equal(serverUser().token);
-      expect(clientStore0.getSocketId()).equal(serverUser().connectionId);
-      expect(clientStore1.getState().user, 'clientStore1.user').null;
-      expect(serverStore.getState().users).size(1);
-    });
-
-    it('Duplicate Tabs (With inject)', () => {
-      const serverStore = mockServerStore();
-      const serverUser = () => serverStore.getState().users.first();
-      const userId = ObjectId();
-
-      serverStore.dispatch(server$injectUser(userId, 'User0'));
-      const clientStore0 = mockClientStore().connect(serverStore);
-      clientStore0.dispatch(loginUserTokenRequest('/', serverUser().token));
-
-      serverStore.dispatch(server$injectUser(userId, 'User1'));
-      const clientStore1 = mockClientStore(clientStore0.getState().setIn(['user', 'token'], serverUser().token)).connect(serverStore);
-      clientStore0.dispatch(loginUserTokenRequest('/', serverUser().token));
-
-      expect(clientStore0.getState().user, 'clientStore0.user').null;
       expect(clientStore1.getState().user, 'clientStore1.user').ok;
       expect(clientStore1.getState().user.token).equal(serverUser().token);
       expect(clientStore1.getSocketId()).equal(serverUser().connectionId);
-
-      clientStore0.disconnect();
-      clientStore0.connect(serverStore);
-
-      expect(clientStore0.getState().user, 'clientStore0.user after disconnect').null;
-      expect(clientStore1.getState().user, 'clientStore1.user after disconnect').ok;
-      expect(clientStore1.getState().user.token).equal(serverUser().token);
-      expect(clientStore1.getSocketId()).equal(serverUser().connectionId);
-
+      expect(clientStore0.getState().user, 'clientStore1.user').null;
       expect(serverStore.getState().users).size(1);
     });
   });
@@ -239,7 +210,7 @@ describe('Auth:', function () {
 
       expect(serverStore.getState().get('connections')).keys(clientStore0.getSocketId(), clientStore1.getSocketId());
       expect(serverStore.getState().get('users')).size(1);
-      expect(serverStore.getState().getIn(['users', User0.id])).equal(User0);
+      expect(serverStore.getState().getIn(['users', User0.id])).equal(User0.set('connectionId', clientStore1.getSocketId()));
     });
 
     it('Bug with stealing identity', () => {

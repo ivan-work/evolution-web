@@ -27,7 +27,7 @@
           flex-direction: column;
           margin: 0 auto;
           position: relative;
-          transition: transform .25s;
+          transition: transform 1.25s;
           .Animal {
             flex: 0 0 $ANIMAL_WIDTH;
           }

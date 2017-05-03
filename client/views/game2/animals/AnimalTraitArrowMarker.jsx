@@ -17,7 +17,7 @@ export default class AnimalTraitArrowMarker extends Component {
     const {id, markerSize, className} = this.props;
     return <marker id={id} ref={(e) => this.marker = e}>
       <path d={`M0,0 L0,${markerSize} L${markerSize / 4 * 3},${markerSize / 2} z`}
-            className={className}/>
+            className={'Marker ' + className}/>
     </marker>
   }
 }

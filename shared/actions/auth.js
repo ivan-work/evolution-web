@@ -163,8 +163,10 @@ export const authClientToServer = {
         throw new ActionCheckError('server$loginExistingUser', `User not exists (%s)`, token);
       }
 
-      if (getState().get('connections').has(currentUser.connectionId))
-        throw new ActionCheckError('server$loginExistingUser', `Duplicate tabs are not supported`);
+      if (getState().get('connections').has(currentUser.connectionId)) {
+        dispatch(Object.assign(loginUserFailure(`Duplicate tabs are not supported`)
+          , {meta: {clientOnly: true, socketId: currentUser.connectionId}}));
+      }
 
       dispatch(cancelTimeout('logoutUser' + currentUser.id));
 

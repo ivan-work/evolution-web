@@ -10,21 +10,25 @@ export const gameGiveCards = (game, cards, getRef) => {
   const Deck = getRef('Deck');
   const DeckHtml = ReactDOM.findDOMNode(Deck);
 
+  console.log(!Deck, !DeckHtml);
+  if (!Deck || !DeckHtml) return;
+
   return Promise.all(cards.map((card, index) => Promise.resolve()
     .then(() => {
       const CardHtml = document.getElementById('Card' + card.id);
-      const CardClone = CardHtml.cloneNode(true);
-      CardClone.style.position = 'absolute';
-      CardClone.style.top = '0px';
-      CardClone.style.left = '0px';
-      CardClone.style.zIndex = '100';
-      window.document.body.appendChild(CardClone);
 
       const sourceBbx = DeckHtml.getBoundingClientRect();
       const deckOffset = Deck.getXYForCard(game.deck.size - cards.size + index);
       const targetBbx = CardHtml.getBoundingClientRect();
 
+
+      const CardClone = CardHtml.cloneNode(true);
       CardHtml.classList.add('invisible');
+      CardClone.style.position = 'absolute';
+      CardClone.style.top = '0px';
+      CardClone.style.left = '0px';
+      CardClone.style.zIndex = '100';
+      window.document.body.appendChild(CardClone);
       CardClone.classList.add('cover');
 
       return Promise.resolve()
@@ -51,7 +55,8 @@ export const gameGiveCards = (game, cards, getRef) => {
           window.document.body.removeChild(CardClone);
           CardHtml.classList.remove('invisible');
         })
-        .catch(() => {
+        .catch((e) => {
+          console.error(e);
           window.document.body.removeChild(CardClone);
         })
     })

@@ -17,7 +17,7 @@ import TouchBackend from 'react-dnd-touch-backend';
 import TestBackend from 'react-dnd-test-backend';
 const backend = !process.env.TEST ? TouchBackend({enableMouseEvents: true}) : TestBackend;
 
-import CustomDragLayer from '../game/dnd/CustomDragLayer.jsx';
+import CustomDragLayer from './dnd/CustomDragLayer.jsx';
 
 // Style
 import './Game.scss'
