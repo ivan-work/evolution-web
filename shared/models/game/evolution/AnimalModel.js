@@ -71,25 +71,23 @@ export class AnimalModel extends Record({
 
   traitDetach(lookup) {
     const traits = this.traits.filterNot(lookup);
+    return this
+      .set('traits', traits)
+      .recalculateFood()
+  }
+
+  recalculateFood() {
     let foodSize = 1;
     let fatSize = 0;
-    traits.forEach(trait => {
+    this.traits.forEach(trait => {
+      if (trait.disabled) return;
       if (trait.type === TraitFatTissue) fatSize++;
       foodSize += trait.getDataModel().food;
     });
-    return (this
-        .set('traits', traits)
-        .set('foodSize', foodSize)
-        .set('fatSize', fatSize)
-        .set('food', Math.min(this.food, foodSize))
-    );
-  }
-
-  updateTrait(filterFn, updateFn, direction = true) {
-    const index = this.traits[direction ? 'findIndex' : 'findLastIndex'](filterFn);
-    return (~index
-      ? this.updateIn(['traits', index], updateFn)
-      : this);
+    return this
+      .set('foodSize', foodSize)
+      .set('fatSize', fatSize)
+      .set('food', Math.min(this.food, foodSize))
   }
 
   hasFlag(flag) {

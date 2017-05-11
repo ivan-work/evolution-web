@@ -304,6 +304,7 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
   } else if (game.status.phase === PHASE.DEPLOY) {
     logger.verbose('server$gameStart FEEDING:');
     const food = game.generateFood();
+    // dispatch(processNeoplasm(game));
     dispatch(server$game(gameId, gameStartEat(gameId, food)));
     dispatch(server$gamePlayerStart(gameId));
   } else {
@@ -319,6 +320,16 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
     }
   }
 };
+
+// const processNeoplasm = (game) => (dispatch, getState) => {
+//   game
+//     .update('players', players => players.map(player => player.update('continent', continent => continent.map(animal => {
+//       const traitNeoplasm = animal.hasTrait('TraitNeoplasm');
+//       if (!traitNeoplasm) return animal;
+//       animal = traitNeoplasm.getDataModel().action(game, animal);
+//       return animal
+//     }))));
+// };
 
 /**
  * gameNextPlayer

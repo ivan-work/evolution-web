@@ -8,7 +8,7 @@ import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
 
-describe.only('TraitViviparous:', () => {
+describe('TraitViviparous:', () => {
   it('from taking food', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`

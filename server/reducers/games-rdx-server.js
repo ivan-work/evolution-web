@@ -5,7 +5,7 @@ import {GameModel, QuestionRecord, PHASE} from '../../shared/models/game/GameMod
 import {CardModel} from '../../shared/models/game/CardModel';
 import {CooldownList} from '../../shared/models/game/CooldownList';
 import {AnimalModel} from '../../shared/models/game/evolution/AnimalModel';
-import {TraitModel} from '../../shared/models/game/evolution/TraitModel';
+import {TraitModel, TraitData} from '../../shared/models/game/evolution/TraitModel';
 import {TraitDataModel} from '../../shared/models/game/evolution/TraitDataModel';
 import {CTT_PARAMETER, TRAIT_TARGET_TYPE, TRAIT_ANIMAL_FLAG} from '../../shared/models/game/evolution/constants';
 import {TraitFatTissue, TraitShell} from '../../shared/models/game/evolution/traitTypes';
@@ -144,10 +144,10 @@ export const gameStartEat = (game, {food}) => {
 
 const processNeoplasm = (game) => {
   return game
-    .update('players', players => players.map(player => player.update('continent', continent => continent.map(animal => {
-      if (!animal.hasTrait('TraitNeoplasm')) return animal;
-      return animal;
-    }))));
+    .update('players', players => players.map(player => player.update('continent', continent => continent
+      .map(animal => TraitData.TraitNeoplasm.action(game, animal))
+      .filter(a => !!a)
+    )));
 };
 
 export const gameStartDeploy = (game) => {

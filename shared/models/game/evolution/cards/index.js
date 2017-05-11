@@ -3,6 +3,7 @@ import * as traits from '../traitTypes/index';
 
 export * from './base';
 export * from './ttf';
+export * from './cons';
 
 export const CardUnknown = {
   type: 'CardUnknown'

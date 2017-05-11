@@ -5,7 +5,7 @@ import * as traitTypes from './traitTypes/index'
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import {CTT_PARAMETER} from './constants';
 
-const TraitData = Object.keys(traitTypes)
+export const TraitData = Object.keys(traitTypes)
   .reduce((result, traitType) => Object.assign(result, {[traitType]: TraitDataModel.new(traitType)}), {});
 
 export class TraitModel extends Record({
@@ -17,6 +17,7 @@ export class TraitModel extends Record({
   , linkAnimalId: null
   , linkSource: null
   , value: false // for fat
+  , disabled: false // for neoplasm
   , cooldown: null
 }) {
   static new(type) {
@@ -132,6 +133,6 @@ export class TraitModel extends Record({
   }
 
   toString() {
-    return `Trait#${this.id}#${this.type}(${this.value || ''})`;
+    return `Trait#${this.id}#${this.type}(${this.value || ''})${this.disabled ? '(disabled)' : ''}`;
   }
 }
