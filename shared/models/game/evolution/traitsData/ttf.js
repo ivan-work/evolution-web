@@ -22,7 +22,7 @@ import {
   , server$traitNotify_End
   , server$game
   , startCooldown
-  , gameDeployAnimalFromDeck
+  , server$gameDeployAnimalFromDeck
 } from '../../../../actions/actions';
 
 import {selectGame} from '../../../../selectors';
@@ -152,8 +152,7 @@ export const TraitViviparous = {
   ])
   , action: (game, sourceAnimal, trait) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, trait, sourceAnimal));
-    const newborn = AnimalModel.new(sourceAnimal.ownerId, game.deck.last() && game.deck.last().trait1).set('food', 1);
-    dispatch(server$game(game.id, gameDeployAnimalFromDeck(game.id, newborn, sourceAnimal.id)));
+    dispatch(server$gameDeployAnimalFromDeck(game.id, sourceAnimal));
   }
   , $checkAction: (game, animal, traitSpec) => animal.isSaturated(game) && game.deck.size > 0
 };

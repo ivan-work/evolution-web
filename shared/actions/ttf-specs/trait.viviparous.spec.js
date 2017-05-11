@@ -6,7 +6,7 @@ import {
 
 import {PHASE} from '../../models/game/GameModel';
 
-import {makeGameSelectors} from '../../selectors';
+import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
 
 describe.only('TraitViviparous:', () => {
   it('from taking food', () => {
@@ -80,4 +80,41 @@ players:
     expect(selectPlayer(User0).hand, 'hand size').size(3);
     expect(selectGame().deck, 'Deck size').size(6);
   });
+
+  it('Angler', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+deck: 1 angler
+phase: 2
+food: 1
+players:
+  - continent: $A vivi + wait
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame0, selectAnimal0, selectTrait0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
+    const {selectGame1, selectAnimal1, selectTrait1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
+
+    clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    expect(selectAnimal(User0, 1), '$A should give birth').ok;
+    expect(selectGame().deck, 'Deck size').size(0);
+
+    expect(selectTrait(User0, 1, 0).type).equal('TraitAnglerfish');
+    expect(selectTrait0(1, 0, User0).type).equal('TraitAnglerfish');
+    expect(selectTrait1(1, 0, User0), 'User1 should not know about angler' ).undefined;
+  });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

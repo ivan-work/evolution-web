@@ -203,10 +203,25 @@ export const server$gameDeployAnimalFromHand = (gameId, userId, animal, animalPo
   ));
 };
 
-export const gameDeployAnimalFromDeck = (gameId, animal, sourceAid) => ({
+const gameDeployAnimalFromDeck = (gameId, animal, sourceAid) => ({
   type: 'gameDeployAnimalFromDeck'
   , data: {gameId, animal, sourceAid}
 });
+
+export const server$gameDeployAnimalFromDeck = (gameId, sourceAnimal) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  const userId = sourceAnimal.ownerId;
+  const animal = AnimalModel.new(userId, game.deck.last() && game.deck.last().trait1).set('food', 1);
+  dispatch(gameDeployAnimalFromDeck(gameId, animal, sourceAnimal.id));
+  dispatch(Object.assign(
+    gameDeployAnimalFromDeck(gameId, animal.toClient(), sourceAnimal.id)
+    , {meta: {clientOnly: true, userId}}
+  ));
+  dispatch(Object.assign(
+    gameDeployAnimalFromDeck(gameId, animal.toOthers().toClient(), sourceAnimal.id)
+    , {meta: {clientOnly: true, users: selectUsersInGame(getState, gameId).filter(uid => uid !== userId)}}
+  ));
+};
 
 // gameDeployTrait
 export const gameDeployTraitRequest = (cardId, animalId, alternateTrait, linkId) => (dispatch, getState) => dispatch({
