@@ -44,7 +44,7 @@ settings:
       expect(selectGame().question).ok;
       expect(ClientGame0().question).ok;
       expect(ClientGame1().question).ok;
-      clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', 2));
+      clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', 'TraitRunning'));
       expect(selectGame().question).null;
       expect(ClientGame0().question).null;
       expect(ClientGame1().question).null;
@@ -54,10 +54,8 @@ settings:
       //expect(selectGame().getIn(['cooldowns', 'PLAYER', User0.id])).size(1);
       expect(selectPlayer(User0).acted).true;
       expect(selectAnimal(User1, 0).id).equal('$Z');
-      expect(selectAnimal(User1, 0).traits).size(3);
-      expect(selectAnimal(User1, 0).traits.get(0).type).equal('TraitTailLoss');
-      expect(selectAnimal(User1, 0).traits.get(1).type).equal('TraitMimicry');
-      expect(selectAnimal(User1, 0).traits.get(2).type).equal('TraitFatTissue');
+      expect(selectAnimal(User1, 0).traits.map(t => t.type).toArray())
+        .eql(['TraitTailLoss', 'TraitMimicry', 'TraitFatTissue']);
       clientStore0.dispatch(gameEndTurnRequest());
     });
     clientStore1.dispatch(gameEndTurnRequest());
@@ -71,9 +69,8 @@ settings:
 
     //console.log(selectAnimal(User1, 0).traits)
 
-    expect(selectAnimal(User1, 0).traits, 'selectAnimal(User1, 0).traits').size(2);
-    expect(selectAnimal(User1, 0).traits.get(0).type).equal('TraitTailLoss');
-    expect(selectAnimal(User1, 0).traits.get(1).type).equal('TraitMimicry');
+    expect(selectAnimal(User1, 0).traits.map(t => t.type).toArray())
+      .eql(['TraitTailLoss', 'TraitMimicry']);
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore1.dispatch(gameEndTurnRequest());
 
@@ -85,22 +82,21 @@ settings:
     expect(selectGame().question).null;
     expect(ClientGame0().question).null;
     expect(ClientGame1().question).null;
-    expect(selectAnimal(User1, 0).traits).size(2);
-    expect(selectAnimal(User1, 0).traits.get(0).type).equal('TraitTailLoss');
-    expect(selectAnimal(User1, 0).traits.get(1).type).equal('TraitMimicry');
+    expect(selectAnimal(User1, 0).traits.map(t => t.type).toArray())
+      .eql(['TraitTailLoss', 'TraitMimicry']);
     expect(selectAnimal(User1, 2)).undefined;
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore1.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$E', 'TraitCarnivorous', '$Z'));
-    clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', 0));
-    expect(selectAnimal(User1, 0).traits).size(1);
-    expect(selectAnimal(User1, 0).traits.get(0).type).equal('TraitMimicry');
+    clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', 'TraitTailLoss'));
+    expect(selectAnimal(User1, 0).traits.map(t => t.type).toArray())
+      .eql(['TraitMimicry']);
     clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$F', 'TraitCarnivorous', '$Z'));
-    expect(selectAnimal(User1, 0).traits).size(1);
-    expect(selectAnimal(User1, 0).traits.get(0).type).equal('TraitMimicry');
+    expect(selectAnimal(User1, 0).traits.map(t => t.type).toArray())
+      .eql(['TraitMimicry']);
     expect(selectAnimal(User1, 1)).undefined;
     clientStore0.dispatch(gameEndTurnRequest());
   });

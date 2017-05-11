@@ -31,3 +31,5 @@ export const TraitAmbush = 'TraitAmbush';
 export const TraitFlight = 'TraitFlight';
 export const TraitSpecA = 'TraitSpecA';
 export const TraitSpecB = 'TraitSpecB';
+
+export const TraitNeoplasm = 'TraitNeoplasm';

@@ -1,4 +1,4 @@
-import {Map, List} from 'immutable';
+import {Map, List, OrderedMap} from 'immutable';
 
 import {PHASE} from '../../models/game/GameModel';
 import {TraitModel} from '../../models/game/evolution/TraitModel';
@@ -186,5 +186,25 @@ phase: 0
 
     expect(clientStore2.getState().get('game')).null;
     expect(clientStore2.getState().get('room')).null;
+  });
+
+
+  it('Increased eating', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+food: 10
+phase: 2
+players:
+  - continent: $A TraitCarnivorous
+`);
+    const {selectGame, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    expect(selectAnimal(User0, 0).traits).instanceOf(OrderedMap);
+    clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    expect(selectAnimal(User0, 0).traits).instanceOf(OrderedMap);
+    expectUnchanged('Cant end turn after game', () => {
+      clientStore0.dispatch(gameEndTurnRequest());
+    }, serverStore, clientStore0);
   });
 });

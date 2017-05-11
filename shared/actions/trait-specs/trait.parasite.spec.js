@@ -18,8 +18,8 @@ players:
       ServerGame().getPlayer(User0).getCard(0).id
       , ServerGame().getPlayer(User1).getAnimal(0).id
     ));
-    expect(ServerGame().getPlayer(User1).getAnimal(0).traits, 'User1.Animal0 has trait Parasite').size(1);
-    expect(ServerGame().getPlayer(User1).getAnimal(0).traits.get(0).type).equal('TraitParasite');
+    expect(ServerGame().getPlayer(User1).getAnimal(0).traits.map(t => t.type).toArray(), 'User1.Animal0 has trait Parasite')
+      .eql(['TraitParasite']);
   });
 
   it('Cannot be casted to self', () => {

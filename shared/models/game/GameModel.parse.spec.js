@@ -83,14 +83,9 @@ describe('GameModel.parse', () => {
     expect(list.get(0).id).equal('$A');
     expect(list.get(1).traits.size).equal(0);
     expect(list.get(2).id).equal('$B');
-    expect(list.get(2).traits.size).equal(2);
-    expect(list.get(2).traits.get(0).type).equal('TraitCarnivorous');
-    expect(list.get(2).traits.get(1).type).equal('TraitSharpVision');
-    expect(list.get(3).traits.size).equal(2);
-    expect(list.get(3).traits.get(0).type).equal('TraitSharpVision');
-    expect(list.get(3).traits.get(1).type).equal('TraitCamouflage');
-    expect(list.get(4).traits.size).equal(1);
-    expect(list.get(4).traits.get(0).type).equal('TraitCamouflage');
+    expect(list.get(2).traits.map(t => t.type).toArray()).eql(['TraitCarnivorous', 'TraitSharpVision']);
+    expect(list.get(3).traits.map(t => t.type).toArray()).eql(['TraitSharpVision', 'TraitCamouflage']);
+    expect(list.get(4).traits.map(t => t.type).toArray()).eql(['TraitCamouflage']);
 
     expect(list.get(0).getFood()).equal(0);
     expect(list.get(1).getFood()).equal(1);

@@ -5,6 +5,9 @@ export const selectRoom = (getState, roomId) => getState().getIn(['rooms', roomI
 export const selectGame = (getState, gameId) =>
   getState().getIn(['games', gameId]);
 
+export const selectTrait = (game, user, animalIndex, traitIndex) =>
+  game.getPlayer(user).getAnimal(animalIndex).traits.toArray()[traitIndex];
+
 
 export const selectUsersInRoom = (getState, roomId) => {
   const room = selectRoom(getState, roomId);
@@ -23,10 +26,8 @@ export const makeGameSelectors = (getState, gameId) => ({
   , selectCard: (user, cardIndex) => selectGame(getState, gameId).getPlayer(user).getCard(cardIndex)
   , selectAnimal: (user, animalIndex) =>
     selectGame(getState, gameId).getPlayer(user).getAnimal(animalIndex)
-  , selectTrait: (user, animalIndex, traitIndex) =>
-    selectGame(getState, gameId).getPlayer(user).getAnimal(animalIndex).getIn(['traits', traitIndex])
-  , selectTraitId: (user, animalIndex, traitIndex) =>
-    selectGame(getState, gameId).getPlayer(user).getAnimal(animalIndex).getIn(['traits', traitIndex]).id
+  , selectTrait: (user, animalIndex, traitIndex) => selectTrait(selectGame(getState, gameId), user, animalIndex, traitIndex)
+  , selectTraitId: (user, animalIndex, traitIndex) => selectTrait(selectGame(getState, gameId), user, animalIndex, traitIndex).id
 });
 
 export const makeClientGameSelectors = (getState, gameId, i) => ({
@@ -34,8 +35,7 @@ export const makeClientGameSelectors = (getState, gameId, i) => ({
   , ['selectPlayer' + i]: () => getState().get('game').getPlayer()
   , ['selectCard' + i]: (cardIndex, user) => getState().get('game').getPlayer(user).getCard(cardIndex)
   , ['selectAnimal' + i]: (animalIndex, user) => getState().get('game').getPlayer(user).getAnimal(animalIndex)
-  , ['selectTrait' + i]: (animalIndex, traitIndex, user) => getState().get('game')
-    .getPlayer(user).getAnimal(animalIndex).getIn(['traits', traitIndex])
+  , ['selectTrait' + i]: (animalIndex, traitIndex, user) => selectTrait(getState().get('game'), user, animalIndex, traitIndex)
 });
 
 export const selectClientRoute = (getState) => getState().getIn(['routing', 'locationBeforeTransitions', 'pathname']);

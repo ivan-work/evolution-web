@@ -57,18 +57,21 @@ players:
   });
 
   it('Increased eating', () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
 food: 10
 phase: 2
 players:
-  - continent: $A TraitCarnivorous
+  - continent: $A TraitCarnivorous wait
 `);
     const {selectGame, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
-    clientStore1.dispatch(gameEndTurnRequest());
+
+    clientStore0.dispatch(gameEndTurnRequest());
+
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
+
     clientStore0.dispatch(gameEndTurnRequest());
 
     expect(selectAnimal(User0, 0).getFood()).equal(2);

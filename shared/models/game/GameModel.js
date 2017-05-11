@@ -262,12 +262,12 @@ export class GameModel extends Record({
   }
 
   locateTrait(traitId, animalId, playerId = null) {
-    let animalIndex = -1, traitIndex = -1;
+    let animalIndex = -1, trait;
     traitId && this.players.some(player => {
       animalIndex = player.continent.findIndex(animal => {
         if (!!animalId && (animalId !== animal.id)) return false; // faster searches if animal id provided
-        traitIndex = animal.traits.findIndex(trait => trait.isEqual(traitId));
-        return ~traitIndex;
+        trait = animal.traits.get(traitId);
+        return !!trait;
       });
       if (~animalIndex) {
         playerId = player.id;
@@ -275,7 +275,7 @@ export class GameModel extends Record({
       }
     });
     const animal = playerId !== null ? this.getPlayer(playerId).getAnimal(animalIndex) : null;
-    return {animal, animalIndex, traitIndex};
+    return {animal, animalIndex, trait};
   }
 
   locateCard(cardId) {

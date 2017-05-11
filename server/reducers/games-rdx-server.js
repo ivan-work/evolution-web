@@ -24,7 +24,7 @@ const addToGameLog = (message) => (game) => game.update('log', log => log.push({
   , message
 }));
 
-const logAnimal = animal => animal && ['$Animal'].concat(animal.traits.toArray()
+export const logAnimal = animal => animal && ['$Animal'].concat(animal.traits.toArray()
   .filter(trait => !trait.getDataModel().hidden)
   .map(trait => trait.type));
 
@@ -34,9 +34,8 @@ const logAnimalById = (game, animalId) => {
 };
 
 const logTrait = (game, traitId) => {
-  const {animal, traitIndex} = game.locateTrait(traitId);
-  const animalLog = logAnimal(animal);
-  return ['$Trait', traitIndex].concat(animalLog.slice(1));
+  const {trait} = game.locateTrait(traitId);
+  return trait && trait.type;
 };
 
 /**
@@ -139,7 +138,16 @@ export const gameStartEat = (game, {food}) => {
     .setIn(['food'], food)
     .setIn(['status', 'phase'], PHASE.FEEDING)
     .setIn(['status', 'round'], 0)
+    .update(processNeoplasm)
     .update(addToGameLog(['gameStartEat', food]))
+};
+
+const processNeoplasm = (game) => {
+  return game
+    .update('players', players => players.map(player => player.update('continent', continent => continent.map(animal => {
+      if (!animal.hasTrait('TraitNeoplasm')) return animal;
+      return animal;
+    }))));
 };
 
 export const gameStartDeploy = (game) => {
@@ -265,8 +273,9 @@ export const traitGrazeFood = (game, {food}) => game
 
 export const traitConvertFat = (game, {sourceAid, traitId}) => {
   const {animal, animalIndex} = game.locateAnimal(sourceAid);
+
   return game.updateIn(['players', animal.ownerId, 'continent', animalIndex], animal => {
-    const traitIndex = animal.traits.findIndex(t => t.id === traitId);
+    const traitIndex = animal.traits.valueSeq().findIndex(t => t.id === traitId);
     const availableFat = animal.traits.take(traitIndex + 1).filter(trait => trait.type === TraitFatTissue && trait.value).size;
     let fatCounter = availableFat;
     return animal
@@ -285,9 +294,9 @@ export const traitSetAnimalFlag = (game, {sourceAid, flag, on}) => {
 
 
 export const traitSetValue = (game, {sourceAid, traitId, value}) => {
-  const {animal, animalIndex, traitIndex} = game.locateTrait(traitId, sourceAid);
+  const {animal, animalIndex} = game.locateTrait(traitId, sourceAid);
   return game
-    .setIn(['players', animal.ownerId, 'continent', animalIndex, 'traits', traitIndex, 'value'], value);
+    .setIn(['players', animal.ownerId, 'continent', animalIndex, 'traits', traitId, 'value'], value);
 };
 
 const traitNotify_Start_getTarget = {

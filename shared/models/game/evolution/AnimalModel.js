@@ -1,4 +1,4 @@
-import {Record, List, Map} from 'immutable';
+import {Record, List, Map, OrderedMap} from 'immutable';
 import uuid from 'uuid';
 import {TraitModel} from './TraitModel';
 
@@ -11,7 +11,7 @@ export class AnimalModel extends Record({
   , food: 0
   , foodSize: 1
   , fatSize: 0
-  , traits: List()
+  , traits: OrderedMap()
   , flags: Map()
 }) {
   static new(ownerId, trait) {
@@ -27,14 +27,17 @@ export class AnimalModel extends Record({
     return js == null
       ? null
       : new AnimalModel(js)
-        .set('traits', List(js.traits).map(trait => TraitModel.fromServer(trait)))
+        .set('traits', js.traits.reduce((result, trait) => result.set(trait.id, trait), OrderedMap())
+          .map(trait => TraitModel.fromServer(trait)))
         .set('flags', Map(js.flags));
   }
 
   toClient() {
     return this
       .update('traits', traits => traits
-        .map(trait => trait.toClient()))
+        .map(trait => trait.toClient())
+        .toArray())
+
   }
 
   toOthers() {
@@ -61,7 +64,7 @@ export class AnimalModel extends Record({
       .set('ownerId', this.ownerId)
       .set('hostAnimalId', this.id);
     return this
-      .update('traits', traits => traits.push(attachedTrait))
+      .update('traits', traits => traits.set(attachedTrait.id, attachedTrait))
       .update('foodSize', foodSize => foodSize + trait.getDataModel().food)
       .update('fatSize', fatSize => fatSize + (trait.type === TraitFatTissue ? 1 : 0));
   }

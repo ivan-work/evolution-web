@@ -8,13 +8,13 @@ import gecko from '../../../assets/gfx/gecko.svg';
 
 import './AnimalText.scss';
 
-export const AnimalText = ({animal, select}) =>(
+export const AnimalText = ({animal}) =>(
   <span>
     <img className='AnimalText' src={gecko}/>
     {!!animal && <span>
       ({animal.slice(1)
         .map((trait, index) => (
-          <span className={index === select ? '' : ''}>
+          <span>
             {T.translate('Game.Trait.' + trait)}
           </span>))
         .map((item, index) => [index > 0 && ', ', item])

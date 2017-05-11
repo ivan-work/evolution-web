@@ -12,8 +12,40 @@ import {replaceGetRandom} from '../../utils/randomGenerator';
 
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
 
+import {logAnimal} from '../../../server/reducers/games-rdx-server';
+
 describe('Logging test:', () => {
-  it('Typical game', async() => {
+
+//   Bullshit hell when i switched AnimalModel.traits from List to OrderedMap and it fucked up order
+//   due to implicit conversion from OrderedMap to POJO over sockets
+//   FFFUUUUUU
+//
+//   it.only('order', () => {
+//     for (let i = 0; i < 100; ++i) {
+//       const [{ParseGame, serverStore}, {clientStore0, User0}] = mockGame(1);
+//       const gameId = ParseGame(`
+// players:
+//   - continent: $A Camouflage Scavenger Communication$S FatTissue Hibernation Running, $S TailLoss Grazing
+// `);
+//       const animal = serverStore.getState().getIn(['games', gameId, 'players', User0.id, 'continent', 0]);
+//       const animal0 = clientStore0.getState().getIn(['game', 'players', User0.id, 'continent', 0]);
+//
+//       console.log('good', animal)
+//       console.log('baad', animal0)
+//       // expect(animal.toClient()).equal(animal.toClient());
+//       // expect(animal.traits).equal(animal0.traits);
+//       // console.log(animal.traits.toArray().map(t => t.type))
+//       // console.log(logAnimal(animal));
+//       // expect(animal.traits.toArray().map(t => t.type))
+//       //   .eql(['TraitCamouflage', 'TraitScavenger', 'TraitFatTissue', 'TraitHibernation', 'TraitRunning', 'TraitCommunication'])
+//       // expect(logAnimal(animal))
+//       //   .eql(['$Animal', 'TraitCamouflage', 'TraitScavenger', 'TraitFatTissue', 'TraitHibernation', 'TraitRunning', 'TraitCommunication'])
+//       expect(logAnimal(animal0))
+//         .eql(['$Animal', 'TraitCamouflage', 'TraitScavenger', 'TraitFatTissue', 'TraitHibernation', 'TraitRunning', 'TraitCommunication'])
+//     }
+//   });
+
+  it('Typical game', async () => {
     const [{ParseGame, serverStore}, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockGame(3);
     const gameId = ParseGame(`
 phase: 0
@@ -58,8 +90,7 @@ players:
     });
 
     clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$S'));
-    const traitTailLossId = selectTrait1(1, 0).id;
-    clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', traitTailLossId));
+    clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', 'TraitTailLoss'));
 
     clientStore1.dispatch(traitActivateRequest('$S', 'TraitGrazing'));
     clientStore1.dispatch(traitTakeFoodRequest('$D'));
@@ -87,6 +118,17 @@ players:
     const $F = ['$Animal', 'TraitSymbiosis', 'TraitCooperation'];
     const $G = ['$Animal', 'TraitMimicry', 'TraitRunning', 'TraitSymbiosis', 'TraitCooperation'];
     const $H = ['$Animal', 'TraitPoisonous', 'TraitHibernation'];
+
+    expect(logAnimal(selectGame().locateAnimal('$A').animal), 'A s').eql($A);
+    expect(logAnimal(selectGame().locateAnimal('$S').animal), 'S s').eql($S1);
+    expect(logAnimal(selectGame().locateAnimal('$D').animal), 'D s').eql($D);
+    expect(logAnimal(selectGame().locateAnimal('$F').animal), 'F s').eql($F);
+    expect(logAnimal(selectGame().locateAnimal('$G').animal), 'G s').eql($G);
+    expect(logAnimal(selectGame0().locateAnimal('$A').animal), 'A c').eql($A);
+    expect(logAnimal(selectGame0().locateAnimal('$S').animal), 'S c').eql($S1);
+    expect(logAnimal(selectGame0().locateAnimal('$D').animal), 'D c').eql($D);
+    expect(logAnimal(selectGame0().locateAnimal('$F').animal), 'F c').eql($F);
+    expect(logAnimal(selectGame0().locateAnimal('$G').animal), 'G c').eql($G);
 
     const checkLog = (selectGame) => {
       let i = 0;
@@ -131,7 +173,7 @@ players:
 
       expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User0.id]);
       expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $Q, 'TraitCarnivorous', $S]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $S, 'TraitTailLoss', ['$Trait', 0].concat($S.slice(1))]);
+      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $S, 'TraitTailLoss', 'TraitTailLoss']);
       expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'TraitTailLoss', $Q, $S1]);
       expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User0.id, false, false]);
 

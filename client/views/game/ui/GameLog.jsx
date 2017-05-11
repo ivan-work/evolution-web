@@ -68,10 +68,6 @@ export default class GameLog extends React.Component {
       } else if (/\$Animal@(\d)/.test(match)) {
         const valueIndex = match.slice(8, 9);
         return <AnimalText key={index} animal={values[valueIndex]}/>;
-      } else if (/\$Trait@(\d)/.test(match)) {
-        const valueIndex = match.slice(7, 8);
-        const [, traitIndex, ...traits] = values[valueIndex];
-        return <AnimalText key={index} animal={[, ...traits]} select={traitIndex}/>;
       } else if (/\$(Trait\w+)/.test(match)) {
         return T.translate('Game.Trait.' + match.slice(1))
       } else if (/\$A/.test(match)) {

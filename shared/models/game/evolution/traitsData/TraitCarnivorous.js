@@ -126,10 +126,10 @@ export const TraitCarnivorous = {
      */
     const animalAnglerfish = game.getPlayer(targetAnimal.ownerId).continent.filter(animal =>
       animal.traits.size === 1
-      && animal.traits.get(0).type === TraitAnglerfish
-      && animal.traits.get(0).checkAction(game, animal)
+      && animal.traits.first().type === TraitAnglerfish
+      && animal.traits.first().checkAction(game, animal)
       && (targetAnimal === animal || (
-        animal.traits.get(0).value === true
+        animal.traits.first().value === true
         && targetAnimal.traits.size === 0
       ))
     ).get(0);

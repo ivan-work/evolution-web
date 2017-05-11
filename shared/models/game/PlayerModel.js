@@ -22,11 +22,13 @@ export class PlayerModel extends Record({
   toOthers() {
     return this
       .update('hand', hand => hand.map((card) => card.toOthers()))
-      .set('continent', this.continent.map(animalModel => animalModel.toOthers()));
+      .update('continent', continent => continent.map(animal => animal.toOthers()));
   }
 
   toClient() {
-    return this.update('hand', hand => hand.map((card) => card.toClient()))
+    return this
+      .update('hand', hand => hand.map((card) => card.toClient()))
+      .update('continent', continent => continent.map(animal => animal.toClient()));
   }
 
   static fromServer(js) {

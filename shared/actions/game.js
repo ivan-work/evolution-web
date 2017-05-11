@@ -278,7 +278,7 @@ export const server$autoTurn = (gameId, userId) => (dispatch, getState) => {
 export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
   const isAutoTurn = !!dispatch(server$autoTurn(gameId, userId));
   if (isAutoTurn) return;
-  logger.debug('server$gameEndTurn:', userId);
+  logger.verbose('server$gameEndTurn:', userId);
   dispatch(server$gameCancelTurnTimeout(gameId));
   dispatch(server$game(gameId, gameEndTurn(gameId, userId)));
 
@@ -287,15 +287,15 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
   if (game.players.some(player => !player.ended)) {
     dispatch(server$gamePlayerContinue(gameId));
   } else if (game.status.phase === PHASE.DEPLOY) {
-    logger.debug('server$gameStartFEEDING:');
+    logger.verbose('server$gameStart FEEDING:');
     const food = game.generateFood();
     dispatch(server$game(gameId, gameStartEat(gameId, food)));
     dispatch(server$gamePlayerStart(gameId));
   } else {
-    logger.debug('server$gameExtict:', userId);
+    // logger.verbose('server$gameExtict:', userId);
     dispatch(server$gameExtict(gameId));
     if (selectGame(getState, gameId).deck.size > 0) {
-      logger.debug('server$gameStartDEPLOY');
+      logger.verbose('server$gameStart DEPLOY');
       dispatch(server$game(gameId, gameStartDeploy(gameId)));
       dispatch(server$gameDistributeCards(gameId));
       dispatch(server$gamePlayerStart(gameId));
@@ -540,7 +540,9 @@ const server$gameEnd = (gameId) => (dispatch, getState) => {
   dispatch(server$gameCancelTurnTimeout(gameId));
   const game = selectGame(getState, gameId);
   loggerOnline.info(`Game finished ${game.players.map(p => getState().getIn(['users', p.id, 'login'])).join(', ')}`);
-  dispatch(server$game(gameId, gameEnd(gameId, game.toClient())));
+  dispatch(gameEnd(gameId, game));
+  dispatch(to$({clientOnly: true, users: selectUsersInGame(getState, gameId)}
+    , gameEnd(gameId, game.toClient())));
 };
 
 export const gameClientToServer = {
@@ -549,6 +551,9 @@ export const gameClientToServer = {
     checkGameDefined(game);
     checkGameHasUser(game, userId);
     checkPlayerCanAct(game, userId);
+    if (!(game.status.phase === PHASE.FEEDING || game.status.phase === PHASE.DEPLOY)) {
+      throw new ActionCheckError(`checkGamePhase@Game(${game.id})`, 'Wrong phase (%s)', game.status.phase);
+    }
     dispatch(server$gameEndTurn(gameId, userId));
   }
   , gameDeployAnimalRequest: ({gameId, cardId, animalPosition = 0}, {userId}) => (dispatch, getState) => {

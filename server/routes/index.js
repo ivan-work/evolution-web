@@ -37,7 +37,6 @@ module.exports = (app, passport) => {
 
     const replacer = (key, value) => (
       key === 'connections' ? (Object.keys(value).reduce((result, connectionId) => {
-        console.log(value, value[connectionId])
         result[connectionId] = value[connectionId].ip;
         return result;
       }, {}))

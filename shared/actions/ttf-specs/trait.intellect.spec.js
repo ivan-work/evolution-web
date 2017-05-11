@@ -243,7 +243,6 @@ players:
     const {selectGame, selectPlayer, selectCard, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
-    console.log('atk end')
     expect(selectGame().question).ok;
     expect(selectGame().question.type).equal(QuestionRecord.INTELLECT);
     clientStore0.dispatch(traitAnswerRequest('TraitIntellect', true));
