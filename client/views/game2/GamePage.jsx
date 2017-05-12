@@ -13,10 +13,10 @@ import {createAnimationServiceConfig} from '../game/animations';
 
 export class GamePage extends React.Component {
   render() {
-    const {game, newUI} = this.props;
+    const {game, oldUI} = this.props;
     if (!game) return null;
-    if (newUI) return <Game/>;
-    return <GameWrapper/>;
+    if (oldUI) return <GameWrapper/>;
+    return <Game/>;
   }
 }
 
@@ -28,8 +28,8 @@ export const GamePageView = compose(
       const user = state.get('user');
       const roomId = state.get('room');
       const room = state.getIn(['rooms', roomId]);
-      const newUI = state.getIn(['app', 'newUI']);
-      return {game, user, roomId, room, newUI}
+      const oldUI = state.getIn(['app', 'oldUI']);
+      return {game, user, roomId, room, oldUI}
     }
     , (dispatch) => ({})
   ))(GamePage);

@@ -10,7 +10,7 @@ export const SETTINGS_TIME_MODIFIER = 60e3; // by 1 minute
 export const SETTINGS_TIMED_OUT_TURN_TIME = 5e3;
 
 export const SettingsRules = {
-  name: 'string|between:4,20|required|regex:/^[a-zA-Zа-яА-Я\\d\\s]*$/'
+  name: 'string|between:4,20|required|regex:/^[a-zA-Zа-яА-ЯёЁ\\d\\s]*$/'
   , maxPlayers: `integer|between:${SETTINGS_PLAYERS[0]},${SETTINGS_PLAYERS[1]}`
   , timeTurn: `numeric|between:${SETTINGS_TIME_VALUES[0]},${SETTINGS_TIME_VALUES[1]}`
   , timeTraitResponse: `numeric|between:${SETTINGS_TIME_VALUES[0]},${SETTINGS_TIME_VALUES[1]}`

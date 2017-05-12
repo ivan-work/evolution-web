@@ -109,7 +109,8 @@ export default class PlayerSticker extends React.Component {
     const scaleH = Math.min(1, Math.ceil((outerH / innerH) * 100) / 100);
     const scale = Math.min(scaleW, scaleH);
     this.inner.style.transform = `scale(${scale})`;
-    this.div.scrollTop += this.div.scrollHeight;
+    this.div.scrollTop += 2 * this.div.scrollHeight;
+    this.div.scrollLeft += 2 * this.div.scrollWidth;
   }
 
   trackScroll(e) {

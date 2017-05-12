@@ -23,13 +23,13 @@ const saveValue = (key, value) => {
 const getInitialState = () => Map({
   lang: loadValue('lang', langCodes.hasOwnProperty(window.navigator.language) ? window.navigator.language : 'ru-ru')
   , sound: 'true' === loadValue('sound', 'true')
-  , newUI: 'true' === loadValue('newUI', 'false')
+  , oldUI: 'true' === loadValue('oldUI', 'false')
 });
 
 export const reducer = createReducer(getInitialState(), {
   appChangeLanguage: (state, data) => state.set('lang', saveValue('lang', data))
   , appChangeSound: (state, data) => state.set('sound', saveValue('sound', data))
-  , appSwitchUI: (state, data) => state.set('newUI', saveValue('newUI', data))
+  , appSwitchUI: (state, data) => state.set('oldUI', saveValue('oldUI', data))
   , appShowAdminPanel: (state, data) => state.set('showAdminPanel', !state.get('showAdminPanel'))
   , socketConnectClient: (state, {connectionId}) => state.set('connectionId', connectionId)
 });
