@@ -27,7 +27,7 @@ export const appChangeSound = (value) => ({
 });
 
 export const appSwitchUI = () => (dispatch, getState) => {
-  const value = getState().getIn(['app', 'newUI']);
+  const value = getState().getIn(['app', 'oldUI']);
   dispatch({
     type: 'appSwitchUI'
     , data: !value

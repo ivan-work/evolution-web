@@ -30,6 +30,7 @@
           transition: transform 1.25s;
           .Animal {
             flex: 0 0 $ANIMAL_WIDTH;
+            max-width: $ANIMAL_WIDTH;
           }
           .CardCollection {
             height: $CARD_HEIGHT;

@@ -115,7 +115,7 @@ export const TraitPiracy = {
     dispatch(server$startFeeding(game.id, sourceAnimal, 1, tt.TraitPiracy, targetAnimal.id));
     return true;
   }
-  , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game)
+  , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game) && sourceAnimal.getNeededFood() > 0
   , checkTarget: (game, sourceAnimal, targetAnimal) => targetAnimal.food > 0 && !targetAnimal.isSaturated()
 };
 

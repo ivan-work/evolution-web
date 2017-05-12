@@ -41,5 +41,12 @@ $MARGIN: .25em;
 
   .Chat {
     font-size: .75em;
+    .ChatInput .mdl-textfield {
+      width: 100%;
+    }
+  }
+
+  .GameShellContainer .TraitShell {
+    display: inline-block;
   }
 }

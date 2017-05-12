@@ -56,7 +56,7 @@ export class Game extends React.Component {
       <TraitDefenceDialog game={game} $traitAnswer={$traitAnswer}/>
 
       <Portal target='header'>
-        <MDL.IconButton id="Game$switchUI" onClick={$switchUI} name="swap_vert"/>
+        <MDL.Button id="Game$switchUI" onClick={$switchUI}>{T.translate('Game.UI.SwitchUI.New')}</MDL.Button>
         <ControlGroup name={T.translate('Game.Game')}>
           <MDL.Button id="Game$Exit" onClick={$exit}>{T.translate('App.Room.$Exit')}</MDL.Button>
           <GameScoreboardFinal game={game}/>
@@ -86,17 +86,20 @@ export class Game extends React.Component {
         <div className='row'>
           {/*<MDL.Card shadow={SHADOW}>Player</MDL.Card>*/}
           {this.renderPlayer(game, players, 0)}
-          {this.renderPlayer(game, players, 3)}
-          {this.renderPlayer(game, players, 5)}
-          {this.renderPlayer(game, players, 7)}
+          {(players.size > 3) && this.renderPlayer(game, players, 1)}
+          {(players.size > 5) && this.renderPlayer(game, players, 2)}
+          {(players.size > 7) && this.renderPlayer(game, players, 3)}
           {/*<MDL.Card shadow={SHADOW}>Player6</MDL.Card>*/}
         </div>
         <div className='row'>
           {/*<MDL.Card shadow={SHADOW}>Player6</MDL.Card>*/}
-          {this.renderPlayer(game, players, 1)}
-          {this.renderPlayer(game, players, 2)}
-          {this.renderPlayer(game, players, 4)}
-          {this.renderPlayer(game, players, 6)}
+          {(players.size > 7) && this.renderPlayer(game, players, 7)}
+          {(players.size > 6) && this.renderPlayer(game, players, 6)}
+          {(players.size > 5) && this.renderPlayer(game, players, 5)}
+          {(players.size > 4) && this.renderPlayer(game, players, 4)}
+          {(players.size > 3 && players.size < 8) && this.renderPlayer(game, players, 3)}
+          {(players.size > 2 && players.size < 6) && this.renderPlayer(game, players, 2)}
+          {(players.size > 1 && players.size < 4) && this.renderPlayer(game, players, 1)}
           {/*<MDL.Card shadow={SHADOW}>Player6</MDL.Card>*/}
         </div>
       </div>

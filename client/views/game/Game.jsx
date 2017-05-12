@@ -32,7 +32,7 @@ class Game extends React.Component {
 
     return <div className='Game'>
       <Portal target='header'>
-        <IconButton id="Game$switchUI" onClick={this.context.gameActions.$switchUI} name="swap_vert"/>
+        <Button id="Game$switchUI" onClick={this.context.gameActions.$switchUI}>{T.translate('Game.UI.SwitchUI.Old')}</Button>
         <ControlGroup name={T.translate('Game.Game')}>
           <Button id="Game$Exit" onClick={this.context.gameActions.$exit}>{T.translate('App.Room.$Exit')}</Button>
           <GameScoreboardFinal game={game}/>
