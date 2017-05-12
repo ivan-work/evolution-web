@@ -122,9 +122,11 @@ Game:
       TraitCommunication: '{2} делится едой с {3}'
       TraitCarnivorous: '{2} съедает {3}'
       TraitScavenger: '{2} кушает останки.'
-    traitKillAnimal: '{0} убито.'
-    gameAnimalStarve: '{0} умерло от голода.'
-    traitAnimalPoisoned: '{0} умерло от яда.'
+    animalDeath:
+      STARVE: '{0} умерло от голода.'
+      KILL: '{0} убито.'
+      POISON: '{0} умерло от яда.'
+      NEOPLASM: '{0} умерло от $TraitNeoplasm.'
     traitNotify_Start:
       0: '{0} использует свойство ${1}'
       1: '{0} использует свойство ${1} на {2}'

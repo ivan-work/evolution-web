@@ -8,16 +8,23 @@ import {CardModel} from '../models/game/CardModel';
 import {AnimalModel} from '../models/game/evolution/AnimalModel';
 import {TraitModel} from '../models/game/evolution/TraitModel';
 import {
-  CARD_TARGET_TYPE,
-  CARD_SOURCE,
-  CTT_PARAMETER,
-  TRAIT_TARGET_TYPE,
-  TRAIT_ANIMAL_FLAG
+  CARD_TARGET_TYPE
+  , CARD_SOURCE
+  , CTT_PARAMETER
+  , TRAIT_TARGET_TYPE
+  , TRAIT_ANIMAL_FLAG
+  , ANIMAL_DEATH_REASON
 } from '../models/game/evolution/constants';
 
 import {server$game, to$} from './generic';
 import {doesPlayerHasOptions, getFeedingOption} from './ai';
-import {server$tryViviparous, server$takeFoodRequest, server$questionPauseTimeout, server$questionResumeTimeout} from './actions';
+import {
+  server$tryViviparous
+  , server$takeFoodRequest
+  , server$questionPauseTimeout
+  , server$questionResumeTimeout
+  , server$traitProcessNeoplasm
+} from './actions';
 import {appPlaySound} from '../../client/actions/app';
 import {redirectTo} from '../utils';
 import {selectGame, selectUsersInGame} from '../selectors';
@@ -304,7 +311,7 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
   } else if (game.status.phase === PHASE.DEPLOY) {
     logger.verbose('server$gameStart FEEDING:');
     const food = game.generateFood();
-    // dispatch(processNeoplasm(game));
+    dispatch(server$traitProcessNeoplasm(game));
     dispatch(server$game(gameId, gameStartEat(gameId, food)));
     dispatch(server$gamePlayerStart(gameId));
   } else {
@@ -320,16 +327,6 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
     }
   }
 };
-
-// const processNeoplasm = (game) => (dispatch, getState) => {
-//   game
-//     .update('players', players => players.map(player => player.update('continent', continent => continent.map(animal => {
-//       const traitNeoplasm = animal.hasTrait('TraitNeoplasm');
-//       if (!traitNeoplasm) return animal;
-//       animal = traitNeoplasm.getDataModel().action(game, animal);
-//       return animal
-//     }))));
-// };
 
 /**
  * gameNextPlayer
@@ -475,16 +472,6 @@ export const gameStartEat = (gameId, food) => ({
 
 // ===== EXTINCT!
 
-const gameAnimalStarve = (gameId, animalId) => ({
-  type: 'gameAnimalStarve'
-  , data: {gameId, animalId}
-});
-
-const traitAnimalPoisoned = (gameId, animalId) => ({
-  type: 'traitAnimalPoisoned'
-  , data: {gameId, animalId}
-});
-
 const gameStartDeploy = (gameId) => ({
   type: 'gameStartDeploy'
   , data: {gameId}
@@ -500,9 +487,9 @@ const server$gameExtict = (gameId) => (dispatch, getState) => {
   selectGame(getState, gameId).players.forEach((player) =>
     player.continent.forEach((animal) => {
       if (animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED)) {
-        dispatch(server$game(gameId, traitAnimalPoisoned(gameId, animal.id)));
+        dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.POISON, animal.id)));
       } else if (!animal.canSurvive()) {
-        dispatch(server$game(gameId, gameAnimalStarve(gameId, animal.id)));
+        dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.STARVE, animal.id)));
       } else {
         dispatch(server$tryViviparous(gameId, animal));
       }
@@ -690,6 +677,10 @@ export const gameClientToServer = {
   }
 };
 
+export const animalDeath = (gameId, type, animalId, data) => ({
+  type: 'animalDeath'
+  , data: {gameId, type, animalId, data}
+});
 // gameServerToClient
 
 export const gameServerToClient = {
@@ -722,11 +713,11 @@ export const gameServerToClient = {
   , gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
   , gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
   , gamePlayerLeft: ({gameId, userId}) => gamePlayerLeft(gameId, userId)
-  , gameAnimalStarve: ({gameId, animalId}) => gameAnimalStarve(gameId, animalId)
   , gameSetUserTimedOut: ({gameId, playerId, timedOut}) => gameSetUserTimedOut(gameId, playerId, timedOut)
   , gameSetUserWantsPause: ({gameId, userId, wantsPause}) => gameSetUserWantsPause(gameId, userId, wantsPause)
   , gameSetPaused: ({gameId, paused}) => gameSetPaused(gameId, paused)
-  , traitAnimalPoisoned: ({gameId, animalId}) => traitAnimalPoisoned(gameId, animalId)
+  , animalDeath: ({gameId, type, animalId, data}) =>
+    animalDeath(gameId, type, animalId, data)
 };
 
 

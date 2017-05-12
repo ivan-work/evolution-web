@@ -187,7 +187,7 @@ players:
       expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $G, 'TraitMimicry', $H]);
       expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $X, 'TraitCarnivorous', $H]);
       expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $H, 'TraitPoisonous', $X]);
-      expect(selectGame().log.get(i++).message).eql(['traitKillAnimal', $H]);
+      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'KILL', $H]);
       expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 2, 'TraitCarnivorous', $X, null]);
       expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'TraitScavenger', $A, $X]);
       expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $A, 'TraitCommunication', $S1]);
@@ -201,14 +201,14 @@ players:
       expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User2.id, true, false]);
       expect(selectGame().log.get(i++).message).eql(['PhaseExtinct']);
 
-      expect(selectGame().log.get(i++).message).eql(['gameAnimalStarve', ['$Animal', 'TraitFatTissue']]);
-      expect(selectGame().log.get(i++).message).eql(['gameAnimalStarve', ['$Animal']]);
-      expect(selectGame().log.get(i++).message).eql(['gameAnimalStarve', ['$Animal', 'TraitCarnivorous']]);
-      expect(selectGame().log.get(i++).message).eql(['gameAnimalStarve', ['$Animal', 'TraitCarnivorous']]);
-      expect(selectGame().log.get(i++).message).eql(['gameAnimalStarve', ['$Animal']]);
-      expect(selectGame().log.get(i++).message).eql(['gameAnimalStarve', ['$Animal', 'TraitCarnivorous']]);
-      expect(selectGame().log.get(i++).message).eql(['traitAnimalPoisoned', $X]);
-      expect(selectGame().log.get(i++).message).eql(['gameAnimalStarve', ['$Animal', 'TraitCarnivorous']]);
+      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitFatTissue']]);
+      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal']]);
+      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitCarnivorous']]);
+      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitCarnivorous']]);
+      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal']]);
+      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitCarnivorous']]);
+      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'POISON', $X]);
+      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitCarnivorous']]);
 
       expect(selectGame().log.get(i++).message).eql(['PhaseDeploy']);
     };

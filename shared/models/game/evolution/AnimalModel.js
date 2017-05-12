@@ -2,7 +2,7 @@ import {Record, List, Map, OrderedMap} from 'immutable';
 import uuid from 'uuid';
 import {TraitModel} from './TraitModel';
 
-import {TraitFatTissue, TraitSymbiosis, TraitShell, TraitHibernation, TraitAnglerfish} from './traitTypes/index';
+import {TraitFatTissue, TraitSymbiosis, TraitShell, TraitHibernation, TraitAnglerfish, TraitNeoplasm} from './traitTypes/index';
 import {TRAIT_ANIMAL_FLAG, CTT_PARAMETER} from './constants';
 
 export class AnimalModel extends Record({
@@ -52,19 +52,22 @@ export class AnimalModel extends Record({
   }
 
   getTraits() {
-    return this.traits.filter(trait => !trait.getDataModel().hidden)
+    return this.traits.filter(trait => !trait.disabled && !trait.getDataModel().hidden)
   }
 
   hasTrait(typeOrId) {
-    return this.traits.find(trait => trait.type === typeOrId || trait.id === typeOrId)
+    return this.traits.find(trait => !trait.disabled && trait.type === typeOrId || trait.id === typeOrId)
   }
 
   traitAttach(trait) {
     const attachedTrait = trait
       .set('ownerId', this.ownerId)
       .set('hostAnimalId', this.id);
+    const updatedTraits = (trait.type !== TraitNeoplasm
+      ? this.traits.set(attachedTrait.id, attachedTrait) // .push()
+      : OrderedMap().set(attachedTrait.id, attachedTrait).concat(this.traits)); // .unshift()
     return this
-      .update('traits', traits => traits.set(attachedTrait.id, attachedTrait))
+      .set('traits', updatedTraits)
       .update('foodSize', foodSize => foodSize + trait.getDataModel().food)
       .update('fatSize', fatSize => fatSize + (trait.type === TraitFatTissue ? 1 : 0));
   }

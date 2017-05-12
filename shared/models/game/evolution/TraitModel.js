@@ -98,6 +98,7 @@ export class TraitModel extends Record({
   // TODO replace it with checkActionFails
   checkAction(game, sourceAnimal) {
     const traitData = this.getDataModel();
+    if (this.disabled) return false;
     if (!traitData.action) return false;
     if (traitData.cooldowns && traitData.cooldowns.some(([link, place]) =>
         game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id, this.id))) {
@@ -109,6 +110,7 @@ export class TraitModel extends Record({
 
   checkActionFails(game, sourceAnimal) {
     const traitData = this.getDataModel();
+    if (this.disabled) return 'Trait is disabled';
     if (!traitData.action) return 'Trait has no .action';
     if (traitData.cooldowns && traitData.cooldowns.some(([link, place]) =>
         game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id, this.id)))

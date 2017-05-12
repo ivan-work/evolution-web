@@ -9,11 +9,17 @@ import {
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
   , TRAIT_COOLDOWN_LINK
+  , ANIMAL_DEATH_REASON
 } from '../models/game/evolution/constants';
 
 import {server$game, to$} from './generic';
 import {doesPlayerHasOptions} from './ai';
-import {server$gameEndTurn, server$addTurnTimeout, server$gameCancelTurnTimeout} from './actions';
+import {
+  server$gameEndTurn
+  , server$addTurnTimeout
+  , server$gameCancelTurnTimeout
+  , animalDeath
+} from './actions';
 
 import {selectRoom, selectGame, selectUsersInGame} from '../selectors';
 
@@ -163,16 +169,8 @@ export const server$traitSetValue = (game, sourceAnimal, trait, value) => (dispa
   }
 };
 
-const traitKillAnimal = (gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId) => ({
-  type: 'traitKillAnimal'
-  , data: {gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId}
-});
-
-export const server$traitKillAnimal = (gameId, sourceAnimal, targetAnimal) => (dispatch, getState) => dispatch(
-  Object.assign(traitKillAnimal(gameId
-    , sourceAnimal.ownerId, sourceAnimal.id
-    , targetAnimal.ownerId, targetAnimal.id)
-    , {meta: {users: selectUsersInGame(getState, gameId)}}));
+export const server$traitKillAnimal = (gameId, sourceAnimal, targetAnimal) => (dispatch, getState) =>
+  dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.KILL, targetAnimal.id)));
 
 const traitAnimalRemoveTrait = (gameId, sourcePid, sourceAid, traitId) => ({
   type: 'traitAnimalRemoveTrait'
@@ -214,6 +212,22 @@ export const traitClearHuntingCallbacks = (gameId) => ({
   type: 'traitClearHuntingCallbacks'
   , data: {gameId}
 });
+
+const traitProcessNeoplasm = (gameId) => ({
+  type: 'traitProcessNeoplasm'
+  , data: {gameId}
+});
+
+export const server$traitProcessNeoplasm = (game) => (dispatch, getState) => {
+  dispatch(traitProcessNeoplasm(game.id));
+  game
+    .update('players', players => players.map(player => player.update('continent', continent => continent.map(animal => {
+      const traitNeoplasm = animal.hasTrait('TraitNeoplasm');
+      if (!traitNeoplasm) return animal;
+      animal = traitNeoplasm.getDataModel().action(game, animal);
+      return animal
+    }))));
+};
 
 /**
  * Acted
@@ -636,8 +650,6 @@ export const traitServerToClient = {
     traitMoveFood(gameId, animalId, amount, sourceType, sourceId)
   , startCooldown: ({gameId, link, duration, place, placeId}) =>
     startCooldown(gameId, link, duration, place, placeId)
-  , traitKillAnimal: ({gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId}) =>
-    traitKillAnimal(gameId, sourcePlayerId, sourceAnimalId, targetPlayerId, targetAnimalId)
   , playerActed: ({gameId, userId}) =>
     playerActed(gameId, userId)
   , traitQuestion: ({gameId, question}, currentUserId) =>

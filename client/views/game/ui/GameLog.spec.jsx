@@ -34,9 +34,9 @@ describe.only('GameLog', () => {
     console.log();
 
     console.log(shallow(<span>
-      {GameLog.LogItemToText(['traitKillAnimal', ['$Animal', 'TraitCarnivorous']])}
-      {GameLog.LogItemToText(['gameAnimalStarve', ['$Animal', 'TraitCarnivorous']])}
-      {GameLog.LogItemToText(['traitAnimalPoisoned', ['$Animal', 'TraitCarnivorous']])}
+      {GameLog.LogItemToText(['animalDeath', 'KILL', ['$Animal', 'TraitCarnivorous']])}
+      {GameLog.LogItemToText(['animalDeath', 'STARVE', ['$Animal', 'TraitCarnivorous']])}
+      {GameLog.LogItemToText(['animalDeath', 'POISON', ['$Animal', 'TraitCarnivorous']])}
     </span>).text());
     console.log();
     console.log(shallow(<span>

@@ -21,13 +21,11 @@ import {
   , gameSetUserWantsPause
   , gameSetPaused
   , playerActed
+  , animalDeath
   , traitMoveFood
   , startCooldown
-  , traitKillAnimal
   , traitQuestion
   , traitAnswerSuccess
-  , gameAnimalStarve
-  , traitAnimalPoisoned
   , traitAnimalRemoveTrait
   , traitAnimalAttachTrait
   , traitGrazeFood
@@ -59,13 +57,11 @@ export const reducer = createReducer(null, {
   , gameSetUserWantsPause
   , gameSetPaused
   , playerActed
+  , animalDeath
   , traitMoveFood
   , startCooldown
-  , traitKillAnimal
   , traitQuestion
   , traitAnswerSuccess
-  , gameAnimalStarve
-  , traitAnimalPoisoned
   , traitAnimalRemoveTrait
   , traitAnimalAttachTrait
   , traitGrazeFood

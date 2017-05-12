@@ -39,6 +39,13 @@ const customLog = {
     // http://docs.translatehouse.org/projects/localization-guide/en/latest/l10n/pluralforms.html?id=l10n/pluralforms
     return T.translate('Game.Log.' + message + '.' + sourceType, {context: amount, ...[amount, sourceType, animal, another]})
   }
+  , animalDeath: (message, [type, animal, data]) => {
+    // const n = values[1];
+    // const plural = (n <= 0) ? 3
+    //   : (n % 10 == 1 && n % 100 != 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2);
+    // http://docs.translatehouse.org/projects/localization-guide/en/latest/l10n/pluralforms.html?id=l10n/pluralforms
+    return T.translate('Game.Log.' + message + '.' + type, {context: animal, ...[type, animal, data]})
+  }
   , default: (message, values) => T.translate('Game.Log.' + message, {...values})
 };
 

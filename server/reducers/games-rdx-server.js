@@ -216,36 +216,16 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
       : updatedGame;
 };
 
-const animalDies = (playerId, animalIndex, animal) => (game) => {
-  const animal = game.getIn(['players', playerId, 'continent', animalIndex]);
+export const animalDeath = (game, {type, animalId, data}) => {
+  const {animalIndex, animal} = game.locateAnimal(animalId);
   const shell = animal.hasTrait(TraitShell);
   return game
-    .updateIn(['players', playerId, 'scoreDead'], scoreDead => scoreDead + animal.countScore())
-    .removeIn(['players', playerId, 'continent', animalIndex])
-    .updateIn(['players', playerId, 'continent'], continent => continent
+    .updateIn(['players', animal.ownerId, 'scoreDead'], scoreDead => scoreDead + animal.countScore())
+    .removeIn(['players', animal.ownerId, 'continent', animalIndex])
+    .updateIn(['players', animal.ownerId, 'continent'], continent => continent
       .map(a => a.traitDetach(trait => trait.linkAnimalId === animal.id)))
-    .updateIn(['continents', 'standard', 'shells'], shells => shell ? shells.set(shell.id, shell) : shells);
-};
-
-export const traitKillAnimal = (game, {targetAnimalId}) => {
-  const {animalIndex, animal} = game.locateAnimal(targetAnimalId);
-  return game
-    .update(animalDies(animal.ownerId, animalIndex, animal))
-    .update(addToGameLog(['traitKillAnimal', logAnimal(animal)]))
-};
-
-export const gameAnimalStarve = (game, {animalId}) => {
-  const {animalIndex, animal} = game.locateAnimal(animalId);
-  return game
-    .update(animalDies(animal.ownerId, animalIndex, animal))
-    .update(addToGameLog(['gameAnimalStarve', logAnimal(animal)]))
-};
-
-export const traitAnimalPoisoned = (game, {animalId}) => {
-  const {animalIndex, animal} = game.locateAnimal(animalId);
-  return game
-    .update(animalDies(animal.ownerId, animalIndex, animal))
-    .update(addToGameLog(['traitAnimalPoisoned', logAnimal(animal)]))
+    .updateIn(['continents', 'standard', 'shells'], shells => shell ? shells.set(shell.id, shell) : shells)
+    .update(addToGameLog(['animalDeath', type, logAnimal(animal)]));
 };
 
 export const startCooldown = (game, {link, duration, place, placeId}) =>
@@ -348,20 +328,18 @@ export const reducer = createReducer(Map(), {
   , gameSetUserWantsPause: (state, data) => state.update(data.gameId, game => gameSetUserWantsPause(game, data))
   , gameSetPaused: (state, data) => state.update(data.gameId, game => gameSetPaused(game, data))
   , playerActed: (state, data) => state.update(data.gameId, game => playerActed(game, data))
+  , animalDeath: (state, data) => state.update(data.gameId, game => animalDeath(game, data))
   , traitMoveFood: (state, data) => state.update(data.gameId, game => traitMoveFood(game, data))
   , startCooldown: (state, data) => state.update(data.gameId, game => startCooldown(game, data))
   , clearCooldown: (state, data) => state.update(data.gameId, game => clearCooldown(game, data))
   , traitQuestion: (state, data) => state.update(data.gameId, game => traitQuestion(game, data))
   , traitAnswerSuccess: (state, data) => state.update(data.gameId, game => traitAnswerSuccess(game, data))
-  , traitKillAnimal: (state, data) => state.update(data.gameId, game => traitKillAnimal(game, data))
   , traitAnimalAttachTrait: (state, data) => state.update(data.gameId, game => traitAnimalAttachTrait(game, data))
   , traitAnimalRemoveTrait: (state, data) => state.update(data.gameId, game => traitAnimalRemoveTrait(game, data))
   , traitConvertFat: (state, data) => state.update(data.gameId, game => traitConvertFat(game, data))
   , traitGrazeFood: (state, data) => state.update(data.gameId, game => traitGrazeFood(game, data))
   , traitSetAnimalFlag: (state, data) => state.update(data.gameId, game => traitSetAnimalFlag(game, data))
   , traitSetValue: (state, data) => state.update(data.gameId, game => traitSetValue(game, data))
-  , gameAnimalStarve: (state, data) => state.update(data.gameId, game => gameAnimalStarve(game, data))
-  , traitAnimalPoisoned: (state, data) => state.update(data.gameId, game => traitAnimalPoisoned(game, data))
   , traitNotify_Start: (state, data) => state.update(data.gameId, game => traitNotify_Start(game, data))
   , traitTakeShell: (state, data) => state.update(data.gameId, game => traitTakeShell(game, data))
   , traitAddHuntingCallback: (state, data) => state.update(data.gameId, game => traitAddHuntingCallback(game, data))

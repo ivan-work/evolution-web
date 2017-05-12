@@ -49,3 +49,10 @@ export const TRAIT_ANIMAL_FLAG = {
   , POISONED: 'POISONED'
   , SHELL: 'SHELL'
 };
+
+export const ANIMAL_DEATH_REASON = {
+  STARVE: 'STARVE'
+  , KILL: 'KILL'
+  , POISON: 'POISON'
+  , NEOPLASM: 'NEOPLASM'
+};

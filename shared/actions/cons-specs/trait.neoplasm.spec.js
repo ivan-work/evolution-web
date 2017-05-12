@@ -9,7 +9,7 @@ import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
 
-describe.only('TraitNeoplasm:', () => {
+describe('TraitNeoplasm:', () => {
   it('Works', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`

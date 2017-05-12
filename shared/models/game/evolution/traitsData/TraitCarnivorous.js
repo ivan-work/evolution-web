@@ -87,7 +87,8 @@ const countUnavoidableDefenses = (game, sourceAnimal, targetAnimal) => {
 
 export const getStaticDefenses = (game, sourceAnimal, targetAnimal) =>
   targetAnimal.traits.filter((trait) =>
-    (trait.type === TraitCamouflage && !sourceAnimal.hasTrait(TraitSharpVision))
+    !trait.disabled
+    && (trait.type === TraitCamouflage && !sourceAnimal.hasTrait(TraitSharpVision))
     || (trait.type === TraitSymbiosis && trait.linkSource)
     || (trait.type === TraitMassive && !sourceAnimal.hasTrait(TraitMassive))
     || (trait.type === TraitBurrowing && targetAnimal.isSaturated())
@@ -102,7 +103,8 @@ export const getAffectiveDefenses = (game, sourceAnimal, targetAnimal) => [
 
 export const getActiveDefenses = (game, sourceAnimal, targetAnimal) =>
   targetAnimal.traits.filter((trait) =>
-    (trait.type === TraitRunning.type)
+    !trait.disabled
+    && (trait.type === TraitRunning.type)
     || (trait.type === TraitMimicry.type && trait.checkAction(game, targetAnimal))
     || (trait.type === TraitTailLoss.type && trait.checkAction(game, targetAnimal))
     || (trait.type === TraitShell.type && trait.checkAction(game, targetAnimal))
