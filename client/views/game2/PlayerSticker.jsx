@@ -213,8 +213,7 @@ export default class PlayerSticker extends React.Component {
         ({player.hand.size})
         {isUser && <MDL.Icon name={this.state.showCards ? 'keyboard_arrow_down' : 'keyboard_arrow_up'}/>}
         <MDL.Icon name={this.state.scale === this.state.minScale ? 'zoom_in' : 'zoom_out'} onClick={this.switchZoom}/>
-        {this.state.scale}/{this.state.minScale} {this.state.scrollX}/{this.state.scrollWidth} {this.state.scrollY}/{this.state.scrollHeight}
-
+        {/*{this.state.scale}/{this.state.minScale} {this.state.scrollX}/{this.state.scrollWidth} {this.state.scrollY}/{this.state.scrollHeight}*/}
       </div>
     </div>);
   }
