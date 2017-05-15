@@ -10,9 +10,9 @@ import PlayerWrapper from './PlayerWrapper.jsx';
 import User from '../utils/User.jsx';
 import PlayerSVG from './PlayerSVG.jsx'
 
-const speedL = 6;
-const speedR = 6.5; // You won't believe, but they're different. No idea why =(
-const speed = 5;
+const scrollSpeed = 8;
+
+const SCALE_THRESHOLD = 20;
 
 export default class PlayerSticker extends React.Component {
 
@@ -29,21 +29,27 @@ export default class PlayerSticker extends React.Component {
     });
     this.setupContainer = (c) => this.div = c;
     this.setupInner = (c) => this.inner = ReactDOM.findDOMNode(c);
+
+
     this.switchZoom = this.switchZoom.bind(this);
     this.scrollContainer = this.scrollContainer.bind(this);
-    this.trackScroll = this.trackScroll.bind(this);
+    this.trackMouse = this.trackMouse.bind(this);
+    this.trackWheel = this.trackWheel.bind(this);
     this.onCardCollectionIconClick = this.onCardCollectionIconClick.bind(this);
     const {game, player} = this.props;
     const isUser = game.userId === player.id;
     this.state = {
       showCards: isUser
-      , zoom: true
+      , scale: 1
+      , minScale: .1
+      , scrollX: 0
+      , scrollY: 0
+      , scrollWidth: 0
+      , scrollHeight: 0
     };
 
     this.x = 0;
     this.y = 0;
-    this.zoom = 0;
-    this.waitingCounter = 0;
   }
 
   onCardCollectionIconClick() {
@@ -55,8 +61,13 @@ export default class PlayerSticker extends React.Component {
     }
   }
 
-  switchZoom() {
-    this.setState({zoom: !this.state.zoom});
+  switchZoom(e) {
+    e.stopPropagation();
+    if (this.state.scale !== this.state.minScale) {
+      this.setScale(this.state.minScale);
+    } else {
+      this.setScale(1);
+    }
   }
 
   scrollContainer() {
@@ -64,37 +75,30 @@ export default class PlayerSticker extends React.Component {
     const y = this.y;
     if (this.div) {
       const bbx = this.div.getBoundingClientRect();
-      // console.log(x, bbx.top, bbx.bottom, y >= bbx.top && y <= bbx.bottom)
+
       const isInside = x >= bbx.left && y >= bbx.top && x <= bbx.left + bbx.width && y <= bbx.bottom;
-      if (this.state.zoom) {
-        this.calcScale();
-      } else if (isInside) {
-        this.inner.style.transform = `scale(1)`;
-        this.waitingCounter = 0;
+
+      this.calcScale();
+      if (isInside) {
+        let scrollX = this.state.scrollX;
+        let scrollY = this.state.scrollY;
+
         const startX = bbx.left;
-        const stepX = bbx.width / 5;
-        const scrollX = this.div.scrollLeft;
-        if (startX <= x && x <= startX + stepX) {
-          this.div.scrollLeft = scrollX - speedL;
-        } else if (1 * stepX + startX <= x && x <= 4 * stepX + startX) {
-        } else if (4 * stepX + startX <= x && x <= 5 * stepX + startX) {
-          this.div.scrollLeft = scrollX + speedR;
-        }
+        const endX = bbx.right;
         const startY = bbx.top;
-        const stepY = bbx.height / 5;
-        const scrollY = this.div.scrollTop;
-        if (startY <= y && y <= startY + stepY) {
-          this.div.scrollTop = scrollY - speed;
-        } else if (1 * stepY + startY <= y && y <= 4 * stepY + startY) {
-        } else if (4 * stepY + startY <= y && y <= 5 * stepY + startY) {
-          this.div.scrollTop = scrollY + speed;
-        }
-      } else {
-        if (this.waitingCounter > 100) {
-          this.div.scrollTop += speed;
-        } else {
-          this.waitingCounter++;
-        }
+        const endY = bbx.bottom;
+
+        if (startX <= x && x <= startX + 64)
+          scrollX += scrollSpeed;
+        if (endX - 64 <= x && x <= endX)
+          scrollX -= scrollSpeed;
+
+        if (startY <= y && y <= startY + 64)
+          scrollY += scrollSpeed;
+        if (endY - 64 <= y && y <= endY)
+          scrollY -= scrollSpeed;
+
+        this.setScroll(scrollX, scrollY);
       }
     }
     if (this.$isMounted) window.requestAnimationFrame(this.scrollContainer);
@@ -103,56 +107,114 @@ export default class PlayerSticker extends React.Component {
   calcScale() {
     const outerW = this.div.offsetWidth;
     const outerH = this.div.offsetHeight;
-    const innerW = this.inner.scrollWidth;
-    const innerH = this.inner.scrollHeight + 20;
-    const scaleW = Math.min(1, Math.ceil((outerW / innerW) * 100) / 100);
-    const scaleH = Math.min(1, Math.ceil((outerH / innerH) * 100) / 100);
-    const scale = Math.min(scaleW, scaleH);
-    this.inner.style.transform = `scale(${scale})`;
-    this.div.scrollTop += 2 * this.div.scrollHeight;
-    this.div.scrollLeft += 2 * this.div.scrollWidth;
+
+    const innerWidth = this.inner.offsetWidth;
+    const innerHeight = this.inner.offsetHeight;
+
+    const scaleW = Math.min(1, (outerW / innerWidth));
+    const scaleH = Math.min(1, (outerH / innerHeight));
+
+    const minScale = Math.floor(Math.min(scaleW, scaleH) * SCALE_THRESHOLD) / SCALE_THRESHOLD;
+
+    const scrollWidth = Math.floor(Math.max(0, innerWidth * this.state.scale - outerW) * SCALE_THRESHOLD) / SCALE_THRESHOLD;
+    const scrollHeight = Math.floor(Math.max(0, innerHeight * this.state.scale - outerH) * SCALE_THRESHOLD) / SCALE_THRESHOLD;
+
+    if (scrollWidth !== this.state.scrollWidth || scrollHeight !== this.state.scrollHeight) {
+      this.setState({
+        scrollWidth, scrollHeight
+      })
+    }
+    if (minScale !== this.state.minScale) {
+      if (this.state.scale === this.state.minScale) {
+        this.setScale(minScale, minScale);
+      } else {
+        this.setScale(this.state.scale, minScale);
+      }
+    }
   }
 
-  trackScroll(e) {
+  trackMouse(e) {
     this.x = e.pageX;
     this.y = e.pageY;
   }
 
+  trackWheel(e) {
+    if (e.deltaY < 0) {
+      this.setScale(this.state.scale + .1);
+    } else {
+      this.setScale(this.state.scale - .1);
+    }
+  }
+
+  setScale(scale, minScale = this.state.minScale) {
+    scale = Math.floor(Math.max(minScale, Math.min(scale, 1)) * SCALE_THRESHOLD) / SCALE_THRESHOLD;
+    if (scale !== this.state.scale || minScale !== this.state.minScale) {
+      this.setState({
+        scale
+        , minScale
+      })
+    }
+  }
+
+  setScroll(scrollX, scrollY) {
+    scrollX = Math.floor(Math.max(-this.state.scrollWidth, Math.min(scrollX, this.state.scrollWidth)) * SCALE_THRESHOLD) / SCALE_THRESHOLD;
+    scrollY = Math.floor(Math.max(0, Math.min(scrollY, this.state.scrollHeight)) * SCALE_THRESHOLD) / SCALE_THRESHOLD;
+    if (scrollX !== this.state.scrollX || scrollY !== this.state.scrollY) {
+      this.setState({
+        scrollX, scrollY
+      })
+    }
+  }
+
   componentDidMount() {
     this.$isMounted = true;
-    document.addEventListener('mousemove', this.trackScroll, false);
+    document.addEventListener('mousemove', this.trackMouse, false);
+    document.addEventListener('wheel', this.trackWheel, false);
     window.requestAnimationFrame(this.scrollContainer)
   }
 
   componentWillUnmount() {
-    document.removeEventListener('mousemove', this.trackScroll);
+    document.removeEventListener('mousemove', this.trackMouse);
+    document.removeEventListener('wheel', this.trackWheel);
     this.$isMounted = false;
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.div && !prevState.showCards && this.state.showCards) {
-      this.div.scrollTop = this.div.scrollHeight;
-    }
-  }
+  // componentDidUpdate(prevProps, prevState) {
+  //   if (this.div && !prevState.showCards && this.state.showCards) {
+  //     // this.div.scrollTop = this.div.scrollHeight;
+  //   }
+  // }
 
   render() {
     const {game, player} = this.props;
     const isUser = game.userId === player.id;
     return (<div className='PlayerStickerControls'>
-      <div style={{position: 'absolute', top: '.5em', left: '.5em', zIndex: 100}}>
-        <MDL.IconButton name={this.state.zoom ? 'zoom_out' : 'zoom_in'} onClick={this.switchZoom}/>
-        <User id={player.id}/>
-      </div>
       <div className='PlayerSticker'
            id={`PlayerSticker${player.id}`}
            ref={this.setupContainer}>
         <PlayerSVG ref={this.setupSvgContext}/>
-        <PlayerWrapper game={game} player={player} showCards={this.state.showCards} ref={this.setupInner}/>
+        <div className='PlayerStickerInner'
+             style={{
+               transform: `translate(${this.state.scrollX}px, ${this.state.scrollY}px) scale(${this.state.scale})`
+               , transformOrigin: '50% 100%'
+             }}>
+          <PlayerWrapper game={game} player={player} showCards={this.state.showCards} ref={this.setupInner}/>
+        </div>
+
+        {this.state.scrollX !== this.state.scrollWidth && <MDL.Icon className='arrow arrow-left' name='keyboard_arrow_left'/>}
+        {this.state.scrollX !== -this.state.scrollWidth && <MDL.Icon className='arrow arrow-right' name='keyboard_arrow_right'/>}
+        {this.state.scrollY !== this.state.scrollHeight && <MDL.Icon className='arrow arrow-top' name='keyboard_arrow_up'/>}
+        {this.state.scrollY !== 0 && <MDL.Icon className='arrow arrow-bottom' name='keyboard_arrow_down'/>}
       </div>
       <div className={'CardCollectionIcon' + (isUser ? ' pointer' : '')}
            onClick={this.onCardCollectionIconClick}>
-        {isUser && <MDL.Icon name={this.state.showCards ? 'keyboard_arrow_down' : 'keyboard_arrow_up'}/>}
+
+        <User id={player.id}/>
         ({player.hand.size})
+        {isUser && <MDL.Icon name={this.state.showCards ? 'keyboard_arrow_down' : 'keyboard_arrow_up'}/>}
+        <MDL.Icon name={this.state.scale === this.state.minScale ? 'zoom_in' : 'zoom_out'} onClick={this.switchZoom}/>
+        {this.state.scale}/{this.state.minScale} {this.state.scrollX}/{this.state.scrollWidth} {this.state.scrollY}/{this.state.scrollHeight}
+
       </div>
     </div>);
   }
