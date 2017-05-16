@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes';
 import T from 'i18n-react';
 import cn from 'classnames';
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 import * as MDL from 'react-mdl';
 import {connect} from 'react-redux';
@@ -123,12 +124,14 @@ export class PlayerWrapper extends Component {
   }
 
   renderContinent(game, player, isUser) {
-    return (<Continent
-      key='Continent'
-      isActive={game.isPlayerTurn(player)}
-      isUserContinent={isUser}>
-      {player.continent.map(animal => this.renderAnimal(animal, isUser))}
-    </Continent>)
+    return (
+      <Continent
+        key='Continent'
+        isActive={game.isPlayerTurn(player)}
+        isUserContinent={isUser}>
+        {player.continent.map(animal => this.renderAnimal(animal, isUser))}
+      </Continent>
+    );
   }
 
   renderAnimal(animal, isUserContinent) {
@@ -140,17 +143,19 @@ export class PlayerWrapper extends Component {
     const onFoodDropped = isFeeding ? this.$traitTakeFood : this.$noop;
     const onCardDropped = isDeploy ? this.$deployTrait : this.$noop;
     const onAnimalLink = isDeploy ? this.$deployLinkedTrait : this.$noop;
-    return <DropAnimal
-      ref={this.props.connectRef('Animal#' + animal.id)}
-      key={animal.id}
-      game={game}
-      model={animal}
-      isUserAnimal={isUserContinent}
-      onTraitDropped={onTraitDropped}
-      onTraitShellDropped={onTraitShellDropped}
-      onFoodDropped={onFoodDropped}
-      onCardDropped={onCardDropped}
-      onAnimalLink={onAnimalLink}/>
+    return (
+      <DropAnimal
+        ref={this.props.connectRef('Animal#' + animal.id)}
+        key={animal.id}
+        game={game}
+        model={animal}
+        isUserAnimal={isUserContinent}
+        onTraitDropped={onTraitDropped}
+        onTraitShellDropped={onTraitShellDropped}
+        onFoodDropped={onFoodDropped}
+        onCardDropped={onCardDropped}
+        onAnimalLink={onAnimalLink}/>
+    );
   }
 }
 

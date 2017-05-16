@@ -33,5 +33,12 @@ export const createAnimationServiceConfig = () => ({
         return localTraits[traitType + '_End'](actionData);
       }
     });
+
+    // subscribe('animalDeath', (actionData, getState) => {
+    //   const {animalId} = actionData;
+    //   const AnimalHtml = document.getElementById('Animal' + animalId);
+    //   if (AnimalHtml) AnimalHtml.classList.add('Death');
+    //   else console.warn('No AnimalHtml for ', animalId);
+    // });
   }
 });

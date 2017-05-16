@@ -1,6 +1,11 @@
 import {Record} from 'immutable';
 import * as traitsData from './traitsData/index'
+import * as tt from './traitTypes'
 import {CARD_TARGET_TYPE} from './constants';
+
+export const TRAIT_DATA_PLACEMENT_ERRORS = {
+  HIDDEN: 'HIDDEN'
+};
 
 export class TraitDataModel extends Record({
   type: null // 'TraitFatTissuue', etc
@@ -25,5 +30,14 @@ export class TraitDataModel extends Record({
     return new TraitDataModel({
       ...traitData
     });
+  }
+
+  checkTraitPlacementFails(animal) {
+    if (this.hidden) return TRAIT_DATA_PLACEMENT_ERRORS.HIDDEN;
+    if (this.checkTraitPlacement && !this.checkTraitPlacement(animal)) return this.type;
+    if (animal.some(trait => trait.type === tt.TraitRegeneration) && (
+        this.food > 0 || animal.traits.filter(t => !t.getDataModel().hidden).size >= 2
+      )) return tt.TraitRegeneration;
+    return false;
   }
 }

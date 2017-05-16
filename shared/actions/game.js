@@ -23,7 +23,6 @@ import {
   , server$takeFoodRequest
   , server$questionPauseTimeout
   , server$questionResumeTimeout
-  , server$traitProcessNeoplasm
 } from './actions';
 import {appPlaySound} from '../../client/actions/app';
 import {redirectTo} from '../utils';
@@ -311,7 +310,6 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
   } else if (game.status.phase === PHASE.DEPLOY) {
     logger.verbose('server$gameStart FEEDING:');
     const food = game.generateFood();
-    dispatch(server$traitProcessNeoplasm(game));
     dispatch(server$game(gameId, gameStartEat(gameId, food)));
     dispatch(server$gamePlayerStart(gameId));
   } else {
@@ -606,10 +604,6 @@ export const gameClientToServer = {
         , traitData);
     }
 
-    if (traitData.hidden) {
-      throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Cannot deploy hidden trait to an Animal#(%s)', animalId);
-    }
-
     const {animal} = game.locateAnimal(animalId);
     if (!animal) {
       throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Player#%s doesn\'t have Animal#%s', playerId, animalId);
@@ -638,7 +632,7 @@ export const gameClientToServer = {
           throw new ActionCheckError(`checkCardTargetType(${game.id})`, `CardType(LINK_ENEMY) Player(%s) linking to Player(%s)`, playerId, linkedPlayerId);
     }
 
-    if (traitData.checkTraitPlacement && !traitData.checkTraitPlacement(animal))
+    if (traitData.checkTraitPlacementFails(animal))
       throw new ActionCheckError(`gameDeployTraitRequest(${game.id})`, `Trait(%s) failed checkTraitPlacement on Animal(%s)`, traitData.type, animal.id);
 
     // TODO: refactor.

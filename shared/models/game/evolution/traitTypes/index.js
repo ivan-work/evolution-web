@@ -32,4 +32,11 @@ export const TraitFlight = 'TraitFlight';
 export const TraitSpecA = 'TraitSpecA';
 export const TraitSpecB = 'TraitSpecB';
 
+export const TraitAedificator = 'TraitAedificator';
+export const TraitCnidocytes = 'TraitCnidocytes';
+export const TraitHerding = 'TraitHerding';
+export const TraitMigration = 'TraitMigration';
 export const TraitNeoplasm = 'TraitNeoplasm';
+export const TraitRecombination = 'TraitRecombination';
+export const TraitRegeneration = 'TraitRegeneration';
+export const TraitSuckerfish = 'TraitSuckerfish';

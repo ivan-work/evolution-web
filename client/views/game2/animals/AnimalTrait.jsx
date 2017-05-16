@@ -12,7 +12,7 @@ import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 import AnimalTraitDetails from './AnimalTraitDetails.jsx';
 import Tooltip from 'rc-tooltip';
 
-import './AnimalTrait.scss';
+import '../../game/animals/AnimalTrait.scss';
 
 class AnimalTrait extends React.PureComponent {
   static propTypes = {

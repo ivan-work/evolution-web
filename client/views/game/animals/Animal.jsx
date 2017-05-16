@@ -57,11 +57,11 @@ class Animal extends React.Component {
     return (<div id={'Animal' + model.id} className={className}>
       <div className='traits'>
         {model.traits
+          .toList()
           .reverse()
           //.sort((t1, t2) => t1.isLinked() ? 1 : -1)
           .map((trait, index) =>
-            (<div key={trait.id}
-                  style={{marginBottom: '-5px'}}>
+            (<div key={trait.id}>
               {this.renderTrait(trait, model)}
             </div>))}
       </div>
@@ -123,9 +123,7 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
         const {model: animal} = props;
         const {card, alternateTrait} = monitor.getItem();
         const traitData = card.getTraitDataModel(alternateTrait);
-        return !card.getTraitDataModel(alternateTrait).hidden
-
-          && (!traitData.checkTraitPlacement || traitData.checkTraitPlacement(animal));
+        return !traitData.checkTraitPlacementFails(animal);
       }
       case DND_ITEM_TYPE.FOOD:
         const {index} = monitor.getItem();

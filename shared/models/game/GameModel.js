@@ -4,13 +4,15 @@ import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
 import {TraitModel} from './evolution/TraitModel';
 import {CooldownList} from './CooldownList';
-import {SettingsRecord, Deck_Base, Deck_TimeToFly} from './GameSettings';
+import {SettingsRecord, Deck_Base, Deck_TimeToFly, Deck_ContinentsShort} from './GameSettings';
 
 import uuid from 'uuid';
 import {ensureParameter} from '../../utils';
 import {getRandom} from '../../utils/randomGenerator';
 
 import {parseFromRoom, parseCardList, parseAnimalList} from './GameModel.parse';
+
+import * as tt from './evolution/traitTypes';
 
 export const TEST_DECK_SIZE = 84;
 export const TEST_HAND_SIZE = 6;
@@ -143,12 +145,17 @@ export class GameModel extends Record({
   }
 
   generateFood() {
-    return FOOD_TABLE[this.getActualPlayers().size]();
+    let aedificatorFood = 0;
+    this.forEachAnimal((continent, animal) => {
+      if (animal.hasTrait(tt.TraitAedificator)) aedificatorFood += 2;
+    });
+    return FOOD_TABLE[this.getActualPlayers().size]() + aedificatorFood;
   }
 
   static new(room) {
     let deck = Deck_Base;
     if (room.settings.addon_timeToFly) deck = deck.concat(Deck_TimeToFly);
+    if (room.settings.addon_continents) deck = deck.concat(Deck_ContinentsShort);
 
     if (room.settings.halfDeck) deck = deck.map(([count, type]) => [count / 2, type]);
     return new GameModel({
@@ -239,10 +246,10 @@ export class GameModel extends Record({
     return this.players.some(player => player.continent.some(cb));
   }
 
-  mapAnimalsOnContinent(continent, cb) {
+  forEachAnimal(cb) {
     return this
-      .update('players', players => players.map(player => player
-        .update('continent', continent => continent.map(cb))))
+      .get('players').forEach(player => player
+        .get('continent').forEach(animal => cb(null, animal)));
   }
 
   locateAnimal(animalId) {

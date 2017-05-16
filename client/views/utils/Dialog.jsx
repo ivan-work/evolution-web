@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {Portal} from './Portal.jsx';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 import './Dialog.scss';
 
@@ -16,7 +16,7 @@ export class Dialog extends React.PureComponent {
       return <span>{show && children}</span>;
     }
     return <Portal target='body'>
-      <ReactCSSTransitionGroup
+      <CSSTransitionGroup
         transitionName='transition'
         transitionEnterTimeout={200}
         transitionLeaveTimeout={200}>
@@ -28,7 +28,7 @@ export class Dialog extends React.PureComponent {
             </div>
           </div>
         </div>}
-      </ReactCSSTransitionGroup>
+      </CSSTransitionGroup>
     </Portal>;
   }
 }

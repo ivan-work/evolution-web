@@ -5,7 +5,7 @@ import {Button, Radio, Checkbox, Tooltip, Icon} from 'react-mdl';
 
 import MDLForm from '../utils/Form.jsx';
 import {RoomModel} from '../../../shared/models/RoomModel';
-import {Deck_Base, Deck_TimeToFly} from '../../../shared/models/game/GameSettings';
+import {Deck_Base, Deck_TimeToFly, Deck_ContinentsShort} from '../../../shared/models/game/GameSettings';
 import {SettingsRules, SETTINGS_TIME_MODIFIER} from '../../../shared/models/game/GameSettings';
 import * as cards from '../../../shared/models/game/evolution/cards';
 
@@ -44,6 +44,7 @@ export default class RoomSettings extends React.Component {
     this.formSubmit = this.formSubmit.bind(this);
     this.Deck_Base_help = makeDeckHelp(Deck_Base);
     this.Deck_TimeToFly_help = makeDeckHelp(Deck_TimeToFly);
+    this.Deck_ContinentsShort_help = makeDeckHelp(Deck_ContinentsShort);
   }
 
   isHost() {
@@ -79,6 +80,12 @@ export default class RoomSettings extends React.Component {
       <div className='flex-row'>
         <MDLForm.Checkbox name='addon_timeToFly'/>
         <Tooltip label={this.Deck_TimeToFly_help} position="left">
+          <Icon name="help_outline"/>
+        </Tooltip>
+      </div>
+      <div className='flex-row'>
+        <MDLForm.Checkbox name='addon_continents'/>
+        <Tooltip label={this.Deck_ContinentsShort_help} position="left">
           <Icon name="help_outline"/>
         </Tooltip>
       </div>

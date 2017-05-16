@@ -29,15 +29,19 @@ import {
 import {selectGame} from '../../../../selectors';
 
 import {endHunt, endHuntNoCd, getStaticDefenses, getActiveDefenses, getAffectiveDefenses} from './TraitCarnivorous';
+
 import * as tt from '../traitTypes';
 
 const traitForNeoplasm = (t) => !t.disabled && !t.getDataModel().hidden && !(t.getDataModel().cardTargetType & CTT_PARAMETER.LINK);
 
+
+export const TraitAedificator = {type: tt.TraitAedificator};
+
 export const TraitNeoplasm = {
   type: tt.TraitNeoplasm
   , cardTargetType: CARD_TARGET_TYPE.ANIMAL_ENEMY
-  , action: (game, animal) => {
-    const animalTraitArray = animal.traits.toArray();
+  , actionMoveInAnimal: (animal) => {
+    let animalTraitArray = animal.traits.toArray();
     const index = animalTraitArray.findIndex((t) => t.type === tt.TraitNeoplasm);
     if (!~index) return animal;
     const nextIndex = animalTraitArray.findIndex((t, i) => {
@@ -45,21 +49,40 @@ export const TraitNeoplasm = {
     });
     if (!~nextIndex) return null; // KILL
     const traitNeoplasm = animalTraitArray[index];
-    console.log('processing neoplasm')
-    // console.log(animal, animal.traits.toArray())
     animalTraitArray.splice(index, 1);
     animalTraitArray.splice(nextIndex, 0, traitNeoplasm);
-    // console.log(animalTraitArray);
-    animal = animal
-      .set('traits', animalTraitArray.reduce((r, t, i) => {
-        if (i < nextIndex && traitForNeoplasm(t)) {
-          t = t.set('disabled', true).set('value', false);
-        }
-        return r.set(t.id, t);
-      }, OrderedMap()))
+    animalTraitArray = animalTraitArray.map(t => [t.id, t]);
+    return animal.set('traits', OrderedMap(animalTraitArray));
+  }
+  , actionDisableTraitsInAnimal: (animal) => {
+    let foundNeoplasm = false;
+    if (!animal.hasTrait(tt.TraitNeoplasm)) return animal;
+    return animal
+      .update('traits', traits => traits
+        .map((t) => {
+          if (t.type === tt.TraitNeoplasm) {
+            foundNeoplasm = true;
+          } else if (!foundNeoplasm && traitForNeoplasm(t)) {
+            t = t.set('disabled', true).set('value', false);
+          }
+          return t;
+        }))
       .recalculateFood();
-    console.log(animal, animal.traits.toArray())
-    console.log('end neoplasm')
-    return animal;
   }
 };
+
+
+export const TraitRegeneration = {
+  type: tt.TraitRegeneration
+  , checkTraitPlacement: (animal) => (animal.traits.filter(t => !t.hidden).size < 2
+    && animal.traits.every(t => t.getDataModel().food === 0)
+  )
+};
+
+export const TraitCnidocytes = {type: tt.TraitCnidocytes};
+
+export const TraitRecombination = {type: tt.TraitRecombination};
+
+export const TraitHerding = {type: tt.TraitHerding};
+export const TraitMigration = {type: tt.TraitMigration};
+export const TraitSuckerfish = {type: tt.TraitSuckerfish};

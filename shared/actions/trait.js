@@ -9,6 +9,7 @@ import {
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
   , TRAIT_COOLDOWN_LINK
+  , TRAIT_ANIMAL_FLAG
   , ANIMAL_DEATH_REASON
 } from '../models/game/evolution/constants';
 
@@ -24,14 +25,7 @@ import {
 import {selectRoom, selectGame, selectUsersInGame} from '../selectors';
 
 import {PHASE, QuestionRecord} from '../models/game/GameModel';
-import {
-  TraitCommunication,
-  TraitCooperation,
-  TraitViviparous,
-  TraitCarnivorous,
-  TraitAmbush,
-  TraitIntellect
-} from '../models/game/evolution/traitTypes';
+import * as tt from '../models/game/evolution/traitTypes';
 
 import {
   checkGameDefined
@@ -169,8 +163,14 @@ export const server$traitSetValue = (game, sourceAnimal, trait, value) => (dispa
   }
 };
 
-export const server$traitKillAnimal = (gameId, sourceAnimal, targetAnimal) => (dispatch, getState) =>
-  dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.KILL, targetAnimal.id)));
+export const server$traitKillAnimal = (gameId, sourceAnimal, targetAnimal) => (dispatch, getState) => {
+  if (targetAnimal.hasTrait(tt.TraitRegeneration)) {
+    dispatch(server$game(gameId, traitSetAnimalFlag(gameId, sourceAnimal.id, TRAIT_ANIMAL_FLAG.REGENERATION, true)));
+  } else {
+    dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.KILL, targetAnimal.id)));
+  }
+};
+
 
 const traitAnimalRemoveTrait = (gameId, sourcePid, sourceAid, traitId) => ({
   type: 'traitAnimalRemoveTrait'
@@ -198,7 +198,7 @@ const traitTakeShell = (gameId, continentId, animalId, trait) => ({
 export const server$tryViviparous = (gameId, animal) => (dispatch, getState) => {
   return passesChecks(() => {
     const game = selectGame(getState, gameId);
-    const {sourceAnimal, trait} = checkTraitActivation(game, animal.ownerId, animal.id, TraitViviparous);
+    const {sourceAnimal, trait} = checkTraitActivation(game, animal.ownerId, animal.id, tt.TraitViviparous);
     return dispatch(server$traitActivate(game, sourceAnimal, trait));
   })
 };
@@ -212,22 +212,6 @@ export const traitClearHuntingCallbacks = (gameId) => ({
   type: 'traitClearHuntingCallbacks'
   , data: {gameId}
 });
-
-const traitProcessNeoplasm = (gameId) => ({
-  type: 'traitProcessNeoplasm'
-  , data: {gameId}
-});
-
-export const server$traitProcessNeoplasm = (game) => (dispatch, getState) => {
-  dispatch(traitProcessNeoplasm(game.id));
-  game
-    .update('players', players => players.map(player => player.update('continent', continent => continent.map(animal => {
-      const traitNeoplasm = animal.hasTrait('TraitNeoplasm');
-      if (!traitNeoplasm) return animal;
-      animal = traitNeoplasm.getDataModel().action(game, animal);
-      return animal
-    }))));
-};
 
 /**
  * Acted
@@ -285,7 +269,7 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
   const game = selectGame(getState, gameId);
   // Cooperation
   if (sourceType === 'GAME' && game.food > 0) {
-    animal.traits.filter(trait => trait.type === TraitCooperation && trait.checkAction(game, animal))
+    animal.traits.filter(trait => trait.type === tt.TraitCooperation && trait.checkAction(game, animal))
       .forEach(traitCooperation => {
         if (selectGame(getState, gameId).food <= 0) return; // Re-check food after each cooperation
 
@@ -302,7 +286,7 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
   }
 
   // Communication
-  animal.traits.filter(traitCommunication => traitCommunication.type === TraitCommunication)
+  animal.traits.filter(traitCommunication => traitCommunication.type === tt.TraitCommunication)
     .map(traitCommunication => {
       if (!traitCommunication.checkAction(selectGame(getState, gameId), animal)) return;
       const {animal: linkedAnimal} = game.locateAnimal(traitCommunication.linkAnimalId);
@@ -314,7 +298,7 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
         .map(cooldownAction => dispatch(cooldownAction));
 
       dispatch(server$traitNotify_Start(game, animal, traitCommunication, linkedAnimal));
-      dispatch(server$startFeeding(gameId, linkedAnimal, 1, 'TraitCommunication', animal.id));
+      dispatch(server$startFeeding(gameId, linkedAnimal, 1, tt.TraitCommunication, animal.id));
     });
 
   dispatch(server$tryViviparous(game.id, animal));
@@ -336,7 +320,7 @@ export const server$takeFoodRequest = (gameId, playerId, animalId) => (dispatch,
 
   // Beware, this was copied to TraitInkCloud
   dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, playerId)));
-  dispatch(server$game(gameId, startCooldown(gameId, TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, playerId)));
+  dispatch(server$game(gameId, startCooldown(gameId, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, playerId)));
 
   dispatch(server$startFeedingFromGame(game.id, animal.id, 1));
 };
@@ -347,11 +331,11 @@ export const server$startFeedingFromGame = (gameId, animalId, amount) => (dispat
   const ownerId = animal.ownerId;
   const ambushed = game.someAnimalOnContinent('standard', (attackAnimal) => {
     if (attackAnimal.ownerId === animal.ownerId) return;
-    const ambush = attackAnimal.hasTrait(TraitAmbush);
-    const carnivorous = attackAnimal.hasTrait(TraitCarnivorous);
+    const ambush = attackAnimal.hasTrait(tt.TraitAmbush);
+    const carnivorous = attackAnimal.hasTrait(tt.TraitCarnivorous);
     if (!ambush || !ambush.value || !carnivorous) return;
 
-    if (game.cooldowns.checkFor(TraitCarnivorous, null, attackAnimal.id)) return;
+    if (game.cooldowns.checkFor(tt.TraitCarnivorous, null, attackAnimal.id)) return;
 
     const carnivorousData = carnivorous.getDataModel();
 
@@ -547,7 +531,7 @@ export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetI
   }
   const targetAnimal = checkPlayerHasAnimal(game, question.targetPid, question.targetAid);
 
-  const traitIntellect = attackAnimal.hasTrait(TraitIntellect);
+  const traitIntellect = attackAnimal.hasTrait(tt.TraitIntellect);
 
   if (!targetId) {
     throw new ActionCheckError(`server$traitIntellectAnswer@Game(${game.id})`, 'Wrong target trait')

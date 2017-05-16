@@ -8,6 +8,7 @@ import {CardModel} from './CardModel';
 import {AnimalModel} from './evolution/AnimalModel';
 import {TraitModel} from './evolution/TraitModel';
 import * as cardsData from './evolution/cards/index';
+import {TraitNeoplasm} from './evolution/traitsData';
 import yaml from 'yaml-js';
 
 const searchCardClasses = (name) => Object.keys(cardsData)
@@ -65,7 +66,7 @@ export const parseAnimalList = (userId, string) => {
           const type = TraitModel.parse(prop.split('=')[0]);
           const value = prop.split('=')[1];
           if (!type) throw new Error(`Cannot parse prop (${prop})`);
-          return animal.traitAttach(TraitModel.new(type).set('value', value));
+          return animal.traitAttach(TraitModel.new(type).set('value', value), true);
         }
       }, AnimalModel.new(userId, null)))
     .reduce((result, animal) => result.set(animal.id, animal), Map());
@@ -79,11 +80,13 @@ export const parseAnimalList = (userId, string) => {
       .set(a1.id, a1.traitAttach(trait1))
       .set(a2.id, a2.traitAttach(trait2));
   });
-  return animalsMap.toList()
-    // .map(a => {
-    //   console.log(a.traits.map(t => t.type).toArray())
-    //   return a;
-    // });
+  return animalsMap
+    .map(a => TraitNeoplasm.actionDisableTraitsInAnimal(a))
+    .toList()
+  // .map(a => {
+  //   console.log(a.traits.map(t => t.type).toArray())
+  //   return a;
+  // });
 };
 
 export const parseFromRoom = (room, string = '') => {

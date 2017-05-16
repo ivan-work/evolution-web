@@ -59,11 +59,11 @@ export class AnimalModel extends Record({
     return this.traits.find(trait => !trait.disabled && trait.type === typeOrId || trait.id === typeOrId)
   }
 
-  traitAttach(trait) {
+  traitAttach(trait, forced) {
     const attachedTrait = trait
       .set('ownerId', this.ownerId)
       .set('hostAnimalId', this.id);
-    const updatedTraits = (trait.type !== TraitNeoplasm
+    const updatedTraits = (trait.type !== TraitNeoplasm || forced
       ? this.traits.set(attachedTrait.id, attachedTrait) // .push()
       : OrderedMap().set(attachedTrait.id, attachedTrait).concat(this.traits)); // .unshift()
     return this
@@ -93,8 +93,8 @@ export class AnimalModel extends Record({
       .set('food', Math.min(this.food, foodSize))
   }
 
-  hasFlag(flag) {
-    return !!this.flags.get(flag);
+  hasFlag(flag, traitType) {
+    return !!this.flags.get(flag) && (!traitType || this.hasTrait(traitType));
   }
 
   /**
@@ -128,6 +128,7 @@ export class AnimalModel extends Record({
 
   isFull() {
     return this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
+      || this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)
       || this.getWantedFood() <= 0;
   }
 
@@ -154,6 +155,7 @@ export class AnimalModel extends Record({
 
   canEat(game) {
     return this.getWantedFood() > 0
+      && !this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)
       && this.getEatingBlockers(game).length === 0;
   }
 
@@ -173,6 +175,8 @@ export class AnimalModel extends Record({
     let fatToSpend = Math.max(0, this.foodSize - this.getFood());
     if (this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)) {
       return this
+    } else if (this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) {
+      return this
     } else {
       return this
         .update('food', food => food + Math.min(this.getFat(), fatToSpend))
@@ -183,9 +187,10 @@ export class AnimalModel extends Record({
   }
 
   countScore() {
-    return (2 + this.traits.reduce((result, trait) => (
-    result
-    + (trait.getDataModel().cardTargetType & CTT_PARAMETER.LINK
+    let baseScore = 2;
+    if (this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) baseScore = 0;
+    return (0 + this.traits.reduce((result, trait) => (
+    result + (trait.getDataModel().cardTargetType & CTT_PARAMETER.LINK
         ? .5 + trait.getDataModel().food * 2 // card is splitted to two traits, so .5. And food is doubled by traits, so 2x score
         : 1 + trait.getDataModel().food
     )), 0));

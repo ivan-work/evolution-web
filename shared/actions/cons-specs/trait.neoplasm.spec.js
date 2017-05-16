@@ -103,4 +103,18 @@ players:
     clientStore0.dispatch(gameEndTurnRequest());
     expect(selectAnimal(User0, 0).id).equal('$B');
   });
+
+  it.only('Disable defences', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: 2
+players:
+  - continent: $A carn wait, $B swim neoplasm
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
+    expect(selectAnimal(User0, 0).id).equal('$A');
+    expect(selectAnimal(User0, 1), '$B is dead').not.ok;
+  });
 });

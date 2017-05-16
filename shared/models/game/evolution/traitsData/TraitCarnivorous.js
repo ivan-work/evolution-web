@@ -42,23 +42,9 @@ import {
   TraitMimicry
   , TraitRunning
   , TraitTailLoss
-  , TraitShell
-  , TraitInkCloud
 } from './index';
 
-import {
-  TraitScavenger
-  , TraitSymbiosis
-  , TraitSharpVision
-  , TraitCamouflage
-  , TraitMassive
-  , TraitPoisonous
-  , TraitBurrowing
-  , TraitSwimming
-  , TraitFlight
-  , TraitIntellect
-  , TraitAnglerfish
-} from '../traitTypes/index';
+import * as tt from '../traitTypes/index';
 
 export const endHunt = (game, sourceAnimal, traitCarnivorous, targetAnimal) => (dispatch) => {
   dispatch(server$traitStartCooldown(game.id, traitCarnivorous, sourceAnimal));
@@ -67,7 +53,7 @@ export const endHunt = (game, sourceAnimal, traitCarnivorous, targetAnimal) => (
 
 export const endHuntNoCd = (gameId, sourceAnimal, traitCarnivorous, targetAnimal) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
-  const traitIntellect = sourceAnimal.hasTrait('TraitIntellect');
+  const traitIntellect = sourceAnimal.hasTrait(tt.TraitIntellect);
   if (!!traitIntellect && traitIntellect.value === true) dispatch(server$traitSetValue(game, sourceAnimal, traitIntellect, false));
   dispatch(server$traitNotify_End(game.id, sourceAnimal.id, traitCarnivorous, targetAnimal.id));
   if (game.huntingCallbacks.size > 0) {
@@ -80,43 +66,47 @@ export const endHuntNoCd = (gameId, sourceAnimal, traitCarnivorous, targetAnimal
 
 const countUnavoidableDefenses = (game, sourceAnimal, targetAnimal) => {
   let defenses = 0;
-  if (sourceAnimal.hasTrait(TraitSwimming) && !targetAnimal.hasTrait(TraitSwimming))
+  if (sourceAnimal.hasTrait(tt.TraitSwimming) && !targetAnimal.hasTrait(tt.TraitSwimming))
+    defenses++;
+  if (targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION))
     defenses++;
   return defenses;
 };
 
 export const getStaticDefenses = (game, sourceAnimal, targetAnimal) =>
   targetAnimal.traits.filter((trait) =>
-    !trait.disabled
-    && (trait.type === TraitCamouflage && !sourceAnimal.hasTrait(TraitSharpVision))
-    || (trait.type === TraitSymbiosis && trait.linkSource)
-    || (trait.type === TraitMassive && !sourceAnimal.hasTrait(TraitMassive))
-    || (trait.type === TraitBurrowing && targetAnimal.isSaturated())
-    || (trait.type === TraitSwimming && !sourceAnimal.hasTrait(TraitSwimming))
-    || (trait.type === TraitShell.type && targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL))
-    || (trait.type === TraitFlight && (sourceAnimal.traits.size >= targetAnimal.traits.size))
-  ).toArray();
+  !trait.disabled && (
+    (trait.type === tt.TraitCamouflage && !sourceAnimal.hasTrait(tt.TraitSharpVision))
+    || (trait.type === tt.TraitSymbiosis && trait.linkSource)
+    || (trait.type === tt.TraitMassive && !sourceAnimal.hasTrait(tt.TraitMassive))
+    || (trait.type === tt.TraitBurrowing && targetAnimal.isSaturated())
+    || (trait.type === tt.TraitSwimming && !sourceAnimal.hasTrait(tt.TraitSwimming))
+    || (trait.type === tt.TraitShell && targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL, tt.TraitShell))
+    || (trait.type === tt.TraitFlight && (sourceAnimal.traits.size >= targetAnimal.traits.size))
+  )).toArray();
 
-export const getAffectiveDefenses = (game, sourceAnimal, targetAnimal) => [
-  targetAnimal.hasTrait(TraitPoisonous)
-].filter(trait => !!trait);
+export const getAffectiveDefenses = (game, sourceAnimal, targetAnimal) =>
+  targetAnimal.traits.filter((trait) =>
+  !trait.disabled && (
+    (trait.type === tt.TraitPoisonous)
+  )).toArray();
 
 export const getActiveDefenses = (game, sourceAnimal, targetAnimal) =>
   targetAnimal.traits.filter((trait) =>
-    !trait.disabled
-    && (trait.type === TraitRunning.type)
-    || (trait.type === TraitMimicry.type && trait.checkAction(game, targetAnimal))
-    || (trait.type === TraitTailLoss.type && trait.checkAction(game, targetAnimal))
-    || (trait.type === TraitShell.type && trait.checkAction(game, targetAnimal))
-    || (trait.type === TraitInkCloud.type && trait.checkAction(game, targetAnimal))
-  ).toArray();
+  !trait.disabled && (
+    (trait.type === tt.TraitRunning)
+    || (trait.type === tt.TraitMimicry && trait.checkAction(game, targetAnimal))
+    || (trait.type === tt.TraitTailLoss && trait.checkAction(game, targetAnimal))
+    || (trait.type === tt.TraitShell && trait.checkAction(game, targetAnimal))
+    || (trait.type === tt.TraitInkCloud && trait.checkAction(game, targetAnimal))
+  )).toArray();
 
 export const TraitCarnivorous = {
   type: 'TraitCarnivorous'
   , food: 1
   , targetType: TRAIT_TARGET_TYPE.ANIMAL
   , playerControllable: true
-  , checkTraitPlacement: (animal) => !animal.hasTrait(TraitScavenger)
+  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitScavenger)
   , cooldowns: fromJS([
     ['TraitCarnivorous', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
@@ -128,7 +118,7 @@ export const TraitCarnivorous = {
      */
     const animalAnglerfish = game.getPlayer(targetAnimal.ownerId).continent.filter(animal =>
       animal.traits.size === 1
-      && animal.traits.first().type === TraitAnglerfish
+      && animal.traits.first().type === tt.TraitAnglerfish
       && animal.traits.first().checkAction(game, animal)
       && (targetAnimal === animal || (
         animal.traits.first().value === true
@@ -139,7 +129,7 @@ export const TraitCarnivorous = {
     if (animalAnglerfish) {
       const traitAnglerfish = animalAnglerfish.traits.first();
       const newTraitCarnivorous = TraitModel.new('TraitCarnivorous');
-      const newTraitIntellect = TraitModel.new(TraitIntellect);
+      const newTraitIntellect = TraitModel.new(tt.TraitIntellect);
 
       dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
 
@@ -152,7 +142,7 @@ export const TraitCarnivorous = {
         dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
           const {animal} = reselectedGame.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
           if (animal) {
-            const traitIntellect = animal.hasTrait(TraitIntellect);
+            const traitIntellect = animal.hasTrait(tt.TraitIntellect);
             if (traitIntellect) dispatch(server$traitAnimalRemoveTrait(game, animal, traitIntellect));
           }
         }));
@@ -172,7 +162,7 @@ export const TraitCarnivorous = {
     let possibleDefenseTargets = 0;
     let traitMimicry, traitMimicryTargets, traitTailLoss, traitTailLossTargets, traitRunning, traitShell, traitInkCloud;
 
-    const traitIntellect = sourceAnimal.hasTrait(TraitIntellect);
+    const traitIntellect = sourceAnimal.hasTrait(tt.TraitIntellect);
     const canUseIntellect = traitIntellect && traitIntellect.checkAction(game, sourceAnimal);
     const disabledTid = !!traitIntellect && traitIntellect.value;
     logger.debug(`traitIntellect: ${traitIntellect}; ${canUseIntellect}; ${disabledTid}`);
@@ -181,21 +171,21 @@ export const TraitCarnivorous = {
       .forEach((defenseTrait) => {
         if (defenseTrait.isEqual(disabledTid)) return;
 
-        if (defenseTrait.type === TraitRunning.type) {
+        if (defenseTrait.type === tt.TraitRunning) {
           traitRunning = defenseTrait;
           possibleDefenses.push(defenseTrait);
-        } else if (defenseTrait.type === TraitInkCloud.type) {
+        } else if (defenseTrait.type === tt.TraitInkCloud) {
           traitInkCloud = defenseTrait;
           possibleDefenses.push(defenseTrait);
-        } else if (defenseTrait.type === TraitTailLoss.type) {
+        } else if (defenseTrait.type === tt.TraitTailLoss) {
           traitTailLoss = defenseTrait;
           traitTailLossTargets = TraitTailLoss.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
           possibleDefenseTargets += traitTailLossTargets.size;
           if (traitTailLossTargets.size > 0) possibleDefenses.push(defenseTrait);
-        } else if (defenseTrait.type === TraitShell.type) {
+        } else if (defenseTrait.type === tt.TraitShell) {
           traitShell = defenseTrait;
           possibleDefenses.push(defenseTrait);
-        } else if (defenseTrait.type === TraitMimicry.type) {
+        } else if (defenseTrait.type === tt.TraitMimicry) {
           traitMimicry = defenseTrait;
           traitMimicryTargets = TraitMimicry.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
           possibleDefenseTargets += traitMimicryTargets.size;
@@ -211,7 +201,7 @@ export const TraitCarnivorous = {
     if (canUseIntellect && !disabledTid) {
       // default intellect found, need to ask
       const unavoidableDefenses = countUnavoidableDefenses(game, sourceAnimal, targetAnimal);
-      const staticDefenses = getStaticDefenses(game, sourceAnimal, targetAnimal)
+      const staticDefenses = getStaticDefenses(game, sourceAnimal, targetAnimal);
       logger.debug(`${sourceAnimal.id} activates Intellect`);
       logger.debug(`unavoidableDefenses: ${unavoidableDefenses}`);
       logger.debug(`staticDefenses: ${staticDefenses.map(t => t.type) || []}`);
@@ -223,7 +213,7 @@ export const TraitCarnivorous = {
         const defaultIntellect = (questionId) => {
           const targetId = (possibleDefenses.length > 0 ? possibleDefenses[0].id
             : affectiveDefenses.length > 0 ? affectiveDefenses[0].id
-            : true);
+              : true);
           return server$traitIntellectAnswer(game.id, questionId, traitIntellect.id, targetId);
         };
 
@@ -252,14 +242,14 @@ export const TraitCarnivorous = {
         if (traitTailLoss && traitTailLossTargets.size > 0 && !traitTailLoss.isEqual(disabledTid)) {
           dispatch(server$traitDefenceAnswer(game.id
             , questionId
-            , TraitTailLoss.type
+            , tt.TraitTailLoss
             , traitTailLossTargets.last().id
           ));
           return false;
         } else if (traitMimicry && traitMimicryTargets.size > 0 && !traitMimicry.isEqual(disabledTid)) {
           dispatch(server$traitDefenceAnswer(game.id
             , questionId
-            , TraitMimicry.type
+            , tt.TraitMimicry
             , traitMimicryTargets.get(0).id
           ));
           return false;
@@ -278,7 +268,7 @@ export const TraitCarnivorous = {
         } else {
           dispatch(server$traitAnswerSuccess(game.id, questionId));
 
-          const poisonous = targetAnimal.hasTrait(TraitPoisonous);
+          const poisonous = targetAnimal.hasTrait(tt.TraitPoisonous);
           if (poisonous && !poisonous.isEqual(disabledTid)) {
             dispatch(server$traitActivate(game, targetAnimal, poisonous, sourceAnimal));
           }
@@ -291,9 +281,9 @@ export const TraitCarnivorous = {
           const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
           // Selecing new game to not touch killed animal
           game.constructor.sortPlayersFromIndex(selectGame(getState, game.id), currentPlayerIndex).some(player => player.continent.some(animal => {
-            const traitScavenger = animal.hasTrait(TraitScavenger);
+            const traitScavenger = animal.hasTrait(tt.TraitScavenger);
             if (traitScavenger && animal.canEat(game) > 0) {
-              dispatch(server$startFeeding(game.id, animal, 1, 'TraitScavenger', sourceAnimal.id));
+              dispatch(server$startFeeding(game.id, animal, 1, tt.TraitScavenger, sourceAnimal.id));
               return true;
             }
           }));
@@ -327,7 +317,7 @@ export const TraitCarnivorous = {
 
     const defenses = getStaticDefenses(game, sourceAnimal, targetAnimal).length;
 
-    return sourceAnimal.hasTrait(TraitIntellect)
+    return sourceAnimal.hasTrait(tt.TraitIntellect)
       ? defenses < 2
       : defenses < 1;
   }

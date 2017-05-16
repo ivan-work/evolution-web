@@ -36,9 +36,9 @@ export class SettingsRecord extends Record({
     return js == null
       ? new SettingsRecord()
       : new SettingsRecord({
-      ...js
-      , decks: List(js.decks)
-    });
+        ...js
+        , decks: List(js.decks)
+      });
   }
 
   applySettings(settings) {
@@ -126,4 +126,48 @@ export const Deck_TimeToFly = [
   , [4, cardsData.CardTrematodeAndCommunication.type]
   , [2, cardsData.CardTrematodeAndCooperation.type]
   , [2, cardsData.CardTrematodeAndFatTissue.type]
+];
+
+export const Deck_ContinentsShort = [
+// 0
+// стадность / водоплавающее - 2,
+// стадность / сотрудничество - 4,
+// стадность / хищник - 2,
+// миграция / хищник - 4,
+
+// 1
+// миграция / водоплавающее - 4,
+// прилипала / водоплавающее - 2,
+// прилипала / сотрудничество - 2,
+// регенерация / сотрудничество - 2,
+  [2, cardsData.CardRegenerationAndCommunication.type]
+
+// 2
+// регенерация / водоплавающее - 2,
+// регенерация / хищник - 2,
+// стрекательные клетки / водоплавающее - 2,
+// стрекательные клетки / взаимодействие - 2,
+
+  , [2, cardsData.CardRegenerationAndSwimming.type]
+  , [2, cardsData.CardRegenerationAndCarnivorous.type]
+  , [2, cardsData.CardCnidocytesAndSwimming.type]
+  , [2, cardsData.CardCnidocytesAndCooperation.type]
+
+// 3
+// рекомбинация / хищник - 2,
+// рекомбинация / водоплавающее - 2,
+// эдификатор / хищник - 2,
+// эдификатор / водоплавающее - 2,
+
+  , [2, cardsData.CardRecombinationAndSwimming.type]
+  , [2, cardsData.CardRecombinationAndCarnivorous.type]
+  , [2, cardsData.CardAedificatorAndSwimming.type]
+  , [2, cardsData.CardAedificatorAndCarnivorous.type]
+
+// 4
+// неоплазия / водоплавающее - 2,
+// неоплазия / взаимодействие - 2.
+
+  , [2, cardsData.CardNeoplasmAndSwimming.type]
+  , [2, cardsData.CardNeoplasmAndCooperation.type]
 ];

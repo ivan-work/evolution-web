@@ -7,8 +7,10 @@ import {CooldownList} from '../../shared/models/game/CooldownList';
 import {AnimalModel} from '../../shared/models/game/evolution/AnimalModel';
 import {TraitModel, TraitData} from '../../shared/models/game/evolution/TraitModel';
 import {TraitDataModel} from '../../shared/models/game/evolution/TraitDataModel';
-import {CTT_PARAMETER, TRAIT_TARGET_TYPE, TRAIT_ANIMAL_FLAG} from '../../shared/models/game/evolution/constants';
-import {TraitFatTissue, TraitShell} from '../../shared/models/game/evolution/traitTypes';
+import {CTT_PARAMETER, TRAIT_TARGET_TYPE, TRAIT_ANIMAL_FLAG, ANIMAL_DEATH_REASON} from '../../shared/models/game/evolution/constants';
+import * as tt from '../../shared/models/game/evolution/traitTypes';
+
+import {TraitNeoplasm} from '../../shared/models/game/evolution/traitsData/cons';
 
 /**
  * TRAITS
@@ -143,11 +145,26 @@ export const gameStartEat = (game, {food}) => {
 };
 
 const processNeoplasm = (game) => {
+  let deadAnimals = [];
   return game
     .update('players', players => players.map(player => player.update('continent', continent => continent
-      .map(animal => TraitData.TraitNeoplasm.action(game, animal))
-      .filter(a => !!a)
-    )));
+        .map(animal => {
+          const updatedAnimal = TraitNeoplasm.actionMoveInAnimal(animal);
+          if (updatedAnimal) {
+            return TraitNeoplasm.actionDisableTraitsInAnimal(updatedAnimal);
+          } else {
+            deadAnimals.push(animal.id);
+            return animal;
+          }
+        })
+      // .map(animal => {
+      //   console.log(animal.traits);
+      //   return animal;
+      // })
+    )))
+    .update(game => deadAnimals.reduce(
+      (game, animalId) => animalDeath(game, {type: ANIMAL_DEATH_REASON.NEOPLASM, animalId})
+      , game));
 };
 
 export const gameStartDeploy = (game) => {
@@ -218,7 +235,7 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
 
 export const animalDeath = (game, {type, animalId, data}) => {
   const {animalIndex, animal} = game.locateAnimal(animalId);
-  const shell = animal.hasTrait(TraitShell);
+  const shell = animal.hasTrait(tt.TraitShell);
   return game
     .updateIn(['players', animal.ownerId, 'scoreDead'], scoreDead => scoreDead + animal.countScore())
     .removeIn(['players', animal.ownerId, 'continent', animalIndex])
@@ -256,11 +273,11 @@ export const traitConvertFat = (game, {sourceAid, traitId}) => {
 
   return game.updateIn(['players', animal.ownerId, 'continent', animalIndex], animal => {
     const traitIndex = animal.traits.valueSeq().findIndex(t => t.id === traitId);
-    const availableFat = animal.traits.take(traitIndex + 1).filter(trait => trait.type === TraitFatTissue && trait.value).size;
+    const availableFat = animal.traits.take(traitIndex + 1).filter(trait => trait.type === tt.TraitFatTissue && trait.value).size;
     let fatCounter = availableFat;
     return animal
       .update('traits', traits => traits.map(trait =>
-        (trait.type === TraitFatTissue && trait.value) ? trait.set('value', fatCounter-- <= 0)
+        (trait.type === tt.TraitFatTissue && trait.value) ? trait.set('value', fatCounter-- <= 0)
           : trait))
       .receiveFood(availableFat)
   });
@@ -271,7 +288,6 @@ export const traitSetAnimalFlag = (game, {sourceAid, flag, on}) => {
   return game
     .setIn(['players', animal.ownerId, 'continent', animalIndex, 'flags', flag], on);
 };
-
 
 export const traitSetValue = (game, {sourceAid, traitId, value}) => {
   const {animal, animalIndex} = game.locateTrait(traitId, sourceAid);
