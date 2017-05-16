@@ -33,7 +33,7 @@ export class GameTimedOutDialog extends React.PureComponent {
 
 export const GameTimedOutDialogView = connect(
   (state, {game}) => ({
-    show: game.getPlayer() && game.getPlayer().timedOut
+    show: game.getPlayer() ? game.getPlayer().timedOut : false
   })
   , (dispatch, props) => ({
     $timedOutRequest: () => dispatch(gameSetUserTimedOutRequest())

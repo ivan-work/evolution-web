@@ -84,7 +84,7 @@ players:
   it('Angler', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
-deck: 1 angler
+deck: 1 angler, 1 camo
 phase: 2
 food: 1
 players:
@@ -95,12 +95,15 @@ players:
     const {selectGame1, selectAnimal1, selectTrait1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
 
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    console.log(selectPlayer(User0).continent);
     expect(selectAnimal(User0, 1), '$A should give birth').ok;
-    expect(selectGame().deck, 'Deck size').size(0);
+    expect(selectGame().deck, 'Deck size').size(1);
+    expect(selectGame().deck.first().trait1, 'Deck has camo').equal('TraitCamouflage');
 
+    expect(selectTrait(User0, 1, 0), 'Newborn has trait').ok;
     expect(selectTrait(User0, 1, 0).type).equal('TraitAnglerfish');
     expect(selectTrait0(1, 0, User0).type).equal('TraitAnglerfish');
-    expect(selectTrait1(1, 0, User0), 'User1 should not know about angler' ).undefined;
+    expect(selectTrait1(1, 0, User0), 'User1 should not know about angler').undefined;
   });
 });
 

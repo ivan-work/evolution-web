@@ -1,6 +1,6 @@
 @import '../../styles/variables';
 
-$MARGIN: .25em;
+$MARGIN: 1px;
 
 .Game2-wrapper {
   width: 100%;
@@ -24,15 +24,16 @@ $MARGIN: .25em;
     display: flex;
     flex-direction: row;
     &:first-child {
-      max-height: 250px;
+      max-height: 170px;
     }
   }
   .mdl-card {
     flex: 1 1 0;
     margin: $MARGIN;
     font-size: 14px;
-    padding: .5em;
+    padding: 0 .5em;
     width: auto;
+    min-height: 100px;
   }
 
   .Short {
@@ -48,5 +49,62 @@ $MARGIN: .25em;
 
   .GameShellContainer .TraitShell {
     display: inline-block;
+  }
+
+  .PlayersSticker {
+    min-width: 160px;
+    max-width: 160px;
+    h6 {
+      display: inline-block;
+    }
+    .PlayersList {
+      font-size: 0.9em;
+      line-height: 1.4em;
+      .Player {
+        @include ellipsis();
+      }
+      .isPlayerTurn {
+        background: $CURRENT_TURN_BACKGROUND;
+        font-weight: bold;
+      }
+      .material-icons {
+        vertical-align: text-bottom;
+        font-size: 14px;
+      }
+      .ended {
+        color: #bbb;
+      }
+    }
+  }
+
+  .DeckSticker {
+    .deck {
+      margin: 5px 15px 15px 0;
+      .Deck {
+        background: gray;
+        box-shadow: 1px 1px 1px 1px gray;
+      }
+    }
+  }
+
+  .GameSticker {
+    .controls {
+      display: flex;
+      justify-content: space-around;
+    }
+    .line {
+      .key {
+        font-weight: bold;
+      }
+    }
+  }
+
+  .FoodCard {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .ChatCard {
+    flex: 2;
   }
 }

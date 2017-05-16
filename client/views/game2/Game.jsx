@@ -37,6 +37,7 @@ import TraitDefenceDialog from '../game/ui/TraitDefenceDialog.jsx'
 import DeckSticker from './ui/DeckSticker.jsx';
 
 import GameSticker from './ui/GameSticker.jsx';
+import PlayersSticker from "./ui/PlayersSticker.jsx";
 
 import Chat from '../Chat.jsx';
 import PlayerSticker from "./PlayerSticker.jsx";
@@ -65,20 +66,23 @@ export class Game extends React.Component {
 
       <div className='Game2'>
         <div className='row'>
-          <MDL.Card shadow={SHADOW} className='GameStickerCard Short'>
-            <GameSticker game={game}/>
+          <MDL.Card shadow={SHADOW} className='PlayersStickerCard Short'>
+            <PlayersSticker game={game}/>
           </MDL.Card>
           <MDL.Card shadow={SHADOW} className='DeckStickerCard Short'>
             <DeckSticker game={game}/>
           </MDL.Card>
-          <MDL.Card shadow={SHADOW}>
+          <MDL.Card shadow={SHADOW} className='GameStickerCard Short'>
+            <GameSticker game={game}/>
+          </MDL.Card>
+          <MDL.Card shadow={SHADOW} className='FoodCard'>
             <h6>{T.translate('Game.UI.FoodBase')}{game.status.phase === PHASE.FEEDING && <span> ({game.food})</span>}:</h6>
-            {game.status.phase === PHASE.FEEDING && <GameFoodContainer game={game} food={game.food}/>}
             <div className='GameShellContainer'>
               {game.continents.get('standard').shells.map((shell) => <TraitShell key={shell.id} game={game} trait={shell}/>).toList()}
             </div>
+            {game.status.phase === PHASE.FEEDING && <GameFoodContainer game={game} food={game.food}/>}
           </MDL.Card>
-          <MDL.Card shadow={SHADOW}>
+          <MDL.Card shadow={SHADOW} className='ChatCard'>
             <h6>{T.translate('App.Chat.Label')}:</h6>
             <Chat chatTargetType='ROOM' roomId={game.roomId}/>
           </MDL.Card>

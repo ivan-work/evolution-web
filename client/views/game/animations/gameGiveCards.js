@@ -10,7 +10,6 @@ export const gameGiveCards = (game, cards, getRef) => {
   const Deck = getRef('Deck');
   const DeckHtml = ReactDOM.findDOMNode(Deck);
 
-  console.log(!Deck, !DeckHtml);
   if (!Deck || !DeckHtml) return;
 
   return Promise.all(cards.map((card, index) => Promise.resolve()
@@ -20,7 +19,7 @@ export const gameGiveCards = (game, cards, getRef) => {
       const sourceBbx = DeckHtml.getBoundingClientRect();
       const deckOffset = Deck.getXYForCard(game.deck.size - cards.size + index);
       const targetBbx = CardHtml.getBoundingClientRect();
-
+      // console.log(CardHtml, targetBbx)
 
       const CardClone = CardHtml.cloneNode(true);
       CardHtml.classList.add('invisible');

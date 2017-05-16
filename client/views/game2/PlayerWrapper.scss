@@ -22,22 +22,48 @@
         flex: 1 1 0;
         align-items: center;
         justify-content: flex-end;
-        .PlayerWrapper {
-          display: flex;
-          flex-direction: column;
-          margin: 0 auto;
-          position: relative;
-          transition: transform 1.25s;
-          .Animal {
-            flex: 0 0 $ANIMAL_WIDTH;
-            max-width: $ANIMAL_WIDTH;
-          }
-          .CardCollection {
-            height: $CARD_HEIGHT;
-            margin-bottom: 10px;
+        .PlayerStickerInner {
+          .PlayerWrapper {
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            position: relative;
+            .Animal {
+              flex: 0 0 $ANIMAL_WIDTH;
+              max-width: $ANIMAL_WIDTH;
+            }
+            .CardCollection {
+              height: $CARD_HEIGHT;
+              margin-bottom: 10px;
+            }
           }
         }
       }
     }
   }
+}
+
+.arrow {
+  position: absolute;
+  pointer-events: none;
+  opacity: .3;
+  font-size: 64px !important;
+}
+.arrow-left, .arrow-right {
+  top: calc(50% - 32px);
+}
+.arrow-left {
+  left: 0;
+}
+.arrow-right {
+  right: 0;
+}
+.arrow-top, .arrow-bottom {
+  left: calc(50% - 32px);
+}
+.arrow-top {
+  top: 0;
+}
+.arrow-bottom {
+  bottom: 0;
 }

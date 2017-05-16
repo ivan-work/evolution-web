@@ -51,6 +51,7 @@ export class PlayerWrapper extends Component {
       , $traitActivate
       , $traitTakeShell
     } = props.gameActions;
+    this.style = {};
     this.state = INITIAL_STATE;
     this.$noop = () => null;
     this.$traitTakeFood = (animal) => $traitTakeFood(animal.id);
@@ -85,7 +86,7 @@ export class PlayerWrapper extends Component {
   }
 
   render() {
-    const {game, player} = this.props;
+    const {game, player, showCards} = this.props;
     const isUser = game.userId === player.id;
     return (
       <div className={cn({PlayerWrapper: true, UserWrapper: isUser, EnemyWrapper: !isUser})}
