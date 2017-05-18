@@ -13,7 +13,7 @@ describe('TraitPiracy:', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 20 camo
-phase: 2
+phase: feeding
 food: 0
 players:
   - continent: $A piracy, $B piracy, $C piracy, $D piracy, $E piracy + fat

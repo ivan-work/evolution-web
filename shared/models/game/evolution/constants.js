@@ -44,6 +44,10 @@ export const TRAIT_COOLDOWN_LINK = {
   EATING: 'EATING'
 };
 
+/**
+ * @readonly
+ * @enum {string}
+ */
 export const TRAIT_ANIMAL_FLAG = {
   HIBERNATED: 'HIBERNATED'
   , POISONED: 'POISONED'

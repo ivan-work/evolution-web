@@ -11,12 +11,11 @@ import {
   , gameDeployAnimalFromHand
   , gameDeployAnimalFromDeck
   , gameDeployTrait
+  , gameDeployRegeneratedAnimal
   , gameEndTurn
   , gameEnd
   , gamePlayerLeft
-  , gameStartDeploy
-  , gameStartEat
-  , gameStartExtinct
+  , gameStartPhase
   , gameSetUserTimedOut
   , gameSetUserWantsPause
   , gameSetPaused
@@ -29,6 +28,7 @@ import {
   , traitAnimalRemoveTrait
   , traitAnimalAttachTrait
   , traitGrazeFood
+  , traitParalyze
   , traitConvertFat
   , traitSetAnimalFlag
   , traitSetValue
@@ -47,12 +47,11 @@ export const reducer = createReducer(null, {
   , gameDeployAnimalFromHand
   , gameDeployAnimalFromDeck
   , gameDeployTrait
+  , gameDeployRegeneratedAnimal
   , gameEndTurn
   , gameEnd
   , gamePlayerLeft
-  , gameStartDeploy
-  , gameStartEat
-  , gameStartExtinct
+  , gameStartPhase
   , gameSetUserTimedOut
   , gameSetUserWantsPause
   , gameSetPaused
@@ -65,6 +64,7 @@ export const reducer = createReducer(null, {
   , traitAnimalRemoveTrait
   , traitAnimalAttachTrait
   , traitGrazeFood
+  , traitParalyze
   , traitConvertFat
   , traitSetAnimalFlag
   , traitSetValue

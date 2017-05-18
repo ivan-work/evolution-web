@@ -13,7 +13,7 @@ describe('TraitTrematode:', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 4
 players:
   - continent: $A carn wait, $B tail trema$C, $C

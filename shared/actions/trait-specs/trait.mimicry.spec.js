@@ -14,7 +14,7 @@ describe('TraitMimicry:', () => {
   it('$A > $B ($C camo)', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A carn
@@ -31,7 +31,7 @@ players:
   it('$A > $B ($C) TIMEOUT', async () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A carn wait
@@ -53,7 +53,7 @@ settings:
   it('$A > $B m> $C', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A carn
@@ -70,7 +70,7 @@ players:
   it('$A > $B m> $C m> $B', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A carn
@@ -87,7 +87,7 @@ players:
   it('$A > $B QA m> $C', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A carn
@@ -114,7 +114,7 @@ players:
   it('$A > $B m> $C m> $B', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A carn graz
@@ -141,7 +141,7 @@ players:
   it('$A > $B (auto)> $C ($D)', async () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A carn
@@ -169,7 +169,7 @@ settings:
   it('$A > $B (mimi)> end', async () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 deck: 20 camo
 players:

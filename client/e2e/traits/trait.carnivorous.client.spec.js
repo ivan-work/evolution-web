@@ -5,7 +5,7 @@ import {mountClient} from '~/shared/test/test-helpers.jsx'
 import {selectTrait, selectDTAnimal, selectHID} from '../test.selectors';
 
 /*
-phase: 2
+phase: feeding
 food: 5
 players:
   - continent: $A carn mimicry tailloss piracy fat, $B
@@ -16,7 +16,7 @@ describe('Carnivorous', () => {
   it('Can Eat', async () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 5
 players:
   - continent: $A carn, $B

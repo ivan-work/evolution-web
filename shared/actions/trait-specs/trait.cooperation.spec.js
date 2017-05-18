@@ -14,7 +14,7 @@ describe('TraitCooperation:', () => {
     it('friend > friend', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
       const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   - hand: CardCooperation
     continent: $A, $B
@@ -37,7 +37,7 @@ players:
     it('friend0 > friend1, friend1 > friend2, friend0 > friend2, fail:friend1 > friend2, fail: friend2 > friend0 ', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   -
   - hand: 8 CardCooperation
@@ -82,7 +82,7 @@ players:
     it('fail friend0 > enemy0, fail friend0 > friend0, fail enemy0 > enemy0', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   - continent: $A, $B, $C
   - hand: 8 CardCooperation
@@ -118,7 +118,7 @@ players:
     it('$A+-$B-$C-$D takes food', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A carn coop$B, $B carn coop$C, $C carn coop$D, $D carn
@@ -136,7 +136,7 @@ players:
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
 deck: 12 camo
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A piracy coop$A1, $A1, $B carn + coop$B1, $B1, $C
@@ -155,7 +155,7 @@ players:
     it('Cant take more food than exists', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 2
 players:
   - continent: $A carn coop$B, $B carn coop$C, $C carn coop$D, $D carn
@@ -172,7 +172,7 @@ players:
     it('Cant take more food than need', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A + coop$B, $B coop$C, $C +
@@ -194,7 +194,7 @@ players:
     it(`Can't be used with Communication $A`, () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A coop$B comm$B para, $B comm$C para, $C comm$D coop$D para, $D comm$A para, $Waiter graz
@@ -212,7 +212,7 @@ players:
     it(`Can't be used with Communication $D`, () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A coop$B comm$B para, $B comm$C para, $C comm$D coop$D para, $D comm$A para, $Waiter graz
@@ -230,7 +230,7 @@ players:
     it(`Works with symbiosis`, () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A coop$B symb$B, $B, $Waiter graz
@@ -248,7 +248,7 @@ players:
     it('Dies from carnivore', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   - continent: $D carn
   - hand: 2 CardCooperation
@@ -282,7 +282,7 @@ players:
     it('Dies from starving', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 3
 players:
   - hand: 2 CardCooperation

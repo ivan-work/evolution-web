@@ -32,7 +32,7 @@ describe('Game (ENDING PHASE):', function () {
     const gameId = ParseGame(`
 deck: 32 carn
 food: 0
-phase: 2
+phase: feeding
 players:
   - continent: $Q piracy, $W +
   - continent: $A mass + fat=true fat=true, $D +
@@ -49,7 +49,7 @@ players:
     expect(selectGame().status.turn, 'status.turn').equal(1);
     expect(selectGame().status.phase, 'status.phase').equal(PHASE.DEPLOY);
     expect(ClientGame0().status.turn, 'ClientGame0().status.turn').equal(1);
-    expect(ClientGame0().status.turn, 'ClientGame0().status.phase').equal(PHASE.DEPLOY);
+    expect(ClientGame0().status.phase, 'ClientGame0().status.phase').equal(PHASE.DEPLOY);
 
     expect(selectPlayer(User0).continent).size(1);
     expect(ClientGame0().getPlayer(User0).continent).size(1);
@@ -83,7 +83,7 @@ players:
     const gameId = ParseGame(`
 deck: 4 carn
 food: 4
-phase: 2
+phase: feeding
 players:
   - continent: $
   - continent: $
@@ -110,7 +110,7 @@ players:
       , {clientStore2, User2, ClientGame2}] = mockGame(3);
     ParseGame(`
 food: 0
-phase: 2
+phase: feeding
 players:
   - continent: $ + , $
   - continent: $ + camo sharp
@@ -159,7 +159,7 @@ players:
     clientStore2.dispatch(roomSpectateRequest(roomId));
     clientStore0.dispatch(roomSetSeedRequest(`
 deck: 2 camo
-phase: 0
+phase: prepare
 `));
     clientStore0.dispatch(roomStartVotingRequest());
     clientStore1.dispatch(roomStartVoteActionRequest(true));
@@ -193,7 +193,7 @@ phase: 0
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
 food: 10
-phase: 2
+phase: feeding
 players:
   - continent: $A TraitCarnivorous
 `);

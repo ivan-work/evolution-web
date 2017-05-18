@@ -15,6 +15,12 @@
 
   transition: background .2s;
 
+  &.disabled {
+    color: #333;
+    background: #999;
+    border-color: #999;
+  }
+
   .inner {
     -webkit-user-select: none;
     -moz-user-select: none;

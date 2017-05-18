@@ -6,6 +6,7 @@ import classnames from 'classnames';
 import {DragSource} from 'react-dnd';
 import {DND_ITEM_TYPE} from './../dnd/DND_ITEM_TYPE';
 
+import {PHASE} from '../../../../shared/models/game/GameModel';
 import {AnimalModel} from '../../../../shared/models/game/evolution/AnimalModel';
 import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 
@@ -28,6 +29,7 @@ class AnimalTrait extends React.PureComponent {
       AnimalTrait: true
       , [trait.type]: true
       , value: trait.value
+      , disabled: trait.disabled
     }));
 
     return (<div id={'AnimalTrait' + trait.id} className={className}>
@@ -50,7 +52,7 @@ const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
     beginDrag: ({trait, sourceAnimal}) => ({trait, sourceAnimal})
     , canDrag: ({trait, sourceAnimal, game}, monitor) => (
       game.isPlayerTurn()
-      && game.isFeeding()
+      && game.status.phase === PHASE.FEEDING
       && sourceAnimal.ownerId === game.userId
       && trait.checkAction(game, sourceAnimal)
     )
@@ -98,7 +100,7 @@ class ClickAnimalTrait extends AnimalTrait {
   render() {
     const {trait, game, sourceAnimal, onClick} = this.props;
     const active = (game.isPlayerTurn() || trait.getDataModel().transient)
-      && game.isFeeding()
+      && game.status.phase === PHASE.FEEDING
       && sourceAnimal.ownerId === game.userId
       && trait.checkAction(game, sourceAnimal);
     this.classNames = {

@@ -110,7 +110,7 @@ players:
       turn: 0
       , round: 0
       , player: 0
-      , phase: 1
+      , phase: PHASE.DEPLOY
     }));
     expect(parsed.deck.size).equal(18);
     expect(parsed.deck.first().type).equal('CardCarnivorous');
@@ -137,7 +137,7 @@ players:
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     ParseGame(`
 deck: 12 carnivorous, 6 sharp
-phase: 2
+phase: feeding
 food: 2
 players:
   - hand: 2 carn
@@ -149,7 +149,7 @@ players:
       turn: 0
       , round: 0
       , player: 0
-      , phase: 2
+      , phase: PHASE.FEEDING
     }));
     expect(ServerGame().deck.size).equal(18);
     expect(ServerGame().getIn(['players', User0.id, 'hand']).size).equal(2);
@@ -188,7 +188,7 @@ settings:
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 12 carnivorous, 6 sharp
-phase: 0
+phase: prepare
 food: 2
 players:
   - hand: 2 carn
@@ -199,7 +199,7 @@ players:
     expect(ServerGame().status.round, 'round').equal(0);
     expect(ServerGame().status.currentPlayer, 'currentPlayer').equal(0);
     expect(ServerGame().status.roundPlayer, 'roundPlayer').equal(0);
-    expect(ServerGame().status.phase, 'phase').equal(1);
+    expect(ServerGame().status.phase, 'phase').equal(PHASE.DEPLOY);
     expect(ServerGame().status.turnStartTime, 'turnTime').above(0);
     // console.log(ServerGame().getIn(['players', User1.id, 'hand']).size)
     // console.log(ServerGame().getIn(['players', User0.id, 'hand']).size)

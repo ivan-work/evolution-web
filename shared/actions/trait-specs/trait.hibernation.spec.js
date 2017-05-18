@@ -16,7 +16,7 @@ describe('TraitHibernation:', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 12 camo
-phase: 2
+phase: feeding
 players:
   - continent: $A hiber fat fat, $B hiber carn, $C hiber
 `);
@@ -116,7 +116,7 @@ players:
     const gameId = ParseGame(`
 deck: 50 camo
 food: 0
-phase: 2
+phase: feeding
 players:
   - continent: $A hiber fat=true fat=true
 `);

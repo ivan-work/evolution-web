@@ -8,7 +8,7 @@ describe('e2e Deploy', () => {
   it('Can deploy animal', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   - hand: camo
 `);
@@ -37,7 +37,7 @@ players:
   it('Can deploy simple trait', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   - hand: camo
     continent: $A
@@ -67,7 +67,7 @@ players:
   it('Can deploy linked trait', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   - hand: commu
     continent: $A, $B

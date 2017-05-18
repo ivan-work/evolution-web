@@ -16,7 +16,6 @@ const DragTraitShell = DragSource(DND_ITEM_TYPE.TRAIT_SHELL
     beginDrag: ({trait}) => ({trait})
     , canDrag: ({trait, game}, monitor) => (
       game.isPlayerTurn()
-      && game.isFeeding()
       && !game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, game.getPlayer() && game.getPlayer().id)
     )
   }

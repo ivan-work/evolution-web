@@ -14,7 +14,7 @@ describe('TraitNeoplasm:', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 15 camo
-phase: 1
+phase: deploy
 players:
   - continent: $A neoplasm coop$B mass trem$B fat=true para, $B wait
 `);
@@ -75,7 +75,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 1
+phase: deploy
 players:
   - continent: $A
     hand: 10 neoplasm
@@ -94,7 +94,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 1
+phase: deploy
 players:
   - continent: $A neoplasm angler, $B wait
 `);
@@ -104,10 +104,10 @@ players:
     expect(selectAnimal(User0, 0).id).equal('$B');
   });
 
-  it.only('Disable defences', () => {
+  it('Disable defences', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 players:
   - continent: $A carn wait, $B swim neoplasm
 `);

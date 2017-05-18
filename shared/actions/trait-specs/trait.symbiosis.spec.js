@@ -14,7 +14,7 @@ describe('TraitSymbiosis:', () => {
     it('friend > friend', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
       const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   - hand: CardSymbiosis
     continent: $A fat fat, $B fat fat
@@ -37,7 +37,7 @@ players:
     it('A > B, B > C, C > D, A > D, C > A, fail B > A, fail B > B, fail B > C, B > D', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   -
   - hand: 8 CardSymbiosis
@@ -119,7 +119,7 @@ players:
     it('fail A > B; fail B > A', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   - hand: 8 CardSymbiosis
     continent: $A
@@ -144,7 +144,7 @@ players:
     it(`Can't get food when not full`, () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   - hand: 3 CardSymbiosis
     continent: $A carn graz, $B carn fat fat, $C carn, $D
@@ -259,7 +259,7 @@ players:
     it(`Can't hunt on symbiotics`, () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   - hand: 2 CardSymbiosis
     continent: $A, $B, $C
@@ -303,7 +303,7 @@ players:
 //    it('Dies from carnivore', () => {
 //      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
 //      const gameId = ParseGame(`
-//phase: 1
+//phase: deploy
 //players:
 //  - continent: $D carn
 //  - hand: 2 CardCommunication
@@ -337,7 +337,7 @@ players:
 //    it('Dies from starving', () => {
 //      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
 //      const gameId = ParseGame(`
-//phase: 1
+//phase: deploy
 //players:
 //  -
 //  - hand: 2 CardCommunication

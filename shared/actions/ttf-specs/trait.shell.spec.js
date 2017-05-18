@@ -14,7 +14,7 @@ describe('TraitShell:', () => {
   it('Works + food', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 2
 players:
   - continent: $A carn comm$D wait, $B carn, $C shell tail piracy, $D shell + fat
@@ -57,7 +57,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 5 shell
-phase: 2
+phase: feeding
 food: 
 players:
   - continent: $A shell, $B shell +, $C +

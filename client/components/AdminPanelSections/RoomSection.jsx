@@ -5,7 +5,7 @@ import {Map, List, fromJS} from 'immutable';
 import {roomSetSeedRequest, roomStartVotingRequest} from '../../../shared/actions/actions';
 
 const defaultGameSeed = `deck: 12 carnivorous, 6 sharp
-phase: 2
+phase: feeding
 food: 2
 players:
   - hand: 1 sharp, 1 camo

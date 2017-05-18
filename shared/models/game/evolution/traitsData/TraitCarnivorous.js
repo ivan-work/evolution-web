@@ -59,7 +59,7 @@ export const endHuntNoCd = (gameId, sourceAnimal, traitCarnivorous, targetAnimal
   if (game.huntingCallbacks.size > 0) {
     dispatch(traitClearHuntingCallbacks(game.id));
     game.huntingCallbacks.forEach((callback) => {
-      dispatch(callback(game, sourceAnimal, traitCarnivorous, targetAnimal))
+      dispatch(callback(selectGame(getState, gameId), sourceAnimal, traitCarnivorous, targetAnimal))
     });
   }
 };
@@ -89,6 +89,7 @@ export const getAffectiveDefenses = (game, sourceAnimal, targetAnimal) =>
   targetAnimal.traits.filter((trait) =>
   !trait.disabled && (
     (trait.type === tt.TraitPoisonous)
+    || (trait.type === tt.TraitCnidocytes)
   )).toArray();
 
 export const getActiveDefenses = (game, sourceAnimal, targetAnimal) =>
@@ -140,7 +141,7 @@ export const TraitCarnivorous = {
       const {animal: revealledAnglerfish} = reselectedGame.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
       if (TraitCarnivorous.checkTarget(reselectedGame, revealledAnglerfish, sourceAnimal)) {
         dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
-          const {animal} = reselectedGame.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
+          const {animal} = game.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
           if (animal) {
             const traitIntellect = animal.hasTrait(tt.TraitIntellect);
             if (traitIntellect) dispatch(server$traitAnimalRemoveTrait(game, animal, traitIntellect));
@@ -239,6 +240,12 @@ export const TraitCarnivorous = {
       // if user has no options or if user didn't respond - outcome will be the same, so we DRY
 
     const defaultDefence = (questionId) => (dispatch, getState) => {
+        const traitCnidocytes = targetAnimal.hasTrait(tt.TraitCnidocytes);
+        if (traitCnidocytes && !traitCnidocytes.isEqual(disabledTid)) {
+          dispatch(traitAddHuntingCallback(game.id, (game) => (dispatch, getState) => {
+            dispatch(server$traitActivate(game, targetAnimal, traitCnidocytes, sourceAnimal));
+          }));
+        }
         if (traitTailLoss && traitTailLossTargets.size > 0 && !traitTailLoss.isEqual(disabledTid)) {
           dispatch(server$traitDefenceAnswer(game.id
             , questionId
@@ -268,9 +275,9 @@ export const TraitCarnivorous = {
         } else {
           dispatch(server$traitAnswerSuccess(game.id, questionId));
 
-          const poisonous = targetAnimal.hasTrait(tt.TraitPoisonous);
-          if (poisonous && !poisonous.isEqual(disabledTid)) {
-            dispatch(server$traitActivate(game, targetAnimal, poisonous, sourceAnimal));
+          const traitPoisonous = targetAnimal.hasTrait(tt.TraitPoisonous);
+          if (traitPoisonous && !traitPoisonous.isEqual(disabledTid)) {
+            dispatch(server$traitActivate(game, targetAnimal, traitPoisonous, sourceAnimal));
           }
 
           dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));

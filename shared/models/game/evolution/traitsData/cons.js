@@ -13,17 +13,9 @@ import {
 } from '../constants';
 
 import {
-  server$startFeeding
-  , server$traitActivate
-  , server$traitStartCooldown
-  , server$traitAnimalRemoveTrait
-  , server$traitGrazeFood
-  , server$traitSetAnimalFlag
-  , server$traitSetValue
-  , server$traitNotify_End
+  server$traitNotify_End
   , server$game
-  , startCooldown
-  , gameDeployAnimalFromDeck
+  , traitParalyze
 } from '../../../../actions/actions';
 
 import {selectGame} from '../../../../selectors';
@@ -31,9 +23,6 @@ import {selectGame} from '../../../../selectors';
 import {endHunt, endHuntNoCd, getStaticDefenses, getActiveDefenses, getAffectiveDefenses} from './TraitCarnivorous';
 
 import * as tt from '../traitTypes';
-
-const traitForNeoplasm = (t) => !t.disabled && !t.getDataModel().hidden && !(t.getDataModel().cardTargetType & CTT_PARAMETER.LINK);
-
 
 export const TraitAedificator = {type: tt.TraitAedificator};
 
@@ -45,7 +34,7 @@ export const TraitNeoplasm = {
     const index = animalTraitArray.findIndex((t) => t.type === tt.TraitNeoplasm);
     if (!~index) return animal;
     const nextIndex = animalTraitArray.findIndex((t, i) => {
-      return i > index && traitForNeoplasm(t);
+      return i > index && !t.disabled && t.getDataModel().canBeDisabled();
     });
     if (!~nextIndex) return null; // KILL
     const traitNeoplasm = animalTraitArray[index];
@@ -62,8 +51,8 @@ export const TraitNeoplasm = {
         .map((t) => {
           if (t.type === tt.TraitNeoplasm) {
             foundNeoplasm = true;
-          } else if (!foundNeoplasm && traitForNeoplasm(t)) {
-            t = t.set('disabled', true).set('value', false);
+          } else if (!foundNeoplasm && !t.disabled && t.getDataModel().canBeDisabled()) {
+            t = t.setDisabled(true);
           }
           return t;
         }))
@@ -79,7 +68,14 @@ export const TraitRegeneration = {
   )
 };
 
-export const TraitCnidocytes = {type: tt.TraitCnidocytes};
+export const TraitCnidocytes = {
+  type: tt.TraitCnidocytes
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , action: (game, sourceAnimal, trait, targetAnimal) => (dispatch) => {
+    dispatch(server$game(game.id, traitParalyze(game.id, targetAnimal.id)));
+    return true;
+  }
+};
 
 export const TraitRecombination = {type: tt.TraitRecombination};
 

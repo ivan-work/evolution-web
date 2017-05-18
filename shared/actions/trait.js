@@ -165,12 +165,11 @@ export const server$traitSetValue = (game, sourceAnimal, trait, value) => (dispa
 
 export const server$traitKillAnimal = (gameId, sourceAnimal, targetAnimal) => (dispatch, getState) => {
   if (targetAnimal.hasTrait(tt.TraitRegeneration)) {
-    dispatch(server$game(gameId, traitSetAnimalFlag(gameId, sourceAnimal.id, TRAIT_ANIMAL_FLAG.REGENERATION, true)));
+    dispatch(server$game(gameId, traitSetAnimalFlag(gameId, targetAnimal.id, TRAIT_ANIMAL_FLAG.REGENERATION, true)));
   } else {
     dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.KILL, targetAnimal.id)));
   }
 };
-
 
 const traitAnimalRemoveTrait = (gameId, sourcePid, sourceAid, traitId) => ({
   type: 'traitAnimalRemoveTrait'
@@ -211,6 +210,11 @@ export const traitAddHuntingCallback = (gameId, callback) => ({
 export const traitClearHuntingCallbacks = (gameId) => ({
   type: 'traitClearHuntingCallbacks'
   , data: {gameId}
+});
+
+export const traitParalyze = (gameId, animalId) => ({
+  type: 'traitParalyze'
+  , data: {gameId, animalId}
 });
 
 /**
@@ -649,6 +653,7 @@ export const traitServerToClient = {
   , traitAnimalAttachTrait: ({gameId, sourcePid, sourceAid, trait}) =>
     traitAnimalAttachTrait(gameId, sourcePid, sourceAid, TraitModel.fromServer(trait))
   , traitGrazeFood: ({gameId, food, sourceAid}) => traitGrazeFood(gameId, food, sourceAid)
+  , traitParalyze: ({gameId, animalId}) => traitParalyze(gameId, animalId)
   , traitConvertFat: ({gameId, sourceAid, traitId}) => traitConvertFat(gameId, sourceAid, traitId)
   , traitSetAnimalFlag: ({gameId, sourceAid, flag, on}) =>
     traitSetAnimalFlag(gameId, sourceAid, flag, on)

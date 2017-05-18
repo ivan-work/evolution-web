@@ -15,7 +15,7 @@ describe('TraitFatTissue:', () => {
     it('Can deploy multiple', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
       const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   - hand: 2 CardGrazingAndFatTissue
     continent: $
@@ -46,7 +46,7 @@ players:
       const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
 deck: 12 CardGrazingAndFatTissue
-phase: 2
+phase: feeding
 food: 7
 players:
   - continent: $A fat carn, $B fat fat fat, $Waiter,  $C
@@ -103,7 +103,7 @@ players:
       const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
 deck: 12 camo
-phase: 2
+phase: feeding
 food: 12
 players:
   - continent: $A mass fat=true fat=true fat=true fat=true ++, $B fat=true +, $Waiter graz +

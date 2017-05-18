@@ -13,7 +13,7 @@ describe('Game Hacking (EAT PHASE):', function () {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 food: 2
-phase: 2
+phase: feeding
 players:
   - hand: 6 camo
     continent: $,$

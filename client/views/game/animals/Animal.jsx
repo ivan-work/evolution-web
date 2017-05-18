@@ -76,7 +76,7 @@ class Animal extends React.Component {
 
   renderAnimalBody(animal, game) {
     return (<div id={'AnimalBody' + animal.id} className='inner'>
-      {game && game.isFeeding() && this.renderFoodStatus(animal, game)}
+      {game && game.status.phase === PHASE.FEEDING && this.renderFoodStatus(animal, game)}
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) && <span className='material-icons Flag Poisoned'>smoking_rooms</span>}
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && <span className='material-icons Flag Hibernated'>snooze</span>}
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <span className='material-icons Flag Shell'>lock</span>}
@@ -136,7 +136,7 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
       case DND_ITEM_TYPE.TRAIT_SHELL: {
         const {model: animal} = props;
         const {trait} = monitor.getItem();
-        return trait.checkAttach(animal);
+        return !trait.getDataModel().checkTraitPlacementFails(animal);
       }
       case DND_ITEM_TYPE.ANIMAL_LINK: {
         const {model: targetAnimal} = props;

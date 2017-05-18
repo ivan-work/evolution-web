@@ -18,10 +18,12 @@ export const TEST_DECK_SIZE = 84;
 export const TEST_HAND_SIZE = 6;
 
 export const PHASE = {
-  PREPARE: 0
-  , DEPLOY: 1
-  , FEEDING: 2
-  , FINAL: 3
+  PREPARE: 'PREPARE'
+  , DEPLOY: 'DEPLOY'
+  , FEEDING: 'FEEDING'
+  , EXTINCTION: 'EXTINCTION'
+  , REGENERATION: 'REGENERATION'
+  , FINAL: 'FINAL'
 };
 
 export const StatusRecord = Record({
@@ -146,7 +148,7 @@ export class GameModel extends Record({
 
   generateFood() {
     let aedificatorFood = 0;
-    this.forEachAnimal((continent, animal) => {
+    this.forEachAnimal((animal, continent, player) => {
       if (animal.hasTrait(tt.TraitAedificator)) aedificatorFood += 2;
     });
     return FOOD_TABLE[this.getActualPlayers().size]() + aedificatorFood;
@@ -197,27 +199,6 @@ export class GameModel extends Record({
       });
   }
 
-  end() {
-    const scoreboard = this.players.reduce((result, player, playerId) => result.concat([{
-      playerId
-      , playing: player.playing
-      , scoreNormal: player.countScore()
-      , scoreDead: player.scoreDead
-    }]), []);
-
-    const scoreboardFinal = scoreboard.sort((p1, p2) =>
-      !p1.playing ? 1
-        : !p2.playing ? -1
-        : p2.scoreNormal != p1.scoreNormal ? p2.scoreNormal - p1.scoreNormal
-          : p1.scoreDead != p2.scoreDead ? p2.scoreDead - p1.scoreDead
-            : 1 - Math.round(Math.random()) * 2);
-
-    return this
-      .set('scoreboardFinal', scoreboardFinal)
-      .set('winnerId', scoreboardFinal[0].playerId)
-      .setIn(['status', 'phase'], PHASE.FINAL);
-  }
-
   getActualPlayers() {
     return this.players.filter(p => p.playing);
   }
@@ -246,10 +227,21 @@ export class GameModel extends Record({
     return this.players.some(player => player.continent.some(cb));
   }
 
+  /**
+   * This callback is displayed as a global member.
+   * @callback GamePerAnimalCallback
+   * @param {AnimalModel} animal
+   * @param {Continent} continent
+   * @param {PlayerModel} player
+   */
+
+  /**
+   * @param {GamePerAnimalCallback} cb
+   */
   forEachAnimal(cb) {
     return this
-      .get('players').forEach(player => player
-        .get('continent').forEach(animal => cb(null, animal)));
+      .get('players').some(player => player
+        .get('continent').some(animal => cb(animal, null, player)));
   }
 
   locateAnimal(animalId) {
@@ -334,14 +326,6 @@ export class GameModelClient extends Record({
   isPlayerTurn(userId) {
     return !!((userId || this.userId) && this.getPlayer(userId) && this.getPlayer(userId).index === this.status.currentPlayer
     && (this.status.phase === PHASE.DEPLOY || this.status.phase === PHASE.FEEDING));
-  }
-
-  isDeploy() {
-    return this.status.phase === PHASE.DEPLOY;
-  }
-
-  isFeeding() {
-    return this.status.phase === PHASE.FEEDING;
   }
 }
 

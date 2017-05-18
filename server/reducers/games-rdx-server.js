@@ -124,14 +124,60 @@ export const gameEndTurn = (game, {userId}) => {
       endedAlready = player.ended;
       endedNow = !player.acted;
       if (endedAlready) logger.silly(`Player#${player.id} already ended.`);
-      if (endedNow) logger.debug(`Player#${player.id} ended by skipping.`);
+      if (endedNow) logger.silly(`Player#${player.id} ended by skipping.`);
       return player
         .set('ended', endedNow)
     })
     .update(addToGameLog(['gameEndTurn', userId, endedNow, endedAlready]));
 };
 
-export const gameStartEat = (game, {food}) => {
+export const gameNextPlayer = (game, {round, nextPlayerId, nextPlayerIndex, roundChanged, turnTime}) => game
+  .setIn(['players', nextPlayerId, 'acted'], false)
+  .setIn(['status', 'currentPlayer'], nextPlayerIndex)
+  .updateIn(['status', 'round'], round => roundChanged ? round + 1 : round)
+  .update('cooldowns', cooldowns => cooldowns.eventNextPlayer(roundChanged))
+  .update(addToGameLog(['gameNextPlayer', nextPlayerId]));
+
+export const gameAddTurnTimeout = (game, {turnStartTime, turnDuration}) => game
+  .setIn(['status', 'turnStartTime'], turnStartTime)
+  .setIn(['status', 'turnDuration'], turnDuration);
+
+export const gameSetUserTimedOut = (game, {playerId, timedOut}) => game.setIn(['players', playerId, 'timedOut'], timedOut);
+
+export const gameSetUserWantsPause = (game, {userId, wantsPause}) => game.setIn(['players', userId, 'wantsPause'], wantsPause);
+
+export const gameSetPaused = (game, {paused}) => game.setIn(['status', 'paused'], paused);
+
+/**
+ * GAME PHASES
+ * */
+
+export const gameStartDeploy = (game) => {
+  const roundPlayer = game.status.roundPlayer;
+  const nextRoundPlayer = (roundPlayer + 1) % game.players.size;
+  return game
+    .update('players', players => players.map(player => player
+      .set('ended', !player.playing)
+      .update('continent', continent => continent.map(animal => animal
+        .set('food', 0)
+        .set('flags', Map())
+        .update('traits', traits => traits
+          .map(trait => trait.type === 'TraitIntellect' ? trait.set('value', false) : trait)
+          .map(trait => trait.setDisabled(false))
+        )
+        .update(animal => TraitNeoplasm.actionDisableTraitsInAnimal(animal))
+        .recalculateFood()
+      ))
+    ))
+    .setIn(['food'], 0)
+    .setIn(['status', 'phase'], PHASE.DEPLOY)
+    .updateIn(['status', 'turn'], turn => ++turn)
+    .setIn(['status', 'round'], 0)
+    .setIn(['status', 'roundPlayer'], nextRoundPlayer)
+    .update('cooldowns', cooldowns => cooldowns.eventNextTurn())
+};
+
+export const gameStartFeeding = (game, {food}) => {
   ensureParameter(food, 'number');
   return game
     .update('players', players => players.map(player => player
@@ -141,7 +187,6 @@ export const gameStartEat = (game, {food}) => {
     .setIn(['status', 'phase'], PHASE.FEEDING)
     .setIn(['status', 'round'], 0)
     .update(processNeoplasm)
-    .update(addToGameLog(['gameStartEat', food]))
 };
 
 const processNeoplasm = (game) => {
@@ -167,55 +212,43 @@ const processNeoplasm = (game) => {
       , game));
 };
 
-export const gameStartDeploy = (game) => {
-  const roundPlayer = game.status.roundPlayer;
-  const nextRoundPlayer = (roundPlayer + 1) % game.players.size;
-  return game
-    .update('players', players => players.map(player => player
-      .set('ended', !player.playing)
-      .update('continent', continent => continent.map(animal => animal
-        .set('food', 0)
-        .set('flags', Map())
-        .update('traits', traits => traits.map(trait =>
-          trait.type === 'TraitIntellect' ? trait.set('value', false) : trait
-        ))
-      ))
-    ))
-    .setIn(['food'], 0)
-    .setIn(['status', 'phase'], PHASE.DEPLOY)
-    .updateIn(['status', 'turn'], turn => ++turn)
-    .setIn(['status', 'round'], 0)
-    .setIn(['status', 'roundPlayer'], nextRoundPlayer)
-    .update('cooldowns', cooldowns => cooldowns.eventNextTurn())
-    .update(addToGameLog(['PhaseDeploy']));
-};
-
 export const gameStartExtinct = (game) => game
   .update('players', players => players.map(player => player
     .update('continent', continent => continent.map(animal => animal.digestFood()))
-  ))
-  .update(addToGameLog(['PhaseExtinct']));
+  ));
 
-export const gameNextPlayer = (game, {round, nextPlayerId, nextPlayerIndex, roundChanged, turnTime}) => game
-  .setIn(['players', nextPlayerId, 'acted'], false)
-  .setIn(['status', 'currentPlayer'], nextPlayerIndex)
-  .updateIn(['status', 'round'], round => roundChanged ? round + 1 : round)
-  .update('cooldowns', cooldowns => cooldowns.eventNextPlayer(roundChanged))
-  .update(addToGameLog(['gameNextPlayer', nextPlayerId]));
+export const gameStartRegeneration = (game) => game
+  .setIn(['status', 'phase'], PHASE.REGENERATION)
+  .setIn(['status', 'round'], 0)
 
-export const gameAddTurnTimeout = (game, {turnStartTime, turnDuration}) => game
-  .setIn(['status', 'turnStartTime'], turnStartTime)
-  .setIn(['status', 'turnDuration'], turnDuration);
-
-export const gameSetUserTimedOut = (game, {playerId, timedOut}) => game.setIn(['players', playerId, 'timedOut'], timedOut);
-
-export const gameSetUserWantsPause = (game, {userId, wantsPause}) => game.setIn(['players', userId, 'wantsPause'], wantsPause);
-
-export const gameSetPaused = (game, {paused}) => game.setIn(['status', 'paused'], paused);
+export const gameStartPhase = (game, {phase, timestamp, data}) => (game
+  .setIn(['status', 'turnStartTime'], timestamp)
+  .update(addToGameLog(['gameStartPhase', phase, data]))
+  .update(game =>
+    phase === PHASE.PREPARE ? game
+      : phase === PHASE.DEPLOY ? gameStartDeploy(game)
+      : phase === PHASE.FEEDING ? gameStartFeeding(game, data)
+        : phase === PHASE.EXTINCTION ? gameStartExtinct(game, data)
+          : phase === PHASE.REGENERATION ? gameStartRegeneration(game)
+            //   : phase === PHASE.FINAL ? game
+            : game
+  ));
 
 /**
  * Traits
  * */
+
+export const gameDeployRegeneratedAnimal = (game, {userId, cardId, animalId, source}) => game
+  .update(game => {
+    if (source === 'DECK') {
+      return game.update('deck', deck => deck.skip(1))
+    } else {
+      const {cardIndex} = game.locateCard(cardId, userId);
+      return game.removeIn(['players', userId, 'hand', cardIndex]);
+    }
+  })
+  .update(game => traitSetAnimalFlag(game, {sourceAid: animalId, flag: TRAIT_ANIMAL_FLAG.REGENERATION, on: false}))
+;
 
 export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) => {
   ensureParameter(animalId, 'string');
@@ -252,7 +285,26 @@ export const clearCooldown = (game, {link, place, placeId}) =>
   game.update('cooldowns', cooldowns => cooldowns.clearCooldown(link, place, placeId));
 
 // Transferring new game for game.end
-export const gameEnd = (state, {game}) => game.end();
+export const gameEnd = (oldGame, {game}) => {
+  const scoreboard = game.players.reduce((result, player, playerId) => result.concat([{
+    playerId
+    , playing: player.playing
+    , scoreNormal: player.countScore()
+    , scoreDead: player.scoreDead
+  }]), []);
+
+  const scoreboardFinal = scoreboard.sort((p1, p2) =>
+    !p1.playing ? 1
+      : !p2.playing ? -1
+      : p2.scoreNormal !== p1.scoreNormal ? p2.scoreNormal - p1.scoreNormal
+        : p1.scoreDead !== p2.scoreDead ? p2.scoreDead - p1.scoreDead
+          : 1 - Math.round(Math.random()) * 2);
+
+  return game
+    .set('scoreboardFinal', scoreboardFinal)
+    .set('winnerId', scoreboardFinal[0].playerId)
+    .setIn(['status', 'phase'], PHASE.FINAL);
+};
 
 export const gamePlayerLeft = (game, {userId}) => game
   .setIn(['players', userId, 'hand'], List())
@@ -267,6 +319,15 @@ export const traitAnswerSuccess = (game, {questionId}) => game
 
 export const traitGrazeFood = (game, {food}) => game
   .set('food', Math.max(game.food - 1, 0));
+
+export const traitParalyze = (game, {animalId}) => {
+  const {animal, animalIndex} = game.locateAnimal(animalId);
+  return game.updateIn(['players', animal.ownerId, 'continent', animalIndex], animal => animal
+    .update('traits', traits => traits
+      .map(t => t.getDataModel().canBeDisabled() ? t.setDisabled(true) : t))
+    .recalculateFood()
+  );
+};
 
 export const traitConvertFat = (game, {sourceAid, traitId}) => {
   const {animal, animalIndex} = game.locateAnimal(sourceAid);
@@ -334,12 +395,11 @@ export const reducer = createReducer(Map(), {
   , gameDeployAnimalFromHand: (state, data) => state.update(data.gameId, game => gameDeployAnimalFromHand(game, data))
   , gameDeployAnimalFromDeck: (state, data) => state.update(data.gameId, game => gameDeployAnimalFromDeck(game, data))
   , gameDeployTrait: (state, data) => state.update(data.gameId, game => gameDeployTrait(game, data))
+  , gameDeployRegeneratedAnimal: (state, data) => state.update(data.gameId, game => gameDeployRegeneratedAnimal(game, data))
   , gameEndTurn: (state, data) => state.update(data.gameId, game => gameEndTurn(game, data))
   , gameEnd: (state, data) => state.update(data.gameId, game => gameEnd(game, data))
   , gamePlayerLeft: (state, data) => state.update(data.gameId, game => gamePlayerLeft(game, data))
-  , gameStartEat: (state, data) => state.update(data.gameId, game => gameStartEat(game, data))
-  , gameStartDeploy: (state, data) => state.update(data.gameId, game => gameStartDeploy(game, data))
-  , gameStartExtinct: (state, data) => state.update(data.gameId, game => gameStartExtinct(game, data))
+  , gameStartPhase: (state, data) => state.update(data.gameId, game => gameStartPhase(game, data))
   , gameSetUserTimedOut: (state, data) => state.update(data.gameId, game => gameSetUserTimedOut(game, data))
   , gameSetUserWantsPause: (state, data) => state.update(data.gameId, game => gameSetUserWantsPause(game, data))
   , gameSetPaused: (state, data) => state.update(data.gameId, game => gameSetPaused(game, data))
@@ -354,6 +414,7 @@ export const reducer = createReducer(Map(), {
   , traitAnimalRemoveTrait: (state, data) => state.update(data.gameId, game => traitAnimalRemoveTrait(game, data))
   , traitConvertFat: (state, data) => state.update(data.gameId, game => traitConvertFat(game, data))
   , traitGrazeFood: (state, data) => state.update(data.gameId, game => traitGrazeFood(game, data))
+  , traitParalyze: (state, data) => state.update(data.gameId, game => traitParalyze(game, data))
   , traitSetAnimalFlag: (state, data) => state.update(data.gameId, game => traitSetAnimalFlag(game, data))
   , traitSetValue: (state, data) => state.update(data.gameId, game => traitSetValue(game, data))
   , traitNotify_Start: (state, data) => state.update(data.gameId, game => traitNotify_Start(game, data))

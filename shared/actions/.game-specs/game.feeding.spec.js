@@ -12,7 +12,7 @@ describe('Game (EAT PHASE):', function () {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 food: 3
-phase: 2
+phase: feeding
 players:
   - continent: $A,$B
   - continent: $A1,$B1
@@ -60,7 +60,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
 food: 10
-phase: 2
+phase: feeding
 players:
   - continent: $A TraitCarnivorous wait
 `);

@@ -13,7 +13,7 @@ describe('TraitViviparous:', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 4
 players:
   - continent: $A vivi fat graz
@@ -34,7 +34,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 1 camo
-phase: 2
+phase: feeding
 food: 2
 players:
   - continent: $A vivi graz hiber +
@@ -52,7 +52,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 2
 players:
   - continent: $A vivi graz fat=true +
@@ -68,7 +68,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 0
 players:
   - continent: $A vivi graz fat=true +
@@ -85,7 +85,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 1 angler, 1 camo
-phase: 2
+phase: feeding
 food: 1
 players:
   - continent: $A vivi + wait

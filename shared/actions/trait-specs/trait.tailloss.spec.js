@@ -14,7 +14,7 @@ describe('TraitTailLoss:', () => {
   it('Simple tail loss', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A carn graz, $B carn
@@ -57,7 +57,7 @@ players:
   it('Tail loss with Symbiosis and Communication', async () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   - continent: $A carn, $B carn, $C carn
   - hand: CardSymb, CardCommu

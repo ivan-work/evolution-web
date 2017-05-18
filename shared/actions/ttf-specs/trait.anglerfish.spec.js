@@ -16,7 +16,7 @@ describe('TraitAnglerfish:', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 1
+phase: deploy
 players:
   - hand: angler
 `);
@@ -37,7 +37,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 1
+phase: deploy
 players:
   - hand: angler
     continent: $A
@@ -53,7 +53,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 4
 players:
   - continent: $A carn, $B angler
@@ -69,7 +69,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 0
 players:
   - continent: $Q carn tail camo graz, $W carn camo mass, $E carn tail mimi wait, $E2 tail
@@ -106,7 +106,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $Q carn
@@ -123,7 +123,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $Q carn intel camo tail angler ink wait, $W angler
@@ -145,7 +145,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $Q carn intel tail angler ink wait, $W angler
@@ -162,7 +162,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $Q fli carn camo, $W angler

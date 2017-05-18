@@ -68,20 +68,18 @@ export class TraitModel extends Record({
     ];
   }
 
+  setDisabled(value) {
+    return (value
+      ? this.set('disabled', value).set('value', false)
+      : this.set('disabled', value));
+  }
+
   isEqual(id) {
     return this.id === id || this.type === id;
   }
 
-  //TODO move to AnimalModel
-  checkAttach(animal) {
-    return (this.getDataModel().multiple || !animal.hasTrait(this.type));
-  }
-
   // TODO remove
   attachTo(animal) {
-    if (!this.checkAttach(animal)) {
-      throw new ActionCheckError(`TraitModelValidation`, `Animal#%s already has Trait(%s)`, animal.id, this.type);
-    }
     return this
       .set('ownerId', animal.ownerId)
       .set('hostAnimalId', animal.id);

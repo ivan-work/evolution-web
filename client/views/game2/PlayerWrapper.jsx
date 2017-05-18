@@ -14,6 +14,7 @@ import {
   , traitTakeFoodRequest
   , traitActivateRequest
   , traitTakeShellRequest
+  , gameDeployRegeneratedAnimalRequest
 } from '../../../shared/actions/actions';
 
 import {CardCollection} from '../game/CardCollection.jsx';
@@ -50,6 +51,7 @@ export class PlayerWrapper extends Component {
       , $traitTakeFood
       , $traitActivate
       , $traitTakeShell
+      , $deployRegeneratedAnimal
     } = props.gameActions;
     this.style = {};
     this.state = INITIAL_STATE;
@@ -83,6 +85,8 @@ export class PlayerWrapper extends Component {
       $deployTrait(card.id, animal.id, alternateTrait, linkedAnimal.id);
 
     this.$traitTakeShell = (animal, trait) => $traitTakeShell(animal.id, trait.id);
+
+    this.$deployRegeneratedAnimal = (card, animal) => $deployRegeneratedAnimal(card.id, animal.id)
   }
 
   render() {
@@ -103,8 +107,8 @@ export class PlayerWrapper extends Component {
   renderCardCollection(game, player, isUser) {
     const {showCards} = this.props;
     const dragEnabled = isUser
-      && game.status.phase === PHASE.DEPLOY
-      && game.isPlayerTurn();
+      && (game.status.phase === PHASE.DEPLOY && game.isPlayerTurn())
+      || (game.status.phase === PHASE.REGENERATION);
 
     return (<CardCollection
       key='CardCollection'
@@ -137,12 +141,15 @@ export class PlayerWrapper extends Component {
 
   renderAnimal(animal, isUserContinent) {
     const {game} = this.props;
-    const isDeploy = game.isDeploy();
-    const isFeeding = !isDeploy; // Just easier to read
+    const isDeploy = game.status.phase === PHASE.DEPLOY;
+    const isFeeding = game.status.phase === PHASE.FEEDING;
+    const isRegeneration = game.status.phase === PHASE.REGENERATION;
     const onTraitDropped = isFeeding ? this.$traitActivate : this.$noop;
     const onTraitShellDropped = isFeeding ? this.$traitTakeShell : this.$noop;
     const onFoodDropped = isFeeding ? this.$traitTakeFood : this.$noop;
-    const onCardDropped = isDeploy ? this.$deployTrait : this.$noop;
+    const onCardDropped = isDeploy ? this.$deployTrait :
+      isRegeneration ? this.$deployRegeneratedAnimal
+        : this.$noop;
     const onAnimalLink = isDeploy ? this.$deployLinkedTrait : this.$noop;
     return (
       <DropAnimal
@@ -170,6 +177,8 @@ export const PlayerWrapperView = compose(
         , $traitTakeFood: (...args) => dispatch(traitTakeFoodRequest(...args))
         , $traitActivate: (...args) => dispatch(traitActivateRequest(...args))
         , $traitTakeShell: (...args) => dispatch(traitTakeShellRequest(...args))
+        // PHASE.REGENERATION
+        , $deployRegeneratedAnimal: (...args) => dispatch(gameDeployRegeneratedAnimalRequest(...args))
       }
     }))
   , AnimationServiceRef

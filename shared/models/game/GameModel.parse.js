@@ -2,7 +2,7 @@ import uuid from 'uuid';
 import invariant from 'invariant';
 import {Map, List} from 'immutable';
 
-import {GameModel, StatusRecord} from './GameModel';
+import {GameModel, StatusRecord, PHASE} from './GameModel';
 import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
 import {AnimalModel} from './evolution/AnimalModel';
@@ -13,6 +13,11 @@ import yaml from 'yaml-js';
 
 const searchCardClasses = (name) => Object.keys(cardsData)
   .find(cardType => ~cardType.toLowerCase().indexOf(name.toLowerCase()));
+
+export const parsePhase = (string) => PHASE[Object.keys(PHASE).find((key) => {
+  string = !!string ? string.toUpperCase() : 'DEPLOY';
+  return key === string
+})];
 
 export const parseCardList = string => {
   invariant(typeof string === 'string', `GameModel.parseCardList: bad string: (${string})`)
@@ -94,8 +99,6 @@ export const parseFromRoom = (room, string = '') => {
 
   const deck = parseCardList(seed.deck || '').map(card => card.toClient());
 
-  if (seed.phase === void 0) seed.phase = 1;
-
   const players = room.users.reduce((result, id, index) => {
     result[id] = new PlayerModel({
       id
@@ -112,7 +115,7 @@ export const parseFromRoom = (room, string = '') => {
     , roomId: room.id
     , food: seed.food || 0
     , status: new StatusRecord({
-      phase: seed.phase
+      phase: parsePhase(seed.phase)
     })
     , deck
     , players

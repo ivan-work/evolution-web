@@ -5,6 +5,11 @@ import {TraitModel} from './TraitModel';
 import {TraitFatTissue, TraitSymbiosis, TraitShell, TraitHibernation, TraitAnglerfish, TraitNeoplasm} from './traitTypes/index';
 import {TRAIT_ANIMAL_FLAG, CTT_PARAMETER} from './constants';
 
+/**
+ * @class AnimalModel
+ * @property {string} id - an ID.
+ * @property {string} ownerId - a PlayerModel ID.
+ */
 export class AnimalModel extends Record({
   id: null
   , ownerId: null
@@ -55,8 +60,8 @@ export class AnimalModel extends Record({
     return this.traits.filter(trait => !trait.disabled && !trait.getDataModel().hidden)
   }
 
-  hasTrait(typeOrId) {
-    return this.traits.find(trait => !trait.disabled && trait.type === typeOrId || trait.id === typeOrId)
+  hasTrait(typeOrId, ignoreDisable) {
+    return this.traits.find(trait => (ignoreDisable || !trait.disabled) && (trait.type === typeOrId || trait.id === typeOrId))
   }
 
   traitAttach(trait, forced) {
@@ -93,6 +98,11 @@ export class AnimalModel extends Record({
       .set('food', Math.min(this.food, foodSize))
   }
 
+  /**
+   * @param {TRAIT_ANIMAL_FLAG} flag
+   * @param {string} [traitType]
+   * @return {boolean}
+   */
   hasFlag(flag, traitType) {
     return !!this.flags.get(flag) && (!traitType || this.hasTrait(traitType));
   }
@@ -134,6 +144,7 @@ export class AnimalModel extends Record({
 
   canSurvive() {
     return this.isSaturated()
+      || this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)
       || this.getFoodAndFat() >= this.foodSize
   }
 
@@ -189,7 +200,7 @@ export class AnimalModel extends Record({
   countScore() {
     let baseScore = 2;
     if (this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) baseScore = 0;
-    return (0 + this.traits.reduce((result, trait) => (
+    return (baseScore + this.traits.reduce((result, trait) => (
     result + (trait.getDataModel().cardTargetType & CTT_PARAMETER.LINK
         ? .5 + trait.getDataModel().food * 2 // card is splitted to two traits, so .5. And food is doubled by traits, so 2x score
         : 1 + trait.getDataModel().food

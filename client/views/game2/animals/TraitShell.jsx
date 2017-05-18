@@ -6,6 +6,7 @@ import cn from 'classnames';
 import {DragSource} from 'react-dnd';
 import {DND_ITEM_TYPE} from './../dnd/DND_ITEM_TYPE';
 
+import {PHASE} from '../../../../shared/models/game/GameModel';
 import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 import {TRAIT_COOLDOWN_LINK} from '../../../../shared/models/game/evolution/constants';
 
@@ -16,7 +17,7 @@ const DragTraitShell = DragSource(DND_ITEM_TYPE.TRAIT_SHELL
     beginDrag: ({trait}) => ({trait})
     , canDrag: ({trait, game}, monitor) => (
       game.isPlayerTurn()
-      && game.isFeeding()
+      && game.status.phase === PHASE.FEEDING
       && !game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, game.getPlayer() && game.getPlayer().id)
     )
   }

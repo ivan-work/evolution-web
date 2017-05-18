@@ -16,7 +16,7 @@ describe('Complex traits:', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
 
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A carn graz, $B carn, $C carn, $D carn, $E carn, $F carn
@@ -105,7 +105,7 @@ settings:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
 
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 1
 players:
   - continent: $A carn graz, $B mimi, $C tail fat
@@ -120,7 +120,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
 
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 1
 players:
   - continent: $A carn, $B tail
@@ -135,7 +135,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
 
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 5
 players:
   - continent: $Q carn graz piracy hiber +
@@ -170,7 +170,7 @@ players:
 
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 4
 players:
   - continent: $Q comm$A int carn wait, $A tail mimi ink shell, $B tail mimi ink shell, $C tail mimi ink shell

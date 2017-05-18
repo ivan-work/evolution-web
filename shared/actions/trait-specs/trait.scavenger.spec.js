@@ -13,7 +13,7 @@ describe('TraitScavenger:', () => {
   it('Carnivore <> Scavenger', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {User1, clientStore1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   - hand: 1 carn, 1 scavenger
     continent: $A carn, $B scavenger
@@ -38,7 +38,7 @@ players:
   it('A > B1 D+; B > E A1+; C > B2 A2+', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {User1, clientStore1}, {User2, clientStore2}] = mockGame(3);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 players:
   - continent: $A carn waiter, $B carn, $C carn, $D scavenger, $E
   - continent: $A1 scavenger, $B1
@@ -85,7 +85,7 @@ players:
   it('killing scavenger', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {User1, clientStore1}, {User2, clientStore2}] = mockGame(3);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 1
 players:
   - continent: $A carn, $B scavenger

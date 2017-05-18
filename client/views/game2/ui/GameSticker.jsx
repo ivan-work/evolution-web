@@ -41,16 +41,17 @@ export class GameSticker extends React.PureComponent {
           <span className='value'>{status.round}</span>
         </li>
         <li className='line'>
-          <span className='key'>{T.translate('Game.UI.Status.Phase')}:&nbsp;</span>
+          <span className='key'></span>
           <span className='value'>{T.translate('Game.Phase.' + status.phase)}</span>
         </li>
         <li className='line'>
           <span className='key'>{T.translate('Game.UI.Status.Time')}:&nbsp;</span>
           <span className='value'>
           {(game.status.paused ? <span>{T.translate('Game.UI.Status.Pause')}</span>
-            : !!question ? <Timer start={question.time} duration={settings.timeTraitResponse}/>
-              : status.turnStartTime != null ? <Timer start={status.turnStartTime} duration={status.turnDuration}/>
-                : '-')}
+          : !!question ? <Timer start={question.time} duration={settings.timeTraitResponse}/>
+          : status.phase === PHASE.REGENERATION ? <Timer start={status.turnStartTime} duration={settings.timeTraitResponse}/>
+          : status.turnStartTime != null ? <Timer start={status.turnStartTime} duration={status.turnDuration}/>
+          : '-')}
           </span>
         </li>
       </ul>

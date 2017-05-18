@@ -48,7 +48,7 @@ describe('Logging test:', () => {
   it('Typical game', async () => {
     const [{ParseGame, serverStore}, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockGame(3);
     const gameId = ParseGame(`
-phase: 0
+phase: prepare
 deck: 32 fat
 players:
   - continent: $Q Carnivorous, $W Carnivorous
@@ -150,7 +150,7 @@ players:
       expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User0.id]);
       expect(selectGame().log.get(i++).message).eql(['gameDeployAnimal', User0.id]);
       expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User0.id, true, false]);
-      expect(selectGame().log.get(i++).message).eql(['gameStartEat', 6]);
+      expect(selectGame().log.get(i++).message).eql(['gameStartPhase', PHASE.FEEDING, {food: 6}]);
       expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User0.id]);
 
       expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'GAME', $Q, null]);
@@ -199,7 +199,7 @@ players:
       expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User1.id, true, false]);
       expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User2.id]);
       expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User2.id, true, false]);
-      expect(selectGame().log.get(i++).message).eql(['PhaseExtinct']);
+      expect(selectGame().log.get(i++).message).eql(['gameStartPhase', PHASE.EXTINCTION, void 0]);
 
       expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitFatTissue']]);
       expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal']]);
@@ -210,7 +210,8 @@ players:
       expect(selectGame().log.get(i++).message).eql(['animalDeath', 'POISON', $X]);
       expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitCarnivorous']]);
 
-      expect(selectGame().log.get(i++).message).eql(['PhaseDeploy']);
+      // expect(selectGame().log.get(i++).message).eql(['gameGiveCards', User0, 6]);
+      // expect(selectGame().log.get(i++).message).eql(['gameStartPhase', PHASE.DEPLOY, void 0]);
     };
     checkLog(selectGame);
     checkLog(selectGame0);

@@ -13,7 +13,7 @@ describe('TraitGrazing:', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 12 camo
-phase: 2
+phase: feeding
 food: 7
 players:
   - continent: $A grazing carn, $B + grazing, $C + grazing
@@ -42,7 +42,7 @@ players:
     clientStore0.dispatch(gameEndTurnRequest());
 
     // Turn1, deploy
-    expect(selectGame().status.turn, 'PHASE.DEPLOY').equal(1);
+    expect(selectGame().status.turn, 'PHASE.TURN').equal(1);
     expect(selectGame().status.phase, 'PHASE.DEPLOY').equal(PHASE.DEPLOY);
     clientStore0.dispatch(gameEndTurnRequest());
 

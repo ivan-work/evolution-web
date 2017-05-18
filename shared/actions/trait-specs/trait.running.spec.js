@@ -14,7 +14,7 @@ describe('TraitRunning:', () => {
   it('carn > running', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0}, {User1, clientStore1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 0
 players:
   - continent: carn waiter, carn, carn, carn, carn, carn

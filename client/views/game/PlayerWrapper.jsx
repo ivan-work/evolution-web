@@ -123,8 +123,9 @@ export class PlayerWrapper extends Component {
 
   renderAnimal(animal, isUserContinent) {
     const {game} = this.props;
-    const isDeploy = game.isDeploy();
-    const isFeeding = !isDeploy; // Just easier to read
+    const isDeploy = game.status.phase === PHASE.DEPLOY;
+    const isFeeding = game.status.phase === PHASE.FEEDING;
+    const isRegeneration = game.status.phase === PHASE.REGENERATION;
     const onTraitDropped = isFeeding ? this.$traitActivate : this.$noop;
     const onTraitShellDropped = isFeeding ? this.$traitTakeShell : this.$noop;
     const onFoodDropped = isFeeding ? this.$traitTakeFood : this.$noop;

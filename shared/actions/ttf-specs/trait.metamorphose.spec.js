@@ -13,7 +13,7 @@ describe('TraitMetamorphose:', () => {
   it('Works', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 2
 players:
   - continent: $A meta comm$B, $B, $C meta carn, $D meta symb$E, $E, $Waiter graz
@@ -54,7 +54,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 2
 players:
   - continent: $Sh meta shell, $Sh1 carn, $Hi meta hiber, $Sy meta symb$Sy1, $Sy1, $SyHiPassive meta hiber symb$SyHi1, $ShHiActive meta shell hiber symb$SyHi2, $SyHi1, $SyHi2, $Waiter graz

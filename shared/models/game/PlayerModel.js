@@ -3,6 +3,10 @@ import {UserModel} from '../UserModel';
 import {CardModel} from './CardModel';
 import {AnimalModel} from './evolution/AnimalModel';
 
+/**
+ * @class PlayerModel
+ * @property {string} id - an ID.
+ */
 export class PlayerModel extends Record({
   id: null
   , hand: List()

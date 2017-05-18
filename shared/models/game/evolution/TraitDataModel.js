@@ -1,10 +1,11 @@
 import {Record} from 'immutable';
 import * as traitsData from './traitsData/index'
 import * as tt from './traitTypes'
-import {CARD_TARGET_TYPE} from './constants';
+import {CARD_TARGET_TYPE, CTT_PARAMETER} from './constants';
 
 export const TRAIT_DATA_PLACEMENT_ERRORS = {
   HIDDEN: 'HIDDEN'
+  , MULTIPLE: 'MULTIPLE'
 };
 
 export class TraitDataModel extends Record({
@@ -33,11 +34,16 @@ export class TraitDataModel extends Record({
   }
 
   checkTraitPlacementFails(animal) {
+    if (!(this.cardTargetType & CTT_PARAMETER.LINK) && !this.multiple && animal.hasTrait(this.type, true)) return TRAIT_DATA_PLACEMENT_ERRORS.MULTIPLE;
     if (this.hidden) return TRAIT_DATA_PLACEMENT_ERRORS.HIDDEN;
     if (this.checkTraitPlacement && !this.checkTraitPlacement(animal)) return this.type;
-    if (animal.some(trait => trait.type === tt.TraitRegeneration) && (
+    if (animal.hasTrait(tt.TraitRegeneration) && (
         this.food > 0 || animal.traits.filter(t => !t.getDataModel().hidden).size >= 2
       )) return tt.TraitRegeneration;
     return false;
+  }
+
+  canBeDisabled() {
+    return !this.hidden && !(this.cardTargetType & CTT_PARAMETER.LINK);
   }
 }

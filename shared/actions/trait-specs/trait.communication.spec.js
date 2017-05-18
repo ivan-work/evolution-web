@@ -13,7 +13,7 @@ describe('TraitCommunication:', () => {
     it('friend > friend', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
       const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   - hand: CardCommunication
     continent: $A, $B
@@ -36,7 +36,7 @@ players:
     it('friend0 > friend1, friend1 > friend2, friend0 > friend2, fail:friend1 > friend2, fail: friend2 > friend0 ', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   -
   - hand: 8 CardCommunication
@@ -81,7 +81,7 @@ players:
     it('fail friend0 > enemy0, fail friend0 > friend0, fail enemy0 > enemy0', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`
-phase: 1
+phase: deploy
 players:
   - continent: $A, $B, $C
   - hand: 8 CardCommunication
@@ -117,7 +117,7 @@ players:
     it('Generates food from taking', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 2
 players:
   - hand: 3 CardCommunication
@@ -138,7 +138,7 @@ players:
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(2);
       const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 1
 players:
   - continent: $A piracy comm$A1 , $A1, $B hiber comm$B1, $B1, $C carn comm$C1, $C1, $TurnWaiter
@@ -162,7 +162,7 @@ players:
       const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
       const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 0
 players:
   - continent: $A carn mass piracy comm$B fat fat, $B fat fat
@@ -196,7 +196,7 @@ players:
     it(`Works with symbiosis`, () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $A comm$B symb$B, $B, $Waiter graz
@@ -213,7 +213,7 @@ players:
     it('Dies from carnivore', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 1
 players:
   - continent: $A carn, $WaitTurn
@@ -231,7 +231,7 @@ players:
     it('Dies from starving', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
       const gameId = ParseGame(`
-phase: 2
+phase: feeding
 players:
   - continent: $A +, $B carn comm$A comm$C, $C +
 `);

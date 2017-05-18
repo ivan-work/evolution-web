@@ -14,7 +14,7 @@ describe('TraitPoisonous:', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {User1, clientStore1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 12 camo
-phase: 2
+phase: feeding
 food: 0
 players:
   - continent: $A carn, $B carn, $C carn, $Waiter fat=true
@@ -46,7 +46,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 12 camo
-phase: 2
+phase: feeding
 food: 0
 players:
   - continent: $A pois, $B carn mass, $C carn mass, $D pois

@@ -14,7 +14,7 @@ describe('TraitCarnivorous:', function () {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 food: 10
-phase: 2
+phase: feeding
 players:
   - continent: $A Carnivorous graz, $B Carnivorous
 `);
@@ -32,7 +32,7 @@ players:
     const gameId = ParseGame(`
 deck: 10 camo
 food: 10
-phase: 2
+phase: feeding
 players:
   - continent: $A Carnivorous ++ fat fat fat graz, $B
 `);
@@ -50,7 +50,7 @@ players:
     const gameId = ParseGame(`
 deck: 10 camo
 food: 1
-phase: 2
+phase: feeding
 players:
   - continent: $Q carn fat graz, $W carn fat=true fat=true, $E carn fat=true fat=true
   - continent: $A +, $S +, $D +, $F +

@@ -22,7 +22,7 @@ describe('Game (LEAVERS):', function () {
       , {clientStore1, User1, ClientGame1}
       , {clientStore2, User2, ClientGame2}] = mockGame(3);
     const gameId = ParseGame(`
-phase: 0
+phase: prepare
 deck: 50 camo
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
@@ -57,7 +57,7 @@ deck: 50 camo
       , {clientStore1, User1, ClientGame1}
       , {clientStore2, User2, ClientGame2}] = mockGame(3);
     const gameId = ParseGame(`
-phase: 0
+phase: prepare
 deck: 50 camo
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
@@ -85,7 +85,7 @@ deck: 50 camo
       , {clientStore1, User1, ClientGame1}
       , {clientStore2, User2, ClientGame2}] = mockGame(3);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 5
 deck: 50 camo
 players:

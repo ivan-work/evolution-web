@@ -57,9 +57,11 @@ App:
 Game:
   Game: Игра
   Phase:
-    1: Развитие
-    2: Кормление
-    3: Игра закончена
+    DEPLOY: Фаза развития
+    FEEDING: Фаза питания
+    REGENERATION: Фаза регенерации
+    EXTINCTION: Фаза вымирания
+    FINAL: Игра закончена
   UI:
     SwitchUI:
       New: Новый интерфейс
@@ -113,9 +115,6 @@ Game:
     gameDeployTrait_LINKED : $Player@{0} выложил свойтво "${1}" на {2} и {3}
     gameEndTurn: $Player@{0} закончил ход
     gameNextPlayer: $Player@{0} начал ход
-    PhaseDeploy: Фаза развития
-    PhaseExtinct: Фаза вымирания
-    gameStartEat: 'Фаза питания. Еда: {0}'
     traitTakeShell: '${0} залезает в раковину'
     traitGiveBirth: '${0} рожает ребенка'
     traitMoveFood:

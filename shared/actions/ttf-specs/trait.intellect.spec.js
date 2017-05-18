@@ -15,7 +15,7 @@ describe('TraitIntellect:', () => {
   it('Static: 1', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 players:
   - continent: $A carn int wait
   - continent: $B + camo
@@ -30,7 +30,7 @@ players:
   it('Static: 2', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 players:
   - continent: $A carn int wait
   - continent: $B + burr camo
@@ -45,7 +45,7 @@ players:
   it('Static: 1, Possible: 1', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 players:
   - continent: $A carn int wait
   - continent: $B + camo tail
@@ -66,7 +66,7 @@ players:
   it('Static: 0, Possible: 2', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 players:
   - continent: $A carn int wait
   - continent: $B + run tail
@@ -92,7 +92,7 @@ players:
   it('No bullshit', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $Q carn int
@@ -115,7 +115,7 @@ players:
   it('Intellect ignore Poison', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 players:
   - continent: $A carn int wait, $B pois
 `);
@@ -130,7 +130,7 @@ players:
   it('Intellect ignore Running', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 players:
   - continent: $A carn int wait, $B run
 `);
@@ -146,7 +146,7 @@ players:
   it('Intellect may not ignore Running', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 players:
   - continent: $A carn int wait, $B run
 `);
@@ -163,7 +163,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 10
 players:
   - continent: $Q carn int + graz, $W swim ink cloud
@@ -178,7 +178,7 @@ players:
   it('BUG: Intellect should ignore Shell', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 players:
   - continent: $A carn int wait, $B shell
 `);
@@ -193,7 +193,7 @@ players:
   it('BUG: Intellect should ignore carn + tailloss', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 players:
   - continent: $A carn int wait, $B carn tail
 `);
@@ -210,7 +210,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 1 camo
-phase: 2
+phase: feeding
 players:
   - continent: $A carn int wait +, $B mimi +, $C tail +
 `);
@@ -236,7 +236,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 1 camo
-phase: 2
+phase: feeding
 players:
   - continent: $A carn int wait, $B ink +, $C tail +
 `);

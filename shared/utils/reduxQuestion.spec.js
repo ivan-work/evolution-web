@@ -10,7 +10,7 @@ describe('Redux Question', () => {
   it('Promises', async () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 0
+phase: prepare
 deck: 36 camo
 `);
     const testAction = {

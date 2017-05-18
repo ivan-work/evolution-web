@@ -13,7 +13,7 @@ describe('Game (TURNS TIME):', function () {
   it('Deploy, basic', async () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 0
+phase: prepare
 deck: 50 camo
 players:
   - hand: 5 camo
@@ -55,7 +55,7 @@ settings:
   it('Deploy, switch to feeding', async () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 0
+phase: prepare
 deck: 50 camo
 players:
   - hand: 5 camo

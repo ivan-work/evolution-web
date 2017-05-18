@@ -7,7 +7,7 @@ describe('TraitParasite:', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     ParseGame(`
 food: 2
-phase: 1
+phase: deploy
 players:
   - hand: Parasite
     continent: $

@@ -8,7 +8,7 @@ describe('Take Food', () => {
   it('Takes food', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
-phase: 2
+phase: feeding
 food: 5
 players:
   - continent: $A

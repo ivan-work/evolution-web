@@ -14,7 +14,7 @@ describe('TraitAmbush:', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 4
 players:
   - continent: $A, $B hiber
@@ -31,7 +31,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 4
 players:
   - continent: $A tail, $B hiber
@@ -49,7 +49,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 4
 players:
   - continent: $A tail mimi, $B hiber, $D mimi
@@ -73,7 +73,7 @@ settings:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 4
 players:
   - continent: $A tail mimi, $B hiber, $D
@@ -98,7 +98,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1, clientStore1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 4
 players:
   - continent: $Q ambush=true carn hiber tail fat fat, $W ambush carn hiber tail fat fat
@@ -147,7 +147,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1, clientStore1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 4
 players:
   - continent: $A tail fat
@@ -169,7 +169,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1, clientStore1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 4
 players:
   - continent: $Q swim, $W flight
@@ -196,7 +196,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1, clientStore1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 4
 players:
   - continent: $Q ink fat
@@ -220,7 +220,7 @@ players:
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {User1, clientStore1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
-phase: 2
+phase: feeding
 food: 4
 players:
   - continent: $Q ink fat tail

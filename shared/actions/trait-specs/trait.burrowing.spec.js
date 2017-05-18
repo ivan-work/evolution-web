@@ -14,7 +14,7 @@ describe('TraitBurrowing:', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 5 camo
-phase: 2
+phase: feeding
 food: 1
 players:
   - continent: $A carn ++, $B burr fat +, $Waiter graz +
