@@ -2,6 +2,8 @@
   .GameFoodContainer {
     .Food {
       display: inline-block;
+      width: 24px;
+      height: 24px;
     }
   }
 
@@ -12,8 +14,6 @@
     -ms-user-select: none;
     user-select: none;
     text-align: center;
-    width: 24px;
-    height: 24px;
     color: #888;
     //background: #FF0;
     //outline: 1px solid black;
@@ -25,6 +25,7 @@
       opacity: 0;
     }
   }
+
   .Preview .Food {
     color: #00A000;
   }

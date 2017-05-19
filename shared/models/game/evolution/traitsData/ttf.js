@@ -57,7 +57,7 @@ export const TraitMetamorphose = {
   , getTargets: (game, sourceAnimal, traitMetamorphose) => {
     const eatingBlockers = sourceAnimal.getEatingBlockers(game);
     if (eatingBlockers.length === 0)
-      return sourceAnimal.getTraits().filter(trait => trait.getDataModel().food === 0);
+      return sourceAnimal.getTraits().filter(trait => trait.getDataModel().food === 0).toList();
     else // length === 1
       return List(eatingBlockers);
   }

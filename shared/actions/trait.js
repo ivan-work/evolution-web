@@ -56,21 +56,28 @@ export const traitTakeFoodRequest = (animalId) => (dispatch, getState) => dispat
   , meta: {server: true}
 });
 
-export const traitActivateRequest = (sourceAid, traitId, targetId) => (dispatch, getState) => dispatch({
+export const traitActivateRequest = (sourceAid, traitId, ...targets) => (dispatch, getState) => dispatch({
   type: 'traitActivateRequest'
-  , data: {gameId: getState().get('game').id, sourceAid, traitId, targetId}
+  , data: {gameId: getState().get('game').id, sourceAid, traitId, targets}
   , meta: {server: true}
 });
 
-export const server$traitActivate = (game, sourceAnimal, trait, ...params) => (dispatch, getState) => {
+const logTarget = (result = [], target) => {
+  if (Array.isArray(target)) target.reduce(logTarget, result)
+  else if (!!target && !!target.type) result.push(target.type);
+  else if (!!target && !!target.id) result.push(target.id);
+  else result.push(target);
+  return result;
+};
+export const server$traitActivate = (game, sourceAnimal, trait, ...targets) => (dispatch, getState) => {
   if (!trait.getDataModel().transient) {
-    dispatch(server$traitNotify_Start(game, sourceAnimal, trait, ...params));
+    dispatch(server$traitNotify_Start(game, sourceAnimal, trait, ...targets));
   }
   const newGame = selectGame(getState, game.id);
   const {animal: newAnimal} = newGame.locateAnimal(sourceAnimal.id, sourceAnimal.ownerId);
-  logger.verbose('server$traitActivate:', sourceAnimal.id, trait.type);
+  logger.verbose('server$traitActivate:', sourceAnimal.id, trait.type, ...((targets || []).reduce(logTarget, [])));
   const traitData = trait.getDataModel();
-  const result = dispatch(traitData.action(newGame, newAnimal, trait, ...params));
+  const result = dispatch(traitData.action(newGame, newAnimal, trait, ...targets));
   logger.silly('server$traitActivate finish:', trait.type, result);
   return result;
 };
@@ -582,17 +589,16 @@ export const traitClientToServer = {
     dispatch(server$game(gameId, traitTakeShell(gameId, 'standard', animalId, trait)));
     dispatch(server$playerActed(gameId, userId));
   }
-  , traitActivateRequest: ({gameId, sourceAid, traitId, targetId}, {userId}) => (dispatch, getState) => {
+  , traitActivateRequest: ({gameId, sourceAid, traitId, targets}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
     checkGamePhase(game, PHASE.FEEDING);
-    const {sourceAnimal, trait, target} = checkTraitActivation(game, userId, sourceAid, traitId, targetId);
+    const {sourceAnimal, trait, target} = checkTraitActivation(game, userId, sourceAid, traitId, ...targets);
     if (!trait.getDataModel().transient) checkPlayerCanAct(game, userId);
-
     const result = dispatch(server$traitActivate(game, sourceAnimal, trait, target));
     if (result === void 0) {
-      throw new Error(`traitActivateRequest@Game(${gameId}): Animal(${sourceAid})-${trait.type}-Animal(${targetId}) result undefined`);
+      throw new Error(`traitActivateRequest@Game(${gameId}): Animal(${sourceAid})-${trait.type}-(${targets.join(' ')}) result undefined`);
     }
     //logger.silly('traitActivateRequest: ' + result);
     if (result) {

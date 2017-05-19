@@ -13,3 +13,18 @@
     }
   }
 }
+
+.TraitRecombinationDialog {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  .TraitHolder {
+    transition: transform .25s;
+    &.selected0 {
+      transform: translate($ANIMAL_WIDTH);
+    }
+    &.selected1 {
+      transform: translate(-$ANIMAL_WIDTH);
+    }
+  }
+}

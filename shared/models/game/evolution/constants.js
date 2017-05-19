@@ -22,6 +22,7 @@ export const CARD_SOURCE = {
 export const TRAIT_TARGET_TYPE = {
   ANIMAL: 'ANIMAL'
   , TRAIT: 'TRAIT'
+  , TWO_TRAITS: 'TWO_TRAITS'
   , NONE: 'NONE'
 };
 

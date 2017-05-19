@@ -47,7 +47,7 @@ class Animal extends React.Component {
   }
 
   render() {
-    const {model, isOver, canDrop, game} = this.props;
+    const {model, children, isOver, canDrop, game} = this.props;
 
     const className = classnames({
       Animal: true
@@ -56,7 +56,7 @@ class Animal extends React.Component {
 
     return (<div id={'Animal' + model.id} className={className}>
       <div className='traits'>
-        {model.traits
+        {!children && model.traits
           .toList()
           .reverse()
           //.sort((t1, t2) => t1.isLinked() ? 1 : -1)
@@ -64,6 +64,7 @@ class Animal extends React.Component {
             (<div key={trait.id}>
               {this.renderTrait(trait, model)}
             </div>))}
+        {!!children && children}
       </div>
       {this.renderSelectLink()}
       {!game && this.renderAnimalBody(model, game)}
@@ -180,7 +181,16 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
 
     renderTrait(trait, animal) {
       if (trait.isLinked()) {
-        return <AnimalLinkedTrait trait={trait} sourceAnimal={animal}/>;
+        if (trait.getDataModel().playerControllable) {
+          return <AnimalLinkedTrait trait={trait} sourceAnimal={animal}>
+            <ClickAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}
+                              onClick={() => this.props.onTraitDropped(animal, trait)}/>
+          </AnimalLinkedTrait>
+        } else {
+          return <AnimalLinkedTrait trait={trait} sourceAnimal={animal}>
+            <AnimalTrait trait={trait}/>
+          </AnimalLinkedTrait>
+        }
       } else if (trait.getDataModel().playerControllable && trait.getDataModel().targetType === TRAIT_TARGET_TYPE.ANIMAL) {
         return <DragAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}/>;
       } else if (trait.getDataModel().playerControllable) {

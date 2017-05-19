@@ -64,8 +64,10 @@ export const doesOptionExist = (game, playerId) => {
       switch (traitData.targetType) {
         case TRAIT_TARGET_TYPE.ANIMAL:
           return allAnimals.some((targetAid) => {
-            if (passesChecks(() => checkTraitActivation_Animal(game, animal, traitData, targetAid))) return true;
+            if (passesChecks(() => checkTraitActivation_Animal(game, animal, trait, targetAid))) return true;
           });
+        case TRAIT_TARGET_TYPE.TWO_TRAITS:
+          return true;
         case TRAIT_TARGET_TYPE.TRAIT:
           return true;
         case TRAIT_TARGET_TYPE.NONE:
@@ -102,11 +104,12 @@ export const getOptions = (game, playerId) => {
       switch (traitData.targetType) {
         case TRAIT_TARGET_TYPE.ANIMAL:
           allAnimals.forEach((targetAid) => {
-            if (passesChecks(() => checkTraitActivation_Animal(game, animal, traitData, targetAid))) {
+            if (passesChecks(() => checkTraitActivation_Animal(game, animal, trait, targetAid))) {
               result.push(Option.new('traitActivateRequest', animal.id, trait.type, targetAid))
             }
           });
-
+          break;
+        case TRAIT_TARGET_TYPE.TWO_TRAITS:
           break;
         case TRAIT_TARGET_TYPE.TRAIT:
           break;

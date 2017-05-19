@@ -1,63 +1,81 @@
 @import './variables';
 
+$TraitCarnivorous: #900;
+$TraitSwimming: #00F;
+$TraitRecombination: #3AA;
+$TraitCommunication: #99F;
+$TraitCooperation: #090;
+$TraitSymbiosis: #F06;
+$TraitParasite: #909;
+$TraitFatTissue: #FF0;
+
+$Activated: #f66;
+
 .AnimalTraitArrow.Marker {
   fill: red;
 }
 
 .TraitFatTissue {
   color: #d60;
-  &.value {background: #ff0;}
+  &.value {background: $TraitFatTissue;}
   &.value.active {
     background: $TRAIT_ACTIVE_BACK;
     color: $TRAIT_ACTIVE_TEXT;
   }
 }
 
-.TraitCarnivorous {color: #900;}
+.TraitCarnivorous {color: $TraitCarnivorous;}
 
-.TraitSwimming {color: #00F;}
+.TraitSwimming {color: $TraitSwimming;}
+
+.TraitRecombination {
+  color: $TraitRecombination;
+  &.Link {stroke: $TraitRecombination;}
+  &.AnimalLinkedTrait--Link {stroke: $TraitRecombination;}
+  &.pointer.active {
+    color: $TRAIT_ACTIVE_TEXT;
+  }
+}
 
 .TraitCommunication {
-  color: #99F;
-  &.Link {stroke: #99F;}
-  &.AnimalLinkedTrait--Link {stroke: #99F;}
+  color: $TraitCommunication;
+  &.Link {stroke: $TraitCommunication;}
+  &.AnimalLinkedTrait--Link {stroke: $TraitCommunication;}
 }
 
 .TraitCooperation {
-  color: #090;
-  &.Link {stroke: #090;}
-  &.AnimalLinkedTrait--Link {stroke: #090;}
+  color: $TraitCooperation;
+  &.Link {stroke: $TraitCooperation;}
+  &.AnimalLinkedTrait--Link {stroke: $TraitCooperation;}
 }
 
 .TraitSymbiosis {
-  $color: #F06;
-  color: $color;
-  &.Link {stroke: $color;}
-  &.AnimalLinkedTrait--Link {stroke: $color;}
-  &.Marker {fill: $color;}
+  color: $TraitSymbiosis;
+  &.Link {stroke: $TraitSymbiosis;}
+  &.AnimalLinkedTrait--Link {stroke: $TraitSymbiosis;}
+  &.Marker {fill: $TraitSymbiosis;}
   &.MarkerStart {marker-start: url(#symbioticArrow);}
   &.MarkerEnd {marker-end: url(#symbioticArrow);}
 }
 
 .TraitTrematode {
-  $color: #909;
-  color: $color;
-  &.Link {stroke: $color;}
-  &.AnimalLinkedTrait--Link {stroke: $color;}
+  color: $TraitParasite;
+  &.Link {stroke: $TraitParasite;}
+  &.AnimalLinkedTrait--Link {stroke: $TraitParasite;}
 }
 
-.TraitParasite {color: #60c;}
+.TraitParasite {color: $TraitParasite;}
 
 .TraitAmbush {
   &.value.pointer.active {
     font-weight: bold;
-    background: #f96;
+    background: $Activated;
   }
 }
 
 .TraitAnglerfish {
   &.value.pointer.active {
     font-weight: bold;
-    background: #f96;
+    background: $Activated;
   }
 }

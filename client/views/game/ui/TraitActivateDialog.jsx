@@ -36,7 +36,6 @@ export default class TraitActivateDialog extends React.Component {
     const {traits, onSelectTrait, allowNothing, game} = this.props;
     return (<DialogContent>
       <div className='TraitActivateDialog'>
-        <h1><T.span text='Game.UI.TraitActivateDialog.Title'/></h1>
         <div className='Row'>
           {traits.map((trait, index) =>
             <div key={trait.id}

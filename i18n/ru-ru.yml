@@ -95,6 +95,9 @@ Game:
     TraitActivateDialog:
       Title: Выберите свойство
       Nothing: Не использовать
+    TraitRecombinationDialog:
+      Title: Рекомбинация
+      Action: Рекомбинировать
     TraitDefenceDialog:
       Title: Защищайтесь!
       Time: Осталось времени

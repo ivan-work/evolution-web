@@ -15,7 +15,7 @@ export class GamePage extends React.Component {
   render() {
     const {game, oldUI} = this.props;
     if (!game) return null;
-    if (oldUI) return <GameWrapper/>;
+    // if (oldUI) return <GameWrapper/>;
     return <Game/>;
   }
 }

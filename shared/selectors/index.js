@@ -26,9 +26,10 @@ export const makeGameSelectors = (getState, gameId) => ({
   , selectCard: (user, cardIndex) => selectGame(getState, gameId).getPlayer(user).getCard(cardIndex)
   , findCard: (user, type) => selectGame(getState, gameId).getPlayer(user).hand.find(c => c.trait1 === type).id
   , selectAnimal: (user, animalIndex) => selectGame(getState, gameId).getPlayer(user).getAnimal(animalIndex)
-  , findAnimal: (animaidId) => selectGame(getState, gameId).locateAnimal(animaidId).animal
+  , findAnimal: (animalId) => selectGame(getState, gameId).locateAnimal(animalId).animal
   , selectTrait: (user, animalIndex, traitIndex) => selectTrait(selectGame(getState, gameId), user, animalIndex, traitIndex)
   , selectTraitId: (user, animalIndex, traitIndex) => selectTrait(selectGame(getState, gameId), user, animalIndex, traitIndex).id
+  , findTrait: (animalId, traitType) => selectGame(getState, gameId).locateAnimal(animalId).animal.hasTrait(traitType, true)
 });
 
 export const makeClientGameSelectors = (getState, gameId, i) => ({

@@ -270,7 +270,10 @@ export const animalDeath = (game, {type, animalId, data}) => {
   const {animalIndex, animal} = game.locateAnimal(animalId);
   const shell = animal.hasTrait(tt.TraitShell);
   return game
-    .updateIn(['players', animal.ownerId, 'scoreDead'], scoreDead => scoreDead + animal.countScore())
+    .updateIn(['players', animal.ownerId, 'scoreDead'], scoreDead => scoreDead
+      + animal.countScore()
+      + animal.traits.reduce((result, trait) => result + trait.countDetachScore(), 0)
+    )
     .removeIn(['players', animal.ownerId, 'continent', animalIndex])
     .updateIn(['players', animal.ownerId, 'continent'], continent => continent
       .map(a => a.traitDetach(trait => trait.linkAnimalId === animal.id)))

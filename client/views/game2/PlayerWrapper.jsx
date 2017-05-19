@@ -27,14 +27,16 @@ import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 import {PlayerModel} from '../../../shared/models/game/PlayerModel';
 import {CTT_PARAMETER} from '../../../shared/models/game/evolution/constants';
 
-import {TraitMetamorphose} from '../../../shared/models/game/evolution/traitTypes';
+import * as tt from '../../../shared/models/game/evolution/traitTypes';
 
-import TraitActivateDialog from '../game/ui/TraitActivateDialog.jsx';
+import TraitMetamorphoseDialog from './ui/TraitMetamorphoseDialog.jsx';
+import TraitRecombinationDialog from './ui/TraitRecombinationDialog.jsx';
 
 import './PlayerWrapper.scss';
 
 const INITIAL_STATE = {
-  traitActivateQuestion: null
+  metamorphoseQuestion: {}
+  , recombinationQuestion: {}
 };
 
 export class PlayerWrapper extends Component {
@@ -58,12 +60,23 @@ export class PlayerWrapper extends Component {
     this.$noop = () => null;
     this.$traitTakeFood = (animal) => $traitTakeFood(animal.id);
     this.$traitActivate = (animal, trait, targetId) => {
-      if (trait.type === TraitMetamorphose) {
+      if (trait.type === tt.TraitMetamorphose) {
         this.setState({
-          traitActivateQuestion: {
-            traits: trait.getDataModel().getTargets(props.game, animal, trait)
+          metamorphoseQuestion: {
+            animal, trait
             , onSelectTrait: (targetTraitId) => {
               !!targetTraitId && $traitActivate(animal.id, trait.id, targetTraitId);
+              this.setState(INITIAL_STATE)
+            }
+          }
+        });
+      } else if (trait.type === tt.TraitRecombination) {
+        this.setState({
+          recombinationQuestion: {
+            animal, trait
+            , onSelectTrait: (traits) => {
+              if (!!traits && !!traits[0] && !!traits[1])
+                $traitActivate(animal.id, trait.id, ...traits);
               this.setState(INITIAL_STATE)
             }
           }
@@ -97,7 +110,8 @@ export class PlayerWrapper extends Component {
            id={`PlayerWrapper${player.id}`}
            data-player-id={player.id}>
         <div className='flex'/>
-        <TraitActivateDialog game={game} {...this.state.traitActivateQuestion}/>
+        <TraitMetamorphoseDialog game={game} metamorphoseQuestion={this.state.metamorphoseQuestion}/>
+        <TraitRecombinationDialog game={game} recombinationQuestion={this.state.recombinationQuestion}/>
         {this.renderContinent(game, player, isUser)}
         {this.renderCardCollection(game, player, isUser)}
       </div>

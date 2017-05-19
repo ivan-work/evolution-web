@@ -7,7 +7,7 @@ import cn from 'classnames';
 
 import Tooltip from 'rc-tooltip';
 import {Portal} from '../../utils/Portal.jsx';
-import {AnimalTrait} from './AnimalTrait.jsx';
+import {AnimalTrait, ClickAnimalTrait} from './AnimalTrait.jsx';
 import AnimalTraitArrowMarker from './AnimalTraitArrowMarker.jsx';
 
 import {ANIMAL_TRAIT_HEIGHT} from '../../../styles.json';
@@ -42,9 +42,7 @@ export class AnimalLinkedTrait extends React.PureComponent {
   }
 
   render() {
-    const {trait, sourceAnimal} = this.props;
-    return (<div>
-      <AnimalTrait trait={trait}/>
-    </div>);
+    const {children} = this.props;
+    return (<div>{children}</div>);
   }
 }

@@ -28,11 +28,6 @@ import {
   , server$traitSetValue
 } from '../../../../actions/actions';
 
-import {
-  checkTraitActivation
-  , checkIfTraitDisabledByIntellect
-} from '../../../../actions/trait.checks';
-
 import {selectGame} from '../../../../selectors';
 
 import {TraitModel} from '../TraitModel';

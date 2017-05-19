@@ -93,7 +93,7 @@ players:
     expect(selectGame().deck.size, 'Deck check').equal(3);
   });
 
-  it.only('After turn', () => {
+  it('After turn', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 1 camo
@@ -106,24 +106,17 @@ players:
     clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
     clientStore0.dispatch(traitActivateRequest('$D', tt.TraitCarnivorous, '$C'));
 
-    expect(selectGame().status.phase).equal(PHASE.DEPLOY);
-    expect(selectGame().status.turn, 'TURN 1').equal(1);
+    expect(selectGame().status.phase).equal(PHASE.FINAL);
+    expect(selectGame().status.turn, 'TURN 1').equal(0);
 
     expect(findAnimal('$A'), 'find $A').ok;
     expect(findAnimal('$B'), 'find $B').ok;
     expect(findAnimal('$C'), 'find $C').ok;
     expect(findAnimal('$D'), 'find $D').ok;
-
-    clientStore0.dispatch(gameDeployRegeneratedAnimalRequest(findCard(User0, tt.TraitAnglerfish), '$B'));
-
-    expect(selectGame().status.turn, 'TURN 1').equal(1);
-    expect(selectGame().status.phase).equal(PHASE.DEPLOY);
-
-    // console.log(selectPlayer(User0).continent.map(a => a.traits.toArray()))
-    // console.log(selectPlayer(User0).hand)
-
-    // 5 - (1 + 1 for $A + 0 for $B) = 7. -1 for regeneration
-    expect(selectPlayer(User0).hand).size(5);
-    expect(selectGame().deck.size, 'Deck check').equal(3);
+    expect(selectGame().deck.size, 'Deck check').equal(0);
+    expect(findAnimal('$A').countScore(), 'score $A').equal(4);
+    expect(findAnimal('$B').countScore(), 'score $B').equal(3);
+    expect(findAnimal('$C').countScore(), 'score $C').equal(1);
+    expect(findAnimal('$D').countScore(), 'score $D').equal(4);
   });
 });

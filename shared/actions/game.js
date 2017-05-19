@@ -304,12 +304,11 @@ export const server$defaultTurn = (gameId, userId) => (dispatch, getState) => {
 };
 
 export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
-  logger.verbose('server$gameEndTurn 1:', userId);
+  logger.debug('server$gameEndTurn:', userId);
   const isDefaultTurn = !!dispatch(server$defaultTurn(gameId, userId));
   // if isDefaultTurn is true, then player performed default turn\
   // and there's second server$gameEndTurn is coming. So we finish this one.
   if (isDefaultTurn) return;
-  logger.verbose('server$gameEndTurn 2:', userId);
   dispatch(server$gameCancelTurnTimeout(gameId));
   dispatch(server$game(gameId, gameEndTurn(gameId, userId)));
 

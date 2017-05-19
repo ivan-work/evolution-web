@@ -53,7 +53,7 @@ export class AnimalModel extends Record({
   }
 
   toString() {
-    return `Animal#${this.id} (${this.getFood()}/${this.foodSize}+${this.getFat()}/${this.fatSize})`;
+    return `Animal#${this.id}(${this.getFood()}/${this.foodSize}+${this.getFat()}/${this.fatSize})[${this.traits.toArray().map(t => t.type)}]`;
   }
 
   getTraits() {
@@ -73,8 +73,7 @@ export class AnimalModel extends Record({
       : OrderedMap().set(attachedTrait.id, attachedTrait).concat(this.traits)); // .unshift()
     return this
       .set('traits', updatedTraits)
-      .update('foodSize', foodSize => foodSize + trait.getDataModel().food)
-      .update('fatSize', fatSize => fatSize + (trait.type === TraitFatTissue ? 1 : 0));
+      .recalculateFood();
   }
 
   traitDetach(lookup) {
@@ -200,10 +199,6 @@ export class AnimalModel extends Record({
   countScore() {
     let baseScore = 2;
     if (this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) baseScore = 0;
-    return (baseScore + this.traits.reduce((result, trait) => (
-    result + (trait.getDataModel().cardTargetType & CTT_PARAMETER.LINK
-        ? .5 + trait.getDataModel().food * 2 // card is splitted to two traits, so .5. And food is doubled by traits, so 2x score
-        : 1 + trait.getDataModel().food
-    )), 0));
+    return (baseScore + this.traits.reduce((result, trait) => result + trait.countScore(), 0));
   }
 }

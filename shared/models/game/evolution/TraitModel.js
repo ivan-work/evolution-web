@@ -135,4 +135,22 @@ export class TraitModel extends Record({
   toString() {
     return `Trait#${this.id}#${this.type}(${this.value || ''})${this.disabled ? '(disabled)' : ''}`;
   }
+
+  countScore() {
+    if (this.getDataModel().cardTargetType & CTT_PARAMETER.LINK) {
+      if (this.linkSource) {
+        return 1 + this.getDataModel().food * 2 // 1 for linkSource only. And food is doubled by traits, so 2x score
+      } else {
+        return 0 // Doesn't count not linksourced
+      }
+    }
+    return 1 + this.getDataModel().food;
+  }
+
+  countDetachScore() {
+    if (this.getDataModel().cardTargetType & CTT_PARAMETER.LINK && !this.linkSource) {
+      return 1 + this.getDataModel().food * 2 // card is splitted to two traits, so .5. And food is doubled by traits, so 2x score
+    }
+    return 0;
+  }
 }

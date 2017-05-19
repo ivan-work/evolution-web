@@ -23,16 +23,16 @@ class AnimalTrait extends React.PureComponent {
   static defaultProps = {classNames: {}};
 
   render() {
-    const {trait} = this.props;
+    const {trait, className} = this.props;
 
-    const className = classnames(Object.assign(this.classNames || {}, {
+    const classNames = classnames(Object.assign(this.classNames || {}, {
       AnimalTrait: true
       , [trait.type]: true
       , value: trait.value
       , disabled: trait.disabled
     }));
 
-    return (<div id={'AnimalTrait' + trait.id} className={className}>
+    return (<div id={'AnimalTrait' + trait.id} className={classNames + (!!className ? ' ' + className : '')}>
       <Tooltip
         overlay={<AnimalTraitDetails trait={trait}/>}
         mouseEnterDelay={.5}

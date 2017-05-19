@@ -39,8 +39,8 @@ export class PlayerModel extends Record({
     return js == null
       ? null
       : new PlayerModel(js)
-      .set('hand', List(js.hand).map(card => CardModel.fromServer(card)))
-      .set('continent', List(js.continent).map(animalModel => AnimalModel.fromServer(animalModel)));
+        .set('hand', List(js.hand).map(card => CardModel.fromServer(card)))
+        .set('continent', List(js.continent).map(animalModel => AnimalModel.fromServer(animalModel)));
   }
 
   static new(userId, index) {
@@ -48,7 +48,9 @@ export class PlayerModel extends Record({
   }
 
   countScore() {
-    return this.continent.reduce((score, animal) => score + animal.countScore(), 0);
+    return this.continent.reduce((score, animal) => {
+      return score + animal.countScore()
+    }, 0);
   }
 
   getCard(index) {
