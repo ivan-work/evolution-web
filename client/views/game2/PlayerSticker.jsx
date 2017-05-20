@@ -206,7 +206,7 @@ export default class PlayerSticker extends React.Component {
         {this.state.scrollY !== this.state.scrollHeight && <MDL.Icon className='arrow arrow-top' name='keyboard_arrow_up'/>}
         {this.state.scrollY !== 0 && <MDL.Icon className='arrow arrow-bottom' name='keyboard_arrow_down'/>}
       </div>
-      <div className={'CardCollectionIcon' + (isUser ? ' pointer' : '')}
+      <div className={'CardCollectionIcon' + (isUser ? ' pointer' : '') + (game.isPlayerTurn(player) ? ' active' : '')}
            onClick={this.onCardCollectionIconClick}>
 
         <User id={player.id}/>

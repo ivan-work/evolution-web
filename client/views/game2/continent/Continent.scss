@@ -10,7 +10,7 @@ $VERTICAL_MARGIN: 2px;
     margin-top: $ANIMAL_TRAIT_HEIGHT;
     justify-content: center;
 
-    background: $CURRENT_TURN_BACKGROUND;
+    background: #eee;
 
     &.isActive {
       background: $CURRENT_TURN_BACKGROUND;

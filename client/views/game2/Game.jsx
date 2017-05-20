@@ -57,7 +57,7 @@ export class Game extends React.Component {
       <TraitDefenceDialog game={game} $traitAnswer={$traitAnswer}/>
 
       <Portal target='header'>
-        <MDL.Button id="Game$switchUI" onClick={$switchUI}>{T.translate('Game.UI.SwitchUI.New')}</MDL.Button>
+        {/*<MDL.Button id="Game$switchUI" onClick={$switchUI}>{T.translate('Game.UI.SwitchUI.New')}</MDL.Button>*/}
         <ControlGroup name={T.translate('Game.Game')}>
           <MDL.Button id="Game$Exit" onClick={$exit}>{T.translate('App.Room.$Exit')}</MDL.Button>
           <GameScoreboardFinal game={game}/>

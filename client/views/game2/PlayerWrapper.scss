@@ -6,6 +6,9 @@
     .CardCollectionIcon {
       width: 100%;
       text-align: center;
+      &.active {
+        background: $CURRENT_TURN_BACKGROUND;
+      }
       .material-icons {
         vertical-align: middle;
       }
