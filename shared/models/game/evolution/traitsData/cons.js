@@ -83,7 +83,7 @@ export const TraitCnidocytes = {
 export const TraitRecombination = {
   type: tt.TraitRecombination
   , targetType: TRAIT_TARGET_TYPE.TWO_TRAITS
-  , cardTargetType: CARD_TARGET_TYPE.LINK_ENEMY
+  , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
   , playerControllable: true
   , cooldowns: fromJS([
     [tt.TraitRecombination, TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]

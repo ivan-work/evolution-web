@@ -123,13 +123,17 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
     switch (monitor.getItemType()) {
       case DND_ITEM_TYPE.CARD: {
         const {game, model: animal} = props;
+        console.log('canDrop', game.status.phase);
         switch (game.status.phase) {
-          case PHASE.FEEDING:
+          case PHASE.DEPLOY:
             const {card, alternateTrait} = monitor.getItem();
             const traitData = card.getTraitDataModel(alternateTrait);
+            console.log(game.status.phase, !traitData.checkTraitPlacementFails(animal))
             return !traitData.checkTraitPlacementFails(animal);
           case PHASE.REGENERATION:
             return animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION);
+          default:
+            return false;
         }
       }
       case DND_ITEM_TYPE.FOOD:
