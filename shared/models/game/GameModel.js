@@ -21,6 +21,7 @@ export const PHASE = {
   PREPARE: 'PREPARE'
   , DEPLOY: 'DEPLOY'
   , FEEDING: 'FEEDING'
+  , AMBUSH: 'AMBUSH'
   , EXTINCTION: 'EXTINCTION'
   , REGENERATION: 'REGENERATION'
   , FINAL: 'FINAL'
@@ -221,10 +222,6 @@ export class GameModel extends Record({
   // TODO remove
   getPlayerAnimal(pid, index) {
     return this.getPlayer(pid).continent.get(index);
-  }
-
-  someAnimalOnContinent(continent, cb) {
-    return this.players.some(player => player.continent.some(cb));
   }
 
   /**

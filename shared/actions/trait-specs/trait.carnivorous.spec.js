@@ -4,11 +4,13 @@ import {
   traitTakeFoodRequest
   , gameEndTurnRequest
   , traitActivateRequest
+  , traitAnswerRequest
 } from '../actions';
 import {makeGameSelectors} from '../../selectors';
 
 import {PHASE} from '../../models/game/GameModel';
 import * as tt from '../../models/game/evolution/traitTypes';
+import {replaceGetRandom, replaceGetRandomAsync} from '../../utils/randomGenerator';
 
 describe('TraitCarnivorous:', function () {
   it('Simple', () => {
@@ -124,4 +126,78 @@ players:
 
     clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$C'));
   });
+
+  it('Asking for running', async () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players: 
+  - continent: $A wait run tail fat para, $B carn, $C carn, $D carn, $E carn, $G
+settings:
+  timeTraitResponse: 10
+`);
+    const {selectGame, selectAnimal, selectPlayer} = makeGameSelectors(serverStore.getState, gameId);
+
+    // B attacks A and gets parasite
+    clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$A'));
+    expect(selectGame().question).ok;
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitTailLoss, tt.TraitParasite));
+
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    // C attacks A and A runs out manually
+    replaceGetRandomAsync(() => 1, () => {
+      clientStore0.dispatch(traitActivateRequest('$C', tt.TraitCarnivorous, '$A'));
+      expect(selectGame().question).ok;
+      clientStore0.dispatch(traitAnswerRequest(tt.TraitRunning));
+    });
+
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    // D attacks A and A runs out automatically
+    await replaceGetRandomAsync(() => 1, (resolve) => {
+      clientStore0.dispatch(traitActivateRequest('$D', tt.TraitCarnivorous, '$A'));
+      expect(selectGame().question).ok;
+      setTimeout(() => {
+        expect(selectGame().question).not.ok;
+        resolve();
+      }, 20);
+    });
+
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    // E attacks A and A runs out automatically, fails and tailloss question pops up
+    await replaceGetRandomAsync(() => 0, (resolve) => {
+      clientStore0.dispatch(traitActivateRequest('$E', tt.TraitCarnivorous, '$A'));
+      expect(selectGame().question).ok;
+
+      setTimeout(() => {
+        expect(selectGame().question).ok;
+        resolve();
+      }, 20);
+    });
+
+    expect(selectGame().question).ok;
+    await new Promise(resolve => setTimeout(resolve, 20));
+    expect(selectGame().question).not.ok;
+
+    clientStore0.dispatch(gameEndTurnRequest());
+  });
+
+  it.skip('Order or attack', async () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players: 
+  - continent: $A carn wait, $B mimi tail ink, $C mimi, $D
+settings:
+  timeTraitResponse: 5
+`);
+    const {selectGame, selectAnimal, selectPlayer} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitMimicry, '$C'));
+    await new Promise(resolve => setTimeout(resolve, 20));
+    await new Promise(resolve => setTimeout(resolve, 100));
+  })
 });

@@ -68,7 +68,19 @@ export const TraitSwimming = {
 
 export const TraitRunning = {
   type: tt.TraitRunning
-  , action: () => getRandom(0, 1) > 0
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , cooldowns: fromJS([
+    [tt.TraitRunning, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ACTIVATION]
+  ])
+  , action: (game, defenceAnimal, traitRunning, target, attackAnimal, attackTrait) => (dispatch) => {
+    dispatch(server$traitStartCooldown(game.id, traitRunning, defenceAnimal));
+    if (getRandom(0, 1) > 0) {
+      dispatch(endHunt(game, attackAnimal, attackTrait, defenceAnimal));
+      return true;
+    } else {
+      return dispatch(server$traitActivate(game, attackAnimal, attackTrait, defenceAnimal));
+    }
+  }
 };
 
 export const TraitMimicry = {
@@ -179,7 +191,7 @@ export const TraitHibernation = {
   , action: (game, sourceAnimal, traitHibernation) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, traitHibernation, sourceAnimal));
     dispatch(server$traitSetAnimalFlag(game, sourceAnimal, TRAIT_ANIMAL_FLAG.HIBERNATED));
-    dispatch(server$tryViviparous(game.id, sourceAnimal));
+    dispatch(server$tryViviparous(game.id, sourceAnimal.id));
     return true;
   }
   , $checkAction: (game, sourceAnimal) => !sourceAnimal.isFull() && game.deck.size > 0

@@ -8,9 +8,9 @@ import {
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
+import * as tt from '../../models/game/evolution/traitTypes';
 import {TRAIT_ANIMAL_FLAG} from '../../models/game/evolution/constants';
 import {replaceGetRandom} from '../../utils/randomGenerator';
-import * as tt from '../../models/game/evolution/traitTypes';
 
 import {makeGameSelectors} from '../../selectors';
 
@@ -27,10 +27,11 @@ players:
 
     replaceGetRandom(() => 1, () => {
       clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$C'));
+      clientStore0.dispatch(traitAnswerRequest(tt.TraitRunning))
       expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
-    });
+
     clientStore0.dispatch(gameEndTurnRequest());
-    replaceGetRandom(() => 0, () => {
+
       clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$C'));
       clientStore0.dispatch(traitAnswerRequest(tt.TraitInkCloud));
       expect(findAnimal('$B').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;

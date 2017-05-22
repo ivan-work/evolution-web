@@ -87,14 +87,14 @@ export const getAffectiveDefenses = (game, sourceAnimal, targetAnimal) =>
     || (trait.type === tt.TraitCnidocytes)
   )).toArray();
 
-export const getActiveDefenses = (game, sourceAnimal, targetAnimal) =>
+export const getActiveDefenses = (game, sourceAnimal, targetAnimal, passiveDefence = false) =>
   targetAnimal.traits.filter((trait) =>
   !trait.disabled && (
-    (trait.type === tt.TraitRunning)
-    || (trait.type === tt.TraitMimicry && trait.checkAction(game, targetAnimal))
-    || (trait.type === tt.TraitTailLoss && trait.checkAction(game, targetAnimal))
-    || (trait.type === tt.TraitShell && trait.checkAction(game, targetAnimal))
-    || (trait.type === tt.TraitInkCloud && trait.checkAction(game, targetAnimal))
+    (trait.type === tt.TraitRunning && !trait.checkActionFails(game, targetAnimal))
+    || (trait.type === tt.TraitMimicry && !trait.checkActionFails(game, targetAnimal))
+    || (trait.type === tt.TraitTailLoss && !trait.checkActionFails(game, targetAnimal))
+    || (trait.type === tt.TraitShell && !trait.checkActionFails(game, targetAnimal) && !passiveDefence)
+    || (trait.type === tt.TraitInkCloud && !trait.checkActionFails(game, targetAnimal) && !passiveDefence)
   )).toArray();
 
 export const TraitCarnivorous = {
@@ -107,46 +107,49 @@ export const TraitCarnivorous = {
     ['TraitCarnivorous', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
-  , action: (game, sourceAnimal, trait, targetAnimal) => (dispatch, getState) => {
+  , action: (game, sourceAnimal, trait, targetAnimal, passiveDefence) => (dispatch, getState) => {
 
     /**
      * Check for counter-attack (aka anglerfish)
      */
-    const animalAnglerfish = game.getPlayer(targetAnimal.ownerId).continent.filter(animal =>
-      animal.traits.size === 1
-      && animal.traits.first().type === tt.TraitAnglerfish
-      && animal.traits.first().checkAction(game, animal)
-      && (targetAnimal === animal || (
-        animal.traits.first().value === true
-        && targetAnimal.traits.size === 0
-      ))
-    ).get(0);
 
-    if (animalAnglerfish) {
-      const traitAnglerfish = animalAnglerfish.traits.first();
-      const newTraitCarnivorous = TraitModel.new('TraitCarnivorous');
-      const newTraitIntellect = TraitModel.new(tt.TraitIntellect);
+    {
+      const animalAnglerfish = game.getPlayer(targetAnimal.ownerId).continent.filter(animal =>
+        animal.traits.size === 1
+        && animal.traits.first().type === tt.TraitAnglerfish
+        && animal.traits.first().checkAction(game, animal)
+        && (targetAnimal === animal || (
+          animal.traits.first().value === true
+          && targetAnimal.traits.size === 0
+        ))
+      ).get(0);
 
-      dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
+      if (animalAnglerfish) {
+        const traitAnglerfish = animalAnglerfish.traits.first();
+        const newTraitCarnivorous = TraitModel.new('TraitCarnivorous');
+        const newTraitIntellect = TraitModel.new(tt.TraitIntellect);
 
-      dispatch(server$traitAnimalAttachTrait(game, animalAnglerfish, newTraitCarnivorous));
-      dispatch(server$traitAnimalAttachTrait(game, animalAnglerfish, newTraitIntellect));
-      dispatch(server$traitAnimalRemoveTrait(game, animalAnglerfish, traitAnglerfish));
-      const reselectedGame = selectGame(getState, game.id);
-      const {animal: revealledAnglerfish} = reselectedGame.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
-      if (TraitCarnivorous.checkTarget(reselectedGame, revealledAnglerfish, sourceAnimal)) {
-        dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
-          const {animal} = game.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
-          if (animal) {
-            const traitIntellect = animal.hasTrait(tt.TraitIntellect);
-            if (traitIntellect) dispatch(server$traitAnimalRemoveTrait(game, animal, traitIntellect));
-          }
-        }));
-        dispatch(server$traitActivate(game, animalAnglerfish, newTraitCarnivorous, sourceAnimal));
-      } else {
-        dispatch(server$traitAnimalRemoveTrait(game, animalAnglerfish, newTraitIntellect));
+        dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
+
+        dispatch(server$traitAnimalAttachTrait(game, animalAnglerfish, newTraitCarnivorous));
+        dispatch(server$traitAnimalAttachTrait(game, animalAnglerfish, newTraitIntellect));
+        dispatch(server$traitAnimalRemoveTrait(game, animalAnglerfish, traitAnglerfish));
+        const reselectedGame = selectGame(getState, game.id);
+        const {animal: revealledAnglerfish} = reselectedGame.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
+        if (TraitCarnivorous.checkTarget(reselectedGame, revealledAnglerfish, sourceAnimal)) {
+          dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
+            const {animal} = game.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
+            if (animal) {
+              const traitIntellect = animal.hasTrait(tt.TraitIntellect);
+              if (traitIntellect) dispatch(server$traitAnimalRemoveTrait(game, animal, traitIntellect));
+            }
+          }));
+          dispatch(server$traitActivate(game, animalAnglerfish, newTraitCarnivorous, sourceAnimal));
+        } else {
+          dispatch(server$traitAnimalRemoveTrait(game, animalAnglerfish, newTraitIntellect));
+        }
+        return true;
       }
-      return true;
     }
 
     /**
@@ -163,7 +166,7 @@ export const TraitCarnivorous = {
     const disabledTid = !!traitIntellect && traitIntellect.value;
     logger.debug(`traitIntellect: ${traitIntellect}; ${canUseIntellect}; ${disabledTid}`);
 
-    getActiveDefenses(game, sourceAnimal, targetAnimal)
+    getActiveDefenses(game, sourceAnimal, targetAnimal, passiveDefence)
       .forEach((defenseTrait) => {
         if (defenseTrait.isEqual(disabledTid)) return;
 
@@ -194,6 +197,7 @@ export const TraitCarnivorous = {
      * After defences because we need to know, if it will be useful to use intellect.
      * disabledTid = string ID | 'Ignore' | false
      */
+
     if (canUseIntellect && !disabledTid) {
       // default intellect found, need to ask
       const unavoidableDefenses = countUnavoidableDefenses(game, sourceAnimal, targetAnimal);
@@ -231,19 +235,23 @@ export const TraitCarnivorous = {
       }));
     }
 
-    if (traitRunning && !!TraitRunning.action() && !traitRunning.isEqual(disabledTid)) {
-      dispatch(server$traitNotify_Start(game, targetAnimal, traitRunning, sourceAnimal));
-      dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
-      return true;
-    }
-
     /**
      * Make function for default defense
      * */
       // if user has no options or if user didn't respond - outcome will be the same, so we DRY
 
     const defaultDefence = (questionId) => (dispatch, getState) => {
-        if (traitTailLoss && traitTailLossTargets.size > 0 && !traitTailLoss.isEqual(disabledTid)) {
+        // console.log('defaultDefence');
+        // console.log(traitRunning);
+        // console.log(traitTailLoss, traitTailLossTargets);
+        // console.log(traitMimicry, traitMimicryTargets);
+        if (traitRunning && !traitRunning.isEqual(disabledTid)) {
+          dispatch(server$traitDefenceAnswer(game.id
+            , questionId
+            , tt.TraitRunning
+          ));
+          return false;
+        } else if (traitTailLoss && traitTailLossTargets.size > 0 && !traitTailLoss.isEqual(disabledTid)) {
           dispatch(server$traitDefenceAnswer(game.id
             , questionId
             , tt.TraitTailLoss
@@ -302,7 +310,9 @@ export const TraitCarnivorous = {
      * */
 
     logger.debug(`Should ask DEFENCE question? ${possibleDefenses.map(t => t.type)} / ${possibleDefenseTargets} = ${(possibleDefenses.length > 1 || possibleDefenseTargets > 1)}`);
-    if (possibleDefenses.length > 1 || possibleDefenseTargets > 1) {
+    if (possibleDefenses.length > 1
+      || possibleDefenseTargets > 1
+      || possibleDefenses.some(t => t.getDataModel().optional)) {
       dispatch(server$traitDefenceQuestion(game.id, sourceAnimal, trait, targetAnimal, defaultDefence));
       return false;
     } else {

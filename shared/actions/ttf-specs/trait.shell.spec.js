@@ -33,12 +33,12 @@ players:
         clientStore0.dispatch(traitTakeFoodRequest('$C'))
       , serverStore, clientStore0);
 
-    clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$C'))
     expectUnchanged('$B cant attack $C', () =>
       clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$C'))
       , serverStore, clientStore0);
 
     clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$D'));
+    clientStore0.dispatch(traitAnswerRequest('TraitShell'));
     expect(selectAnimal(User0, 1).getFood(), 'Animal#B.getFood()').equal(0);
     expect(selectAnimal(User0, 3).id, 'Animal#D.id').equal('$D');
 
@@ -90,14 +90,17 @@ players:
     const gameId = ParseGame(`
 deck: 5 shell
 phase: feeding
-food: 
+food: 6
 players:
   - continent: $A carn, $B shell carn meta speca specb
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+    clientStore0.dispatch(traitAnswerRequest('TraitShell'));
     clientStore0.dispatch(gameEndTurnRequest());
+
+    expect(selectGame().status.round, 'Round').equal(2);
 
     expectUnchanged('$B cant attack', () => {
       clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$A'));
@@ -105,5 +108,20 @@ players:
       clientStore0.dispatch(traitActivateRequest('$B', tt.TraitSpecB));
       clientStore0.dispatch(traitActivateRequest('$B', tt.TraitMetamorphose, tt.TraitSpecA));
     }, serverStore, clientStore0);
+  });
+
+  it(`Shell can suicide`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A carn wait, $B shell
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+    expect(selectGame().question).ok;
+    clientStore0.dispatch(traitAnswerRequest(true));
+    expect(findAnimal('$A').getFood()).equal(2);
   });
 });

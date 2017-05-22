@@ -8,6 +8,7 @@ import {
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
+import * as tt from '../../models/game/evolution/traitTypes';
 import {replaceGetRandom} from '../../utils/randomGenerator';
 
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
@@ -55,23 +56,23 @@ players:
   - continent: $A Camouflage Scavenger Communication$S, $S TailLoss Grazing, $D Carnivorous FatTissue Piracy, $F Symbiosis$G Cooperation$G, $G Mimicry Running, $H Poisonous Hibernation
   - continent: $Z Carnivorous, $X Carnivorous, $C Carnivorous
 `);
-    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
-    const {selectGame0, selectAnimal0, selectTrait0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
-    const {selectGame1, selectAnimal1, selectTrait1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
-    const {selectGame2, selectAnimal2, selectTrait2} = makeClientGameSelectors(clientStore2.getState, gameId, 2);
+    const {selectGame, selectPlayer, findCard} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
+    const {selectGame1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
+    const {selectGame2} = makeClientGameSelectors(clientStore2.getState, gameId, 2);
 
     replaceGetRandom(() => 3, () => {
-      clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id, 0));
+      clientStore0.dispatch(gameDeployAnimalRequest(findCard(User0, tt.TraitFatTissue), 0));
 
       clientStore1.dispatch(gameEndTurnRequest());
 
-      clientStore2.dispatch(gameDeployAnimalRequest(selectCard(User2, 0).id, 0));
+      clientStore2.dispatch(gameDeployAnimalRequest(findCard(User2, tt.TraitFatTissue), 0));
 
-      clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, selectAnimal(User0, 0).id, true));
+      clientStore0.dispatch(gameDeployTraitRequest(findCard(User0, tt.TraitFatTissue), selectPlayer(User0).continent.first().id, true));
 
       clientStore2.dispatch(gameEndTurnRequest());
 
-      clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id, 1));
+      clientStore0.dispatch(gameDeployAnimalRequest(findCard(User0, tt.TraitFatTissue), 1));
     });
 
     /**
@@ -87,6 +88,7 @@ players:
 
     replaceGetRandom(() => 1, () => {
       clientStore2.dispatch(traitActivateRequest('$Z', 'TraitCarnivorous', '$G'));
+      clientStore1.dispatch(traitAnswerRequest(tt.TraitRunning));
     });
 
     clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$S'));

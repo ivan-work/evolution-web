@@ -54,7 +54,7 @@ export const gameInit = (game, userId) => ({type: 'gameInit', data: {game, userI
 
 const gameStartPhase = (gameId, phase, timestamp, data) => ({type: 'gameStartPhase', data: {gameId, phase, timestamp, data}})
 
-const server$gameStartPhase = (gameId, phase, data) => {
+export const server$gameStartPhase = (gameId, phase, data) => {
   logger.verbose('server$gameStartPhase:', phase, data);
   return server$game(gameId, gameStartPhase(gameId, phase, Date.now(), data));
 };
@@ -475,7 +475,7 @@ const server$gameExtict = (gameId) => (dispatch, getState) => {
     } else if (!animal.canSurvive()) {
       dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.STARVE, animal.id)));
     } else {
-      dispatch(server$tryViviparous(gameId, animal));
+      dispatch(server$tryViviparous(gameId, animal.id));
     }
   });
 };

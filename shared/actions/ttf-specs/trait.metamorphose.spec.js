@@ -64,6 +64,7 @@ players:
     clientStore0.dispatch(traitActivateRequest('$Hi', 'TraitHibernation'));
     clientStore0.dispatch(traitActivateRequest('$ShHiActive', 'TraitHibernation'));
     clientStore0.dispatch(traitActivateRequest('$Sh1', 'TraitCarnivorous', '$Sh'));
+    clientStore0.dispatch(traitAnswerRequest('TraitShell'));
     clientStore0.dispatch(gameEndTurnRequest());
 
     expectUnchanged('Animal cannot take food', () => {

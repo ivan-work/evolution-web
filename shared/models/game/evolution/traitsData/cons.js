@@ -24,8 +24,6 @@ import {
 
 import {selectGame} from '../../../../selectors';
 
-import {endHunt, endHuntNoCd, getStaticDefenses, getActiveDefenses, getAffectiveDefenses} from './TraitCarnivorous';
-
 import * as tt from '../traitTypes';
 
 export const TraitAedificator = {type: tt.TraitAedificator};

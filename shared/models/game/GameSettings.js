@@ -3,7 +3,7 @@ import * as cardsData from './evolution/cards/index';
 
 export const SETTINGS_PLAYERS = [2, 8];
 
-export const SETTINGS_TIME_VALUES = [.5, 20];
+export const SETTINGS_TIME_VALUES = [.1, 30];
 
 export const SETTINGS_TIME_MODIFIER = 60e3; // by 1 minute
 

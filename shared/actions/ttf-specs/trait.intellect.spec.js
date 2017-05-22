@@ -246,6 +246,7 @@ players:
     expect(selectGame().question).ok;
     expect(selectGame().question.type).equal(QuestionRecord.INTELLECT);
     clientStore0.dispatch(traitAnswerRequest('TraitIntellect', true));
+    clientStore0.dispatch(traitAnswerRequest('TraitInkCloud'));
     expect(selectGame().question).null;
 
     expect(selectAnimal(User0, 0).getFood()).equal(0);

@@ -66,6 +66,7 @@ export const TraitMetamorphose = {
 export const TraitShell = {
   type: tt.TraitShell
   , targetType: TRAIT_TARGET_TYPE.NONE
+  , optional: true
   , cooldowns: fromJS([
     [tt.TraitShell, TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
   ])
@@ -87,9 +88,11 @@ export const TraitTrematode = {
   , cardTargetType: CARD_TARGET_TYPE.LINK_ENEMY
   , food: 1
 };
+
 export const TraitInkCloud = {
   type: tt.TraitInkCloud
   , targetType: TRAIT_TARGET_TYPE.NONE
+  , optional: true
   , cooldowns: fromJS([
     [tt.TraitInkCloud, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
   ])
