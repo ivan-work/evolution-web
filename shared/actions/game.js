@@ -693,6 +693,8 @@ export const gameClientToServer = {
     if (!(traitData.cardTargetType & CTT_PARAMETER.LINK)) {
       traits = [TraitModel.new(traitData.type).attachTo(animal)];
     } else {
+      if (traitData.checkTraitPlacementFails(linkedAnimal))
+        throw new ActionCheckError(`gameDeployTraitRequest(${game.id})`, `Trait(%s) failed checkTraitPlacement on Animal(%s)`, traitData.type, animal.id);
       traits = TraitModel.LinkBetween(
         traitData.type
         , animal

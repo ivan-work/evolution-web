@@ -7,6 +7,7 @@ import {
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
+import * as tt from '../../models/game/evolution/traitTypes';
 
 import {makeGameSelectors} from '../../selectors';
 
@@ -82,5 +83,27 @@ players:
 
     expect(selectAnimal(User0, 0).traits).size(1);
     expect(selectAnimal(User0, 1).traits).size(1);
+  });
+
+  it(`Can't use traits under shell`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 5 shell
+phase: feeding
+food: 
+players:
+  - continent: $A carn, $B shell carn meta speca specb
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expectUnchanged('$B cant attack', () => {
+      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$A'));
+      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitSpecA));
+      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitSpecB));
+      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitMetamorphose, tt.TraitSpecA));
+    }, serverStore, clientStore0);
   });
 });

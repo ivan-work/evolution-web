@@ -219,9 +219,17 @@ export const TraitCarnivorous = {
         }
       }
     }
+
     /**
      * Actual attack started - check for running first
      * */
+
+    const traitCnidocytes = targetAnimal.hasTrait(tt.TraitCnidocytes);
+    if (traitCnidocytes && !traitCnidocytes.isEqual(disabledTid)) {
+      dispatch(traitAddHuntingCallback(game.id, (game) => (dispatch, getState) => {
+        dispatch(server$traitActivate(game, targetAnimal, traitCnidocytes, sourceAnimal));
+      }));
+    }
 
     if (traitRunning && !!TraitRunning.action() && !traitRunning.isEqual(disabledTid)) {
       dispatch(server$traitNotify_Start(game, targetAnimal, traitRunning, sourceAnimal));
@@ -235,12 +243,6 @@ export const TraitCarnivorous = {
       // if user has no options or if user didn't respond - outcome will be the same, so we DRY
 
     const defaultDefence = (questionId) => (dispatch, getState) => {
-        const traitCnidocytes = targetAnimal.hasTrait(tt.TraitCnidocytes);
-        if (traitCnidocytes && !traitCnidocytes.isEqual(disabledTid)) {
-          dispatch(traitAddHuntingCallback(game.id, (game) => (dispatch, getState) => {
-            dispatch(server$traitActivate(game, targetAnimal, traitCnidocytes, sourceAnimal));
-          }));
-        }
         if (traitTailLoss && traitTailLossTargets.size > 0 && !traitTailLoss.isEqual(disabledTid)) {
           dispatch(server$traitDefenceAnswer(game.id
             , questionId

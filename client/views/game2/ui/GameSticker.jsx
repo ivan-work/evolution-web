@@ -28,10 +28,6 @@ export class GameSticker extends React.PureComponent {
       <span>
         <h6>{T.translate('Game.UI.Status.Title')}:</h6>
       </span>
-      <div className='controls'>
-        <GameLog game={game}/>
-        <Pause/>
-      </div>
       <ul>
         <li className='line'>
           <span className='key'>{T.translate('Game.UI.Status.Turn')}:&nbsp;</span>
@@ -55,6 +51,10 @@ export class GameSticker extends React.PureComponent {
           </span>
         </li>
       </ul>
+      <div className='controls'>
+        <GameLog game={game}/>
+        <Pause/>
+      </div>
       <div className='flex'/>
       <GameEndTurnButton game={game}/>
     </div>);

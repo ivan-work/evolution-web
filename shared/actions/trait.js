@@ -109,7 +109,7 @@ const traitMakeCooldownActions = (gameId, trait, sourceAnimal) => {
   return traitData.cooldowns.map(([link, place, duration]) => {
     const placeId = (place === TRAIT_COOLDOWN_PLACE.PLAYER ? sourceAnimal.ownerId
       : place === TRAIT_COOLDOWN_PLACE.TRAIT ? trait.id
-      : sourceAnimal.id);
+        : sourceAnimal.id);
     return startCooldown(gameId, link, duration, place, placeId);
   }).toArray();
 };
@@ -184,7 +184,10 @@ const traitAnimalRemoveTrait = (gameId, sourcePid, sourceAid, traitId) => ({
 });
 
 export const server$traitAnimalRemoveTrait = (game, animal, trait) => (dispatch) => {
-  trait.getDataModel().onRemove && dispatch(trait.getDataModel().onRemove(game, animal, trait));
+  const dataModel = trait.getDataModel();
+  if (!!dataModel && !!dataModel.customFns && dataModel.customFns.onRemove) {
+    dispatch(dataModel.customFns.onRemove(game, animal, trait));
+  }
   dispatch(server$game(game.id, traitAnimalRemoveTrait(game.id, animal.ownerId, animal.id, trait.id)));
 };
 

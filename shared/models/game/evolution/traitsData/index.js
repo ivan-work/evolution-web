@@ -85,7 +85,7 @@ export const TraitMimicry = {
     return game.getPlayer(mimicryAnimal.ownerId).continent.filter((animal) =>
       mimicryAnimal.id !== animal.id
       && attackAnimal.id !== animal.id
-        //&& !animal.hasTrait(tt.TraitMimicry)
+      //&& !animal.hasTrait(tt.TraitMimicry)
       //&& (!animal.hasTrait(tt.TraitMimicry) || animal.hasTrait(tt.TraitMimicry) && animal.hasTrait(tt.TraitMimicry).checkAction(game, animal))
       && attackTraitData.checkTarget(game, attackAnimal, animal)
     );
@@ -183,7 +183,11 @@ export const TraitHibernation = {
     return true;
   }
   , $checkAction: (game, sourceAnimal) => !sourceAnimal.isFull() && game.deck.size > 0
-  , onRemove: (game, animal) => dispatch(server$traitSetAnimalFlag(game, animal, TRAIT_ANIMAL_FLAG.HIBERNATED, false))
+  , customFns: {
+    onRemove: (game, animal) => (dispatch) => {
+      dispatch(server$traitSetAnimalFlag(game, animal, TRAIT_ANIMAL_FLAG.HIBERNATED, false))
+    }
+  }
 };
 
 export const TraitPoisonous = {

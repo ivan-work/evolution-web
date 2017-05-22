@@ -75,8 +75,10 @@ export const TraitShell = {
     dispatch(endHunt(game, attackAnimal, attackTrait, defenceAnimal));
     return true;
   }
-  , onRemove: (game, animal) => (dispatch) => {
-    dispatch(server$traitSetAnimalFlag(game, animal, TRAIT_ANIMAL_FLAG.SHELL, false));
+  , customFns: {
+    onRemove: (game, animal) => (dispatch) => {
+      dispatch(server$traitSetAnimalFlag(game, animal, TRAIT_ANIMAL_FLAG.SHELL, false));
+    }
   }
 };
 

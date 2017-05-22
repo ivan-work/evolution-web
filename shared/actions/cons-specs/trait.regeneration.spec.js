@@ -2,6 +2,7 @@ import {
   gameEndTurnRequest
   , traitTakeFoodRequest
   , traitActivateRequest
+  , gameDeployAnimalRequest
   , gameDeployTraitRequest
   , gameDeployRegeneratedAnimalRequest
 } from '../actions';
@@ -13,12 +14,13 @@ import {makeGameSelectors} from '../../selectors';
 
 describe('TraitRegeneration:', () => {
   it('Placements', () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: deploy
 players:
-  - continent: $A regen, $B regen swim, $C angler regen
-    hand: 3 camo, 3 vivi
+  - continent: $A regen, $B regen swim, $C angler regen, $D
+    hand: 3 camo, 3 vivi, 3 comm
+  - hand: 5 camo, 3 trem
 `);
     const {selectGame, selectPlayer, findCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
     expectUnchanged(`Cannot be placed to invalid animal (Viviparous)`, () => {
@@ -33,7 +35,17 @@ players:
 
     expectChanged(`Can be placed to valid animal (Camouflage)`, () => {
       clientStore0.dispatch(gameDeployTraitRequest(findCard(User0, tt.TraitCamouflage), '$A'));
+      clientStore1.dispatch(gameDeployAnimalRequest(findCard(User1, tt.TraitCamouflage), 0));
       clientStore0.dispatch(gameDeployTraitRequest(findCard(User0, tt.TraitCamouflage), '$C'));
+    }, serverStore, clientStore0);
+
+    expectUnchanged(`Cannot be placed as pair`, () => {
+      clientStore1.dispatch(gameDeployTraitRequest(findCard(User1, tt.TraitTrematode), '$D', false, '$B'));
+    }, serverStore, clientStore0);
+    clientStore1.dispatch(gameDeployAnimalRequest(findCard(User1, tt.TraitCamouflage), 0));
+
+    expectUnchanged(`Cannot be placed as pair`, () => {
+      clientStore0.dispatch(gameDeployTraitRequest(findCard(User0, tt.TraitCommunication), '$D', false, '$B'));
     }, serverStore, clientStore0);
   });
 

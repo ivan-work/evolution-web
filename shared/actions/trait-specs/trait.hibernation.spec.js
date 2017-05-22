@@ -7,6 +7,7 @@ import {
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
+import * as tt from '../../models/game/evolution/traitTypes';
 import {TRAIT_ANIMAL_FLAG} from '../../models/game/evolution/constants';
 
 import {makeGameSelectors} from '../../selectors';
@@ -131,6 +132,23 @@ players:
     expect(selectGame().status.phase, 'FEEDING 1').equal(PHASE.FEEDING);
     expect(selectAnimal(User0, 0).getFoodAndFat(), '2: Animal stored food').equal(2);
     expect(selectAnimal(User0, 0).getFat(), '2: Animal stored fat').equal(2);
+  });
+
+  it(`Drops flag when dropped`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 10 camo
+food: 0
+phase: feeding
+players:
+  - continent: $A hiber meta carn trem$B + wait, $B
+`);
+    const {selectGame, selectPlayer, findAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitHibernation));
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitMetamorphose, tt.TraitHibernation));
+    clientStore0.dispatch(gameEndTurnRequest());
+    expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)).false;
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
   });
 });
 
