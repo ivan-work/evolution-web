@@ -10,9 +10,13 @@ import PlayerWrapper from './PlayerWrapper.jsx';
 import User from '../utils/User.jsx';
 import PlayerSVG from './PlayerSVG.jsx'
 
-const scrollSpeed = 8;
+const scrollSpeed = 6;
 
 const SCALE_THRESHOLD = 20;
+
+import styles from '../../styles.json';
+const {PLAYER_STICKER_ARROW_SIZE} = styles;
+
 
 export default class PlayerSticker extends React.Component {
 
@@ -88,14 +92,14 @@ export default class PlayerSticker extends React.Component {
         const startY = bbx.top;
         const endY = bbx.bottom;
 
-        if (startX <= x && x <= startX + 64)
+        if (startX <= x && x <= startX + PLAYER_STICKER_ARROW_SIZE)
           scrollX += scrollSpeed;
-        if (endX - 64 <= x && x <= endX)
+        if (endX - PLAYER_STICKER_ARROW_SIZE <= x && x <= endX)
           scrollX -= scrollSpeed;
 
-        if (startY <= y && y <= startY + 64)
+        if (startY <= y && y <= startY + PLAYER_STICKER_ARROW_SIZE)
           scrollY += scrollSpeed;
-        if (endY - 64 <= y && y <= endY)
+        if (endY - PLAYER_STICKER_ARROW_SIZE <= y && y <= endY)
           scrollY -= scrollSpeed;
 
         this.setScroll(scrollX, scrollY);
@@ -125,7 +129,8 @@ export default class PlayerSticker extends React.Component {
       })
     }
     if (minScale !== this.state.minScale) {
-      if (this.state.scale === this.state.minScale) {
+      // Initial autoscaling is turned off
+      if (this.state.scale === this.state.minScale && this.state.scale !== 1) {
         this.setScale(minScale, minScale);
       } else {
         this.setScale(this.state.scale, minScale);
@@ -201,9 +206,12 @@ export default class PlayerSticker extends React.Component {
           <PlayerWrapper game={game} player={player} showCards={this.state.showCards} ref={this.setupInner}/>
         </div>
 
-        {this.state.scrollX !== this.state.scrollWidth && <MDL.Icon className='arrow arrow-left' name='keyboard_arrow_left'/>}
-        {this.state.scrollX !== -this.state.scrollWidth && <MDL.Icon className='arrow arrow-right' name='keyboard_arrow_right'/>}
-        {this.state.scrollY !== this.state.scrollHeight && <MDL.Icon className='arrow arrow-top' name='keyboard_arrow_up'/>}
+        {this.state.scrollX !== this.state.scrollWidth &&
+        <MDL.Icon className='arrow arrow-left' name='keyboard_arrow_left'/>}
+        {this.state.scrollX !== -this.state.scrollWidth &&
+        <MDL.Icon className='arrow arrow-right' name='keyboard_arrow_right'/>}
+        {this.state.scrollY !== this.state.scrollHeight &&
+        <MDL.Icon className='arrow arrow-top' name='keyboard_arrow_up'/>}
         {this.state.scrollY !== 0 && <MDL.Icon className='arrow arrow-bottom' name='keyboard_arrow_down'/>}
       </div>
       <div className={'CardCollectionIcon' + (isUser ? ' pointer' : '') + (game.isPlayerTurn(player) ? ' active' : '')}

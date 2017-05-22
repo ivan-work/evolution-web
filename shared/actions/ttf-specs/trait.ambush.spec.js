@@ -240,4 +240,17 @@ players:
     expect(selectPlayer(User0).continent).size(0);
     expect(selectGame().food).equal(2);
   });
+
+  it('Score', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: angler, angler camo
+`);
+
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    expect(selectPlayer(User0).countScore()).equal(5);
+  });
 });

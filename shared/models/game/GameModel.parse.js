@@ -86,7 +86,7 @@ export const parseAnimalList = (userId, string) => {
       .set(a2.id, a2.traitAttach(trait2));
   });
   return animalsMap
-    .map(a => TraitNeoplasm.actionDisableTraitsInAnimal(a))
+    .map(a => a.recalculateDisabling())
     .toList()
   // .map(a => {
   //   console.log(a.traits.map(t => t.type).toArray())

@@ -17,7 +17,8 @@
 .TraitRecombinationDialog {
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: space-between;
+  min-width: 4 * $ANIMAL_WIDTH;
   .TraitHolder {
     transition: transform .25s;
     &.selected0 {

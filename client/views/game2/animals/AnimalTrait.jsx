@@ -11,19 +11,23 @@ import {AnimalModel} from '../../../../shared/models/game/evolution/AnimalModel'
 import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 
 import AnimalTraitDetails from './AnimalTraitDetails.jsx';
-import Tooltip from 'rc-tooltip';
+import Tooltip from '../../utils/Tooltip.jsx';
 
 import '../../game/animals/AnimalTrait.scss';
 
 class AnimalTrait extends React.PureComponent {
   static propTypes = {
     trait: PropTypes.instanceOf(TraitModel).isRequired
+    , enableTooltip: PropTypes.bool
   };
 
-  static defaultProps = {classNames: {}};
+  static defaultProps = {
+    classNames: {}
+    , enableTooltip: true
+  };
 
   render() {
-    const {trait, className} = this.props;
+    const {trait, className, enableTooltip} = this.props;
 
     const classNames = classnames(Object.assign(this.classNames || {}, {
       AnimalTrait: true
@@ -34,7 +38,7 @@ class AnimalTrait extends React.PureComponent {
 
     return (<div id={'AnimalTrait' + trait.id} className={classNames + (!!className ? ' ' + className : '')}>
       <Tooltip
-        overlay={<AnimalTraitDetails trait={trait}/>}
+        overlay={enableTooltip && <AnimalTraitDetails trait={trait}/>}
         mouseEnterDelay={.5}
         destroyTooltipOnHide={true}
       >

@@ -1,7 +1,7 @@
 import React from 'react'
 import Tooltip from 'rc-tooltip';
 
-export default ({children, overlay, ...props}) => (overlay === null ? null
+export default ({children, overlay, ...props}) => (!overlay ? children
   : <Tooltip
   {...props}
   mouseEnterDelay={props.mouseEnterDelay !== void 0 ? props.mouseEnterDelay : .5}

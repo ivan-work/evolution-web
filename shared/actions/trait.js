@@ -109,7 +109,7 @@ const traitMakeCooldownActions = (gameId, trait, sourceAnimal) => {
   return traitData.cooldowns.map(([link, place, duration]) => {
     const placeId = (place === TRAIT_COOLDOWN_PLACE.PLAYER ? sourceAnimal.ownerId
       : place === TRAIT_COOLDOWN_PLACE.TRAIT ? trait.id
-        : sourceAnimal.id);
+      : sourceAnimal.id);
     return startCooldown(gameId, link, duration, place, placeId);
   }).toArray();
 };
@@ -274,7 +274,6 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
   logger.debug(`server$startFeeding: ${sourceId} feeds ${animal.id} through ${sourceType} with (${amount})`);
   if (!animal.canEat(selectGame(getState, gameId))) return false;
 
-  // TODO bug with 2 amount on animal 2/3
   dispatch(server$game(gameId, traitMoveFood(gameId, animal.id, amount, sourceType, sourceId)));
 
   const game = selectGame(getState, gameId);
@@ -301,7 +300,11 @@ export const server$startFeeding = (gameId, animal, amount, sourceType, sourceId
     .map(traitCommunication => {
       if (!traitCommunication.checkAction(selectGame(getState, gameId), animal)) return;
       const {animal: linkedAnimal} = game.locateAnimal(traitCommunication.linkAnimalId);
-      if (!linkedAnimal) logger.error('linkedAnimal not found', {game, 'select': selectGame(getState, gameId)});
+      if (!linkedAnimal) {
+        // Because "animal" is coming from params, when it kills linkedAnimal, linkedAnimal is null
+        // TODO refactor so startFeeding accepts animalId and reselects "animal"
+        return;
+      }
       const linkedTrait = linkedAnimal.traits.find(trait => trait.id === traitCommunication.linkId);
 
       traitMakeCooldownActions(gameId, traitCommunication, animal)
@@ -346,7 +349,7 @@ export const server$startFeedingFromGame = (gameId, animalId, amount) => (dispat
     const carnivorous = attackAnimal.hasTrait(tt.TraitCarnivorous);
     if (!ambush || !ambush.value || !carnivorous) return;
 
-    if (game.cooldowns.checkFor(tt.TraitCarnivorous, null, attackAnimal.id)) return;
+    if (game.cooldowns.checkFor(tt.TraitCarnivorous, null, attackAnimal.id, carnivorous.id)) return;
 
     const carnivorousData = carnivorous.getDataModel();
 
@@ -380,8 +383,15 @@ const makeTraitQuestionTimeout = (gameId, questionId) => `traitQuestion#${gameId
 
 export const traitAnswerRequest = (traitId, targetId) => (dispatch, getState) => dispatch({
   type: 'traitAnswerRequest'
-  , data: {gameId: getState().getIn(['game', 'id']), questionId: getState().getIn(['game', 'question', 'id']), traitId, targetId}
-  , meta: {server: true}
+  ,
+  data: {
+    gameId: getState().getIn(['game', 'id']),
+    questionId: getState().getIn(['game', 'question', 'id']),
+    traitId,
+    targetId
+  }
+  ,
+  meta: {server: true}
 });
 
 export const traitAnswerSuccess = (gameId, questionId) => ({

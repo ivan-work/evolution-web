@@ -197,6 +197,7 @@ export const TraitAnglerfish = {
   , playerControllable: true
   , transient: true
   , hidden: true
+  , score: 0
   , $checkAction: (game, animal, traitSpec) => animal.traits.size === 1
   , action: (game, sourceAnimal, trait) => (dispatch) => {
     dispatch(server$traitSetValue(game, sourceAnimal, trait, !trait.value));

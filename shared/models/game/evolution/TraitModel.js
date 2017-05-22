@@ -68,12 +68,6 @@ export class TraitModel extends Record({
     ];
   }
 
-  setDisabled(value) {
-    return (value
-      ? this.set('disabled', value).set('value', false)
-      : this.set('disabled', value));
-  }
-
   isEqual(id) {
     return this.id === id || this.type === id;
   }
@@ -141,10 +135,10 @@ export class TraitModel extends Record({
       if (this.linkSource) {
         return 1 + this.getDataModel().food * 2 // 1 for linkSource only. And food is doubled by traits, so 2x score
       } else {
-        return 0 // Doesn't count not linksourced
+        return 0; // Doesn't count not linksourced
       }
     }
-    return 1 + this.getDataModel().food;
+    return this.getDataModel().score + this.getDataModel().food;
   }
 
   countDetachScore() {

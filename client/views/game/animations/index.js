@@ -27,7 +27,7 @@ export const createAnimationServiceConfig = () => ({
     }));
 
     subscribe('traitNotify_End', (actionData, getState) => {
-      console.log('traitNotify_End', actionData);
+      // console.log('traitNotify_End', actionData);
       const {sourceAid, traitId, traitType, targetId} = actionData;
       if (localTraits[traitType + '_End']) {
         return localTraits[traitType + '_End'](actionData);

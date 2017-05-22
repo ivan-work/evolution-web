@@ -2,7 +2,14 @@ import {Record, List, Map, OrderedMap} from 'immutable';
 import uuid from 'uuid';
 import {TraitModel} from './TraitModel';
 
-import {TraitFatTissue, TraitSymbiosis, TraitShell, TraitHibernation, TraitAnglerfish, TraitNeoplasm} from './traitTypes/index';
+import {
+  TraitFatTissue,
+  TraitSymbiosis,
+  TraitShell,
+  TraitHibernation,
+  TraitAnglerfish,
+  TraitNeoplasm
+} from './traitTypes/index';
 import {TRAIT_ANIMAL_FLAG, CTT_PARAMETER} from './constants';
 
 /**
@@ -32,9 +39,9 @@ export class AnimalModel extends Record({
     return js == null
       ? null
       : new AnimalModel(js)
-        .set('traits', js.traits.reduce((result, trait) => result.set(trait.id, trait), OrderedMap())
-          .map(trait => TraitModel.fromServer(trait)))
-        .set('flags', Map(js.flags));
+      .set('traits', js.traits.reduce((result, trait) => result.set(trait.id, trait), OrderedMap())
+        .map(trait => TraitModel.fromServer(trait)))
+      .set('flags', Map(js.flags));
   }
 
   toClient() {
@@ -80,6 +87,7 @@ export class AnimalModel extends Record({
     const traits = this.traits.filterNot(lookup);
     return this
       .set('traits', traits)
+      .recalculateDisabling()
       .recalculateFood()
   }
 
@@ -95,6 +103,25 @@ export class AnimalModel extends Record({
       .set('foodSize', foodSize)
       .set('fatSize', fatSize)
       .set('food', Math.min(this.food, foodSize))
+  }
+
+  recalculateDisabling() {
+    const traitNeoplasm = this.hasTrait(TraitNeoplasm);
+    let belowNeoplasm = true;
+    const isParalysed = this.hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED);
+    return this.update('traits', traits => traits.map(trait => {
+      if (isParalysed) {
+        return trait.set('disabled', true);
+      } else if (trait.type === TraitNeoplasm) {
+        belowNeoplasm = false;
+        return trait.set('disabled', false);
+      } else if (!!traitNeoplasm && belowNeoplasm && traitNeoplasm.getDataModel().customFns.canBeDisabled(trait)) {
+        return trait.set('disabled', true).set('value', false)
+      } else {
+        return trait.set('disabled', false);
+      }
+    }))
+      .recalculateFood();
   }
 
   /**

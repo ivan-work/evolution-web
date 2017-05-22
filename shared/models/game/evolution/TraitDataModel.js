@@ -11,6 +11,7 @@ export const TRAIT_DATA_PLACEMENT_ERRORS = {
 export class TraitDataModel extends Record({
   type: null // 'TraitFatTissuue', etc
   , food: 0 // Amount of food required
+  , score: 1 // Base score for trait. TODO rewrite every trait to use score only
   , cardTargetType: CARD_TARGET_TYPE.ANIMAL_SELF // from CARD_TARGET_TYPE
   , checkTraitPlacement: null // (animal) => boolean // if trait is allowed to be placed on this animal
   , targetType: null // from TRAIT_TARGET_TYPE
@@ -24,6 +25,7 @@ export class TraitDataModel extends Record({
   , $checkAction: null // if trait is allowed to be clicked? (game, sourceAnimal) => boolean
   , checkTarget: null // if target is valid? (game, sourceAnimal, targetAnimal) => boolean
   , getTargets: null // get list of available target for an active trait (game, sourceAnimal) => list of targets
+  , customFns: null // Object of custom trait functions
 }) {
   static new(traitType) {
     if (!(traitType in traitsData)) throw Error(`traitData[${traitType}] not found`);
@@ -41,9 +43,5 @@ export class TraitDataModel extends Record({
         this.food > 0 || animal.traits.filter(t => !t.getDataModel().hidden).size >= 2
       )) return tt.TraitRegeneration;
     return false;
-  }
-
-  canBeDisabled() {
-    return !this.hidden && !(this.cardTargetType & CTT_PARAMETER.LINK);
   }
 }

@@ -104,7 +104,7 @@ export const TraitCarnivorous = {
   , playerControllable: true
   , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitScavenger)
   , cooldowns: fromJS([
-    ['TraitCarnivorous', TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
+    ['TraitCarnivorous', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: (game, sourceAnimal, trait, targetAnimal) => (dispatch, getState) => {

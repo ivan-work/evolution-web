@@ -23,9 +23,16 @@ export default class TraitRecombinationDialog extends React.Component {
     this.state = INITIAL_STATE;
     this.onChooseTrait = (traitId, position) => {
       const traits = this.state.traits;
-      traits[position] = traitId;
+      if (traits[position] === traitId) {
+        traits[position] = null;
+      } else {
+        traits[position] = traitId;
+      }
       this.setState({traits})
     };
+    this.validate = () => {
+      return !(!!this.state.traits[0] && !!this.state.traits[1]);
+    }
   }
 
   componentWillReceiveProps(props) {
@@ -70,7 +77,7 @@ export default class TraitRecombinationDialog extends React.Component {
           {this.renderAnimal(animal2, traits2, 1)}
         </div>
       </div>
-      <Button onClick={this.confirmAction}>
+      <Button primary raised disabled={this.validate()} onClick={this.confirmAction}>
         {T.translate('Game.UI.TraitRecombinationDialog.Action')}
       </Button>
     </DialogContent>);
@@ -84,7 +91,7 @@ export default class TraitRecombinationDialog extends React.Component {
           <div key={trait.id}
                onClick={() => this.onChooseTrait(trait.id, position)}
                className={'TraitHolder pointer' + (this.state.traits[position] === trait.id ? ' selected' + position : '')}>
-            <AnimalTrait trait={trait}/>
+            <AnimalTrait trait={trait} enableTooltip={false}/>
           </div>
         ))
       }

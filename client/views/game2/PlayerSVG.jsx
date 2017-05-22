@@ -7,6 +7,8 @@ import cn from 'classnames';
 
 import AnimalTraitArrowMarker from './animals/AnimalTraitArrowMarker.jsx';
 
+const LOG = false;
+
 const linkedTraitPathStyle = {
   strokeWidth: '3px'
   , strokeLinecap: 'round'
@@ -37,6 +39,7 @@ export default class PlayerSVG extends React.Component {
   }
 
   mountLinkedTrait(linkedTrait) {
+    LOG && console.log('mountLinkedTrait', linkedTrait);
     const trait1 = linkedTrait.props.trait;
     this.linkedTraits[trait1.id] = linkedTrait;
     const links = this.state.links;
@@ -50,10 +53,11 @@ export default class PlayerSVG extends React.Component {
   }
 
   unmountLinkedTrait(linkedTrait) {
+    LOG && console.log('unmountLinkedTrait', linkedTrait);
     const trait = linkedTrait.props.trait;
     if (this.$isMounted && this.linkedTraits[trait.id]) {
       delete this.linkedTraits[trait.id];
-      this.setState({links: this.state.links.filter(link => this.isTraitInLink(link, trait.id))});
+      this.setState({links: this.state.links.filter(link => !this.isTraitInLink(link, trait.id))});
     }
   }
 

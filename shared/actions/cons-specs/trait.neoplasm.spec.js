@@ -2,10 +2,12 @@ import {
   gameEndTurnRequest
   , traitTakeFoodRequest
   , traitActivateRequest
+  , traitAnswerRequest
   , gameDeployTraitRequest
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
+import * as tt from '../../models/game/evolution/traitTypes';
 
 import {makeGameSelectors} from '../../selectors';
 
@@ -57,17 +59,6 @@ players:
     expect(selectGame().status.turn).equal(2);
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
 
-    expect(selectAnimal(User0, 0).getWantedFood(), `Neoplasm disabled parasite`).equal(2);
-    clientStore0.dispatch(traitTakeFoodRequest('$A'));
-    clientStore0.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(traitTakeFoodRequest('$A'));
-    clientStore0.dispatch(gameEndTurnRequest());
-
-    clientStore0.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(gameEndTurnRequest());
-    expect(selectGame().status.turn).equal(3);
-    expect(selectGame().status.phase).equal(PHASE.FEEDING);
-
     expect(selectAnimal(User0, 0).id, 'Neoplasm killed $A').equal('$B');
   });
 
@@ -117,4 +108,39 @@ players:
     expect(selectAnimal(User0, 0).id).equal('$A');
     expect(selectAnimal(User0, 1), '$B is dead').not.ok;
   });
+
+  it('Drops disabling after loss', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A carn wait, $B pira neoplasm tail
+`);
+    const {selectGame, selectPlayer, selectCard, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitTailLoss, tt.TraitNeoplasm));
+    expect(findAnimal('$A').getFood()).equal(1);
+    expect(findAnimal('$B').getFood()).equal(0);
+    clientStore0.dispatch(traitActivateRequest('$B', tt.TraitPiracy, '$A'));
+    expect(findAnimal('$A').getFood()).equal(0);
+    expect(findAnimal('$B').getFood()).equal(1);
+  });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

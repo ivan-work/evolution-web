@@ -8,6 +8,7 @@ import {
 import {makeGameSelectors} from '../../selectors';
 
 import {PHASE} from '../../models/game/GameModel';
+import * as tt from '../../models/game/evolution/traitTypes';
 
 describe('TraitCarnivorous:', function () {
   it('Simple', () => {
@@ -110,5 +111,17 @@ players:
     expectChanged('$E', () => {
       clientStore0.dispatch(traitActivateRequest('$E', 'TraitCarnivorous', '$D'))
     }, serverStore, clientStore0, clientStore1);
+  });
+
+  it('traits null bug', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+players: 
+  - continent: $A cnid carn comm$B wait, $B cnid carn comm$C wait, $C cnid carn wait
+`);
+    const {selectGame, selectAnimal, selectPlayer} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$C'));
   });
 });

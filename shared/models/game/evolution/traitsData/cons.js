@@ -17,6 +17,7 @@ import {
   , server$traitStartCooldown
   , server$traitAnimalAttachTrait
   , server$traitAnimalRemoveTrait
+  , server$traitSetAnimalFlag
   , server$game
   , traitParalyze
 } from '../../../../actions/actions';
@@ -32,34 +33,27 @@ export const TraitAedificator = {type: tt.TraitAedificator};
 export const TraitNeoplasm = {
   type: tt.TraitNeoplasm
   , cardTargetType: CARD_TARGET_TYPE.ANIMAL_ENEMY
-  , actionMoveInAnimal: (animal) => {
-    let animalTraitArray = animal.traits.toArray();
-    const index = animalTraitArray.findIndex((t) => t.type === tt.TraitNeoplasm);
-    if (!~index) return animal;
-    const nextIndex = animalTraitArray.findIndex((t, i) => {
-      return i > index && !t.disabled && t.getDataModel().canBeDisabled();
-    });
-    if (!~nextIndex) return null; // KILL
-    const traitNeoplasm = animalTraitArray[index];
-    animalTraitArray.splice(index, 1);
-    animalTraitArray.splice(nextIndex, 0, traitNeoplasm);
-    animalTraitArray = animalTraitArray.map(t => [t.id, t]);
-    return animal.set('traits', OrderedMap(animalTraitArray));
-  }
-  , actionDisableTraitsInAnimal: (animal) => {
-    let foundNeoplasm = false;
-    if (!animal.hasTrait(tt.TraitNeoplasm)) return animal;
-    return animal
-      .update('traits', traits => traits
-        .map((t) => {
-          if (t.type === tt.TraitNeoplasm) {
-            foundNeoplasm = true;
-          } else if (!foundNeoplasm && !t.disabled && t.getDataModel().canBeDisabled()) {
-            t = t.setDisabled(true);
-          }
-          return t;
-        }))
-      .recalculateFood();
+  , customFns: {
+    canBeDisabled: (trait) => (!trait.getDataModel().hidden
+    && !(trait.getDataModel().cardTargetType & CTT_PARAMETER.LINK))
+    , actionMoveInAnimal: (animal) => {
+      let animalTraitArray = animal.traits.toArray();
+      const currentIndex = animalTraitArray.findIndex((t) => t.type === tt.TraitNeoplasm);
+      if (!~currentIndex) return animal;
+      const nextIndex = animalTraitArray.findIndex((t, i) => {
+        return i > currentIndex && TraitNeoplasm.customFns.canBeDisabled(t);
+      });
+      if (!~nextIndex) return null; // KILL
+      const futureIndex = animalTraitArray.findIndex((t, i) => {
+        return i > nextIndex && TraitNeoplasm.customFns.canBeDisabled(t);
+      });
+      if (!~futureIndex) return null; // KILL
+      const traitNeoplasm = animalTraitArray[currentIndex];
+      animalTraitArray.splice(currentIndex, 1);
+      animalTraitArray.splice(nextIndex, 0, traitNeoplasm);
+      animalTraitArray = animalTraitArray.map(t => [t.id, t]);
+      return animal.set('traits', OrderedMap(animalTraitArray));
+    }
   }
 };
 
@@ -110,8 +104,10 @@ export const TraitRecombination = {
     return (TraitRecombination.getTargets(game, sourceAnimal).size > 0
     && TraitRecombination.getTargets(game, linkedAnimal).size > 0);
   }
-  , checkTarget: (game, targetAnimal, targetTrait) => targetTrait.getDataModel().canBeDisabled()
-  , getTargets: (game, targetAnimal, targetTrait) => targetAnimal.traits.filter(t => t.getDataModel().canBeDisabled()).toList()
+  , checkTarget: (game, targetAnimal, targetTrait) => (!targetTrait.getDataModel().hidden
+  && !(targetTrait.getDataModel().cardTargetType & CTT_PARAMETER.LINK)) // Copypaste of TraitNeoplasm =/
+  , getTargets: (game, targetAnimal, targetTrait) => targetAnimal.traits
+    .filter(t => TraitRecombination.checkTarget(null, null, t)).toList()
   , getLinkedAnimal: (game, animal, trait) => (game.locateAnimal(
       animal.id === trait.hostAnimalId
         ? trait.linkAnimalId
