@@ -128,13 +128,14 @@ Game:
       TraitCarnivorous: '{2} съедает {3}'
       TraitScavenger: '{2} кушает останки.'
     animalDeath:
-      STARVE: '{0} умерло от голода.'
-      KILL: '{0} убито.'
-      POISON: '{0} умерло от яда.'
-      NEOPLASM: '{0} умерло от $TraitNeoplasm.'
+      STARVE: '{1} умерло от голода.'
+      KILL: '{1} убито.'
+      POISON: '{1} умерло от яда.'
+      NEOPLASM: '{1} умерло от $TraitNeoplasm.'
     traitNotify_Start:
       0: '{0} использует свойство ${1}'
       1: '{0} использует свойство ${1} на {2}'
+      2: '{0} использует свойство ${1} на {2} и {3}'
   Trait:
     TraitSymbiosis      : Симбиоз
     TraitCommunication  : Сотрудничество

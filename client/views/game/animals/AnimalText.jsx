@@ -10,7 +10,7 @@ import './AnimalText.scss';
 
 export const AnimalText = ({animal}) =>(
   <span>
-    <img className='AnimalText' src={gecko}/>
+    <img className='AnimalText' src={gecko} alt={T.translate('Game.Animal')}/>
     {!!animal && <span>
       ({animal.slice(1)
         .map((trait, index) => (

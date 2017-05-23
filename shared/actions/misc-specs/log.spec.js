@@ -157,8 +157,8 @@ players:
       expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User0.id, false, false]);
 
       expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User1.id]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $S, 'TraitGrazing', void 0]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $H, 'TraitHibernation', void 0]);
+      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $S, 'TraitGrazing']);
+      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $H, 'TraitHibernation']);
       expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $D, 'TraitPiracy', $Q]);
       expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'TraitPiracy', $D, $Q]);
       expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'GAME', $G, null]);
@@ -168,7 +168,7 @@ players:
 
       expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User2.id]);
       expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $Z, 'TraitCarnivorous', $G]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $G, 'TraitRunning', void 0]);
+      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $G, 'TraitRunning']);
       expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User2.id, false, false]);
 
       expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User0.id]);
@@ -178,7 +178,7 @@ players:
       expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User0.id, false, false]);
 
       expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User1.id]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $S1, 'TraitGrazing', void 0]);
+      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $S1, 'TraitGrazing']);
       expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'GAME', $D, null]);
       expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User1.id, false, false]);
 

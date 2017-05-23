@@ -260,4 +260,20 @@ players:
     expect(selectAnimal(User0, 0).getFood()).equal(2);
     expect(selectAnimal(User0, 2)).undefined;
   });
+
+  it('Intellect on CD with attacking passive', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 1 camo
+phase: feeding
+players:
+  - continent: $A carn int wait, $B mimi flight, $C swim
+`);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
+    expect(selectGame().question).not.ok;
+    expect(findAnimal('$B')).not.ok;
+    expect(findAnimal('$C')).ok;
+  });
 });
