@@ -18,6 +18,8 @@ import {
   , server$traitAnimalAttachTrait
   , server$traitAnimalRemoveTrait
   , server$traitSetAnimalFlag
+  , traitAddHuntingCallback
+  , server$traitActivate
   , server$game
   , traitParalyze
 } from '../../../../actions/actions';
@@ -66,9 +68,21 @@ export const TraitRegeneration = {
 export const TraitCnidocytes = {
   type: tt.TraitCnidocytes
   , targetType: TRAIT_TARGET_TYPE.NONE
-  , action: (game, sourceAnimal, trait, targetAnimal) => (dispatch) => {
-    dispatch(server$game(game.id, traitParalyze(game.id, targetAnimal.id)));
-    return true;
+  , cooldowns: fromJS([
+    [tt.TraitCnidocytes, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ACTIVATION]
+  ])
+  , action: (game, defenceAnimal, traitCnidocytes, target, attackAnimal, attackTrait) => (dispatch) => {
+    dispatch(TraitCnidocytes.customFns.paralyze(game, defenceAnimal, traitCnidocytes, attackAnimal));
+    return dispatch(server$traitActivate(game, attackAnimal, attackTrait, defenceAnimal));
+  }
+  , customFns: {
+    paralyze: (game, sourceAnimal, traitCnidocytes, targetAnimal) => dispatch => {
+      const gameId = game.id;
+      dispatch(server$traitStartCooldown(gameId, traitCnidocytes, sourceAnimal));
+      dispatch(traitAddHuntingCallback(gameId, (game) => (dispatch, getState) => {
+        dispatch(server$game(gameId, traitParalyze(game.id, targetAnimal.id)));
+      }));
+    }
   }
 };
 
@@ -78,7 +92,7 @@ export const TraitRecombination = {
   , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
   , playerControllable: true
   , cooldowns: fromJS([
-    [tt.TraitRecombination, TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
+    [tt.TraitRecombination, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
   ])
   , action: (game, sourceAnimal, traitRecombination, [trait1, trait2]) => (dispatch, getState) => {
     const animal1 = sourceAnimal;

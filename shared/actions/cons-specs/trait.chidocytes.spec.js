@@ -27,12 +27,14 @@ players:
 
     replaceGetRandom(() => 1, () => {
       clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$C'));
-      clientStore0.dispatch(traitAnswerRequest(tt.TraitRunning))
+      clientStore0.dispatch(traitAnswerRequest(tt.TraitCnidocytes));
+      clientStore0.dispatch(traitAnswerRequest(tt.TraitRunning));
       expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
 
     clientStore0.dispatch(gameEndTurnRequest());
 
       clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$C'));
+      clientStore0.dispatch(traitAnswerRequest(tt.TraitCnidocytes));
       clientStore0.dispatch(traitAnswerRequest(tt.TraitInkCloud));
       expect(findAnimal('$B').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
     });

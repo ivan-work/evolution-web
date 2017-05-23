@@ -4,8 +4,8 @@ import PropTypes from 'prop-types'
 import {DragFood, Food} from './Food.jsx';
 
 
-export const GameFoodContainer = ({food}) => (<div className='GameFoodContainer'>
-  {Array.from({length: food}).map((u, index) => <DragFood key={index}/>)}
+export const GameFoodContainer = ({game, food}) => (<div className='GameFoodContainer'>
+  {Array.from({length: food}).map((u, index) => <DragFood key={index} game={game}/>)}
 </div>);
 
 

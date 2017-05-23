@@ -4,17 +4,10 @@ import classnames from 'classnames';
 
 import './Food.scss';
 
-import {GameProvider} from '../providers/GameProvider.jsx';
-
 import { DragSource } from 'react-dnd';
 import { DND_ITEM_TYPE } from '../dnd/DND_ITEM_TYPE';
 
 import {TRAIT_COOLDOWN_LINK} from '../../../../shared/models/game/evolution/constants';
-
-//const graphics = ['\u1F345']/*, '&#127814;', '&#127815;'
-//  , '&#127816;', '&#127817;', '&#127818;', '&#127819;', '&#127820;'
-//  , '&#127821;', '&#127822;', '&#127823;', '&#127824;', '&#127825;', '&#127826;', '&#127827;'];*/
-//const getGraphics = () => graphics[Math.floor(Math.random() * graphics.length)];
 
 class Food extends React.PureComponent {
   render() {
@@ -60,10 +53,7 @@ const DragFood = DragSource(DND_ITEM_TYPE.FOOD
 )(DragFood_Body);
 
 DragFood.propTypes = {
-  // by GameProvider
   game: PropTypes.object.isRequired
 };
 
-const GameDragFood = GameProvider(DragFood);
-
-export {Food, GameDragFood as DragFood};
+export {Food, DragFood};

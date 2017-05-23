@@ -5,7 +5,7 @@ export const SETTINGS_PLAYERS = [2, 8];
 
 export const SETTINGS_TIME_VALUES = [.1, 30];
 
-export const SETTINGS_TIME_MODIFIER = 60e3; // by 1 minute
+export const SETTINGS_MINUTES = 60e3; // by 1 minute
 
 export const SETTINGS_TIMED_OUT_TURN_TIME = 5e3;
 
@@ -23,8 +23,9 @@ export const SettingsRules = {
 
 export class SettingsRecord extends Record({
   maxPlayers: 4
-  , timeTurn: process.env.TEST ? 0 : 4 * SETTINGS_TIME_MODIFIER
-  , timeTraitResponse: process.env.TEST ? 0 : 1 * SETTINGS_TIME_MODIFIER
+  , timeTurn: process.env.TEST ? 0 : 4 * SETTINGS_MINUTES
+  , timeTraitResponse: process.env.TEST ? 0 : 1 * SETTINGS_MINUTES
+  , timeAmbush: process.env.TEST ? 0 : 10e3
   , halfDeck: false
   , addon_timeToFly: false
   , addon_continents: false

@@ -26,14 +26,6 @@ export const appChangeSound = (value) => ({
   , data: value
 });
 
-export const appSwitchUI = () => (dispatch, getState) => {
-  const value = getState().getIn(['app', 'oldUI']);
-  dispatch({
-    type: 'appSwitchUI'
-    , data: !value
-  });
-};
-
 const SHOULD_PLAY_AUDIO = GLOBAL_BROWSER && process.env.NODE_ENV !== 'test' && window && window.Audio;
 
 const AUDIO_FILES = {};

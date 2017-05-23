@@ -2,6 +2,11 @@ export const selectRoom = (getState, roomId) => getState().getIn(['rooms', roomI
 
 // Game:
 
+/**
+ * @param getState
+ * @param gameId
+ * @return {GameModel} game
+ */
 export const selectGame = (getState, gameId) =>
   getState().getIn(['games', gameId]);
 

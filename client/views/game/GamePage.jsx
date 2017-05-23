@@ -5,17 +5,15 @@ import {connect} from 'react-redux';
 import {compose} from 'redux';
 
 import Game from './Game.jsx'
-import {GameWrapperView as GameWrapper} from '../game/GameWrapper.jsx'
 
 // Animations
 import {AnimationServiceContext} from '../../services/AnimationService';
-import {createAnimationServiceConfig} from '../game/animations';
+import {createAnimationServiceConfig} from './animations';
 
 export class GamePage extends React.Component {
   render() {
-    const {game, oldUI} = this.props;
+    const {game} = this.props;
     if (!game) return null;
-    // if (oldUI) return <GameWrapper/>;
     return <Game/>;
   }
 }
@@ -28,8 +26,7 @@ export const GamePageView = compose(
       const user = state.get('user');
       const roomId = state.get('room');
       const room = state.getIn(['rooms', roomId]);
-      const oldUI = state.getIn(['app', 'oldUI']);
-      return {game, user, roomId, room, oldUI}
+      return {game, user, roomId, room}
     }
     , (dispatch) => ({})
   ))(GamePage);

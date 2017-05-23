@@ -1,4 +1,5 @@
 import {fromJS} from 'immutable';
+import {PHASE} from '../../GameModel';
 import {
   TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_DURATION
@@ -125,7 +126,7 @@ export const TraitPiracy = {
   ])
   , action: (game, sourceAnimal, traitPiracy, targetAnimal) => dispatch => {
     dispatch(server$traitStartCooldown(game.id, traitPiracy, sourceAnimal));
-    dispatch(server$startFeeding(game.id, sourceAnimal, 1, tt.TraitPiracy, targetAnimal.id));
+    dispatch(server$startFeeding(game.id, sourceAnimal.id, 1, tt.TraitPiracy, targetAnimal.id));
     return true;
   }
   , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game) && sourceAnimal.getNeededFood() > 0
@@ -139,11 +140,12 @@ export const TraitTailLoss = {
     [tt.TraitTailLoss, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
   , getTargets: (game, attackAnimal, attackTraitData, defenseAnimal) => defenseAnimal.getTraits()
+    .toList()
     .filter(t => t.type !== tt.TraitTrematode)
   , action: (game, targetAnimal, trait, targetTrait, attackAnimal, attackTrait) => (dispatch, getState) => {
     dispatch(server$traitAnimalRemoveTrait(game, targetAnimal, targetTrait));
 
-    dispatch(server$startFeeding(game.id, attackAnimal, 1, tt.TraitTailLoss, targetAnimal.id));
+    dispatch(server$startFeeding(game.id, attackAnimal.id, 1, tt.TraitTailLoss, targetAnimal.id));
 
     dispatch(endHunt(game, attackAnimal, attackTrait, targetAnimal));
     return true;

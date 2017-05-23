@@ -19,6 +19,11 @@ import {
   , gameSetUserTimedOut
   , gameSetUserWantsPause
   , gameSetPaused
+  , traitAmbushActivate
+  , gameAmbushPrepareStart
+  , gameAmbushPrepareEnd
+  , gameAmbushAttackStart
+  , gameAmbushAttackEnd
   , playerActed
   , animalDeath
   , traitMoveFood
@@ -55,6 +60,11 @@ export const reducer = createReducer(null, {
   , gameSetUserTimedOut
   , gameSetUserWantsPause
   , gameSetPaused
+  , traitAmbushActivate
+  , gameAmbushPrepareStart
+  , gameAmbushPrepareEnd
+  , gameAmbushAttackStart
+  , gameAmbushAttackEnd
   , playerActed
   , animalDeath
   , traitMoveFood

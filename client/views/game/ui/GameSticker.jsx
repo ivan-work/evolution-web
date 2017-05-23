@@ -8,11 +8,12 @@ import {connect} from 'react-redux';
 import * as MDL from 'react-mdl';
 
 import {GameModel, GameModelClient, PHASE} from '../../../../shared/models/game/GameModel';
+import {traitAmbushContinueRequest} from '../../../../shared/actions/actions';
 
 import Tooltip from 'rc-tooltip';
 import GameEndTurnButton from './GameEndTurnButton.jsx';
-import GameLog from '../../game/ui/GameLog.jsx';
-import Pause from '../../game/ui/Pause.jsx';
+import GameLog from '../ui/GameLog.jsx';
+import Pause from '../ui/Pause.jsx';
 
 import {Timer} from '../../utils/Timer.jsx';
 
@@ -22,7 +23,7 @@ export class GameSticker extends React.PureComponent {
   };
 
   render() {
-    const {game} = this.props;
+    const {game, $traitAmbushContinue} = this.props;
     const {status, settings, question} = game;
     return (<div className="GameSticker">
       <span>
@@ -46,6 +47,7 @@ export class GameSticker extends React.PureComponent {
           {(game.status.paused ? <span>{T.translate('Game.UI.Status.Pause')}</span>
           : !!question ? <Timer start={question.time} duration={settings.timeTraitResponse}/>
           : status.phase === PHASE.REGENERATION ? <Timer start={status.turnStartTime} duration={settings.timeTraitResponse}/>
+          : status.phase === PHASE.AMBUSH ? <Timer start={status.turnStartTime} duration={settings.timeAmbush}/>
           : status.turnStartTime != null ? <Timer start={status.turnStartTime} duration={status.turnDuration}/>
           : '-')}
           </span>
@@ -56,7 +58,10 @@ export class GameSticker extends React.PureComponent {
         <Pause/>
       </div>
       <div className='flex'/>
-      <GameEndTurnButton game={game}/>
+      {game.status.phase !== PHASE.AMBUSH && <GameEndTurnButton game={game}/>}
+      {game.status.phase === PHASE.AMBUSH && <MDL.Button onClick={$traitAmbushContinue}>
+        {T.translate('Game.UI.EndAmbush')}
+      </MDL.Button>}
     </div>);
   }
 }
@@ -65,11 +70,10 @@ const GameStickerView = connect((state, {game}) => {
     const userId = state.getIn(['user', 'id']);
     const roomId = state.get('room');
     const isHost = state.getIn(['rooms', roomId, 'users', 0]) === userId;
-    return {
-      isHost
-    }
+    return {isHost}
   }
-  , (dispatch) => ({
+  , (dispatch, props) => ({
+    $traitAmbushContinue: () => dispatch(traitAmbushContinueRequest())
   }))(GameSticker);
 
 export default GameStickerView

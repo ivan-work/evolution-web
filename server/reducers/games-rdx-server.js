@@ -84,8 +84,8 @@ export const gameDeployAnimalFromDeck = (game, {animal, sourceAid}) => {
   return game
     .update(game => !ending ? game
       : game
-      .update('players', players => players.map(player => player
-        .update('continent', continent => continent.map(animal => animal.setIn(['flags', TRAIT_ANIMAL_FLAG.HIBERNATED], false))))))
+        .update('players', players => players.map(player => player
+          .update('continent', continent => continent.map(animal => animal.setIn(['flags', TRAIT_ANIMAL_FLAG.HIBERNATED], false))))))
     .update('deck', deck => deck.skip(1))
     .update(gameDeployAnimal(animal, card, animalIndex + 1))
     .update(addToGameLog(['traitGiveBirth', logAnimal(parent)]));
@@ -173,7 +173,6 @@ export const gameStartDeploy = (game) => {
       ))
     ))
     .setIn(['food'], 0)
-    .setIn(['status', 'phase'], PHASE.DEPLOY)
     .updateIn(['status', 'turn'], turn => ++turn)
     .setIn(['status', 'round'], 0)
     .setIn(['status', 'roundPlayer'], nextRoundPlayer)
@@ -187,7 +186,6 @@ export const gameStartFeeding = (game, {food}) => {
       .set('ended', !player.playing)
     ))
     .setIn(['food'], food)
-    .setIn(['status', 'phase'], PHASE.FEEDING)
     .setIn(['status', 'round'], 0)
     .update(processNeoplasm)
 };
@@ -223,37 +221,40 @@ export const gameStartExtinct = (game) => game
   ));
 
 export const gameStartRegeneration = (game) => game
-  .setIn(['status', 'phase'], PHASE.REGENERATION)
-  .setIn(['status', 'round'], 0)
+  .setIn(['status', 'round'], 0);
+
+const gameStartPhaseUpdate = {
+  [PHASE.PREPARE]: (game) => game
+  , [PHASE.DEPLOY]: gameStartDeploy
+  , [PHASE.FEEDING]: gameStartFeeding
+  , [PHASE.AMBUSH]: (game) => game
+  , [PHASE.EXTINCTION]: gameStartExtinct
+  , [PHASE.REGENERATION]: gameStartRegeneration
+  , [PHASE.FINAL]: (game) => game
+};
 
 export const gameStartPhase = (game, {phase, timestamp, data}) => (game
-  .setIn(['status', 'turnStartTime'], timestamp)
-  .update(addToGameLog(['gameStartPhase', phase, data]))
-  .update(game =>
-    phase === PHASE.PREPARE ? game
-      : phase === PHASE.DEPLOY ? gameStartDeploy(game)
-      : phase === PHASE.FEEDING ? gameStartFeeding(game, data)
-      : phase === PHASE.EXTINCTION ? gameStartExtinct(game, data)
-      : phase === PHASE.REGENERATION ? gameStartRegeneration(game)
-      //   : phase === PHASE.FINAL ? game
-      : game
-  ));
+    .setIn(['status', 'phase'], phase)
+    .setIn(['status', 'turnStartTime'], timestamp)
+    .update(addToGameLog(['gameStartPhase', phase, data]))
+    .update(game => gameStartPhaseUpdate[phase](game, data))
+);
 
 /**
  * Traits
  * */
 
 export const gameDeployRegeneratedAnimal = (game, {userId, cardId, animalId, source}) => game
-    .update(game => {
-      if (source === 'DECK') {
-        return game.update('deck', deck => deck.skip(1))
-      } else {
-        const {cardIndex} = game.locateCard(cardId, userId);
-        return game.removeIn(['players', userId, 'hand', cardIndex]);
-      }
-    })
-    .update(game => traitSetAnimalFlag(game, {sourceAid: animalId, flag: TRAIT_ANIMAL_FLAG.REGENERATION, on: false}))
-  ;
+  .update(game => {
+    if (source === 'DECK') {
+      return game.update('deck', deck => deck.skip(1))
+    } else {
+      const {cardIndex} = game.locateCard(cardId, userId);
+      return game.removeIn(['players', userId, 'hand', cardIndex]);
+    }
+  })
+  .update(game => traitSetAnimalFlag(game, {sourceAid: animalId, flag: TRAIT_ANIMAL_FLAG.REGENERATION, on: false}))
+;
 
 export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) => {
   ensureParameter(animalId, 'string');
@@ -268,7 +269,7 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
 
   return sourceType === 'GAME' ? updatedGame.update('food', food => food - amount)
     : sourceType === 'TraitPiracy' ? updatedGame.updateIn(['players', another.ownerId, 'continent', takenFromAix, 'food'], food => Math.max(food - amount, 0))
-    : updatedGame;
+      : updatedGame;
 };
 
 export const animalDeath = (game, {type, animalId, data}) => {
@@ -305,8 +306,8 @@ export const gameEnd = (oldGame, {game}) => {
     !p1.playing ? 1
       : !p2.playing ? -1
       : p2.scoreNormal !== p1.scoreNormal ? p2.scoreNormal - p1.scoreNormal
-      : p1.scoreDead !== p2.scoreDead ? p2.scoreDead - p1.scoreDead
-      : 1 - Math.round(Math.random()) * 2);
+        : p1.scoreDead !== p2.scoreDead ? p2.scoreDead - p1.scoreDead
+          : 1 - Math.round(Math.random()) * 2);
 
   return game
     .set('scoreboardFinal', scoreboardFinal)
@@ -387,80 +388,64 @@ export const traitTakeShell = (game, {continentId, animalId, trait}) => {
     .update(addToGameLog(['traitTakeShell', logAnimal(animal)]));
 };
 
+export const traitAmbushActivate = (game, {animalId, on}) => game
+  .setIn(['ambush', 'ambushers', animalId], on);
+export const gameAmbushPrepareStart = (game, {ambushRecord}) => game
+  .setIn(['ambush'], ambushRecord);
+export const gameAmbushPrepareEnd = (game) => game;
+export const gameAmbushAttackStart = (game) => game
+  .update('cooldowns', cooldowns => cooldowns.eventNextAction());
+export const gameAmbushAttackEnd = (game) => game
+  .setIn(['status', 'phase'], PHASE.FEEDING)
+  .removeIn(['ambush']);
+
 // No need to exports, serverside-only
 const traitAddHuntingCallback = (game, {callback}) => game.update('huntingCallbacks', (list) => list.push(callback));
 const traitClearHuntingCallbacks = (game, {}) => game.set('huntingCallbacks', List());
 
 export const reducer = createReducer(Map(), {
   gameCreateSuccess: (state, {game}) => state.set(game.id, game)
-  ,
-  gameDestroy: (state, data) => state.remove(data.gameId)
-  ,
-  gameStart: (state, data) => state.update(data.gameId, game => gameStart(game, data))
-  ,
-  gameGiveCards: (state, data) => state.update(data.gameId, game => gameGiveCards(game, data))
-  ,
-  gameNextPlayer: (state, data) => state.update(data.gameId, game => gameNextPlayer(game, data))
-  ,
-  gameAddTurnTimeout: (state, data) => state.update(data.gameId, game => gameAddTurnTimeout(game, data))
-  ,
-  gameDeployAnimalFromHand: (state, data) => state.update(data.gameId, game => gameDeployAnimalFromHand(game, data))
-  ,
-  gameDeployAnimalFromDeck: (state, data) => state.update(data.gameId, game => gameDeployAnimalFromDeck(game, data))
-  ,
-  gameDeployTrait: (state, data) => state.update(data.gameId, game => gameDeployTrait(game, data))
-  ,
-  gameDeployRegeneratedAnimal: (state, data) => state.update(data.gameId, game => gameDeployRegeneratedAnimal(game, data))
-  ,
-  gameEndTurn: (state, data) => state.update(data.gameId, game => gameEndTurn(game, data))
-  ,
-  gameEnd: (state, data) => state.update(data.gameId, game => gameEnd(game, data))
-  ,
-  gamePlayerLeft: (state, data) => state.update(data.gameId, game => gamePlayerLeft(game, data))
-  ,
-  gameStartPhase: (state, data) => state.update(data.gameId, game => gameStartPhase(game, data))
-  ,
-  gameSetUserTimedOut: (state, data) => state.update(data.gameId, game => gameSetUserTimedOut(game, data))
-  ,
-  gameSetUserWantsPause: (state, data) => state.update(data.gameId, game => gameSetUserWantsPause(game, data))
-  ,
-  gameSetPaused: (state, data) => state.update(data.gameId, game => gameSetPaused(game, data))
-  ,
-  playerActed: (state, data) => state.update(data.gameId, game => playerActed(game, data))
-  ,
-  animalDeath: (state, data) => state.update(data.gameId, game => animalDeath(game, data))
-  ,
-  traitMoveFood: (state, data) => state.update(data.gameId, game => traitMoveFood(game, data))
-  ,
-  startCooldown: (state, data) => state.update(data.gameId, game => startCooldown(game, data))
-  ,
-  clearCooldown: (state, data) => state.update(data.gameId, game => clearCooldown(game, data))
-  ,
-  traitQuestion: (state, data) => state.update(data.gameId, game => traitQuestion(game, data))
-  ,
-  traitAnswerSuccess: (state, data) => state.update(data.gameId, game => traitAnswerSuccess(game, data))
-  ,
-  traitAnimalAttachTrait: (state, data) => state.update(data.gameId, game => traitAnimalAttachTrait(game, data))
-  ,
-  traitAnimalRemoveTrait: (state, data) => state.update(data.gameId, game => traitAnimalRemoveTrait(game, data))
-  ,
-  traitConvertFat: (state, data) => state.update(data.gameId, game => traitConvertFat(game, data))
-  ,
-  traitGrazeFood: (state, data) => state.update(data.gameId, game => traitGrazeFood(game, data))
-  ,
-  traitParalyze: (state, data) => state.update(data.gameId, game => traitParalyze(game, data))
-  ,
-  traitSetAnimalFlag: (state, data) => state.update(data.gameId, game => traitSetAnimalFlag(game, data))
-  ,
-  traitSetValue: (state, data) => state.update(data.gameId, game => traitSetValue(game, data))
-  ,
-  traitNotify_Start: (state, data) => state.update(data.gameId, game => traitNotify_Start(game, data))
-  ,
-  traitTakeShell: (state, data) => state.update(data.gameId, game => traitTakeShell(game, data))
-  ,
-  traitAddHuntingCallback: (state, data) => state.update(data.gameId, game => traitAddHuntingCallback(game, data))
-  ,
-  traitClearHuntingCallbacks: (state, data) => state.update(data.gameId, game => traitClearHuntingCallbacks(game, data))
-  ,
-  testHackGame: (state, data) => state.update(data.gameId, data.callback)
+  , gameDestroy: (state, data) => state.remove(data.gameId)
+  , gameStart: (state, data) => state.update(data.gameId, game => gameStart(game, data))
+  , gameGiveCards: (state, data) => state.update(data.gameId, game => gameGiveCards(game, data))
+  , gameNextPlayer: (state, data) => state.update(data.gameId, game => gameNextPlayer(game, data))
+  , gameAddTurnTimeout: (state, data) => state.update(data.gameId, game => gameAddTurnTimeout(game, data))
+  , gameDeployAnimalFromHand: (state, data) => state.update(data.gameId, game => gameDeployAnimalFromHand(game, data))
+  , gameDeployAnimalFromDeck: (state, data) => state.update(data.gameId, game => gameDeployAnimalFromDeck(game, data))
+  , gameDeployTrait: (state, data) => state.update(data.gameId, game => gameDeployTrait(game, data))
+  , gameDeployRegeneratedAnimal: (state, data) => state.update(data.gameId, game => gameDeployRegeneratedAnimal(game, data))
+  , gameEndTurn: (state, data) => state.update(data.gameId, game => gameEndTurn(game, data))
+  , gameEnd: (state, data) => state.update(data.gameId, game => gameEnd(game, data))
+  , gamePlayerLeft: (state, data) => state.update(data.gameId, game => gamePlayerLeft(game, data))
+  , gameStartPhase: (state, data) => state.update(data.gameId, game => gameStartPhase(game, data))
+  , gameSetUserTimedOut: (state, data) => state.update(data.gameId, game => gameSetUserTimedOut(game, data))
+  , gameSetUserWantsPause: (state, data) => state.update(data.gameId, game => gameSetUserWantsPause(game, data))
+  , gameSetPaused: (state, data) => state.update(data.gameId, game => gameSetPaused(game, data))
+
+  , traitAmbushActivate: (state, data) => state.update(data.gameId, game => traitAmbushActivate(game, data))
+  , gameAmbushPrepareStart: (state, data) => state.update(data.gameId, game => gameAmbushPrepareStart(game, data))
+  , gameAmbushPrepareEnd: (state, data) => state.update(data.gameId, game => gameAmbushPrepareEnd(game, data))
+  , gameAmbushAttackStart: (state, data) => state.update(data.gameId, game => gameAmbushAttackStart(game, data))
+  , gameAmbushAttackEnd: (state, data) => state.update(data.gameId, game => gameAmbushAttackEnd(game, data))
+
+  , playerActed: (state, data) => state.update(data.gameId, game => playerActed(game, data))
+  , animalDeath: (state, data) => state.update(data.gameId, game => animalDeath(game, data))
+  , traitMoveFood: (state, data) => state.update(data.gameId, game => traitMoveFood(game, data))
+  , startCooldown: (state, data) => state.update(data.gameId, game => startCooldown(game, data))
+  , clearCooldown: (state, data) => state.update(data.gameId, game => clearCooldown(game, data))
+  , traitQuestion: (state, data) => state.update(data.gameId, game => traitQuestion(game, data))
+  , traitAnswerSuccess: (state, data) => state.update(data.gameId, game => traitAnswerSuccess(game, data))
+  , traitAnimalAttachTrait: (state, data) => state.update(data.gameId, game => traitAnimalAttachTrait(game, data))
+  , traitAnimalRemoveTrait: (state, data) => state.update(data.gameId, game => traitAnimalRemoveTrait(game, data))
+  , traitConvertFat: (state, data) => state.update(data.gameId, game => traitConvertFat(game, data))
+  , traitGrazeFood: (state, data) => state.update(data.gameId, game => traitGrazeFood(game, data))
+  , traitParalyze: (state, data) => state.update(data.gameId, game => traitParalyze(game, data))
+  , traitSetAnimalFlag: (state, data) => state.update(data.gameId, game => traitSetAnimalFlag(game, data))
+  , traitSetValue: (state, data) => state.update(data.gameId, game => traitSetValue(game, data))
+  , traitNotify_Start: (state, data) => state.update(data.gameId, game => traitNotify_Start(game, data))
+  // , traitNotify_End: (state, data) => state.update(data.gameId, game => traitNotify_End(game, data))
+  , traitTakeShell: (state, data) => state.update(data.gameId, game => traitTakeShell(game, data))
+  , traitAddHuntingCallback: (state, data) => state.update(data.gameId, game => traitAddHuntingCallback(game, data))
+  , traitClearHuntingCallbacks: (state, data) => state.update(data.gameId, game => traitClearHuntingCallbacks(game, data))
+  , testHackGame: (state, data) => state.update(data.gameId, data.callback)
 });

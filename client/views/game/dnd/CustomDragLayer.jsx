@@ -9,7 +9,6 @@ import {ArrowPreview} from './ArrowPreview.jsx';
 
 const layerStyles = {
   position: 'fixed',
-  zIndex: 5,
   pointerEvents: 'none',
   zIndex: 100,
   left: 0,

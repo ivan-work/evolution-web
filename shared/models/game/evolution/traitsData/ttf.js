@@ -1,5 +1,6 @@
 import logger from '~/shared/utils/logger';
 import {List, fromJS} from 'immutable';
+import {PHASE} from '../../GameModel';
 import {AnimalModel} from '../AnimalModel';
 import {
   TRAIT_TARGET_TYPE
@@ -42,8 +43,7 @@ export const TraitMetamorphose = {
     dispatch(server$traitAnimalRemoveTrait(game, sourceAnimal, targetTrait));
     dispatch(server$traitStartCooldown(game.id, traitMetamorphose, sourceAnimal));
 
-    const {animal} = selectGame(getState, game.id).locateAnimal(sourceAnimal.id, sourceAnimal.ownerId);
-    dispatch(server$startFeeding(game.id, animal, 1, tt.TraitMetamorphose));
+    dispatch(server$startFeeding(game.id, sourceAnimal.id, 1, tt.TraitMetamorphose));
     return true;
   }
   , $checkAction: (game, sourceAnimal) => sourceAnimal.getWantedFood() > 0 && sourceAnimal.getEatingBlockers(game).length <= 1
@@ -70,6 +70,7 @@ export const TraitShell = {
   , cooldowns: fromJS([
     [tt.TraitShell, TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
   ])
+  , $checkAction: (game) => game.status.phase !== PHASE.AMBUSH
   , action: (game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, defenceTrait, defenceAnimal));
     dispatch(server$traitSetAnimalFlag(game, defenceAnimal, TRAIT_ANIMAL_FLAG.SHELL, true));
@@ -98,8 +99,8 @@ export const TraitInkCloud = {
   ])
   , action: (game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait) => (dispatch) => {
     dispatch(server$game(game.id, startCooldown(game.id, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, attackAnimal.ownerId)));
-    dispatch(server$game(game.id, startCooldown(game.id, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, attackAnimal.ownerId)));
-    dispatch(server$game(game.id, startCooldown(game.id, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.ANIMAL, attackAnimal.id)));
+    // dispatch(server$game(game.id, startCooldown(game.id, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, attackAnimal.ownerId)));
+    dispatch(server$game(game.id, startCooldown(game.id, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.TRAIT, attackTrait.id)));
     dispatch(server$traitStartCooldown(game.id, defenceTrait, defenceAnimal));
     dispatch(endHuntNoCd(game.id, attackAnimal, attackTrait, defenceAnimal));
     return true;
@@ -117,7 +118,7 @@ export const TraitSpecA = {
   ])
   , action: (game, animal, trait) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, trait, animal));
-    dispatch(server$startFeeding(game.id, animal, 1, tt.TraitSpecA));
+    dispatch(server$startFeeding(game.id, animal.id, 1, tt.TraitSpecA));
     return true;
   }
   , $checkAction: (game, animal, traitSpec) => (animal.canEat(game)
@@ -137,7 +138,7 @@ export const TraitSpecB = {
   ])
   , action: (game, animal, trait) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, trait, animal));
-    dispatch(server$startFeeding(game.id, animal, 1, tt.TraitSpecA));
+    dispatch(server$startFeeding(game.id, animal.id, 1, tt.TraitSpecA));
     return true;
   }
   , $checkAction: (game, animal, traitSpec) => (animal.canEat(game)
@@ -164,14 +165,6 @@ export const TraitViviparous = {
 
 export const TraitAmbush = {
   type: tt.TraitAmbush
-  , targetType: TRAIT_TARGET_TYPE.NONE
-  , playerControllable: true
-  , transient: true
-  , $checkAction: (game, animal, traitSpec) => animal.hasTrait(tt.TraitCarnivorous)
-  , action: (game, sourceAnimal, trait) => (dispatch) => {
-    dispatch(server$traitSetValue(game, sourceAnimal, trait, !trait.value));
-    return false;
-  }
 };
 export const TraitIntellect = {
   type: tt.TraitIntellect

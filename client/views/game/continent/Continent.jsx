@@ -1,27 +1,21 @@
+import {List} from 'immutable';
+
 import React from 'react';
 import PropTypes from 'prop-types'
 import classnames from 'classnames';
 
 import RIP from 'react-immutable-proptypes';
 
-import {DropTargetContinentZone} from './ContinentZone.jsx';
+import ContinentZone from './ContinentZone.jsx';
 
 import './Continent.scss';
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 export default class Continent extends React.Component {
-  static contextTypes = {
-    gameActions: PropTypes.object
-  };
-
   static propTypes = {
     isUserContinent: PropTypes.bool.isRequired
     , children: RIP.listOf(PropTypes.node)
   };
-
-  constructor(props, context) {
-    super(props, context);
-    this.$deployAnimal = (card, zoneIndex) => context.gameActions.$deployAnimal(card.id, zoneIndex);
-  }
 
   render() {
     const {children, isUserContinent, isActive} = this.props;
@@ -31,23 +25,25 @@ export default class Continent extends React.Component {
       , EnemyContinent: !isUserContinent
       , isActive
     });
-    return <div className={className}>
-      {this.renderPlaceholderWrapper(0)}
-      {children.map((animal, index) => {
-        return [
-          animal
-          , this.renderPlaceholderWrapper(index + 1)
-          ]})}
-    </div>;
+    let mixedChildren = [this.renderPlaceholderWrapper(0, 0)];
+    children.forEach((animal, index) => {
+      mixedChildren.push(animal);
+      mixedChildren.push(this.renderPlaceholderWrapper(index + 1, 'pre' + animal.key));
+    });
+    mixedChildren = mixedChildren.filter(c => !!c);
+    // transitionLeaveTimeout IS THE SAME AS ../animals/Animal.scss
+    return (
+      <CSSTransitionGroup component="div"
+                          className={className}
+                          transitionName="Death"
+                          transitionEnterTimeout={1}
+                          transitionLeaveTimeout={450}>
+        {mixedChildren}
+      </CSSTransitionGroup>
+    );
   }
 
-  renderPlaceholderWrapper(index) {
-    return !this.props.isUserContinent
-      ? null
-      : <DropTargetContinentZone
-      key={index}
-      index={index}
-      onCardDropped={this.$deployAnimal}>
-    </DropTargetContinentZone>
+  renderPlaceholderWrapper(index, key) {
+    return this.props.isUserContinent && <ContinentZone key={key} index={index}/> || null;
   }
 }

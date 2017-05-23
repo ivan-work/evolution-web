@@ -31,7 +31,7 @@ import {
 import {selectGame} from '../../../../selectors';
 
 import {TraitModel} from '../TraitModel';
-import {QuestionRecord} from '../../GameModel';
+import {PHASE, QuestionRecord} from '../../GameModel';
 
 import {
   TraitMimicry
@@ -41,7 +41,7 @@ import {
 
 import * as tt from '../traitTypes/index';
 
-export const endHunt = (game, sourceAnimal, traitCarnivorous, targetAnimal) => (dispatch) => {
+export const endHunt = (game, sourceAnimal, traitCarnivorous, targetAnimal) => (dispatch, getState) => {
   dispatch(server$traitStartCooldown(game.id, traitCarnivorous, sourceAnimal));
   dispatch(endHuntNoCd(game.id, sourceAnimal, traitCarnivorous, targetAnimal));
 };
@@ -74,7 +74,7 @@ export const getStaticDefenses = (game, sourceAnimal, targetAnimal) =>
     (trait.type === tt.TraitCamouflage && !sourceAnimal.hasTrait(tt.TraitSharpVision))
     || (trait.type === tt.TraitSymbiosis && trait.linkSource)
     || (trait.type === tt.TraitMassive && !sourceAnimal.hasTrait(tt.TraitMassive))
-    || (trait.type === tt.TraitBurrowing && targetAnimal.isSaturated())
+    || (trait.type === tt.TraitBurrowing && targetAnimal.isSaturated() && game.status.phase !== PHASE.AMBUSH)
     || (trait.type === tt.TraitSwimming && !sourceAnimal.hasTrait(tt.TraitSwimming))
     || (trait.type === tt.TraitShell && targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL, tt.TraitShell))
     || (trait.type === tt.TraitFlight && (sourceAnimal.traits.size >= targetAnimal.traits.size))
@@ -84,7 +84,6 @@ export const getAffectiveDefenses = (game, sourceAnimal, targetAnimal) =>
   targetAnimal.traits.filter((trait) =>
   !trait.disabled && (
     (trait.type === tt.TraitPoisonous)
-    || (trait.type === tt.TraitCnidocytes)
   )).toArray();
 
 export const getActiveDefenses = (game, sourceAnimal, targetAnimal, passiveDefence = false) =>
@@ -95,6 +94,7 @@ export const getActiveDefenses = (game, sourceAnimal, targetAnimal, passiveDefen
     || (trait.type === tt.TraitTailLoss && !trait.checkActionFails(game, targetAnimal))
     || (trait.type === tt.TraitShell && !trait.checkActionFails(game, targetAnimal) && !passiveDefence)
     || (trait.type === tt.TraitInkCloud && !trait.checkActionFails(game, targetAnimal) && !passiveDefence)
+    || (trait.type === tt.TraitCnidocytes && !trait.checkActionFails(game, targetAnimal))
   )).toArray();
 
 export const TraitCarnivorous = {
@@ -108,7 +108,6 @@ export const TraitCarnivorous = {
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: (game, sourceAnimal, trait, targetAnimal, passiveDefence) => (dispatch, getState) => {
-
     /**
      * Check for counter-attack (aka anglerfish)
      */
@@ -134,9 +133,9 @@ export const TraitCarnivorous = {
         dispatch(server$traitAnimalAttachTrait(game, animalAnglerfish, newTraitCarnivorous));
         dispatch(server$traitAnimalAttachTrait(game, animalAnglerfish, newTraitIntellect));
         dispatch(server$traitAnimalRemoveTrait(game, animalAnglerfish, traitAnglerfish));
-        const reselectedGame = selectGame(getState, game.id);
-        const {animal: revealledAnglerfish} = reselectedGame.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
-        if (TraitCarnivorous.checkTarget(reselectedGame, revealledAnglerfish, sourceAnimal)) {
+        game = selectGame(getState, game.id);
+        const {animal: revealledAnglerfish} = game.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
+        if (TraitCarnivorous.checkTarget(game, revealledAnglerfish, sourceAnimal)) {
           dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
             const {animal} = game.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
             if (animal) {
@@ -159,7 +158,7 @@ export const TraitCarnivorous = {
     logger.debug(`TraitCarnivorous: ${sourceAnimal.id} > ${targetAnimal.id}`);
     const possibleDefenses = [];
     let possibleDefenseTargets = 0;
-    let traitMimicry, traitMimicryTargets, traitTailLoss, traitTailLossTargets, traitRunning, traitShell, traitInkCloud;
+    let traitMimicry, traitMimicryTargets, traitTailLoss, traitTailLossTargets, traitRunning, traitShell, traitInkCloud, traitCnidocytes;
 
     const traitIntellect = sourceAnimal.hasTrait(tt.TraitIntellect);
     const canUseIntellect = traitIntellect && traitIntellect.checkAction(game, sourceAnimal);
@@ -189,6 +188,9 @@ export const TraitCarnivorous = {
           traitMimicryTargets = TraitMimicry.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
           possibleDefenseTargets += traitMimicryTargets.size;
           if (traitMimicryTargets.size > 0) possibleDefenses.push(defenseTrait);
+        } else if (defenseTrait.type === tt.TraitMimicry) {
+          traitCnidocytes = defenseTrait;
+          possibleDefenses.push(defenseTrait);
         }
       });
 
@@ -225,17 +227,6 @@ export const TraitCarnivorous = {
     }
 
     /**
-     * Actual attack started - check for running first
-     * */
-
-    const traitCnidocytes = targetAnimal.hasTrait(tt.TraitCnidocytes);
-    if (traitCnidocytes && !traitCnidocytes.isEqual(disabledTid)) {
-      dispatch(traitAddHuntingCallback(game.id, (game) => (dispatch, getState) => {
-        dispatch(server$traitActivate(game, targetAnimal, traitCnidocytes, sourceAnimal));
-      }));
-    }
-
-    /**
      * Make function for default defense
      * */
       // if user has no options or if user didn't respond - outcome will be the same, so we DRY
@@ -249,6 +240,12 @@ export const TraitCarnivorous = {
           dispatch(server$traitDefenceAnswer(game.id
             , questionId
             , tt.TraitRunning
+          ));
+          return false;
+        } else if (traitCnidocytes && !traitCnidocytes.isEqual(disabledTid)) {
+          dispatch(server$traitDefenceAnswer(game.id
+            , questionId
+            , tt.TraitCnidocytes
           ));
           return false;
         } else if (traitTailLoss && traitTailLossTargets.size > 0 && !traitTailLoss.isEqual(disabledTid)) {
@@ -278,6 +275,12 @@ export const TraitCarnivorous = {
           ));
           return false;
         } else {
+          game = selectGame(getState, game.id);
+
+          if (traitCnidocytes && !traitCnidocytes.isEqual(disabledTid) && traitCnidocytes.checkActionFails(game,)) {
+            dispatch(traitCnidocytes.getDataModel().customFns.paralyze(game.id, targetAnimal, traitCnidocytes, sourceAnimal));
+          }
+
           dispatch(server$traitAnswerSuccess(game.id, questionId));
 
           const traitPoisonous = targetAnimal.hasTrait(tt.TraitPoisonous);
@@ -287,17 +290,19 @@ export const TraitCarnivorous = {
 
           dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
 
-          dispatch(server$startFeeding(game.id, sourceAnimal, 2, 'TraitCarnivorous'));
+          dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
+            dispatch(server$startFeeding(game.id, sourceAnimal.id, 2, 'TraitCarnivorous'));
 
-          // Scavenge
-          const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
-          // Selecing new game to not touch killed animal
-          game.constructor.sortPlayersFromIndex(selectGame(getState, game.id), currentPlayerIndex).some(player => player.continent.some(animal => {
-            const traitScavenger = animal.hasTrait(tt.TraitScavenger);
-            if (traitScavenger && animal.canEat(game) > 0) {
-              dispatch(server$startFeeding(game.id, animal, 1, tt.TraitScavenger, sourceAnimal.id));
-              return true;
-            }
+            // Scavenge
+            const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
+
+            game.constructor.sortPlayersFromIndex(game, currentPlayerIndex).some(player => player.continent.some(animal => {
+              const traitScavenger = animal.hasTrait(tt.TraitScavenger);
+              if (traitScavenger && animal.canEat(game) > 0) {
+                dispatch(server$startFeeding(game.id, animal.id, 1, tt.TraitScavenger, sourceAnimal.id));
+                return true;
+              }
+            }));
           }));
 
           dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));

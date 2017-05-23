@@ -6,7 +6,7 @@ import {connect} from 'react-redux';
 import {TraitIntellect} from '../../../../shared/models/game/evolution/traitsData';
 import {QuestionRecord} from '../../../../shared/models/game/GameModel.js';
 
-import TraitActivateDialog from '../../game/ui/TraitActivateDialog.jsx'
+import TraitActivateDialog from '../ui/TraitActivateDialog.jsx'
 
 export const TraitIntellectDialogView = connect(
   (state, {game, $traitAnswer}) => {

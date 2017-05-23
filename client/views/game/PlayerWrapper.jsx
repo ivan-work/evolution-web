@@ -1,103 +1,138 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes';
-
+import T from 'i18n-react';
 import cn from 'classnames';
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
-import {CardCollection} from './CardCollection.jsx';
+import * as MDL from 'react-mdl';
+import {connect} from 'react-redux';
+import {compose} from 'redux';
+
+import {
+  gameDeployTraitRequest
+  , traitTakeFoodRequest
+  , traitActivateRequest
+  , traitAmbushActivateRequest
+  , traitTakeShellRequest
+  , gameDeployRegeneratedAnimalRequest
+} from '../../../shared/actions/actions';
+
+import {CardCollection} from './cards/CardCollection.jsx';
 import DragCard from './cards/Card.jsx';
 import {DropAnimal} from './animals/Animal.jsx';
 import Continent from './continent/Continent.jsx';
-import {PortalTarget} from '../utils/PortalTarget.jsx'
 import {AnimationServiceRef} from '../../services/AnimationService';
 
 import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 import {PlayerModel} from '../../../shared/models/game/PlayerModel';
 import {CTT_PARAMETER} from '../../../shared/models/game/evolution/constants';
 
-import {TraitMetamorphose} from '../../../shared/models/game/evolution/traitTypes';
+import * as tt from '../../../shared/models/game/evolution/traitTypes';
 
-import TraitActivateDialog from './ui/TraitActivateDialog.jsx';
-import Tooltip from "rc-tooltip";
+import TraitMetamorphoseDialog from './ui/TraitMetamorphoseDialog.jsx';
+import TraitRecombinationDialog from './ui/TraitRecombinationDialog.jsx';
+
+import './PlayerWrapper.scss';
 
 const INITIAL_STATE = {
-  traitActivateQuestion: null
+  metamorphoseQuestion: {}
+  , recombinationQuestion: {}
 };
 
 export class PlayerWrapper extends Component {
-  static contextTypes = {
-    gameActions: PropTypes.object.isRequired
-  };
-
   static propTypes = {
     game: PropTypes.instanceOf(GameModelClient).isRequired
     , player: PropTypes.instanceOf(PlayerModel).isRequired
-    , upsideDown: PropTypes.bool.isRequired
     , connectRef: PropTypes.func.isRequired
   };
 
-  constructor(props, context) {
-    super(props, context);
+  constructor(props) {
+    super(props);
+    const {
+      $deployTrait
+      , $traitTakeFood
+      , $traitActivate
+      , $traitAmbushActivate
+      , $traitTakeShell
+      , $deployRegeneratedAnimal
+    } = props.gameActions;
+    this.style = {};
     this.state = INITIAL_STATE;
     this.$noop = () => null;
-    this.$traitTakeFood = (animal) => context.gameActions.$traitTakeFood(animal.id);
+    this.$traitTakeFood = (animal) => $traitTakeFood(animal.id);
     this.$traitActivate = (animal, trait, targetId) => {
-      if (trait.type === TraitMetamorphose) {
+      // Yes i know it's bad, no idea how to make it better =\
+      if (trait.type === tt.TraitMetamorphose) {
         this.setState({
-          traitActivateQuestion: {
-            traits: trait.getDataModel().getTargets(props.game, animal, trait)
+          metamorphoseQuestion: {
+            animal, trait
             , onSelectTrait: (targetTraitId) => {
-              !!targetTraitId && this.context.gameActions.$traitActivate(animal.id, trait.id, targetTraitId);
+              !!targetTraitId && $traitActivate(animal.id, trait.id, targetTraitId);
+              this.setState(INITIAL_STATE)
+            }
+          }
+        });
+      } else if (trait.type === tt.TraitRecombination) {
+        this.setState({
+          recombinationQuestion: {
+            animal, trait
+            , onSelectTrait: (traits) => {
+              if (!!traits && !!traits[0] && !!traits[1])
+                $traitActivate(animal.id, trait.id, ...traits);
               this.setState(INITIAL_STATE)
             }
           }
         });
       } else {
-        this.context.gameActions.$traitActivate(animal.id, trait.id, targetId);
+        $traitActivate(animal.id, trait.id, targetId);
       }
     };
+
     this.$deployTrait = (card, animal, alternateTrait, component) => {
       if (card.getTraitDataModel(alternateTrait).cardTargetType & CTT_PARAMETER.LINK) {
         component.setState({selectLink: {card, animal, alternateTrait}});
       } else {
-        this.context.gameActions.$deployTrait(card.id, animal.id, alternateTrait);
+        $deployTrait(card.id, animal.id, alternateTrait);
       }
     };
-    this.$deployLinkedTrait = (card, animal, alternateTrait, linkedAnimal) => {
-      this.context.gameActions.$deployTrait(card.id, animal.id, alternateTrait, linkedAnimal.id);
-    };
-    this.$traitTakeShell = (animal, trait) => {
-      this.context.gameActions.$traitTakeShell(animal.id, trait.id);
-    };
+
+    this.$deployLinkedTrait = (card, animal, alternateTrait, linkedAnimal) =>
+      $deployTrait(card.id, animal.id, alternateTrait, linkedAnimal.id);
+
+    this.$traitTakeShell = (animal, trait) => $traitTakeShell(animal.id, trait.id);
+
+    this.$deployRegeneratedAnimal = (card, animal) => $deployRegeneratedAnimal(card.id, animal.id)
+
+    this.$traitAmbushActivate = (animal, trait, game) => $traitAmbushActivate(animal.id, !game.getIn(['ambush', 'ambushers', animal.id]))
   }
 
   render() {
-    const {game, player, upsideDown} = this.props;
+    const {game, player, showCards} = this.props;
     const isUser = game.userId === player.id;
-    const innerElements = [
-      this.renderContinent(game, player, isUser)
-      , this.renderCardCollection(game, player, isUser)
-    ];
     return (
       <div className={cn({PlayerWrapper: true, UserWrapper: isUser, EnemyWrapper: !isUser})}
+           id={`PlayerWrapper${player.id}`}
            data-player-id={player.id}>
-        <TraitActivateDialog game={game} {...this.state.traitActivateQuestion}/>
-        {upsideDown ? innerElements : innerElements.reverse()}
-        <svg width="100%" height="100%" style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
-          <PortalTarget name={`svg-player-wrapper-${player.id}`} container='g'/>
-        </svg>
+        <div className='flex'/>
+        <TraitMetamorphoseDialog game={game} metamorphoseQuestion={this.state.metamorphoseQuestion}/>
+        <TraitRecombinationDialog game={game} recombinationQuestion={this.state.recombinationQuestion}/>
+        {this.renderContinent(game, player, isUser)}
+        {this.renderCardCollection(game, player, isUser)}
       </div>
     );
   }
 
   renderCardCollection(game, player, isUser) {
+    const {showCards} = this.props;
     const dragEnabled = isUser
-      && game.status.phase === PHASE.DEPLOY
-      && game.isPlayerTurn();
+      && (game.status.phase === PHASE.DEPLOY && game.isPlayerTurn())
+      || (game.status.phase === PHASE.REGENERATION);
 
     return (<CardCollection
       key='CardCollection'
       name={isUser ? 'Hand' : player.id}
+      visible={showCards && player.hand.size > 0}
       isUser={isUser}>
       {player.hand.map((cardModel, i) => this.renderCard(cardModel, dragEnabled, isUser))}
     </CardCollection>)
@@ -113,12 +148,14 @@ export class PlayerWrapper extends Component {
   }
 
   renderContinent(game, player, isUser) {
-    return (<Continent
-      key='Continent'
-      isActive={game.isPlayerTurn(player)}
-      isUserContinent={isUser}>
-      {player.continent.map(animal => this.renderAnimal(animal, isUser))}
-    </Continent>)
+    return (
+      <Continent
+        key='Continent'
+        isActive={game.isPlayerTurn(player)}
+        isUserContinent={isUser}>
+        {player.continent.map(animal => this.renderAnimal(animal, isUser))}
+      </Continent>
+    );
   }
 
   renderAnimal(animal, isUserContinent) {
@@ -126,23 +163,48 @@ export class PlayerWrapper extends Component {
     const isDeploy = game.status.phase === PHASE.DEPLOY;
     const isFeeding = game.status.phase === PHASE.FEEDING;
     const isRegeneration = game.status.phase === PHASE.REGENERATION;
-    const onTraitDropped = isFeeding ? this.$traitActivate : this.$noop;
+    const isAmbush = game.status.phase === PHASE.AMBUSH;
+    const onTraitDropped = isFeeding ? this.$traitActivate
+      : isAmbush ? this.$traitAmbushActivate
+      : this.$noop;
     const onTraitShellDropped = isFeeding ? this.$traitTakeShell : this.$noop;
     const onFoodDropped = isFeeding ? this.$traitTakeFood : this.$noop;
-    const onCardDropped = isDeploy ? this.$deployTrait : this.$noop;
+    const onCardDropped = isDeploy ? this.$deployTrait :
+      isRegeneration ? this.$deployRegeneratedAnimal
+        : this.$noop;
     const onAnimalLink = isDeploy ? this.$deployLinkedTrait : this.$noop;
-    return <DropAnimal
-      ref={this.props.connectRef('Animal#' + animal.id)}
-      key={animal.id}
-      game={game}
-      model={animal}
-      isUserAnimal={isUserContinent}
-      onTraitDropped={onTraitDropped}
-      onTraitShellDropped={onTraitShellDropped}
-      onFoodDropped={onFoodDropped}
-      onCardDropped={onCardDropped}
-      onAnimalLink={onAnimalLink}/>
+    return (
+      <DropAnimal
+        ref={this.props.connectRef('Animal#' + animal.id)}
+        key={animal.id}
+        game={game}
+        model={animal}
+        isUserAnimal={isUserContinent}
+        onTraitDropped={onTraitDropped}
+        onTraitShellDropped={onTraitShellDropped}
+        onFoodDropped={onFoodDropped}
+        onCardDropped={onCardDropped}
+        onAnimalLink={onAnimalLink}/>
+    );
   }
 }
 
-export default AnimationServiceRef(PlayerWrapper);
+export const PlayerWrapperView = compose(
+  connect((state) => ({})
+    , (dispatch) => ({
+      gameActions: {
+        // PHASE.DEPLOY
+        $deployTrait: (...args) => dispatch(gameDeployTraitRequest(...args))
+        // PHASE.FEEDING
+        , $traitTakeFood: (...args) => dispatch(traitTakeFoodRequest(...args))
+        , $traitActivate: (...args) => dispatch(traitActivateRequest(...args))
+        , $traitAmbushActivate: (...args) => dispatch(traitAmbushActivateRequest(...args))
+        , $traitTakeShell: (...args) => dispatch(traitTakeShellRequest(...args))
+        // PHASE.REGENERATION
+        , $deployRegeneratedAnimal: (...args) => dispatch(gameDeployRegeneratedAnimalRequest(...args))
+      }
+    }))
+  , AnimationServiceRef
+)(PlayerWrapper);
+
+export default PlayerWrapperView;

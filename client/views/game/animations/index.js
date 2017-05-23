@@ -10,8 +10,7 @@ export const createAnimationServiceConfig = () => ({
   animations: ({subscribe, getRef}) => {
     subscribe('gameGiveCards', ({userId, cards}, getState) => {
       const game = getState().get('game');
-      const oldUI = getState().getIn(['app', 'oldUI']);
-      if (oldUI || game.userId === userId)
+      if (game.userId === userId)
         return gameGiveCards(game, cards, getRef);
       else
         return gameGiveCardsOther(userId, game.deck.size, cards, getRef)

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes'
 import T from 'i18n-react'
 
-import Deck from '../../game/cards/Deck.jsx';
+import Deck from '../cards/Deck.jsx';
 
 export default ({game}) => {
   return (<div className='DeckSticker'>

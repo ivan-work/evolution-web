@@ -184,7 +184,7 @@ const server$gameCheckForPause = (gameId) => (dispatch, getState) => {
       if (game.question) {
         dispatch(server$questionResumeTimeout(gameId, game.question));
       } else {
-        dispatch(server$addTurnTimeout(gameId,));
+        dispatch(server$addTurnTimeout(gameId));
       }
     }
   }
@@ -352,11 +352,6 @@ const gameAddTurnTimeout = (gameId, turnStartTime, turnDuration) => ({
   , data: {gameId, turnStartTime, turnDuration}
 });
 
-const gameCancelTurnTimeout = (gameId, userId) => ({
-  type: 'gameCancelTurnTimeout'
-  , data: {gameId, userId}
-});
-
 export const gameSetUserTimedOutRequest = () => (dispatch, getState) => dispatch({
   type: 'gameSetUserTimedOutRequest'
   , data: {gameId: getState().getIn(['game', 'id'])}
@@ -376,11 +371,12 @@ const server$gameSetUserTimedOut = (gameId, userId, timedOut) => (dispatch, getS
 export const server$addTurnTimeout = (gameId, userId, turnTime) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   if (game.status.paused) return;
+  if (turnTime === 0) return;
 
-  if (userId === void 0) {
+  if (!userId) {
     userId = game.players.find(p => p.index === game.status.currentPlayer).id
   }
-  if (turnTime === void 0) {
+  if (!turnTime) {
     turnTime = !game.getPlayer(userId).timedOut ? game.settings.timeTurn : SETTINGS_TIMED_OUT_TURN_TIME;
   }
   dispatch(server$game(gameId, gameAddTurnTimeout(gameId, Date.now(), turnTime)));
@@ -392,10 +388,8 @@ export const server$addTurnTimeout = (gameId, userId, turnTime) => (dispatch, ge
 };
 
 export const server$gameCancelTurnTimeout = (gameId) => (dispatch, getState) => {
-  // logger.info(`Turn Timeout:`, `${gameId}: ${userId}`);
-  // dispatch(server$game(gameId, gameCancelTurnTimeout(gameId)));
-  dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
-  dispatch(gameCancelTurnTimeout(gameId));
+  // logger.info(`Turn Timeout:`, `${gameId}`);
+  return dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
 };
 
 /**

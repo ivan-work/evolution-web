@@ -4,7 +4,7 @@ import RIP from 'react-immutable-proptypes'
 
 import {TraitMetamorphose} from '../../../../shared/models/game/evolution/traitsData';
 
-import TraitActivateDialog from '../../game/ui/TraitActivateDialog.jsx'
+import TraitActivateDialog from '../ui/TraitActivateDialog.jsx'
 
 export const TraitMetamorphoseDialogView = ({game, metamorphoseQuestion}) => {
   const {animal, trait, onSelectTrait} = metamorphoseQuestion;

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 
-import styles from '../../styles.json';
+import styles from '../../../styles.json';
 const {CARD_WIDTH} = styles;
 
 import './CardCollection.scss';

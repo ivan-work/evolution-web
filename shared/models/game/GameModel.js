@@ -83,6 +83,31 @@ export class QuestionRecord extends Record({
   }
 }
 
+export class AmbushRecord extends Record({
+  animalId: null
+  , animalOwnerId: null
+  , ambushers: null
+  , turnRemainingTime: null
+}) {
+  static new(animal, ambushers, turnRemainingTime) {
+    return new AmbushRecord({
+      animalId: animal.id
+      , animalOwnerId: animal.ownerId
+      , ambushers: ambushers.reduce((result, animalId) => result.set(animalId, null), OrderedMap())
+      , turnRemainingTime
+    })
+  }
+
+  static fromServer(js) {
+    // if (js) console.log('js.ambushers', js.ambushers)
+    return (!js ? null
+      : new AmbushRecord({
+        ...js
+        , ambushers: OrderedMap(js.ambushers)
+      }));
+  }
+}
+
 export class ContinentRecord extends Record({
   id: null
   , shells: Map()
@@ -109,12 +134,12 @@ const FOOD_TABLE = [
   () => 10
   , () => 10
   , () => rollDice() + 2
-  , () => rollDice() + rollDice()
-  , () => rollDice() + rollDice() + 2
-  , () => rollDice() + rollDice() + rollDice() + 2
-  , () => rollDice() + rollDice() + rollDice() + 4
-  , () => rollDice() + rollDice() + rollDice() + rollDice() + 2
-  , () => rollDice() + rollDice() + rollDice() + rollDice() + 4
+  , () => rollDice() * 2
+  , () => rollDice() * 2 + 2
+  , () => rollDice() * 3 + 2
+  , () => rollDice() * 3 + 4
+  , () => rollDice() * 4 + 2
+  , () => rollDice() * 4 + 4
 ];
 
 const GameModelData = {
@@ -132,9 +157,10 @@ const GameModelData = {
   , settings: null
   , scoreboardFinal: null
   , winnerId: null
+  , ambush: null
 };
 
-global.locateAnimalTime = 0;
+// global.locateAnimalTime = 0;
 
 export class GameModel extends Record({
   ...GameModelData
@@ -170,19 +196,6 @@ export class GameModel extends Record({
     })
   }
 
-  toOthers(userId) {
-    return this
-      .set('deck', this.deck.map(card => card.toOthers()))
-      .set('players', this.players.map(player => player.id === userId ? player : player.toOthers()))
-  }
-
-  toClient() {
-    // TODO question
-    return this
-      .set('deck', this.deck.map(card => card.toClient()))
-      .set('players', this.players.map(player => player.toClient()));
-  }
-
   static fromServer(js) {
     return js == null
       ? null
@@ -197,7 +210,22 @@ export class GameModel extends Record({
         , settings: SettingsRecord.fromJS(js.settings)
         , log: List(js.log)
         , huntingCallbacks: List()
+        , ambush: AmbushRecord.fromServer(js.ambush)
       });
+  }
+
+  toOthers(userId) {
+    return this
+      .set('deck', this.deck.map(card => card.toOthers()))
+      .set('players', this.players.map(player => player.id === userId ? player : player.toOthers()))
+  }
+
+  toClient() {
+    // TODO question
+    return this
+      .set('deck', this.deck.map(card => card.toClient()))
+      .set('players', this.players.map(player => player.toClient()))
+      .remove('huntingCallbacks')
   }
 
   getActualPlayers() {
@@ -241,19 +269,24 @@ export class GameModel extends Record({
         .get('continent').some(animal => cb(animal, null, player)));
   }
 
-  locateAnimal(animalId) {
-    // const start = clock();
-    let playerId = null, animalIndex = -1;
-    animalId && this.players.some(player => {
-      animalIndex = player.continent.findIndex(animal => animal.id === animalId);
-      if (~animalIndex) {
-        playerId = player.id;
-        return true;
-      }
-    });
-    const animal = playerId !== null ? this.getPlayer(playerId).getAnimal(animalIndex) : null;
-    // locateAnimalTime += clock(start);
-    // console.log(locateAnimalTime);
+  searchAnimalInPlayer(player, animalId) {
+    return player.continent.findIndex(animal => animal.id === animalId);
+  }
+
+  locateAnimal(animalId, playerId = null) {
+    let animalIndex = -1;
+    if (!!playerId) {
+      animalIndex = this.getPlayer(playerId).continent.findIndex(animal => animal.id === animalId);
+    } else {
+      this.players.some(player => {
+        animalIndex = player.continent.findIndex(animal => animal.id === animalId)
+        if (~animalIndex) {
+          playerId = player.id;
+          return true;
+        }
+      });
+    }
+    const animal = (!!playerId && ~animalIndex) ? this.getPlayer(playerId).getAnimal(animalIndex) : null;
     return {animalIndex, animal};
   }
 

@@ -7,6 +7,7 @@ import {DropTarget} from 'react-dnd';
 import {DND_ITEM_TYPE} from './../dnd/DND_ITEM_TYPE';
 
 
+import {PHASE} from '../../../../shared/models/game/GameModel';
 import {AnimalModel} from '../../../../shared/models/game/evolution/AnimalModel';
 import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 import {TRAIT_ANIMAL_FLAG, TRAIT_TARGET_TYPE} from '../../../../shared/models/game/evolution/constants';
@@ -14,10 +15,9 @@ import {TRAIT_ANIMAL_FLAG, TRAIT_TARGET_TYPE} from '../../../../shared/models/ga
 import {AnimalTrait, DragAnimalTrait, ClickAnimalTrait} from './AnimalTrait.jsx';
 import {AnimalLinkedTrait} from './AnimalLinkedTrait.jsx';
 import {DragAnimalSelectLink} from './AnimalSelectLink.jsx'
-import {GameProvider} from './../providers/GameProvider.jsx';
 import {Food} from './../food/Food.jsx';
 
-import './Animal.scss';
+import '../animals/Animal.scss';
 import Tooltip from '../../utils/Tooltip.jsx';
 
 class Animal extends React.Component {
@@ -47,7 +47,7 @@ class Animal extends React.Component {
   }
 
   render() {
-    const {model, isOver, canDrop, game} = this.props;
+    const {model, children, isOver, canDrop, game} = this.props;
 
     const className = classnames({
       Animal: true
@@ -56,7 +56,7 @@ class Animal extends React.Component {
 
     return (<div id={'Animal' + model.id} className={className}>
       <div className='traits'>
-        {model.traits
+        {!children && model.traits
           .toList()
           .reverse()
           //.sort((t1, t2) => t1.isLinked() ? 1 : -1)
@@ -64,6 +64,7 @@ class Animal extends React.Component {
             (<div key={trait.id}>
               {this.renderTrait(trait, model)}
             </div>))}
+        {!!children && children}
       </div>
       {this.renderSelectLink()}
       {!game && this.renderAnimalBody(model, game)}
@@ -79,7 +80,8 @@ class Animal extends React.Component {
       {game && game.status.phase === PHASE.FEEDING && this.renderFoodStatus(animal, game)}
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) && <span className='material-icons Flag Poisoned'>smoking_rooms</span>}
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && <span className='material-icons Flag Hibernated'>snooze</span>}
-      {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <span className='material-icons Flag Shell'>lock</span>}
+      {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <span className='material-icons Flag Shell'>home</span>}
+      {animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION) && <span className='material-icons Flag Regeneration'>get_app</span>}
       <div className='AnimalFoodContainer'>
         {Array.from({length: animal.food}).map((u, index) => <Food key={index}/>)}
       </div>
@@ -120,10 +122,17 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
   , canDrop(props, monitor) {
     switch (monitor.getItemType()) {
       case DND_ITEM_TYPE.CARD: {
-        const {model: animal} = props;
-        const {card, alternateTrait} = monitor.getItem();
-        const traitData = card.getTraitDataModel(alternateTrait);
-        return !traitData.checkTraitPlacementFails(animal);
+        const {game, model: animal} = props;
+        switch (game.status.phase) {
+          case PHASE.DEPLOY:
+            const {card, alternateTrait} = monitor.getItem();
+            const traitData = card.getTraitDataModel(alternateTrait);
+            return !traitData.checkTraitPlacementFails(animal);
+          case PHASE.REGENERATION:
+            return animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION);
+          default:
+            return false;
+        }
       }
       case DND_ITEM_TYPE.FOOD:
         const {index} = monitor.getItem();
@@ -158,7 +167,6 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
 }))(class extends Animal {
     static displayName = 'Animal';
     static propTypes = {
-      // by GameProvider
       game: PropTypes.object.isRequired
       // by DnD
       , connectDropTarget: PropTypes.func.isRequired
@@ -175,12 +183,21 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
 
     renderTrait(trait, animal) {
       if (trait.isLinked()) {
-        return <AnimalLinkedTrait trait={trait} sourceAnimal={animal}/>;
+        if (trait.getDataModel().playerControllable) {
+          return <AnimalLinkedTrait trait={trait} sourceAnimal={animal}>
+            <ClickAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}
+                              onClick={() => this.props.onTraitDropped(animal, trait)}/>
+          </AnimalLinkedTrait>
+        } else {
+          return <AnimalLinkedTrait trait={trait} sourceAnimal={animal}>
+            <AnimalTrait trait={trait}/>
+          </AnimalLinkedTrait>
+        }
       } else if (trait.getDataModel().playerControllable && trait.getDataModel().targetType === TRAIT_TARGET_TYPE.ANIMAL) {
         return <DragAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}/>;
-      } else if (trait.getDataModel().playerControllable) {
+      } else if (trait.getDataModel().playerControllable || trait.type === 'TraitAmbush') {
         return <ClickAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}
-                                 onClick={() => this.props.onTraitDropped(animal, trait)}/>;
+                                 onClick={() => this.props.onTraitDropped(animal, trait, this.props.game)}/>;
       } else {
         return <AnimalTrait trait={trait}/>;
       }

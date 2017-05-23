@@ -9,31 +9,37 @@ import {DND_ITEM_TYPE} from './../dnd/DND_ITEM_TYPE';
 import {PHASE} from '../../../../shared/models/game/GameModel';
 import {AnimalModel} from '../../../../shared/models/game/evolution/AnimalModel';
 import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
+import * as tt from '../../../../shared/models/game/evolution/traitTypes';
 
 import AnimalTraitDetails from './AnimalTraitDetails.jsx';
-import Tooltip from 'rc-tooltip';
+import Tooltip from '../../utils/Tooltip.jsx';
 
-import './AnimalTrait.scss';
+import '../animals/AnimalTrait.scss';
 
 class AnimalTrait extends React.PureComponent {
   static propTypes = {
     trait: PropTypes.instanceOf(TraitModel).isRequired
+    , enableTooltip: PropTypes.bool
   };
 
-  static defaultProps = {classNames: {}};
+  static defaultProps = {
+    classNames: {}
+    , enableTooltip: true
+  };
 
   render() {
-    const {trait} = this.props;
+    const {trait, className, enableTooltip} = this.props;
 
-    const className = classnames(Object.assign(this.classNames || {}, {
+    const classNames = classnames(Object.assign({
       AnimalTrait: true
       , [trait.type]: true
       , value: trait.value
-    }));
+      , disabled: trait.disabled
+    }, this.classNames || {}));
 
-    return (<div id={'AnimalTrait' + trait.id} className={className}>
+    return (<div id={'AnimalTrait' + trait.id} className={classNames + (!!className ? ' ' + className : '')}>
       <Tooltip
-        overlay={<AnimalTraitDetails trait={trait}/>}
+        overlay={enableTooltip && <AnimalTraitDetails trait={trait}/>}
         mouseEnterDelay={.5}
         destroyTooltipOnHide={true}
       >
@@ -98,15 +104,31 @@ class ClickAnimalTrait extends AnimalTrait {
 
   render() {
     const {trait, game, sourceAnimal, onClick} = this.props;
-    const active = (game.isPlayerTurn() || trait.getDataModel().transient)
-      && game.status.phase === PHASE.FEEDING
-      && sourceAnimal.ownerId === game.userId
-      && trait.checkAction(game, sourceAnimal);
+    const traitCarnivorous = sourceAnimal.hasTrait(tt.TraitCarnivorous);
+    const active = (
+      (sourceAnimal.ownerId === game.userId)
+      && (( // Normal trait
+        (game.isPlayerTurn() || trait.getDataModel().transient)
+        && game.status.phase === PHASE.FEEDING
+        && trait.checkAction(game, sourceAnimal)
+      ) || ( // Ambush
+        trait.type === tt.TraitAmbush
+        && game.status.phase === PHASE.AMBUSH
+        && traitCarnivorous
+        && !traitCarnivorous.checkActionFails(game, sourceAnimal)
+      ))
+    );
+    const value = (trait.value
+      || (
+        game.status.phase === PHASE.AMBUSH
+        && !!game.getIn(['ambush', 'ambushers', sourceAnimal.id])
+      )
+    );
     this.classNames = {
       pointer: active
       , active
       , ClickAnimalTrait
-      , value: trait.value
+      , value
     };
     return (active
       ? React.cloneElement(super.render(), {onClick})

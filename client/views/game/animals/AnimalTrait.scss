@@ -78,10 +78,8 @@
   }
 }
 
-.AnimalTraitIcon {
-  padding: .3em;
-  font-weight: bold;
-  text-align: center;
+.AnimalTraitIcon.mdl-button {
+  background: white;
 }
 
 //.AnimalLinkedTrait {

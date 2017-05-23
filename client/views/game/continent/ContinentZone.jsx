@@ -1,33 +1,50 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import classnames from 'classnames';
+import {connect} from 'react-redux';
+import {compose} from 'redux';
 
-import { DropTarget } from 'react-dnd';
-import { DND_ITEM_TYPE } from '../dnd/DND_ITEM_TYPE';
+import {DropTarget} from 'react-dnd';
+import {DND_ITEM_TYPE} from '../dnd/DND_ITEM_TYPE';
+
+import {gameDeployAnimalRequest} from '../../../../shared/actions/actions';
 
 export class ContinentZone extends React.PureComponent {
   static propTypes = {
     index: PropTypes.number.isRequired
-    //, width: PropTypes.string.isRequired
-    , onCardDropped: PropTypes.func.isRequired
   };
-  render() {
-    const {isOver} = this.props;
-    return this.props.connectDropTarget(<div className={classnames({
+
+  constructor(props) {
+    super(props);
+    this.className = 'ContinentZone'
+  }
+
+  componentWillReceiveProps({isOver}) {
+    this.className = classnames({
       ContinentZone: true
       , highlight: isOver
-    })}><div className="inner"></div>
+    });
+  }
+
+  render() {
+    return this.props.connectDropTarget(<div className={this.className}>
+      <div className="inner"/>
     </div>);
   }
 }
 
-export const DropTargetContinentZone = DropTarget(DND_ITEM_TYPE.CARD, {
-  drop(props, monitor, component) {
-    const {card} = monitor.getItem();
-    props.onCardDropped(card, props.index);
-  }
-}, (connect, monitor) => ({
-  connectDropTarget: connect.dropTarget(),
-  isOver: monitor.isOver(),
-  canDrop: monitor.canDrop()
-}))(ContinentZone);
+export default compose(connect(() => ({})
+  , (dispatch) => ({
+    $deployAnimal: (...args) => dispatch(gameDeployAnimalRequest(...args))
+  }))
+  , DropTarget(DND_ITEM_TYPE.CARD, {
+    drop({index, $deployAnimal}, monitor, component) {
+      const {card} = monitor.getItem();
+      $deployAnimal(card.id, index);
+    }
+  }, (connect, monitor) => ({
+    connectDropTarget: connect.dropTarget(),
+    isOver: monitor.isOver(),
+    canDrop: monitor.canDrop()
+  }))
+)(ContinentZone)
