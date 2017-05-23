@@ -107,7 +107,7 @@ export const TraitMimicry = {
 
 export const TraitScavenger = {
   type: tt.TraitScavenger
-  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitCarnivorous)
+  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitCarnivorous, true)
 };
 
 //

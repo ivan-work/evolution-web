@@ -41,8 +41,12 @@ const logAnimalById = (game, animalId) => {
 };
 
 const logTrait = (game, traitId) => {
-  const {trait} = game.locateTrait(traitId);
-  return trait && trait.type;
+  if (!!TraitData[traitId]) {
+    return traitId;
+  } else {
+    const {trait} = game.locateTrait(traitId);
+    return trait && trait.type;
+  }
 };
 
 /**
@@ -364,20 +368,24 @@ export const traitSetValue = (game, {sourceAid, traitId, value}) => {
 };
 
 const traitNotify_Start_getTarget = {
-  'TraitCommunication': logAnimalById
-  , 'TraitCooperation': logAnimalById
-  , 'TraitPoisonous': logAnimalById
-  , [TRAIT_TARGET_TYPE.ANIMAL]: logAnimalById
-  , [TRAIT_TARGET_TYPE.TRAIT]: (game, targetId) => logTrait(game, targetId)
+  'TraitCommunication': (game, animalId) => [logAnimalById(game, animalId)]
+  , 'TraitCooperation': (game, animalId) => [logAnimalById(game, animalId)]
+  , 'TraitPoisonous': (game, animalId) => [logAnimalById(game, animalId)]
+  , [TRAIT_TARGET_TYPE.ANIMAL]: (game, animalId) => [logAnimalById(game, animalId)]
+  , [TRAIT_TARGET_TYPE.TRAIT]: (game, targetId) => [logTrait(game, targetId)]
+  , [TRAIT_TARGET_TYPE.TWO_TRAITS]: (game, trait1Id, trait2Id) => [logTrait(game, trait1Id), logTrait(game, trait2Id)]
+  , default: () => []
 };
 
-export const traitNotify_Start = (game, {sourceAid, traitId, traitType, targetId}) => {
-  if (targetId === true) return game;
+export const traitNotify_Start = (game, {sourceAid, traitId, traitType, targets}) => {
+  if (targets[0] === true) return game;
   const {animal} = game.locateAnimal(sourceAid);
   const targetType = TraitDataModel.new(traitType).targetType;
-  const getTarget = traitNotify_Start_getTarget[traitType] || traitNotify_Start_getTarget[targetType];
-  const target = getTarget && getTarget(game, targetId);
-  return game.update(addToGameLog(['traitNotify_Start', logAnimal(animal), traitType, target]));
+  const getTarget = traitNotify_Start_getTarget[traitType]
+    || traitNotify_Start_getTarget[targetType]
+    || traitNotify_Start_getTarget.default;
+  const logTargets = getTarget(game, ...targets);
+  return game.update(addToGameLog(['traitNotify_Start', logAnimal(animal), traitType].concat(logTargets)));
 };
 
 export const traitTakeShell = (game, {continentId, animalId, trait}) => {
@@ -413,7 +421,8 @@ export const reducer = createReducer(Map(), {
   , gameDeployAnimalFromHand: (state, data) => state.update(data.gameId, game => gameDeployAnimalFromHand(game, data))
   , gameDeployAnimalFromDeck: (state, data) => state.update(data.gameId, game => gameDeployAnimalFromDeck(game, data))
   , gameDeployTrait: (state, data) => state.update(data.gameId, game => gameDeployTrait(game, data))
-  , gameDeployRegeneratedAnimal: (state, data) => state.update(data.gameId, game => gameDeployRegeneratedAnimal(game, data))
+  , gameDeployRegeneratedAnimal: (state, data) => state.update(data.gameId, game =>
+    gameDeployRegeneratedAnimal(game, data))
   , gameEndTurn: (state, data) => state.update(data.gameId, game => gameEndTurn(game, data))
   , gameEnd: (state, data) => state.update(data.gameId, game => gameEnd(game, data))
   , gamePlayerLeft: (state, data) => state.update(data.gameId, game => gamePlayerLeft(game, data))
@@ -446,6 +455,7 @@ export const reducer = createReducer(Map(), {
   // , traitNotify_End: (state, data) => state.update(data.gameId, game => traitNotify_End(game, data))
   , traitTakeShell: (state, data) => state.update(data.gameId, game => traitTakeShell(game, data))
   , traitAddHuntingCallback: (state, data) => state.update(data.gameId, game => traitAddHuntingCallback(game, data))
-  , traitClearHuntingCallbacks: (state, data) => state.update(data.gameId, game => traitClearHuntingCallbacks(game, data))
+  , traitClearHuntingCallbacks: (state, data) => state.update(data.gameId, game =>
+    traitClearHuntingCallbacks(game, data))
   , testHackGame: (state, data) => state.update(data.gameId, data.callback)
 });

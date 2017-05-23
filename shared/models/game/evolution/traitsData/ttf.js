@@ -111,7 +111,7 @@ export const TraitSpecA = {
   type: tt.TraitSpecA
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
-  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitSpecB)
+  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitSpecB, true)
   , cooldowns: fromJS([
     [tt.TraitSpecA, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
@@ -131,7 +131,7 @@ export const TraitSpecB = {
   type: tt.TraitSpecB
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
-  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitSpecA)
+  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitSpecA, true)
   , cooldowns: fromJS([
     [tt.TraitSpecB, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
@@ -170,6 +170,9 @@ export const TraitIntellect = {
   type: tt.TraitIntellect
   , targetType: TRAIT_TARGET_TYPE.TRAIT
   , food: 1
+  , cooldowns: fromJS([
+    [tt.TraitIntellect, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+  ])
   , getTargets: (game) => {
     const {animal: sourceAnimal} = game.locateAnimal(game.question.sourceAid);
     const {animal: targetAnimal} = game.locateAnimal(game.question.targetAid);
@@ -178,9 +181,6 @@ export const TraitIntellect = {
       , getActiveDefenses(game, sourceAnimal, targetAnimal)
       , getAffectiveDefenses(game, sourceAnimal, targetAnimal));
   }
-  , cooldowns: fromJS([
-    [tt.TraitIntellect, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
-  ])
   , action: (game, sourceAnimal, traitIntellect, targetTrait) => (dispatch, getState) => {
     dispatch(server$traitSetValue(game, sourceAnimal, traitIntellect, targetTrait));
     if (targetTrait !== true) {

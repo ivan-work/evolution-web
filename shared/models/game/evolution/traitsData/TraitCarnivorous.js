@@ -102,7 +102,7 @@ export const TraitCarnivorous = {
   , food: 1
   , targetType: TRAIT_TARGET_TYPE.ANIMAL
   , playerControllable: true
-  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitScavenger)
+  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitScavenger, true)
   , cooldowns: fromJS([
     ['TraitCarnivorous', TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
@@ -125,7 +125,7 @@ export const TraitCarnivorous = {
 
       if (animalAnglerfish) {
         const traitAnglerfish = animalAnglerfish.traits.first();
-        const newTraitCarnivorous = TraitModel.new('TraitCarnivorous');
+        const newTraitCarnivorous = TraitModel.new(tt.TraitCarnivorous);
         const newTraitIntellect = TraitModel.new(tt.TraitIntellect);
 
         dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
@@ -156,11 +156,16 @@ export const TraitCarnivorous = {
      */
 
     logger.debug(`TraitCarnivorous: ${sourceAnimal.id} > ${targetAnimal.id}`);
+    const staticDefenses = getStaticDefenses(game, sourceAnimal, targetAnimal);
     const possibleDefenses = [];
     let possibleDefenseTargets = 0;
     let traitMimicry, traitMimicryTargets, traitTailLoss, traitTailLossTargets, traitRunning, traitShell, traitInkCloud, traitCnidocytes;
 
     const traitIntellect = sourceAnimal.hasTrait(tt.TraitIntellect);
+    if (traitIntellect && staticDefenses.length === 1) {
+      dispatch(server$traitActivate(game, sourceAnimal, traitIntellect, staticDefenses[0]));
+      game = selectGame(getState, game.id);
+    }
     const canUseIntellect = traitIntellect && traitIntellect.checkAction(game, sourceAnimal);
     const disabledTid = !!traitIntellect && traitIntellect.value;
     logger.debug(`traitIntellect: ${traitIntellect}; ${canUseIntellect}; ${disabledTid}`);
@@ -203,7 +208,6 @@ export const TraitCarnivorous = {
     if (canUseIntellect && !disabledTid) {
       // default intellect found, need to ask
       const unavoidableDefenses = countUnavoidableDefenses(game, sourceAnimal, targetAnimal);
-      const staticDefenses = getStaticDefenses(game, sourceAnimal, targetAnimal);
       logger.debug(`${sourceAnimal.id} activates Intellect`);
       logger.debug(`unavoidableDefenses: ${unavoidableDefenses}`);
       logger.debug(`staticDefenses: ${staticDefenses.map(t => t.type) || []}`);
@@ -223,6 +227,8 @@ export const TraitCarnivorous = {
           dispatch(server$traitIntellectQuestion(game.id, sourceAnimal, trait, targetAnimal, defaultIntellect));
           return false;
         }
+      } else {
+        logger.error('unavoidableDefenses + staticDefenses > 0')
       }
     }
 
@@ -336,7 +342,9 @@ export const TraitCarnivorous = {
 
     const defenses = getStaticDefenses(game, sourceAnimal, targetAnimal).length;
 
-    return sourceAnimal.hasTrait(tt.TraitIntellect)
+    const traitIntellect = sourceAnimal.hasTrait(tt.TraitIntellect);
+
+    return (traitIntellect && !traitIntellect.checkActionFails(game, sourceAnimal))
       ? defenses < 2
       : defenses < 1;
   }

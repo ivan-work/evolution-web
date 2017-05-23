@@ -29,17 +29,17 @@ const customLog = {
   , gameDeployTrait: (message, [userId, traitType, animal, another]) => {
     return T.translate('Game.Log.' + message, {context: another ? 2 : 1, ...[userId, traitType, animal, another]})
   }
-  , traitNotify_Start: (message, [source, traitType, target]) => {
-    return T.translate('Game.Log.' + message, {context: target ? 1 : 0, ...[source, traitType, target]})
+  , traitNotify_Start: (message, [source, traitType, ...targets]) => {
+    return T.translate('Game.Log.' + message, {context: targets.length, ...[source, traitType, ...targets]})
   }
   , traitMoveFood: (message, [amount, sourceType, animal, another]) => {
     return T.translate('Game.Log.' + message + '.' + sourceType, {context: amount, ...[amount, sourceType, animal, another]})
   }
   , animalDeath: (message, [type, animal, data]) => {
-    return T.translate('Game.Log.' + message + '.' + type, {context: animal, ...[type, animal, data]})
+    return T.translate('Game.Log.' + message, {context: type, ...[type, animal, data]})
   }
   , gameStartPhase: (message, [phase, data]) => {
-    return T.translate('Game.Phase.' + message + '.' + phase, {data})
+    return T.translate('Game.Phase.' + phase, {data})
   }
   , default: (message, values) => T.translate('Game.Log.' + message, {...values})
 };
@@ -72,6 +72,8 @@ export default class GameLog extends React.Component {
         return <AnimalText key={index} animal={values[valueIndex]}/>;
       } else if (/\$(Trait\w+)/.test(match)) {
         return T.translate('Game.Trait.' + match.slice(1))
+      } else if (/(Trait\w+)/.test(match)) {
+        return T.translate('Game.Trait.' + match)
       } else if (/\$A/.test(match)) {
         return <AnimalText key={index}/>
       } else if (/\$F/.test(match)) {

@@ -71,12 +71,13 @@ const logTarget = (result = [], target) => {
   return result;
 };
 export const server$traitActivate = (game, sourceAnimal, trait, ...targets) => (dispatch, getState) => {
+  const logTargets = (targets || []).reduce(logTarget, []);
   if (!trait.getDataModel().transient) {
-    dispatch(server$traitNotify_Start(game, sourceAnimal, trait, ...targets));
+    dispatch(server$traitNotify_Start(game, sourceAnimal, trait, ...logTargets));
   }
   const newGame = selectGame(getState, game.id);
   const {animal: newAnimal} = newGame.locateAnimal(sourceAnimal.id, sourceAnimal.ownerId);
-  logger.verbose('server$traitActivate:', sourceAnimal.id, trait.type, ...((targets || []).reduce(logTarget, [])));
+  logger.verbose('server$traitActivate:', sourceAnimal.id, trait.type, ...logTargets);
   const traitData = trait.getDataModel();
   const result = dispatch(traitData.action(newGame, newAnimal, trait, ...targets));
   logger.silly('server$traitActivate finish:', trait.type, result);
@@ -393,9 +394,9 @@ export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
  * Notification
  */
 
-const traitNotify_Start = (gameId, sourceAid, traitId, traitType, targetId) => ({
+const traitNotify_Start = (gameId, sourceAid, traitId, traitType, targets) => ({
   type: 'traitNotify_Start'
-  , data: {gameId, sourceAid, traitId, traitType, targetId}
+  , data: {gameId, sourceAid, traitId, traitType, targets}
 });
 
 const traitNotify_End = (gameId, sourceAid, traitId, traitType, targetId) => ({
@@ -403,9 +404,9 @@ const traitNotify_End = (gameId, sourceAid, traitId, traitType, targetId) => ({
   , data: {gameId, sourceAid, traitId, traitType, targetId}
 });
 
-export const server$traitNotify_Start = (game, sourceAnimal, trait, target) => {
+export const server$traitNotify_Start = (game, sourceAnimal, trait, ...targets) => {
   logger.debug('server$traitNotify_Start:', trait.type);
-  return server$game(game.id, traitNotify_Start(game.id, sourceAnimal.id, trait.id, trait.type, target && target.id || target));
+  return server$game(game.id, traitNotify_Start(game.id, sourceAnimal.id, trait.id, trait.type, targets));
 };
 
 //TODO TRAIT
@@ -441,7 +442,7 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
           .concat(traitMakeCooldownActions(gameId, linkedTrait, linkedAnimal))
           .map(cooldownAction => dispatch(cooldownAction));
 
-        dispatch(server$traitNotify_Start(game, animal, traitCooperation, linkedAnimal));
+        dispatch(server$traitNotify_Start(game, animal, traitCooperation, linkedAnimal.id));
         dispatch(server$startFeeding(gameId, linkedAnimal.id, 1, 'GAME', animal.id));
       });
   }
@@ -462,7 +463,7 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
         .concat(traitMakeCooldownActions(gameId, linkedTrait, linkedAnimal))
         .map(cooldownAction => dispatch(cooldownAction));
 
-      dispatch(server$traitNotify_Start(game, animal, traitCommunication, linkedAnimal));
+      dispatch(server$traitNotify_Start(game, animal, traitCommunication, linkedAnimal.id));
       dispatch(server$startFeeding(gameId, linkedAnimal.id, 1, tt.TraitCommunication, animal.id));
     });
 
@@ -831,8 +832,8 @@ export const traitServerToClient = {
     traitQuestion(gameId, QuestionRecord.fromJS(question))
   , traitAnswerSuccess: ({gameId, questionId}, currentUserId) =>
     traitAnswerSuccess(gameId, questionId)
-  , traitNotify_Start: ({gameId, sourceAid, traitId, traitType, targetId}, currentUserId) =>
-    traitNotify_Start(gameId, sourceAid, traitId, traitType, targetId)
+  , traitNotify_Start: ({gameId, sourceAid, traitId, traitType, targets}, currentUserId) =>
+    traitNotify_Start(gameId, sourceAid, traitId, traitType, targets)
   , traitNotify_End: ({gameId, sourceAid, traitId, traitType, targetId}, currentUserId) =>
     traitNotify_End(gameId, sourceAid, traitId, traitType, targetId)
   , traitAnimalRemoveTrait: ({gameId, sourcePid, sourceAid, traitId}) =>
