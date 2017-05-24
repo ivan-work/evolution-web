@@ -97,22 +97,22 @@ export const TraitRecombination = {
   , action: (game, sourceAnimal, traitRecombination, [trait1, trait2]) => (dispatch, getState) => {
     const animal1 = sourceAnimal;
     const animal2 = TraitRecombination.getLinkedAnimal(game, sourceAnimal, traitRecombination);
+    const traitRecombination2 = animal2.hasTrait(tt.TraitRecombination);
     dispatch(server$traitAnimalRemoveTrait(game, animal1, trait1));
     dispatch(server$traitAnimalRemoveTrait(game, animal2, trait2));
-    if (!trait1.getDataModel().checkTraitPlacementFails(selectGame(getState, game.id).locateAnimal(animal2.id).animal))
+    if (!trait1.getDataModel().checkTraitPlacementFails(selectGame(getState, game.id).locateAnimal(animal2.id, animal2.ownerId)))
       dispatch(server$traitAnimalAttachTrait(game, animal2, trait1));
-    if (!trait2.getDataModel().checkTraitPlacementFails(selectGame(getState, game.id).locateAnimal(animal1.id).animal))
+    if (!trait2.getDataModel().checkTraitPlacementFails(selectGame(getState, game.id).locateAnimal(animal1.id, animal1.ownerId)))
       dispatch(server$traitAnimalAttachTrait(game, animal1, trait2));
     dispatch(server$traitStartCooldown(game.id, traitRecombination, animal1));
-    dispatch(server$traitStartCooldown(game.id, traitRecombination, animal2));
+    dispatch(server$traitStartCooldown(game.id, traitRecombination2, animal2));
     return false;
   }
   , $checkAction: (game, sourceAnimal, traitRecombination) => {
     const linkedAnimal = game.locateAnimal(
-      sourceAnimal.id === traitRecombination.hostAnimalId
-        ? traitRecombination.linkAnimalId
-        : traitRecombination.hostAnimalId
-    ).animal;
+      sourceAnimal.id === traitRecombination.hostAnimalId ? traitRecombination.linkAnimalId : traitRecombination.hostAnimalId
+      , traitRecombination.ownerId
+    );
     return (TraitRecombination.getTargets(game, sourceAnimal).size > 0
     && TraitRecombination.getTargets(game, linkedAnimal).size > 0);
   }
@@ -121,10 +121,9 @@ export const TraitRecombination = {
   , getTargets: (game, targetAnimal, targetTrait) => targetAnimal.traits
     .filter(t => TraitRecombination.checkTarget(null, null, t)).toList()
   , getLinkedAnimal: (game, animal, trait) => (game.locateAnimal(
-      animal.id === trait.hostAnimalId
-        ? trait.linkAnimalId
-        : trait.hostAnimalId
-    ).animal
+      animal.id === trait.hostAnimalId ? trait.linkAnimalId : trait.hostAnimalId
+      , trait.ownerId
+    )
   )
 };
 

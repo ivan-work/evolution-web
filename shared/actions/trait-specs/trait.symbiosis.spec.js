@@ -142,32 +142,14 @@ players:
 
   describe('Feedng:', () => {
     it(`Can't get food when not full`, () => {
-      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
-phase: deploy
+phase: feeding
+food: 8
 players:
-  - hand: 3 CardSymbiosis
-    continent: $A carn graz, $B carn fat fat, $C carn, $D
+  - continent: $A carn symb$B symb$C wait, $B carn fat fat symb$C, $C carn, $D
 `);
       const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-      clientStore0.dispatch(gameDeployTraitRequest(
-        selectCard(User0, 0).id
-        , '$A', false, '$B'
-      ));
-      clientStore1.dispatch(gameEndTurnRequest());
-
-      clientStore0.dispatch(gameDeployTraitRequest(
-        selectCard(User0, 0).id
-        , '$A', false, '$C'
-      ));
-
-      replaceGetRandom(() => 6, () => {
-        clientStore0.dispatch(gameDeployTraitRequest(
-          selectCard(User0, 0).id
-          , '$B', false, '$C'
-        ));
-      });
-      expect(selectGame().food).equal(8);
 
       expect(selectGame().status.phase).equal(PHASE.FEEDING);
       expect(selectAnimal(User0, 0).traits, 'Animal $A.traits').size(4);
@@ -190,19 +172,18 @@ players:
       expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(0);
       expect(selectAnimal(User0, 2).getFoodAndFat(), 'Animal#2.getFoodAndFat()').equal(1);
       clientStore0.dispatch(gameEndTurnRequest());
-      clientStore1.dispatch(gameEndTurnRequest());
 
-      expectUnchanged(`$A can't take food`, () => clientStore0.dispatch(
-        traitTakeFoodRequest('$A')
-      ), serverStore);
+      expectUnchanged(`$A can't take food`, () =>
+          clientStore0.dispatch(traitTakeFoodRequest('$A'))
+        , serverStore);
 
-      expectUnchanged(`$B can't take food`, () => clientStore0.dispatch(
-        traitTakeFoodRequest('$B')
-      ), serverStore);
+      expectUnchanged(`$B can't take food`, () =>
+          clientStore0.dispatch(traitTakeFoodRequest('$B'))
+        , serverStore);
 
-      expectChanged(`$C can take food`, () => clientStore0.dispatch(
-        traitTakeFoodRequest('$C')
-      ), serverStore);
+      expectChanged(`$C can take food`, () =>
+          clientStore0.dispatch(traitTakeFoodRequest('$C'))
+        , serverStore);
 
       expect(selectAnimal(User0, 0).getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(0);
       expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(0);

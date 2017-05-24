@@ -26,7 +26,7 @@ export class GameSticker extends React.PureComponent {
     const game = this.props.game;
     if (game.getIn(['ambush', 'ambushers']) && game.userId) {
       return game.getIn(['ambush', 'ambushers']).some((wants, animalId) => {
-        const animal = game.locateAnimal(animalId, game.userId).animal;
+        const animal = game.locateAnimal(animalId, game.userId);
         if (animal && wants === null) return true;
       });
     }

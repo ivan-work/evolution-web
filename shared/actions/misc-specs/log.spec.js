@@ -56,13 +56,14 @@ players:
   - continent: $A Camouflage Scavenger Communication$S, $S TailLoss Grazing, $D Carnivorous FatTissue Piracy, $F Symbiosis$G Cooperation$G, $G Mimicry Running, $H Poisonous Hibernation
   - continent: $Z Carnivorous, $X Carnivorous, $C Carnivorous
 `);
-    const {selectGame, selectPlayer, findCard} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, findCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
     const {selectGame0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
     const {selectGame1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
     const {selectGame2} = makeClientGameSelectors(clientStore2.getState, gameId, 2);
 
     replaceGetRandom(() => 3, () => {
       clientStore0.dispatch(gameDeployAnimalRequest(findCard(User0, tt.TraitFatTissue), 0));
+      expect(selectAnimal(User0, 1).id).equal('$Q');
 
       clientStore1.dispatch(gameEndTurnRequest());
 
@@ -121,16 +122,16 @@ players:
     const $G = ['$Animal', 'TraitMimicry', 'TraitRunning', 'TraitSymbiosis', 'TraitCooperation'];
     const $H = ['$Animal', 'TraitPoisonous', 'TraitHibernation'];
 
-    expect(logAnimal(selectGame().locateAnimal('$A').animal), 'A s').eql($A);
-    expect(logAnimal(selectGame().locateAnimal('$S').animal), 'S s').eql($S1);
-    expect(logAnimal(selectGame().locateAnimal('$D').animal), 'D s').eql($D);
-    expect(logAnimal(selectGame().locateAnimal('$F').animal), 'F s').eql($F);
-    expect(logAnimal(selectGame().locateAnimal('$G').animal), 'G s').eql($G);
-    expect(logAnimal(selectGame0().locateAnimal('$A').animal), 'A c').eql($A);
-    expect(logAnimal(selectGame0().locateAnimal('$S').animal), 'S c').eql($S1);
-    expect(logAnimal(selectGame0().locateAnimal('$D').animal), 'D c').eql($D);
-    expect(logAnimal(selectGame0().locateAnimal('$F').animal), 'F c').eql($F);
-    expect(logAnimal(selectGame0().locateAnimal('$G').animal), 'G c').eql($G);
+    expect(logAnimal(selectGame().locateAnimal('$A')), 'A s').eql($A);
+    expect(logAnimal(selectGame().locateAnimal('$S')), 'S s').eql($S1);
+    expect(logAnimal(selectGame().locateAnimal('$D')), 'D s').eql($D);
+    expect(logAnimal(selectGame().locateAnimal('$F')), 'F s').eql($F);
+    expect(logAnimal(selectGame().locateAnimal('$G')), 'G s').eql($G);
+    expect(logAnimal(selectGame0().locateAnimal('$A')), 'A c').eql($A);
+    expect(logAnimal(selectGame0().locateAnimal('$S')), 'S c').eql($S1);
+    expect(logAnimal(selectGame0().locateAnimal('$D')), 'D c').eql($D);
+    expect(logAnimal(selectGame0().locateAnimal('$F')), 'F c').eql($F);
+    expect(logAnimal(selectGame0().locateAnimal('$G')), 'G c').eql($G);
 
     const checkLog = (selectGame) => {
       let i = 0;

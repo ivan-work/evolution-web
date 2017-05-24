@@ -49,9 +49,9 @@ players:
     ParseGame(`
 players:
   - hand: 6 camo
-    continent: $
+    continent: $A
   - hand: 6 camo
-    continent: $
+    continent: $B
 `);
 
     // gameDeployTraitRequest empty
@@ -61,7 +61,7 @@ players:
     // gameDeployTraitRequest invalid card
     expectUnchanged('gameDeployTraitRequest invalid card', () => clientStore0.dispatch(gameDeployTraitRequest(
       '123'
-      , ClientGame0().getPlayer().getAnimal(0).id))
+      , '$A'))
       , serverStore, clientStore0);
 
     // gameDeployTraitRequest invalid animal
@@ -73,16 +73,16 @@ players:
     // gameDeployTraitRequest valid card, valid animal
     expectChanged('gameDeployTraitRequest valid card, valid animal', () => clientStore0.dispatch(gameDeployTraitRequest(
       ClientGame0().getPlayer().getCard(0).id
-      , ClientGame0().getPlayer().getAnimal(0).id))
+      , '$A'))
       , serverStore, clientStore0);
 
     // wait turn
-    clientStore1.dispatch(gameDeployTraitRequest(ClientGame1().getPlayer().getCard(0).id, ClientGame1().getPlayer().getAnimal(0).id));
+    clientStore1.dispatch(gameDeployTraitRequest(ClientGame1().getPlayer().getCard(0).id, '$B'));
 
     // gameDeployTraitRequest already has trait, valid animal
     expectUnchanged('gameDeployTraitRequest already has trait, valid animal', () => clientStore0.dispatch(gameDeployTraitRequest(
       ClientGame0().getPlayer().getCard(0).id
-      , ClientGame0().getPlayer().getAnimal(0).id))
+      , '$A'))
       , serverStore, clientStore0);
   });
 });

@@ -1,4 +1,4 @@
-import {List, Map} from 'immutable';
+import {List, OrderedMap} from 'immutable';
 import {GameModel, PHASE, StatusRecord} from './GameModel';
 import {SettingsRecord} from './GameSettings';
 import {AnimalModel} from './evolution/AnimalModel';
@@ -24,16 +24,16 @@ describe('GameModel.parse', () => {
   it('parseAnimalList', () => {
     const list = GameModel.parseAnimalList('u', ' carn sharp , sharp camo , $A ');
     expect(list.size).equal(3);
-    expect(list.get(0).traits.size).equal(2);
-    expect(list.get(0).traits.first().type).equal('TraitCarnivorous');
-    expect(list.get(0).traits.last().type).equal('TraitSharpVision');
-    expect(list.get(1).traits.size).equal(2);
-    expect(list.get(1).traits.first().type).equal('TraitSharpVision');
-    expect(list.get(1).traits.last().type).equal('TraitCamouflage');
-    expect(list.get(2).id).equal('$A');
-    expect(list.get(2).traits.size).equal(0);
+    expect(list.toArray()[0].traits.size).equal(2);
+    expect(list.toArray()[0].traits.first().type).equal('TraitCarnivorous');
+    expect(list.toArray()[0].traits.last().type).equal('TraitSharpVision');
+    expect(list.toArray()[1].traits.size).equal(2);
+    expect(list.toArray()[1].traits.first().type).equal('TraitSharpVision');
+    expect(list.toArray()[1].traits.last().type).equal('TraitCamouflage');
+    expect(list.toArray()[2].id).equal('$A');
+    expect(list.toArray()[2].traits.size).equal(0);
 
-    expect(GameModel.parseAnimalList('u', ''), 'parseAnimalList(empty)').equal(List());
+    expect(GameModel.parseAnimalList('u', ''), 'parseAnimalList(empty)').equal(OrderedMap());
 
     expect(GameModel.parseAnimalList('u', '$').size, 'parseAnimalList($)').equal(1);
     expect(GameModel.parseAnimalList('u', '$').first().traits.size, 'parseAnimalList($)').equal(0);
@@ -42,18 +42,18 @@ describe('GameModel.parse', () => {
   it('parseAnimalList with links', () => {
     const list = GameModel.parseAnimalList('u', '$A coop$B symb$C, $B, $C');
     expect(list.size).equal(3);
-    expect(list.get(0).traits.size).equal(2);
-    expect(list.get(0).traits.first().type).equal('TraitCooperation');
-    expect(list.get(0).traits.last().type).equal('TraitSymbiosis');
-    expect(list.get(1).traits.size).equal(1);
-    expect(list.get(1).traits.first().type).equal('TraitCooperation');
-    expect(list.get(2).traits.size).equal(1);
-    expect(list.get(2).traits.first().type).equal('TraitSymbiosis');
+    expect(list.get('$A').traits.size).equal(2);
+    expect(list.get('$A').traits.first().type).equal('TraitCooperation');
+    expect(list.get('$A').traits.last().type).equal('TraitSymbiosis');
+    expect(list.get('$B').traits.size).equal(1);
+    expect(list.get('$B').traits.first().type).equal('TraitCooperation');
+    expect(list.get('$C').traits.size).equal(1);
+    expect(list.get('$C').traits.first().type).equal('TraitSymbiosis');
 
-    const TraitCooperation$A = list.get(0).traits.first();
-    const TraitCooperation$B = list.get(1).traits.first();
-    const TraitSymbiosis$A = list.get(0).traits.first();
-    const TraitSymbiosis$C = list.get(1).traits.first();
+    const TraitCooperation$A = list.get('$A').traits.first();
+    const TraitCooperation$B = list.get('$B').traits.first();
+    const TraitSymbiosis$A = list.get('$A').traits.first();
+    const TraitSymbiosis$C = list.get('$B').traits.first();
 
     expect(TraitCooperation$A.id).equal(TraitCooperation$B.linkId);
     expect(TraitCooperation$A.hostAnimalId).equal('$A');
@@ -79,19 +79,18 @@ describe('GameModel.parse', () => {
   it('parseAnimalListWithFood', () => {
     const list = GameModel.parseAnimalList('u', '$A, +, $B ++ carn sharp, $ sharp camo, + camo');
     expect(list.size).equal(5);
-    expect(list.get(0).traits.size).equal(0);
-    expect(list.get(0).id).equal('$A');
-    expect(list.get(1).traits.size).equal(0);
-    expect(list.get(2).id).equal('$B');
-    expect(list.get(2).traits.map(t => t.type).toArray()).eql(['TraitCarnivorous', 'TraitSharpVision']);
-    expect(list.get(3).traits.map(t => t.type).toArray()).eql(['TraitSharpVision', 'TraitCamouflage']);
-    expect(list.get(4).traits.map(t => t.type).toArray()).eql(['TraitCamouflage']);
-
-    expect(list.get(0).getFood()).equal(0);
-    expect(list.get(1).getFood()).equal(1);
-    expect(list.get(2).getFood()).equal(2);
-    expect(list.get(3).getFood()).equal(0);
-    expect(list.get(4).getFood()).equal(1);
+    expect(list.toArray()[0].traits.size).equal(0);
+    expect(list.toArray()[0].id).equal('$A');
+    expect(list.toArray()[1].traits.size).equal(0);
+    expect(list.toArray()[2].id).equal('$B');
+    expect(list.toArray()[2].traits.map(t => t.type).toArray()).eql(['TraitCarnivorous', 'TraitSharpVision']);
+    expect(list.toArray()[3].traits.map(t => t.type).toArray()).eql(['TraitSharpVision', 'TraitCamouflage']);
+    expect(list.toArray()[4].traits.map(t => t.type).toArray()).eql(['TraitCamouflage']);
+    expect(list.toArray()[0].getFood()).equal(0);
+    expect(list.toArray()[1].getFood()).equal(1);
+    expect(list.toArray()[2].getFood()).equal(2);
+    expect(list.toArray()[3].getFood()).equal(0);
+    expect(list.toArray()[4].getFood()).equal(1);
   });
 
   it('Valid Seed', () => {
@@ -130,7 +129,7 @@ players:
     expect(parsedContinent.last().traits.last().type).equal('TraitCamouflage');
 
     expect(parsed.getIn(['players', 'u1', 'hand'])).equal(List());
-    expect(parsed.getIn(['players', 'u1', 'continent'])).equal(List());
+    expect(parsed.getIn(['players', 'u1', 'continent'])).equal(OrderedMap());
   });
 
   it('mockGame.ParseGame', () => {
@@ -155,7 +154,7 @@ players:
     expect(ServerGame().getIn(['players', User0.id, 'hand']).size).equal(2);
     expect(ServerGame().getIn(['players', User0.id, 'continent']).size).equal(2);
     expect(ServerGame().getIn(['players', User1.id, 'hand'])).equal(List());
-    expect(ServerGame().getIn(['players', User1.id, 'continent'])).equal(List());
+    expect(ServerGame().getIn(['players', User1.id, 'continent'])).equal(OrderedMap());
   });
 
   it('mockGame.ParseGame settings', () => {

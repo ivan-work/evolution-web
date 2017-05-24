@@ -101,7 +101,7 @@ export const TraitMimicry = {
       //&& !animal.hasTrait(tt.TraitMimicry)
       //&& (!animal.hasTrait(tt.TraitMimicry) || animal.hasTrait(tt.TraitMimicry) && animal.hasTrait(tt.TraitMimicry).checkAction(game, animal))
       && attackTraitData.checkTarget(game, attackAnimal, animal)
-    );
+    ).toList();
   }
 };
 

@@ -121,7 +121,7 @@ export const TraitCarnivorous = {
           animal.traits.first().value === true
           && targetAnimal.traits.size === 0
         ))
-      ).get(0);
+      ).first();
 
       if (animalAnglerfish) {
         const traitAnglerfish = animalAnglerfish.traits.first();
@@ -134,10 +134,10 @@ export const TraitCarnivorous = {
         dispatch(server$traitAnimalAttachTrait(game, animalAnglerfish, newTraitIntellect));
         dispatch(server$traitAnimalRemoveTrait(game, animalAnglerfish, traitAnglerfish));
         game = selectGame(getState, game.id);
-        const {animal: revealledAnglerfish} = game.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
+        const revealledAnglerfish = game.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
         if (TraitCarnivorous.checkTarget(game, revealledAnglerfish, sourceAnimal)) {
           dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
-            const {animal} = game.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
+            const animal = game.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
             if (animal) {
               const traitIntellect = animal.hasTrait(tt.TraitIntellect);
               if (traitIntellect) dispatch(server$traitAnimalRemoveTrait(game, animal, traitIntellect));
@@ -193,7 +193,7 @@ export const TraitCarnivorous = {
           traitMimicryTargets = TraitMimicry.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
           possibleDefenseTargets += traitMimicryTargets.size;
           if (traitMimicryTargets.size > 0) possibleDefenses.push(defenseTrait);
-        } else if (defenseTrait.type === tt.TraitMimicry) {
+        } else if (defenseTrait.type === tt.TraitCnidocytes) {
           traitCnidocytes = defenseTrait;
           possibleDefenses.push(defenseTrait);
         }
@@ -265,7 +265,7 @@ export const TraitCarnivorous = {
           dispatch(server$traitDefenceAnswer(game.id
             , questionId
             , tt.TraitMimicry
-            , traitMimicryTargets.get(0).id
+            , traitMimicryTargets.first().id
           ));
           return false;
         } else if (traitShell && !traitShell.isEqual(disabledTid)) {
@@ -283,7 +283,7 @@ export const TraitCarnivorous = {
         } else {
           game = selectGame(getState, game.id);
 
-          if (traitCnidocytes && !traitCnidocytes.isEqual(disabledTid) && traitCnidocytes.checkActionFails(game,)) {
+          if (traitCnidocytes && !traitCnidocytes.isEqual(disabledTid) && !traitCnidocytes.checkActionFails(game, sourceAnimal)) {
             dispatch(traitCnidocytes.getDataModel().customFns.paralyze(game.id, targetAnimal, traitCnidocytes, sourceAnimal));
           }
 
@@ -333,9 +333,7 @@ export const TraitCarnivorous = {
       return dispatch(defaultDefence(question.id));
     }
   }
-  , $checkAction: (game, sourceAnimal) => {
-    return sourceAnimal.canEat(game)
-  }
+  , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game)
   , checkTarget: (game, sourceAnimal, targetAnimal) => {
     const unavoidable = countUnavoidableDefenses(game, sourceAnimal, targetAnimal);
     if (unavoidable > 0) return false;

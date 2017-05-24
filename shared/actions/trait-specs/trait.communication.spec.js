@@ -21,8 +21,7 @@ players:
       const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
       expect(selectCard(User0, 0).trait1).equal('TraitCommunication');
 
-      clientStore0.dispatch(gameDeployTraitRequest(
-        selectCard(User0, 0).id, '$A', false, '$B'));
+      clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A', false, '$B'));
       expect(selectAnimal(User0, 0).traits).size(1);
       expect(selectAnimal(User0, 1).traits).size(1);
       expect(selectTrait(User0, 0, 0).ownerId).equal(User0.id);
@@ -165,32 +164,38 @@ deck: 10 camo
 phase: feeding
 food: 0
 players:
-  - continent: $A carn mass piracy comm$B fat fat, $B fat fat
-  - continent: $X + carn, $Y + carn, $Z +
+  - continent: $A carn mass piracy comm$B, $B wait
+  - continent: $X, $Y + mass
 `);
-      const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+      const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
       clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$X'));
       clientStore0.dispatch(traitActivateRequest('$A', 'TraitPiracy', '$Y'));
 
-      expect(selectAnimal(User0, 0).getFoodAndFat(), 'Animal $A.getFoodAndFat()').equal(3);
-      expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal $B.getFoodAndFat()').equal(1);
+      expect(findAnimal('$A').getFoodAndFat(), 'Animal $A.getFoodAndFat()').equal(3);
+      expect(findAnimal('$B').getFoodAndFat(), 'Animal $B.getFoodAndFat()').equal(1);
+    });
 
-      clientStore1.dispatch(gameEndTurnRequest());
-      // 0-1-0
-      clientStore0.dispatch(gameEndTurnRequest());
-      // 0-1-1
-      clientStore1.dispatch(gameEndTurnRequest());
-      clientStore0.dispatch(gameEndTurnRequest());
-      expect(selectGame().getIn(['status', 'turn'])).equal(1);
-      expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.FEEDING);
-      clientStore1.dispatch(gameEndTurnRequest());
+    it('Has cooldown (carn + piracy)', () => {
+      const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+      const gameId = ParseGame(`
+deck: 10 camo
+phase: feeding
+food: 0
+players:
+  - continent: $A carn mass piracy comm$B, $B wait
+  - continent: $X, $Y + mass
+`);
+      const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
-      expect(selectAnimal(User0, 0).getFoodAndFat(), 'Animal $A.getFoodAndFat()').equal(0);
-      expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal $B.getFoodAndFat()').equal(0);
-      clientStore0.dispatch(traitTakeFoodRequest('$A'));
-      expect(selectAnimal(User0, 0).getFoodAndFat(), 'Animal $A.getFoodAndFat()').equal(1);
-      expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal $B.getFoodAndFat()').equal(1);
+      clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$X'));
+      expect(findAnimal('$A').getFoodAndFat(), 'Animal $A.getFoodAndFat()').equal(2);
+      expect(findAnimal('$B').getFoodAndFat(), 'Animal $B.getFoodAndFat()').equal(1);
+      clientStore0.dispatch(gameEndTurnRequest());
+      expect(selectGame().status.round, 'Round').equal(1);
+      clientStore0.dispatch(traitActivateRequest('$A', 'TraitPiracy', '$Y'));
+      expect(findAnimal('$A').getFoodAndFat(), 'Animal $A.getFoodAndFat()').equal(3);
+      expect(findAnimal('$B').getFoodAndFat(), 'Animal $B.getFoodAndFat()').equal(1);
     });
 
     it(`Works with symbiosis`, () => {

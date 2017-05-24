@@ -108,30 +108,30 @@ food: 12
 players:
   - continent: $A mass fat=true fat=true fat=true fat=true ++, $B fat=true +, $Waiter graz +
 `);
-      const {selectGame, selectCard, selectPlayer, selectAnimal, selectTrait, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
-      expect(selectAnimal(User0, 0).getFood()).equal(2);
-      expect(selectAnimal(User0, 0).getFat()).equal(4);
+      const {selectGame, selectCard, findAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+      expect(findAnimal('$A').getFood()).equal(2);
+      expect(findAnimal('$A').getFat()).equal(4);
       clientStore0.dispatch(gameEndTurnRequest());
       clientStore0.dispatch(gameEndTurnRequest());
       expect(selectGame().status.turn, 'Turn 1').equal(1);
       expect(selectGame().status.phase, 'PHASE.FEEDING').equal(PHASE.FEEDING);
 
-      expect(selectAnimal(User0, 0).getFood()).equal(0);
-      expect(selectAnimal(User0, 0).getFat()).equal(4);
+      expect(findAnimal('$A').getFood()).equal(0);
+      expect(findAnimal('$A').getFat()).equal(4);
 
-      clientStore0.dispatch(traitActivateRequest('$A', selectTraitId(User0, 0, 2)));
+      clientStore0.dispatch(traitActivateRequest('$A', selectTrait(User0, 0, 2).id));
 
-      expect(selectAnimal(User0, 0).getFood()).equal(2);
-      expect(selectAnimal(User0, 0).getFat()).equal(2);
+      expect(findAnimal('$A').getFood()).equal(2);
+      expect(findAnimal('$A').getFat()).equal(2);
 
       expectUnchanged('Animal $A cant take food now', () =>
           clientStore0.dispatch(traitTakeFoodRequest('$A'))
         , serverStore, clientStore0);
 
       expectUnchanged('Animal $A cant reactivate', () => {
-        clientStore0.dispatch(traitActivateRequest('$A', selectTraitId(User0, 0, 1)));
-        clientStore0.dispatch(traitActivateRequest('$A', selectTraitId(User0, 0, 3)));
-        clientStore0.dispatch(traitActivateRequest('$B', selectTraitId(User0, 0, 0)));
+        clientStore0.dispatch(traitActivateRequest('$A', selectTrait(User0, 0, 1).id));
+        clientStore0.dispatch(traitActivateRequest('$A', selectTrait(User0, 0, 3).id));
+        clientStore0.dispatch(traitActivateRequest('$B', selectTrait(User0, 0, 0).id));
       }, serverStore, clientStore0);
     });
   });

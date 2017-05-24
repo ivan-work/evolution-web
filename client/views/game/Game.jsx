@@ -5,6 +5,7 @@ import T from 'i18n-react'
 import {connect} from 'react-redux';
 import {compose} from 'redux';
 import * as MDL from 'react-mdl'
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 // shared
 import {GameModel, PHASE} from '../../../shared/models/game/GameModel';
@@ -44,6 +45,11 @@ import PlayerSticker from "./PlayerSticker.jsx";
 const SHADOW = 2;
 
 export class Game extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
   render() {
     const {game, $traitAnswer, $exit} = this.props;
 
@@ -57,10 +63,13 @@ export class Game extends React.Component {
 
       <Portal target='header'>
         <ControlGroup name={T.translate('Game.Game')}>
+          {/*DEBUG*/}
+          {/*<MDL.Button onClick={() => this.setState({reversed: !this.state.reversed})}>DEBUG</MDL.Button>*/}
           <MDL.Button id="Game$Exit" onClick={$exit}>{T.translate('App.Room.$Exit')}</MDL.Button>
           <GameScoreboardFinal game={game}/>
         </ControlGroup>
       </Portal>
+
 
       <div className='Game'>
         <div className='row'>
@@ -115,7 +124,7 @@ export class Game extends React.Component {
     if (!player) return null;
     return (
       <MDL.Card shadow={SHADOW} className='PlayerStickerCard'>
-        <PlayerSticker game={game} player={player}/>
+        <PlayerSticker key={player.id} game={game} player={player}/>
       </MDL.Card>);
   }
 }

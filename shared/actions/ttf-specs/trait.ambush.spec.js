@@ -142,10 +142,6 @@ players:
     expect(findAnimal('$Q').getFoodAndFat(), '$Q should get food').equal(2);
     expect(findAnimal('$A').getFoodAndFat(), '$A should get food').equal(2);
 
-    expect(selectGame().status.round, 'Round').equal(1);
-    clientStore0.dispatch(traitActivateRequest('$W', 'TraitAmbush'));
-    clientStore1.dispatch(traitActivateRequest('$S', 'TraitAmbush'));
-
     clientStore0.dispatch(traitTakeFoodRequest('$W'));
 
     clientStore1.dispatch(traitAmbushActivateRequest('$S'));
@@ -216,6 +212,33 @@ players:
     expect(findAnimal('$A'), '$A dead').null;
     expect(findAnimal('$B').getFoodAndFat(), '$B should have 0 food').equal(0);
     expect(findAnimal('$C').getFoodAndFat(), '$C should have 2 food').equal(2);
+  });
+
+  it('Players order', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {User1, clientStore1}, {User2, clientStore2}] = mockGame(3);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: feeding
+food: 4
+players:
+  - continent: $A ambush carn wait
+  - continent: $B ambush carn wait
+  - continent: $C ambush carn wait
+`);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    clientStore1.dispatch(traitAmbushActivateRequest('$B', false));
+    clientStore2.dispatch(traitAmbushActivateRequest('$C', false));
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    clientStore1.dispatch(traitTakeFoodRequest('$B'));
+    clientStore2.dispatch(traitAmbushActivateRequest('$C'));
+    clientStore0.dispatch(traitAmbushActivateRequest('$A'));
+
+    expect(findAnimal('$B'), '$B dead').null;
+    expect(findAnimal('$C').getFoodAndFat(), '$C food').equal(2);
+    expect(findAnimal('$A').getFoodAndFat(), '$A food').equal(1);
   });
 
   it('Intellect testing', () => {

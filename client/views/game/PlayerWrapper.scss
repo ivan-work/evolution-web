@@ -13,11 +13,35 @@
         vertical-align: middle;
       }
     }
+
+    //.PlayerStickerWrapper {
+    //  height: 100%;
+    //  &.Animation-enter {
+    //    position: absolute; left: 0; top: 0;
+    //    opacity: 0.01;
+    //  }
+    //
+    //  &.Animation-enter.Animation-enter-active {
+    //    opacity: 1;
+    //    transition: opacity 500ms ease-in;
+    //  }
+    //
+    //  &.Animation-leave {
+    //    position: absolute; left: 0; top: 0;
+    //    opacity: 1;
+    //  }
+    //
+    //  &.Animation-leave.Animation-leave-active {
+    //    opacity: 0.01;
+    //    transition: opacity 300ms ease-in;
+    //  }
+    //}
+
     .PlayerStickerControls {
       height: 100%;
       display: flex;
       flex-direction: column;
-      .PlayerSticker {
+      .PlayerStickerBody {
         position: relative;
         overflow: hidden;
         //overflow: scroll;

@@ -36,6 +36,9 @@ players:
     clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$B', tt.TraitRecombination, tt.TraitScavenger, tt.TraitCarnivorous));
+    expectUnchanged('Cooldown', () =>
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitRecombination, tt.TraitScavenger, tt.TraitCarnivorous))
+    , serverStore, clientStore0);
     expect(findTrait('$A', tt.TraitCarnivorous), tt.TraitCarnivorous).undefined;
     expect(findTrait('$A', tt.TraitScavenger), tt.TraitScavenger).ok;
     expect(findTrait('$B', tt.TraitScavenger), tt.TraitScavenger).undefined;

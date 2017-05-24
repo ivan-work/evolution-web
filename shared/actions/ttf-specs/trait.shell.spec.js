@@ -20,7 +20,7 @@ food: 2
 players:
   - continent: $A carn comm$D wait, $B carn, $C shell tail piracy, $D shell + fat
 `);
-    const {selectGame, selectPlayer, selectCard, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
     expect(selectGame().status.round).equal(0);
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$C'));

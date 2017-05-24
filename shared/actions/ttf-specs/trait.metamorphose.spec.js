@@ -18,7 +18,7 @@ food: 2
 players:
   - continent: $A meta comm$B, $B, $C meta carn, $D meta symb$E, $E, $Waiter graz
 `);
-    const {selectGame, selectPlayer, selectCard, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
     expect(selectGame().status.round).equal(0);
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitMetamorphose', 'TraitCommunication'));
@@ -59,7 +59,7 @@ food: 2
 players:
   - continent: $Sh meta shell, $Sh1 carn, $Hi meta hiber, $Sy meta symb$Sy1, $Sy1, $SyHiPassive meta hiber symb$SyHi1, $ShHiActive meta shell hiber symb$SyHi2, $SyHi1, $SyHi2, $Waiter graz
 `);
-    const {selectGame, selectPlayer, selectCard, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(traitActivateRequest('$Hi', 'TraitHibernation'));
     clientStore0.dispatch(traitActivateRequest('$ShHiActive', 'TraitHibernation'));

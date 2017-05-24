@@ -150,10 +150,12 @@ export class PlayerWrapper extends Component {
   renderContinent(game, player, isUser) {
     return (
       <Continent
-        key='Continent'
+        key={player.id}
         isActive={game.isPlayerTurn(player)}
         isUserContinent={isUser}>
-        {player.continent.map(animal => this.renderAnimal(animal, isUser))}
+        {player.continent
+          .toList()
+          .map(animal => this.renderAnimal(animal, isUser))}
       </Continent>
     );
   }
@@ -166,7 +168,7 @@ export class PlayerWrapper extends Component {
     const isAmbush = game.status.phase === PHASE.AMBUSH;
     const onTraitDropped = isFeeding ? this.$traitActivate
       : isAmbush ? this.$traitAmbushActivate
-      : this.$noop;
+        : this.$noop;
     const onTraitShellDropped = isFeeding ? this.$traitTakeShell : this.$noop;
     const onFoodDropped = isFeeding ? this.$traitTakeFood : this.$noop;
     const onCardDropped = isDeploy ? this.$deployTrait :

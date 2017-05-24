@@ -209,8 +209,8 @@ players:
     continent: $B
 `);
     const {selectGame, selectCard, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    const {selectTrait0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
-    const {selectTrait1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
+    const {selectPlayer0, selectAnimal0, selectTrait0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
+    const {selectPlayer1, selectAnimal1, selectTrait1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
 
     clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A'));
 
@@ -229,14 +229,14 @@ players:
 
     clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A'));
 
-    expect(ServerGame().getPlayer(User0).hand).size(0);
-    expect(ClientGame0().getPlayer(User0).hand).size(0);
-    expect(ClientGame1().getPlayer(User0).hand).size(0);
+    expect(selectPlayer(User0).hand).size(0);
+    expect(selectPlayer0(User0).hand).size(0);
+    expect(selectPlayer1(User0).hand).size(0);
 
     const traitSharpVision = selectTrait(User0, 0, 1);
-    expect(ServerGame().getPlayer(User0).getAnimal(0).traits.toList()).equal(List.of(traitCamouflage, traitSharpVision));
-    expect(ClientGame0().getPlayer(User0).getAnimal(0).traits.toList()).equal(List.of(traitCamouflage, traitSharpVision));
-    expect(ClientGame1().getPlayer(User0).getAnimal(0).traits.toList()).equal(List.of(traitCamouflage, traitSharpVision));
+    expect(selectAnimal(User0, 0).traits.toList()).equal(List.of(traitCamouflage, traitSharpVision));
+    expect(selectAnimal0(User0, 0).traits.toList()).equal(List.of(traitCamouflage, traitSharpVision));
+    expect(selectAnimal1(User0, 0).traits.toList()).equal(List.of(traitCamouflage, traitSharpVision));
   });
 
   it('Play as skip turn', () => {

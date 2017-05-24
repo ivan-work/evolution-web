@@ -134,12 +134,12 @@ const FOOD_TABLE = [
   () => 10
   , () => 10
   , () => rollDice() + 2
-  , () => rollDice() * 2
-  , () => rollDice() * 2 + 2
-  , () => rollDice() * 3 + 2
-  , () => rollDice() * 3 + 4
-  , () => rollDice() * 4 + 2
-  , () => rollDice() * 4 + 4
+  , () => rollDice() + rollDice()
+  , () => rollDice() + rollDice() + 2
+  , () => rollDice() + rollDice() + rollDice() + 2
+  , () => rollDice() + rollDice() + rollDice() + 4
+  , () => rollDice() + rollDice() + rollDice() + rollDice() + 2
+  , () => rollDice() + rollDice() + rollDice() + rollDice() + 4
 ];
 
 const GameModelData = {
@@ -247,11 +247,6 @@ export class GameModel extends Record({
     return this.getPlayer(pid).hand.get(index);
   }
 
-  // TODO remove
-  getPlayerAnimal(pid, index) {
-    return this.getPlayer(pid).continent.get(index);
-  }
-
   /**
    * This callback is displayed as a global member.
    * @callback GamePerAnimalCallback
@@ -264,47 +259,17 @@ export class GameModel extends Record({
    * @param {GamePerAnimalCallback} cb
    */
   forEachAnimal(cb) {
-    return this
-      .get('players').some(player => player
-        .get('continent').some(animal => cb(animal, null, player)));
-  }
-
-  searchAnimalInPlayer(player, animalId) {
-    return player.continent.findIndex(animal => animal.id === animalId);
+    return this.get('players').some(player => player.forEachAnimal((a, c) => cb(a, c, player)));
   }
 
   locateAnimal(animalId, playerId = null) {
-    let animalIndex = -1;
-    if (!!playerId) {
-      animalIndex = this.getPlayer(playerId).continent.findIndex(animal => animal.id === animalId);
-    } else {
-      this.players.some(player => {
-        animalIndex = player.continent.findIndex(animal => animal.id === animalId)
-        if (~animalIndex) {
-          playerId = player.id;
-          return true;
-        }
-      });
-    }
-    const animal = (!!playerId && ~animalIndex) ? this.getPlayer(playerId).getAnimal(animalIndex) : null;
-    return {animalIndex, animal};
+    if (!playerId) playerId = this.players.findKey(player => player.continent.has(animalId));
+    return this.getIn(['players', playerId, 'continent', animalId], null);
   }
 
   locateTrait(traitId, animalId, playerId = null) {
-    let animalIndex = -1, trait;
-    traitId && this.players.some(player => {
-      animalIndex = player.continent.findIndex(animal => {
-        if (!!animalId && (animalId !== animal.id)) return false; // faster searches if animal id provided
-        trait = animal.traits.get(traitId);
-        return !!trait;
-      });
-      if (~animalIndex) {
-        playerId = player.id;
-        return true;
-      }
-    });
-    const animal = playerId !== null ? this.getPlayer(playerId).getAnimal(animalIndex) : null;
-    return {animal, animalIndex, trait};
+    const animal = this.locateAnimal(animalId, playerId);
+    return animal ? animal.traits.get(traitId) : null;
   }
 
   locateCard(cardId) {
@@ -365,7 +330,6 @@ GameModel.parseAnimalList = parseAnimalList;
 GameModelClient.prototype.end = GameModel.prototype.end;
 GameModelClient.prototype.getActualPlayers = GameModel.prototype.getActualPlayers;
 GameModelClient.prototype.getPlayerCard = GameModel.prototype.getPlayerCard;
-GameModelClient.prototype.getPlayerAnimal = GameModel.prototype.getPlayerAnimal;
 GameModelClient.prototype.locateAnimal = GameModel.prototype.locateAnimal;
 GameModelClient.prototype.locateTrait = GameModel.prototype.locateTrait;
 GameModelClient.prototype.locateCard = GameModel.prototype.locateCard;

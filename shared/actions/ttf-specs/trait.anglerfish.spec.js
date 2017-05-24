@@ -78,6 +78,7 @@ players:
     const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$A'));
+    expect(selectGame().question).ok;
     clientStore0.dispatch(traitAnswerRequest('TraitTailLoss', 'TraitCarnivorous'));
     expect(selectAnimal(User0, 0)).ok;
 
@@ -86,8 +87,9 @@ players:
     clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$E', 'TraitCarnivorous', '$D'));
+    expect(selectGame().question).ok;
     clientStore1.dispatch(traitAnswerRequest('TraitIntellect', 'TraitTailLoss'));
-    clientStore0.dispatch(traitAnswerRequest('TraitMimicry', '$E2'));
+    expect(selectGame().question).null;
 
     expect(selectAnimal(User0, 0)).ok;
     expect(selectAnimal(User0, 1)).ok;
@@ -158,21 +160,20 @@ players:
     clientStore0.dispatch(traitAnswerRequest('TraitIntellect', 'TraitTailLoss'));
   });
 
-  it('bug Flight+Carn+Camo dies from Anglerfish', () => {
+  it('bug Flight+Carn+Camo should die from Anglerfish', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
 phase: feeding
 food: 10
 players:
-  - continent: $Q fli carn camo, $W angler
+  - continent: $Q fli carn camo, $W angler, $E wait
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$W'));
 
     expect(selectGame().question).not.ok;
-    clientStore0.dispatch(traitAnswerRequest('TraitIntellect', 'TraitTailLoss'));
 
     expect(selectAnimal(User0, 0).id).equal('$W');
   });

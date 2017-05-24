@@ -39,4 +39,19 @@ players:
       expect(findAnimal('$B').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
     });
   });
+
+  it('Works with flight', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A carn int para, $B flight cnid, $C wait
+`);
+
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+
+    expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
+  });
 });

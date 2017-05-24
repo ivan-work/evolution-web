@@ -33,9 +33,9 @@ export class TraitDefenceDialog extends React.Component {
 
   renderDialogContent() {
     const {game, $traitAnswer} = this.props;
-    const {sourceAid, targetAid, time} = game.question;
-    const {animal: attackAnimal} = game.locateAnimal(sourceAid);
-    const {animal: targetAnimal} = game.locateAnimal(targetAid);
+    const {sourceAid, sourcePid, targetAid, targetPid, time} = game.question;
+    const attackAnimal = game.locateAnimal(sourceAid, sourcePid);
+    const targetAnimal = game.locateAnimal(targetAid, targetPid);
 
     const traitTailLoss = targetAnimal.hasTrait(TraitTailLoss.type);
     const targetsTailLoss = traitTailLoss

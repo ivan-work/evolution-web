@@ -51,13 +51,10 @@ $MARGIN: 1px;
     display: inline-block;
   }
 
-  .PlayersSticker {
-    min-width: 160px;
-    max-width: 160px;
-    h6 {
-      display: inline-block;
-    }
+  .PlayersStickerCard {
     .PlayersList {
+      min-width: 160px;
+      max-width: 160px;
       font-size: 0.9em;
       line-height: 1.4em;
       .Player {

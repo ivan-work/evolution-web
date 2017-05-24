@@ -19,6 +19,9 @@ const {PLAYER_STICKER_ARROW_SIZE} = styles;
 
 
 export default class PlayerSticker extends React.Component {
+  static getById(id) {
+    return document.getElementById(`PlayerStickerBody${id}`);
+  }
 
   static childContextTypes = {svgContext: PropTypes.object.isRequired};
 
@@ -194,8 +197,8 @@ export default class PlayerSticker extends React.Component {
     const {game, player} = this.props;
     const isUser = game.userId === player.id;
     return (<div className='PlayerStickerControls'>
-      <div className='PlayerSticker'
-           id={`PlayerSticker${player.id}`}
+      <div className='PlayerStickerBody'
+           id={`PlayerStickerBody${player.id}`}
            ref={this.setupContainer}>
         <PlayerSVG ref={this.setupSvgContext}/>
         <div className='PlayerStickerInner'

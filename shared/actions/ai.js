@@ -45,7 +45,7 @@ export const doesPlayerHasOptions = (game, playerId) => {
 };
 
 export const doesOptionExist = (game, playerId) => {
-  const allAnimals = game.players.reduce((result, player) => result.concat(player.continent.map(animal => animal.id).toArray()), []);
+  const allAnimals = game.players.reduce((result, player) => result.concat(player.continent.keySeq().toArray()), []);
   return game.getPlayer(playerId).continent.some((animal) => {
     if (passesChecks(() => checkAnimalCanEat(game, animal))) return true;
 

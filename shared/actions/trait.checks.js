@@ -48,7 +48,7 @@ export const checkTraitActivation_Animal = (game, sourceAnimal, trait, targetAid
       , 'Animal(%s):Trait(%s) cant target self', sourceAnimal.id, trait.type)
   }
 
-  const {animal: targetAnimal} = game.locateAnimal(targetAid);
+  const targetAnimal = game.locateAnimal(targetAid);
   if (!targetAnimal) {
     throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
       , 'Animal(%s):Trait(%s) cant locate Animal(%s)', sourceAnimal.id, trait.type, targetAid)
@@ -81,7 +81,8 @@ export const checkTraitActivation_TwoTraits = (game, sourceAnimal, trait, trait1
     sourceAnimal.id === trait.hostAnimalId
       ? trait.linkAnimalId
       : trait.hostAnimalId
-  ).animal;
+    , trait.ownerId
+  );
   const trait1 = sourceAnimal.hasTrait(trait1id, true);
   if (!trait1) {
     throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`

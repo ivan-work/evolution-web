@@ -55,60 +55,51 @@ players:
   });
 
   it('Tail loss with Symbiosis and Communication', async () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
-phase: deploy
+phase: feeding
+food: 4
 players:
-  - continent: $A carn, $B carn, $C carn
-  - hand: CardSymb, CardCommu
-    continent: $Z tailloss, $X
+  - continent: $A carn, $B carn, $C carn, $X tail, $Z symb$X comm$X
 settings:
-  timeTraitResponse: 1
+  timeTraitResponse: 5
 `);
-    const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    clientStore0.dispatch(gameEndTurnRequest());
-    clientStore1.dispatch(gameDeployTraitRequest(selectCard(User1, 0).id, '$X', false, '$Z'));
-    clientStore1.dispatch(gameDeployTraitRequest(selectCard(User1, 0).id, '$X', false, '$Z'));
-
-    expect(selectTrait(User1, 0, 0).type).equal('TraitTailLoss');
-    expect(selectTrait(User1, 0, 1).type).equal('TraitSymbiosis');
-    expect(selectTrait(User1, 0, 2).type).equal('TraitCommunication');
-    expect(selectTrait(User1, 1, 0).type).equal('TraitSymbiosis');
-    expect(selectTrait(User1, 1, 1).type).equal('TraitCommunication');
-
-    expect(selectGame().status.phase, 'Feeding').equal(PHASE.FEEDING);
+    const {selectGame, selectPlayer, selectCard, findAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    expect(selectTrait(User0, 3, 0).type).equal('TraitTailLoss');
+    expect(selectTrait(User0, 3, 1).type).equal('TraitSymbiosis');
+    expect(selectTrait(User0, 3, 2).type).equal('TraitCommunication');
+    expect(selectTrait(User0, 4, 0).type).equal('TraitSymbiosis');
+    expect(selectTrait(User0, 4, 1).type).equal('TraitCommunication');
 
     expectUnchanged(`User0 can't attack $X`, () =>
-        clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$X'))
-      , serverStore, clientStore0, clientStore1);
+        clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$Z'))
+      , serverStore, clientStore0);
 
-    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$Z'))
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$X'));
 
     expectUnchanged(`User1 wrong answer`, () =>
-        clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', null))
-      , serverStore, clientStore0, clientStore1);
+        clientStore0.dispatch(traitAnswerRequest('TraitTailLoss', null))
+      , serverStore, clientStore0);
 
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise(resolve => setTimeout(resolve, 10));
 
-    expect(selectAnimal(User1, 0).traits, '$Z traits').size(2);
-    expect(selectAnimal(User1, 1).traits, '$X traits').size(1);
-    expect(selectTrait(User1, 0, 0).type).equal('TraitTailLoss');
-    expect(selectTrait(User1, 0, 1).type).equal('TraitSymbiosis');
-    expect(selectTrait(User1, 1, 0).type).equal('TraitSymbiosis');
+    expect(findAnimal('$X').traits, '$X traits').size(2);
+    expect(findAnimal('$Z').traits, '$Z traits').size(1);
+    expect(selectTrait(User0, 3, 0).type).equal('TraitTailLoss');
+    expect(selectTrait(User0, 3, 1).type).equal('TraitSymbiosis');
+    expect(selectTrait(User0, 4, 0).type).equal('TraitSymbiosis');
     clientStore0.dispatch(gameEndTurnRequest());
-
-    clientStore1.dispatch(gameEndTurnRequest());
 
     expectUnchanged(`$A can't attack $Z`, () =>
         clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$Z'))
-      , serverStore, clientStore0, clientStore1);
+      , serverStore, clientStore0);
 
-    clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$Z'));
+    clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$X'));
 
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise(resolve => setTimeout(resolve, 10));
 
-    expect(selectAnimal(User1, 0).traits, '$Z traits').size(1);
-    expect(selectAnimal(User1, 1).traits, '$X traits').size(0);
-    expect(selectTrait(User1, 0, 0).type).equal('TraitTailLoss');
+    expect(findAnimal('$X').traits, '$Z traits').size(1);
+    expect(findAnimal('$Z').traits, '$X traits').size(0);
+    expect(selectTrait(User0, 3, 0).type).equal('TraitTailLoss');
   });
 });

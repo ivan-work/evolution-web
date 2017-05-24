@@ -6,6 +6,7 @@ import T from 'i18n-react';
 import cn from 'classnames';
 
 import AnimalTraitArrowMarker from './animals/AnimalTraitArrowMarker.jsx';
+import PlayerSticker from './PlayerSticker.jsx';
 
 const LOG = false;
 
@@ -82,7 +83,7 @@ export default class PlayerSVG extends React.Component {
         if (!svgElement) return;
         // const linkPoint1 = document.getElementById(`Animal${trait1.hostAnimalId}LinkPoint`);
         // const linkPoint2 = document.getElementById(`Animal${trait2.hostAnimalId}LinkPoint`);
-        const base = document.getElementById(`PlayerSticker${trait1.ownerId}`);
+        const base = PlayerSticker.getById(trait1.ownerId);
         // const wrapper1 = document.getElementById(`PlayerWrapper${trait1.ownerId}`);
 
         const basebbx = base.getBoundingClientRect();

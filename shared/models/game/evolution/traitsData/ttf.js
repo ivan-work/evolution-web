@@ -174,8 +174,8 @@ export const TraitIntellect = {
     [tt.TraitIntellect, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
   ])
   , getTargets: (game) => {
-    const {animal: sourceAnimal} = game.locateAnimal(game.question.sourceAid);
-    const {animal: targetAnimal} = game.locateAnimal(game.question.targetAid);
+    const sourceAnimal = game.locateAnimal(game.question.sourceAid, game.question.sourcePid);
+    const targetAnimal = game.locateAnimal(game.question.targetAid, game.question.targetPid);
     return [].concat(
       getStaticDefenses(game, sourceAnimal, targetAnimal)
       , getActiveDefenses(game, sourceAnimal, targetAnimal)

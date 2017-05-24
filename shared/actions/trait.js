@@ -76,7 +76,7 @@ export const server$traitActivate = (game, sourceAnimal, trait, ...targets) => (
     dispatch(server$traitNotify_Start(game, sourceAnimal, trait, ...logTargets));
   }
   const newGame = selectGame(getState, game.id);
-  const {animal: newAnimal} = newGame.locateAnimal(sourceAnimal.id, sourceAnimal.ownerId);
+  const newAnimal = newGame.locateAnimal(sourceAnimal.id, sourceAnimal.ownerId);
   logger.verbose('server$traitActivate:', sourceAnimal.id, trait.type, ...logTargets);
   const traitData = trait.getDataModel();
   const result = dispatch(traitData.action(newGame, newAnimal, trait, ...targets));
@@ -209,7 +209,7 @@ const traitTakeShell = (gameId, continentId, animalId, trait) => ({
 export const server$tryViviparous = (gameId, animalId) => (dispatch, getState) => {
   return passesChecks(() => {
     const game = selectGame(getState, gameId);
-    const animal = game.locateAnimal(animalId).animal;
+    const animal = game.locateAnimal(animalId);
     const {trait} = checkTraitActivation(game, animal, tt.TraitViviparous);
     return dispatch(server$traitActivate(game, animal, trait));
   })
@@ -274,7 +274,7 @@ const gameAmbushPrepareEnd = (gameId) => ({
 export const server$gameAmbushPrepareStart = (game, animal) => (dispatch, getState) => {
   const gameId = game.id;
   let ambushers = [];
-  game.forEachAnimal((attackAnimal, continent) => {
+  game.constructor.sortPlayersFromIndex(game, game.getPlayer(animal.ownerId).index).some(p => p.forEachAnimal((attackAnimal, continent) => {
     if (attackAnimal.ownerId === animal.ownerId) return; // Can't ambush self
     const ambush = attackAnimal.hasTrait(tt.TraitAmbush);
     const carnivorous = attackAnimal.hasTrait(tt.TraitCarnivorous);
@@ -284,7 +284,7 @@ export const server$gameAmbushPrepareStart = (game, animal) => (dispatch, getSta
     if (!carnivorousData.$checkAction(game, attackAnimal) || !carnivorousData.checkTarget(game, attackAnimal, animal)) return;
 
     ambushers.push(attackAnimal.id);
-  });
+  }));
 
   if (ambushers.length > 0) {
     logger.verbose(`${animal.id} is possibly ambushed by ${ambushers}`);
@@ -352,8 +352,8 @@ export const server$gameAmbushAttackEnd = (gameId) => (dispatch, getState) => {
 export const server$traitAmbushPerform = (gameId, attackAnimalId) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   const defenceAnimalId = game.ambush.animalId;
-  const defenceAnimal = game.locateAnimal(defenceAnimalId).animal;
-  const attackAnimal = game.locateAnimal(attackAnimalId).animal;
+  const defenceAnimal = game.locateAnimal(defenceAnimalId);
+  const attackAnimal = game.locateAnimal(attackAnimalId);
   if (defenceAnimal && attackAnimal) {
     try {
       const traitCarnivorous = checkTraitActivation(game, attackAnimal, tt.TraitCarnivorous, defenceAnimalId).trait;
@@ -424,7 +424,7 @@ export const server$traitNotify_End = (gameId, sourceAid, trait, targetId) => {
 export const server$startFeeding = (gameId, animalId, amount, sourceType, sourceId) => (dispatch, getState) => {
   logger.debug(`server$startFeeding: ${sourceId} feeds ${animalId} through ${sourceType} with (${amount})`);
   let game = selectGame(getState, gameId);
-  const animal = game.locateAnimal(animalId).animal;
+  const animal = game.locateAnimal(animalId);
   if (!animal) return false;
   if (!animal.canEat(game)) return false;
 
@@ -437,7 +437,7 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
       .forEach(traitCooperation => {
         if (selectGame(getState, gameId).food <= 0) return; // Re-check food after each cooperation
 
-        const {animal: linkedAnimal} = game.locateAnimal(traitCooperation.linkAnimalId);
+        const linkedAnimal = game.locateAnimal(traitCooperation.linkAnimalId, traitCooperation.ownerId);
         const linkedTrait = linkedAnimal.traits.find(trait => trait.id === traitCooperation.linkId);
 
         traitMakeCooldownActions(gameId, traitCooperation, animal)
@@ -453,7 +453,7 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
   animal.traits.filter(traitCommunication => traitCommunication.type === tt.TraitCommunication)
     .map(traitCommunication => {
       if (!traitCommunication.checkAction(selectGame(getState, gameId), animal)) return;
-      const {animal: linkedAnimal} = game.locateAnimal(traitCommunication.linkAnimalId);
+      const linkedAnimal = game.locateAnimal(traitCommunication.linkAnimalId, traitCommunication.ownerId);
       if (!linkedAnimal) {
         // Because "animal" is coming from params, when it kills linkedAnimal, linkedAnimal is null
         // TODO refactor so startFeeding accepts animalId and reselects "animal"
@@ -504,8 +504,7 @@ const gameFoodTake_End = (gameId, animalId) => ({
 
 export const server$startFeedingFromGame = (gameId, animalId, amount) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
-  const {animal} = game.locateAnimal(animalId);
-  const ownerId = animal.ownerId;
+  const animal = game.locateAnimal(animalId);
 
   dispatch(server$game(gameId, gameFoodTake_Start(gameId, animalId)));
 
@@ -689,7 +688,7 @@ export const server$traitIntellectQuestion = (gameId, attackAnimal, trait, defen
 
 export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetId) => (dispatch, getState) => {
   logger.debug('server$traitIntellectAnswer', questionId, traitId, targetId);
-  const game = selectGame(getState, gameId);
+  let game = selectGame(getState, gameId);
   if (!game.get('question')) {
     throw new ActionCheckError(`server$traitIntellectAnswer@Game(${game.id})`
       , 'Game doesnt have Question(%s)', questionId)
@@ -720,10 +719,10 @@ export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetI
   dispatch(server$traitAnswerSuccess(game.id, questionId));
 
   // Reselecting animal from new game to refresh intellect value
-  const newGame = selectGame(getState, gameId);
-  const {animal: sourceAnimal} = newGame.locateAnimal(attackAnimal.id);
+  game = selectGame(getState, gameId);
+  const sourceAnimal = game.locateAnimal(attackAnimal.id, attackAnimal.ownerId);
 
-  const result = dispatch(server$traitActivate(newGame, sourceAnimal, attackTrait, targetAnimal));
+  const result = dispatch(server$traitActivate(game, sourceAnimal, attackTrait, targetAnimal));
   logger.debug('server$traitIntellectAnswer result:', attackTrait.type, result);
   if (result) dispatch(server$playerActed(gameId, attackAnimal.ownerId));
   return result;
@@ -775,7 +774,7 @@ export const traitClientToServer = {
 
     game.getIn(['ambush', 'ambushers']).forEach((wants, animalId) => {
       if (wants === null) {
-        const animal = game.locateAnimal(animalId, userId).animal;
+        const animal = game.locateAnimal(animalId, userId);
         if (animal) {
           dispatch(server$traitAmbushActivate(gameId, animal.id, false));
         }

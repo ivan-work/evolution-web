@@ -1,4 +1,4 @@
-import {Record, List, Map} from 'immutable';
+import {Record, List, OrderedMap} from 'immutable';
 import {UserModel} from '../UserModel';
 import {CardModel} from './CardModel';
 import {AnimalModel} from './evolution/AnimalModel';
@@ -10,7 +10,7 @@ import {AnimalModel} from './evolution/AnimalModel';
 export class PlayerModel extends Record({
   id: null
   , hand: List()
-  , continent: List()
+  , continent: OrderedMap()
   , index: -1
   , playing: true // Has he active in the game
   , ended: false // Has he ended a phase
@@ -32,7 +32,7 @@ export class PlayerModel extends Record({
   toClient() {
     return this
       .update('hand', hand => hand.map((card) => card.toClient()))
-      .update('continent', continent => continent.map(animal => animal.toClient()));
+      .update('continent', continent => continent.map(animal => animal.toClient()).entrySeq());
   }
 
   static fromServer(js) {
@@ -40,7 +40,7 @@ export class PlayerModel extends Record({
       ? null
       : new PlayerModel(js)
         .set('hand', List(js.hand).map(card => CardModel.fromServer(card)))
-        .set('continent', List(js.continent).map(animalModel => AnimalModel.fromServer(animalModel)));
+        .set('continent', OrderedMap(js.continent).map(animalModel => AnimalModel.fromServer(animalModel)));
   }
 
   static new(userId, index) {
@@ -57,7 +57,18 @@ export class PlayerModel extends Record({
     return this.hand.get(index);
   }
 
-  getAnimal(index) {
-    return this.continent.get(index);
+  /**
+   * This callback is displayed as a global member.
+   * @callback PlayerModel.forEachAnimalCallback
+   * @param {AnimalModel} animal
+   * @param {Continent} continent
+   * @param {PlayerModel} player
+   */
+
+  /**
+   * @param {PlayerModel.forEachAnimalCallback} cb
+   */
+  forEachAnimal(cb) {
+    return this.continent.some(animal => cb(animal, null, this));
   }
 }

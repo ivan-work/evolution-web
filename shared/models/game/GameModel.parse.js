@@ -1,6 +1,6 @@
 import uuid from 'uuid';
 import invariant from 'invariant';
-import {Map, List} from 'immutable';
+import {OrderedMap, List} from 'immutable';
 
 import {GameModel, StatusRecord, PHASE} from './GameModel';
 import {PlayerModel} from './PlayerModel';
@@ -48,7 +48,7 @@ export const parseAnimalList = (userId, string) => {
   invariant(typeof userId === 'string', `GameModel.parseAnimalList wrong userId: (${userId})`);
   invariant(typeof string === 'string', `GameModel.parseAnimalList wrong string: (${string})`);
   const links = [];
-  let animalsMap = List(string.split(','))
+  let animalsMap = string.split(',')
     .map(rawAnimal => rawAnimal.trim())
     .filter(rawAnimal => rawAnimal.length > 0)
     .map(rawAnimal => rawAnimal
@@ -74,7 +74,7 @@ export const parseAnimalList = (userId, string) => {
           return animal.traitAttach(TraitModel.new(type).set('value', value), true);
         }
       }, AnimalModel.new(userId, null)))
-    .reduce((result, animal) => result.set(animal.id, animal), Map());
+    .reduce((result, animal) => result.set(animal.id, animal), OrderedMap());
   links.forEach(([a1id, prop, a2id]) => {
     invariant(animalsMap.has(a1id), 'invalid linkable trait ' + [a1id, prop, a2id]);
     invariant(animalsMap.has(a2id), 'invalid linkable trait ' + [a1id, prop, a2id]);
@@ -87,7 +87,6 @@ export const parseAnimalList = (userId, string) => {
   });
   return animalsMap
     .map(a => a.recalculateDisabling())
-    .toList()
   // .map(a => {
   //   console.log(a.traits.map(t => t.type).toArray())
   //   return a;

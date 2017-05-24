@@ -33,6 +33,7 @@ import {
   , checkGameHasUser
   , checkPlayerTurn
   , checkPlayerHasCard
+  , checkPlayerHasAnimal
   , checkPlayerCanAct
   , checkGamePhase
   , checkValidAnimalPosition
@@ -650,14 +651,13 @@ export const gameClientToServer = {
         , traitData);
     }
 
-    const {animal} = game.locateAnimal(animalId);
+    const animal = game.locateAnimal(animalId);
     if (!animal) {
       throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Player#%s doesn\'t have Animal#%s', playerId, animalId);
     }
     const playerId = animal.ownerId;
 
-    const {animal: linkedAnimal} = game.locateAnimal(linkId);
-    const linkedPlayerId = linkedAnimal && linkedAnimal.ownerId;
+    const linkedAnimal = game.locateAnimal(linkId, playerId);
 
     if (traitData.cardTargetType & CTT_PARAMETER.SELF)
       if (playerId !== userId)
@@ -670,12 +670,6 @@ export const gameClientToServer = {
         throw new ActionCheckError(`CheckCardTargetType(${game.id})`, 'Player#%s want to link Animal#%s to itself', playerId, linkedAnimal);
       if (!linkedAnimal)
         throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Player#%s doesn\'t have linked Animal#%s', playerId, linkedAnimal);
-      if (traitData.cardTargetType & CTT_PARAMETER.SELF)
-        if (linkedPlayerId !== userId)
-          throw new ActionCheckError(`checkCardTargetType(${game.id})`, `CardType(LINK_SELF) Player(%s) linking to Player(%s)`, playerId, linkedPlayerId);
-      if (traitData.cardTargetType & CTT_PARAMETER.ENEMY)
-        if (linkedPlayerId !== playerId)
-          throw new ActionCheckError(`checkCardTargetType(${game.id})`, `CardType(LINK_ENEMY) Player(%s) linking to Player(%s)`, playerId, linkedPlayerId);
     }
 
     if (traitData.checkTraitPlacementFails(animal))
@@ -723,7 +717,7 @@ export const gameClientToServer = {
     checkGameHasUser(game, userId);
     checkGamePhase(game, PHASE.REGENERATION);
     checkPlayerHasCard(game, userId, cardId);
-    const {animal} = game.locateAnimal(animalId);
+    const animal = checkPlayerHasAnimal(game, userId, animalId);
     if (!animal) {
       throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Player#%s doesn\'t have Animal#%s', userId, animalId);
     }

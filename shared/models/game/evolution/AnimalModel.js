@@ -39,17 +39,13 @@ export class AnimalModel extends Record({
     return js == null
       ? null
       : new AnimalModel(js)
-      .set('traits', js.traits.reduce((result, trait) => result.set(trait.id, trait), OrderedMap())
-        .map(trait => TraitModel.fromServer(trait)))
-      .set('flags', Map(js.flags));
+        .set('traits', OrderedMap(js.traits).map(trait => TraitModel.fromServer(trait)))
+        .set('flags', Map(js.flags));
   }
 
   toClient() {
     return this
-      .update('traits', traits => traits
-        .map(trait => trait.toClient())
-        .toArray())
-
+      .update('traits', traits => traits.map(trait => trait.toClient()).entrySeq())
   }
 
   toOthers() {
@@ -179,7 +175,7 @@ export class AnimalModel extends Record({
     eatingBlockers = eatingBlockers.concat(this.traits
       .filter(trait => {
         if (trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === this.id) {
-          const {animal: hostAnimal} = game.locateAnimal(trait.linkAnimalId);
+          const hostAnimal = game.locateAnimal(trait.linkAnimalId, trait.ownerId);
           return !hostAnimal.isSaturated();
         }
       }).toArray());

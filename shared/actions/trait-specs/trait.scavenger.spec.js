@@ -21,18 +21,12 @@ players:
     const {selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     expect(selectCard(User0, 0).trait1).equal('TraitCarnivorous');
     expect(selectCard(User0, 1).trait1).equal('TraitScavenger');
-    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(
-      gameDeployTraitRequest(selectCard(User0, 0).id, '$A')
-    ), serverStore, clientStore0, clientStore1);
-    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(
-      gameDeployTraitRequest(selectCard(User0, 0).id, '$B')
-    ), serverStore, clientStore0, clientStore1);
-    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(
-      gameDeployTraitRequest(selectCard(User0, 1).id, '$A')
-    ), serverStore, clientStore0, clientStore1);
-    expectUnchanged('CHANGEIT', () => clientStore0.dispatch(
-      gameDeployTraitRequest(selectCard(User0, 1).id, '$B')
-    ), serverStore, clientStore0, clientStore1);
+    expectUnchanged('CHANGEIT', () => {
+      clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A'));
+      clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$B'));
+      clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 1).id, '$A'));
+      clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 1).id, '$B'));
+    }, serverStore, clientStore0, clientStore1);
   });
 
   it('A > B1 D+; B > E A1+; C > B2 A2+', () => {
@@ -50,8 +44,6 @@ players:
 
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B1'));
     clientStore0.dispatch(gameEndTurnRequest());
-    clientStore1.dispatch(gameEndTurnRequest());
-    clientStore2.dispatch(gameEndTurnRequest());
 
     expect(selectAnimal(User0, 0).getFoodAndFat()).equal(2);
     expect(selectAnimal(User0, 1).getFoodAndFat()).equal(0);

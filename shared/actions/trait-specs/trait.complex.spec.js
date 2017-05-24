@@ -28,7 +28,9 @@ settings:
 
     replaceGetRandom(() => 1, () => {
       clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$Z'));
+      clientStore1.dispatch(traitAnswerRequest('TraitRunning'));
     });
+    expect(selectGame().question).null;
 
     //expect(selectGame().getIn(['cooldowns', 'ANIMAL', '$A'])).size(1);
     expect(selectAnimal(User1, 0).id).equal('$Z');
@@ -141,7 +143,7 @@ players:
   - continent: $Q carn graz piracy hiber +
   - continent: $A tail mimi carn graz piracy hiber +
 `);
-    const {selectGame, selectPlayer, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer} = makeGameSelectors(serverStore.getState, gameId);
     clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$A'));
 
     expectUnchanged('split this if you have problems', () => {
@@ -161,7 +163,7 @@ players:
     }, serverStore, clientStore0, clientStore1);
 
     expectChanged('User1 can only answer', () => {
-      clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', selectTraitId(User1, 0, 1)));
+      clientStore1.dispatch(traitAnswerRequest('TraitTailLoss', 'TraitMimicry'));
     }, serverStore, clientStore0, clientStore1);
   });
 
@@ -175,7 +177,7 @@ food: 4
 players:
   - continent: $Q comm$A int carn wait, $A tail mimi ink shell, $B tail mimi ink shell, $C tail mimi ink shell
 `);
-    const {selectGame, selectPlayer, selectAnimal, selectTraitId} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer} = makeGameSelectors(serverStore.getState, gameId);
     clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$A'));
     expect(selectGame().question).ok;
     expect(selectGame().question.type).equal(QuestionRecord.INTELLECT);

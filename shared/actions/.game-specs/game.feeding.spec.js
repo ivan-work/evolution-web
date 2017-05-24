@@ -5,7 +5,7 @@ import {
   , gameEndTurnRequest
   , traitActivateRequest
 } from '../actions';
-import {makeGameSelectors} from '../../selectors';
+import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
 
 describe('Game (EAT PHASE):', function () {
   it('Simple eating', () => {
@@ -17,7 +17,9 @@ players:
   - continent: $A,$B
   - continent: $A1,$B1
 `);
-    const {selectGame, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    const {findAnimal0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
+    const {findAnimal1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
     expectUnchanged(`User1 can't take food $A when it's User0's turn`, () =>
         clientStore1.dispatch(traitTakeFoodRequest('$A'))
       , serverStore, clientStore1);
@@ -37,9 +39,9 @@ players:
     expect(selectGame().food, 'ServerGame().food').equal(2);
     expect(ClientGame0().food, 'ClientGame0().food').equal(2);
     expect(ClientGame1().food, 'ClientGame1().food').equal(2);
-    expect(selectAnimal(User0, 0).food).equal(1);
-    expect(ClientGame0().getPlayer(User0).getAnimal(0).food).equal(1);
-    expect(ClientGame1().getPlayer(User0).getAnimal(0).food).equal(1);
+    expect(findAnimal('$A').food).equal(1);
+    expect(findAnimal0('$A').food).equal(1);
+    expect(findAnimal1('$A').food).equal(1);
 
     clientStore1.dispatch(gameEndTurnRequest());
 
