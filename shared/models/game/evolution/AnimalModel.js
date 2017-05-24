@@ -107,6 +107,11 @@ export class AnimalModel extends Record({
     const isParalysed = this.hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED);
     return this.update('traits', traits => traits.map(trait => {
       if (isParalysed) {
+        if (isParalysed) {
+
+        } else {
+
+        }
         return trait.set('disabled', true);
       } else if (trait.type === TraitNeoplasm) {
         belowNeoplasm = false;
@@ -176,7 +181,8 @@ export class AnimalModel extends Record({
       .filter(trait => {
         if (trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === this.id) {
           const hostAnimal = game.locateAnimal(trait.linkAnimalId, trait.ownerId);
-          return !hostAnimal.isSaturated();
+          const linkedTrait = game.locateTrait(trait.linkId, trait.linkAnimalId, trait.ownerId);
+          return !linkedTrait.disabled && !hostAnimal.isSaturated();
         }
       }).toArray());
     const traitShell = this.hasTrait(TraitShell);

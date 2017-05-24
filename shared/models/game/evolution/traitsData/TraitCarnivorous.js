@@ -72,7 +72,7 @@ export const getStaticDefenses = (game, sourceAnimal, targetAnimal) =>
   targetAnimal.traits.filter((trait) =>
   !trait.disabled && (
     (trait.type === tt.TraitCamouflage && !sourceAnimal.hasTrait(tt.TraitSharpVision))
-    || (trait.type === tt.TraitSymbiosis && trait.linkSource)
+    || (trait.type === tt.TraitSymbiosis && trait.linkSource && !trait.findLinkedTrait(game).disabled)
     || (trait.type === tt.TraitMassive && !sourceAnimal.hasTrait(tt.TraitMassive))
     || (trait.type === tt.TraitBurrowing && targetAnimal.isSaturated() && game.status.phase !== PHASE.AMBUSH)
     || (trait.type === tt.TraitSwimming && !sourceAnimal.hasTrait(tt.TraitSwimming))
@@ -219,7 +219,7 @@ export const TraitCarnivorous = {
         const defaultIntellect = (questionId) => {
           const targetId = (possibleDefenses.length > 0 ? possibleDefenses[0].id
             : affectiveDefenses.length > 0 ? affectiveDefenses[0].id
-              : true);
+            : true);
           return server$traitIntellectAnswer(game.id, questionId, traitIntellect.id, targetId);
         };
 

@@ -34,8 +34,7 @@ export const TraitNeoplasm = {
   type: tt.TraitNeoplasm
   , cardTargetType: CARD_TARGET_TYPE.ANIMAL_ENEMY
   , customFns: {
-    canBeDisabled: (trait) => (!trait.getDataModel().hidden
-    && !(trait.getDataModel().cardTargetType & CTT_PARAMETER.LINK))
+    canBeDisabled: (trait) => (!trait.getDataModel().hidden && !trait.isLinked())
     , actionMoveInAnimal: (animal) => {
       let animalTraitArray = animal.traits.toArray();
       const currentIndex = animalTraitArray.findIndex((t) => t.type === tt.TraitNeoplasm);
@@ -116,8 +115,7 @@ export const TraitRecombination = {
     return (TraitRecombination.getTargets(game, sourceAnimal).size > 0
     && TraitRecombination.getTargets(game, linkedAnimal).size > 0);
   }
-  , checkTarget: (game, targetAnimal, targetTrait) => (!targetTrait.getDataModel().hidden
-  && !(targetTrait.getDataModel().cardTargetType & CTT_PARAMETER.LINK)) // Copypaste of TraitNeoplasm =/
+  , checkTarget: (game, targetAnimal, targetTrait) => (!targetTrait.getDataModel().hidden && !(targetTrait.isLinked())) // Copypaste of TraitNeoplasm =/
   , getTargets: (game, targetAnimal, targetTrait) => targetAnimal.traits
     .filter(t => TraitRecombination.checkTarget(null, null, t)).toList()
   , getLinkedAnimal: (game, animal, trait) => (game.locateAnimal(

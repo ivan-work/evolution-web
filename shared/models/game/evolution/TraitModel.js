@@ -87,6 +87,10 @@ export class TraitModel extends Record({
     return this.linkId !== null; // && this.dataModel.cardTargetType & CTT_PARAMETER.LINK
   }
 
+  findLinkedTrait(game) {
+    return game.locateTrait(this.linkId, this.linkAnimalId, this.ownerId);
+  }
+
   // TODO replace it with checkActionFails
   checkAction(game, sourceAnimal) {
     const traitData = this.getDataModel();
@@ -131,7 +135,7 @@ export class TraitModel extends Record({
   }
 
   countScore() {
-    if (this.getDataModel().cardTargetType & CTT_PARAMETER.LINK) {
+    if (this.isLinked()) {
       if (this.linkSource) {
         return 1 + this.getDataModel().food * 2 // 1 for linkSource only. And food is doubled by traits, so 2x score
       } else {
@@ -139,12 +143,5 @@ export class TraitModel extends Record({
       }
     }
     return this.getDataModel().score + this.getDataModel().food;
-  }
-
-  countDetachScore() {
-    if (this.getDataModel().cardTargetType & CTT_PARAMETER.LINK && !this.linkSource) {
-      return 1 + this.getDataModel().food * 2 // card is splitted to two traits, so .5. And food is doubled by traits, so 2x score
-    }
-    return 0;
   }
 }

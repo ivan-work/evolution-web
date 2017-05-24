@@ -89,8 +89,8 @@ export const gameDeployAnimalFromDeck = (game, {animal, sourceAid}) => {
   return game
     .update(game => !ending ? game
       : game
-        .update('players', players => players.map(player => player
-          .update('continent', continent => continent.map(animal => animal.setIn(['flags', TRAIT_ANIMAL_FLAG.HIBERNATED], false))))))
+      .update('players', players => players.map(player => player
+        .update('continent', continent => continent.map(animal => animal.setIn(['flags', TRAIT_ANIMAL_FLAG.HIBERNATED], false))))))
     .update('deck', deck => deck.skip(1))
     .update(gameDeployAnimal(animal, card, animalIndex + 1))
     .update(addToGameLog(['traitGiveBirth', logAnimal(parent)]));
@@ -247,16 +247,16 @@ export const gameStartPhase = (game, {phase, timestamp, data}) => (game
  * */
 
 export const gameDeployRegeneratedAnimal = (game, {userId, cardId, animalId, source}) => game
-  .update(game => {
-    if (source === 'DECK') {
-      return game.update('deck', deck => deck.skip(1))
-    } else {
-      const {cardIndex} = game.locateCard(cardId, userId);
-      return game.removeIn(['players', userId, 'hand', cardIndex]);
-    }
-  })
-  .update(game => traitSetAnimalFlag(game, {sourceAid: animalId, flag: TRAIT_ANIMAL_FLAG.REGENERATION, on: false}))
-;
+    .update(game => {
+      if (source === 'DECK') {
+        return game.update('deck', deck => deck.skip(1))
+      } else {
+        const {cardIndex} = game.locateCard(cardId, userId);
+        return game.removeIn(['players', userId, 'hand', cardIndex]);
+      }
+    })
+    .update(game => traitSetAnimalFlag(game, {sourceAid: animalId, flag: TRAIT_ANIMAL_FLAG.REGENERATION, on: false}))
+  ;
 
 export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) => {
   ensureParameter(animalId, 'string');
@@ -271,18 +271,15 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
 
   return sourceType === 'GAME' ? updatedGame.update('food', food => food - amount)
     : sourceType === tt.TraitPiracy ? updatedGame.updateIn(['players', another.ownerId, 'continent', sourceId, 'food'], food =>
-      Math.max(food - amount, 0))
-      : updatedGame;
+    Math.max(food - amount, 0))
+    : updatedGame;
 };
 
 export const animalDeath = (game, {type, animalId, data}) => {
   const animal = game.locateAnimal(animalId);
   const shell = animal.hasTrait(tt.TraitShell);
   return game
-    .updateIn(['players', animal.ownerId, 'scoreDead'], scoreDead => scoreDead
-      + animal.countScore()
-      + animal.traits.reduce((result, trait) => result + trait.countDetachScore(), 0)
-    )
+    .updateIn(['players', animal.ownerId, 'scoreDead'], scoreDead => scoreDead + 1 + animal.traits.size + (!!shell ? -1 : 0))
     .removeIn(['players', animal.ownerId, 'continent', animalId])
     .updateIn(['players', animal.ownerId, 'continent'], continent => continent
       .map(a => a.traitDetach(trait => trait.linkAnimalId === animal.id)))
@@ -309,8 +306,8 @@ export const gameEnd = (oldGame, {game}) => {
     !p1.playing ? 1
       : !p2.playing ? -1
       : p2.scoreNormal !== p1.scoreNormal ? p2.scoreNormal - p1.scoreNormal
-        : p1.scoreDead !== p2.scoreDead ? p2.scoreDead - p1.scoreDead
-          : 1 - Math.round(Math.random()) * 2);
+      : p1.scoreDead !== p2.scoreDead ? p2.scoreDead - p1.scoreDead
+      : 1 - Math.round(Math.random()) * 2);
 
   return game
     .set('scoreboardFinal', scoreboardFinal)
