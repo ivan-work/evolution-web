@@ -16,8 +16,8 @@ export const TraitCarnivorous_Start = ({sourceAid, targetId}) => {
 
   return Velocity(SourceAnimalHtml, {
     translateX: 0
-    , translateY: -25
-  }, 1200);
+    , translateY: -30
+  }, 500);
 };
 
 export const TraitCarnivorous_End = ({sourceAid, targetId}) => {
@@ -28,5 +28,26 @@ export const TraitCarnivorous_End = ({sourceAid, targetId}) => {
   return Velocity(SourceAnimalHtml, {
     translateX: 0
     , translateY: 0
-  }, 500)
+  }, 250)
+};
+
+
+export const gameFoodTake_Start = ({animalId}) => {
+  const AnimalHtml = document.getElementById('Animal' + animalId);
+
+  if (AnimalHtml)
+    return Velocity(AnimalHtml, {
+      translateX: 0
+      , translateY: -30
+    }, 500);
+};
+
+export const gameFoodTake_End = ({animalId}) => {
+  const AnimalHtml = document.getElementById('Animal' + animalId);
+
+  if (AnimalHtml)
+    return Velocity(AnimalHtml, {
+      translateX: 0
+      , translateY: 0
+    }, 250)
 };

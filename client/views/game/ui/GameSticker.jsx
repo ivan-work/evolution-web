@@ -22,6 +22,16 @@ export class GameSticker extends React.PureComponent {
     game: PropTypes.instanceOf(GameModelClient).isRequired
   };
 
+  playerHasAmbushes() {
+    const game = this.props.game;
+    if (game.getIn(['ambush', 'ambushers']) && game.userId) {
+      return game.getIn(['ambush', 'ambushers']).some((wants, animalId) => {
+        const animal = game.locateAnimal(animalId, game.userId).animal;
+        if (animal && wants === null) return true;
+      });
+    }
+  }
+
   render() {
     const {game, $traitAmbushContinue} = this.props;
     const {status, settings, question} = game;
@@ -45,11 +55,12 @@ export class GameSticker extends React.PureComponent {
           <span className='key'>{T.translate('Game.UI.Status.Time')}:&nbsp;</span>
           <span className='value'>
           {(game.status.paused ? <span>{T.translate('Game.UI.Status.Pause')}</span>
-          : !!question ? <Timer start={question.time} duration={settings.timeTraitResponse}/>
-          : status.phase === PHASE.REGENERATION ? <Timer start={status.turnStartTime} duration={settings.timeTraitResponse}/>
-          : status.phase === PHASE.AMBUSH ? <Timer start={status.turnStartTime} duration={settings.timeAmbush}/>
-          : status.turnStartTime != null ? <Timer start={status.turnStartTime} duration={status.turnDuration}/>
-          : '-')}
+            : !!question ? <Timer start={question.time} duration={settings.timeTraitResponse}/>
+            : status.phase === PHASE.REGENERATION ?
+            <Timer start={status.turnStartTime} duration={settings.timeTraitResponse}/>
+            : status.phase === PHASE.AMBUSH ? <Timer start={status.turnStartTime} duration={settings.timeAmbush}/>
+            : status.turnStartTime != null ? <Timer start={status.turnStartTime} duration={status.turnDuration}/>
+            : '-')}
           </span>
         </li>
       </ul>
@@ -59,7 +70,8 @@ export class GameSticker extends React.PureComponent {
       </div>
       <div className='flex'/>
       {game.status.phase !== PHASE.AMBUSH && <GameEndTurnButton game={game}/>}
-      {game.status.phase === PHASE.AMBUSH && <MDL.Button onClick={$traitAmbushContinue}>
+      {game.status.phase === PHASE.AMBUSH &&
+      <MDL.Button raised accent disabled={!this.playerHasAmbushes()} onClick={$traitAmbushContinue}>
         {T.translate('Game.UI.EndAmbush')}
       </MDL.Button>}
     </div>);

@@ -33,6 +33,12 @@ export const createAnimationServiceConfig = () => ({
       }
     });
 
+    subscribe('gameFoodTake_Start', (actionData, getState) =>
+      localTraits.gameFoodTake_Start(actionData));
+
+    subscribe('gameFoodTake_End', (actionData, getState) =>
+      localTraits.gameFoodTake_End(actionData));
+
     // subscribe('animalDeath', (actionData, getState) => {
     //   const {animalId} = actionData;
     //   const AnimalHtml = document.getElementById('Animal' + animalId);
