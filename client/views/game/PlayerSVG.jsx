@@ -83,7 +83,7 @@ export default class PlayerSVG extends React.Component {
         if (!svgElement) return;
         // const linkPoint1 = document.getElementById(`Animal${trait1.hostAnimalId}LinkPoint`);
         // const linkPoint2 = document.getElementById(`Animal${trait2.hostAnimalId}LinkPoint`);
-        const base = PlayerSticker.getById(trait1.ownerId);
+        const base = PlayerSticker.getContainerById(trait1.ownerId);
         // const wrapper1 = document.getElementById(`PlayerWrapper${trait1.ownerId}`);
 
         const basebbx = base.getBoundingClientRect();

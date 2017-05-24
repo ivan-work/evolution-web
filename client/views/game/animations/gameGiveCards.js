@@ -2,6 +2,7 @@ import ReactDOM from 'react-dom';
 import Velocity from 'velocity-animate'
 
 import {CardUnknown} from '../../../../shared/models/game/evolution/cards/index'
+import PlayerSticker from '../PlayerSticker.jsx';
 
 export const gameGiveCards = (game, cards, getRef) => {
   const DELAY = 100;
@@ -72,7 +73,7 @@ export const gameGiveCardsOther = (userId, deckSize, cards, getRef) => {
   return Promise.all(cards.map((card, index) => Promise.resolve()
     .then(() => {
       const CardHtml = document.getElementById('Card' + card.id);
-      const StickerHtml = document.getElementById('PlayerSticker' + userId);
+      const StickerHtml = PlayerSticker.getContainerById(userId);
       const CardClone = CardHtml.cloneNode(true);
       CardClone.style.position = 'absolute';
       CardClone.style.top = '0px';

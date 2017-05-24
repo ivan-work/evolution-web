@@ -19,7 +19,7 @@ const {PLAYER_STICKER_ARROW_SIZE} = styles;
 
 
 export default class PlayerSticker extends React.Component {
-  static getById(id) {
+  static getContainerById(id) {
     return document.getElementById(`PlayerStickerBody${id}`);
   }
 
