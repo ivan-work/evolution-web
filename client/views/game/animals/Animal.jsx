@@ -54,7 +54,7 @@ class Animal extends React.Component {
       , highlight: isOver && canDrop
     });
 
-    return (<div id={'Animal' + model.id} className={className}>
+    return (<div id={game ? `Animal${model.id}` : null} className={className}>
       <div className='traits'>
         {!children && model.traits
           .toList()
@@ -82,6 +82,7 @@ class Animal extends React.Component {
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && <span className='material-icons Flag Hibernated'>snooze</span>}
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <span className='material-icons Flag Shell'>home</span>}
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION) && <span className='material-icons Flag Regeneration'>get_app</span>}
+      {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHY) && <span className='material-icons Flag Shy'>report</span>}
       <div className='AnimalFoodContainer'>
         {Array.from({length: animal.food}).map((u, index) => <Food key={index}/>)}
       </div>

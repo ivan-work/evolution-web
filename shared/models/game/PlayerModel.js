@@ -59,16 +59,16 @@ export class PlayerModel extends Record({
 
   /**
    * This callback is displayed as a global member.
-   * @callback PlayerModel.forEachAnimalCallback
+   * @callback PlayerModel.someAnimalCallback
    * @param {AnimalModel} animal
    * @param {Continent} continent
    * @param {PlayerModel} player
    */
 
   /**
-   * @param {PlayerModel.forEachAnimalCallback} cb
+   * @param {PlayerModel.someAnimalCallback} cb
    */
-  forEachAnimal(cb) {
+  someAnimal(cb) {
     return this.continent.some(animal => cb(animal, null, this));
   }
 }

@@ -5,11 +5,8 @@ import {
   TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
-  , TRAIT_COOLDOWN_LINK
   , CARD_TARGET_TYPE
   , CTT_PARAMETER
-  , CARD_SOURCE
-  , TRAIT_ANIMAL_FLAG
 } from '../constants';
 
 import {
@@ -17,7 +14,6 @@ import {
   , server$traitStartCooldown
   , server$traitAnimalAttachTrait
   , server$traitAnimalRemoveTrait
-  , server$traitSetAnimalFlag
   , traitAddHuntingCallback
   , server$traitActivate
   , server$game

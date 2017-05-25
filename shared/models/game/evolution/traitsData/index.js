@@ -30,6 +30,7 @@ import {TraitCarnivorous, endHunt} from './TraitCarnivorous';
 export {TraitCarnivorous};
 export * from './ttf';
 export * from './cons';
+export * from './gift';
 
 export const TraitWaiter = {
   type: tt.TraitWaiter
@@ -165,11 +166,11 @@ export const TraitCommunication = {
 
 export const TraitGrazing = {
   type: tt.TraitGrazing
+  , playerControllable: true
   , targetType: TRAIT_TARGET_TYPE.NONE
   , cooldowns: fromJS([
     [tt.TraitGrazing, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
-  , playerControllable: true
   , action: (game, sourceAnimal, traitGrazing) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, traitGrazing, sourceAnimal));
     dispatch(server$traitGrazeFood(game.id, 1, sourceAnimal));

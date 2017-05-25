@@ -15,10 +15,27 @@
 }
 
 .TraitRecombinationDialog {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  min-width: 4 * $ANIMAL_WIDTH;
+  width: 4.5 * $ANIMAL_WIDTH;
+
+  .animals {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin: 0 0 1em;
+    .Animal {
+      position: inherit;
+    }
+  }
+
+  /** position: inherit; is a dirty hack and I have no idea why mdl-button jumping without it.
+    * If you ever get WTF is happening, please, enlighten me, it's just a pure magic >:(
+    */
+
+  .actions .mdl-button {
+    position: inherit;
+  }
+
   .TraitHolder {
     transition: transform .25s;
     &.selected0 {

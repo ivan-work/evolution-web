@@ -122,11 +122,10 @@ export class AnimalModel extends Record({
 
   /**
    * @param {TRAIT_ANIMAL_FLAG} flag
-   * @param {string} [traitType]
    * @return {boolean}
    */
-  hasFlag(flag, traitType) {
-    return !!this.flags.get(flag) && (!traitType || this.hasTrait(traitType));
+  hasFlag(flag) {
+    return !!this.flags.get(flag);
   }
 
   /**

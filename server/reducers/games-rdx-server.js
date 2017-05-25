@@ -159,9 +159,17 @@ export const gameSetPaused = (game, {paused}) => game.setIn(['status', 'paused']
  * GAME PHASES
  * */
 
-export const gameStartDeploy = (game) => {
+export const gameStartTurn = (game) => {
   const roundPlayer = game.status.roundPlayer;
   const nextRoundPlayer = (roundPlayer + 1) % game.players.size;
+  return game
+    .updateIn(['status', 'turn'], turn => ++turn)
+    .setIn(['status', 'roundPlayer'], nextRoundPlayer)
+    .setIn(['food'], 0)
+    .update('cooldowns', cooldowns => cooldowns.eventNextTurn());
+};
+
+export const gameStartDeploy = (game) => {
   return game
     .update('players', players => players.map(player => player
       .set('ended', !player.playing)
@@ -174,11 +182,7 @@ export const gameStartDeploy = (game) => {
         .recalculateDisabling()
       ))
     ))
-    .setIn(['food'], 0)
-    .updateIn(['status', 'turn'], turn => ++turn)
     .setIn(['status', 'round'], 0)
-    .setIn(['status', 'roundPlayer'], nextRoundPlayer)
-    .update('cooldowns', cooldowns => cooldowns.eventNextTurn())
 };
 
 export const gameStartFeeding = (game, {food}) => {
@@ -397,6 +401,10 @@ export const traitTakeShell = (game, {continentId, animalId, trait}) => {
 
 export const traitAmbushActivate = (game, {animalId, on}) => game
   .setIn(['ambush', 'ambushers', animalId], on);
+export const gameAmbushPushTarget = (game, {animalId}) => game
+  .updateIn(['ambush', 'targets'], targets => targets.push(animalId));
+export const gameAmbushUnshiftTarget = (game, {animalId}) => game
+  .updateIn(['ambush', 'targets'], targets => targets.unshift(animalId));
 export const gameAmbushPrepareStart = (game, {ambushRecord}) => game
   .setIn(['ambush'], ambushRecord);
 export const gameAmbushPrepareEnd = (game) => game;
@@ -425,12 +433,15 @@ export const reducer = createReducer(Map(), {
   , gameEndTurn: (state, data) => state.update(data.gameId, game => gameEndTurn(game, data))
   , gameEnd: (state, data) => state.update(data.gameId, game => gameEnd(game, data))
   , gamePlayerLeft: (state, data) => state.update(data.gameId, game => gamePlayerLeft(game, data))
+  , gameStartTurn: (state, data) => state.update(data.gameId, game => gameStartTurn(game, data))
   , gameStartPhase: (state, data) => state.update(data.gameId, game => gameStartPhase(game, data))
   , gameSetUserTimedOut: (state, data) => state.update(data.gameId, game => gameSetUserTimedOut(game, data))
   , gameSetUserWantsPause: (state, data) => state.update(data.gameId, game => gameSetUserWantsPause(game, data))
   , gameSetPaused: (state, data) => state.update(data.gameId, game => gameSetPaused(game, data))
 
   , traitAmbushActivate: (state, data) => state.update(data.gameId, game => traitAmbushActivate(game, data))
+  , gameAmbushPushTarget: (state, data) => state.update(data.gameId, game => gameAmbushPushTarget(game, data))
+  , gameAmbushUnshiftTarget: (state, data) => state.update(data.gameId, game => gameAmbushUnshiftTarget(game, data))
   , gameAmbushPrepareStart: (state, data) => state.update(data.gameId, game => gameAmbushPrepareStart(game, data))
   , gameAmbushPrepareEnd: (state, data) => state.update(data.gameId, game => gameAmbushPrepareEnd(game, data))
   , gameAmbushAttackStart: (state, data) => state.update(data.gameId, game => gameAmbushAttackStart(game, data))

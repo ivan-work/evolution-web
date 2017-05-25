@@ -15,6 +15,7 @@ import {
   , gameEndTurn
   , gameEnd
   , gamePlayerLeft
+  , gameStartTurn
   , gameStartPhase
   , gameSetUserTimedOut
   , gameSetUserWantsPause
@@ -56,6 +57,7 @@ export const reducer = createReducer(null, {
   , gameEndTurn
   , gameEnd
   , gamePlayerLeft
+  , gameStartTurn
   , gameStartPhase
   , gameSetUserTimedOut
   , gameSetUserWantsPause

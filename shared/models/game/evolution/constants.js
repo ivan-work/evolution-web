@@ -55,6 +55,7 @@ export const TRAIT_ANIMAL_FLAG = {
   , SHELL: 'SHELL'
   , REGENERATION: 'REGENERATION'
   , PARALYSED: 'PARALYSED'
+  , SHY: 'SHY'
 };
 
 export const ANIMAL_DEATH_REASON = {

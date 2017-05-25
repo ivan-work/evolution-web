@@ -179,6 +179,10 @@ Game:
     TraitRecombination  : Рекомбинация
     TraitRegeneration   : Регенерация
     TraitSuckerfish     : Прилипала
+
+    TraitRstrategy      : r-Стратегия
+    TraitHomeothermy    : Теплокровное
+    TraitShy            : Пугливое
   TraitDesc:
     $EAT: Активируется вместо взятия еды
     $CDRound: Можно использовать в каждом раунде

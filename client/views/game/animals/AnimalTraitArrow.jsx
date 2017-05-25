@@ -13,6 +13,7 @@ const style = {
   , fill: 'blue'
   , markerEnd: 'url(#arrow)'
 };
+
 export class AnimalTraitArrow extends React.Component {
   constructor(props) {
     super(props);
@@ -38,7 +39,7 @@ export class AnimalTraitArrow extends React.Component {
         <AnimalTraitArrowMarker id='arrow' markerSize={2} markerEnd={true} className='AnimalTraitArrow'/>
       </defs>
       <g>
-        <path d={`M${x1},${y1} L${x2},${y2}`} style={style}/>
+        <path d={`M${x1},${y1} L${x2},${y2}`} style={{...style}}/>
       </g>
     </svg>
   }

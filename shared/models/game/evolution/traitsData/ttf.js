@@ -17,7 +17,6 @@ import {
   , server$traitActivate
   , server$traitStartCooldown
   , server$traitAnimalRemoveTrait
-  , server$traitGrazeFood
   , server$traitSetAnimalFlag
   , server$traitSetValue
   , server$traitNotify_End
@@ -136,15 +135,13 @@ export const TraitSpecB = {
     [tt.TraitSpecB, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
+  , $checkAction: (game, animal, traitSpec) => (animal.canEat(game)
+  && !game.someAnimal((animal) => animal.traits.some(trait => trait.id !== traitSpec.id && trait.type === traitSpec.type)))
   , action: (game, animal, trait) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, trait, animal));
     dispatch(server$startFeeding(game.id, animal.id, 1, tt.TraitSpecA));
     return true;
   }
-  , $checkAction: (game, animal, traitSpec) => (animal.canEat(game)
-  && !game.players.some(player =>
-    player.continent.some(animal =>
-      animal.traits.some(trait => trait.id !== traitSpec.id && trait.type === traitSpec.type))))
 };
 
 export const TraitFlight = {type: tt.TraitFlight};

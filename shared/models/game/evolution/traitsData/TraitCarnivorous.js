@@ -76,8 +76,9 @@ export const getStaticDefenses = (game, sourceAnimal, targetAnimal) =>
     || (trait.type === tt.TraitMassive && !sourceAnimal.hasTrait(tt.TraitMassive))
     || (trait.type === tt.TraitBurrowing && targetAnimal.isSaturated() && game.status.phase !== PHASE.AMBUSH)
     || (trait.type === tt.TraitSwimming && !sourceAnimal.hasTrait(tt.TraitSwimming))
-    || (trait.type === tt.TraitShell && targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL, tt.TraitShell))
+    || (trait.type === tt.TraitShell && targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL))
     || (trait.type === tt.TraitFlight && (sourceAnimal.traits.size >= targetAnimal.traits.size))
+    || (trait.type === tt.TraitShy && targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHY))
   )).toArray();
 
 export const getAffectiveDefenses = (game, sourceAnimal, targetAnimal) =>
@@ -237,11 +238,16 @@ export const TraitCarnivorous = {
      * */
       // if user has no options or if user didn't respond - outcome will be the same, so we DRY
 
+    const traitShy = targetAnimal.hasTrait(tt.TraitShy);
+    if (traitShy) {
+      dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
+        const animal = game.locateAnimal(targetAnimal.id);
+        const traitShy = animal.hasTrait(tt.TraitShy);
+        if (traitShy) dispatch(traitShy.getDataModel().action(game, targetAnimal, traitShy));
+      }));
+    }
+
     const defaultDefence = (questionId) => (dispatch, getState) => {
-        // console.log('defaultDefence');
-        // console.log(traitRunning);
-        // console.log(traitTailLoss, traitTailLossTargets);
-        // console.log(traitMimicry, traitMimicryTargets);
         if (traitRunning && !traitRunning.isEqual(disabledTid)) {
           dispatch(server$traitDefenceAnswer(game.id
             , questionId

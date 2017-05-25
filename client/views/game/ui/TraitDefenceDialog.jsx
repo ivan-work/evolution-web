@@ -52,6 +52,7 @@ export class TraitDefenceDialog extends React.Component {
       targetAnimal.hasTrait(tt.TraitShell)
       , targetAnimal.hasTrait(tt.TraitInkCloud)
       , targetAnimal.hasTrait(tt.TraitRunning)
+      , targetAnimal.hasTrait(tt.TraitCnidocytes)
     ].filter(t => !!t // Really has trait
       && t.checkAction(game, targetAnimal) // And can activate it
       && !checkIfTraitDisabledByIntellect(attackAnimal, t) // And it's not blocked by attacking intellect

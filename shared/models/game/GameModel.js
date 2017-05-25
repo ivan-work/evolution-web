@@ -84,15 +84,15 @@ export class QuestionRecord extends Record({
 }
 
 export class AmbushRecord extends Record({
-  animalId: null
-  , animalOwnerId: null
+  targets: null
+  , targetPlayerId: null
   , ambushers: null
   , turnRemainingTime: null
 }) {
   static new(animal, ambushers, turnRemainingTime) {
     return new AmbushRecord({
-      animalId: animal.id
-      , animalOwnerId: animal.ownerId
+      targets: List.of(animal.id)
+      , targetPlayerId: animal.ownerId
       , ambushers: ambushers.reduce((result, animalId) => result.set(animalId, null), OrderedMap())
       , turnRemainingTime
     })
@@ -175,7 +175,7 @@ export class GameModel extends Record({
 
   generateFood() {
     let aedificatorFood = 0;
-    this.forEachAnimal((animal, continent, player) => {
+    this.someAnimal((animal, continent, player) => {
       if (animal.hasTrait(tt.TraitAedificator)) aedificatorFood += 2;
     });
     return FOOD_TABLE[this.getActualPlayers().size]() + aedificatorFood;
@@ -258,8 +258,8 @@ export class GameModel extends Record({
   /**
    * @param {GamePerAnimalCallback} cb
    */
-  forEachAnimal(cb) {
-    return this.get('players').some(player => player.forEachAnimal((a, c) => cb(a, c, player)));
+  someAnimal(cb) {
+    return this.get('players').some(player => player.someAnimal((a, c) => cb(a, c, player)));
   }
 
   locateAnimal(animalId, playerId = null) {

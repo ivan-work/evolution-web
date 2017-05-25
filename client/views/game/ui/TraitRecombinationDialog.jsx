@@ -70,16 +70,16 @@ export default class TraitRecombinationDialog extends React.Component {
 
     return (<DialogContent>
       <div className='TraitRecombinationDialog'>
-        <div>
+        <div className='animals'>
           {this.renderAnimal(animal1, traits1, 0)}
-        </div>
-        <div>
           {this.renderAnimal(animal2, traits2, 1)}
         </div>
+        <div className='actions'>
+          <Button primary raised disabled={this.validate()} onClick={this.confirmAction}>
+            {T.translate('Game.UI.TraitRecombinationDialog.Action')}
+          </Button>
+        </div>
       </div>
-      <Button primary raised disabled={this.validate()} onClick={this.confirmAction}>
-        {T.translate('Game.UI.TraitRecombinationDialog.Action')}
-      </Button>
     </DialogContent>);
   }
 

@@ -40,3 +40,7 @@ export const TraitNeoplasm = 'TraitNeoplasm';
 export const TraitRecombination = 'TraitRecombination';
 export const TraitRegeneration = 'TraitRegeneration';
 export const TraitSuckerfish = 'TraitSuckerfish';
+
+export const TraitRstrategy = 'TraitRstrategy';
+export const TraitHomeothermy = 'TraitHomeothermy';
+export const TraitShy = 'TraitShy';

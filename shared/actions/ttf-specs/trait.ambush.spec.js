@@ -3,6 +3,7 @@ import {
   , traitTakeFoodRequest
   , traitActivateRequest
   , traitAmbushActivateRequest
+  , traitAmbushContinueRequest
   , traitAnswerRequest
 } from '../actions';
 
@@ -344,16 +345,42 @@ players:
     expect(selectGame().food).equal(2);
   });
 
-  it('Score', () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+  it(`Works with cooperation and homeo`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: feeding
+food: 10
 players:
-  - continent: angler, angler camo
+  - continent: $Q wait coop$W coop$E homeo, $W, $E coop$R, $R
+  - continent: $A carn ambu, $S carn ambu, $D carn ambu, $F carn ambu
 `);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+    clientStore1.dispatch(traitAmbushContinueRequest());
 
-    const {selectGame, selectPlayer} = makeGameSelectors(serverStore.getState, gameId);
+    expect(findAnimal('$Q').getFood()).equal(1);
+    expect(findAnimal('$W').getFood()).equal(0);
+    expect(findAnimal('$E').getFood()).equal(0);
+    expect(findAnimal('$R').getFood()).equal(0);
 
-    expect(selectPlayer(User0).countScore()).equal(5);
+    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+    clientStore1.dispatch(traitAmbushContinueRequest());
+
+    expect(findAnimal('$W').getFood()).equal(1);
+    expect(findAnimal('$E').getFood()).equal(0);
+    expect(findAnimal('$R').getFood()).equal(0);
+
+    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+    clientStore1.dispatch(traitAmbushActivateRequest('$A'));
+    clientStore1.dispatch(traitAmbushContinueRequest());
+
+    expect(findAnimal('$E')).null;
+    expect(findAnimal('$R').getFood()).equal(0);
+    expect(selectGame().status.phase).equal(PHASE.FEEDING);
+
+    clientStore0.dispatch(traitActivateRequest('$Q', tt.TraitHomeothermy));
+    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+    clientStore1.dispatch(traitAmbushContinueRequest());
   });
 });

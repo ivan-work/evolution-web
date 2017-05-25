@@ -87,7 +87,7 @@ export class Game extends React.Component {
             <div className='GameShellContainer'>
               {game.continents.get('standard').shells.map((shell) => <TraitShell key={shell.id} game={game} trait={shell}/>).toList()}
             </div>
-            {game.status.phase === PHASE.FEEDING && <GameFoodContainer game={game} food={game.food}/>}
+            <GameFoodContainer game={game} food={game.food}/>
           </MDL.Card>
           <MDL.Card shadow={SHADOW} className='ChatCard'>
             <h6>{T.translate('App.Chat.Label')}:</h6>
