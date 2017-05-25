@@ -4,6 +4,7 @@ import * as traits from '../traitTypes/index';
 export * from './base';
 export * from './ttf';
 export * from './cons';
+export * from './bonus';
 
 export const CardUnknown = {
   type: 'CardUnknown'

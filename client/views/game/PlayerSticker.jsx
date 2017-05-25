@@ -83,10 +83,9 @@ export default class PlayerSticker extends React.Component {
     if (this.div) {
       const bbx = this.div.getBoundingClientRect();
 
-      const isInside = x >= bbx.left && y >= bbx.top && x <= bbx.left + bbx.width && y <= bbx.bottom;
-
       this.calcScale();
-      if (isInside) {
+
+      if (this.isInside) {
         let scrollX = this.state.scrollX;
         let scrollY = this.state.scrollY;
 
@@ -142,15 +141,21 @@ export default class PlayerSticker extends React.Component {
   }
 
   trackMouse(e) {
-    this.x = e.pageX;
-    this.y = e.pageY;
+    const x = this.x = e.pageX;
+    const y = this.y = e.pageY;
+    if (this.div) {
+      const bbx = this.div.getBoundingClientRect();
+      this.isInside = x >= bbx.left && y >= bbx.top && x <= bbx.left + bbx.width && y <= bbx.bottom;
+    }
   }
 
   trackWheel(e) {
-    if (e.deltaY < 0) {
-      this.setScale(this.state.scale + .1);
-    } else {
-      this.setScale(this.state.scale - .1);
+    if (this.isInside) {
+      if (e.deltaY < 0) {
+        this.setScale(this.state.scale + .1);
+      } else {
+        this.setScale(this.state.scale - .1);
+      }
     }
   }
 
@@ -222,6 +227,7 @@ export default class PlayerSticker extends React.Component {
 
         <User id={player.id}/>
         ({player.hand.size})
+        {this.isInside ? 'isInside' : 'outSide'}
         {isUser && <MDL.Icon name={this.state.showCards ? 'keyboard_arrow_down' : 'keyboard_arrow_up'}/>}
         <MDL.Icon name={this.state.scale === this.state.minScale ? 'zoom_in' : 'zoom_out'} onClick={this.switchZoom}/>
         {/*{this.state.scale}/{this.state.minScale} {this.state.scrollX}/{this.state.scrollWidth} {this.state.scrollY}/{this.state.scrollHeight}*/}

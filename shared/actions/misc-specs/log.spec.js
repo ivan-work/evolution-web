@@ -166,7 +166,7 @@ players:
       expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'TraitPiracy', $D, $Q]);
       expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'GAME', $G, null]);
       expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $G, 'TraitCooperation', $F]);
-      expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'GAME', $F, $G]);
+      expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'GAME', $F, null]);
       expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User1.id, false, false]);
 
       expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User2.id]);

@@ -81,35 +81,33 @@ describe('Game:', function () {
   });
 
   it('Play as deploy', () => {
-    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
-    ParseGame(`
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
 players:
   - hand: 6 camo
   - hand: 6 camo
 `);
+    const {selectGame, selectPlayer, selectCard, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame0, selectPlayer0, selectCard0, findAnimal0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
+    const {selectGame1, selectPlayer1, selectCard1, findAnimal1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
 
-    const User0OriginalHand = ClientGame0().getIn(['players', User0.id, 'hand']);
-    const User1OriginalHand = ClientGame1().getIn(['players', User1.id, 'hand']);
+    const User0OriginalHand = selectGame0().getIn(['players', User0.id, 'hand']);
+    const User1OriginalHand = selectGame1().getIn(['players', User1.id, 'hand']);
 
-    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id, 0));
 
-    expect(ServerGame().getIn(['players', User0.id, 'hand']), 'Server: User0.hand').size(5);
-    expect(ServerGame().getIn(['players', User0.id, 'hand', 0]), 'Server: User0.hand.0').equal(User0OriginalHand.get(1));
-    expect(ServerGame().getIn(['players', User0.id, 'hand', 1]), 'Server: User0.hand.1').equal(User0OriginalHand.get(2));
-    expect(ServerGame().getIn(['players', User0.id, 'continent']).size, 'Server: User0.continent').equal(1);
-    expect(ServerGame().getIn(['players', User0.id, 'continent', 0]), 'Server: User0.continent(animal)').instanceof(AnimalModel);
+    expect(selectPlayer(User0).hand, 'Server: User0.hand').size(5);
+    expect(selectPlayer(User0).hand.get(0), 'Server: User0.hand.0').equal(User0OriginalHand.get(1));
+    expect(selectPlayer(User0).hand.get(1), 'Server: User0.hand.1').equal(User0OriginalHand.get(2));
+    expect(selectPlayer(User0).continent, 'Server: User0.continent').size(1);
+    expect(selectPlayer(User0).continent.first(), 'Server: User0.continent').instanceof(AnimalModel);
 
-    expect(ClientGame0().getIn(['players', User0.id, 'hand']), 'User0.hand')
-      .equal(ServerGame().getIn(['players', User0.id, 'hand']));
-    expect(ClientGame0().getIn(['players', User0.id, 'continent']), 'User0.continent')
-      .equal(ServerGame().getIn(['players', User0.id, 'continent']));
+    expect(selectPlayer0(User0).hand, 'User0.hand').equal(selectPlayer(User0).hand);
+    expect(selectPlayer0(User0).continent, 'User0.hand').equal(selectPlayer(User0).continent);
 
-    expect(ClientGame1().getIn(['players', User0.id, 'hand']).size, 'User1 see User0.hand')
-      .equal(TEST_HAND_SIZE - 1);
-    expect(ClientGame1().getIn(['players', User0.id, 'hand']), 'User1 see User0.hand')
-      .not.equal(ServerGame().getIn(['players', User0.id, 'hand']));
-    expect(ClientGame1().getIn(['players', User0.id, 'continent']), 'User1 see User0.continent')
-      .equal(ServerGame().getIn(['players', User0.id, 'continent']));
+    expect(selectPlayer1(User0).hand, 'User0.hand').size(TEST_HAND_SIZE - 1);
+    expect(selectPlayer1(User0).hand, 'User0.hand').not.equal(selectPlayer(User0).hand);
+    expect(selectPlayer1(User0).continent, 'User0.hand').equal(selectPlayer(User0).continent);
 
     /**
      * State: 0-0-1
@@ -117,13 +115,13 @@ players:
      * User1: Card#0, Card#1, Card#2, ... |
      * */
 
-    expect(ServerGame().status.round, 'ServerGame().status.round').equal(0);
-    expect(ClientGame0().status.round, 'ClientGame0().status.round').equal(0);
-    expect(ClientGame1().status.round, 'ClientGame1().status.round').equal(0);
-    expect(ServerGame().status.currentPlayer, 'ServerGame().status.currentPlayer').equal(1);
-    expect(ClientGame0().status.currentPlayer, 'ClientGame0().status.currentPlayer').equal(1);
-    expect(ClientGame1().status.currentPlayer, 'ClientGame1().status.currentPlayer').equal(1);
-    clientStore1.dispatch(gameEndTurnRequest());
+    expect(selectGame().status.round, 'selectGame().status.round').equal(0);
+    expect(selectGame0().status.round, 'ClientGame0().status.round').equal(0);
+    expect(selectGame1().status.round, 'ClientGame1().status.round').equal(0);
+    expect(selectGame().status.currentPlayer, 'selectGame().status.currentPlayer').equal(1);
+    expect(selectGame0().status.currentPlayer, 'ClientGame0().status.currentPlayer').equal(1);
+    expect(selectGame1().status.currentPlayer, 'ClientGame1().status.currentPlayer').equal(1);
+    clientStore1.dispatch(gameDeployAnimalRequest(selectCard(User1, 0).id, 0));
 
     /**
      * State: 0-1-0
@@ -131,12 +129,12 @@ players:
      * User1: Card#0, Card#2, Card#3, ... | Animal#1
      * */
 
-    expect(ServerGame().status.round, 'ServerGame().status.round').equal(1);
-    expect(ClientGame0().status.round, 'ClientGame0().status.round').equal(1);
-    expect(ClientGame1().status.round, 'ClientGame1().status.round').equal(1);
-    expect(ServerGame().status.currentPlayer, 'ServerGame().status.currentPlayer').equal(0);
-    expect(ClientGame0().status.currentPlayer, 'ClientGame0().status.currentPlayer').equal(0);
-    expect(ClientGame1().status.currentPlayer, 'ClientGame1().status.currentPlayer').equal(0);
+    expect(selectGame().status.round, 'selectGame().status.round').equal(1);
+    expect(selectGame0().status.round, 'ClientGame0().status.round').equal(1);
+    expect(selectGame1().status.round, 'ClientGame1().status.round').equal(1);
+    expect(selectGame().status.currentPlayer, 'selectGame().status.currentPlayer').equal(0);
+    expect(selectGame0().status.currentPlayer, 'ClientGame0().status.currentPlayer').equal(0);
+    expect(selectGame1().status.currentPlayer, 'ClientGame1().status.currentPlayer').equal(0);
     clientStore0.dispatch(gameDeployAnimalRequest(User0OriginalHand.get(2).id, 0));
 
     /**
@@ -145,12 +143,12 @@ players:
      * User1: Card#0, Card#2, Card#3, ... | Animal#1
      * */
 
-    expect(ServerGame().status.round, 'ServerGame().status.round').equal(1);
-    expect(ClientGame0().status.round, 'ClientGame0().status.round').equal(1);
-    expect(ClientGame1().status.round, 'ClientGame1().status.round').equal(1);
-    expect(ServerGame().status.currentPlayer, 'ServerGame().status.currentPlayer').equal(1);
-    expect(ClientGame0().status.currentPlayer, 'ClientGame0().status.currentPlayer').equal(1);
-    expect(ClientGame1().status.currentPlayer, 'ClientGame1().status.currentPlayer').equal(1);
+    expect(selectGame().status.round, 'serverGame().status.round').equal(1);
+    expect(selectGame0().status.round, 'ClientGame0().status.round').equal(1);
+    expect(selectGame1().status.round, 'ClientGame1().status.round').equal(1);
+    expect(selectGame().status.currentPlayer, 'selectGame().status.currentPlayer').equal(1);
+    expect(selectGame0().status.currentPlayer, 'ClientGame0().status.currentPlayer').equal(1);
+    expect(selectGame1().status.currentPlayer, 'ClientGame1().status.currentPlayer').equal(1);
     clientStore1.dispatch(gameDeployAnimalRequest(User1OriginalHand.get(1).id, 1));
 
     /**
@@ -159,9 +157,9 @@ players:
      * User1: Card#2, Card#3, Card#4, ... | Animal#1, Animal#0
      * */
 
-    expect(ClientGame0().status.round, 'ServerGame().status.round').equal(2);
-    expect(ClientGame1().status.round, 'ServerGame().status.round').equal(2);
-    expect(ServerGame().status.round, 'ServerGame().status.round').equal(2);
+    expect(selectGame0().status.round, 'selectGame().status.round').equal(2);
+    expect(selectGame1().status.round, 'selectGame().status.round').equal(2);
+    expect(selectGame().status.round, 'selectGame().status.round').equal(2);
     clientStore0.dispatch(gameDeployAnimalRequest(User0OriginalHand.get(4).id, 1));
 
     /**
@@ -170,37 +168,30 @@ players:
      * User1: Card#2, Card#3, Card#4, ... | Animal#1, Animal#0
      * */
 
-    expect(ServerGame().getIn(['players', User0.id, 'hand']).size, 'Server: User0.hand').equal(3);
-    expect(ServerGame().getIn(['players', User0.id, 'hand', 0]), 'Server: User0.hand.0').equal(User0OriginalHand.get(1));
-    expect(ServerGame().getIn(['players', User0.id, 'hand', 1]), 'Server: User0.hand.1').equal(User0OriginalHand.get(3));
-    expect(ServerGame().getIn(['players', User0.id, 'hand', 2]), 'Server: User0.hand.1').equal(User0OriginalHand.get(5));
-    expect(ServerGame().getIn(['players', User0.id, 'continent']).size, 'Server: User0.continent').equal(3);
-    expect(ServerGame().getIn(['players', User0.id, 'continent', 0, 'ownerId']), 'Server: User0.continent(animal)').equal(User0.id);
-    expect(ServerGame().getIn(['players', User0.id, 'continent', 1, 'ownerId']), 'Server: User0.continent(animal)').equal(User0.id);
-    expect(ServerGame().getIn(['players', User0.id, 'continent', 2, 'ownerId']), 'Server: User0.continent(animal)').equal(User0.id);
+    expect(selectPlayer(User0).hand, 'Server: User0.hand').size(3);
+    expect(selectPlayer(User0).hand.get(0), 'Server: User0.hand.0').equal(User0OriginalHand.get(1));
+    expect(selectPlayer(User0).hand.get(1), 'Server: User0.hand.1').equal(User0OriginalHand.get(3));
+    expect(selectPlayer(User0).hand.get(2), 'Server: User0.hand.1').equal(User0OriginalHand.get(5));
+    expect(selectPlayer(User0).continent, 'Server: User0.continent').size(3);
 
-    expect(ServerGame().getIn(['players', User1.id, 'hand']).size, 'Server: User1.hand').equal(4);
-    expect(ServerGame().getIn(['players', User1.id, 'hand', 0]), 'Server: User1.hand.0').equal(User1OriginalHand.get(2));
-    expect(ServerGame().getIn(['players', User1.id, 'hand', 1]), 'Server: User1.hand.1').equal(User1OriginalHand.get(3));
-    expect(ServerGame().getIn(['players', User1.id, 'continent']).size, 'Server: User1.continent').equal(2);
-    expect(ServerGame().getIn(['players', User1.id, 'continent', 0, 'ownerId']), 'Server: User1.continent(animal)').equal(User1.id);
-    expect(ServerGame().getIn(['players', User1.id, 'continent', 1, 'ownerId']), 'Server: User1.continent(animal)').equal(User1.id);
+    expect(selectPlayer(User1).hand, 'Server: User1.hand').size(4);
+    expect(selectPlayer(User1).hand.get(0), 'Server: User1.hand.0').equal(User1OriginalHand.get(2));
+    expect(selectPlayer(User1).hand.get(1), 'Server: User1.hand.1').equal(User1OriginalHand.get(3));
+    expect(selectPlayer(User1).continent, 'Server: User1.continent').size(2);
 
-    expect(ClientGame0().getIn(['players', User0.id, 'hand']), 'User0.hand')
-      .equal(ServerGame().getIn(['players', User0.id, 'hand']));
-    expect(ClientGame0().getIn(['players', User0.id, 'continent']), 'User0.continent')
-      .equal(ServerGame().getIn(['players', User0.id, 'continent']));
+    expect(selectPlayer0(User0).hand, 'User0.hand').equal(selectPlayer(User0).hand);
+    expect(selectPlayer0(User0).continent, 'User0.hand').equal(selectPlayer(User0).continent);
 
-    expect(ClientGame1().getIn(['players', User0.id, 'hand']).size, 'User1 see User0.hand')
-      .equal(3);
-    expect(ClientGame1().getIn(['players', User0.id, 'hand']), 'User1 see User0.hand')
-      .not.equal(ServerGame().getIn(['players', User0.id, 'hand']));
-    expect(ClientGame1().getIn(['players', User0.id, 'continent']), 'User1 see User0.continent')
-      .equal(ServerGame().getIn(['players', User0.id, 'continent']));
+    expect(selectPlayer0(User0).hand, 'User0.hand').equal(selectPlayer(User0).hand);
+    expect(selectPlayer0(User0).continent, 'User0.hand').equal(selectPlayer(User0).continent);
+
+    expect(selectPlayer1(User0).hand, 'User0.hand').size(3);
+    expect(selectPlayer1(User0).hand, 'User0.hand').not.equal(selectPlayer(User0).hand);
+    expect(selectPlayer1(User0).continent, 'User0.hand').equal(selectPlayer(User0).continent);
   });
 
   it('Play as upgrade', () => {
-    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 players:
   - hand: 1 camo, 1 sharp
@@ -209,21 +200,21 @@ players:
     continent: $B
 `);
     const {selectGame, selectCard, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    const {selectPlayer0, selectAnimal0, selectTrait0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
-    const {selectPlayer1, selectAnimal1, selectTrait1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
+    const {selectGame0, selectPlayer0, selectAnimal0, selectTrait0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
+    const {selectGame1, selectPlayer1, selectAnimal1, selectTrait1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
 
     clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A'));
 
-    expect(ServerGame().getPlayer(User0).hand, 'ServerGame.hand').size(1);
-    expect(ServerGame().getPlayer(User0).getIn(['hand', 0, 'type'])).equal('CardSharpVision');
-    expect(ClientGame0().getPlayer(User0).hand, 'ClientGame0.hand').size(1);
-    expect(ClientGame0().getPlayer(User0).getIn(['hand', 0, 'type'])).equal('CardSharpVision');
-    expect(ClientGame1().getPlayer(User0).hand, 'ClientGame1.hand').size(1);
-    expect(ClientGame1().getPlayer(User0).getIn(['hand', 0, 'type'])).not.equal('CardSharpVision');
+    expect(selectPlayer (User0).hand, 'ServerGame.hand').size(1);
+    expect(selectPlayer (User0).getIn(['hand', 0, 'type'])).equal('CardSharpVision');
+    expect(selectPlayer0(User0).hand, 'selectGame0.hand').size(1);
+    expect(selectPlayer0(User0).getIn(['hand', 0, 'type'])).equal('CardSharpVision');
+    expect(selectPlayer1(User0).hand, 'ClientGame1.hand').size(1);
+    expect(selectPlayer1(User0).getIn(['hand', 0, 'type'])).not.equal('CardSharpVision');
 
     const traitCamouflage = selectTrait(User0, 0, 0);
-    expect(selectTrait0(0, 0, User0)).equal(traitCamouflage);
-    expect(selectTrait1(0, 0, User0)).equal(traitCamouflage);
+    expect(selectTrait0(User0, 0, 0)).equal(traitCamouflage);
+    expect(selectTrait1(User0, 0, 0)).equal(traitCamouflage);
 
     clientStore1.dispatch(gameEndTurnRequest());
 
@@ -240,21 +231,21 @@ players:
   });
 
   it('Play as skip turn', () => {
-    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
-    ParseGame(`
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
 players:
   - hand: 5 camo
   - hand: 5 camo
 `);
+    const {selectGame, selectCard, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
-    clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id));
+    clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id));
     clientStore1.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id));
-    clientStore1.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id));
+    clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id));
+    clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id));
 
-    expect(ServerGame().getIn(['players', User0.id, 'hand']), 'Server: User0.hand').size(2);
-    expect(ServerGame().getIn(['players', User1.id, 'hand']), 'Server: User0.hand').size(4);
+    expect(selectGame().getIn(['players', User0.id, 'hand']), 'Server: User0.hand').size(2);
+    expect(selectGame().getIn(['players', User1.id, 'hand']), 'Server: User0.hand').size(5);
   });
 
   it('Reload', () => {

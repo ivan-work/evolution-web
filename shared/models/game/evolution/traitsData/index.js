@@ -30,7 +30,7 @@ import {TraitCarnivorous, endHunt} from './TraitCarnivorous';
 export {TraitCarnivorous};
 export * from './ttf';
 export * from './cons';
-export * from './gift';
+export * from './bonus';
 
 export const TraitWaiter = {
   type: tt.TraitWaiter

@@ -4,7 +4,7 @@ import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
 import {TraitModel} from './evolution/TraitModel';
 import {CooldownList} from './CooldownList';
-import {SettingsRecord, Deck_Base, Deck_TimeToFly, Deck_ContinentsShort} from './GameSettings';
+import {SettingsRecord, Deck_Base, Deck_TimeToFly, Deck_ContinentsShort, Deck_Bonus} from './GameSettings';
 
 import uuid from 'uuid';
 import {ensureParameter} from '../../utils';
@@ -183,10 +183,13 @@ export class GameModel extends Record({
 
   static new(room) {
     let deck = Deck_Base;
+
     if (room.settings.addon_timeToFly) deck = deck.concat(Deck_TimeToFly);
     if (room.settings.addon_continents) deck = deck.concat(Deck_ContinentsShort);
+    if (room.settings.addon_bonus) deck = deck.concat(Deck_Bonus);
 
-    if (room.settings.halfDeck) deck = deck.map(([count, type]) => [count / 2, type]);
+    if (room.settings.halfDeck) deck = deck.map(([count, type]) => [Math.ceil(count / 2), type]);
+
     return new GameModel({
       id: uuid.v4()
       , roomId: room.id

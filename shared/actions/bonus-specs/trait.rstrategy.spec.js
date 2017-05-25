@@ -2,6 +2,7 @@ import {
   gameEndTurnRequest
   , traitTakeFoodRequest
   , traitActivateRequest
+  , gameDeployTraitRequest
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
@@ -10,6 +11,23 @@ import * as tt from '../../models/game/evolution/traitTypes';
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
 
 describe(tt.TraitRstrategy, () => {
+  it('Deploy', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: deploy
+players:
+  - continent: $A +
+    hand: 4 rstr
+  - continent: $B +
+`);
+    const {selectGame, selectPlayer, selectCard, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A'));
+    clientStore1.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$B'));
+    expect(findAnimal('$A').traits, '$A traits').size(1)
+    expect(findAnimal('$B').traits, '$B traits').size(1)
+  });
+
   it('At the end', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockGame(3);
     const gameId = ParseGame(`

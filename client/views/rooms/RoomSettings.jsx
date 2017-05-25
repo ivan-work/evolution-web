@@ -5,8 +5,8 @@ import {Button, Radio, Checkbox, Tooltip, Icon} from 'react-mdl';
 
 import MDLForm from '../utils/Form.jsx';
 import {RoomModel} from '../../../shared/models/RoomModel';
-import {Deck_Base, Deck_TimeToFly, Deck_ContinentsShort} from '../../../shared/models/game/GameSettings';
-import {SettingsRules, SETTINGS_TIME_MODIFIER} from '../../../shared/models/game/GameSettings';
+import {Deck_Base, Deck_TimeToFly, Deck_ContinentsShort, Deck_Bonus} from '../../../shared/models/game/GameSettings';
+import {SettingsRules, SETTINGS_MINUTES} from '../../../shared/models/game/GameSettings';
 import * as cards from '../../../shared/models/game/evolution/cards';
 
 const makeDeckHelp = (deck) => (
@@ -23,8 +23,8 @@ const makeDeckHelp = (deck) => (
 const propsToForm = (props) => ({
   name: props.room.name
   , maxPlayers: props.room.settings.maxPlayers
-  , timeTurn: props.room.settings.timeTurn / SETTINGS_TIME_MODIFIER
-  , timeTraitResponse: props.room.settings.timeTraitResponse / SETTINGS_TIME_MODIFIER
+  , timeTurn: props.room.settings.timeTurn / SETTINGS_MINUTES
+  , timeTraitResponse: props.room.settings.timeTraitResponse / SETTINGS_MINUTES
   , halfDeck: props.room.settings.halfDeck
   , addon_timeToFly: props.room.settings.addon_timeToFly
   , addon_continents: props.room.settings.addon_continents
@@ -45,6 +45,7 @@ export default class RoomSettings extends React.Component {
     this.Deck_Base_help = makeDeckHelp(Deck_Base);
     this.Deck_TimeToFly_help = makeDeckHelp(Deck_TimeToFly);
     this.Deck_ContinentsShort_help = makeDeckHelp(Deck_ContinentsShort);
+    this.Deck_Bonus_help = makeDeckHelp(Deck_Bonus);
   }
 
   isHost() {
@@ -86,6 +87,12 @@ export default class RoomSettings extends React.Component {
       <div className='flex-row'>
         <MDLForm.Checkbox name='addon_continents'/>
         <Tooltip label={this.Deck_ContinentsShort_help} position="left">
+          <Icon name="help_outline"/>
+        </Tooltip>
+      </div>
+      <div className='flex-row'>
+        <MDLForm.Checkbox name='addon_bonus'/>
+        <Tooltip label={this.Deck_Bonus_help} position="left">
           <Icon name="help_outline"/>
         </Tooltip>
       </div>

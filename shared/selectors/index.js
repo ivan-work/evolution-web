@@ -49,12 +49,12 @@ export const makeGameSelectors = (getState, gameId) => ({
 export const makeClientGameSelectors = (getState, gameId, i) => ({
   ['selectGame' + i]: () => getState().get('game')
   , ['selectPlayer' + i]: (user) => getState().get('game').getPlayer(user)
-  , ['selectCard' + i]: (cardIndex, user) => getState().get('game').getPlayer(user).getCard(cardIndex)
+  , ['selectCard' + i]: (user, cardIndex) => getState().get('game').getPlayer(user).getCard(cardIndex)
 
-  , ['selectAnimal' + i]: (animalIndex, user) => selectAnimal(getState().get('game'), user, animalIndex)
-  , ['findAnimal' + i]: (animalId) => selectGame(getState, gameId).locateAnimal(animalId)
+  , ['selectAnimal' + i]: (user, animalIndex) => selectAnimal(getState().get('game'), user, animalIndex)
+  , ['findAnimal' + i]: (animalId) => getState().get('game').locateAnimal(animalId)
 
-  , ['selectTrait' + i]: (animalIndex, traitIndex, user) => selectTrait(getState().get('game'), user, animalIndex, traitIndex)
+  , ['selectTrait' + i]: (user, animalIndex, traitIndex) => selectTrait(getState().get('game'), user, animalIndex, traitIndex)
 });
 
 export const selectClientRoute = (getState) => getState().getIn(['routing', 'locationBeforeTransitions', 'pathname']);

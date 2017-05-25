@@ -6,6 +6,7 @@ import {
   , TRAIT_COOLDOWN_PLACE
   , TRAIT_COOLDOWN_LINK
   , CARD_TARGET_TYPE
+  , CTT_PARAMETER
   , TRAIT_ANIMAL_FLAG
 } from '../constants';
 
@@ -22,6 +23,7 @@ import * as tt from '../traitTypes';
 
 export const TraitRstrategy = {
   type: tt.TraitRstrategy
+  , cardTargetType: CTT_PARAMETER.ANIMAL
 };
 export const TraitHomeothermy = {
   type: tt.TraitHomeothermy
@@ -29,7 +31,7 @@ export const TraitHomeothermy = {
   , playerControllable: true
   , targetType: TRAIT_TARGET_TYPE.NONE
   , cooldowns: fromJS([
-    [tt.TraitHomeothermy, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+    [tt.TraitHomeothermy, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , $checkAction: (game, animal, traitSpec) => game.food > 0 && (animal.canEat(game) && animal.getNeededFood() > 0)
   , action: (game, animal, trait) => (dispatch, getState) => {

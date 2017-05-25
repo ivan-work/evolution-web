@@ -18,8 +18,8 @@ players:
   - continent: $A1,$B1
 `);
     const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
-    const {findAnimal0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
-    const {findAnimal1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
+    const {selectGame0, findAnimal0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
+    const {selectGame1, findAnimal1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
     expectUnchanged(`User1 can't take food $A when it's User0's turn`, () =>
         clientStore1.dispatch(traitTakeFoodRequest('$A'))
       , serverStore, clientStore1);
@@ -37,8 +37,8 @@ players:
       , serverStore, clientStore0);
 
     expect(selectGame().food, 'ServerGame().food').equal(2);
-    expect(ClientGame0().food, 'ClientGame0().food').equal(2);
-    expect(ClientGame1().food, 'ClientGame1().food').equal(2);
+    expect(selectGame0().food, 'ClientGame0().food').equal(2);
+    expect(selectGame1().food, 'ClientGame1().food').equal(2);
     expect(findAnimal('$A').food).equal(1);
     expect(findAnimal0('$A').food).equal(1);
     expect(findAnimal1('$A').food).equal(1);
@@ -54,8 +54,8 @@ players:
     clientStore0.dispatch(traitTakeFoodRequest('$B'));
 
     expect(selectGame().food).equal(0);
-    expect(selectAnimal(User0, 0).food).equal(1);
-    expect(selectAnimal(User0, 1).food).equal(1);
+    expect(findAnimal0('$A').food).equal(1);
+    expect(findAnimal1('$B').food).equal(1);
   });
 
   it('Increased eating', () => {

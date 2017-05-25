@@ -91,8 +91,8 @@ players:
   - continent: $A vivi + wait
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    const {selectGame0, selectAnimal0, selectTrait0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
-    const {selectGame1, selectAnimal1, selectTrait1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
+    const {selectTrait0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
+    const {selectTrait1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
 
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
     console.log(selectPlayer(User0).continent);
@@ -102,8 +102,8 @@ players:
 
     expect(selectTrait(User0, 1, 0), 'Newborn has trait').ok;
     expect(selectTrait(User0, 1, 0).type).equal('TraitAnglerfish');
-    expect(selectTrait0(1, 0, User0).type).equal('TraitAnglerfish');
-    expect(selectTrait1(1, 0, User0), 'User1 should not know about angler').undefined;
+    expect(selectTrait0(User0, 1, 0).type).equal('TraitAnglerfish');
+    expect(selectTrait1(User0, 1, 0), 'User1 should not know about angler').undefined;
   });
 });
 

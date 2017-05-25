@@ -26,11 +26,11 @@ players:
 
     clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id));
     expect(selectAnimal(User0, 0).traits, `Server can see anglerfish`).size(1);
-    expect(selectAnimal0(0).traits, `User0 can see anglerfish`).size(1);
-    expect(selectAnimal1(0, User0).traits, `User1 can't see anglerfish`).size(0);
+    expect(selectAnimal0(User0, 0).traits, `User0 can see anglerfish`).size(1);
+    expect(selectAnimal1(User0, 0).traits, `User1 can't see anglerfish`).size(0);
     clientStore1.dispatch(gameEndTurnRequest());
-    expect(selectTrait(User0, 0, 0).id).equal(selectTrait0(0, 0).id);
-    clientStore0.dispatch(traitActivateRequest(selectAnimal0(0).id, selectTrait0(0, 0).id));
+    expect(selectTrait(User0, 0, 0).id).equal(selectTrait0(User0, 0, 0).id);
+    clientStore0.dispatch(traitActivateRequest(selectAnimal0(User0, 0).id, selectTrait0(User0, 0, 0).id));
   });
 
   it('Cannot deploy as a trait', () => {

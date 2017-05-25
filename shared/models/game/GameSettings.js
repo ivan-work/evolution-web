@@ -3,7 +3,7 @@ import * as cardsData from './evolution/cards/index';
 
 export const SETTINGS_PLAYERS = [2, 8];
 
-export const SETTINGS_TIME_VALUES = [.1, 30];
+export const SETTINGS_TIME_VALUES = [.1, 5];
 
 export const SETTINGS_MINUTES = 60e3; // by 1 minute
 
@@ -171,4 +171,18 @@ export const Deck_ContinentsShort = [
 
   , [2, cardsData.CardNeoplasmAndSwimming.type]
   , [2, cardsData.CardNeoplasmAndCooperation.type]
+];
+
+export const Deck_Bonus = [
+  // 0
+  // r-Strategy 6
+  // Homeothermy/Swimming 3
+  // Homeothermy/Fat 3
+  // Shy/Swimming 3
+  // Shy/Carnivorous 3
+  [6, cardsData.CardRstrategy.type]
+  , [3, cardsData.CardHomeothermyAndSwimming.type]
+  , [3, cardsData.CardHomeothermyAndFatTissue.type]
+  , [3, cardsData.CardShyAndSwimming.type]
+  , [3, cardsData.CardShyAndCarnivorous.type]
 ];
