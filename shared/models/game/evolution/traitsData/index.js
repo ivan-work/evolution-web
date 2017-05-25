@@ -89,7 +89,7 @@ export const TraitMimicry = {
   type: tt.TraitMimicry
   , targetType: TRAIT_TARGET_TYPE.ANIMAL
   , cooldowns: fromJS([
-    [tt.TraitMimicry, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
+    [tt.TraitMimicry, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
   , action: (game, mimicryAnimal, traitMimicry, newTargetAnimal, attackAnimal, attackTrait) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, traitMimicry, mimicryAnimal));

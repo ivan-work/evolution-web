@@ -31,7 +31,7 @@ players:
       clientStore0.dispatch(traitAnswerRequest(tt.TraitRunning));
       expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
 
-    clientStore0.dispatch(gameEndTurnRequest());
+      clientStore0.dispatch(gameEndTurnRequest());
 
       clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$C'));
       clientStore0.dispatch(traitAnswerRequest(tt.TraitCnidocytes));
@@ -53,5 +53,28 @@ players:
     clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
 
     expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
+  });
+
+  it('Symbiosis', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+food: 5
+players:
+  - continent: $A symb$B, $B carn, $C ink cnid wait, $D carn
+`);
+
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$C'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitCnidocytes));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitInkCloud));
+    expect(findAnimal('$B').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    expect(findAnimal('$A').getFood()).equal(1);
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(traitActivateRequest('$D', tt.TraitCarnivorous, '$A'));
+    expect(findAnimal('$A')).null;
   });
 });
