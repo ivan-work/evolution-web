@@ -466,6 +466,8 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
         const linkedAnimal = game.locateAnimal(traitCooperation.linkAnimalId, traitCooperation.ownerId);
         const linkedTrait = linkedAnimal.traits.find(trait => trait.id === traitCooperation.linkId);
 
+        if (!linkedAnimal.canEat(game)) return;
+
         traitMakeCooldownActions(gameId, traitCooperation, animal)
           .concat(traitMakeCooldownActions(gameId, linkedTrait, linkedAnimal))
           .map(cooldownAction => dispatch(cooldownAction));

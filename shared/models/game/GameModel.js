@@ -194,7 +194,11 @@ export class GameModel extends Record({
       id: uuid.v4()
       , roomId: room.id
       , deck: GameModel.generateDeck(deck, true)
-      , players: room.users.reduce((result, userId, index) => result.set(userId, PlayerModel.new(userId, index)), Map())
+      , players: (
+        room.settings.randomPlayers
+          ? doShuffle(room.users.toArray())
+          : room.users
+      ).reduce((result, userId, index) => result.set(userId, PlayerModel.new(userId, index)), OrderedMap())
       , settings: room.settings
     })
   }
@@ -330,8 +334,8 @@ export class GameModelClient extends Record({
 GameModel.parse = parseFromRoom;
 GameModel.parseCardList = parseCardList;
 GameModel.parseAnimalList = parseAnimalList;
-GameModelClient.prototype.end = GameModel.prototype.end;
 GameModelClient.prototype.getActualPlayers = GameModel.prototype.getActualPlayers;
+GameModelClient.prototype.someAnimal = GameModel.prototype.someAnimal;
 GameModelClient.prototype.getPlayerCard = GameModel.prototype.getPlayerCard;
 GameModelClient.prototype.locateAnimal = GameModel.prototype.locateAnimal;
 GameModelClient.prototype.locateTrait = GameModel.prototype.locateTrait;
@@ -339,6 +343,8 @@ GameModelClient.prototype.locateCard = GameModel.prototype.locateCard;
 
 // TODO move to utils
 function doShuffle(array) {
+  if (!Array.isArray(array)) throw new Error('Not an array!');
+  array = array.slice(0);
   let counter = array.length;
 
   // While there are elements in the array

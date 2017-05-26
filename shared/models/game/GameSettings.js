@@ -14,6 +14,7 @@ export const SettingsRules = {
   , maxPlayers: `integer|between:${SETTINGS_PLAYERS[0]},${SETTINGS_PLAYERS[1]}`
   , timeTurn: `numeric|between:${SETTINGS_TIME_VALUES[0]},${SETTINGS_TIME_VALUES[1]}`
   , timeTraitResponse: `numeric|between:${SETTINGS_TIME_VALUES[0]},${SETTINGS_TIME_VALUES[1]}`
+  , randomPlayers: `boolean`
   , halfDeck: `boolean`
   , addon_timeToFly: `boolean`
   , addon_continents: `boolean`
@@ -26,6 +27,7 @@ export class SettingsRecord extends Record({
   , timeTurn: process.env.TEST ? 0 : 4 * SETTINGS_MINUTES
   , timeTraitResponse: process.env.TEST ? 0 : 1 * SETTINGS_MINUTES
   , timeAmbush: process.env.TEST ? 0 : 10e3
+  , randomPlayers: !process.env.TEST
   , halfDeck: false
   , addon_timeToFly: false
   , addon_continents: false
@@ -46,6 +48,7 @@ export class SettingsRecord extends Record({
     return this.mergeWith((prev, next, key) => {
       //console.log(prev, next, key, Number.isInteger(next));
       switch (key) {
+        case 'randomPlayers':
         case 'halfDeck':
         case 'addon_timeToFly':
         case 'addon_continents':

@@ -383,4 +383,24 @@ players:
     expect(selectGame().status.phase).equal(PHASE.AMBUSH);
     clientStore1.dispatch(traitAmbushContinueRequest());
   });
+
+  it(`Doesnt attack full animal`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 10
+players:
+  - continent: $Q wait coop$W, $W + wait
+  - continent: $A carn ambu
+`);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+    clientStore1.dispatch(traitAmbushContinueRequest());
+
+    expect(findAnimal('$Q').getFood()).equal(1);
+    expect(findAnimal('$W').getFood()).equal(1);
+
+    expect(selectGame().status.phase).equal(PHASE.FEEDING);
+  });
 });

@@ -17,7 +17,7 @@ const makeDeckHelp = (deck) => (
       if (card.trait1) traits += T.translate('Game.Trait.' + card.trait1);
       if (card.trait2) traits += '/' + T.translate('Game.Trait.' + card.trait2);
       return (<div key={index}>{count}x {traits}</div>)
-      })}
+    })}
   </div>);
 
 const propsToForm = (props) => ({
@@ -25,6 +25,7 @@ const propsToForm = (props) => ({
   , maxPlayers: props.room.settings.maxPlayers
   , timeTurn: props.room.settings.timeTurn / SETTINGS_MINUTES
   , timeTraitResponse: props.room.settings.timeTraitResponse / SETTINGS_MINUTES
+  , randomPlayers: props.room.settings.randomPlayers
   , halfDeck: props.room.settings.halfDeck
   , addon_timeToFly: props.room.settings.addon_timeToFly
   , addon_continents: props.room.settings.addon_continents
@@ -67,10 +68,11 @@ export default class RoomSettings extends React.Component {
       <div><MDLForm.Textfield name='maxPlayers'/></div>
       <div><MDLForm.Textfield name='timeTurn'/></div>
       <div><MDLForm.Textfield name='timeTraitResponse'/></div>
+      <div><MDLForm.Checkbox name='randomPlayers'/></div>
       <div className='flex-row'>
         <Checkbox checked={true}
-                      label={T.translate('App.Room.Settings.addon_base')}
-                      disabled={true}/>
+                  label={T.translate('App.Room.Settings.addon_base')}
+                  disabled={true}/>
         <Tooltip label={this.Deck_Base_help} position="left">
           <Icon name="help_outline"/>
         </Tooltip>
