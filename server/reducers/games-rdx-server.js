@@ -412,7 +412,7 @@ export const gameAmbushAttackEnd = (game) => game
   .removeIn(['ambush']);
 
 // No need to exports, serverside-only
-const traitAddHuntingCallback = (game, {callback}) => game.update('huntingCallbacks', (list) => list.push(callback));
+const traitAddHuntingCallback = (game, {callback}) => game.update('huntingCallbacks', (list) => list.unshift(callback));
 const traitClearHuntingCallbacks = (game, {}) => game.set('huntingCallbacks', List());
 
 export const reducer = createReducer(Map(), {

@@ -358,19 +358,29 @@ export const server$gameAmbushAttackEnd = (gameId) => (dispatch, getState) => {
   dispatch(gameAmbushUnshiftTarget(gameId));
 
   if (targets.size === 1) {
-    dispatch(server$game(gameId, gameAmbushAttackEnd(gameId)));
-    dispatch(server$addTurnTimeout(gameId, void 0, turnRemainingTime));
-
-    dispatch(server$startFeeding(gameId, animalId, 1, 'GAME'));
-    dispatch(server$game(gameId, gameFoodTake_End(gameId, animalId)));
-    dispatch(server$playerActed(gameId, targetPlayerId));
+    dispatch(server$gameAmbushAttackCleanup(gameId, animalId, targetPlayerId, turnRemainingTime));
   } else {
     dispatch(server$startFeeding(gameId, animalId, 1, 'GAME'));
     dispatch(server$game(gameId, gameFoodTake_End(gameId, animalId)));
 
     const nextAnimal = game.locateAnimal(targets.get(1));
-    dispatch(server$gameAmbushPrepareStart(game, nextAnimal))
+    if (nextAnimal) {
+      if (!dispatch(server$gameAmbushPrepareStart(game, nextAnimal))) {
+        dispatch(server$gameAmbushAttackCleanup(gameId, nextAnimal.id, nextAnimal.ownerId, turnRemainingTime));
+      }
+    }
   }
+};
+
+export const server$gameAmbushAttackCleanup = (gameId, animalId, playerId, turnRemainingTime) => (dispatch, getState) => {
+  dispatch(server$game(gameId, gameAmbushAttackEnd(gameId)));
+  dispatch(server$addTurnTimeout(gameId, void 0, turnRemainingTime));
+
+  if (!!selectGame(getState, gameId).locateAnimal(animalId, playerId)) {
+    dispatch(server$startFeeding(gameId, animalId, 1, 'GAME'));
+    dispatch(server$game(gameId, gameFoodTake_End(gameId, animalId)));
+  }
+  dispatch(server$playerActed(gameId, playerId));
 };
 
 export const server$traitAmbushPerform = (gameId, attackAnimalId) => (dispatch, getState) => {

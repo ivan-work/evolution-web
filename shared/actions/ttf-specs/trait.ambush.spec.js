@@ -403,4 +403,24 @@ players:
 
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
   });
+
+  it(`Bug with multicoop`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 10
+players:
+  - continent: $A coop$B, $B camo coop$C, $C wait 
+  - continent: $D carn ambu
+`);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitTakeFoodRequest('$B'));
+    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+    clientStore1.dispatch(traitAmbushActivateRequest('$D'));
+
+    expect(selectGame().status.phase).equal(PHASE.FEEDING);
+    expect(findAnimal('$C').getFood()).equal(1);
+
+    expect(selectGame().status.phase).equal(PHASE.FEEDING);
+  });
 });
