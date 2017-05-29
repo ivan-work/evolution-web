@@ -101,7 +101,7 @@ export const TraitRecombination = {
       dispatch(server$traitAnimalAttachTrait(game, animal1, trait2));
     dispatch(server$traitStartCooldown(game.id, traitRecombination, animal1));
     dispatch(server$traitStartCooldown(game.id, traitRecombination2, animal2));
-    return false;
+    return true;
   }
   , $checkAction: (game, sourceAnimal, traitRecombination) => {
     const linkedAnimal = game.locateAnimal(

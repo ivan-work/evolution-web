@@ -20,14 +20,14 @@ phase: deploy
 players:
   - continent: $A neoplasm coop$B mass trem$B fat=true para, $B wait
 `);
-    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
-    expect(selectAnimal(User0, 0).getWantedFood(), `Neoplasm is waiting`).equal(5);
+    expect(findAnimal('$A').getWantedFood(), `Neoplasm is waiting`).equal(5);
     clientStore0.dispatch(gameEndTurnRequest());
 
-    expect(selectAnimal(User0, 0).getWantedFood(), `Neoplasm disabled massive`).equal(4);
+    expect(findAnimal('$A').getWantedFood(), `Neoplasm disabled massive`).equal(4);
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
-    expect(selectAnimal(User0, 1).getFood(), `Neoplasm doesn't disable Cooperation`).equal(1);
+    expect(findAnimal('$B').getFood(), `Neoplasm doesn't disable Cooperation`).equal(1);
     clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
@@ -42,15 +42,15 @@ players:
     expect(selectGame().status.turn).equal(1);
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
 
-    expect(selectAnimal(User0, 0).getWantedFood(), `Neoplasm disabled fat`).equal(4);
-    expect(selectAnimal(User0, 0).getFat(), `Neoplasm disabled fat`).equal(0);
+    expect(findAnimal('$A').getWantedFood(), `Neoplasm disabled fat`).equal(4);
+    expect(findAnimal('$A').getFat(), `Neoplasm disabled fat`).equal(0);
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
     clientStore0.dispatch(gameEndTurnRequest());
-    expect(selectAnimal(User0, 0).canSurvive(), `Neoplasm disabled fat`).equal(false);
+    expect(findAnimal('$A').canSurvive(), `Neoplasm disabled fat`).equal(false);
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
     clientStore0.dispatch(gameEndTurnRequest());
 
@@ -59,7 +59,7 @@ players:
     expect(selectGame().status.turn).equal(2);
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
 
-    expect(selectAnimal(User0, 0).id, 'Neoplasm killed $A').equal('$B');
+    expect(findAnimal('$A'), 'Neoplasm killed $A').null;
   });
 
   it('Places at bottom', () => {
@@ -72,7 +72,7 @@ players:
     hand: 10 neoplasm
   - continent: $B fat fat fat
 `);
-    const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, selectCard, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
     expectUnchanged(`Can't deploy Neoplasm to yourself`, () => {
       clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A', false));
@@ -89,10 +89,10 @@ phase: deploy
 players:
   - continent: $A neoplasm angler, $B wait
 `);
-    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(gameEndTurnRequest());
-    expect(selectAnimal(User0, 0).id).equal('$B');
+    expect(findAnimal('$A')).null;
   });
 
   it('Disable defences', () => {
@@ -102,11 +102,11 @@ phase: feeding
 players:
   - continent: $A carn wait, $B swim neoplasm
 `);
-    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
-    expect(selectAnimal(User0, 0).id).equal('$A');
-    expect(selectAnimal(User0, 1), '$B is dead').not.ok;
+    expect(findAnimal('$A').id).equal('$A');
+    expect(findAnimal('$B'), '$B is dead').not.ok;
   });
 
   it('Drops disabling after loss', () => {

@@ -54,7 +54,7 @@ export class Game extends React.Component {
     const {game, $traitAnswer, $exit} = this.props;
 
     const playerIndex = game.getPlayer() && game.getPlayer().index;
-    const players = GameModel.sortActualPlayersFromIndex(game, playerIndex);
+    const players = game.sortPlayersFromIndex(game.players, playerIndex);
 
     return <div className="Game-wrapper">
       <GameTimedOutDialog game={game}/>

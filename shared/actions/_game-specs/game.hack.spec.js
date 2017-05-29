@@ -28,7 +28,7 @@ players:
 
     // gameDeployAnimalRequest (0:0:0) User0 turn
     expectChanged('CHANGEIT', () => clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id, 0)), serverStore, clientStore0);
-    expect(ServerGame().status.currentPlayer, 'ServerGame().status.currentPlayer').equal(1);
+    expect(ServerGame().status.currentPlayer, 'ServerGame().status.currentPlayer').equal(User1.id);
 
     // gameDeployAnimalRequest (0:0:1) User0 second try
     expectUnchanged('CHANGEIT', () => clientStore0.dispatch(gameDeployAnimalRequest(ClientGame0().getPlayerCard(User0, 0).id, 0))
@@ -36,8 +36,8 @@ players:
 
     // gameDeployAnimalRequest (0:0:1) User1 turn
     expectChanged('CHANGEIT', () => clientStore1.dispatch(gameDeployAnimalRequest(ClientGame1().getPlayerCard(User1, 1).id, 0)), serverStore, clientStore1);
-    expect(ServerGame().status.round, 'ServerGame().status.currentPlayer').equal(1);
-    expect(ServerGame().status.currentPlayer, 'ServerGame().status.currentPlayer').equal(0);
+    expect(ServerGame().status.round, 'ServerGame().status.round').equal(1);
+    expect(ServerGame().status.currentPlayer, 'ServerGame().status.currentPlayer').equal(User0.id);
 
     // gameDeployAnimalRequest (0:1:0) User1 second try
     expectUnchanged('CHANGEIT', () => clientStore1.dispatch(gameDeployAnimalRequest(ClientGame1().getPlayerCard(User1, 0).id, 0))

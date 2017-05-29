@@ -12,13 +12,12 @@ import {
   CARD_TARGET_TYPE
   , CARD_SOURCE
   , CTT_PARAMETER
-  , TRAIT_TARGET_TYPE
   , TRAIT_ANIMAL_FLAG
   , ANIMAL_DEATH_REASON
 } from '../models/game/evolution/constants';
 
 import {server$game, to$} from './generic';
-import {doesPlayerHasOptions, getFeedingOption} from './ai';
+import {doesPlayerHasOptions, getFeedingOption, doesOptionExist, getOptions} from './ai';
 import {
   server$tryViviparous
   , server$takeFoodRequest
@@ -26,6 +25,7 @@ import {
   , server$questionResumeTimeout
 } from './actions';
 import {appPlaySound} from '../../client/actions/app';
+import {gameNextPlayer as Reduce_gameNextPlayer} from '../../server/reducers/games-rdx-server';
 import {redirectTo} from '../utils';
 import {selectGame, selectUsersInGame} from '../selectors';
 
@@ -93,8 +93,8 @@ export const server$gameCreateSuccess = (room) => (dispatch, getState) => {
   if (game.status.phase === PHASE.PREPARE) {
     dispatch(server$game(gameId, gameStart(gameId)));
     dispatch(server$gameDistributeCards(gameId));
-    dispatch(server$gamePlayerStart(gameId));
   }
+  dispatch(server$gamePlayerStart(gameId));
 };
 
 // Game Leave
@@ -112,14 +112,13 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
   logger.info(`server$gameLeave: ${gameId}, ${userId}`);
   dispatch(server$game(gameId, gamePlayerLeft(gameId, userId)));
   const game = selectGame(getState, gameId);
-  const leaver = game.getPlayer(userId);
   switch (game.getActualPlayers().size) {
     case 0:
     case 1:
       if (game.status.phase !== PHASE.FINAL) dispatch(server$gameEnd(gameId));
       break;
     default:
-      if (game.status.currentPlayer === leaver.index) {
+      if (game.status.currentPlayer === userId) {
         dispatch(server$gamePlayerContinue(gameId));
       }
   }
@@ -196,7 +195,10 @@ const server$gameCheckForPause = (gameId) => (dispatch, getState) => {
 
 // ===== DEPLOY!
 
-// gameDeployAnimal
+/**
+ * gameDeployAnimal
+ */
+
 export const gameDeployAnimalRequest = (cardId, animalPosition) => (dispatch, getState) => dispatch({
   type: 'gameDeployAnimalRequest'
   , data: {gameId: getState().get('game').id, cardId, animalPosition}
@@ -240,7 +242,10 @@ export const server$gameDeployAnimalFromDeck = (gameId, sourceAnimal) => (dispat
   ));
 };
 
-// gameDeployTrait
+/**
+ * gameDeployTrait
+ */
+
 export const gameDeployTraitRequest = (cardId, animalId, alternateTrait, linkId) => (dispatch, getState) => dispatch({
   type: 'gameDeployTraitRequest'
   , data: {gameId: getState().get('game').id, cardId, animalId, alternateTrait, linkId}
@@ -262,23 +267,16 @@ export const server$gameDeployTrait = (gameId, cardId, traits) => (dispatch, get
   ));
 };
 
-// gameDeployAnimal || gameDeployTrait > gameDeployNext > gameNextPlayer || gameFinishDeploy
-export const server$gameDeployNext = (gameId, userId) => (dispatch, getState) => {
-  logger.debug('server$gameDeployNext:', userId);
-  const game = selectGame(getState, gameId);
-  if (game.getPlayer(userId).hand.size !== 0) {
-    dispatch(server$gamePlayerContinue(gameId));
-  } else {
-    dispatch(server$gameEndTurn(gameId, userId));
-  }
-};
+/**
+ * gameEndTurn
+ */
 
-// gameEndTurn
 export const gameEndTurnRequest = () => (dispatch, getState) => dispatch({
   type: 'gameEndTurnRequest'
   , data: {gameId: getState().get('game').id}
   , meta: {server: true}
 });
+
 export const gameEndTurn = (gameId, userId) => ({
   type: 'gameEndTurn'
   , data: {gameId, userId}
@@ -293,33 +291,41 @@ export const server$defaultTurn = (gameId, userId) => (dispatch, getState) => {
     //   const card = player.hand.first();
     //   const animal = AnimalModel.new(userId, card.trait1);
     //   dispatch(server$gameDeployAnimalFromHand(gameId, userId, animal, 0, card.id));
-    //   dispatch(server$gameDeployNext(gameId, userId));
+    //   dispatch(server$playerActed(gameId, userId));
     //   return true;
     // }
   } else if (game.status.phase === PHASE.FEEDING) {
-    if (!player.acted) {
-      const animal = getFeedingOption(game, userId);
-      if (!!animal) {
-        dispatch(server$takeFoodRequest(gameId, userId, animal.id));
-        return true;
-      }
+    const animal = getFeedingOption(game, userId);
+    if (!!animal) {
+      logger.debug('server$defaultTurn:', userId, animal.id);
+      dispatch(server$takeFoodRequest(gameId, userId, animal.id));
+      return true;
     }
   }
 };
 
 export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
-  logger.debug('server$gameEndTurn:', userId);
   const isDefaultTurn = !!dispatch(server$defaultTurn(gameId, userId));
   // if isDefaultTurn is true, then player performed default turn\
   // and there's second server$gameEndTurn is coming. So we finish this one.
   if (isDefaultTurn) return;
+  logger.debug('server$gameEndTurn:', userId);
+  let game = selectGame(getState, gameId);
   dispatch(server$gameCancelTurnTimeout(gameId));
+  const acted = selectGame(getState, gameId).getPlayer(userId).acted;
+  if (!acted && game.status.phase === PHASE.FEEDING) {
+    // console.log('NOT ACTED')
+    const options = getOptions(game, userId);
+    options.forEach(option => {
+      dispatch(option.cooldownAction(gameId));
+      // console.log(option.text);
+    });
+  }
+
   dispatch(server$game(gameId, gameEndTurn(gameId, userId)));
 
-  const game = selectGame(getState, gameId);
-
-  if (game.players.some(player => !player.ended)) {
-    dispatch(server$gamePlayerContinue(gameId));
+  const nextPlayer = dispatch(server$gameNextPlayer(gameId, userId));
+  if (nextPlayer) {
   } else if (game.status.phase === PHASE.DEPLOY) {
     const food = game.generateFood();
     dispatch(server$gameStartPhase(gameId, PHASE.FEEDING, {food}));
@@ -335,15 +341,36 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
  * gameNextPlayer
  * */
 
-const gameNextPlayer = (gameId, nextPlayerId, nextPlayerIndex, roundChanged, playerHasOptions) => ({
-  type: 'gameNextPlayer'
-  , data: {gameId, nextPlayerId, nextPlayerIndex, roundChanged, playerHasOptions}
+const gameNextRound = (gameId) => ({
+  type: 'gameNextRound'
+  , data: {gameId}
 });
 
-const gameNextPlayerNotify = (gameId, userId) => ({
-  type: 'gameNextPlayerNotify'
+const gameNextPlayer = (gameId, playerId) => ({
+  type: 'gameNextPlayer'
+  , data: {gameId, playerId}
+});
+
+/**
+ * Acted
+ * */
+
+const playerActed = (gameId, userId) => ({
+  type: 'playerActed'
   , data: {gameId, userId}
 });
+
+export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  dispatch(server$game(gameId, playerActed(gameId, userId)));
+  switch (game.status.phase) {
+    case PHASE.DEPLOY:
+      return dispatch(server$gameEndTurn(gameId, userId));
+    case PHASE.FEEDING:
+      if (!doesPlayerHasOptions(selectGame(getState, gameId), userId))
+        return dispatch(server$gameEndTurn(gameId, userId));
+  }
+};
 
 /**
  * Timeout
@@ -377,9 +404,7 @@ export const server$addTurnTimeout = (gameId, userId, turnTime) => (dispatch, ge
   if (game.status.paused) return;
   if (turnTime === 0) return;
 
-  if (!userId) {
-    userId = game.players.find(p => p.index === game.status.currentPlayer).id
-  }
+  if (!userId) userId = game.status.currentPlayer;
   if (!turnTime) {
     turnTime = !game.getPlayer(userId).timedOut ? game.settings.timeTurn : SETTINGS_TIMED_OUT_TURN_TIME;
   }
@@ -401,69 +426,83 @@ export const server$gameCancelTurnTimeout = (gameId) => (dispatch, getState) => 
  * */
 
 export const server$gamePlayerStart = (gameId) => (dispatch, getState) => {
-  const game = selectGame(getState, gameId);
-  const roundPlayer = game.getIn(['status', 'roundPlayer']);
-
-  const {nextPlayer, roundChanged} = choosePlayer(game, roundPlayer);
-
-  dispatch(server$gameNextPlayer(gameId, nextPlayer, false));
+  logger.debug('server$gamePlayerStart');
+  dispatch(server$gameNextPlayer(gameId));
 };
 
 export const server$gamePlayerContinue = (gameId, previousUserId) => (dispatch, getState) => {
   logger.debug('server$gamePlayerContinue');
   const game = selectGame(getState, gameId);
-  const currentPlayer = game.getIn(['status', 'currentPlayer']);
+  const currentPlayerId = game.getIn(['status', 'currentPlayer']);
   const phase = game.getIn(['status', 'phase']);
 
   if (phase === PHASE.DEPLOY || phase === PHASE.FEEDING) {
-    const {nextPlayer, roundChanged} = choosePlayer(game, (currentPlayer + 1));
-
-    dispatch(server$gameNextPlayer(gameId, nextPlayer, roundChanged));
+    dispatch(server$gameNextPlayer(gameId, currentPlayerId));
   }
 };
 
-const server$gameNextPlayer = (gameId, nextPlayer, roundChanged) => (dispatch, getState) => {
-  logger.debug('server$gameNextPlayer:', nextPlayer.id, !!roundChanged);
-  dispatch(server$gameCancelTurnTimeout(gameId));
-
-  const currentPlayerIndex = selectGame(getState, gameId).getIn(['status', 'currentPlayer']);
-
-  dispatch(server$game(gameId, gameNextPlayer(gameId, nextPlayer.id, nextPlayer.index, roundChanged)));
-
-  const playerHasOptions = doesPlayerHasOptions(selectGame(getState, gameId), nextPlayer.id);
-  if (playerHasOptions) {
-    //dispatch(gameLogNotify)
-    if (currentPlayerIndex !== nextPlayer.index) {
-      dispatch(to$({clientOnly: true, userId: nextPlayer.id}, gameNextPlayerNotify(gameId, nextPlayer.id)))
-    }
-    dispatch(server$addTurnTimeout(gameId, nextPlayer.id));
-  } else {
-    dispatch(server$gameEndTurn(gameId, nextPlayer.id));
+const server$gameNextPlayer = (gameId, startSearchFromId) => (dispatch, getState) => {
+  // logger.debug('server$gameNextPlayer search start:', startSearchFromId);
+  if (dispatch(checkTimeout(makeTurnTimeoutId(gameId)))) {
+    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
+    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
+    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
+    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
+    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
+    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
+    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
+    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
+    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
+    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
+    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
+    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
+    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
+    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
+    dispatch(server$gameCancelTurnTimeout(gameId));
   }
-};
 
-const choosePlayer = (game, startIndex) => {
-  let roundChanged = false;
+  const game = selectGame(getState, gameId);
 
-  const roundPlayer = game.getIn(['status', 'roundPlayer']);
-  //console.log('searching for suitable player. start index = ', startIndex % game.players.size);
-  const nextPlayer = GameModel.sortPlayersFromIndex(game, startIndex % game.players.size)
+  let nextRound = false;
+  const roundPlayerId = game.getIn(['status', 'roundPlayer']);
+  const currentPlayerId = game.getIn(['status', 'currentPlayer']);
+  // console.log('server$gameNextPlayer', roundPlayerId, currentPlayerId, !!startSearchFromId)
+  const startIndex = !!startSearchFromId
+    ? (game.getPlayer(startSearchFromId).index + 1) % game.players.size
+    : game.getPlayer(roundPlayerId).index;
+
+  const nextPlayer = game.sortPlayersFromIndex(game.players, startIndex)
     .find((player) => {
-      //console.log('Player', player.id, player.playing, !player.ended);
-      if (player.index === roundPlayer) roundChanged = true;
-      return player.playing && !player.ended;
+      if (player.id === roundPlayerId && !!startSearchFromId) nextRound = true;
+
+      if (!player.playing) return false;
+
+      const nextGame = Reduce_gameNextPlayer(game, {playerId: player.id});
+
+      switch (game.status.phase) {
+        case PHASE.DEPLOY:
+          return !player.ended;
+        case PHASE.FEEDING:
+          // console.log('doesOptionExist', player.id, getOptions(nextGame, player.id).map(o => o.text))
+          return doesOptionExist(nextGame, player.id);
+        default:
+          return true;
+      }
     });
 
-  if (!nextPlayer) logger.error('nextPlayer not found', {
-    players: game.get('players')
-    , status: game.get('status')
-  });
-  //logger.info('choosePlayer:', `${game.id} ${nextPlayer.index} ${roundChanged === true}`);
-
-  return {nextPlayer, roundChanged};
+  logger.debug('server$gameNextPlayer:', !!nextPlayer ? nextPlayer.id : null);
+  if (nextPlayer) {
+    if (nextRound) dispatch(server$game(gameId, gameNextRound(gameId)));
+    dispatch(server$game(gameId, gameNextPlayer(gameId, nextPlayer.id)));
+    dispatch(server$addTurnTimeout(gameId));
+  }
+  return !!nextPlayer;
 };
 
-// ===== EXTINCT!
+
+/**
+ * EXTINCT
+ */
 
 const server$gameExtict = (gameId) => (dispatch, getState) => {
   dispatch(server$gameStartPhase(gameId, PHASE.EXTINCTION));
@@ -511,7 +550,7 @@ const server$gameDistributeCards = (gameId) => (dispatch, getState) => {
   const playersGiveAnimals = {};
   let deckSize = game.deck.size;
 
-  const players = GameModel.sortPlayersFromIndex(game);
+  const players = game.sortPlayersFromIndex(game.players);
   // players.some(player => {
   //   console.log(`${getState().getIn(['users', player.id, 'login'])} Wants: ${playersWantedCards[player.id]}/${playersWantedAnimals[player.id]}`)
   // });
@@ -586,7 +625,7 @@ export const server$gamePhaseStartRegeneration = (gameId) => (dispatch, getState
 
 /**
  * @param gameId
- * @return boolean if regeneration should be ended
+ * @return boolean if regeneration should be finished
  */
 export const server$gamePhaseCheckEndRegeneration = (gameId) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
@@ -646,6 +685,7 @@ export const gameClientToServer = {
     if (!(game.status.phase === PHASE.FEEDING || game.status.phase === PHASE.DEPLOY)) {
       throw new ActionCheckError(`checkGamePhase@Game(${game.id})`, 'Wrong phase (%s)', game.status.phase);
     }
+    logger.debug('gameEndTurnRequest:', userId);
     dispatch(server$gameEndTurn(gameId, userId));
   }
   , gameDeployAnimalRequest: ({gameId, cardId, animalPosition = 0}, {userId}) => (dispatch, getState) => {
@@ -663,10 +703,7 @@ export const gameClientToServer = {
     // console.timeEnd('gameDeployAnimalRequest body');
     // console.time('server$gameDeployAnimal');
     dispatch(server$gameDeployAnimalFromHand(gameId, userId, animal, parseInt(animalPosition), cardId));
-    // console.timeEnd('server$gameDeployAnimal');
-    // console.time('server$gameDeployNext');
-    dispatch(server$gameDeployNext(gameId, userId));
-    // console.timeEnd('server$gameDeployNext');
+    dispatch(server$playerActed(gameId, userId));
   }
   , gameDeployTraitRequest: ({gameId, cardId, animalId, alternateTrait, linkId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
@@ -725,7 +762,7 @@ export const gameClientToServer = {
     }
 
     dispatch(server$gameDeployTrait(gameId, cardId, traits));
-    dispatch(server$gameDeployNext(gameId, userId));
+    dispatch(server$playerActed(gameId, userId));
   }
   , gameSetUserTimedOutRequest: ({gameId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
@@ -733,7 +770,7 @@ export const gameClientToServer = {
     checkGameHasUser(game, userId);
     if (!game.getPlayer(userId).timedOut) throw new ActionCheckError(`User(%s) is not timedOut`, userId);
     dispatch(server$gameSetUserTimedOut(gameId, userId, false));
-    if (game.status.currentPlayer === game.getPlayer(userId).index && checkTimeout(makeTurnTimeoutId(gameId))) {
+    if (game.status.currentPlayer === userId && checkTimeout(makeTurnTimeoutId(gameId))) {
       dispatch(server$gameCancelTurnTimeout(gameId));
       dispatch(server$addTurnTimeout(gameId, userId))
     }
@@ -796,9 +833,14 @@ export const gameServerToClient = {
     gameDeployRegeneratedAnimal(gameId, userId, cardId, animalId, source)
   , gameAddTurnTimeout: ({gameId, turnStartTime, turnDuration}) =>
     gameAddTurnTimeout(gameId, turnStartTime, turnDuration)
-  , gameNextPlayer: ({gameId, nextPlayerId, nextPlayerIndex, roundChanged}) =>
-    gameNextPlayer(gameId, nextPlayerId, nextPlayerIndex, roundChanged)
-  , gameNextPlayerNotify: ({gameId, userId}, currentUserId) => (appPlaySound('NOTIFICATION'))
+  , gameNextRound: ({gameId}) => gameNextRound(gameId)
+  , gameNextPlayer: ({gameId, playerId}, userId) => (dispatch, getState) => {
+    const game = getState().get('game');
+    const previousPlayerId = game.status.currentPlayer;
+    if (previousPlayerId !== userId && playerId === userId) dispatch(appPlaySound('NOTIFICATION'));
+    dispatch(gameNextPlayer(gameId, playerId))
+  }
+  , playerActed: ({gameId, userId}) => playerActed(gameId, userId)
   , gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
   , gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
   , gamePlayerLeft: ({gameId, userId}) => gamePlayerLeft(gameId, userId)

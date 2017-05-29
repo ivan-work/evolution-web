@@ -49,7 +49,7 @@ export class PlayersList extends React.PureComponent {
         {T.translate('App.Room.Players')}:
       </h6>
       {this.renderSpectators()}
-      {GameModel.sortPlayersFromIndex(game)
+      {game.sortPlayersFromIndex(game.players)
         .map(player => this.renderPlayer(game, player))}
     </ul>
   }

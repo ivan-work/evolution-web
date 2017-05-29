@@ -105,12 +105,10 @@ players:
 
     expect(parsed.roomId).equal('r0');
     expect(parsed.food).equal(2);
-    expect(parsed.status).equal(new StatusRecord({
-      turn: 0
-      , round: 0
-      , player: 0
-      , phase: PHASE.DEPLOY
-    }));
+    expect(parsed.status.turn).equal(0);
+    expect(parsed.status.round).equal(0);
+    expect(parsed.status.roundPlayer).equal('u0');
+    expect(parsed.status.phase).equal(PHASE.DEPLOY);
     expect(parsed.deck.size).equal(18);
     expect(parsed.deck.first().type).equal('CardCarnivorous');
     expect(parsed.deck.first().trait1).equal('TraitCarnivorous');
@@ -144,12 +142,11 @@ players:
 `);
     expect(serverStore.getState().getIn(['rooms', ServerGame().roomId, 'gameId']), 'room.gameId === game.id').equal(ServerGame().id);
     expect(ServerGame().food).equal(2);
-    expect(ServerGame().status).equal(new StatusRecord({
-      turn: 0
-      , round: 0
-      , player: 0
-      , phase: PHASE.FEEDING
-    }));
+    expect(ServerGame().status.turn).equal(0);
+    expect(ServerGame().status.round).equal(0);
+    expect(ServerGame().status.roundPlayer).equal(User0.id);
+    expect(ServerGame().status.currentPlayer).equal(User0.id);
+    expect(ServerGame().status.phase).equal(PHASE.FEEDING);
     expect(ServerGame().deck.size).equal(18);
     expect(ServerGame().getIn(['players', User0.id, 'hand']).size).equal(2);
     expect(ServerGame().getIn(['players', User0.id, 'continent']).size).equal(2);
@@ -170,7 +167,7 @@ settings:
     }))
   });
 
-  it('mockGame.ParseGame settings without decks', () => {
+  it('mockGame.ParseGame settings without decks', async () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 settings:
@@ -180,7 +177,9 @@ settings:
     expect(ServerGame().settings).equal(new SettingsRecord({
       timeTurn: 20
       , timeTraitResponse: 10
-    }))
+    }));
+
+    await new Promise(resolve => setTimeout(resolve, 50));
   });
 
   it('mockGame.ParseGame phase 0', () => {
@@ -196,8 +195,8 @@ players:
     expect(ServerGame().food, 'ServerGame().food').equal(2);
     expect(ServerGame().status.turn, 'turn').equal(0);
     expect(ServerGame().status.round, 'round').equal(0);
-    expect(ServerGame().status.currentPlayer, 'currentPlayer').equal(0);
-    expect(ServerGame().status.roundPlayer, 'roundPlayer').equal(0);
+    expect(ServerGame().status.currentPlayer, 'currentPlayer').equal(User0.id);
+    expect(ServerGame().status.roundPlayer, 'roundPlayer').equal(User0.id);
     expect(ServerGame().status.phase, 'phase').equal(PHASE.DEPLOY);
     expect(ServerGame().status.turnStartTime, 'turnTime').above(0);
     // console.log(ServerGame().getIn(['players', User1.id, 'hand']).size)

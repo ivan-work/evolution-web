@@ -6,6 +6,19 @@ import {PHASE} from '../models/game/GameModel';
 import {ActionCheckError} from '../models/ActionCheckError';
 import {selectGame} from '../selectors';
 
+/**
+ * PLEASE READ
+ *
+ * Currently, there's a two types of checks in a project.
+ * Old one, when check = (f() => throws error), which is used by request handlers
+ * and uses passesChecks and failsChecks when you don't need to throw and error.
+ *
+ * And the new one, when check = (fFails() => string OR false), which returns some string when it fails
+ * and returns false otherwise.
+ * Advantages over the old one: no need to "passesChecks" try catching gimmicks
+ */
+
+// TODO remove and replace with throwError
 export const passesChecks = (checks) => {
   try {
     checks();
@@ -17,6 +30,7 @@ export const passesChecks = (checks) => {
   return true;
 };
 
+// TODO remove and replace with throwError
 export const failsChecks = (checks) => {
   try {
     checks();
@@ -26,6 +40,11 @@ export const failsChecks = (checks) => {
     } else throw e;
   }
   return false;
+};
+
+export const throwError = (check) => {
+  let result = check();
+  if (result) throw new ActionCheckError(result);
 };
 
 export const checkGameCanStart = (room) => {
@@ -60,10 +79,11 @@ export const checkPlayerHasAnimal = (game, userId, animalId) => {
 };
 
 export const checkPlayerTurn = (game, userId) => {
-  if (game.players.get(userId).index !== game.status.currentPlayer) {
+  if (userId !== game.status.currentPlayer) {
     throw new ActionCheckError(`checkPlayerTurn@Game(${game.id})`
-      , `Player(%s@%s) acting on Player(%s)'s turn`
-      , userId, game.players.get(userId).index, game.status.currentPlayer);
+      , `Player(%s) [%s] acting on Player(%s)'s [%s] turn`
+      , userId, game.getPlayer(userId).index
+      , game.status.currentPlayer, game.getPlayer(game.status.currentPlayer).index);
   }
 };
 

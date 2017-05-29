@@ -27,8 +27,8 @@ settings:
 
     expect(selectGame().getIn(['status', 'turn'])).equal(0);
     expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.DEPLOY);
-    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(0);
-    expect(selectGame().getIn(['status', 'roundPlayer'])).equal(0);
+    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(User0.id);
+    expect(selectGame().getIn(['status', 'roundPlayer'])).equal(User0.id);
 
     //console.log(selectGame().status, Date.now());
     await new Promise(resolve => setTimeout(resolve, 50));
@@ -36,8 +36,8 @@ settings:
 
     expect(selectGame().getIn(['status', 'turn'])).equal(0);
     expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.DEPLOY);
-    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(0);
-    expect(selectGame().getIn(['status', 'roundPlayer'])).equal(0);
+    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(User0.id);
+    expect(selectGame().getIn(['status', 'roundPlayer'])).equal(User0.id);
 
     //console.log(selectGame().status, Date.now());
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -45,8 +45,8 @@ settings:
 
     expect(selectGame().getIn(['status', 'turn'])).equal(0);
     expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.DEPLOY);
-    expect(selectGame().getIn(['status', 'currentPlayer']), 'Player changed by turn time').equal(1);
-    expect(selectGame().getIn(['status', 'roundPlayer'])).equal(0);
+    expect(selectGame().getIn(['status', 'currentPlayer']), 'Player changed by turn time').equal(User1.id);
+    expect(selectGame().getIn(['status', 'roundPlayer'])).equal(User0.id);
 
     clientStore0.disconnect(SOCKET_DISCONNECT_NOW);
     clientStore1.disconnect(SOCKET_DISCONNECT_NOW);
@@ -73,16 +73,16 @@ settings:
 
     expect(selectGame().getIn(['status', 'turn'])).equal(0);
     expect(selectGame().getIn(['status', 'phase']), 'first').equal(PHASE.DEPLOY);
-    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(0);
-    expect(selectGame().getIn(['status', 'roundPlayer'])).equal(0);
+    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(User0.id);
+    expect(selectGame().getIn(['status', 'roundPlayer'])).equal(User0.id);
 
     await new Promise(resolve => setTimeout(resolve, 50));
 
     // User0's Turn, time: 50 / 50
     expect(selectGame().getIn(['status', 'turn'])).equal(0);
     expect(selectGame().getIn(['status', 'phase']), 'second').equal(PHASE.DEPLOY);
-    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(0);
-    expect(selectGame().getIn(['status', 'roundPlayer'])).equal(0);
+    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(User0.id);
+    expect(selectGame().getIn(['status', 'roundPlayer'])).equal(User0.id);
 
     await new Promise(resolve => setTimeout(resolve, 100)); // 150 total time
 
@@ -90,8 +90,8 @@ settings:
 
     expect(selectGame().getIn(['status', 'turn'])).equal(0);
     expect(selectGame().getIn(['status', 'phase']), 'third').equal(PHASE.DEPLOY);
-    expect(selectGame().getIn(['status', 'currentPlayer']), 'Player changed by turn time').equal(1);
-    expect(selectGame().getIn(['status', 'roundPlayer'])).equal(0);
+    expect(selectGame().getIn(['status', 'currentPlayer']), 'Player changed by turn time').equal(User1.id);
+    expect(selectGame().getIn(['status', 'roundPlayer'])).equal(User0.id);
 
     clientStore1.dispatch(gameEndTurnRequest());
 
@@ -99,8 +99,8 @@ settings:
 
     expect(selectGame().getIn(['status', 'turn'])).equal(0);
     expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.FEEDING);
-    expect(selectGame().getIn(['status', 'currentPlayer']), '0-2-0 currentPlayer').equal(0);
-    expect(selectGame().getIn(['status', 'roundPlayer'])).equal(0);
+    expect(selectGame().getIn(['status', 'currentPlayer']), '0-2-0 currentPlayer').equal(User0.id);
+    expect(selectGame().getIn(['status', 'roundPlayer'])).equal(User0.id);
 
     clientStore0.disconnect(SOCKET_DISCONNECT_NOW);
     clientStore1.disconnect(SOCKET_DISCONNECT_NOW);

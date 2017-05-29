@@ -30,8 +30,8 @@ export const PHASE = {
 export const StatusRecord = Record({
   turn: 0
   , round: 0
-  , currentPlayer: 0
-  , roundPlayer: 0
+  , currentPlayer: null
+  , roundPlayer: null
   , phase: PHASE.PREPARE
   , turnStartTime: null
   , turnDuration: null
@@ -292,15 +292,10 @@ export class GameModel extends Record({
     return {playerId, cardIndex, card};
   }
 
-  static sortPlayersFromIndex(game, index) {
-    if (index === void 0) index = game.status.roundPlayer;
-    const playersList = game.players.toList();
-    return playersList.slice(index).concat(playersList.slice(0, index));
-  }
-
-  static sortActualPlayersFromIndex(game, index) {
-    if (index === void 0) index = game.status.roundPlayer;
-    const playersList = game.players.toList().filter(p => p.playing);
+  sortPlayersFromIndex(players, index) {
+    const game = this;
+    if (index === void 0) index = game.getPlayer(game.status.roundPlayer).index;
+    const playersList = players.toList();
     return playersList.slice(index).concat(playersList.slice(0, index));
   }
 }
@@ -326,14 +321,18 @@ export class GameModelClient extends Record({
   }
 
   isPlayerTurn(userId) {
-    return !!((userId || this.userId) && this.getPlayer(userId) && this.getPlayer(userId).index === this.status.currentPlayer
-    && (this.status.phase === PHASE.DEPLOY || this.status.phase === PHASE.FEEDING));
+    if (!userId) userId = this.userId;
+    return !!(
+      userId
+      && userId === this.status.currentPlayer
+      && (this.status.phase === PHASE.DEPLOY || this.status.phase === PHASE.FEEDING));
   }
 }
 
 GameModel.parse = parseFromRoom;
 GameModel.parseCardList = parseCardList;
 GameModel.parseAnimalList = parseAnimalList;
+GameModelClient.prototype.sortPlayersFromIndex = GameModel.prototype.sortPlayersFromIndex;
 GameModelClient.prototype.getActualPlayers = GameModel.prototype.getActualPlayers;
 GameModelClient.prototype.someAnimal = GameModel.prototype.someAnimal;
 GameModelClient.prototype.getPlayerCard = GameModel.prototype.getPlayerCard;

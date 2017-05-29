@@ -68,7 +68,7 @@ players:
     expect(selectGame().status.turn, 'turn').equal(0);
     expect(selectGame().status.round, 'round').equal(0);
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
-    expect(selectGame().status.currentPlayer).equal(selectPlayer(User0).index);
+    expect(selectGame().status.currentPlayer).equal(User0.id);
 
     expectUnchanged('User0 has cooldown on hunt', () => {
       clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$S'));
@@ -103,7 +103,7 @@ players:
     expect(selectGame().status.turn, 'turn').equal(1);
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
     expect(selectGame().status.round, 'round').equal(0);
-    expect(selectGame().status.currentPlayer).equal(0);
+    expect(selectGame().status.currentPlayer).equal(User0.id);
 
     expectUnchanged('User0 still has cooldown on $Q and $W', () => {
       clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$S'));

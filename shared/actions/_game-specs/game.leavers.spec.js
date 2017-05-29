@@ -29,7 +29,7 @@ deck: 50 camo
 
     expect(selectGame().getIn(['status', 'turn'])).equal(0);
     expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.DEPLOY);
-    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(0);
+    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(User0.id);
 
     clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id, 0));
     clientStore1.dispatch(gameDeployAnimalRequest(selectCard(User1, 0).id, 0));
@@ -37,7 +37,6 @@ deck: 50 camo
 
     clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id, 0));
     clientStore1.disconnect(SOCKET_DISCONNECT_NOW);
-    expect(selectPlayer(User1).ended, 'User1 should ended if left').true;
     clientStore2.dispatch(gameDeployAnimalRequest(selectCard(User2, 0).id, 0));
 
     clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id, 0));
@@ -45,7 +44,7 @@ deck: 50 camo
 
     expect(selectGame().getIn(['status', 'turn']), 'turn').equal(0);
     expect(selectGame().getIn(['status', 'phase']), 'PHASE.DEPLOY').equal(PHASE.DEPLOY);
-    expect(selectGame().getIn(['status', 'currentPlayer']), 'currentPlayer').equal(0);
+    expect(selectGame().getIn(['status', 'currentPlayer']), 'currentPlayer').equal(User0.id);
     expect(selectGame().getPlayer(User0).continent).size(3);
     expect(selectGame().getPlayer(User1).continent).size(1);
     expect(selectGame().getPlayer(User2).continent).size(3);
@@ -64,7 +63,7 @@ deck: 50 camo
 
     expect(selectGame().getIn(['status', 'turn'])).equal(0);
     expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.DEPLOY);
-    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(0);
+    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(User0.id);
 
     clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id, 0));
     clientStore1.dispatch(gameDeployAnimalRequest(selectCard(User1, 0).id, 0));
@@ -76,7 +75,7 @@ deck: 50 camo
 
     expect(selectGame().getIn(['status', 'turn']), 'turn').equal(0);
     expect(selectGame().getIn(['status', 'phase']), 'PHASE.FEEDING').equal(PHASE.FEEDING);
-    expect(selectGame().getIn(['status', 'currentPlayer']), 'currentPlayer').equal(1);
+    expect(selectGame().getIn(['status', 'currentPlayer']), 'currentPlayer').equal(User1.id);
   });
 
   it(`Handle game with leaver`, () => {
@@ -98,19 +97,19 @@ players:
 
     expect(selectGame().getIn(['status', 'turn'])).equal(0);
     expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.FEEDING);
-    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(0);
+    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(User0.id);
 
     //replaceGetRandom(() => )
     clientStore0.disconnect(SOCKET_DISCONNECT_NOW);
     expect(selectPlayer(User0).hand, 'empties hand after leave').size(0);
-    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(1);
+    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(User1.id);
 
     clientStore1.dispatch(traitTakeFoodRequest('$S'));
     clientStore2.dispatch(traitTakeFoodRequest('$X'));
 
     expect(selectGame().getIn(['status', 'turn'])).equal(1);
     expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.DEPLOY);
-    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(1);
+    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(User1.id);
     expect(selectPlayer(User0).hand).size(0);
     expect(selectPlayer(User1).hand).size(3);
     expect(selectPlayer(User2).hand).size(3);

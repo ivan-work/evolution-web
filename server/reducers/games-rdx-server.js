@@ -55,8 +55,8 @@ const logTrait = (game, traitId) => {
 
 export const gameStart = game => game
   .setIn(['status', 'phase'], PHASE.DEPLOY)
+  .setIn(['status', 'roundPlayer'], game.players.first().id)
   .setIn(['status', 'round'], 0);
-//.setIn(['status', 'currentPlayer'], 0); // TODO RANDOMIZE
 
 export const gameGiveCards = (game, {userId, cards}) => {
   ensureParameter(userId, 'string');
@@ -89,8 +89,8 @@ export const gameDeployAnimalFromDeck = (game, {animal, sourceAid}) => {
   return game
     .update(game => !ending ? game
       : game
-      .update('players', players => players.map(player => player
-        .update('continent', continent => continent.map(animal => animal.setIn(['flags', TRAIT_ANIMAL_FLAG.HIBERNATED], false))))))
+        .update('players', players => players.map(player => player
+          .update('continent', continent => continent.map(animal => animal.setIn(['flags', TRAIT_ANIMAL_FLAG.HIBERNATED], false))))))
     .update('deck', deck => deck.skip(1))
     .update(gameDeployAnimal(animal, card, animalIndex + 1))
     .update(addToGameLog(['traitGiveBirth', logAnimal(parent)]));
@@ -123,27 +123,22 @@ export const playerActed = (game, {userId}) => {
 };
 
 export const gameEndTurn = (game, {userId}) => {
-  //console.log('gameEndTurn for ' + userId);
-  ensureParameter(userId, 'string');
-  let endedAlready, endedNow;
+  const acted = game.getIn(['players', userId, 'acted']);
+  const hand = game.getIn(['players', userId, 'hand']);
   return game
-    .updateIn(['players', userId], player => {
-      endedAlready = player.ended;
-      endedNow = !player.acted;
-      if (endedAlready) logger.silly(`Player#${player.id} already ended.`);
-      if (endedNow) logger.silly(`Player#${player.id} ended by skipping.`);
-      return player
-        .set('ended', endedNow)
-    })
-    .update(addToGameLog(['gameEndTurn', userId, endedNow, endedAlready]));
+    .setIn(['players', userId, 'ended'], game.status.phase === PHASE.DEPLOY && (!acted || hand.size === 0))
+    .setIn(['players', userId, 'acted'], false)
+    .update(addToGameLog(['gameEndTurn', userId, acted]));
 };
 
-export const gameNextPlayer = (game, {round, nextPlayerId, nextPlayerIndex, roundChanged, turnTime}) => game
-  .setIn(['players', nextPlayerId, 'acted'], false)
-  .setIn(['status', 'currentPlayer'], nextPlayerIndex)
-  .updateIn(['status', 'round'], round => roundChanged ? round + 1 : round)
-  .update('cooldowns', cooldowns => cooldowns.eventNextPlayer(roundChanged))
-  .update(addToGameLog(['gameNextPlayer', nextPlayerId]));
+export const gameNextRound = (game, {}) => game
+  .updateIn(['status', 'round'], round => round + 1)
+  .update(addToGameLog(['gameNextRound']));
+
+export const gameNextPlayer = (game, {playerId}) => game
+  .setIn(['status', 'currentPlayer'], playerId)
+  .update('cooldowns', cooldowns => cooldowns.eventNextPlayer())
+  .update(addToGameLog(['gameNextPlayer', playerId]));
 
 export const gameAddTurnTimeout = (game, {turnStartTime, turnDuration}) => game
   .setIn(['status', 'turnStartTime'], turnStartTime)
@@ -160,11 +155,12 @@ export const gameSetPaused = (game, {paused}) => game.setIn(['status', 'paused']
  * */
 
 export const gameStartTurn = (game) => {
-  const roundPlayer = game.status.roundPlayer;
-  const nextRoundPlayer = (roundPlayer + 1) % game.players.size;
+  const roundPlayerIndex = game.getPlayer(game.status.roundPlayer).index;
+  const nextRoundPlayerIndex = (roundPlayerIndex + 1) % game.players.size;
+  const nextRoundPlayerId = game.players.find(p => p.index === nextRoundPlayerIndex).id;
   return game
     .updateIn(['status', 'turn'], turn => ++turn)
-    .setIn(['status', 'roundPlayer'], nextRoundPlayer)
+    .setIn(['status', 'roundPlayer'], nextRoundPlayerId)
     .setIn(['food'], 0)
     .update('cooldowns', cooldowns => cooldowns.eventNextTurn());
 };
@@ -188,9 +184,6 @@ export const gameStartDeploy = (game) => {
 export const gameStartFeeding = (game, {food}) => {
   ensureParameter(food, 'number');
   return game
-    .update('players', players => players.map(player => player
-      .set('ended', !player.playing)
-    ))
     .setIn(['food'], food)
     .setIn(['status', 'round'], 0)
     .update(processNeoplasm)
@@ -251,16 +244,16 @@ export const gameStartPhase = (game, {phase, timestamp, data}) => (game
  * */
 
 export const gameDeployRegeneratedAnimal = (game, {userId, cardId, animalId, source}) => game
-    .update(game => {
-      if (source === 'DECK') {
-        return game.update('deck', deck => deck.skip(1))
-      } else {
-        const {cardIndex} = game.locateCard(cardId, userId);
-        return game.removeIn(['players', userId, 'hand', cardIndex]);
-      }
-    })
-    .update(game => traitSetAnimalFlag(game, {sourceAid: animalId, flag: TRAIT_ANIMAL_FLAG.REGENERATION, on: false}))
-  ;
+  .update(game => {
+    if (source === 'DECK') {
+      return game.update('deck', deck => deck.skip(1))
+    } else {
+      const {cardIndex} = game.locateCard(cardId, userId);
+      return game.removeIn(['players', userId, 'hand', cardIndex]);
+    }
+  })
+  .update(game => traitSetAnimalFlag(game, {sourceAid: animalId, flag: TRAIT_ANIMAL_FLAG.REGENERATION, on: false}))
+;
 
 export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) => {
   ensureParameter(animalId, 'string');
@@ -275,8 +268,8 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
 
   return sourceType === 'GAME' ? updatedGame.update('food', food => food - amount)
     : sourceType === tt.TraitPiracy ? updatedGame.updateIn(['players', another.ownerId, 'continent', sourceId, 'food'], food =>
-    Math.max(food - amount, 0))
-    : updatedGame;
+      Math.max(food - amount, 0))
+      : updatedGame;
 };
 
 export const animalDeath = (game, {type, animalId, data}) => {
@@ -310,8 +303,8 @@ export const gameEnd = (oldGame, {game}) => {
     !p1.playing ? 1
       : !p2.playing ? -1
       : p2.scoreNormal !== p1.scoreNormal ? p2.scoreNormal - p1.scoreNormal
-      : p1.scoreDead !== p2.scoreDead ? p2.scoreDead - p1.scoreDead
-      : 1 - Math.round(Math.random()) * 2);
+        : p1.scoreDead !== p2.scoreDead ? p2.scoreDead - p1.scoreDead
+          : 1 - Math.round(Math.random()) * 2);
 
   return game
     .set('scoreboardFinal', scoreboardFinal)
@@ -321,8 +314,7 @@ export const gameEnd = (oldGame, {game}) => {
 
 export const gamePlayerLeft = (game, {userId}) => game
   .setIn(['players', userId, 'hand'], List())
-  .setIn(['players', userId, 'playing'], false)
-  .setIn(['players', userId, 'ended'], true);
+  .setIn(['players', userId, 'playing'], false);
 
 export const traitQuestion = (game, {question}) => game
   .set('question', question);
@@ -420,6 +412,7 @@ export const reducer = createReducer(Map(), {
   , gameDestroy: (state, data) => state.remove(data.gameId)
   , gameStart: (state, data) => state.update(data.gameId, game => gameStart(game, data))
   , gameGiveCards: (state, data) => state.update(data.gameId, game => gameGiveCards(game, data))
+  , gameNextRound: (state, data) => state.update(data.gameId, game => gameNextRound(game, data))
   , gameNextPlayer: (state, data) => state.update(data.gameId, game => gameNextPlayer(game, data))
   , gameAddTurnTimeout: (state, data) => state.update(data.gameId, game => gameAddTurnTimeout(game, data))
   , gameDeployAnimalFromHand: (state, data) => state.update(data.gameId, game => gameDeployAnimalFromHand(game, data))

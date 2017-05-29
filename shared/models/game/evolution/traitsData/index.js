@@ -36,7 +36,8 @@ export const TraitWaiter = {
   type: tt.TraitWaiter
   , playerControllable: true
   , targetType: TRAIT_TARGET_TYPE.NONE
-  , action: () => (dispatch) => false
+  , cooldowns: fromJS([[tt.TraitWaiter, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ACTIVATION]])
+  , action: () => (dispatch) => true
 };
 
 export const TraitParasite = {
@@ -48,12 +49,12 @@ export const TraitParasite = {
 export const TraitFatTissue = {
   type: tt.TraitFatTissue
   , multiple: true
+  , playerControllable: true
+  , targetType: TRAIT_TARGET_TYPE.NONE
   , cooldowns: fromJS([
     [tt.TraitFatTissue, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
-  , targetType: TRAIT_TARGET_TYPE.NONE
-  , playerControllable: true
   , action: (game, sourceAnimal, traitFatTissue) => (dispatch) => {
     dispatch(server$traitConvertFat(game.id, sourceAnimal, traitFatTissue));
     dispatch(server$traitStartCooldown(game.id, traitFatTissue, sourceAnimal));
@@ -186,11 +187,11 @@ export const TraitMassive = {
 
 export const TraitHibernation = {
   type: tt.TraitHibernation
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , playerControllable: true
   , cooldowns: fromJS([
     [tt.TraitHibernation, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TWO_TURNS]
   ])
-  , targetType: TRAIT_TARGET_TYPE.NONE
-  , playerControllable: true
   , action: (game, sourceAnimal, traitHibernation) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, traitHibernation, sourceAnimal));
     dispatch(server$traitSetAnimalFlag(game, sourceAnimal, TRAIT_ANIMAL_FLAG.HIBERNATED));

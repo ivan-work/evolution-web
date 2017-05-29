@@ -21,11 +21,12 @@ import {
   , server$gameCancelTurnTimeout
   , animalDeath
   , server$gameStartPhase
+  , server$playerActed
 } from './actions';
 
 import {selectRoom, selectGame, selectUsersInGame} from '../selectors';
 
-import {PHASE, QuestionRecord, AmbushRecord} from '../models/game/GameModel';
+import {GameModel, PHASE, QuestionRecord, AmbushRecord} from '../models/game/GameModel';
 import * as tt from '../models/game/evolution/traitTypes';
 
 import {
@@ -35,13 +36,14 @@ import {
   , checkPlayerHasAnimal
   , checkPlayerCanAct
   , checkPlayerTurn
+  , throwError
   , passesChecks
 } from './checks';
 
 import {
   checkAnimalCanEat
   , checkTraitActivation
-  , checkAnimalCanTakeShell
+  , checkAnimalCanTakeShellFails
   , checkIfTraitDisabledByIntellect
 } from './trait.checks';
 
@@ -70,6 +72,7 @@ const logTarget = (result = [], target) => {
   else result.push(target);
   return result;
 };
+
 export const server$traitActivate = (game, sourceAnimal, trait, ...targets) => (dispatch, getState) => {
   const logTargets = (targets || []).reduce(logTarget, []);
   if (!trait.getDataModel().transient) {
@@ -285,7 +288,7 @@ export const server$gameAmbushPrepareStart = (game, animal) => (dispatch, getSta
   logger.debug(`Checking ${animal.id} for ambushers`);
   const gameId = game.id;
   let ambushers = [];
-  game.constructor.sortPlayersFromIndex(game, game.getPlayer(animal.ownerId).index).some(p => p.someAnimal((attackAnimal, continent) => {
+  game.sortPlayersFromIndex(game.players, game.getPlayer(animal.ownerId).index).some(p => p.someAnimal((attackAnimal, continent) => {
     if (attackAnimal.ownerId === animal.ownerId) return; // Can't ambush self
     const ambush = attackAnimal.hasTrait(tt.TraitAmbush);
     const carnivorous = attackAnimal.hasTrait(tt.TraitCarnivorous);
@@ -310,6 +313,7 @@ export const server$gameAmbushPrepareStart = (game, animal) => (dispatch, getSta
       , makeAmbushPhaseTimeoutId(gameId)
       , (dispatch) => dispatch(server$gameAmbushPrepareEnd(gameId))));
   }
+
   return ambushers.length > 0;
 };
 
@@ -410,25 +414,6 @@ export const server$traitAmbushPerform = (gameId, attackAnimalId) => (dispatch, 
 };
 
 /**
- * Acted
- * */
-
-const playerActed = (gameId, userId) => ({
-  type: 'playerActed'
-  , data: {gameId, userId}
-});
-
-export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
-  const game = selectGame(getState, gameId);
-  //console.log(userId, game.getPlayer(userId).index, game.status)
-  //if (game.getPlayer(userId).index === game.status.currentPlayer) {
-  dispatch(server$game(gameId, playerActed(gameId, userId)));
-  if (!doesPlayerHasOptions(selectGame(getState, gameId), userId))
-    dispatch(server$gameEndTurn(gameId, userId));
-  //}
-};
-
-/**
  * Notification
  */
 
@@ -483,7 +468,7 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
           .map(cooldownAction => dispatch(cooldownAction));
 
         dispatch(server$traitNotify_Start(game, animal, traitCooperation, linkedAnimal.id));
-        dispatch(server$startFeedingFromGame(gameId, linkedAnimal.id, 1));
+        dispatch(server$startFeedingFromGame(gameId, linkedAnimal.id, 1, animal.id));
       });
   }
 
@@ -540,7 +525,7 @@ const gameFoodTake_End = (gameId, animalId) => ({
   , data: {gameId, animalId}
 });
 
-export const server$startFeedingFromGame = (gameId, animalId, amount) => (dispatch, getState) => {
+export const server$startFeedingFromGame = (gameId, animalId, amount, source) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   const animal = game.locateAnimal(animalId);
 
@@ -554,7 +539,7 @@ export const server$startFeedingFromGame = (gameId, animalId, amount) => (dispat
     if (!ambushed) {
       dispatch(server$startFeeding(gameId, animal.id, amount, 'GAME'));
       dispatch(server$game(gameId, gameFoodTake_End(gameId, animalId)));
-      dispatch(server$playerActed(gameId, animal.ownerId));
+      if (!source) dispatch(server$playerActed(gameId, animal.ownerId));
     }
 
     return !ambushed;
@@ -703,7 +688,7 @@ export const server$traitDefenceAnswer = (gameId, questionId, traitId, targetId)
 
     // TODO line below possibly belongs to somewhere else
     // Because player should not get "acted" if it happens in another players turns
-    if (game.getPlayer(attackAnimal.ownerId).index === game.status.currentPlayer)
+    if (attackAnimal.ownerId === game.status.currentPlayer)
       if (result)
         dispatch(server$playerActed(gameId, attackAnimal.ownerId));
     return result;
@@ -713,7 +698,7 @@ export const server$traitDefenceAnswer = (gameId, questionId, traitId, targetId)
 
     // TODO line below possibly belongs to somewhere else
     // Because player should not get "acted" if it happens in another players turns
-    if (game.getPlayer(attackAnimal.ownerId).index === game.status.currentPlayer)
+    if (attackAnimal.ownerId === game.status.currentPlayer)
       if (result)
         dispatch(server$playerActed(gameId, attackAnimal.ownerId));
     return result;
@@ -775,9 +760,7 @@ export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetI
 //
 
 export const traitClientToServer = {
-  traitTakeFoodRequest: ({gameId, animalId}, {userId}) => (dispatch, getState) => {
-    dispatch(server$takeFoodRequest(gameId, userId, animalId));
-  }
+  traitTakeFoodRequest: ({gameId, animalId}, {userId}) => server$takeFoodRequest(gameId, userId, animalId)
   , traitTakeShellRequest: ({gameId, animalId, traitId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
@@ -787,7 +770,7 @@ export const traitClientToServer = {
 
     const animal = checkPlayerHasAnimal(game, userId, animalId);
 
-    checkAnimalCanTakeShell(game, animal);
+    throwError(() => checkAnimalCanTakeShellFails(game, animal));
 
     const trait = game.getContinent().shells.get(traitId);
     if (!trait)
@@ -883,8 +866,6 @@ export const traitServerToClient = {
     traitMoveFood(gameId, animalId, amount, sourceType, sourceId)
   , startCooldown: ({gameId, link, duration, place, placeId}) =>
     startCooldown(gameId, link, duration, place, placeId)
-  , playerActed: ({gameId, userId}) =>
-    playerActed(gameId, userId)
   , traitQuestion: ({gameId, question}, currentUserId) =>
     traitQuestion(gameId, QuestionRecord.fromJS(question))
   , traitAnswerSuccess: ({gameId, questionId}, currentUserId) =>

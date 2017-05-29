@@ -37,7 +37,7 @@ export const TraitHomeothermy = {
   , action: (game, animal, trait) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, trait, animal));
     dispatch(server$startFeedingFromGame(game.id, animal.id, 1));
-    return false;
+    return true;
   }
 };
 export const TraitShy = {

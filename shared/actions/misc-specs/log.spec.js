@@ -79,7 +79,7 @@ players:
     /**
      * FEEDING
      */
-    expect(selectGame().food).equal(6);
+    expect(selectGame().food, 'food').equal(6);
     clientStore0.dispatch(traitTakeFoodRequest('$Q'));
 
     clientStore1.dispatch(traitActivateRequest('$S', 'TraitGrazing'));
@@ -135,86 +135,96 @@ players:
 
     const checkLog = (selectGame) => {
       let i = 0;
-      expect(selectGame().log.get(i++).message).eql(['gameGiveCards', User0.id, 3]);
-      expect(selectGame().log.get(i++).message).eql(['gameGiveCards', User1.id, 7]);
-      expect(selectGame().log.get(i++).message).eql(['gameGiveCards', User2.id, 4]);
-      expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User0.id]);
-      expect(selectGame().log.get(i++).message).eql(['gameDeployAnimal', User0.id]);
-      expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User1.id]);
-      expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User1.id, true, false]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameGiveCards', User0.id, 3]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameGiveCards', User1.id, 7]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameGiveCards', User2.id, 4]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextPlayer', User0.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameDeployAnimal', User0.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User0.id, true]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextPlayer', User1.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User1.id, false]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextPlayer', User2.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameDeployAnimal', User2.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User2.id, true]);
 
-      expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User2.id]);
-      expect(selectGame().log.get(i++).message).eql(['gameDeployAnimal', User2.id]);
-      expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User0.id]);
-      expect(selectGame().log.get(i++).message).eql(['gameDeployTrait', User0.id, 'TraitFatTissue', ['$Animal']]);
-      expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User2.id]);
-      expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User2.id, true, false]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextRound']);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextPlayer', User0.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameDeployTrait', User0.id, 'TraitFatTissue', ['$Animal']]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User0.id, true]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextPlayer', User2.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User2.id, false]);
 
-      expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User0.id]);
-      expect(selectGame().log.get(i++).message).eql(['gameDeployAnimal', User0.id]);
-      expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User0.id, true, false]);
-      expect(selectGame().log.get(i++).message).eql(['gameStartPhase', PHASE.FEEDING, {food: 6}]);
-      expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User0.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextRound']);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextPlayer', User0.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameDeployAnimal', User0.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User0.id, true]);
 
-      expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'GAME', $Q, null]);
-      expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User0.id, false, false]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameStartPhase', PHASE.FEEDING, {food: 6}]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextPlayer', User0.id]);
 
-      expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User1.id]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $S, 'TraitGrazing']);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $H, 'TraitHibernation']);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $D, 'TraitPiracy', $Q]);
-      expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'TraitPiracy', $D, $Q]);
-      expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'GAME', $G, null]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $G, 'TraitCooperation', $F]);
-      expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'GAME', $F, null]);
-      expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User1.id, false, false]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitMoveFood', 1, 'GAME', $Q, null]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User0.id, true]);
 
-      expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User2.id]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $Z, 'TraitCarnivorous', $G]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $G, 'TraitRunning']);
-      expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User2.id, false, false]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextPlayer', User1.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $S, 'TraitGrazing']);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $H, 'TraitHibernation']);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $D, 'TraitPiracy', $Q]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitMoveFood', 1, 'TraitPiracy', $D, $Q]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitMoveFood', 1, 'GAME', $G, null]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $G, 'TraitCooperation', $F]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitMoveFood', 1, 'GAME', $F, null]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User1.id, true]);
 
-      expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User0.id]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $Q, 'TraitCarnivorous', $S]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $S, 'TraitTailLoss', 'TraitTailLoss']);
-      expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'TraitTailLoss', $Q, $S1]);
-      expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User0.id, false, false]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextPlayer', User2.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $Z, 'TraitCarnivorous', $G]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $G, 'TraitRunning']);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User2.id, true]);
 
-      expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User1.id]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $S1, 'TraitGrazing']);
-      expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'GAME', $D, null]);
-      expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User1.id, false, false]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextRound']);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextPlayer', User0.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $Q, 'TraitCarnivorous', $S]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $S, 'TraitTailLoss', 'TraitTailLoss']);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitMoveFood', 1, 'TraitTailLoss', $Q, $S1]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User0.id, true]);
 
-      expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User2.id]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $X, 'TraitCarnivorous', $G]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $G, 'TraitMimicry', $H]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $X, 'TraitCarnivorous', $H]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $H, 'TraitPoisonous', $X]);
-      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'KILL', $H]);
-      expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 2, 'TraitCarnivorous', $X, null]);
-      expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'TraitScavenger', $A, $X]);
-      expect(selectGame().log.get(i++).message).eql(['traitNotify_Start', $A, 'TraitCommunication', $S1]);
-      expect(selectGame().log.get(i++).message).eql(['traitMoveFood', 1, 'TraitCommunication', $S1, $A]);
-      expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User2.id, false, false]);
-      expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User0.id]);
-      expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User0.id, true, false]);
-      expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User1.id]);
-      expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User1.id, true, false]);
-      expect(selectGame().log.get(i++).message).eql(['gameNextPlayer', User2.id]);
-      expect(selectGame().log.get(i++).message).eql(['gameEndTurn', User2.id, true, false]);
-      expect(selectGame().log.get(i++).message).eql(['gameStartPhase', PHASE.EXTINCTION, void 0]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextPlayer', User1.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $S1, 'TraitGrazing']);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitMoveFood', 1, 'GAME', $D, null]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User1.id, true]);
 
-      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitFatTissue']]);
-      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal']]);
-      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitCarnivorous']]);
-      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitCarnivorous']]);
-      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal']]);
-      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitCarnivorous']]);
-      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'POISON', $X]);
-      expect(selectGame().log.get(i++).message).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitCarnivorous']]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextPlayer', User2.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $X, 'TraitCarnivorous', $G]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $G, 'TraitMimicry', $H]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $X, 'TraitCarnivorous', $H]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $H, 'TraitPoisonous', $X]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['animalDeath', 'KILL', $H]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitMoveFood', 2, 'TraitCarnivorous', $X, null]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitMoveFood', 1, 'TraitScavenger', $A, $X]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $A, 'TraitCommunication', $S1]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitMoveFood', 1, 'TraitCommunication', $S1, $A]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User2.id, true]);
 
-      // expect(selectGame().log.get(i++).message).eql(['gameGiveCards', User0, 6]);
-      // expect(selectGame().log.get(i++).message).eql(['gameStartPhase', PHASE.DEPLOY, void 0]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextRound']);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextPlayer', User0.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User0.id, false]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextPlayer', User1.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User1.id, false]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameNextPlayer', User2.id]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User2.id, false]);
+
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameStartPhase', PHASE.EXTINCTION, void 0]);
+
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitFatTissue']]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['animalDeath', 'STARVE', ['$Animal']]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitCarnivorous']]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitCarnivorous']]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['animalDeath', 'STARVE', ['$Animal']]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitCarnivorous']]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['animalDeath', 'POISON', $X]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['animalDeath', 'STARVE', ['$Animal', 'TraitCarnivorous']]);
+
+      // expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameGiveCards', User0, 6]);
+      // expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameStartPhase', PHASE.DEPLOY, void 0]);
     };
     checkLog(selectGame);
     checkLog(selectGame0);

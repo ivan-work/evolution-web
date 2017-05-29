@@ -85,6 +85,7 @@ players:
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(traitActivateRequest('$W', 'TraitCarnivorous', '$S'));
     clientStore0.dispatch(gameEndTurnRequest());
+    clientStore1.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$E', 'TraitCarnivorous', '$D'));
     expect(selectGame().question).ok;

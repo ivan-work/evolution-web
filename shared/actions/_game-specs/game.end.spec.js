@@ -42,7 +42,6 @@ players:
     // User0: $A +, $B, $C, $D carn +, $E
 
     clientStore0.dispatch(gameEndTurnRequest()); // Q can't have AutoFood
-    expect(selectPlayer(User0).ended, 'User0.ended 0').equal(true);
 
     clientStore1.dispatch(traitActivateRequest('$A', 'TraitFatTissue')); // A used fat
 

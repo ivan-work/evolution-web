@@ -43,6 +43,7 @@ export const TRAIT_COOLDOWN_DURATION = {
 
 export const TRAIT_COOLDOWN_LINK = {
   EATING: 'EATING'
+  , TAKE_SHELL: 'TAKE_SHELL'
 };
 
 /**

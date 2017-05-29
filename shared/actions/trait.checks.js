@@ -10,6 +10,13 @@ import {
   , TRAIT_COOLDOWN_LINK
 } from '../models/game/evolution/constants';
 
+const ERRORS = {
+  GAME_FOOD: 'GAME_FOOD'
+  , COOLDOWN: 'COOLDOWN'
+  , ANIMAL_CANT_EAT: 'ANIMAL_CANT_EAT'
+  , TRAIT_MULTIPLE: 'TRAIT_MULTIPLE'
+};
+
 export const checkTraitActivation = (game, animal, traitId, ...targets) => {
   const gameId = game.id;
   const trait = animal.hasTrait(traitId);
@@ -113,11 +120,18 @@ export const checkAnimalCanEat = (game, animal) => {
     throw new ActionCheckError(`traitTakeFoodRequest@Game(${game.id})`, `Animal(%s) can't eat`, animal)
 };
 
-export const checkAnimalCanTakeShell = (game, animal) => {
-  if (animal.hasTrait('TraitShell'))
-    throw new ActionCheckError(`traitTakeShellRequest@Game(${game.id})`, 'Multiple trait disabled');
-  if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, animal.ownerId, animal.id))
-    throw new ActionCheckError(`traitTakeFoodRequest@Game(${game.id})`, 'Cooldown active');
+export const checkAnimalCanEatFails = (game, animal) => {
+  if (game.food < 1) return ERRORS.GAME_FOOD;
+  if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, animal.ownerId, animal.id)) return ERRORS.COOLDOWN;
+  if (!animal.canEat(game)) return ERRORS.ANIMAL_CANT_EAT;
+  return false;
+};
+
+export const checkAnimalCanTakeShellFails = (game, animal) => {
+  if (animal.hasTrait('TraitShell', true)) return ERRORS.TRAIT_MULTIPLE;
+  if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, animal.ownerId, animal.id)) return ERRORS.COOLDOWN;
+  if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.TAKE_SHELL, animal.ownerId, animal.id)) return ERRORS.COOLDOWN;
+  return false;
 };
 
 export const checkIfTraitDisabledByIntellect = (attackAnimal, defenseTrait) => {

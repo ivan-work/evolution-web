@@ -23,8 +23,8 @@ deck: 50 camo
 
     expect(selectGame().status.turn).equal(0);
     expect(selectGame().status.phase).equal(PHASE.DEPLOY);
-    expect(selectGame().status.currentPlayer).equal(0);
-    expect(selectGame().status.roundPlayer).equal(0);
+    expect(selectGame().status.currentPlayer).equal(User0.id);
+    expect(selectGame().status.roundPlayer).equal(User0.id);
 
     replaceGetRandom(() => 2, () => {
       clientStore0.dispatch(gameDeployAnimalRequest(selectCard(User0, 0).id, 0));
@@ -36,19 +36,19 @@ deck: 50 camo
 
     expect(selectGame().status.turn).equal(0);
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
-    expect(selectGame().status.currentPlayer).equal(0);
-    expect(selectGame().status.roundPlayer).equal(0);
+    expect(selectGame().status.currentPlayer).equal(User0.id);
+    expect(selectGame().status.roundPlayer).equal(User0.id);
 
     clientStore0.dispatch(traitTakeFoodRequest(selectAnimal(User0, 0).id));
 
-    expect(selectGame().status.currentPlayer, 'User0 took food').equal(1);
+    expect(selectGame().status.currentPlayer, 'User0 took food').equal(User1.id);
 
     clientStore1.dispatch(traitTakeFoodRequest(selectAnimal(User1, 0).id));
 
     expect(selectGame().status.turn).equal(1);
     expect(selectGame().status.phase).equal(PHASE.DEPLOY);
-    expect(selectGame().status.currentPlayer).equal(1);
-    expect(selectGame().status.roundPlayer).equal(1);
+    expect(selectGame().status.currentPlayer).equal(User1.id);
+    expect(selectGame().status.roundPlayer).equal(User1.id);
 
     expectUnchanged('User0 cant act on turn1', () => clientStore0.dispatch(gameEndTurnRequest())
       , serverStore, clientStore0, clientStore1);
@@ -60,8 +60,8 @@ deck: 50 camo
 
     expect(selectGame().status.turn).equal(1);
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
-    expect(selectGame().status.currentPlayer).equal(1);
-    expect(selectGame().status.roundPlayer).equal(1);
+    expect(selectGame().status.currentPlayer).equal(User1.id);
+    expect(selectGame().status.roundPlayer).equal(User1.id);
 
     clientStore1.dispatch(gameEndTurnRequest());
     expect(selectAnimal(User1, 0).getFood()).equal(1);
@@ -72,8 +72,8 @@ deck: 50 camo
 
     expect(selectGame().status.turn, 'status.turn').equal(2);
     expect(selectGame().status.phase, 'status.phase').equal(PHASE.DEPLOY);
-    expect(selectGame().status.currentPlayer, 'status.currentPlayer').equal(0);
-    expect(selectGame().status.roundPlayer, 'status.roundPlayer').equal(0);
+    expect(selectGame().status.currentPlayer, 'status.currentPlayer').equal(User0.id);
+    expect(selectGame().status.roundPlayer, 'status.roundPlayer').equal(User0.id);
   });
 
   it('status.roundPlayer', () => {
@@ -88,16 +88,16 @@ players:
 
     expect(selectGame().status.turn).equal(0);
     expect(selectGame().status.phase).equal(PHASE.DEPLOY);
-    expect(selectGame().status.currentPlayer).equal(0);
-    expect(selectGame().status.roundPlayer).equal(0);
+    expect(selectGame().status.currentPlayer).equal(User0.id);
+    expect(selectGame().status.roundPlayer).equal(User0.id);
 
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore1.dispatch(gameEndTurnRequest());
 
     expect(selectGame().status.turn).equal(0);
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
-    expect(selectGame().status.currentPlayer).equal(0);
-    expect(selectGame().status.roundPlayer).equal(0);
+    expect(selectGame().status.currentPlayer).equal(User0.id);
+    expect(selectGame().status.roundPlayer).equal(User0.id);
 
     expect(selectGame().food).above(2);
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
@@ -105,8 +105,8 @@ players:
 
     expect(selectGame().status.turn).equal(1);
     expect(selectGame().status.phase).equal(PHASE.DEPLOY);
-    expect(selectGame().status.currentPlayer).equal(1);
-    expect(selectGame().status.roundPlayer).equal(1);
+    expect(selectGame().status.currentPlayer).equal(User1.id);
+    expect(selectGame().status.roundPlayer).equal(User1.id);
 
     expectUnchanged('User0 cant act on turn1', () => clientStore0.dispatch(gameEndTurnRequest())
       , serverStore, clientStore0, clientStore1);
@@ -116,8 +116,8 @@ players:
 
     expect(selectGame().status.turn).equal(1);
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
-    expect(selectGame().status.currentPlayer).equal(1);
-    expect(selectGame().status.roundPlayer).equal(1);
+    expect(selectGame().status.currentPlayer).equal(User1.id);
+    expect(selectGame().status.roundPlayer).equal(User1.id);
 
     expect(selectGame().food).above(2);
     clientStore1.dispatch(traitTakeFoodRequest('$B'));
@@ -125,7 +125,7 @@ players:
 
     expect(selectGame().status.turn).equal(2);
     expect(selectGame().status.phase).equal(PHASE.DEPLOY);
-    expect(selectGame().status.currentPlayer).equal(0);
-    expect(selectGame().status.roundPlayer).equal(0);
+    expect(selectGame().status.currentPlayer).equal(User0.id);
+    expect(selectGame().status.roundPlayer).equal(User0.id);
   });
 });

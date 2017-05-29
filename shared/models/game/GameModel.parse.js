@@ -114,7 +114,9 @@ export const parseFromRoom = (room, string = '') => {
     , roomId: room.id
     , food: seed.food || 0
     , status: new StatusRecord({
-      phase: parsePhase(seed.phase)
+      roundPlayer: room.users.first()
+      , currentPlayer: room.users.first()
+      , phase: parsePhase(seed.phase)
     })
     , deck
     , players

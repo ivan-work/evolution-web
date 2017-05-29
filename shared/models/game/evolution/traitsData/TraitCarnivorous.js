@@ -31,7 +31,7 @@ import {
 import {selectGame} from '../../../../selectors';
 
 import {TraitModel} from '../TraitModel';
-import {PHASE, QuestionRecord} from '../../GameModel';
+import {GameModel, PHASE, QuestionRecord} from '../../GameModel';
 
 import {
   TraitMimicry
@@ -308,7 +308,7 @@ export const TraitCarnivorous = {
             // Scavenge
             const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
 
-            game.constructor.sortPlayersFromIndex(game, currentPlayerIndex).some(player => player.continent.some(animal => {
+            game.sortPlayersFromIndex(game.players, currentPlayerIndex).some(player => player.continent.some(animal => {
               const traitScavenger = animal.hasTrait(tt.TraitScavenger);
               if (traitScavenger && animal.canEat(game) > 0) {
                 dispatch(server$startFeeding(game.id, animal.id, 1, tt.TraitScavenger, sourceAnimal.id));

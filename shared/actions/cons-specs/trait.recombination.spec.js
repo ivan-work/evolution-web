@@ -34,6 +34,7 @@ players:
 
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$B', tt.TraitRecombination, tt.TraitScavenger, tt.TraitCarnivorous));
     expectUnchanged('Cooldown', () =>

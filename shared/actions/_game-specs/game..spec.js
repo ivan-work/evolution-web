@@ -118,9 +118,9 @@ players:
     expect(selectGame().status.round, 'selectGame().status.round').equal(0);
     expect(selectGame0().status.round, 'ClientGame0().status.round').equal(0);
     expect(selectGame1().status.round, 'ClientGame1().status.round').equal(0);
-    expect(selectGame().status.currentPlayer, 'selectGame().status.currentPlayer').equal(1);
-    expect(selectGame0().status.currentPlayer, 'ClientGame0().status.currentPlayer').equal(1);
-    expect(selectGame1().status.currentPlayer, 'ClientGame1().status.currentPlayer').equal(1);
+    expect(selectGame().status.currentPlayer, 'selectGame().status.currentPlayer').equal(User1.id);
+    expect(selectGame0().status.currentPlayer, 'ClientGame0().status.currentPlayer').equal(User1.id);
+    expect(selectGame1().status.currentPlayer, 'ClientGame1().status.currentPlayer').equal(User1.id);
     clientStore1.dispatch(gameDeployAnimalRequest(selectCard(User1, 0).id, 0));
 
     /**
@@ -132,9 +132,9 @@ players:
     expect(selectGame().status.round, 'selectGame().status.round').equal(1);
     expect(selectGame0().status.round, 'ClientGame0().status.round').equal(1);
     expect(selectGame1().status.round, 'ClientGame1().status.round').equal(1);
-    expect(selectGame().status.currentPlayer, 'selectGame().status.currentPlayer').equal(0);
-    expect(selectGame0().status.currentPlayer, 'ClientGame0().status.currentPlayer').equal(0);
-    expect(selectGame1().status.currentPlayer, 'ClientGame1().status.currentPlayer').equal(0);
+    expect(selectGame().status.currentPlayer, 'selectGame().status.currentPlayer').equal(User0.id);
+    expect(selectGame0().status.currentPlayer, 'ClientGame0().status.currentPlayer').equal(User0.id);
+    expect(selectGame1().status.currentPlayer, 'ClientGame1().status.currentPlayer').equal(User0.id);
     clientStore0.dispatch(gameDeployAnimalRequest(User0OriginalHand.get(2).id, 0));
 
     /**
@@ -146,9 +146,9 @@ players:
     expect(selectGame().status.round, 'serverGame().status.round').equal(1);
     expect(selectGame0().status.round, 'ClientGame0().status.round').equal(1);
     expect(selectGame1().status.round, 'ClientGame1().status.round').equal(1);
-    expect(selectGame().status.currentPlayer, 'selectGame().status.currentPlayer').equal(1);
-    expect(selectGame0().status.currentPlayer, 'ClientGame0().status.currentPlayer').equal(1);
-    expect(selectGame1().status.currentPlayer, 'ClientGame1().status.currentPlayer').equal(1);
+    expect(selectGame().status.currentPlayer, 'selectGame().status.currentPlayer').equal(User1.id);
+    expect(selectGame0().status.currentPlayer, 'ClientGame0().status.currentPlayer').equal(User1.id);
+    expect(selectGame1().status.currentPlayer, 'ClientGame1().status.currentPlayer').equal(User1.id);
     clientStore1.dispatch(gameDeployAnimalRequest(User1OriginalHand.get(1).id, 1));
 
     /**

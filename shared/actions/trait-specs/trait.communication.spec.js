@@ -212,6 +212,22 @@ players:
       expect(selectAnimal(User0, 0).getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(1);
       expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(1);
     });
+
+    it(`Works with cooperation`, () => {
+      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+      const gameId = ParseGame(`
+phase: feeding
+food: 10
+players:
+  - continent: $A mass comm$B coop$B, $B mass
+`);
+      const {selectGame, selectPlayer, findAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+      clientStore0.dispatch(traitTakeFoodRequest('$B'));
+
+      expect(findAnimal('$A').getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(1);
+      expect(findAnimal('$B').getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(2);
+      console.log(clientStore0.getState().get('game').getPlayer(User0.id).continent.toArray())
+    });
   });
 
   describe('Death:', () => {
