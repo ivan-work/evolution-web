@@ -218,6 +218,24 @@ players:
       expect(findAnimal('$B').getFoodAndFat(), 'Animal $B.getFoodAndFat()').equal(1);
     });
 
+    it('Piracy waits for autofood', () => {
+      const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+      const gameId = ParseGame(`
+deck: 10 camo
+phase: feeding
+food: 5
+players:
+  - continent: $A mass comm$B wait +, $B wait mass piracy 
+  - continent: $X, $Y + mass
+`);
+      const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+      clientStore0.dispatch(traitTakeFoodRequest('$B'));
+      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitPiracy, '$A'));
+      expect(findAnimal('$A').getFoodAndFat(), 'Animal $A.getFoodAndFat()').equal(2);
+      expect(findAnimal('$B').getFoodAndFat(), 'Animal $B.getFoodAndFat()').equal(1);
+    });
+
     it(`Works with symbiosis`, () => {
       const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`

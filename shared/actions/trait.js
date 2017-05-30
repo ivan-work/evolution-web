@@ -818,7 +818,7 @@ export const traitClientToServer = {
     });
   }
   , traitActivateRequest: ({gameId, sourceAid, traitId, targets}, {userId}) => (dispatch, getState) => {
-    const game = selectGame(getState, gameId);
+    let game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
     checkGamePhase(game, PHASE.FEEDING);
@@ -828,6 +828,8 @@ export const traitClientToServer = {
     if (!!trait && trait.type !== tt.TraitCommunication && trait.type !== tt.TraitCooperation) {
       dispatch(server$autoFoodSharing(gameId, userId));
     }
+    // Reselect game!
+    game = selectGame(getState, gameId);
 
     const {target} = checkTraitActivation(game, sourceAnimal, traitId, ...targets);
     if (!trait.getDataModel().transient) checkPlayerCanAct(game, userId);

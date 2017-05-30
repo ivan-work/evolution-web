@@ -102,9 +102,9 @@ export class AmbushRecord extends Record({
     // if (js) console.log('js.ambushers', js.ambushers)
     return (!js ? null
       : new AmbushRecord({
-        ...js
-        , ambushers: OrderedMap(js.ambushers)
-      }));
+      ...js
+      , ambushers: OrderedMap(js.ambushers)
+    }));
   }
 }
 
@@ -117,9 +117,9 @@ export class ContinentRecord extends Record({
     return js == null
       ? null
       : new ContinentRecord({
-        ...js
-        , shells: Map(js.shells).map(shell => TraitModel.fromServer(shell))
-      });
+      ...js
+      , shells: Map(js.shells).map(shell => TraitModel.fromServer(shell))
+    });
   }
 }
 
@@ -190,35 +190,38 @@ export class GameModel extends Record({
 
     if (room.settings.halfDeck) deck = deck.map(([count, type]) => [Math.ceil(count / 2), type]);
 
+    const players = (room.settings.randomPlayers
+        ? doShuffle(room.users.toArray())
+        : room.users
+    ).reduce((result, userId, index) => result.set(userId, PlayerModel.new(userId, index)), OrderedMap());
+
     return new GameModel({
       id: uuid.v4()
       , roomId: room.id
       , deck: GameModel.generateDeck(deck, true)
-      , players: (
-        room.settings.randomPlayers
-          ? doShuffle(room.users.toArray())
-          : room.users
-      ).reduce((result, userId, index) => result.set(userId, PlayerModel.new(userId, index)), OrderedMap())
+      , players
       , settings: room.settings
     })
+      .setIn(['status', 'currentPlayer'], players.first().id)
+      .setIn(['status', 'roundPlayer'], players.first().id)
   }
 
   static fromServer(js) {
     return js == null
       ? null
       : new GameModel({
-        ...js
-        , deck: List(js.deck).map(c => CardModel.fromServer(c))
-        , players: OrderedMap(js.players).map(PlayerModel.fromServer).sort((p1, p2) => p1.index > p2.index)
-        , continents: Map(js.continents).map(ContinentRecord.fromJS)
-        , status: new StatusRecord(js.status)
-        , question: QuestionRecord.fromJS(js.question)
-        , cooldowns: CooldownList.fromServer(js.cooldowns)
-        , settings: SettingsRecord.fromJS(js.settings)
-        , log: List(js.log)
-        , huntingCallbacks: List()
-        , ambush: AmbushRecord.fromServer(js.ambush)
-      });
+      ...js
+      , deck: List(js.deck).map(c => CardModel.fromServer(c))
+      , players: OrderedMap(js.players).map(PlayerModel.fromServer).sort((p1, p2) => p1.index > p2.index)
+      , continents: Map(js.continents).map(ContinentRecord.fromJS)
+      , status: new StatusRecord(js.status)
+      , question: QuestionRecord.fromJS(js.question)
+      , cooldowns: CooldownList.fromServer(js.cooldowns)
+      , settings: SettingsRecord.fromJS(js.settings)
+      , log: List(js.log)
+      , huntingCallbacks: List()
+      , ambush: AmbushRecord.fromServer(js.ambush)
+    });
   }
 
   toOthers(userId) {
@@ -309,23 +312,23 @@ export class GameModelClient extends Record({
     return game == null
       ? null
       : new GameModelClient(game)
-        .set('userId', userId);
+      .set('userId', userId);
   }
 
   getPlayer(pid) {
     return pid === void 0 || pid === null
       ? (this.players.get(this.userId))
       : pid.id
-        ? (this.players.get(pid.id))
-        : (this.players.get(pid));
+      ? (this.players.get(pid.id))
+      : (this.players.get(pid));
   }
 
   isPlayerTurn(userId) {
     if (!userId) userId = this.userId;
     return !!(
-      userId
-      && userId === this.status.currentPlayer
-      && (this.status.phase === PHASE.DEPLOY || this.status.phase === PHASE.FEEDING));
+    userId
+    && userId === this.status.currentPlayer
+    && (this.status.phase === PHASE.DEPLOY || this.status.phase === PHASE.FEEDING));
   }
 }
 

@@ -55,7 +55,6 @@ const logTrait = (game, traitId) => {
 
 export const gameStart = game => game
   .setIn(['status', 'phase'], PHASE.DEPLOY)
-  .setIn(['status', 'roundPlayer'], game.players.first().id)
   .setIn(['status', 'round'], 0);
 
 export const gameGiveCards = (game, {userId, cards}) => {
@@ -191,6 +190,8 @@ export const gameStartDeploy = (game) => {
 export const gameStartFeeding = (game, {food}) => {
   ensureParameter(food, 'number');
   return game
+    .update('players', players => players.map(player => player
+      .set('ended', !player.playing)))
     .setIn(['food'], food)
     .setIn(['status', 'round'], 0)
     .update(processNeoplasm)
