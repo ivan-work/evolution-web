@@ -9,7 +9,7 @@ export const TRAIT_DATA_PLACEMENT_ERRORS = {
 };
 
 /**
- * @class TraitDataModel TODO standartize
+ * @class TraitDataModel
  * @property {string} type: null - 'TraitFatTissuue', etc
  * @property {number} [food: 0] - Amount of food required
  * @property {number} [score: 1] - Base score for trait. TODO rewrite every trait to use score only
@@ -48,7 +48,7 @@ export class TraitDataModel extends Record({
   , $checkAction: null // if trait is allowed to be clicked? (game, sourceAnimal) => boolean
   , checkTarget: null // if target is valid? (game, sourceAnimal, targetAnimal) => boolean
   , getTargets: null // get list of available target for an active trait (game, sourceAnimal) => list of targets
-  , customFns: null // Object of custom trait functions
+  , customFns: {} // Object of custom trait functions
 }) {
   static new(traitType) {
     if (!(traitType in traitsData)) throw Error(`traitData[${traitType}] not found`);

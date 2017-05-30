@@ -103,6 +103,11 @@ export const startCooldown = (gameId, link, duration, place, placeId) => ({
   , data: {gameId, link, duration, place, placeId}
 });
 
+export const startCooldownList = (list) => ({
+  type: 'startCooldownList'
+  , data: {list}
+});
+
 const clearCooldown = (gameId, link, place, placeId) => ({
   type: 'clearCooldown'
   , data: {gameId, link, place, placeId}
@@ -119,11 +124,17 @@ const traitMakeCooldownActions = (gameId, trait, sourceAnimal) => {
   }).toArray();
 };
 
-export const server$traitStartCooldown = (gameId, trait, sourceAnimal) => (dispatch) => {
+export const server$traitStartCooldown = (gameId, trait, sourceAnimal) => {
   logger.debug('server$traitStartCooldown:', sourceAnimal.id, trait.type);
-  traitMakeCooldownActions(gameId, trait, sourceAnimal)
-    .map((cooldownAction) => dispatch(server$game(gameId, cooldownAction)));
+  return server$startCooldownList(gameId, traitMakeCooldownActions(gameId, trait, sourceAnimal));
 };
+
+export const server$startCooldownList = (gameId, list) => (dispatch) => {
+  dispatch(shared$startCooldownList(list));
+  dispatch(server$game(gameId, startCooldownList(list)));
+};
+
+export const shared$startCooldownList = (list) => (dispatch) => list.forEach(cooldownAction => dispatch(cooldownAction));
 
 /**
  * Local Traits
@@ -232,6 +243,24 @@ export const traitParalyze = (gameId, animalId) => ({
   type: 'traitParalyze'
   , data: {gameId, animalId}
 });
+
+export const server$autoFoodSharing = (gameId, userId) => (dispatch, getState) => {
+  logger.debug(`server$autoFoodSharing`)
+  let game = selectGame(getState, gameId);
+  let sharedFood = 0;
+  game.getPlayer(userId).someAnimal(animal => {
+    animal.getTraits().forEach(trait => {
+      game = selectGame(getState, gameId);
+      // console.log('checking for autoshare', animal.id, trait.value)
+      if ((trait.type === tt.TraitCooperation || trait.type === tt.TraitCommunication)
+        && !trait.checkActionFails(game, animal)) {
+        sharedFood++;
+        dispatch(server$traitActivate(game, animal, trait, true));
+      }
+    })
+  });
+  logger.debug(`server$autoFoodSharing: shared ${sharedFood} food`)
+};
 
 /**
  * AMBUSH
@@ -442,7 +471,7 @@ export const server$traitNotify_End = (gameId, sourceAid, trait, targetId) => {
  * Complex Actions
  */
 
-export const server$startFeeding = (gameId, animalId, amount, sourceType, sourceId) => (dispatch, getState) => {
+export const server$startFeeding = (gameId, animalId, amount, sourceType, sourceId, autoShare) => (dispatch, getState) => {
   logger.debug(`server$startFeeding: ${sourceId} feeds ${animalId} through ${sourceType} with (${amount})`);
   let game = selectGame(getState, gameId);
   const animal = game.locateAnimal(animalId);
@@ -451,48 +480,23 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
 
   dispatch(server$game(gameId, traitMoveFood(gameId, animal.id, amount, sourceType, sourceId)));
 
-  game = selectGame(getState, gameId);
-  // Cooperation
-  if (sourceType === 'GAME' && game.food > 0) {
-    animal.traits.filter(trait => trait.type === tt.TraitCooperation && trait.checkAction(game, animal))
-      .forEach(traitCooperation => {
-        if (selectGame(getState, gameId).food <= 0) return; // Re-check food after each cooperation
+  autoShare = !!autoShare || game.status.currentPlayer !== animal.ownerId;
 
-        const linkedAnimal = game.locateAnimal(traitCooperation.linkAnimalId, traitCooperation.ownerId);
-        const linkedTrait = linkedAnimal.traits.find(trait => trait.id === traitCooperation.linkId);
-
-        if (!linkedAnimal.canEat(game)) return;
-
-        traitMakeCooldownActions(gameId, traitCooperation, animal)
-          .concat(traitMakeCooldownActions(gameId, linkedTrait, linkedAnimal))
-          .map(cooldownAction => dispatch(cooldownAction));
-
-        dispatch(server$traitNotify_Start(game, animal, traitCooperation, linkedAnimal.id));
-        dispatch(server$startFeedingFromGame(gameId, linkedAnimal.id, 1, animal.id));
-      });
-  }
-
-  // Communication
-  animal.traits.filter(traitCommunication => traitCommunication.type === tt.TraitCommunication)
-    .map(traitCommunication => {
-      if (!traitCommunication.checkAction(selectGame(getState, gameId), animal)) return;
-      const linkedAnimal = game.locateAnimal(traitCommunication.linkAnimalId, traitCommunication.ownerId);
-      if (!linkedAnimal) {
-        // Because "animal" is coming from params, when it kills linkedAnimal, linkedAnimal is null
-        // TODO refactor so startFeeding accepts animalId and reselects "animal"
-        return;
+  animal.getTraits().forEach(trait => {
+    game = selectGame(getState, gameId);
+    if (trait.type === tt.TraitCommunication || (sourceType === 'GAME' && trait.type === tt.TraitCooperation)) {
+      trait = trait.set('value', true); // Hack =( to avoid checkActionFails checking for trait.value
+      if (!trait.checkActionFails(game, animal, trait)) {
+        if (autoShare) {
+          dispatch(server$traitActivate(game, animal, trait, true));
+        } else {
+          dispatch(server$traitSetValue(game, animal, trait, true));
+        }
       }
-      const linkedTrait = linkedAnimal.traits.find(trait => trait.id === traitCommunication.linkId);
+    }
+  });
 
-      traitMakeCooldownActions(gameId, traitCommunication, animal)
-        .concat(traitMakeCooldownActions(gameId, linkedTrait, linkedAnimal))
-        .map(cooldownAction => dispatch(cooldownAction));
-
-      dispatch(server$traitNotify_Start(game, animal, traitCommunication, linkedAnimal.id));
-      dispatch(server$startFeeding(gameId, linkedAnimal.id, 1, tt.TraitCommunication, animal.id));
-    });
-
-  dispatch(server$tryViviparous(game.id, animal.id));
+  dispatch(server$tryViviparous(gameId, animalId));
 
   return true;
 };
@@ -525,7 +529,7 @@ const gameFoodTake_End = (gameId, animalId) => ({
   , data: {gameId, animalId}
 });
 
-export const server$startFeedingFromGame = (gameId, animalId, amount, source) => (dispatch, getState) => {
+export const server$startFeedingFromGame = (gameId, animalId, amount, source, auto) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   const animal = game.locateAnimal(animalId);
 
@@ -537,7 +541,7 @@ export const server$startFeedingFromGame = (gameId, animalId, amount, source) =>
     const ambushed = dispatch(server$gameAmbushPrepareStart(game, animal));
 
     if (!ambushed) {
-      dispatch(server$startFeeding(gameId, animal.id, amount, 'GAME'));
+      dispatch(server$startFeeding(gameId, animal.id, amount, 'GAME', 'GAME', auto));
       dispatch(server$game(gameId, gameFoodTake_End(gameId, animalId)));
       if (!source) dispatch(server$playerActed(gameId, animal.ownerId));
     }
@@ -760,7 +764,10 @@ export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetI
 //
 
 export const traitClientToServer = {
-  traitTakeFoodRequest: ({gameId, animalId}, {userId}) => server$takeFoodRequest(gameId, userId, animalId)
+  traitTakeFoodRequest: ({gameId, animalId}, {userId}) => (dispatch) => {
+    dispatch(server$autoFoodSharing(gameId, userId));
+    dispatch(server$takeFoodRequest(gameId, userId, animalId))
+  }
   , traitTakeShellRequest: ({gameId, animalId, traitId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
@@ -769,6 +776,8 @@ export const traitClientToServer = {
     checkPlayerCanAct(game, userId);
 
     const animal = checkPlayerHasAnimal(game, userId, animalId);
+
+    dispatch(server$autoFoodSharing(gameId, userId));
 
     throwError(() => checkAnimalCanTakeShellFails(game, animal));
 
@@ -814,8 +823,16 @@ export const traitClientToServer = {
     checkGameHasUser(game, userId);
     checkGamePhase(game, PHASE.FEEDING);
     const sourceAnimal = checkPlayerHasAnimal(game, userId, sourceAid);
-    const {trait, target} = checkTraitActivation(game, sourceAnimal, traitId, ...targets);
+
+    const trait = sourceAnimal.hasTrait(traitId);
+    if (!!trait && trait.type !== tt.TraitCommunication && trait.type !== tt.TraitCooperation) {
+      dispatch(server$autoFoodSharing(gameId, userId));
+    }
+
+    const {target} = checkTraitActivation(game, sourceAnimal, traitId, ...targets);
     if (!trait.getDataModel().transient) checkPlayerCanAct(game, userId);
+
+
     const result = dispatch(server$traitActivate(game, sourceAnimal, trait, target));
     if (result === void 0) {
       throw new Error(`traitActivateRequest@Game(${gameId}): Animal(${sourceAid})-${trait.type}-(${targets.join(' ')}) result undefined`);
@@ -866,6 +883,7 @@ export const traitServerToClient = {
     traitMoveFood(gameId, animalId, amount, sourceType, sourceId)
   , startCooldown: ({gameId, link, duration, place, placeId}) =>
     startCooldown(gameId, link, duration, place, placeId)
+  , startCooldownList: ({list}) => shared$startCooldownList(list)
   , traitQuestion: ({gameId, question}, currentUserId) =>
     traitQuestion(gameId, QuestionRecord.fromJS(question))
   , traitAnswerSuccess: ({gameId, questionId}, currentUserId) =>

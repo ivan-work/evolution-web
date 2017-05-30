@@ -82,11 +82,12 @@ players:
     expect(selectGame().food, 'food').equal(6);
     clientStore0.dispatch(traitTakeFoodRequest('$Q'));
 
-    clientStore1.dispatch(traitActivateRequest('$S', 'TraitGrazing'));
-    clientStore1.dispatch(traitActivateRequest('$H', 'TraitHibernation'));
-    clientStore1.dispatch(traitActivateRequest('$D', 'TraitPiracy', '$Q'));
+    clientStore1.dispatch(traitActivateRequest('$S', tt.TraitGrazing));
+    clientStore1.dispatch(traitActivateRequest('$H', tt.TraitHibernation));
+    clientStore1.dispatch(traitActivateRequest('$D', tt.TraitPiracy, '$Q'));
     clientStore1.dispatch(traitTakeFoodRequest('$G'));
-
+    clientStore1.dispatch(traitActivateRequest('$G', tt.TraitCooperation));
+    clientStore1.dispatch(gameEndTurnRequest());
     replaceGetRandom(() => 1, () => {
       clientStore2.dispatch(traitActivateRequest('$Z', 'TraitCarnivorous', '$G'));
       clientStore1.dispatch(traitAnswerRequest(tt.TraitRunning));
@@ -171,7 +172,7 @@ players:
       expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $D, 'TraitPiracy', $Q]);
       expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitMoveFood', 1, 'TraitPiracy', $D, $Q]);
       expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitMoveFood', 1, 'GAME', $G, null]);
-      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $G, 'TraitCooperation', $F]);
+      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $G, 'TraitCooperation', null]);
       expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitMoveFood', 1, 'GAME', $F, null]);
       expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User1.id, true]);
 
@@ -200,7 +201,6 @@ players:
       expect(selectGame().log.get(i++).message, `at ${i}`).eql(['animalDeath', 'KILL', $H]);
       expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitMoveFood', 2, 'TraitCarnivorous', $X, null]);
       expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitMoveFood', 1, 'TraitScavenger', $A, $X]);
-      expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitNotify_Start', $A, 'TraitCommunication', $S1]);
       expect(selectGame().log.get(i++).message, `at ${i}`).eql(['traitMoveFood', 1, 'TraitCommunication', $S1, $A]);
       expect(selectGame().log.get(i++).message, `at ${i}`).eql(['gameEndTurn', User2.id, true]);
 

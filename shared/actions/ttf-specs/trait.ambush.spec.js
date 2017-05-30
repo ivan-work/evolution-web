@@ -364,6 +364,9 @@ players:
     expect(findAnimal('$E').getFood()).equal(0);
     expect(findAnimal('$R').getFood()).equal(0);
 
+    expect(selectGame().status.phase).equal(PHASE.FEEDING);
+    clientStore0.dispatch(traitActivateRequest('$Q', tt.TraitWaiter));
+
     expect(selectGame().status.phase).equal(PHASE.AMBUSH);
     clientStore1.dispatch(traitAmbushContinueRequest());
 
@@ -415,8 +418,11 @@ players:
 `);
     const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
     clientStore0.dispatch(traitTakeFoodRequest('$B'));
+    clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCooperation));
     expect(selectGame().status.phase).equal(PHASE.AMBUSH);
     clientStore1.dispatch(traitAmbushActivateRequest('$D'));
+
+    clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCooperation));
 
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
     expect(findAnimal('$C').getFood()).equal(1);

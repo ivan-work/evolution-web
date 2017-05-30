@@ -16,6 +16,8 @@ import {
   , server$traitAnimalRemoveTrait
   , server$traitGrazeFood
   , server$traitSetAnimalFlag
+  , server$startFeedingFromGame
+  , server$traitSetValue
   , server$traitNotify_End
   , server$traitConvertFat
   , server$tryViviparous
@@ -154,15 +156,6 @@ export const TraitTailLoss = {
   }
 };
 
-export const TraitCommunication = {
-  type: tt.TraitCommunication
-  , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
-  , cooldowns: fromJS([
-    [tt.TraitCommunication, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
-  ])
-  , action: () => true
-};
-
 //
 
 export const TraitGrazing = {
@@ -219,12 +212,69 @@ export const TraitPoisonous = {
 
 export const TraitCooperation = {
   type: tt.TraitCooperation
+  , targetType: TRAIT_TARGET_TYPE.NONE
   , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
+  , playerControllable: true
   , cooldowns: fromJS([
     [tt.TraitCooperation, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
-  , action: () => true
-  , $checkAction: (game) => game.food > 0
+  , action: (game, animal, trait, autoShare) => (dispatch) => {
+    const animal1 = animal;
+    const animal2 = trait.findLinkedAnimal(game, animal);
+    const trait1 = trait;
+    const trait2 = trait.findLinkedTrait(game);
+
+    dispatch(server$traitSetValue(game, animal1, trait1, false));
+
+    dispatch(server$traitStartCooldown(game.id, trait1, animal1));
+    dispatch(server$traitStartCooldown(game.id, trait2, animal2));
+
+    dispatch(server$startFeedingFromGame(game.id, animal2.id, 1, animal.id, autoShare));
+
+    return false;
+  }
+  , $checkAction: (game, animal, trait) => {
+    const linkedAnimal = trait.findLinkedAnimal(game, animal);
+    return (game.food > 0
+    && trait.value
+    && !!linkedAnimal
+    && linkedAnimal.canEat(game));
+  }
+  , customFns: {
+    eventNextPlayer: (trait) => trait.set('value', false)
+  }
+};
+
+export const TraitCommunication = {
+  type: tt.TraitCommunication
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
+  , playerControllable: true
+  , cooldowns: fromJS([
+    [tt.TraitCommunication, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
+  ])
+  , action: (game, animal, trait, autoShare) => (dispatch) => {
+    const animal1 = animal;
+    const animal2 = trait.findLinkedAnimal(game, animal);
+    const trait1 = trait;
+    const trait2 = trait.findLinkedTrait(game);
+
+    dispatch(server$traitSetValue(game, animal1, trait1, false));
+
+    dispatch(server$traitStartCooldown(game.id, trait1, animal1));
+    dispatch(server$traitStartCooldown(game.id, trait2, animal2));
+
+    dispatch(server$startFeeding(game.id, animal2.id, 1, tt.TraitCommunication, animal.id, autoShare));
+
+    return false;
+  }
+  , $checkAction: (game, animal, trait) => {
+    const linkedAnimal = trait.findLinkedAnimal(game, animal);
+    return (trait.value && !!linkedAnimal && linkedAnimal.canEat(game));
+  }
+  , customFns: {
+    eventNextPlayer: (trait) => trait.set('value', false)
+  }
 };
 
 export const TraitBurrowing = {

@@ -91,8 +91,8 @@ export const TraitRecombination = {
   ])
   , action: (game, sourceAnimal, traitRecombination, [trait1, trait2]) => (dispatch, getState) => {
     const animal1 = sourceAnimal;
-    const animal2 = TraitRecombination.getLinkedAnimal(game, sourceAnimal, traitRecombination);
-    const traitRecombination2 = animal2.hasTrait(tt.TraitRecombination);
+    const animal2 = traitRecombination.findLinkedAnimal(game, sourceAnimal);
+    const traitRecombination2 = traitRecombination.findLinkedTrait(game);
     dispatch(server$traitAnimalRemoveTrait(game, animal1, trait1));
     dispatch(server$traitAnimalRemoveTrait(game, animal2, trait2));
     if (!trait1.getDataModel().checkTraitPlacementFails(selectGame(getState, game.id).locateAnimal(animal2.id, animal2.ownerId)))
@@ -104,21 +104,13 @@ export const TraitRecombination = {
     return true;
   }
   , $checkAction: (game, sourceAnimal, traitRecombination) => {
-    const linkedAnimal = game.locateAnimal(
-      sourceAnimal.id === traitRecombination.hostAnimalId ? traitRecombination.linkAnimalId : traitRecombination.hostAnimalId
-      , traitRecombination.ownerId
-    );
+    const linkedAnimal = traitRecombination.findLinkedAnimal(game, sourceAnimal);
     return (TraitRecombination.getTargets(game, sourceAnimal).size > 0
     && TraitRecombination.getTargets(game, linkedAnimal).size > 0);
   }
   , checkTarget: (game, targetAnimal, targetTrait) => (!targetTrait.getDataModel().hidden && !(targetTrait.isLinked())) // Copypaste of TraitNeoplasm =/
   , getTargets: (game, targetAnimal, targetTrait) => targetAnimal.traits
     .filter(t => TraitRecombination.checkTarget(null, null, t)).toList()
-  , getLinkedAnimal: (game, animal, trait) => (game.locateAnimal(
-      animal.id === trait.hostAnimalId ? trait.linkAnimalId : trait.hostAnimalId
-      , trait.ownerId
-    )
-  )
 };
 
 export const TraitHerding = {type: tt.TraitHerding};

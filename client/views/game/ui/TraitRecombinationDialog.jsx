@@ -63,7 +63,7 @@ export default class TraitRecombinationDialog extends React.Component {
     const {animal, trait} = recombinationQuestion;
 
     const animal1 = animal;
-    const animal2 = TraitRecombination.getLinkedAnimal(game, animal, trait);
+    const animal2 = trait.findLinkedAnimal(game, animal);
     const traits1 = TraitRecombination.getTargets(game, animal1);
     const traits2 = TraitRecombination.getTargets(game, animal2);
 

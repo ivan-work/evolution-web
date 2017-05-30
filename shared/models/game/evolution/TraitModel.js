@@ -91,6 +91,12 @@ export class TraitModel extends Record({
     return game.locateTrait(this.linkId, this.linkAnimalId, this.ownerId);
   }
 
+  findLinkedAnimal(game, animal) {
+    return game.locateAnimal(
+      animal.id === this.hostAnimalId ? this.linkAnimalId : this.hostAnimalId
+      , this.ownerId)
+  }
+
   // TODO replace it with checkActionFails
   checkAction(game, sourceAnimal) {
     const traitData = this.getDataModel();
@@ -131,7 +137,7 @@ export class TraitModel extends Record({
   }
 
   toString() {
-    return `Trait#${this.id}#${this.type}(${this.value || ''})${this.disabled ? '(disabled)' : ''}`;
+    return `Trait#${this.type}#${this.id}@${this.hostAnimalId}(${this.value || ''})${this.disabled ? '(disabled)' : ''}`;
   }
 
   countScore() {

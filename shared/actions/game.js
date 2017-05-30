@@ -23,6 +23,7 @@ import {
   , server$takeFoodRequest
   , server$questionPauseTimeout
   , server$questionResumeTimeout
+  , server$autoFoodSharing
 } from './actions';
 import {appPlaySound} from '../../client/actions/app';
 import {gameNextPlayer as Reduce_gameNextPlayer} from '../../server/reducers/games-rdx-server';
@@ -305,6 +306,7 @@ export const server$defaultTurn = (gameId, userId) => (dispatch, getState) => {
 };
 
 export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
+  dispatch(server$autoFoodSharing(gameId, userId));
   const isDefaultTurn = !!dispatch(server$defaultTurn(gameId, userId));
   // if isDefaultTurn is true, then player performed default turn\
   // and there's second server$gameEndTurn is coming. So we finish this one.

@@ -138,6 +138,13 @@ export const gameNextRound = (game, {}) => game
 export const gameNextPlayer = (game, {playerId}) => game
   .setIn(['status', 'currentPlayer'], playerId)
   .update('cooldowns', cooldowns => cooldowns.eventNextPlayer())
+  .update('players', players => players.map(player => player
+    .update('continent', continent => continent.map(animal => animal
+      .update('traits', traits => traits.map(trait => trait.getDataModel().customFns.eventNextPlayer
+        ? trait.getDataModel().customFns.eventNextPlayer(trait)
+        : trait))
+    ))
+  ))
   .update(addToGameLog(['gameNextPlayer', playerId]));
 
 export const gameAddTurnTimeout = (game, {turnStartTime, turnDuration}) => game
@@ -173,7 +180,7 @@ export const gameStartDeploy = (game) => {
         .set('food', 0)
         .set('flags', Map())
         .update('traits', traits => traits
-          .map(trait => trait.type === 'TraitIntellect' ? trait.set('value', false) : trait)
+          .map(trait => trait.type === tt.TraitIntellect ? trait.set('value', false) : trait)
         )
         .recalculateDisabling()
       ))

@@ -27,6 +27,7 @@ players:
 
     expect(findAnimal('$A').getWantedFood(), `Neoplasm disabled massive`).equal(4);
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCooperation));
     expect(findAnimal('$B').getFood(), `Neoplasm doesn't disable Cooperation`).equal(1);
     clientStore0.dispatch(gameEndTurnRequest());
 

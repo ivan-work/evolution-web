@@ -43,7 +43,8 @@ export const makeGameSelectors = (getState, gameId) => ({
   , selectTrait: (user, animalIndex, traitIndex) => selectTrait(selectGame(getState, gameId), user, animalIndex, traitIndex)
   , selectTraitId: (user, animalIndex, traitIndex) => selectTrait(selectGame(getState, gameId), user, animalIndex, traitIndex).id
 
-  , findTrait: (animalId, traitType) => selectGame(getState, gameId).locateAnimal(animalId).hasTrait(traitType, true)
+  , findTrait: (animalId, traitType, index = 0) => selectGame(getState, gameId).locateAnimal(animalId).traits.toArray()
+    .filter(t => t.type === traitType)[index]
 });
 
 export const makeClientGameSelectors = (getState, gameId, i) => ({
