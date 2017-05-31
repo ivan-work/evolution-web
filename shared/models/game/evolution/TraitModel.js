@@ -91,6 +91,10 @@ export class TraitModel extends Record({
     return game.locateTrait(this.linkId, this.linkAnimalId, this.ownerId);
   }
 
+  findAnimal(game) {
+    return game.locateAnimal(this.hostAnimalId, this.ownerId);
+  }
+
   findLinkedAnimal(game, animal) {
     return game.locateAnimal(
       animal.id === this.hostAnimalId ? this.linkAnimalId : this.hostAnimalId

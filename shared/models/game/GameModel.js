@@ -102,9 +102,9 @@ export class AmbushRecord extends Record({
     // if (js) console.log('js.ambushers', js.ambushers)
     return (!js ? null
       : new AmbushRecord({
-      ...js
-      , ambushers: OrderedMap(js.ambushers)
-    }));
+        ...js
+        , ambushers: OrderedMap(js.ambushers)
+      }));
   }
 }
 
@@ -117,9 +117,9 @@ export class ContinentRecord extends Record({
     return js == null
       ? null
       : new ContinentRecord({
-      ...js
-      , shells: Map(js.shells).map(shell => TraitModel.fromServer(shell))
-    });
+        ...js
+        , shells: Map(js.shells).map(shell => TraitModel.fromServer(shell))
+      });
   }
 }
 
@@ -210,18 +210,18 @@ export class GameModel extends Record({
     return js == null
       ? null
       : new GameModel({
-      ...js
-      , deck: List(js.deck).map(c => CardModel.fromServer(c))
-      , players: OrderedMap(js.players).map(PlayerModel.fromServer).sort((p1, p2) => p1.index > p2.index)
-      , continents: Map(js.continents).map(ContinentRecord.fromJS)
-      , status: new StatusRecord(js.status)
-      , question: QuestionRecord.fromJS(js.question)
-      , cooldowns: CooldownList.fromServer(js.cooldowns)
-      , settings: SettingsRecord.fromJS(js.settings)
-      , log: List(js.log)
-      , huntingCallbacks: List()
-      , ambush: AmbushRecord.fromServer(js.ambush)
-    });
+        ...js
+        , deck: List(js.deck).map(c => CardModel.fromServer(c))
+        , players: OrderedMap(js.players).map(PlayerModel.fromServer).sort((p1, p2) => p1.index > p2.index)
+        , continents: Map(js.continents).map(ContinentRecord.fromJS)
+        , status: new StatusRecord(js.status)
+        , question: QuestionRecord.fromJS(js.question)
+        , cooldowns: CooldownList.fromServer(js.cooldowns)
+        , settings: SettingsRecord.fromJS(js.settings)
+        , log: List(js.log)
+        , huntingCallbacks: List()
+        , ambush: AmbushRecord.fromServer(js.ambush)
+      });
   }
 
   toOthers(userId) {
@@ -309,18 +309,17 @@ export class GameModelClient extends Record({
 }) {
   static fromServer(js, userId) {
     const game = GameModel.fromServer(js);
-    return game == null
-      ? null
+    return !game ? null
       : new GameModelClient(game)
-      .set('userId', userId);
+        .set('userId', userId);
   }
 
   getPlayer(pid) {
     return pid === void 0 || pid === null
       ? (this.players.get(this.userId))
       : pid.id
-      ? (this.players.get(pid.id))
-      : (this.players.get(pid));
+        ? (this.players.get(pid.id))
+        : (this.players.get(pid));
   }
 
   isPlayerTurn(userId) {

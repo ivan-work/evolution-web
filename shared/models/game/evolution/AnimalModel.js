@@ -84,13 +84,13 @@ export class AnimalModel extends Record({
     return this
       .set('traits', traits)
       .recalculateDisabling()
-      .recalculateFood()
   }
 
   recalculateFood() {
     let foodSize = 1;
     let fatSize = 0;
     this.traits.forEach(trait => {
+      // if (trait.isLinked() && trait.findLinkedTrait(game).disabled) return;
       if (trait.disabled) return;
       if (trait.type === TraitFatTissue) fatSize++;
       foodSize += trait.getDataModel().food;
@@ -107,11 +107,6 @@ export class AnimalModel extends Record({
     const isParalysed = this.hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED);
     return this.update('traits', traits => traits.map(trait => {
       if (isParalysed) {
-        if (isParalysed) {
-
-        } else {
-
-        }
         return trait.set('disabled', true);
       } else if (trait.type === TraitNeoplasm) {
         belowNeoplasm = false;
