@@ -97,8 +97,8 @@ players:
     expect(selectPlayer(User0).continent).size(1);
     expect(selectPlayer(User1).continent).size(1);
     expect(selectPlayer(User2).continent).size(1);
-    expect(selectPlayer(User0).hand).size(1);
-    expect(selectPlayer(User1).hand).size(2);
+    expect(selectPlayer(User0).hand).size(2);
+    expect(selectPlayer(User1).hand).size(1);
     expect(selectPlayer(User2).hand).size(1);
   });
 
@@ -120,7 +120,6 @@ players:
     expect(ServerGame().getPlayer(User2).countScore(), 'score for User2 before').equal(9);
 
     clientStore0.dispatch(gameEndTurnRequest());
-    clientStore2.dispatch(gameEndTurnRequest());
 
     expect(ServerGame().getPlayer(User0).countScore(), 'score for User0 after').equal(2);
     expect(ServerGame().getPlayer(User1).countScore(), 'score for User1 after').equal(4);

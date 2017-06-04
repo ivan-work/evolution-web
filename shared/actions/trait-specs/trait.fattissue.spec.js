@@ -42,7 +42,8 @@ players:
     });
   });
   describe('Feeding:', () => {
-    it('FatTissue test', () => {
+    // AUTO FAT PROCESSING - disabled by rules. TODO delete on sight
+    it.skip('FatTissue test', () => {
       const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
 deck: 12 CardGrazingAndFatTissue

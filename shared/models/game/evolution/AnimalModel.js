@@ -83,7 +83,7 @@ export class AnimalModel extends Record({
     const traits = this.traits.filterNot(lookup);
     return this
       .set('traits', traits)
-      .recalculateDisabling()
+      .recalculateFood();
   }
 
   recalculateFood() {
@@ -92,32 +92,13 @@ export class AnimalModel extends Record({
     this.traits.forEach(trait => {
       // if (trait.isLinked() && trait.findLinkedTrait(game).disabled) return;
       if (trait.disabled) return;
-      if (trait.type === TraitFatTissue) fatSize++;
+      if (trait.type === TraitFatTissue && !trait.disabled) fatSize++;
       foodSize += trait.getDataModel().food;
     });
     return this
       .set('foodSize', foodSize)
       .set('fatSize', fatSize)
       .set('food', Math.min(this.food, foodSize))
-  }
-
-  recalculateDisabling() {
-    const traitNeoplasm = this.hasTrait(TraitNeoplasm);
-    let belowNeoplasm = true;
-    const isParalysed = this.hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED);
-    return this.update('traits', traits => traits.map(trait => {
-      if (isParalysed) {
-        return trait.set('disabled', true);
-      } else if (trait.type === TraitNeoplasm) {
-        belowNeoplasm = false;
-        return trait.set('disabled', false);
-      } else if (!!traitNeoplasm && belowNeoplasm && traitNeoplasm.getDataModel().customFns.canBeDisabled(trait)) {
-        return trait.set('disabled', true).set('value', false)
-      } else {
-        return trait.set('disabled', false);
-      }
-    }))
-      .recalculateFood();
   }
 
   /**
@@ -137,7 +118,7 @@ export class AnimalModel extends Record({
   }
 
   getFat() {
-    return this.traits.filter(trait => trait.type === TraitFatTissue && trait.value).size
+    return this.traits.filter(trait => trait.type === TraitFatTissue && trait.value && !trait.disabled).size
   }
 
   getFoodAndFat() {
@@ -199,25 +180,30 @@ export class AnimalModel extends Record({
 
     return this
       .set('food', this.getFood() + amountForFood)
-      .update('traits', traits => traits.map(trait =>
-        (trait.type === TraitFatTissue && !trait.value) ? trait.set('value', amountForFat-- > 0)
-          : trait));
+      .update('traits', traits => traits
+        .reverse()
+        .map(trait => (trait.type === TraitFatTissue && !trait.value && !trait.disabled
+          ? trait.set('value', amountForFat-- > 0)
+          : trait))
+        .reverse()
+      );
   }
 
-  digestFood() {
-    let fatToSpend = Math.max(0, this.foodSize - this.getFood());
-    if (this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)) {
-      return this
-    } else if (this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) {
-      return this
-    } else {
-      return this
-        .update('food', food => food + Math.min(this.getFat(), fatToSpend))
-        .update('traits', traits => traits.map(trait =>
-          (trait.type === TraitFatTissue && trait.value && fatToSpend-- > 0) ? trait.set('value', false)
-            : trait));
-    }
-  }
+  // AUTO FAT PROCESSING - disabled by rules. TODO delete on sight
+  // digestFood() {
+  //   let fatToSpend = Math.max(0, this.foodSize - this.getFood());
+  //   if (this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)) {
+  //     return this
+  //   } else if (this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) {
+  //     return this
+  //   } else {
+  //     return this
+  //       .update('food', food => food + Math.min(this.getFat(), fatToSpend))
+  //       .update('traits', traits => traits.map(trait =>
+  //         (trait.type === TraitFatTissue && trait.value && fatToSpend-- > 0) ? trait.set('value', false)
+  //           : trait));
+  //   }
+  // }
 
   countScore() {
     let baseScore = 2;

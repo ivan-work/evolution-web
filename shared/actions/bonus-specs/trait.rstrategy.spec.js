@@ -42,12 +42,12 @@ players:
     clientStore0.dispatch(gameEndTurnRequest());
     expect(selectGame().status.turn).equal(1);
     expect(selectGame().status.phase).equal(PHASE.DEPLOY);
-    expect(selectPlayer(User1).hand, '(User1).hand').size(2);
-    expect(selectPlayer(User1).continent, '(User1).continent').size(3 + 2);
-    expect(selectPlayer(User2).hand, '(User2).hand').size(4);
-    expect(selectPlayer(User2).continent, '(User2).continent').size(4);
     expect(selectPlayer(User0).hand, '(User0).hand').size(2);
     expect(selectPlayer(User0).continent, '(User0).continent').size(3 + 1);
+    expect(selectPlayer(User1).hand, '(User1).hand').size(2);
+    expect(selectPlayer(User1).continent, '(User1).continent').size(3 + 1);
+    expect(selectPlayer(User2).hand, '(User2).hand').size(5);
+    expect(selectPlayer(User2).continent, '(User2).continent').size(4);
   });
 });
 

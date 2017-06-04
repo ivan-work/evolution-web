@@ -230,7 +230,6 @@ players:
       clientStore0.dispatch(traitTakeFoodRequest('$A'));
       clientStore0.dispatch(traitActivateRequest('$A', tt.TraitWaiter));
 
-      console.log(selectPlayer(User0).continent.toArray())
       expect(selectGame().food).equal(8);
       expect(findAnimal('$A').getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(2);
       expect(findAnimal('$B').getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(2);

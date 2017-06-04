@@ -24,7 +24,6 @@ players:
 
     expect(findAnimal('$A').getWantedFood(), `Neoplasm is waiting`).equal(5);
     clientStore0.dispatch(gameEndTurnRequest());
-
     expect(findAnimal('$A').getWantedFood(), `Neoplasm disabled massive`).equal(4);
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
     clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCooperation));
@@ -126,6 +125,21 @@ players:
     clientStore0.dispatch(traitActivateRequest('$B', tt.TraitPiracy, '$A'));
     expect(findAnimal('$A').getFood()).equal(0);
     expect(findAnimal('$B').getFood()).equal(1);
+  });
+
+  it('Kills instantly', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A carn wait, $B pira neoplasm tail
+`);
+    const {selectGame, selectPlayer, selectCard, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitTailLoss, tt.TraitTailLoss));
+    expect(findAnimal('$A').getFood()).equal(1);
+    expect(findAnimal('$B')).null;
   });
 });
 

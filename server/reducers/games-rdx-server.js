@@ -108,9 +108,28 @@ export const gameDeployTrait = (game, {cardId, traits}) => {
     .update(addToGameLog(['gameDeployTrait', cardOwnerId, traits[0].type].concat(animals)));
 };
 
-export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) => game
-  .updateIn(['players', sourcePid, 'continent'], continent => continent
-    .map(a => a.traitDetach(trait => trait.id === traitId || trait.linkId === traitId)));
+export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) => {
+  const deadAnimals = [];
+  return game
+    .updateIn(['players', sourcePid, 'continent'], continent => continent
+      .map(animal => animal
+        .update(animal => {
+          if (animal.getIn(['traits', traitId, 'type']) === tt.TraitNeoplasm && !animal.hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)) {
+            return animal.update('traits', traits => traits.map(trait => trait.set('disabled', false)))
+          }
+          return animal;
+        })
+        .traitDetach(trait => trait.id === traitId || trait.linkId === traitId)
+        .update(animal => {
+          if (animal.traits.last() && animal.traits.last().type === tt.TraitNeoplasm)
+            deadAnimals.push(animal.id);
+          return animal;
+        })
+      ))
+    .update(game => deadAnimals.reduce(
+      (game, animalId) => animalDeath(game, {type: ANIMAL_DEATH_REASON.NEOPLASM, animalId})
+      , game));
+}
 
 export const traitAnimalAttachTrait = (game, {sourcePid, sourceAid, trait}) => game
   .updateIn(['players', sourcePid, 'continent', sourceAid], animal => animal.traitAttach(trait));
@@ -180,8 +199,9 @@ export const gameStartDeploy = (game) => {
         .set('flags', Map())
         .update('traits', traits => traits
           .map(trait => trait.type === tt.TraitIntellect ? trait.set('value', false) : trait)
+          .map(trait => trait.set('disabled', false))
         )
-        .recalculateDisabling()
+        .update(animal => TraitNeoplasm.customFns.actionProcess(animal))
       ))
     ))
     .setIn(['status', 'round'], 0)
@@ -206,7 +226,7 @@ const processNeoplasm = (game) => {
           if (!traitNeoplasm) return animal;
           const updatedAnimal = TraitNeoplasm.customFns.actionMoveInAnimal(animal);
           if (updatedAnimal) {
-            return updatedAnimal.recalculateDisabling();
+            return TraitNeoplasm.customFns.actionProcess(updatedAnimal);
           } else {
             deadAnimals.push(animal.id);
             return animal;
@@ -223,9 +243,10 @@ const processNeoplasm = (game) => {
 };
 
 export const gameStartExtinct = (game) => game
-  .update('players', players => players.map(player => player
-    .update('continent', continent => continent.map(animal => animal.digestFood()))
-  ));
+// AUTO FAT PROCESSING - disabled by rules. TODO delete on sight
+// .update('players', players => players.map(player => player
+//   .update('continent', continent => continent.map(animal => animal.digestFood()))
+// ));
 
 export const gameStartRegeneration = (game) => game
   .setIn(['status', 'round'], 0);
@@ -335,9 +356,22 @@ export const traitGrazeFood = (game, {food}) => game
 
 export const traitParalyze = (game, {animalId}) => {
   const animal = game.locateAnimal(animalId);
+  const linkedTraits = [];
   return game
     .update(game => traitSetAnimalFlag(game, {sourceAid: animalId, flag: TRAIT_ANIMAL_FLAG.PARALYSED, on: true}))
-    .updateIn(['players', animal.ownerId, 'continent', animal.id], animal => animal.recalculateDisabling());
+    .updateIn(['players', animal.ownerId, 'continent', animal.id], animal => animal
+      .update('traits', traits => traits.map(trait => {
+        if (trait.isLinked()) linkedTraits.push(trait.findLinkedTrait(game));
+        return trait.set('disabled', true)
+      }))
+      .recalculateFood()
+    )
+    .update(game => linkedTraits.reduce((game, trait) =>
+        game.updateIn(['players', trait.ownerId, 'continent', trait.hostAnimalId], animal => animal
+          .setIn(['traits', trait.id, 'disabled'], true)
+          .recalculateFood()
+        )
+      , game));
 };
 
 export const traitConvertFat = (game, {sourceAid, traitId}) => {
@@ -412,7 +446,7 @@ export const gameAmbushAttackEnd = (game) => game
   .removeIn(['ambush']);
 
 // No need to exports, serverside-only
-const traitAddHuntingCallback = (game, {callback}) => game.update('huntingCallbacks', (list) => list.unshift(callback));
+const traitAddHuntingCallback = (game, {callback}) => game.update('huntingCallbacks', (list) => list.push(callback));
 const traitClearHuntingCallbacks = (game, {}) => game.set('huntingCallbacks', List());
 
 export const reducer = createReducer(Map(), {

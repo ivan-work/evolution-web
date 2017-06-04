@@ -7,6 +7,7 @@ import {
 
 import {PHASE} from '../../models/game/GameModel';
 import * as tt from '../../models/game/evolution/traitTypes';
+import {addTimeout} from '../../utils/reduxTimeout'
 
 import {makeGameSelectors} from '../../selectors';
 
@@ -283,6 +284,27 @@ players:
 
       expect(findAnimal('$A').getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(1);
       expect(findAnimal('$B').getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(2);
+    });
+
+    it.only(`Works afk player`, async () => {
+      const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+      const gameId = ParseGame(`
+phase: feeding
+food: 10
+players:
+  - continent: $A comm$B wait, $B wait
+settings:
+  timeTurn: 10
+`);
+      const {selectGame, selectPlayer, findAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+      console.log(serverStore.getTimeouts())
+      await new Promise(resolve => setTimeout(resolve, 20));
+      console.log(selectGame().status);
+      await new Promise(resolve => setTimeout(resolve, 20));
+      console.log(selectGame().status);
+
+      expect(findAnimal('$A').getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(1);
+      expect(findAnimal('$B').getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(1);
     });
   });
 

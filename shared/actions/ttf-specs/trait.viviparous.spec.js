@@ -64,7 +64,8 @@ players:
     expect(selectGame().deck, 'Deck size').size(9);
   });
 
-  it('from passive Fat', () => {
+  // AUTO FAT PROCESSING - disabled by rules. TODO delete on sight
+  it.skip('from passive Fat', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 10 camo

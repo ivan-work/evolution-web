@@ -83,6 +83,10 @@ export class TraitModel extends Record({
     return TraitData[this.type];
   }
 
+  disable() {
+    return this.set('disabled', true).set('value', false);
+  }
+
   isLinked() {
     return this.linkId !== null; // && this.dataModel.cardTargetType & CTT_PARAMETER.LINK
   }

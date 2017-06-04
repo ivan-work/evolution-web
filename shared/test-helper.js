@@ -119,7 +119,7 @@ global.mockServerStore = function (initialServerState) {
       serverErrorMiddleware(errorInterceptor)
       , thunk
       , reduxQuestion()
-      , reduxTimeoutMiddleware(timeouts)
+      , reduxTimeoutMiddleware(timeouts, true)
       , store => next => action => {
         serverStore.actions.push(action);
         return next(action);

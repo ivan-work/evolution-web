@@ -19,6 +19,7 @@ import {
   , server$startFeedingFromGame
   , server$traitSetValue
   , server$traitNotify_End
+  , traitAddHuntingCallback
   , server$traitConvertFat
   , server$tryViviparous
 } from '../../../../actions/actions';
@@ -149,7 +150,9 @@ export const TraitTailLoss = {
   , action: (game, targetAnimal, trait, targetTrait, attackAnimal, attackTrait) => (dispatch, getState) => {
     dispatch(server$traitAnimalRemoveTrait(game, targetAnimal, targetTrait));
 
-    dispatch(server$startFeeding(game.id, attackAnimal.id, 1, tt.TraitTailLoss, targetAnimal.id));
+    dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
+      dispatch(server$startFeeding(game.id, attackAnimal.id, 1, tt.TraitTailLoss, targetAnimal.id));
+    }));
 
     dispatch(endHunt(game, attackAnimal, attackTrait, targetAnimal));
     return true;

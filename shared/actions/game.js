@@ -334,7 +334,6 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
     dispatch(server$gamePlayerStart(gameId));
   } else if (game.status.phase === PHASE.FEEDING) {
     dispatch(server$gameExtict(gameId));
-
     dispatch(server$gamePhaseStartRegeneration(gameId));
   }
 };
@@ -519,22 +518,23 @@ const server$gameExtict = (gameId) => (dispatch, getState) => {
   });
 };
 
-const getWantedCardsForPlayers = (game) => {
-  const playersWantedCards = {};
-  const playersWantedAnimals = {};
 
+const server$gameDistributeCards = (gameId) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  const playersWantedCards = {};
+  const playersGiveCards = {};
+  let deckSize = game.deck.size;
+
+  // Calculating what players want
   game.players.forEach((player) => {
     if (!player.playing) return;
     playersWantedCards[player.id] = 1;
-    playersWantedAnimals[player.id] = 0;
     if (player.continent.size === 0 && player.hand.size === 0) {
       playersWantedCards[player.id] = 6;
     } else {
       player.someAnimal((animal) => {
         if (!animal.flags.has(TRAIT_ANIMAL_FLAG.REGENERATION)) {
-          if (animal.hasTrait(tt.TraitRstrategy)) {
-            playersWantedAnimals[player.id] += 2;
-          } else {
+          if (!animal.hasTrait(tt.TraitRstrategy)) {
             playersWantedCards[player.id] += 1;
           }
         }
@@ -542,58 +542,59 @@ const getWantedCardsForPlayers = (game) => {
     }
   });
 
-  return {playersWantedCards, playersWantedAnimals};
-};
-
-const server$gameDistributeCards = (gameId) => (dispatch, getState) => {
-  const game = selectGame(getState, gameId);
-  const {playersWantedCards, playersWantedAnimals} = getWantedCardsForPlayers(game);
-  const playersGiveCards = {};
-  const playersGiveAnimals = {};
-  let deckSize = game.deck.size;
-
+  // Calculating what they'll get
   const players = game.sortPlayersFromIndex(game.players);
-  // players.some(player => {
-  //   console.log(`${getState().getIn(['users', player.id, 'login'])} Wants: ${playersWantedCards[player.id]}/${playersWantedAnimals[player.id]}`)
-  // });
-  while (deckSize > 0 && Object.keys(playersWantedCards).length > 0 && Object.keys(playersWantedAnimals).length > 0) {
+  while (deckSize > 0 && Object.keys(playersWantedCards).length > 0) {
     players.some((player) => {
       if (!playersGiveCards[player.id]) playersGiveCards[player.id] = 0;
-      if (!playersGiveAnimals[player.id]) playersGiveAnimals[player.id] = 0;
       if (deckSize <= 0) return;
       if (playersWantedCards[player.id] > 0) {
         playersWantedCards[player.id] -= 1;
         deckSize--;
         playersGiveCards[player.id] += 1;
-      } else if (playersWantedAnimals[player.id] > 0) {
-        playersWantedAnimals[player.id] -= 1;
-        deckSize--;
-        playersGiveAnimals[player.id] += 1;
       } else {
         delete playersWantedCards[player.id];
       }
     });
   }
-  // players.some(player => {
-  //   console.log(`${getState().getIn(['users', player.id, 'login'])} Gets: ${playersGiveCards[player.id]}/${playersGiveAnimals[player.id]}`)
-  // });
+
+  // Finally giving them what they deserve
   Object.keys(playersGiveCards)
     .sort((p1, p2) => game.getPlayer(p1).index - game.getPlayer(p2).index)
     .forEach((playerId) => {
       dispatch(server$gameGiveCards(gameId, playerId, playersGiveCards[playerId]));
-      if (playersGiveAnimals[playerId] > 0) {
-        game.getPlayer(playerId).someAnimal((animal) => {
-          if (animal.hasTrait(tt.TraitRstrategy)) {
-            dispatch(server$gameDeployAnimalFromDeck(gameId, animal));
-            playersGiveAnimals[playerId] -= 1;
-            if (playersGiveAnimals[playerId] === 0) return true;
-            dispatch(server$gameDeployAnimalFromDeck(gameId, animal));
-            playersGiveAnimals[playerId] -= 1;
-            if (playersGiveAnimals[playerId] === 0) return true;
-          }
-        });
+    });
+};
+
+
+const server$gameDistributeAnimals = (gameId) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  let deckSize = game.deck.size;
+  const playerStacks = {};
+
+  game.players.forEach((player) => {
+    playerStacks[player.id] = [];
+    player.someAnimal((animal) => {
+      if (animal.hasTrait(tt.TraitRstrategy)) {
+        playerStacks[player.id].push(server$gameDeployAnimalFromDeck(gameId, animal));
+        playerStacks[player.id].push(server$gameDeployAnimalFromDeck(gameId, animal));
       }
     });
+  });
+  const players = game.sortPlayersFromIndex(game.players);
+  while (deckSize > 0 && Object.keys(playerStacks).length > 0) {
+    players.some((player) => {
+      const playerStack = playerStacks[player.id];
+      if (deckSize <= 0) return true;
+      if (!playerStack) return;
+      if (playerStack.length > 0) {
+        deckSize--;
+        dispatch(playerStack.shift());
+      } else {
+        delete playerStacks[player.id]
+      }
+    });
+  }
 };
 
 /**
@@ -652,10 +653,11 @@ export const server$gamePhaseEndRegeneration = (gameId) => (dispatch, getState) 
   });
 
   if (selectGame(getState, gameId).deck.size > 0) {
-    dispatch(server$game(gameId, gameStartTurn(gameId)))
     dispatch(server$gameDistributeCards(gameId));
+    dispatch(server$game(gameId, gameStartTurn(gameId)));
     dispatch(server$gameStartPhase(gameId, PHASE.DEPLOY));
     dispatch(server$gamePlayerStart(gameId));
+    dispatch(server$gameDistributeAnimals(gameId));
   } else {
     dispatch(server$gameEnd(gameId));
   }
@@ -687,7 +689,7 @@ export const gameClientToServer = {
     if (!(game.status.phase === PHASE.FEEDING || game.status.phase === PHASE.DEPLOY)) {
       throw new ActionCheckError(`checkGamePhase@Game(${game.id})`, 'Wrong phase (%s)', game.status.phase);
     }
-    logger.debug('gameEndTurnRequest:', userId);
+    logger.verbose('gameEndTurnRequest:', userId);
     dispatch(server$gameEndTurn(gameId, userId));
   }
   , gameDeployAnimalRequest: ({gameId, cardId, animalPosition = 0}, {userId}) => (dispatch, getState) => {

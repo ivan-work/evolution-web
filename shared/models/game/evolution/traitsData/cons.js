@@ -49,6 +49,20 @@ export const TraitNeoplasm = {
       animalTraitArray = animalTraitArray.map(t => [t.id, t]);
       return animal.set('traits', OrderedMap(animalTraitArray));
     }
+    , actionProcess: (animal) => {
+      const traitNeoplasm = animal.hasTrait(tt.TraitNeoplasm);
+      if (!traitNeoplasm) return animal.recalculateFood();
+      let belowNeoplasm = true;
+      return animal.update('traits', traits => traits.map(trait => {
+        if (trait.type === tt.TraitNeoplasm) {
+          belowNeoplasm = false;
+        } else if (!!traitNeoplasm && belowNeoplasm && TraitNeoplasm.customFns.canBeDisabled(trait)) {
+          return trait.set('disabled', true).set('value', false)
+        }
+        return trait;
+      }))
+        .recalculateFood();
+    }
   }
 };
 
