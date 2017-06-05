@@ -8,6 +8,9 @@ export const SETTINGS_TIME_VALUES = [.1, 5];
 export const SETTINGS_MINUTES = 60e3; // by 1 minute
 
 export const SETTINGS_TIMED_OUT_TURN_TIME = 5e3;
+export const SETTINGS_AMBUSH_TIME = 10e3;
+export const SETTINGS_DEFAULT_TIME_TURN = 2 * SETTINGS_MINUTES;
+export const SETTINGS_DEFAULT_TIME_TRAIT = 1 * SETTINGS_MINUTES;
 
 export const SettingsRules = {
   name: 'string|between:4,20|required|regex:/^[a-zA-Zа-яА-ЯёЁ\\d\\s]*$/'
@@ -24,9 +27,9 @@ export const SettingsRules = {
 
 export class SettingsRecord extends Record({
   maxPlayers: 4
-  , timeTurn: process.env.TEST ? 0 : 4 * SETTINGS_MINUTES
-  , timeTraitResponse: process.env.TEST ? 0 : 1 * SETTINGS_MINUTES
-  , timeAmbush: process.env.TEST ? 0 : 10e3
+  , timeTurn: SETTINGS_DEFAULT_TIME_TURN
+  , timeTraitResponse: SETTINGS_DEFAULT_TIME_TRAIT
+  , timeAmbush: SETTINGS_AMBUSH_TIME
   , randomPlayers: !process.env.TEST
   , halfDeck: false
   , addon_timeToFly: false

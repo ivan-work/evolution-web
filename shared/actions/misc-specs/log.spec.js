@@ -46,7 +46,7 @@ describe('Logging test:', () => {
 //     }
 //   });
 
-  it('Typical game', async () => {
+  it('Typical game', () => {
     const [{ParseGame, serverStore}, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockGame(3);
     const gameId = ParseGame(`
 phase: prepare

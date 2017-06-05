@@ -14,7 +14,7 @@ import {chatInit} from './chat';
 import {server$roomsInit, server$roomExit, findRoomByUser} from './rooms';
 
 export const SOCKET_DISCONNECT_NOW = 'SOCKET_DISCONNECT_NOW';
-export const TIMEOUT = 30 * 1000;
+export const USER_LOGOUT_TIMEOUT = 120e3;
 
 import TimeService from '../../client/services/TimeService';
 
@@ -39,7 +39,7 @@ export const server$socketDisconnect = (connectionId, reason) => (dispatch, getS
   if (!!user) {
     if (reason !== SOCKET_DISCONNECT_NOW) {
       dispatch(addTimeout(
-        (process.env.TEST ? 1 : TIMEOUT)
+        USER_LOGOUT_TIMEOUT
         , 'logoutUser' + user.id
         , server$logoutUser(user.id)));
     } else {
@@ -119,7 +119,7 @@ export const server$injectUser = (id, login) => (dispatch) => {
   const user = new UserModel({id, login}).sign();
   dispatch(loginUser({user}));
   dispatch(addTimeout(
-    (process.env.TEST ? 1 : TIMEOUT)
+    USER_LOGOUT_TIMEOUT
     , 'logoutUser' + user.id
     , server$logoutUser(user.id)));
   return user;

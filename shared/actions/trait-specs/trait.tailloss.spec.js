@@ -6,6 +6,7 @@ import {
   , traitAnswerRequest
 } from '../actions';
 
+import {testShiftTime} from '../../utils/reduxTimeout'
 import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
@@ -54,7 +55,7 @@ players:
     expect(selectAnimal(User1, 0).traits).size(0);
   });
 
-  it('Tail loss with Symbiosis and Communication', async () => {
+  it('Tail loss with Symbiosis and Communication', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 phase: feeding
@@ -81,7 +82,7 @@ settings:
         clientStore0.dispatch(traitAnswerRequest('TraitTailLoss', null))
       , serverStore, clientStore0);
 
-    await new Promise(resolve => setTimeout(resolve, 10));
+    serverStore.dispatch(testShiftTime(100));
 
     expect(findAnimal('$X').traits, '$X traits').size(2);
     expect(findAnimal('$Z').traits, '$Z traits').size(1);
@@ -96,7 +97,7 @@ settings:
 
     clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$X'));
 
-    await new Promise(resolve => setTimeout(resolve, 10));
+    serverStore.dispatch(testShiftTime(100));
 
     expect(findAnimal('$X').traits, '$Z traits').size(1);
     expect(findAnimal('$Z').traits, '$X traits').size(0);

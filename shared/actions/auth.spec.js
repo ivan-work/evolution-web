@@ -1,10 +1,13 @@
 import {Map, List, fromJS} from 'immutable';
 import {UserModel} from '../models/UserModel';
-import {SOCKET_DISCONNECT_NOW, server$injectUser, loginUserFormRequest, loginUserTokenRequest} from './auth';
+import {
+  SOCKET_DISCONNECT_NOW, USER_LOGOUT_TIMEOUT
+  , server$injectUser, loginUserFormRequest, loginUserTokenRequest
+} from './auth';
 // const {ObjectId} = require('mongodb');
 const {ObjectId} = require('mongodb');
 
-//await new Promise(resolve => setTimeout(resolve, 1));
+import {testShiftTime} from '../utils/reduxTimeout'
 
 describe('Auth:', function () {
   it('socketConnect / disconnect', () => {
@@ -122,8 +125,8 @@ describe('Auth:', function () {
     });
   });
 
-  describe('Logout:', function () {
-    it('Clears after logout', async() => {
+  describe('Logout:', () => {
+    it('Clears after logout', () => {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
       const clientStore1 = mockClientStore().connect(serverStore);
@@ -137,7 +140,7 @@ describe('Auth:', function () {
       expect(serverStore.getState().get('connections')).keys(clientStore1.getSocketId());
       expect(serverStore.getState().get('users')).keys(User0.id, User1.id);
 
-      await new Promise(resolve => setTimeout(resolve, 1));
+      serverStore.dispatch(testShiftTime(USER_LOGOUT_TIMEOUT));
 
       expect(serverStore.getState().get('connections')).keys(clientStore1.getSocketId());
       expect(serverStore.getState().get('users')).keys(User1.id);
@@ -148,7 +151,7 @@ describe('Auth:', function () {
   });
 
   describe('LocalStorage:', () => {
-    it('Remembers User', async() => {
+    it('Remembers User', () => {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
       const clientStore1 = mockClientStore().connect(serverStore);
@@ -171,7 +174,8 @@ describe('Auth:', function () {
       expect(clientStore0.getState().get('online')).keys(User0.id, User1.id);
       expect(clientStore1.getState().get('online')).keys(User0.id, User1.id);
 
-      await new Promise(resolve => setTimeout(resolve, 2));
+      // Test that LOGOUT TIMEOUT was cancelled
+      serverStore.dispatch(testShiftTime(USER_LOGOUT_TIMEOUT));
 
       expect(serverStore.getState().get('connections')).keys(clientStore0.getSocketId(), clientStore1.getSocketId());
       expect(serverStore.getState().get('users')).keys(User0.id, User1.id);
@@ -179,7 +183,7 @@ describe('Auth:', function () {
       expect(clientStore1.getState().get('online')).keys(User0.id, User1.id);
     });
 
-    it('Remembers User from another store', async() => {
+    it('Remembers User from another store', () => {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
 
@@ -193,13 +197,14 @@ describe('Auth:', function () {
       expect(serverStore.getState().get('connections')).keys(clientStore1.getSocketId());
       expect(serverStore.getState().get('users')).keys(User0.id);
 
-      await new Promise(resolve => setTimeout(resolve, 1));
+      // Test that LOGOUT TIMEOUT was cancelled
+      serverStore.dispatch(testShiftTime(USER_LOGOUT_TIMEOUT));
 
       expect(serverStore.getState().get('connections')).keys(clientStore1.getSocketId());
       expect(serverStore.getState().get('users')).keys(User0.id);
     });
 
-    it(`Doesn't allow two Users:`, async() => {
+    it(`Doesn't allow two Users:`, () => {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
 

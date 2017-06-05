@@ -12,7 +12,11 @@ import {
   , roomBanRequest
   , roomStartVotingRequest
   , roomStartVoteActionRequest
+  , USER_LOGOUT_TIMEOUT
 } from '../actions/actions';
+
+import {testShiftTime} from '../utils/reduxTimeout'
+
 import {selectRoom} from '../selectors';
 
 describe('Rooms:', function () {
@@ -89,7 +93,7 @@ describe('Rooms:', function () {
       expect(clientStore1.getState().get('rooms')).equal(Map());
     });
 
-    it('User0, User1 in Room, User0 disconnects, User1 disconnects', async() => {
+    it('User0, User1 in Room, User0 disconnects, User1 disconnects', () => {
       const Room = RoomModel.new();
       const [serverStore, {clientStore0, User0}, {clientStore1, User1}]= mockStores(2, Map({rooms: Map({[Room.id]: Room})}));
       clientStore0.dispatch(roomJoinRequest(Room.id));
@@ -97,19 +101,19 @@ describe('Rooms:', function () {
 
       clientStore0.disconnect();
 
-      await new Promise(resolve => setTimeout(resolve, 1));
+      serverStore.dispatch(testShiftTime(USER_LOGOUT_TIMEOUT));
 
       expect(selectRoom(serverStore.getState, Room.id).users).equal(List.of(User1.id));
       expect(selectRoom(clientStore1.getState, Room.id).users).equal(List.of(User1.id));
 
       clientStore1.disconnect();
 
-      await new Promise(resolve => setTimeout(resolve, 1));
+      serverStore.dispatch(testShiftTime(USER_LOGOUT_TIMEOUT));
 
       expect(serverStore.getState().get('rooms')).equal(Map());
     });
 
-    it('User0, User1 in Room, User0 disconnects, User0 rejoins', async() => {
+    it('User0, User1 in Room, User0 disconnects, User0 rejoins', () => {
       const Room = RoomModel.new();
       const [serverStore, {clientStore0, User0}, {clientStore1, User1}]= mockStores(2, Map({rooms: Map({[Room.id]: Room})}));
       clientStore0.dispatch(roomJoinRequest(Room.id));
@@ -131,7 +135,7 @@ describe('Rooms:', function () {
       expect(selectRoom(clientStore0.getState, Room.id).users).equal(List.of(User0.id, User1.id));
       expect(selectRoom(clientStore1.getState, Room.id).users).equal(List.of(User0.id, User1.id));
 
-      await new Promise(resolve => setTimeout(resolve, 1));
+      serverStore.dispatch(testShiftTime(USER_LOGOUT_TIMEOUT));
 
       expect(clientStore0.getState().get('room'), 'clientStore0.room').equal(Room.id);
       expect(clientStore1.getState().get('room'), 'clientStore1.room').equal(Room.id);
@@ -255,7 +259,7 @@ describe('Rooms:', function () {
   });
 
   describe('Voting', () => {
-    it('Voting', async() => {
+    it('Voting', () => {
       const [serverStore
         , {clientStore0, User0}
         , {clientStore1, User1}
@@ -301,7 +305,7 @@ describe('Rooms:', function () {
       expect(selectVote(serverStore).getIn(['votes', User2.id])).true;
     });
 
-    it.skip('Voting End', async() => {
+    it.skip('Voting End', () => {
       const [serverStore
         , {clientStore0, User0}
         , {clientStore1, User1}

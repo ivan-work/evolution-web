@@ -7,7 +7,7 @@ import {
 
 import {PHASE} from '../../models/game/GameModel';
 import * as tt from '../../models/game/evolution/traitTypes';
-import {addTimeout} from '../../utils/reduxTimeout'
+import {testShiftTime} from '../../utils/reduxTimeout'
 
 import {makeGameSelectors} from '../../selectors';
 
@@ -165,7 +165,7 @@ players:
       clientStore0.dispatch(traitActivateRequest('$A', tt.TraitPiracy, '$X'));
       clientStore0.dispatch(traitActivateRequest('$B', tt.TraitHibernation));
       clientStore0.dispatch(traitActivateRequest('$C', tt.TraitCarnivorous, '$X'));
-      clientStore0.dispatch(traitTakeFoodRequest('$A', tt.TraitWaiter));
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitWaiter));
 
       expect(findAnimal('$A').getFoodAndFat(), 'Animal $A.getFoodAndFat() ').equal(1);
       expect(findAnimal('$A1').getFoodAndFat(), 'Animal $A1.getFoodAndFat()').equal(1);
@@ -286,25 +286,35 @@ players:
       expect(findAnimal('$B').getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(2);
     });
 
-    it.only(`Works afk player`, async () => {
+    it(`Works at autoturn`, () => {
+      const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+      const gameId = ParseGame(`
+phase: feeding
+food: 10
+players:
+  - continent: $A comm$B, $B
+  - continent: $C
+`);
+      const {selectGame, selectPlayer, findAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+      clientStore0.dispatch(gameEndTurnRequest('$A'));
+      expect(findAnimal('$A').getFoodAndFat(), 'Animal#B.getFoodAndFat()').equal(1);
+      expect(findAnimal('$B').getFoodAndFat(), 'Animal#B.getFoodAndFat()').equal(1);
+    });
+
+    it(`Works in afk player`, () => {
       const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
       const gameId = ParseGame(`
 phase: feeding
 food: 10
 players:
   - continent: $A comm$B wait, $B wait
-settings:
-  timeTurn: 10
+  - continent: $C
 `);
       const {selectGame, selectPlayer, findAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-      console.log(serverStore.getTimeouts())
-      await new Promise(resolve => setTimeout(resolve, 20));
-      console.log(selectGame().status);
-      await new Promise(resolve => setTimeout(resolve, 20));
-      console.log(selectGame().status);
-
-      expect(findAnimal('$A').getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(1);
-      expect(findAnimal('$B').getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(1);
+      serverStore.dispatch(testShiftTime(selectGame().settings.timeTurn)); // Waiting for auto turn
+      // serverStore.dispatch(testShiftTime(5e3)); // Should not wait
+      expect(findAnimal('$A').getFoodAndFat(), 'Animal#B.getFoodAndFat()').equal(1);
+      expect(findAnimal('$B').getFoodAndFat(), 'Animal#B.getFoodAndFat()').equal(1);
     });
   });
 

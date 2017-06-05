@@ -10,13 +10,3 @@ export const replaceGetRandom = (randomCb, testCb) => {
   testCb();
   randomFn = originalRandomFn;
 };
-
-export const replaceGetRandomAsync = (randomCb, testCb) => {
-  randomFn = randomCb;
-  return new Promise(resolve => {
-    testCb(resolve)
-  })
-    .then(() => {
-      randomFn = originalRandomFn;
-    });
-};

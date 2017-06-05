@@ -120,6 +120,7 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
       break;
     default:
       if (game.status.currentPlayer === userId) {
+        dispatch(server$gameCancelTurnTimeout(gameId));
         dispatch(server$gamePlayerContinue(gameId));
       }
   }
@@ -300,27 +301,29 @@ export const server$defaultTurn = (gameId, userId) => (dispatch, getState) => {
     if (!!animal) {
       logger.debug('server$defaultTurn:', userId, animal.id);
       dispatch(server$takeFoodRequest(gameId, userId, animal.id));
+      dispatch(server$autoFoodSharing(gameId, userId));
       return true;
     }
   }
 };
 
 export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
-  dispatch(server$autoFoodSharing(gameId, userId));
+  if (!dispatch(server$autoFoodSharing(gameId, userId))) return;
   const isDefaultTurn = !!dispatch(server$defaultTurn(gameId, userId));
   // if isDefaultTurn is true, then player performed default turn\
   // and there's second server$gameEndTurn is coming. So we finish this one.
   if (isDefaultTurn) return;
   logger.debug('server$gameEndTurn:', userId);
   let game = selectGame(getState, gameId);
-  dispatch(server$gameCancelTurnTimeout(gameId));
   const acted = selectGame(getState, gameId).getPlayer(userId).acted;
+
+  dispatch(server$gameCancelTurnTimeout(gameId));
+
+  // If player didn't acted, disable everything that he had chosen to skip
   if (!acted && game.status.phase === PHASE.FEEDING) {
-    // console.log('NOT ACTED')
     const options = getOptions(game, userId);
     options.forEach(option => {
       dispatch(option.cooldownAction(gameId));
-      // console.log(option.text);
     });
   }
 
@@ -362,14 +365,21 @@ const playerActed = (gameId, userId) => ({
 });
 
 export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
-  const game = selectGame(getState, gameId);
+  logger.debug(`server$playerActed`, userId);
+  let game = selectGame(getState, gameId);
   dispatch(server$game(gameId, playerActed(gameId, userId)));
   switch (game.status.phase) {
     case PHASE.DEPLOY:
       return dispatch(server$gameEndTurn(gameId, userId));
     case PHASE.FEEDING:
-      if (!doesPlayerHasOptions(selectGame(getState, gameId), userId))
+      game = selectGame(getState, gameId);
+      const timeout = dispatch(checkTimeout(makeTurnTimeoutId(gameId)));
+
+      // logger.info(`PlayerActed ${!!timeout} ${timeout}`);
+      // logger.info(`doesPlayerHasOptions ${doesPlayerHasOptions(selectGame(getState, gameId), userId)}`);
+      if (!game.question && (!timeout || !doesPlayerHasOptions(game, userId))) {
         return dispatch(server$gameEndTurn(gameId, userId));
+      }
   }
 };
 
@@ -377,7 +387,7 @@ export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
  * Timeout
  * */
 
-const makeTurnTimeoutId = (gameId) => `turnTimeTimeout#${gameId}`;
+export const makeTurnTimeoutId = (gameId) => `turnTimeTimeout#${gameId}`;
 
 const gameAddTurnTimeout = (gameId, turnStartTime, turnDuration) => ({
   type: 'gameAddTurnTimeout'
@@ -418,7 +428,7 @@ export const server$addTurnTimeout = (gameId, userId, turnTime) => (dispatch, ge
 };
 
 export const server$gameCancelTurnTimeout = (gameId) => (dispatch, getState) => {
-  // logger.info(`Turn Timeout:`, `${gameId}`);
+  // logger.info(`Cancel Timeout:`, `${gameId}`);
   return dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
 };
 
@@ -444,24 +454,6 @@ export const server$gamePlayerContinue = (gameId, previousUserId) => (dispatch, 
 
 const server$gameNextPlayer = (gameId, startSearchFromId) => (dispatch, getState) => {
   // logger.debug('server$gameNextPlayer search start:', startSearchFromId);
-  if (dispatch(checkTimeout(makeTurnTimeoutId(gameId)))) {
-    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
-    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
-    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
-    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
-    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
-    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
-    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
-    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
-    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
-    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
-    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
-    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
-    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
-    console.log('TTTTTTTTTTIIIIIIIIIIMEEEEEEEE OOOOOOOOOOOOOOUUUUUUUUUUTTTTTTTTT');
-    dispatch(server$gameCancelTurnTimeout(gameId));
-  }
-
   const game = selectGame(getState, gameId);
 
   let nextRound = false;

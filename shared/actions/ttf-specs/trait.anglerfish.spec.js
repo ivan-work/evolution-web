@@ -5,9 +5,12 @@ import {
   , traitAnswerRequest
   , gameDeployAnimalRequest
   , gameDeployTraitRequest
+  , makeTurnTimeoutId
 } from '../actions';
 
 import {QuestionRecord, PHASE} from '../../models/game/GameModel';
+import * as tt from '../../models/game/evolution/traitTypes';
+import {testShiftTime} from '../../utils/reduxTimeout'
 
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
 
@@ -60,7 +63,7 @@ players:
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
-    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
     expect(selectAnimal(User0, 0).traits).size(1);
     expect(selectAnimal(User0, 0).id).equal('$B');
   });
@@ -72,24 +75,37 @@ deck: 10 camo
 phase: feeding
 food: 0
 players:
-  - continent: $Q carn tail camo graz, $W carn camo mass, $E carn tail mimi wait, $E2 tail
+  - continent: $Q carn tail camo wait, $W carn camo mass, $E carn tail mimi wait, $E2 tail
   - continent: $A angler +, $S angler +, $D angler +
+settings:
+  timeTurn: 100
+  timeTraitResponse: 80
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
-    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$A'));
+    serverStore.dispatch(testShiftTime(25));
+    expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)].remaining).equal(75);
+
+    clientStore0.dispatch(traitActivateRequest('$Q', tt.TraitCarnivorous, '$A'));
     expect(selectGame().question).ok;
-    clientStore0.dispatch(traitAnswerRequest('TraitTailLoss', 'TraitCarnivorous'));
+    expect(selectGame().question.type).equal(QuestionRecord.DEFENSE);
+
+    expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)]).undefined;
+
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitTailLoss, tt.TraitCarnivorous));
     expect(selectAnimal(User0, 0)).ok;
 
+    expect(selectPlayer(User0).acted).true;
+    expect(selectGame().status.round).equal(0);
     clientStore0.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(traitActivateRequest('$W', 'TraitCarnivorous', '$S'));
+    expect(selectGame().status.round).equal(1);
+    clientStore0.dispatch(traitActivateRequest('$W', tt.TraitCarnivorous, '$S'));
     clientStore0.dispatch(gameEndTurnRequest());
     clientStore1.dispatch(gameEndTurnRequest());
 
-    clientStore0.dispatch(traitActivateRequest('$E', 'TraitCarnivorous', '$D'));
+    clientStore0.dispatch(traitActivateRequest('$E', tt.TraitCarnivorous, '$D'));
     expect(selectGame().question).ok;
-    clientStore1.dispatch(traitAnswerRequest('TraitIntellect', 'TraitTailLoss'));
+    clientStore1.dispatch(traitAnswerRequest(tt.TraitIntellect, tt.TraitTailLoss));
     expect(selectGame().question).null;
 
     expect(selectAnimal(User0, 0)).ok;
@@ -117,7 +133,7 @@ players:
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
-    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$A'));
+    clientStore0.dispatch(traitActivateRequest('$Q', tt.TraitCarnivorous, '$A'));
     expect(selectAnimal(User0, 0)).ok;
     expect(selectAnimal(User0, 0).getFood()).equal(1);
   });
@@ -133,7 +149,7 @@ players:
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
-    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$W'));
+    clientStore0.dispatch(traitActivateRequest('$Q', tt.TraitCarnivorous, '$W'));
 
     expect(selectGame().question.type).equal(QuestionRecord.DEFENSE);
     clientStore0.dispatch(traitAnswerRequest('TraitInkCloud'));
@@ -155,10 +171,10 @@ players:
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
-    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$W'));
+    clientStore0.dispatch(traitActivateRequest('$Q', tt.TraitCarnivorous, '$W'));
 
     expect(selectGame().question.type).equal(QuestionRecord.INTELLECT);
-    clientStore0.dispatch(traitAnswerRequest('TraitIntellect', 'TraitTailLoss'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitIntellect, tt.TraitTailLoss));
   });
 
   it('bug Flight+Carn+Camo should die from Anglerfish', () => {
@@ -172,7 +188,7 @@ players:
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
-    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$W'));
+    clientStore0.dispatch(traitActivateRequest('$Q', tt.TraitCarnivorous, '$W'));
 
     expect(selectGame().question).not.ok;
 

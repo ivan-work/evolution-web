@@ -6,6 +6,7 @@ import {
   , traitAnswerRequest
 } from '../actions';
 
+import {testShiftTime} from '../../utils/reduxTimeout'
 import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
@@ -28,7 +29,7 @@ players:
     expect(selectAnimal(User1, 1)).undefined;
   });
 
-  it('$A > $B ($C) TIMEOUT', async () => {
+  it('$A > $B ($C) TIMEOUT', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: feeding
@@ -37,17 +38,17 @@ players:
   - continent: $A carn wait
   - continent: $B mimicry, $C
 settings:
-  timeTraitResponse: 1
-  timeTurn: 1
+  timeTraitResponse: 100
+  timeTurn: 100
 `);
-    const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
+    const {findAnimal} = makeGameSelectors(serverStore.getState, gameId);
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
-    expect(selectAnimal(User0, 0).getFoodAndFat()).equal(2);
-    expect(selectAnimal(User1, 0).id).equal('$B');
-    expect(selectAnimal(User1, 1)).undefined;
 
-    await new Promise(resolve => setTimeout(resolve, 5));
+    serverStore.dispatch(testShiftTime(100));
+
+    expect(findAnimal('$A').getFoodAndFat()).equal(2);
+    expect(findAnimal('$B')).ok;
+    expect(findAnimal('$C')).null;
   });
 
   it('$A > $B m> $C', () => {
@@ -138,7 +139,7 @@ players:
     expect(selectAnimal(User1, 2)).undefined;
   });
 
-  it('$A > $B (auto)> $C ($D)', async () => {
+  it('$A > $B (auto)> $C ($D)', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: feeding
@@ -147,7 +148,7 @@ players:
   - continent: $A carn
   - continent: $B mimicry, $C, $D
 settings:
-  timeTraitResponse: 1
+  timeTraitResponse: 100
 `);
     const {selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
     expect(selectTrait(User1, 0, 0).type).equal('TraitMimicry');
@@ -158,7 +159,7 @@ settings:
     expect(selectAnimal(User1, 1).id).equal('$C');
     expect(selectAnimal(User1, 2).id).equal('$D');
 
-    await new Promise(resolve => setTimeout(resolve, 1));
+    serverStore.dispatch(testShiftTime(100));
 
     expect(selectAnimal(User0, 0).getFoodAndFat(), '').equal(2);
     expect(selectAnimal(User1, 0).id).equal('$B');
@@ -166,7 +167,7 @@ settings:
     expect(selectAnimal(User1, 2)).undefined;
   });
 
-  it('$A > $B (mimi)> end', async () => {
+  it('$A > $B (mimi)> end', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 phase: feeding

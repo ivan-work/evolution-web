@@ -232,9 +232,7 @@ export const TraitCooperation = {
     dispatch(server$traitStartCooldown(game.id, trait1, animal1));
     dispatch(server$traitStartCooldown(game.id, trait2, animal2));
 
-    dispatch(server$startFeedingFromGame(game.id, animal2.id, 1, animal.id, autoShare));
-
-    return false;
+    return dispatch(server$startFeedingFromGame(game.id, animal2.id, 1, animal.id, autoShare));
   }
   , $checkAction: (game, animal, trait) => {
     const linkedAnimal = trait.findLinkedAnimal(game, animal);
@@ -269,7 +267,7 @@ export const TraitCommunication = {
 
     dispatch(server$startFeeding(game.id, animal2.id, 1, tt.TraitCommunication, animal.id, autoShare));
 
-    return false;
+    return true;
   }
   , $checkAction: (game, animal, trait) => {
     const linkedAnimal = trait.findLinkedAnimal(game, animal);

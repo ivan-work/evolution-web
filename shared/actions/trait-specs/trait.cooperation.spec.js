@@ -231,9 +231,9 @@ players:
       clientStore0.dispatch(traitActivateRequest('$A', tt.TraitWaiter));
 
       expect(selectGame().food).equal(8);
-      expect(findAnimal('$A').getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(2);
+      expect(findAnimal('$A').getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(1);
       expect(findAnimal('$B').getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(2);
-      expect(findAnimal('$C').getFoodAndFat(), 'Animal#2.getFoodAndFat()').equal(1);
+      expect(findAnimal('$C').getFoodAndFat(), 'Animal#2.getFoodAndFat()').equal(2);
       expect(findAnimal('$D').getFoodAndFat(), 'Animal#3.getFoodAndFat()').equal(1);
     });
 
@@ -251,9 +251,9 @@ players:
 
       expect(selectGame().food).equal(8);
       expect(findAnimal('$A').getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(1);
-      expect(findAnimal('$B').getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(1);
+      expect(findAnimal('$B').getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(2);
       expect(findAnimal('$C').getFoodAndFat(), 'Animal#2.getFoodAndFat()').equal(2);
-      expect(findAnimal('$D').getFoodAndFat(), 'Animal#3.getFoodAndFat()').equal(2);
+      expect(findAnimal('$D').getFoodAndFat(), 'Animal#3.getFoodAndFat()').equal(1);
     });
 
     it(`Works with symbiosis`, () => {

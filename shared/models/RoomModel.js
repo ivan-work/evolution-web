@@ -17,7 +17,7 @@ export class VotingModel extends Record({
   , showOnClient: true
   , timestamp: null
 }) {
-  static START_VOTING_TIMEOUT = !process.env.TEST ? 15 * 1000 : 500;
+  static START_VOTING_TIMEOUT = 15 * 1000;
 
   static new(timestamp) {
     return new VotingModel({timestamp: timestamp})

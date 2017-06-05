@@ -245,21 +245,33 @@ export const traitParalyze = (gameId, animalId) => ({
 });
 
 export const server$autoFoodSharing = (gameId, userId) => (dispatch, getState) => {
-  logger.debug(`server$autoFoodSharing`)
+  logger.debug(`server$autoFoodSharing`);
   let game = selectGame(getState, gameId);
   let sharedFood = 0;
-  game.getPlayer(userId).someAnimal(animal => {
-    animal.getTraits().forEach(trait => {
+  let autoFeedingResult = true;
+  game.getPlayer(userId).someAnimal(animal => animal.getTraits()
+    .some(trait => {
       game = selectGame(getState, gameId);
       // console.log('checking for autoshare', animal.id, trait.value)
       if ((trait.type === tt.TraitCooperation || trait.type === tt.TraitCommunication)
         && !trait.checkActionFails(game, animal)) {
-        sharedFood++;
-        dispatch(server$traitActivate(game, animal, trait, true));
+        // console.log(`AUTO FOOD FOR ${animal.id}`)
+        const result = dispatch(server$traitActivate(game, animal, trait));
+        // console.log(`AUTO FOOD FOR ${animal.id} RESULT: ${result}`)
+        if (result) {
+          sharedFood++;
+        } else {
+          autoFeedingResult = false;
+          return true;
+        }
       }
-    })
-  });
-  logger.debug(`server$autoFoodSharing: shared ${sharedFood} food`)
+    }));
+  if (sharedFood > 0) {
+    return dispatch(server$autoFoodSharing(gameId, userId));
+  } else {
+    logger.debug(`server$autoFoodSharing: shared ${sharedFood} food`);
+    return autoFeedingResult;
+  }
 };
 
 /**
@@ -298,8 +310,8 @@ const gameAmbushPushTarget = (gameId, animalId) => ({
   , data: {gameId, animalId}
 });
 
-const gameAmbushUnshiftTarget = (gameId) => ({
-  type: 'gameAmbushUnshiftTarget'
+const gameAmbushShiftTarget = (gameId) => ({
+  type: 'gameAmbushShiftTarget'
   , data: {gameId}
 });
 
@@ -385,34 +397,34 @@ export const server$gameAmbushAttackStart = (gameId) => (dispatch, getState) => 
 
 export const server$gameAmbushAttackEnd = (gameId) => (dispatch, getState) => {
   logger.debug(`server$gameAmbushAttackEnd`);
-  const game = selectGame(getState, gameId);
-  const {targets, targetPlayerId, turnRemainingTime} = game.ambush;
-  const animalId = targets.first();
-  dispatch(gameAmbushUnshiftTarget(gameId));
+  let game = selectGame(getState, gameId);
+  const {targetPlayerId, turnRemainingTime} = game.ambush;
+  const animalId = game.ambush.targets.first();
+  dispatch(gameAmbushShiftTarget(gameId));
 
-  if (targets.size === 1) {
+  game = selectGame(getState, gameId);
+  let nextTargets = game.ambush.targets;
+
+  if (nextTargets.size === 0) {
     dispatch(server$gameAmbushAttackCleanup(gameId, animalId, targetPlayerId, turnRemainingTime));
   } else {
-    dispatch(server$startFeeding(gameId, animalId, 1, 'GAME'));
-    dispatch(server$game(gameId, gameFoodTake_End(gameId, animalId)));
-
-    const nextAnimal = game.locateAnimal(targets.get(1));
-    if (nextAnimal) {
-      if (!dispatch(server$gameAmbushPrepareStart(game, nextAnimal))) {
-        dispatch(server$gameAmbushAttackCleanup(gameId, nextAnimal.id, nextAnimal.ownerId, turnRemainingTime));
-      }
-    }
+    logger.error('NEXT TARGETS SIZE IS NON ZERO', {game, nextTargets});
   }
 };
 
 export const server$gameAmbushAttackCleanup = (gameId, animalId, playerId, turnRemainingTime) => (dispatch, getState) => {
   dispatch(server$game(gameId, gameAmbushAttackEnd(gameId)));
-  dispatch(server$addTurnTimeout(gameId, void 0, turnRemainingTime));
 
   if (!!selectGame(getState, gameId).locateAnimal(animalId, playerId)) {
     dispatch(server$startFeeding(gameId, animalId, 1, 'GAME'));
     dispatch(server$game(gameId, gameFoodTake_End(gameId, animalId)));
   }
+
+  // console.log('AMBUSH CLEAN UP', turnRemainingTime);
+  if (turnRemainingTime !== void 0) {
+    dispatch(server$addTurnTimeout(gameId, void 0, turnRemainingTime));
+  }
+
   dispatch(server$playerActed(gameId, playerId));
 };
 
@@ -534,6 +546,7 @@ export const server$startFeedingFromGame = (gameId, animalId, amount, source, au
   const animal = game.locateAnimal(animalId);
 
   if (game.status.phase === PHASE.AMBUSH) {
+    logger.error('CANNOT FEED DURING AMBUSH');
     dispatch(gameAmbushPushTarget(gameId, animalId));
   } else {
     dispatch(server$game(gameId, gameFoodTake_Start(gameId, animalId)));
@@ -612,7 +625,9 @@ export const server$traitAnswerSuccess = (gameId, questionId) => (dispatch, getS
   if (question) {
     dispatch(cancelTimeout(makeTraitQuestionTimeout(gameId, questionId)));
     dispatch(server$game(gameId, traitAnswerSuccess(gameId, questionId)));
-    dispatch(server$addTurnTimeout(gameId, void 0, question.turnRemainingTime));
+    if (question.turnRemainingTime) {
+      dispatch(server$addTurnTimeout(gameId, void 0, question.turnRemainingTime));
+    }
   }
 };
 
@@ -765,7 +780,7 @@ export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetI
 
 export const traitClientToServer = {
   traitTakeFoodRequest: ({gameId, animalId}, {userId}) => (dispatch) => {
-    dispatch(server$autoFoodSharing(gameId, userId));
+    if (!dispatch(server$autoFoodSharing(gameId, userId))) return;
     dispatch(server$takeFoodRequest(gameId, userId, animalId))
   }
   , traitTakeShellRequest: ({gameId, animalId, traitId}, {userId}) => (dispatch, getState) => {
@@ -777,7 +792,7 @@ export const traitClientToServer = {
 
     const animal = checkPlayerHasAnimal(game, userId, animalId);
 
-    dispatch(server$autoFoodSharing(gameId, userId));
+    if (!dispatch(server$autoFoodSharing(gameId, userId))) return;
 
     throwError(() => checkAnimalCanTakeShellFails(game, animal));
 
@@ -825,8 +840,9 @@ export const traitClientToServer = {
     const sourceAnimal = checkPlayerHasAnimal(game, userId, sourceAid);
 
     const trait = sourceAnimal.hasTrait(traitId);
+    //@TODO Communication // trait type checking here smells =\
     if (!!trait && trait.type !== tt.TraitCommunication && trait.type !== tt.TraitCooperation) {
-      dispatch(server$autoFoodSharing(gameId, userId));
+      if (!dispatch(server$autoFoodSharing(gameId, userId))) return;
     }
     // Reselect game!
     game = selectGame(getState, gameId);

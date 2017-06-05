@@ -434,8 +434,8 @@ export const traitAmbushActivate = (game, {animalId, on}) => game
   .setIn(['ambush', 'ambushers', animalId], on);
 export const gameAmbushPushTarget = (game, {animalId}) => game
   .updateIn(['ambush', 'targets'], targets => targets.push(animalId));
-export const gameAmbushUnshiftTarget = (game, {animalId}) => game
-  .updateIn(['ambush', 'targets'], targets => targets.unshift(animalId));
+export const gameAmbushShiftTarget = (game, {}) => game
+  .updateIn(['ambush', 'targets'], targets => targets.shift());
 export const gameAmbushPrepareStart = (game, {ambushRecord}) => game
   .setIn(['ambush'], ambushRecord);
 export const gameAmbushPrepareEnd = (game) => game;
@@ -473,7 +473,7 @@ export const reducer = createReducer(Map(), {
 
   , traitAmbushActivate: (state, data) => state.update(data.gameId, game => traitAmbushActivate(game, data))
   , gameAmbushPushTarget: (state, data) => state.update(data.gameId, game => gameAmbushPushTarget(game, data))
-  , gameAmbushUnshiftTarget: (state, data) => state.update(data.gameId, game => gameAmbushUnshiftTarget(game, data))
+  , gameAmbushShiftTarget: (state, data) => state.update(data.gameId, game => gameAmbushShiftTarget(game, data))
   , gameAmbushPrepareStart: (state, data) => state.update(data.gameId, game => gameAmbushPrepareStart(game, data))
   , gameAmbushPrepareEnd: (state, data) => state.update(data.gameId, game => gameAmbushPrepareEnd(game, data))
   , gameAmbushAttackStart: (state, data) => state.update(data.gameId, game => gameAmbushAttackStart(game, data))

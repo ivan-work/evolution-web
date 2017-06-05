@@ -167,7 +167,7 @@ settings:
     }))
   });
 
-  it('mockGame.ParseGame settings without decks', async () => {
+  it('mockGame.ParseGame settings without decks', () => {
     const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 settings:
@@ -178,8 +178,6 @@ settings:
       timeTurn: 20
       , timeTraitResponse: 10
     }));
-
-    await new Promise(resolve => setTimeout(resolve, 50));
   });
 
   it('mockGame.ParseGame phase 0', () => {

@@ -5,8 +5,10 @@ import {
   , traitAmbushActivateRequest
   , traitAmbushContinueRequest
   , traitAnswerRequest
+  , makeTurnTimeoutId
 } from '../actions';
 
+import {testShiftTime} from '../../utils/reduxTimeout'
 import {PHASE} from '../../models/game/GameModel';
 import * as tt from '../../models/game/evolution/traitTypes';
 
@@ -20,16 +22,23 @@ deck: 10 camo
 phase: feeding
 food: 4
 players:
-  - continent: $A, $B hiber
+  - continent: $A, $B wait
   - continent: $C ambush carn
+settings:
+  timeTurn: 100
+  timeTraitResponse: 100
 `);
     const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    serverStore.dispatch(testShiftTime(50));
+    expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)].remaining).equal(50);
 
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
 
     expect(selectGame().status.phase).equal(PHASE.AMBUSH);
     clientStore1.dispatch(traitAmbushActivateRequest('$C'));
 
+    expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)].remaining).equal(50);
     expect(findAnimal('$A'), '$A should be dead').not.ok;
     expect(findAnimal('$C').getFood(), '$C should ambush $A').equal(2);
 
@@ -45,8 +54,14 @@ food: 4
 players:
   - continent: $A tail, $B hiber
   - continent: $C ambush carn
+settings:
+  timeTurn: 100
+  timeTraitResponse: 100
 `);
     const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    serverStore.dispatch(testShiftTime(50));
+    expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)].remaining).equal(50);
 
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
     clientStore1.dispatch(traitAmbushActivateRequest('$C'));
@@ -54,9 +69,11 @@ players:
     expect(findAnimal('$C').getFood(), '$C should get $A tail').equal(1);
     expect(findAnimal('$A'), '$A should be alive').ok;
     expect(findAnimal('$A').getFood(), '$A should get food').equal(1);
+
+    expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)].remaining).equal(50);
   });
 
-  it('Complex defence, timeout', async () => {
+  it('Complex defence, timeout', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
@@ -66,22 +83,28 @@ players:
   - continent: $A tail mimi, $B hiber, $D mimi
   - continent: $C ambush carn
 settings:
-  timeTraitResponse: 10
+  timeTurn: 100
+  timeTraitResponse: 100
 `);
     const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
+
+    serverStore.dispatch(testShiftTime(50));
+    expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)].remaining).equal(50);
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
+
     clientStore1.dispatch(traitAmbushActivateRequest('$C'));
     expect(selectGame().question, 'Game asks question').ok;
-
-    await new Promise(resolve => setTimeout(resolve, 15));
+    serverStore.dispatch(testShiftTime(100));
 
     expect(findAnimal('$C').getFood(), '$C should get $A tail').equal(1);
     expect(findAnimal('$A'), '$A should be alive').ok;
     expect(findAnimal('$A').getFood(), '$A should get food').equal(1);
+
+    expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)].remaining).equal(50);
   });
 
-  it('Complex defence, manual', async () => {
+  it('Complex defence, manual', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
@@ -367,8 +390,13 @@ players:
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
     clientStore0.dispatch(traitActivateRequest('$Q', tt.TraitWaiter));
 
+    // Ignore $W
     expect(selectGame().status.phase).equal(PHASE.AMBUSH);
     clientStore1.dispatch(traitAmbushContinueRequest());
+
+    // Since there was an attack, need to retry waiter
+    expect(selectGame().status.phase).equal(PHASE.FEEDING);
+    clientStore0.dispatch(traitActivateRequest('$Q', tt.TraitWaiter));
 
     expect(findAnimal('$W').getFood()).equal(1);
     expect(findAnimal('$E').getFood()).equal(0);
@@ -428,5 +456,103 @@ players:
     expect(findAnimal('$C').getFood()).equal(1);
 
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
+  });
+
+  it(`Ambush at the end of turn`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 10
+players:
+  - continent: $Q coop$W, $W
+  - continent: $A carn ambu wait
+settings:
+  timeTurn: 100
+  timeTraitResponse: 100
+`);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+    clientStore1.dispatch(traitAmbushContinueRequest());
+    expect(selectGame().status.phase).equal(PHASE.FEEDING);
+    serverStore.dispatch(testShiftTime(100));
+
+    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+    clientStore1.dispatch(traitAmbushActivateRequest('$A'));
+
+    expect(selectGame().status.phase).equal(PHASE.FEEDING);
+    expect(findAnimal('$A').getFood()).equal(2);
+    expect(selectGame().status.currentPlayer).equal(User1.id);
+  });
+
+  it(`Ambush at the end of turn with multiple targets`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 10
+players:
+  - continent: $Q coop$W coop$E, $W, $E
+  - continent: $A carn ambu wait, $B carn ambu wait
+settings:
+  timeTurn: 100
+  timeTraitResponse: 100
+`);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+    clientStore1.dispatch(traitAmbushContinueRequest());
+    expect(selectGame().status.phase).equal(PHASE.FEEDING);
+    serverStore.dispatch(testShiftTime(100));
+
+    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+
+    // Hunt for $W
+    clientStore1.dispatch(traitAmbushActivateRequest('$A'));
+    clientStore1.dispatch(traitAmbushActivateRequest('$B'));
+
+    // Hunt for $E
+    clientStore1.dispatch(traitAmbushActivateRequest('$B'));
+
+    expect(selectGame().status.phase).equal(PHASE.FEEDING);
+    expect(findAnimal('$A').getFood()).equal(2);
+    expect(selectGame().status.currentPlayer).equal(User1.id);
+    expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)].remaining).equal(100);
+  });
+
+  it(`Ambush at multiple targets + Mimicry `, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 10
+players:
+  - continent: $Q coop$W coop$E coop$D wait, $W mimi, $E, $D
+  - continent: $A carn ambu, $S carn ambu, $D carn ambu
+settings:
+  timeTurn: 100
+  timeTraitResponse: 100
+`);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+    clientStore1.dispatch(traitAmbushContinueRequest());
+    serverStore.dispatch(testShiftTime(100));
+
+    // $A attacks $W, eats $E
+    clientStore1.dispatch(traitAmbushActivateRequest('$A'));
+    clientStore1.dispatch(traitAmbushContinueRequest());
+
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitMimicry, '$E'));
+
+    // $S attacks $D, eats $D
+    clientStore1.dispatch(traitAmbushActivateRequest('$S'));
+    clientStore1.dispatch(traitAmbushContinueRequest());
+
+    expect(findAnimal('$Q').getFood()).equal(1);
+    expect(findAnimal('$W').getFood()).equal(1);
+    expect(findAnimal('$E')).null;
+    expect(findAnimal('$A').getFood()).equal(2);
+    expect(findAnimal('$S').getFood()).equal(2);
+    expect(findAnimal('$D').getFood()).equal(0);
+    expect(selectGame().status.currentPlayer).equal(User1.id);
+    expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)].remaining).equal(100);
   });
 });

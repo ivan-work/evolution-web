@@ -96,7 +96,6 @@ players:
     const {selectTrait1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
 
     clientStore0.dispatch(traitTakeFoodRequest('$A'));
-    console.log(selectPlayer(User0).continent);
     expect(selectAnimal(User0, 1), '$A should give birth').ok;
     expect(selectGame().deck, 'Deck size').size(1);
     expect(selectGame().deck.first().trait1, 'Deck has camo').equal('TraitCamouflage');

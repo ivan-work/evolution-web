@@ -10,9 +10,10 @@ import {PHASE, QuestionRecord} from '../../models/game/GameModel';
 import {replaceGetRandom} from '../../utils/randomGenerator';
 
 import {makeGameSelectors} from '../../selectors';
+import {testShiftTime} from '../../utils/reduxTimeout'
 
 describe('Complex traits:', () => {
-  it('Hunt on Mimicry + TailLoss + Running', async () => {
+  it('Hunt on Mimicry + TailLoss + Running', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
 
     const gameId = ParseGame(`
@@ -22,7 +23,7 @@ players:
   - continent: $A carn graz, $B carn, $C carn, $D carn, $E carn, $F carn
   - continent: $Z tailloss mimicry running fat, $X, $Y
 settings:
-  timeTraitResponse: 10
+  timeTraitResponse: 100
 `);
     const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
@@ -67,7 +68,7 @@ settings:
     expect(ClientGame0().question).ok;
     expect(ClientGame1().question).ok;
 
-    await new Promise(resolve => setTimeout(resolve, 12));
+    serverStore.dispatch(testShiftTime(100));
 
     //console.log(selectAnimal(User1, 0).traits)
 
