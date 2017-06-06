@@ -148,7 +148,7 @@ export const TraitViviparous = {
   ])
   , action: (game, sourceAnimal, trait) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, trait, sourceAnimal));
-    dispatch(server$gameDeployAnimalFromDeck(game.id, sourceAnimal));
+    dispatch(server$gameDeployAnimalFromDeck(game.id, sourceAnimal, animal => animal.set('food', 1)));
   }
   , $checkAction: (game, animal, traitSpec) => animal.isSaturated(game) && game.deck.size > 0
 };

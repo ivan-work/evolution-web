@@ -229,10 +229,11 @@ const gameDeployAnimalFromDeck = (gameId, animal, sourceAid) => ({
   , data: {gameId, animal, sourceAid}
 });
 
-export const server$gameDeployAnimalFromDeck = (gameId, sourceAnimal) => (dispatch, getState) => {
+export const server$gameDeployAnimalFromDeck = (gameId, sourceAnimal, onCreateCallback) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   const userId = sourceAnimal.ownerId;
-  const animal = AnimalModel.new(userId, game.deck.first() && game.deck.first().trait1).set('food', 1);
+  let animal = AnimalModel.new(userId, game.deck.first() && game.deck.first().trait1);
+  if (onCreateCallback) animal = onCreateCallback(animal);
   dispatch(gameDeployAnimalFromDeck(gameId, animal, sourceAnimal.id));
   dispatch(Object.assign(
     gameDeployAnimalFromDeck(gameId, animal.toClient(), sourceAnimal.id)

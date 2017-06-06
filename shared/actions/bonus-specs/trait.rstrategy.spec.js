@@ -38,7 +38,7 @@ players:
   - continent: $ +, rstr +, rstr +
   - continent: $ +, $ +, $ +, $ +
 `);
-    const {selectGame, selectPlayer, selectCard} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
     clientStore0.dispatch(gameEndTurnRequest());
     expect(selectGame().status.turn).equal(1);
     expect(selectGame().status.phase).equal(PHASE.DEPLOY);
@@ -48,6 +48,7 @@ players:
     expect(selectPlayer(User1).continent, '(User1).continent').size(3 + 1);
     expect(selectPlayer(User2).hand, '(User2).hand').size(5);
     expect(selectPlayer(User2).continent, '(User2).continent').size(4);
+    expect(selectAnimal(User0, 2).getFood(), 'Newborn should be without food').equal(0);
   });
 });
 
