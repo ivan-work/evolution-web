@@ -3,7 +3,7 @@ import uuid from 'uuid';
 import {TraitDataModel} from './TraitDataModel';
 import * as traitTypes from './traitTypes/index'
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
-import {CTT_PARAMETER} from './constants';
+import {TRAIT_ANIMAL_FLAG} from './constants';
 
 export const TraitData = Object.keys(traitTypes)
   .reduce((result, traitType) => Object.assign(result, {[traitType]: TraitDataModel.new(traitType)}), {});
@@ -105,22 +105,10 @@ export class TraitModel extends Record({
       , this.ownerId)
   }
 
-  // TODO replace it with checkActionFails
-  checkAction(game, sourceAnimal) {
-    const traitData = this.getDataModel();
-    if (this.disabled) return false;
-    if (!traitData.action) return false;
-    if (traitData.cooldowns && traitData.cooldowns.some(([link, place]) =>
-        game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id, this.id))) {
-      return false;
-    }
-    // Either no $checkAction or it is passing
-    return !traitData.$checkAction || traitData.$checkAction(game, sourceAnimal, this);
-  };
-
   checkActionFails(game, sourceAnimal) {
     const traitData = this.getDataModel();
     if (this.disabled) return 'Trait is disabled';
+    if (sourceAnimal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) return 'Regeneration';
     if (!traitData.action) return 'Trait has no .action';
     if (traitData.cooldowns && traitData.cooldowns.some(([link, place]) =>
         game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id, this.id)))
@@ -133,7 +121,6 @@ export class TraitModel extends Record({
 
   toClient() {
     return this
-    //.set('dataModel', null);
   }
 
   toOthers() {

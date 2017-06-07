@@ -22,9 +22,9 @@ import UsersList from '../utils/UsersList.jsx';
 
 import RoomControlGroup from './RoomControlGroup.jsx';
 import RoomSettings from './RoomSettings.jsx';
+import RoomSettingsView from './RoomSettingsView.jsx';
 import RoomStartVotingDialog, {RoomStartVotingTimer} from './RoomStartVotingDialog.jsx';
 
-import {redirectTo} from '~/shared/utils'
 import {
   roomEditSettingsRequest,
   roomKickRequest,
@@ -46,7 +46,8 @@ export class Room extends React.Component {
   }
 
   render() {
-    const {room, roomId, userId} = this.props;
+    const {room, userId} = this.props;
+    const isHost = room.users.get(0) === userId;
 
     return (<div className='Room'>
       <Portal target='header'>
@@ -57,6 +58,7 @@ export class Room extends React.Component {
       <div className='flex-row'>
         <Card className='RoomSettings'>
           <CardText>
+            {/*{isHost ? <RoomSettings {...this.props}/> : <RoomSettingsView settings={room.settings}/>}*/}
             <RoomSettings {...this.props}/>
           </CardText>
         </Card>
@@ -112,14 +114,9 @@ export class Room extends React.Component {
   }
 }
 
-export const RoomCheck = (props) => (!!props.room
-  ? <Room {...props}/>
-  : <div>Error! <a onClick={props.$goHome}>go back</a></div>);
-
 export const RoomView = connect(
   (state, props) => {
     const roomId = state.get('room');
-    //if (!roomId) throw new Error('Room ID is invalid');
     return {
       roomId
       , room: state.getIn(['rooms', roomId])
@@ -128,11 +125,10 @@ export const RoomView = connect(
   }
   , (dispatch) => ({
     $roomEditSettings: (settings) => dispatch(roomEditSettingsRequest(settings))
-    , $goHome: () => dispatch(redirectTo('/'))
     , $Kick: (userId) => dispatch(roomKickRequest(userId))
     , $Ban: (userId) => dispatch(roomBanRequest(userId))
     , $Unban: (userId) => dispatch(roomUnbanRequest(userId))
   })
-)(RoomCheck);
+)(Room);
 
 export default RoomView

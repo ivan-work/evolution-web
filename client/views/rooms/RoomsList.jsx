@@ -10,7 +10,7 @@ import {roomJoinRequestSoft, roomSpectateRequestSoft} from '../../../shared/acti
 import {PHASE} from '../../../shared/models/game/GameModel';
 
 import {failsChecks} from '../../../shared/actions/checks';
-import {checkCanJoinRoomToPlay, checkCanJoinRoomToSpectate} from '../../../shared/actions/rooms.checks';
+import {checkCanJoinRoomToPlay, checkCanJoinRoomToSpectate, checkUserNotInPlayers} from '../../../shared/actions/rooms.checks';
 
 export class RoomsList extends React.Component {
   static propTypes = {
@@ -37,7 +37,10 @@ export class RoomsList extends React.Component {
             </a>
             &nbsp;({room.users.size}/{room.settings.maxPlayers}) {room.spectators.size > 0 && '+' + room.spectators.size}
             &nbsp;<IconButton name='visibility' colored
-                              disabled={failsChecks(() => checkCanJoinRoomToSpectate(room, userId))}
+                              disabled={failsChecks(() => {
+                                checkCanJoinRoomToSpectate(room, userId);
+                                checkUserNotInPlayers(room, userId);
+                              })}
                               onClick={() => $roomSpectate(room.id)}/>
           </span>
       </ListItem>)}

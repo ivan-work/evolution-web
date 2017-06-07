@@ -78,13 +78,23 @@ class Animal extends React.Component {
   renderAnimalBody(animal, game) {
     return (<div id={'AnimalBody' + animal.id} className='inner'>
       {game && game.status.phase === PHASE.FEEDING && this.renderFoodStatus(animal, game)}
+
+      {/*{<span className='material-icons Flag Poisoned'>smoking_rooms</span>}*/}
+      {/*{<span className='material-icons Flag Hibernated'>snooze</span>}*/}
+      {/*{<span className='material-icons Flag Shell'>home</span>}*/}
+      {/*{<span className='material-icons Flag Regeneration'>get_app</span>}*/}
+      {/*{<span className='material-icons Flag Shy'>report</span>}*/}
+
+
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) && <span className='material-icons Flag Poisoned'>smoking_rooms</span>}
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && <span className='material-icons Flag Hibernated'>snooze</span>}
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <span className='material-icons Flag Shell'>home</span>}
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION) && <span className='material-icons Flag Regeneration'>get_app</span>}
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHY) && <span className='material-icons Flag Shy'>report</span>}
       <div className='AnimalFoodContainer'>
-        {Array.from({length: animal.food}).map((u, index) => <Food key={index}/>)}
+        {animal.food < 5
+          ? Array.from({length: animal.food}).map((u, index) => <Food key={index}/>)
+          : [<span className='FoodCount'>{animal.food}</span>, <Food/>]}
       </div>
     </div>);
   }

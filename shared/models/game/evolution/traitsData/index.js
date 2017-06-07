@@ -104,7 +104,7 @@ export const TraitMimicry = {
       mimicryAnimal.id !== animal.id
       && attackAnimal.id !== animal.id
       //&& !animal.hasTrait(tt.TraitMimicry)
-      //&& (!animal.hasTrait(tt.TraitMimicry) || animal.hasTrait(tt.TraitMimicry) && animal.hasTrait(tt.TraitMimicry).checkAction(game, animal))
+      //&& (!animal.hasTrait(tt.TraitMimicry) || animal.hasTrait(tt.TraitMimicry) && animal.hasTrait(tt.TraitMimicry).checkActionFails(game, animal))
       && attackTraitData.checkTarget(game, attackAnimal, animal)
     ).toList();
   }

@@ -117,7 +117,7 @@ export const TraitCarnivorous = {
       const animalAnglerfish = game.getPlayer(targetAnimal.ownerId).continent.filter(animal =>
         animal.traits.size === 1
         && animal.traits.first().type === tt.TraitAnglerfish
-        && animal.traits.first().checkAction(game, animal)
+        && !animal.traits.first().checkActionFails(game, animal)
         && (targetAnimal === animal || (
           animal.traits.first().value === true
           && targetAnimal.traits.size === 0
@@ -167,7 +167,7 @@ export const TraitCarnivorous = {
       dispatch(server$traitActivate(game, sourceAnimal, traitIntellect, staticDefenses[0]));
       game = selectGame(getState, game.id);
     }
-    const canUseIntellect = traitIntellect && traitIntellect.checkAction(game, sourceAnimal);
+    const canUseIntellect = traitIntellect && !traitIntellect.checkActionFails(game, sourceAnimal);
     const disabledTid = !!traitIntellect && traitIntellect.value;
     logger.debug(`traitIntellect: ${traitIntellect}; ${canUseIntellect}; ${disabledTid}`);
 

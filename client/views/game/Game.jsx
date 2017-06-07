@@ -22,6 +22,10 @@ import CustomDragLayer from './dnd/CustomDragLayer.jsx';
 // Style
 import './Game.scss'
 
+// Animations
+import {AnimationServiceContext} from '../../services/AnimationService';
+import {createAnimationServiceConfig} from './animations';
+
 // Components
 import {Portal} from '../utils/Portal.jsx';
 import {ControlGroup} from '../utils/ControlGroup.jsx';
@@ -130,7 +134,8 @@ export class Game extends React.Component {
 }
 
 export const GameView = compose(
-  DragDropContext(backend)
+  AnimationServiceContext(createAnimationServiceConfig())
+  , DragDropContext(backend)
   , connect((state, props) => {
       const game = state.get('game');
       const user = state.get('user');

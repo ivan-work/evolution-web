@@ -1,7 +1,7 @@
 import React from 'react';
 import {Route, IndexRoute} from 'react-router';
 import App from '../components/App.jsx';
-import {LoginView, RoomsView, Room, GameWrapperView, GamePage} from '../views/index';
+import {LoginView, RoomsView, RouteRoom} from '../views/index';
 import {Test} from '../components/Test.jsx';
 import {redirectToLogin} from '../../shared/actions/actions';
 
@@ -25,8 +25,7 @@ export default (store) => {
   return <Route path='/' component={App}>
     <IndexRoute component={RoomsView} onEnter={AuthCheck}/>
     <Route path='login' component={LoginView} onEnter={LoginCheck}/>
-    <Route path='room/:roomId' component={Room} onEnter={AuthCheck}/>
-    <Route path='game' component={GamePage} onEnter={AuthCheck}/>
+    <Route path={RouteRoom.getRoutePath().slice(1)} component={RouteRoom} onEnter={AuthCheck}/>
     <Route path='test' component={Test}/>
   </Route>
 }

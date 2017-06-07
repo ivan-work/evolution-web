@@ -42,7 +42,7 @@ class AnimalSelectLink extends React.PureComponent {
     //  , draggable: connectDragSource
     //});
 
-    return connectDragSource(<div className="SelectLink">{T.translate('Game.UI.SelectLink')}</div>);
+    return connectDragSource(<div className="SelectLink pointer">{T.translate('Game.UI.SelectLink')}</div>);
   }
 }
 

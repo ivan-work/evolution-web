@@ -47,7 +47,7 @@ App:
       addon_base: База
       addon_timeToFly: Время Летать
       addon_continents: Континенты (Без локаций)
-      addon_bonus: Бонусные
+      addon_bonus: Подарочный набор
       addon_plantarium: Растения
     Players: Игроки
     Spectators: Зрители

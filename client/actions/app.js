@@ -3,9 +3,6 @@ import deepForceUpdate from 'react-deep-force-update';
 
 import RootService from '../services/RootService';
 
-import {selectClientRoute} from '../../shared/selectors';
-import {redirectTo} from '../../shared/utils';
-
 export const appChangeLanguage = (langCode) => (dispatch) => {
   //console.log('fetching', langCode);
   window.fetch(`/api/i18n/${langCode}`)

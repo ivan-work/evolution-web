@@ -17,6 +17,7 @@ import {
 } from '../../../shared/actions/actions';
 import {failsChecks} from '../../../shared/actions/checks';
 import {checkCanJoinRoomToPlay} from '../../../shared/actions/rooms.checks';
+import RouteRoom from '../RouteRoom.jsx'
 
 /*
  * RoomControlGroup
@@ -38,7 +39,7 @@ export class RoomControlGroup extends React.Component {
 
   back() {
     const {room, userId, inRoom} = this.props;
-    this.props.$redirectTo(inRoom ? '/' : '/room/' + room.id)
+    this.props.$redirectTo(inRoom ? '/' : RouteRoom.getRoutePath())
   }
 
   render() {

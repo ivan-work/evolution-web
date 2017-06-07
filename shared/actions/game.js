@@ -808,11 +808,11 @@ export const animalDeath = (gameId, type, animalId, data) => ({
 export const gameServerToClient = {
   gameInit: ({game, userId}, currentUserId) => (dispatch) => {
     dispatch(gameInit(GameModelClient.fromServer(game, userId)));
-    dispatch(redirectTo('/game'));
+    dispatch(redirectTo('/room'));
   }
   , gameCreateSuccess: (({game}, currentUserId) => (dispatch) => {
     dispatch(gameCreateSuccess(GameModelClient.fromServer(game, currentUserId)));
-    dispatch(redirectTo('/game'));
+    dispatch(redirectTo('/room'));
   })
   , gameCreateNotify: ({roomId, gameId}) => gameCreateNotify(roomId, gameId)
   , gameStart: ({gameId}) => gameStart(gameId)

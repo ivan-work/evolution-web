@@ -92,7 +92,7 @@ export const server$roomCreate = (room) => (dispatch, getState) => dispatch(Obje
 
 export const roomJoinRequestSoft = (roomId) => (dispatch, getState) => (
   getState().get('room') === roomId && getState().get('rooms').find(r => ~r.users.indexOf(getState().getIn(['user', 'id'])))
-    ? dispatch(redirectTo(`/room/${roomId}`))
+    ? dispatch(redirectTo(`/room`))
     : dispatch(roomJoinRequest(roomId))
 );
 
@@ -134,7 +134,7 @@ export const server$roomJoin = (roomId, userId) => (dispatch, getState) => {
 
 export const roomSpectateRequestSoft = (roomId) => (dispatch, getState) => (
   getState().get('room') === roomId && getState().get('rooms').find(r => ~r.spectators.indexOf(getState().getIn(['user', 'id'])))
-    ? dispatch(redirectTo(`/room/${roomId}`))
+    ? dispatch(redirectTo(`/room`))
     : dispatch(roomSpectateRequest(roomId))
 );
 
@@ -507,17 +507,15 @@ export const roomsServerToClient = {
   }
   , roomJoinSelf: ({roomId, userId, room}, currentUserId) => (dispatch, getState) => {
     dispatch(roomJoinSelf(roomId, userId, RoomModel.fromJS(room)));
-    dispatch(redirectTo(`/room/${roomId}`));
+    dispatch(redirectTo(`/room`));
   }
   , roomSpectate: ({roomId, userId}) => roomSpectate(roomId, userId)
   , roomSpectateSelf: ({roomId, userId, room, game}, currentUserId) => (dispatch, getState) => {
     dispatch(roomSpectateSelf(roomId, userId, RoomModel.fromJS(room)));
-    if (!game) {
-      dispatch(redirectTo(`/room/${roomId}`));
-    } else {
+    if (game) {
       dispatch(gameInit(GameModelClient.fromServer(game)));
-      dispatch(redirectTo(`/game`));
     }
+    dispatch(redirectTo(`/room`));
   }
   , roomExit: ({roomId, userId}, currentUserId) => (dispatch, getState) => {
     dispatch(roomExit(roomId, userId));
@@ -536,7 +534,7 @@ export const roomsServerToClient = {
     dispatch(roomStartVoting(roomId, timestamp));
     if (isUserInPlayers(selectRoom(getState, roomId), currentUserId)) {
       if (!isUserRouterInGame(getState, roomId)) {
-        dispatch(redirectTo(`/room/${roomId}`));
+        dispatch(redirectTo(`/room`));
       }
       dispatch(appPlaySound('START_D2'));
     }

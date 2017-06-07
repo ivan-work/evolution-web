@@ -759,7 +759,7 @@ export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetI
   if (!targetId) {
     throw new ActionCheckError(`server$traitIntellectAnswer@Game(${game.id})`, 'Wrong target trait')
   }
-  if (!traitIntellect.checkAction(game, attackAnimal)) {
+  if (traitIntellect.checkActionFails(game, attackAnimal)) {
     throw new ActionCheckError(`server$traitIntellectAnswer@Game(${game.id})`, 'Intellect has cooldown')
   }
 

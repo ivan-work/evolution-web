@@ -59,7 +59,7 @@ const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
       game.isPlayerTurn()
       && game.status.phase === PHASE.FEEDING
       && sourceAnimal.ownerId === game.userId
-      && trait.checkAction(game, sourceAnimal)
+      && !trait.checkActionFails(game, sourceAnimal)
     )
   }
   , (connect, monitor) => ({
@@ -110,7 +110,7 @@ class ClickAnimalTrait extends AnimalTrait {
       && (( // Normal trait
         (game.isPlayerTurn() || trait.getDataModel().transient)
         && game.status.phase === PHASE.FEEDING
-        && trait.checkAction(game, sourceAnimal)
+        && !trait.checkActionFails(game, sourceAnimal)
       ) || ( // Ambush
         trait.type === tt.TraitAmbush
         && game.status.phase === PHASE.AMBUSH
