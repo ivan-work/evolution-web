@@ -129,7 +129,7 @@ export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) =>
     .update(game => deadAnimals.reduce(
       (game, animalId) => animalDeath(game, {type: ANIMAL_DEATH_REASON.NEOPLASM, animalId})
       , game));
-}
+};
 
 export const traitAnimalAttachTrait = (game, {sourcePid, sourceAid, trait}) => game
   .updateIn(['players', sourcePid, 'continent', sourceAid], animal => animal.traitAttach(trait));

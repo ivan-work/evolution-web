@@ -23,6 +23,7 @@ import {
   , server$game
   , startCooldown
   , server$gameDeployAnimalFromDeck
+  , server$tryNeoplasmDeath
 } from '../../../../actions/actions';
 
 import {selectGame} from '../../../../selectors';
@@ -43,6 +44,9 @@ export const TraitMetamorphose = {
     dispatch(server$traitStartCooldown(game.id, traitMetamorphose, sourceAnimal));
 
     dispatch(server$startFeeding(game.id, sourceAnimal.id, 1, tt.TraitMetamorphose));
+
+    dispatch(server$tryNeoplasmDeath(game.id, sourceAnimal));
+
     return true;
   }
   , $checkAction: (game, sourceAnimal) => sourceAnimal.getWantedFood() > 0 && sourceAnimal.getEatingBlockers(game).length <= 1
@@ -171,14 +175,15 @@ export const TraitIntellect = {
       , getActiveDefenses(game, sourceAnimal, targetAnimal)
       , getAffectiveDefenses(game, sourceAnimal, targetAnimal));
   }
-  , action: (game, sourceAnimal, traitIntellect, targetTrait) => (dispatch, getState) => {
-    dispatch(server$traitSetValue(game, sourceAnimal, traitIntellect, targetTrait));
-    if (targetTrait !== true) {
+  , action: (game, sourceAnimal, traitIntellect, targetTraitId) => (dispatch, getState) => {
+    dispatch(server$traitSetValue(game, sourceAnimal, traitIntellect, targetTraitId));
+    if (targetTraitId !== true) {
       dispatch(server$traitStartCooldown(game.id, traitIntellect, sourceAnimal));
     }
     return false;
   }
 };
+
 export const TraitAnglerfish = {
   type: tt.TraitAnglerfish
   , targetType: TRAIT_TARGET_TYPE.NONE

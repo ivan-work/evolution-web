@@ -26,6 +26,7 @@ import {
   , traitAddHuntingCallback
   , traitClearHuntingCallbacks
   , server$traitSetValue
+  , animalDeath
 } from '../../../../actions/actions';
 
 import {selectGame} from '../../../../selectors';
@@ -164,7 +165,7 @@ export const TraitCarnivorous = {
 
     const traitIntellect = sourceAnimal.hasTrait(tt.TraitIntellect);
     if (traitIntellect && staticDefenses.length === 1) {
-      dispatch(server$traitActivate(game, sourceAnimal, traitIntellect, staticDefenses[0]));
+      dispatch(server$traitActivate(game, sourceAnimal, traitIntellect, staticDefenses[0].id));
       game = selectGame(getState, game.id);
     }
     const canUseIntellect = traitIntellect && !traitIntellect.checkActionFails(game, sourceAnimal);
@@ -220,7 +221,7 @@ export const TraitCarnivorous = {
         const defaultIntellect = (questionId) => {
           const targetId = (possibleDefenses.length > 0 ? possibleDefenses[0].id
             : affectiveDefenses.length > 0 ? affectiveDefenses[0].id
-            : true);
+              : true);
           return server$traitIntellectAnswer(game.id, questionId, traitIntellect.id, targetId);
         };
 
@@ -248,79 +249,79 @@ export const TraitCarnivorous = {
     }
 
     const defaultDefence = (questionId) => (dispatch, getState) => {
-        if (traitRunning && !traitRunning.isEqual(disabledTid)) {
-          dispatch(server$traitDefenceAnswer(game.id
-            , questionId
-            , tt.TraitRunning
-          ));
-          return false;
-        } else if (traitCnidocytes && !traitCnidocytes.isEqual(disabledTid)) {
-          dispatch(server$traitDefenceAnswer(game.id
-            , questionId
-            , tt.TraitCnidocytes
-          ));
-          return false;
-        } else if (traitTailLoss && traitTailLossTargets.size > 0 && !traitTailLoss.isEqual(disabledTid)) {
-          dispatch(server$traitDefenceAnswer(game.id
-            , questionId
-            , tt.TraitTailLoss
-            , traitTailLossTargets.last().id
-          ));
-          return false;
-        } else if (traitMimicry && traitMimicryTargets.size > 0 && !traitMimicry.isEqual(disabledTid)) {
-          dispatch(server$traitDefenceAnswer(game.id
-            , questionId
-            , tt.TraitMimicry
-            , traitMimicryTargets.first().id
-          ));
-          return false;
-        } else if (traitShell && !traitShell.isEqual(disabledTid)) {
-          dispatch(server$traitDefenceAnswer(game.id
-            , questionId
-            , traitShell.id
-          ));
-          return false;
-        } else if (traitInkCloud && !traitInkCloud.isEqual(disabledTid)) {
-          dispatch(server$traitDefenceAnswer(game.id
-            , questionId
-            , traitInkCloud.id
-          ));
-          return false;
-        } else {
-          game = selectGame(getState, game.id);
+      if (traitRunning && !traitRunning.isEqual(disabledTid)) {
+        dispatch(server$traitDefenceAnswer(game.id
+          , questionId
+          , tt.TraitRunning
+        ));
+        return false;
+      } else if (traitCnidocytes && !traitCnidocytes.isEqual(disabledTid)) {
+        dispatch(server$traitDefenceAnswer(game.id
+          , questionId
+          , tt.TraitCnidocytes
+        ));
+        return false;
+      } else if (traitTailLoss && traitTailLossTargets.size > 0 && !traitTailLoss.isEqual(disabledTid)) {
+        dispatch(server$traitDefenceAnswer(game.id
+          , questionId
+          , tt.TraitTailLoss
+          , traitTailLossTargets.last().id
+        ));
+        return false;
+      } else if (traitMimicry && traitMimicryTargets.size > 0 && !traitMimicry.isEqual(disabledTid)) {
+        dispatch(server$traitDefenceAnswer(game.id
+          , questionId
+          , tt.TraitMimicry
+          , traitMimicryTargets.first().id
+        ));
+        return false;
+      } else if (traitShell && !traitShell.isEqual(disabledTid)) {
+        dispatch(server$traitDefenceAnswer(game.id
+          , questionId
+          , traitShell.id
+        ));
+        return false;
+      } else if (traitInkCloud && !traitInkCloud.isEqual(disabledTid)) {
+        dispatch(server$traitDefenceAnswer(game.id
+          , questionId
+          , traitInkCloud.id
+        ));
+        return false;
+      } else {
+        game = selectGame(getState, game.id);
 
-          if (traitCnidocytes && !traitCnidocytes.isEqual(disabledTid) && !traitCnidocytes.checkActionFails(game, sourceAnimal)) {
-            dispatch(traitCnidocytes.getDataModel().customFns.paralyze(game.id, targetAnimal, traitCnidocytes, sourceAnimal));
-          }
-
-          dispatch(server$traitAnswerSuccess(game.id, questionId));
-
-          const traitPoisonous = targetAnimal.hasTrait(tt.TraitPoisonous);
-          if (traitPoisonous && !traitPoisonous.isEqual(disabledTid)) {
-            dispatch(server$traitActivate(game, targetAnimal, traitPoisonous, sourceAnimal));
-          }
-
-          dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
-
-          dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
-            dispatch(server$startFeeding(game.id, sourceAnimal.id, 2, 'TraitCarnivorous'));
-
-            // Scavenge
-            const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
-
-            game.sortPlayersFromIndex(game.players, currentPlayerIndex).some(player => player.continent.some(animal => {
-              const traitScavenger = animal.hasTrait(tt.TraitScavenger);
-              if (traitScavenger && animal.canEat(game) > 0) {
-                dispatch(server$startFeeding(game.id, animal.id, 1, tt.TraitScavenger, sourceAnimal.id));
-                return true;
-              }
-            }));
-          }));
-
-          dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
-          return true;
+        if (traitCnidocytes && !traitCnidocytes.isEqual(disabledTid) && !traitCnidocytes.checkActionFails(game, sourceAnimal)) {
+          dispatch(traitCnidocytes.getDataModel().customFns.paralyze(game.id, targetAnimal, traitCnidocytes, sourceAnimal));
         }
-      };
+
+        dispatch(server$traitAnswerSuccess(game.id, questionId));
+
+        const traitPoisonous = targetAnimal.hasTrait(tt.TraitPoisonous);
+        if (traitPoisonous && !traitPoisonous.isEqual(disabledTid)) {
+          dispatch(server$traitActivate(game, targetAnimal, traitPoisonous, sourceAnimal));
+        }
+
+        dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
+
+        dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
+          dispatch(server$startFeeding(game.id, sourceAnimal.id, 2, 'TraitCarnivorous'));
+
+          // Scavenge
+          const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;
+
+          game.sortPlayersFromIndex(game.players, currentPlayerIndex).some(player => player.continent.some(animal => {
+            const traitScavenger = animal.hasTrait(tt.TraitScavenger);
+            if (traitScavenger && animal.canEat(game) > 0) {
+              dispatch(server$startFeeding(game.id, animal.id, 1, tt.TraitScavenger, sourceAnimal.id));
+              return true;
+            }
+          }));
+        }));
+
+        dispatch(endHunt(game, sourceAnimal, trait, targetAnimal));
+        return true;
+      }
+    };
 
     /**
      * Now we determine if we need to ask user at all
@@ -344,12 +345,48 @@ export const TraitCarnivorous = {
     const unavoidable = countUnavoidableDefenses(game, sourceAnimal, targetAnimal);
     if (unavoidable > 0) return false;
 
-    const defenses = getStaticDefenses(game, sourceAnimal, targetAnimal).length;
+    // const defenses = getStaticDefenses(game, sourceAnimal, targetAnimal).length;
+    // const traitIntellect = sourceAnimal.hasTrait(tt.TraitIntellect);
 
-    const traitIntellect = sourceAnimal.hasTrait(tt.TraitIntellect);
+    const defenses = getStaticDefenses(game, sourceAnimal, targetAnimal);
+    switch (defenses.length) {
+      case 0:
+        return true;
+      case 1:
+        const traitIntellect = sourceAnimal.hasTrait(tt.TraitIntellect);
+        if (traitIntellect) {
+          const intellectIsAvailable = !traitIntellect.checkActionFails(game, sourceAnimal);
+          const intellectTargetsDefense = defenses[0].id === traitIntellect.value;
+          return intellectIsAvailable || intellectTargetsDefense;
+        }
+        return false;
+      default:
+        return false;
+    }
 
-    return (traitIntellect && !traitIntellect.checkActionFails(game, sourceAnimal))
-      ? defenses < 2
-      : defenses < 1;
+    // return (traitIntellect && !traitIntellect.checkActionFails(game, sourceAnimal))
+    //   ? defenses < 2
+    //   : defenses < 1;
+
+
+    //   const defenses = getStaticDefenses(game, sourceAnimal, targetAnimal);
+    //
+    //   const traitIntellect = sourceAnimal.hasTrait(tt.TraitIntellect);
+    //
+    //   if (traitIntellect) {
+    //     const intellectIsAvailable = !traitIntellect.checkActionFails(game, sourceAnimal);
+    //     const intellectTargetsDefense = defenses.some(t => t.id === traitIntellect.value);
+    //     if (intellectTargetsDefense && !traitIntellect.disabled) {
+    //       // Because intellect can target static defense + InkCloud and enter cooldown
+    //       return defenses.length === 1
+    //     } else if (intellectIsAvailable) {
+    //       return defenses.length < 2;
+    //     } else {
+    //       return defenses.length === 0;
+    //     }
+    //   } else {
+    //     return defenses.length === 0;
+    //   }
+    // }
   }
 };

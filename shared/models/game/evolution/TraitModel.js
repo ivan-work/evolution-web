@@ -110,14 +110,19 @@ export class TraitModel extends Record({
     if (this.disabled) return 'Trait is disabled';
     if (sourceAnimal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) return 'Regeneration';
     if (!traitData.action) return 'Trait has no .action';
-    if (traitData.cooldowns && traitData.cooldowns.some(([link, place]) =>
-        game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id, this.id)))
-      return 'Trait has cooldown';
+    if (this.isOnCooldown(game, sourceAnimal)) return 'Trait has cooldown';
     // Either no $checkAction or it is passing
     if (traitData.$checkAction && !traitData.$checkAction(game, sourceAnimal, this))
       return '$checkAction fails';
     return false;
   };
+
+  isOnCooldown(game, sourceAnimal) {
+    const traitData = this.getDataModel();
+    return !!(traitData.cooldowns
+      && traitData.cooldowns.some(([link, place]) => game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id, this.id))
+    );
+  }
 
   toClient() {
     return this

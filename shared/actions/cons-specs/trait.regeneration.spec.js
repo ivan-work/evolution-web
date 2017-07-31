@@ -131,4 +131,30 @@ players:
     expect(findAnimal('$C').countScore(), 'score $C').equal(1);
     expect(findAnimal('$D').countScore(), 'score $D').equal(4);
   });
+
+  it(`Can't defend symbiont`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 1 camo
+food: 10
+phase: feeding
+players:
+  - continent: $A regen, $B symb$A, $C carn, $D carn wait
+`);
+    const {selectGame, selectPlayer, findCard, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    expectUnchanged(`Can't take food when $A alive`, () => {
+      clientStore0.dispatch(traitTakeFoodRequest('$B'));
+    }, serverStore, clientStore0);
+
+    clientStore0.dispatch(traitActivateRequest('$C', tt.TraitCarnivorous, '$A'));
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    clientStore0.dispatch(traitTakeFoodRequest('$B'));
+    expect(findAnimal('$B').getFood(), 'find $B').equal(1);
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    clientStore0.dispatch(traitActivateRequest('$D', tt.TraitCarnivorous, '$B'));
+    expect(findAnimal('$B'), 'find $B').null;
+  });
 });

@@ -2,6 +2,7 @@ import logger from '~/shared/utils/logger';
 import uuid from 'uuid';
 import {ActionCheckError} from '../models/ActionCheckError';
 import {TraitModel} from '../models/game/evolution/TraitModel';
+import {TraitNeoplasm} from '../models/game/evolution/traitsData';
 
 import {SETTINGS_TIMED_OUT_TURN_TIME} from '../models/game/GameSettings';
 import {
@@ -189,6 +190,7 @@ export const server$traitSetValue = (game, sourceAnimal, trait, value) => (dispa
 export const server$traitKillAnimal = (gameId, sourceAnimal, targetAnimal) => (dispatch, getState) => {
   if (targetAnimal.hasTrait(tt.TraitRegeneration)) {
     dispatch(server$game(gameId, traitSetAnimalFlag(gameId, targetAnimal.id, TRAIT_ANIMAL_FLAG.REGENERATION, true)));
+    dispatch(server$game(gameId, traitParalyze(gameId, targetAnimal.id)));
   } else {
     dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.KILL, targetAnimal.id)));
   }
@@ -227,6 +229,19 @@ export const server$tryViviparous = (gameId, animalId) => (dispatch, getState) =
     const {trait} = checkTraitActivation(game, animal, tt.TraitViviparous);
     return dispatch(server$traitActivate(game, animal, trait));
   })
+};
+
+export const server$tryNeoplasmDeath = (gameId, animal) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  animal = game.locateAnimal(animal.id, animal.ownerId);
+  const animalTraitsArray = animal.traits.toArray();
+  const neoplasmIndex = animalTraitsArray.findIndex(t => t.type === tt.TraitNeoplasm);
+  if (~neoplasmIndex) {
+    const validTraitAboveNeoplasmExists = animalTraitsArray.slice(neoplasmIndex + 1).some((trait, index) => TraitNeoplasm.customFns.canBeDisabled(trait));
+    if (!validTraitAboveNeoplasmExists) {
+      dispatch(animalDeath(gameId, ANIMAL_DEATH_REASON.NEOPLASM, animal.id))
+    }
+  }
 };
 
 export const traitAddHuntingCallback = (gameId, callback) => ({
@@ -756,11 +771,19 @@ export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetI
 
   const traitIntellect = attackAnimal.hasTrait(tt.TraitIntellect);
 
-  if (!targetId) {
-    throw new ActionCheckError(`server$traitIntellectAnswer@Game(${game.id})`, 'Wrong target trait')
-  }
   if (traitIntellect.checkActionFails(game, attackAnimal)) {
     throw new ActionCheckError(`server$traitIntellectAnswer@Game(${game.id})`, 'Intellect has cooldown')
+  }
+
+  if (targetId === true) {
+    // either targetId is true, means - user don't want to use Intellect
+  } else {
+    // or it's a type/id of targetTrait and we convert it strictly to ID
+    const targetTrait = targetAnimal.hasTrait(targetId, true);
+    if (!targetTrait) {
+      throw new ActionCheckError(`server$traitIntellectAnswer@Game(${game.id})`, 'Wrong target trait')
+    }
+    targetId = targetTrait.id;
   }
 
   dispatch(server$traitActivate(game, attackAnimal, traitIntellect, targetId));

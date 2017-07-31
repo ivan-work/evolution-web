@@ -6,7 +6,6 @@ import {
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
   , CARD_TARGET_TYPE
-  , CTT_PARAMETER
 } from '../constants';
 
 import {
@@ -18,6 +17,7 @@ import {
   , server$traitActivate
   , server$game
   , traitParalyze
+  , server$tryNeoplasmDeath
 } from '../../../../actions/actions';
 
 import {selectGame} from '../../../../selectors';
@@ -66,7 +66,6 @@ export const TraitNeoplasm = {
   }
 };
 
-
 export const TraitRegeneration = {
   type: tt.TraitRegeneration
   , checkTraitPlacement: (animal) => (animal.traits.filter(t => !t.hidden).size < 2
@@ -95,6 +94,19 @@ export const TraitCnidocytes = {
   }
 };
 
+const recombinateTrait = (trait) => trait.set('value', false).set('disabled', false);
+const recombinateAnimalTrait = (game, animal, traitRecombination, trait1, trait2) => (dispatch, getState) => {
+  dispatch(server$traitAnimalRemoveTrait(game, animal, trait1));
+
+  game = selectGame(getState, game.id);
+  animal = game.locateAnimal(animal.id, animal.ownerId);
+  if (!trait2.getDataModel().checkTraitPlacementFails(animal)) {
+    dispatch(server$traitAnimalAttachTrait(game, animal, recombinateTrait(trait2)));
+  }
+  dispatch(server$traitStartCooldown(game.id, traitRecombination, animal));
+
+  dispatch(server$tryNeoplasmDeath(game.id, animal));
+};
 export const TraitRecombination = {
   type: tt.TraitRecombination
   , targetType: TRAIT_TARGET_TYPE.TWO_TRAITS
@@ -103,18 +115,24 @@ export const TraitRecombination = {
   , cooldowns: fromJS([
     [tt.TraitRecombination, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
   ])
-  , action: (game, sourceAnimal, traitRecombination, [trait1, trait2]) => (dispatch, getState) => {
+  , action: (game, sourceAnimal, traitRecombination1, [trait1, trait2]) => (dispatch, getState) => {
     const animal1 = sourceAnimal;
-    const animal2 = traitRecombination.findLinkedAnimal(game, sourceAnimal);
-    const traitRecombination2 = traitRecombination.findLinkedTrait(game);
+    const animal2 = traitRecombination1.findLinkedAnimal(game, sourceAnimal);
+    const traitRecombination2 = traitRecombination1.findLinkedTrait(game);
     dispatch(server$traitAnimalRemoveTrait(game, animal1, trait1));
     dispatch(server$traitAnimalRemoveTrait(game, animal2, trait2));
-    if (!trait1.getDataModel().checkTraitPlacementFails(selectGame(getState, game.id).locateAnimal(animal2.id, animal2.ownerId)))
-      dispatch(server$traitAnimalAttachTrait(game, animal2, trait1));
-    if (!trait2.getDataModel().checkTraitPlacementFails(selectGame(getState, game.id).locateAnimal(animal1.id, animal1.ownerId)))
-      dispatch(server$traitAnimalAttachTrait(game, animal1, trait2));
-    dispatch(server$traitStartCooldown(game.id, traitRecombination, animal1));
+
+    game = selectGame(getState, game.id);
+    if (!trait2.getDataModel().checkTraitPlacementFails(game.locateAnimal(animal1.id, animal1.ownerId)))
+      dispatch(server$traitAnimalAttachTrait(game, animal1, recombinateTrait(trait2)));
+    if (!trait1.getDataModel().checkTraitPlacementFails(game.locateAnimal(animal2.id, animal2.ownerId)))
+      dispatch(server$traitAnimalAttachTrait(game, animal2, recombinateTrait(trait1)));
+
+    dispatch(server$traitStartCooldown(game.id, traitRecombination1, animal1));
     dispatch(server$traitStartCooldown(game.id, traitRecombination2, animal2));
+
+    dispatch(server$tryNeoplasmDeath(game.id, animal1));
+    dispatch(server$tryNeoplasmDeath(game.id, animal2));
     return true;
   }
   , $checkAction: (game, sourceAnimal, traitRecombination) => {

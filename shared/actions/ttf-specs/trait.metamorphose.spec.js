@@ -6,6 +6,7 @@ import {
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
+import * as tt from '../../models/game/evolution/traitTypes';
 
 import {makeGameSelectors} from '../../selectors';
 
@@ -42,14 +43,6 @@ players:
     expect(selectAnimal(User0, 2).getFood(), 'Animal#C.getFood()').equal(1);
   });
 
-  /**
-   * TODO
-   * Problem: When something blocks animal from eating, you still can activate metamorphose to drop that blocking trait
-   * f.e.: Animal with Shell active can drop shell or Animal with symbiosis can drop it.
-   * Solution: rewrite checkAction: canEat to countEatingBlockers.
-   * Rewrute checkAction to countEatingBlockers() <= 1
-   * Rewrite getTargets to EatingBlocker OR any other
-   */
   it('Can drop traits', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
@@ -89,5 +82,21 @@ players:
     //expect(selectAnimal(User0, 1).getFood(), 'Animal#B.getFood()').equal(0);
     //expect(selectAnimal(User0, 2).getFood(), 'Animal#C.getFood()').equal(0);
     //expect(selectAnimal(User0, 3).getFood(), 'Animal#D.getFood()').equal(1);
+  });
+
+  it('Dies of neoplasm', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: feeding
+food: 2
+players:
+  - continent: $A neoplasm meta, $B wait 
+`);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitMetamorphose, tt.TraitMetamorphose));
+
+    expect(findAnimal('$A')).null;
   });
 });

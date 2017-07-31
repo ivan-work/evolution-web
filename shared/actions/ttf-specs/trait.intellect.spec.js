@@ -5,6 +5,8 @@ import {
   , traitAnswerRequest
 } from '../actions';
 
+import * as tt from '../../models/game/evolution/traitTypes';
+
 import {PHASE, QuestionRecord} from '../../models/game/GameModel';
 import {TRAIT_ANIMAL_FLAG} from '../../models/game/evolution/constants';
 import {replaceGetRandom} from '../../utils/randomGenerator';
@@ -134,7 +136,7 @@ phase: feeding
 players:
   - continent: $A carn int wait, $B run
 `);
-    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, selectCard, selectAnimal, findTrait} = makeGameSelectors(serverStore.getState, gameId);
 
     replaceGetRandom(() => 1, () => {
       clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
@@ -167,13 +169,21 @@ deck: 10 camo
 phase: feeding
 food: 10
 players:
-  - continent: $Q carn int + graz, $W swim ink cloud
+  - continent: $Q carn int wait, $W swim ink
 `);
-    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, findAnimal, findTrait} = makeGameSelectors(serverStore.getState, gameId);
 
-    clientStore0.dispatch(traitActivateRequest('$Q', 'TraitCarnivorous', '$W'));
-    expect(selectAnimal(User0, 0).getFood()).equal(1);
-    expect(selectAnimal(User0, 1)).ok;
+    clientStore0.dispatch(traitActivateRequest('$Q', tt.TraitCarnivorous, '$W'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitInkCloud));
+
+    expect(findAnimal('$Q').getFood()).equal(0);
+    expect(findAnimal('$W')).ok;
+
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    clientStore0.dispatch(traitActivateRequest('$Q', tt.TraitCarnivorous, '$W'));
+
+    expect(findAnimal('$Q').getFood()).equal(2);
   });
 
   it('BUG: Intellect should ignore Shell', () => {

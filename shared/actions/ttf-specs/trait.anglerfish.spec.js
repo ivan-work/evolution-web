@@ -81,7 +81,7 @@ settings:
   timeTurn: 100
   timeTraitResponse: 80
 `);
-    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, selectCard, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
     serverStore.dispatch(testShiftTime(25));
     expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)].remaining).equal(75);
@@ -93,14 +93,17 @@ settings:
     expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)]).undefined;
 
     clientStore0.dispatch(traitAnswerRequest(tt.TraitTailLoss, tt.TraitCarnivorous));
-    expect(selectAnimal(User0, 0)).ok;
+    expect(findAnimal('$Q')).ok;
 
     expect(selectPlayer(User0).acted).true;
     expect(selectGame().status.round).equal(0);
     clientStore0.dispatch(gameEndTurnRequest());
+
     expect(selectGame().status.round).equal(1);
     clientStore0.dispatch(traitActivateRequest('$W', tt.TraitCarnivorous, '$S'));
+    expect(findAnimal('$W')).ok;
     clientStore0.dispatch(gameEndTurnRequest());
+
     clientStore1.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$E', tt.TraitCarnivorous, '$D'));
@@ -108,17 +111,13 @@ settings:
     clientStore1.dispatch(traitAnswerRequest(tt.TraitIntellect, tt.TraitTailLoss));
     expect(selectGame().question).null;
 
-    expect(selectAnimal(User0, 0)).ok;
-    expect(selectAnimal(User0, 1)).ok;
-    expect(selectAnimal(User0, 2)).ok;
-    expect(selectAnimal(User0, 0).id).equal('$Q');
-    expect(selectAnimal(User0, 1).id).equal('$W');
-    expect(selectAnimal(User0, 2).id).equal('$E');
-    expect(selectAnimal(User0, 3)).undefined;
-    expect(selectAnimal(User1, 0).getFood(), '$A food').equal(2);
-    expect(selectAnimal(User1, 1).getFood(), '$S food').equal(1);
-    //console.log(selectAnimal(User1, 2), selectAnimal(User1, 2).traits)
-    expect(selectAnimal(User1, 2).getFood(), '$D food').equal(2);
+    expect(findAnimal('$Q')).ok;
+    expect(findAnimal('$W')).ok;
+    expect(findAnimal('$E')).ok;
+    expect(findAnimal('$E2')).ok;
+    expect(findAnimal('$A').getFood(), '$A food').equal(2);
+    expect(findAnimal('$S').getFood(), '$S food').equal(1);
+    expect(findAnimal('$D').getFood(), '$D food').equal(2);
   });
 
   it('Tailloss shouldnt be able to lose Angler', () => {

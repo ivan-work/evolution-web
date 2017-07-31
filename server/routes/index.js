@@ -30,33 +30,35 @@ module.exports = (app, passport) => {
     }
   });
 
-  //if (process.env.NODE_ENV !== 'production') {
-  router.get('/state', function (req, res, next) {
-    const state = app.get('store').getState()
-    // .update('connections', c => c.keySeq().toArray());
+  if (process.env.DEBUG_STATE !== 'production') {
+    router.get('/state', function (req, res, next) {
+      const state = app.get('store').getState()
+      // .update('connections', c => c.keySeq().toArray());
 
-    const replacer = (key, value) => (
-      key === 'connections' ? (Object.keys(value).reduce((result, connectionId) => {
-        result[connectionId] = value[connectionId].ip;
+      const replacer = (key, value) => (
+        key === 'connections' ? (Object.keys(value).reduce((result, connectionId) => {
+          result[connectionId] = value[connectionId].ip;
+          return result;
+        }, {}))
+          : key === 'chat' ? 'REPLACED'
+          : key === 'log' ? 'REPLACED'
+            : value);
+
+      const format = (str) => `<pre>${str}</pre>`;
+      res.send(format(JSON.stringify(state.toJS(), replacer, '  ')));
+    });
+  }
+
+  if (process.env.DEBUG_STATE !== 'production') {
+    router.get('/timeouts', function (req, res, next) {
+      const timeouts = app.get('timeouts');
+      res.status(200).json(Object.keys(timeouts).reduce((result, key) => {
+        const timer = timeouts[key];
+        result[key] = timer ? timer.getRemaining() : timer;
         return result;
-      }, {}))
-        : key === 'chat' ? 'REPLACED'
-        : key === 'log' ? 'REPLACED'
-        : value);
-
-    const format = (str) => `<pre>${str}</pre>`;
-    res.send(format(JSON.stringify(state.toJS(), replacer, '  ')));
-  });
-  //}
-
-  router.get('/timeouts', function (req, res, next) {
-    const timeouts = app.get('timeouts');
-    res.status(200).json(Object.keys(timeouts).reduce((result, key) => {
-      const timer = timeouts[key];
-      result[key] = timer ? timer.getRemaining() : timer;
-      return result;
-    }, {}));
-  });
+      }, {}));
+    });
+  }
 
   router.use('/oauth', oauth);
   // set authentication routes

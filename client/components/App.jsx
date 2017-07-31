@@ -2,7 +2,6 @@ import React from 'react';
 import {connect} from 'react-redux';
 //import {logoutAndRedirect} from 'actions';
 import T from 'i18n-react';
-import _get from 'lodash/get';
 
 import {Layout, Header, Navigation, Content, IconButton, Button, Spacer} from 'react-mdl';
 
@@ -23,8 +22,8 @@ export const App = ServicesContext(PortalsContext(
         <PortalTarget name='header'/>
         <Spacer/>
         <span>
-        <Button accent onClick={() => alert(_get(T.texts, 'App.Misc.ReportBugText'))}>
-          {T.translate('App.Misc.ReportBug')}
+        <Button target="blank" href={T.translate('App.Misc.FAQ_HREF')}>
+          {T.translate('App.Misc.FAQ')}
         </Button>
         <Button target="blank" raised accent href="https://vk.com/evolveonline">
           {T.translate('App.Misc.VKGroup')}
