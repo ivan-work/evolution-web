@@ -22,14 +22,11 @@ export const App = ServicesContext(PortalsContext(
         <PortalTarget name='header'/>
         <Spacer/>
         <span>
-        <Button target="blank" href={T.translate('App.Misc.FAQ_HREF')}>
-          {T.translate('App.Misc.FAQ')}
-        </Button>
         <Button target="blank" raised accent href="https://vk.com/evolveonline">
           {T.translate('App.Misc.VKGroup')}
         </Button>
-        <Button target="blank" href="https://github.com/ivan-work/evolution-web/blob/master/changelog.md">
-          {T.translate('App.Misc.Changelog')}
+        <Button target="blank" href={T.translate('App.Misc.FAQ_HREF')}>
+          {T.translate('App.Misc.FAQ')}
         </Button>
         </span>
       </Navigation>

@@ -30,7 +30,7 @@ module.exports = (app, passport) => {
     }
   });
 
-  if (process.env.DEBUG_STATE !== 'production') {
+  if (!!process.env.DEBUG_STATE) {
     router.get('/state', function (req, res, next) {
       const state = app.get('store').getState()
       // .update('connections', c => c.keySeq().toArray());
@@ -49,7 +49,7 @@ module.exports = (app, passport) => {
     });
   }
 
-  if (process.env.DEBUG_STATE !== 'production') {
+  if (!!process.env.DEBUG_STATE) {
     router.get('/timeouts', function (req, res, next) {
       const timeouts = app.get('timeouts');
       res.status(200).json(Object.keys(timeouts).reduce((result, key) => {
