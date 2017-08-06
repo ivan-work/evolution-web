@@ -10,7 +10,7 @@ import {
 import {PHASE} from '../../models/game/GameModel';
 import * as tt from '../../models/game/evolution/traitTypes';
 
-import {makeGameSelectors} from '../../selectors';
+import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
 
 describe('TraitRecombination:', () => {
   it('Works', () => {
@@ -131,11 +131,14 @@ players:
   - continent: $A recomb$B neoplasm wait, $B fat
 `);
     const {selectGame, selectPlayer, findCard, findAnimal, findTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {findAnimal0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
 
     clientStore0.dispatch(traitActivateRequest('$A', tt.TraitRecombination, tt.TraitNeoplasm, tt.TraitFatTissue));
 
     expect(findAnimal('$A')).ok;
     expect(findAnimal('$B')).null;
+    expect(findAnimal0('$A')).ok;
+    expect(findAnimal0('$B')).null;
   });
 
   it.skip('Recombination with regen drops all traits', () => {

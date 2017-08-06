@@ -239,7 +239,7 @@ export const server$tryNeoplasmDeath = (gameId, animal) => (dispatch, getState) 
   if (~neoplasmIndex) {
     const validTraitAboveNeoplasmExists = animalTraitsArray.slice(neoplasmIndex + 1).some((trait, index) => TraitNeoplasm.customFns.canBeDisabled(trait));
     if (!validTraitAboveNeoplasmExists) {
-      dispatch(animalDeath(gameId, ANIMAL_DEATH_REASON.NEOPLASM, animal.id))
+      dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.NEOPLASM, animal.id)));
     }
   }
 };
