@@ -11,6 +11,7 @@ import {
 import {QuestionRecord, PHASE} from '../../models/game/GameModel';
 import * as tt from '../../models/game/evolution/traitTypes';
 import {testShiftTime} from '../../utils/reduxTimeout'
+import {replaceGetRandom} from '../../utils/randomGenerator';
 
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
 

@@ -1,5 +1,6 @@
 export const selectRoom = (getState, roomId) => getState().getIn(['rooms', roomId]);
 
+export const selectUserName = (getState, userId) => getState().getIn(['users', userId, 'login']);
 // Game:
 
 /**

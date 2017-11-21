@@ -14,3 +14,8 @@ export const db$registerUser = (user) => {
 export const db$updateUser = (authType, authId, query) => {
   return db.collection('users').updateOne({'auth.type': authType, 'auth.id': authId}, query);
 };
+
+export const db$gameEnd = (game) => {
+  return Promise.resolve();
+  // return db.collection('users').updateOne({'auth.type': authType, 'auth.id': authId}, query);
+};

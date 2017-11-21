@@ -24,8 +24,8 @@ players:
     clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A'));
     clientStore1.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$B'));
-    expect(findAnimal('$A').traits, '$A traits').size(1)
-    expect(findAnimal('$B').traits, '$B traits').size(1)
+    expect(findAnimal('$A').traits, '$A traits').size(1);
+    expect(findAnimal('$B').traits, '$B traits').size(1);
   });
 
   it('At the end', () => {
@@ -49,6 +49,22 @@ players:
     expect(selectPlayer(User2).hand, '(User2).hand').size(5);
     expect(selectPlayer(User2).continent, '(User2).continent').size(4);
     expect(selectAnimal(User0, 2).getFood(), 'Newborn should be without food').equal(0);
+  });
+
+  it('Dead at the end with regen', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 11 camo
+phase: feeding
+players:
+  - continent: $A carn, $B rstr regen
+`);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+    expect(selectGame().status.turn).equal(1);
+    expect(selectGame().status.phase).equal(PHASE.DEPLOY);
+    expect(selectPlayer(User0).hand, '(User0).hand').size(2);
+    expect(selectPlayer(User0).continent, '(User0).continent').size(2);
   });
 });
 

@@ -90,6 +90,7 @@
     "babel-core": "*",
     "babel-loader": "*",
     "babel-plugin-react-transform": "*",
+    "babel-plugin-rewire": "^1.1.0",
     "babel-plugin-transform-class-properties": "*",
     "babel-plugin-transform-react-constant-elements": "*",
     "babel-plugin-transform-react-inline-elements": "*",

@@ -24,7 +24,7 @@ import {
   , server$tryViviparous
 } from '../../../../actions/actions';
 
-import {getRandom} from '../../../../utils/randomGenerator';
+import {getIntRandom} from '../../../../utils/randomGenerator';
 
 import * as tt from '../traitTypes';
 
@@ -80,7 +80,7 @@ export const TraitRunning = {
   ])
   , action: (game, defenceAnimal, traitRunning, target, attackAnimal, attackTrait) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, traitRunning, defenceAnimal));
-    if (getRandom(0, 1) > 0) {
+    if (getIntRandom(0, 1) > 0) {
       dispatch(endHunt(game, attackAnimal, attackTrait, defenceAnimal));
       return true;
     } else {

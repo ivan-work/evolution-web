@@ -1,5 +1,8 @@
 //require('source-map-support').install();
 if (!global._babelPolyfill) require('babel-polyfill');
+// require('babel-register')({
+//   plugins: ['babel-plugin-rewire']
+// });
 import polyfills from '../shared/utils/polyfills'
 import logger from '../shared/utils/logger';
 import chai from 'chai';
@@ -36,10 +39,10 @@ global.window.localStorage = require('./test/setup-local-storage-mock').default(
 global.window.sessionStorage = require('./test/setup-local-storage-mock').default();
 
 global.window.matchMedia = window.matchMedia || (() => ({
-    matches: false
-    , addListener: () => null
-    , removeListener: () => null
-  }));
+  matches: false
+  , addListener: () => null
+  , removeListener: () => null
+}));
 
 // https://github.com/tleunen/react-mdl/issues/193
 require('react-mdl/extra/material');
@@ -142,6 +145,7 @@ global.mockServerStore = function (initialServerState) {
 
 import T from 'i18n-react';
 import ruru from '../i18n/ru-ru.yml';
+
 T.setTexts(ruru[0]);
 
 global.mockClientStore = function (initialClientState) {

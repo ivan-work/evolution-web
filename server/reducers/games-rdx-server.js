@@ -1,5 +1,6 @@
 import logger from '~/shared/utils/logger';
 import {createReducer, ensureParameter, validateParameter} from '../../shared/utils';
+import {getRandom} from '../../shared/utils/randomGenerator';
 import {Map, List, OrderedMap} from 'immutable';
 import {GameModel, QuestionRecord, PHASE} from '../../shared/models/game/GameModel';
 import {CardModel} from '../../shared/models/game/CardModel';
@@ -326,14 +327,15 @@ export const gameEnd = (oldGame, {game}) => {
     , playing: player.playing
     , scoreNormal: player.countScore()
     , scoreDead: player.scoreDead
+    , scoreRandom: getRandom()
   }]), []);
 
   const scoreboardFinal = scoreboard.sort((p1, p2) =>
     !p1.playing ? 1
       : !p2.playing ? -1
       : p2.scoreNormal !== p1.scoreNormal ? p2.scoreNormal - p1.scoreNormal
-        : p1.scoreDead !== p2.scoreDead ? p2.scoreDead - p1.scoreDead
-          : 1 - Math.round(Math.random()) * 2);
+        : p2.scoreDead !== p1.scoreDead ? p2.scoreDead - p1.scoreDead
+          : p2.scoreRandom - p1.scoreRandom);
 
   return game
     .set('scoreboardFinal', scoreboardFinal)

@@ -57,7 +57,10 @@ export const gameInit = (game, userId) => ({type: 'gameInit', data: {game, userI
 
 const gameStartTurn = (gameId) => ({type: 'gameStartTurn', data: {gameId}});
 
-const gameStartPhase = (gameId, phase, timestamp, data) => ({type: 'gameStartPhase', data: {gameId, phase, timestamp, data}})
+const gameStartPhase = (gameId, phase, timestamp, data) => ({
+  type: 'gameStartPhase',
+  data: {gameId, phase, timestamp, data}
+})
 
 export const server$gameStartPhase = (gameId, phase, data) => {
   logger.verbose('server$gameStartPhase:', phase, data);
@@ -526,10 +529,8 @@ const server$gameDistributeCards = (gameId) => (dispatch, getState) => {
       playersWantedCards[player.id] = 6;
     } else {
       player.someAnimal((animal) => {
-        if (!animal.flags.has(TRAIT_ANIMAL_FLAG.REGENERATION)) {
-          if (!animal.hasTrait(tt.TraitRstrategy)) {
-            playersWantedCards[player.id] += 1;
-          }
+        if (!animal.hasTrait(tt.TraitRstrategy) && !animal.flags.has(TRAIT_ANIMAL_FLAG.REGENERATION)) {
+          playersWantedCards[player.id] += 1;
         }
       });
     }
@@ -568,7 +569,7 @@ const server$gameDistributeAnimals = (gameId) => (dispatch, getState) => {
   game.players.forEach((player) => {
     playerStacks[player.id] = [];
     player.someAnimal((animal) => {
-      if (animal.hasTrait(tt.TraitRstrategy)) {
+      if (animal.hasTrait(tt.TraitRstrategy, true) && !animal.flags.has(TRAIT_ANIMAL_FLAG.REGENERATION)) {
         playerStacks[player.id].push(server$gameDeployAnimalFromDeck(gameId, animal));
         playerStacks[player.id].push(server$gameDeployAnimalFromDeck(gameId, animal));
       }
@@ -647,10 +648,10 @@ export const server$gamePhaseEndRegeneration = (gameId) => (dispatch, getState) 
 
   if (selectGame(getState, gameId).deck.size > 0) {
     dispatch(server$gameDistributeCards(gameId));
+    dispatch(server$gameDistributeAnimals(gameId));
     dispatch(server$game(gameId, gameStartTurn(gameId)));
     dispatch(server$gameStartPhase(gameId, PHASE.DEPLOY));
     dispatch(server$gamePlayerStart(gameId));
-    dispatch(server$gameDistributeAnimals(gameId));
   } else {
     dispatch(server$gameEnd(gameId));
   }
@@ -671,6 +672,8 @@ const server$gameEnd = (gameId) => (dispatch, getState) => {
   dispatch(gameEnd(gameId, game));
   dispatch(to$({clientOnly: true, users: selectUsersInGame(getState, gameId)}
     , gameEnd(gameId, game.toClient())));
+
+  // dispatch(gameEnd(gameId, game));
 };
 
 export const gameClientToServer = {

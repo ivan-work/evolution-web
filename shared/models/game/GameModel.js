@@ -8,7 +8,8 @@ import {SettingsRecord, Deck_Base, Deck_TimeToFly, Deck_ContinentsShort, Deck_Bo
 
 import uuid from 'uuid';
 import {ensureParameter} from '../../utils';
-import {getRandom} from '../../utils/randomGenerator';
+import {getIntRandom} from '../../utils/randomGenerator';
+import {selectUserName} from '../../selectors';
 
 import {parseFromRoom, parseCardList, parseAnimalList} from './GameModel.parse';
 
@@ -126,7 +127,7 @@ export class ContinentRecord extends Record({
 const ContinentsStandard = Map({standard: new ContinentRecord({id: 'standard'})});
 const ContinentsAddon = Map({});
 
-const rollDice = () => getRandom(1, 6);
+const rollDice = () => getIntRandom(1, 6);
 
 const FOOD_TABLE = [
 // chosen by fair dice roll
@@ -238,6 +239,39 @@ export class GameModel extends Record({
       .remove('huntingCallbacks')
   }
 
+  toDatabase(getState) {
+    const game = this;
+    return Map({
+      id: game.id
+      , roomId: game.roomId
+      , timestamp: Date.now()
+      , players: game.players.map(player => ({
+        id: player.id
+        , name: selectUserName(getState, player.id)
+        , playing: player.playing
+        , index: player.index
+      })).toArray()
+      , settings: {
+        maxPlayers: game.settings.maxPlayers
+        , timeTurn: game.settings.timeTurn
+        , timeTraitResponse: game.settings.timeTraitResponse
+        , timeAmbush: game.settings.timeAmbush
+        , randomPlayers: game.settings.randomPlayers
+        , halfDeck: game.settings.halfDeck
+        , addon_timeToFly: game.settings.addon_timeToFly
+        , addon_continents: game.settings.addon_continents
+        , addon_bonus: game.settings.addon_bonus
+        , addon_plantarium: game.settings.addon_plantarium
+      }
+      , status: {
+        turn: game.status.turn
+        , round: game.status.round
+      }
+      , scoreboardFinal: game.scoreboardFinal
+      , winnerId: game.winnerId
+    }).toJS();
+  }
+
   getActualPlayers() {
     return this.players.filter(p => p.playing);
   }
@@ -325,9 +359,9 @@ export class GameModelClient extends Record({
   isPlayerTurn(userId) {
     if (!userId) userId = this.userId;
     return !!(
-    userId
-    && userId === this.status.currentPlayer
-    && (this.status.phase === PHASE.DEPLOY || this.status.phase === PHASE.FEEDING));
+      userId
+      && userId === this.status.currentPlayer
+      && (this.status.phase === PHASE.DEPLOY || this.status.phase === PHASE.FEEDING));
   }
 }
 

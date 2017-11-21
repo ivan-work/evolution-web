@@ -231,15 +231,17 @@ export const server$tryViviparous = (gameId, animalId) => (dispatch, getState) =
   })
 };
 
-export const server$tryNeoplasmDeath = (gameId, animal) => (dispatch, getState) => {
+export const server$tryNeoplasmDeath = (gameId, sourceAnimal) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
-  animal = game.locateAnimal(animal.id, animal.ownerId);
-  const animalTraitsArray = animal.traits.toArray();
-  const neoplasmIndex = animalTraitsArray.findIndex(t => t.type === tt.TraitNeoplasm);
-  if (~neoplasmIndex) {
-    const validTraitAboveNeoplasmExists = animalTraitsArray.slice(neoplasmIndex + 1).some((trait, index) => TraitNeoplasm.customFns.canBeDisabled(trait));
-    if (!validTraitAboveNeoplasmExists) {
-      dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.NEOPLASM, animal.id)));
+  const animal = game.locateAnimal(sourceAnimal.id, sourceAnimal.ownerId);
+  if (animal) {
+    const animalTraitsArray = animal.traits.toArray();
+    const neoplasmIndex = animalTraitsArray.findIndex(t => t.type === tt.TraitNeoplasm);
+    if (~neoplasmIndex) {
+      const validTraitAboveNeoplasmExists = animalTraitsArray.slice(neoplasmIndex + 1).some((trait, index) => TraitNeoplasm.customFns.canBeDisabled(trait));
+      if (!validTraitAboveNeoplasmExists) {
+        dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.NEOPLASM, animal.id)));
+      }
     }
   }
 };
