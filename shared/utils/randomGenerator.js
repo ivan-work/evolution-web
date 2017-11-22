@@ -8,6 +8,8 @@ export const getIntRandom = (min, max) => randomFn(min, max);
 
 export const getRandom = () => Math.random();
 
+// TODO remove this shit and rewrite to proper sinon stub =/
+
 export const replaceGetRandom = (randomCb, testCb) => {
   randomFn = randomCb;
   testCb();

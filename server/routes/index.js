@@ -3,7 +3,10 @@ var path = require('path');
 import oauth from './oauth';
 import glob from 'glob';
 import fs from 'fs';
+import moment from 'moment';
 import yamlParser from 'yaml-js';
+
+import {db$findStats} from '../actions/db';
 
 module.exports = (app, passport) => {
   /**
@@ -37,9 +40,9 @@ module.exports = (app, passport) => {
 
       const replacer = (key, value) => (
         key === 'connections' ? (Object.keys(value).reduce((result, connectionId) => {
-          result[connectionId] = value[connectionId].ip;
-          return result;
-        }, {}))
+            result[connectionId] = value[connectionId].ip;
+            return result;
+          }, {}))
           : key === 'chat' ? 'REPLACED'
           : key === 'log' ? 'REPLACED'
             : value);
@@ -63,6 +66,21 @@ module.exports = (app, passport) => {
   router.use('/oauth', oauth);
   // set authentication routes
   //require('./authentication.js')(app, passport);
+
+  router.get('/stats', (req, res, next) => {
+    const from = moment(req.query.from, "YYYY-MM-DD");
+    const to = moment(req.query.to, "YYYY-MM-DD");
+    if (!from.isValid() || !to.isValid()) {
+      res.status(400).send('Wrong parameters (from=YYYY-MM-DD&to=YYYY-MM-DD)');
+      return;
+    }
+    return db$findStats(from.valueOf(), to.valueOf())
+      .then(data => res.status(200).json(data))
+      .catch(err => {
+        console.error(err);
+        res.status(500);
+      })
+  });
 
   // set other routes
   app.use('/api', router);

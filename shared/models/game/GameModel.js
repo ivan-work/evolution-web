@@ -146,6 +146,7 @@ const FOOD_TABLE = [
 const GameModelData = {
   id: null
   , roomId: null
+  , timeCreated: null
   , deck: null
   , players: OrderedMap()
   , continents: ContinentsStandard
@@ -199,6 +200,7 @@ export class GameModel extends Record({
     return new GameModel({
       id: uuid.v4()
       , roomId: room.id
+      , timeCreated: Date.now()
       , deck: GameModel.generateDeck(deck, true)
       , players
       , settings: room.settings
@@ -239,12 +241,13 @@ export class GameModel extends Record({
       .remove('huntingCallbacks')
   }
 
-  toDatabase(getState) {
+  toDatabase(getState, finished) {
     const game = this;
     return Map({
       id: game.id
       , roomId: game.roomId
-      , timestamp: Date.now()
+      , timeCreated: game.timeCreated
+      , timeEnd: Date.now()
       , players: game.players.map(player => ({
         id: player.id
         , name: selectUserName(getState, player.id)
@@ -269,6 +272,7 @@ export class GameModel extends Record({
       }
       , scoreboardFinal: game.scoreboardFinal
       , winnerId: game.winnerId
+      , finished
     }).toJS();
   }
 

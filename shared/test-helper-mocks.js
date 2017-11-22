@@ -14,8 +14,7 @@ import {
   global.mockStores = (count = 2, initialServerStore = void 0) => {
     const serverStore = mockServerStore(initialServerStore);
     const result = [];
-    const sandbox = sinon.sandbox.create();
-    const UserSpy = sandbox.spy(UserModel, 'new');
+    const UserSpy = sinon.spy(UserModel, 'new');
     let debugInfo = 'Started test with ';
     for (let i = 0; i < count; ++i) {
       const clientStore = mockClientStore().connect(serverStore);
@@ -30,7 +29,7 @@ import {
     logger.debug(debugInfo);
     result.forEach((r, i) => r['clientStore' + i].clearActions())
     serverStore.clearActions();
-    sandbox.restore();
+    UserSpy.restore();
     result.unshift(serverStore);
     return result;
   };

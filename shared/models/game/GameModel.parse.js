@@ -112,6 +112,7 @@ export const parseFromRoom = (room, string = '') => {
   return GameModel.fromServer(new GameModel({
     id: uuid.v4()
     , roomId: room.id
+    , timeCreated: Date.now()
     , food: seed.food || 0
     , status: new StatusRecord({
       roundPlayer: room.users.first()

@@ -1,8 +1,7 @@
 //require('source-map-support').install();
-if (!global._babelPolyfill) require('babel-polyfill');
-// require('babel-register')({
-//   plugins: ['babel-plugin-rewire']
-// });
+if (!global._babelPolyfill) {
+  require('babel-polyfill');
+}
 import polyfills from '../shared/utils/polyfills'
 import logger from '../shared/utils/logger';
 import chai from 'chai';

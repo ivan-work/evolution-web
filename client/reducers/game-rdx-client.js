@@ -14,7 +14,6 @@ import {
   , gameDeployTrait
   , gameDeployRegeneratedAnimal
   , gameEndTurn
-  , gameEnd
   , gamePlayerLeft
   , gameStartTurn
   , gameStartPhase
@@ -46,6 +45,7 @@ import {
 export const reducer = createReducer(null, {
   gameInit: (state, {game}) => game
   , gameCreateSuccess: (state, {game}) => game
+  , gameEnd: (state, {game}) => game
   , roomExitSelf: (state) => null
   , gameStart
   , gameGiveCards
@@ -57,7 +57,6 @@ export const reducer = createReducer(null, {
   , gameDeployTrait
   , gameDeployRegeneratedAnimal
   , gameEndTurn
-  , gameEnd
   , gamePlayerLeft
   , gameStartTurn
   , gameStartPhase

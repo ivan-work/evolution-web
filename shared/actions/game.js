@@ -16,6 +16,8 @@ import {
   , ANIMAL_DEATH_REASON
 } from '../models/game/evolution/constants';
 
+import {db$gameEnd} from '../../server/actions/db';
+
 import {server$game, to$} from './generic';
 import {doesPlayerHasOptions, getFeedingOption, doesOptionExist, getOptions} from './ai';
 import {
@@ -119,7 +121,7 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
   switch (game.getActualPlayers().size) {
     case 0:
     case 1:
-      if (game.status.phase !== PHASE.FINAL) dispatch(server$gameEnd(gameId));
+      if (game.status.phase !== PHASE.FINAL) dispatch(server$gameEnd(gameId, false));
       break;
     default:
       if (game.status.currentPlayer === userId) {
@@ -653,7 +655,7 @@ export const server$gamePhaseEndRegeneration = (gameId) => (dispatch, getState) 
     dispatch(server$gameStartPhase(gameId, PHASE.DEPLOY));
     dispatch(server$gamePlayerStart(gameId));
   } else {
-    dispatch(server$gameEnd(gameId));
+    dispatch(server$gameEnd(gameId, true));
   }
 };
 
@@ -664,16 +666,21 @@ const gameEnd = (gameId, game) => ({
   , data: {gameId, game}
 });
 
-const server$gameEnd = (gameId) => (dispatch, getState) => {
-  logger.debug('server$gameEnd', gameId);
+const client$gameEnd = (gameId) => (dispatch, getState) =>
+  dispatch(to$({clientOnly: true, users: selectUsersInGame(getState, gameId)}
+    , gameEnd(gameId, selectGame(getState, gameId).toClient())));
+
+export const server$gameEnd = (gameId, finished) => (dispatch, getState) => {
+  logger.debug('server$gameEnd', gameId, finished);
   dispatch(server$gameCancelTurnTimeout(gameId));
   const game = selectGame(getState, gameId);
-  loggerOnline.info(`Game finished ${game.players.map(p => getState().getIn(['users', p.id, 'login'])).join(', ')}`);
   dispatch(gameEnd(gameId, game));
-  dispatch(to$({clientOnly: true, users: selectUsersInGame(getState, gameId)}
-    , gameEnd(gameId, game.toClient())));
+  dispatch(client$gameEnd(gameId));
 
-  // dispatch(gameEnd(gameId, game));
+  const gameStats = selectGame(getState, gameId).toDatabase(getState, finished);
+  db$gameEnd(gameStats);
+
+  loggerOnline.info(`Game ${finished ? 'finished' : 'exited'} ${game.players.map(p => getState().getIn(['users', p.id, 'login'])).join(', ')}`);
 };
 
 export const gameClientToServer = {
