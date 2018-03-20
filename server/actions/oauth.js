@@ -13,6 +13,7 @@ export const server$oauthVKRegister = (protocol, host, code) => (dispatch, getSt
     , client_secret: process.env.VK_API_SECRET
     , redirect_uri: `${protocol}://${host}/api/oauth/vk`
     , code
+    , v: process.env.VK_API_VERSION || '5.73'
   };
   const accessTokenUri = 'https://oauth.vk.com/access_token?' + querystring.stringify(VK_API_ACCESS_TOKEN);
 
