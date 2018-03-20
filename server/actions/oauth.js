@@ -7,13 +7,15 @@ import {db$findUser, db$registerUser, db$updateUser} from './db';
 import {AUTH_TYPE} from '../../shared/constants';
 import {server$injectUser} from '../../shared/actions/actions';
 
+const API_VERSION = process.env.VK_API_VERSION || '5.73';
+
 export const server$oauthVKRegister = (protocol, host, code) => (dispatch, getState) => {
   const VK_API_ACCESS_TOKEN = {
     client_id: process.env.VK_API_ID
     , client_secret: process.env.VK_API_SECRET
     , redirect_uri: `${protocol}://${host}/api/oauth/vk`
     , code
-    , v: process.env.VK_API_VERSION || '5.73'
+    , v: API_VERSION
   };
   const accessTokenUri = 'https://oauth.vk.com/access_token?' + querystring.stringify(VK_API_ACCESS_TOKEN);
 
@@ -52,7 +54,10 @@ export const server$oauthVKRegister = (protocol, host, code) => (dispatch, getSt
 };
 
 export const server$getUserInfo = (user_id, access_token, expires_in) =>
-  requestGet('https://api.vk.com/method/users.get?access_token=' + access_token)
+  requestGet('https://api.vk.com/method/users.get' + querystring.stringify({
+      access_token
+      , v: API_VERSION
+    }))
     .then((response) => {
       const body = (typeof response.body === 'string') ? JSON.parse(response.body) : response.body;
       if (body.error) throw new Error('server$getUserInfo:' + response.body);
