@@ -54,7 +54,7 @@ export const server$oauthVKRegister = (protocol, host, code) => (dispatch, getSt
 };
 
 export const server$getUserInfo = (user_id, access_token, expires_in) =>
-  requestGet('https://api.vk.com/method/users.get' + querystring.stringify({
+  requestGet('https://api.vk.com/method/users.get?' + querystring.stringify({
       access_token
       , v: API_VERSION
     }))
