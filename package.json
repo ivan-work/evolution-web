@@ -34,8 +34,8 @@
   "author": "null",
   "license": "MIT",
   "engines": {
-    "node": "6.9.4",
-    "npm": "3.10.9"
+    "node": "9.8.0",
+    "npm": "5.6.0"
   },
   "dependencies": {
     "body-parser": "*",
