@@ -45,7 +45,7 @@ const DragTraitShell = DragSource(DND_ITEM_TYPE.TRAIT_SHELL
       , active: canDrag
       , isDragging
     });
-    return connectDragSource(<div className={className}><AnimalTraitIcon trait={trait}/></div>);
+    return connectDragSource(<div className={className}><AnimalTraitIcon trait={trait} disabled={!canDrag}/></div>);
   }
 });
 

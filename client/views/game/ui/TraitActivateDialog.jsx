@@ -44,7 +44,7 @@ export default class TraitActivateDialog extends React.Component {
               <AnimalTraitIcon trait={trait}/>
             </div>
           )}
-          {allowNothing && <div><Button raised onClick={() => onSelectTrait(true)}>
+          {allowNothing && <div className='Item'><Button raised onClick={() => onSelectTrait(true)}>
             {T.translate('Game.UI.TraitActivateDialog.Nothing')}
           </Button></div>}
         </div>

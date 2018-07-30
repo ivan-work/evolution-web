@@ -5,9 +5,11 @@ import {
   , checkPlayerHasAnimal
 } from './checks';
 
+import * as tt from '../models/game/evolution/traitTypes';
+
 import {
   TRAIT_TARGET_TYPE
-  , TRAIT_COOLDOWN_LINK
+  , TRAIT_COOLDOWN_LINK, TRAIT_ANIMAL_FLAG
 } from '../models/game/evolution/constants';
 
 const ERRORS = {
@@ -15,6 +17,8 @@ const ERRORS = {
   , COOLDOWN: 'COOLDOWN'
   , ANIMAL_CANT_EAT: 'ANIMAL_CANT_EAT'
   , TRAIT_MULTIPLE: 'TRAIT_MULTIPLE'
+  , TRAIT_REGENERATION_TRAIT_MAX: 'TRAIT_REGENERATION_TRAIT_MAX'
+  , TRAIT_REGENERATION_DEAD: 'TRAIT_REGENERATION_DEAD'
 };
 
 export const checkTraitActivation = (game, animal, traitId, ...targets) => {
@@ -128,9 +132,12 @@ export const checkAnimalCanEatFails = (game, animal) => {
 };
 
 export const checkAnimalCanTakeShellFails = (game, animal) => {
-  if (animal.hasTrait('TraitShell', true)) return ERRORS.TRAIT_MULTIPLE;
+  if (animal.hasTrait(tt.TraitShell, true)) return ERRORS.TRAIT_MULTIPLE;
   if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, animal.ownerId, animal.id)) return ERRORS.COOLDOWN;
   if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.TAKE_SHELL, animal.ownerId, animal.id)) return ERRORS.COOLDOWN;
+  if (animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) return ERRORS.TRAIT_REGENERATION_DEAD;
+  const traitRegeneration = animal.hasTrait(tt.TraitRegeneration, true);
+  if (traitRegeneration && !traitRegeneration.getDataModel().checkTraitPlacement(animal)) return ERRORS.TRAIT_REGENERATION_TRAIT_MAX;
   return false;
 };
 

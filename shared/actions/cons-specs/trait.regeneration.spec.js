@@ -4,7 +4,7 @@ import {
   , traitActivateRequest
   , gameDeployAnimalRequest
   , gameDeployTraitRequest
-  , gameDeployRegeneratedAnimalRequest
+  , gameDeployRegeneratedAnimalRequest, traitTakeShellRequest, traitAnswerRequest
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
@@ -156,5 +156,71 @@ players:
 
     clientStore0.dispatch(traitActivateRequest('$D', tt.TraitCarnivorous, '$B'));
     expect(findAnimal('$B'), 'find $B').null;
+  });
+
+  it(`Can take shell when alive and naked`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+food: 0
+phase: feeding
+players:
+  - continent: $Regen regen, $Shell shell, $CarnShell carn int, wait
+`);
+    const {selectGame, selectPlayer, findCard, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$CarnShell', tt.TraitCarnivorous, '$Shell'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitIntellect, tt.TraitShell));
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    clientStore0.dispatch(traitTakeShellRequest('$Regen', selectGame().getContinent().shells.first().id));
+    expect(findAnimal('$Regen').traits, '$Regen.traits.size').size(2);
+  });
+
+  it(`Can't take shell when .traits.size === 2`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+food: 0
+phase: feeding
+players:
+  - continent: $Regen regen graz, $Shell shell, $CarnShell carn int, wait
+`);
+    const {selectGame, selectPlayer, findCard, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$CarnShell', tt.TraitCarnivorous, '$Shell'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitIntellect, tt.TraitShell));
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expectUnchanged(`$Regen can't take shell when .traits.size > 1`, () => {
+      clientStore0.dispatch(traitTakeShellRequest('$Regen', selectGame().getContinent().shells.first().id));
+    }, serverStore, clientStore0);
+    expect(findAnimal('$Regen').traits, '$Regen.traits.size').size(2);
+  });
+
+  it(`Can't take shell when dead`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+food: 0
+phase: feeding
+players:
+  - continent: $Regen regen, $Shell shell, $CarnShell carn int, $CarnRegen carn, wait
+`);
+    const {selectGame, selectPlayer, findCard, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$CarnShell', tt.TraitCarnivorous, '$Shell'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitIntellect, tt.TraitShell));
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    clientStore0.dispatch(traitActivateRequest('$CarnRegen', tt.TraitCarnivorous, '$Regen'));
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expectUnchanged(`$Regen can't take shell when dead`, () => {
+      clientStore0.dispatch(traitTakeShellRequest('$Regen', selectGame().getContinent().shells.first().id));
+    }, serverStore, clientStore0);
+    expect(findAnimal('$Regen').traits, '$Regen.traits.size').size(1);
+
+    expectChanged(`$CarnShell can take shell`, () => {
+      clientStore0.dispatch(traitTakeShellRequest('$CarnShell', selectGame().getContinent().shells.first().id));
+    }, serverStore, clientStore0);
+    expect(findAnimal('$CarnShell').traits, '$CarnShell.traits.size').size(3);
   });
 });

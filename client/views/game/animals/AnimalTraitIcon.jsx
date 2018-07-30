@@ -8,14 +8,14 @@ import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 
 import * as MDL from 'react-mdl';
 
-const AnimalTraitIcon = ({trait, onClick}) => {
+const AnimalTraitIcon = ({trait, onClick, disabled}) => {
   const className = classnames({
     AnimalTraitIcon: true
     , [trait.type]: true
     , value: trait.value
   });
 
-  return <Button raised className={className} onClick={onClick}>
+  return <Button disabled={disabled} raised className={className} onClick={onClick}>
       {T.translate('Game.Trait.' + trait.type)}&nbsp;{trait.getDataModel().food > 0 && ('+' + trait.getDataModel().food)}
   </Button>;
 };
