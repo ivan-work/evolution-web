@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import uuid from 'uuid';
+const fs = require('fs');
+const path = require('path');
+const uuid = require('uuid');
 
 const originalV4 = uuid.v4;
 if (process.env.NODE_ENV !== 'production')
@@ -16,7 +16,7 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 global.GLOBAL_BROWSER = false; // defined in configs
 process.env.PORT = process.env.PORT || 3000;
 
-export default {
+module.exports = {
   GLOBAL_VERSION: JSON.stringify(GLOBAL_VERSION)
   , process: {
     env: {

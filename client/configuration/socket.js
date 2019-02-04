@@ -23,7 +23,8 @@ export const socketStore = (socket, store) => {
     // console.log('socket connected', LocationService.getLocationQuery().token)
     const locationToken = LocationService.getLocationQuery().token;
     const userToken = store.getState().getIn(['user', 'token']);
-    let previousLocation = store.getState().getIn(['routing', 'locationBeforeTransitions', 'pathname'], '/');
+    // let previousLocation = store.getState().getIn(['routing', 'locationBeforeTransitions', 'pathname'], '/');
+    let previousLocation = '/';
     if (previousLocation === '/login') previousLocation = '/';
     if (locationToken) {
       // console.log('locationToken', previousLocation)

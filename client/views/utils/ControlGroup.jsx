@@ -1,20 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types'
+
 import './ControlGroup.scss';
+import Typography from "@material-ui/core/Typography/Typography";
 
-export class ControlGroup extends React.Component {
-  static propTypes = {
-    name: PropTypes.string.isRequired
-  };
+export const ControlGroup = ({name, children}) => (
+  <div className='ControlGroup'>
+    <Typography className='title' color={"inherit"} variant={'button'}>{name}: </Typography>
+    <div className='body'>{children}</div>
+  </div>
+);
 
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    return <div className='ControlGroup'>
-      <div className='title'>{this.props.name}</div>
-      <div className='body'>{this.props.children}</div>
-    </div>;
-  }
-}
+export default ControlGroup;

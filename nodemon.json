@@ -2,7 +2,9 @@
   "restartable": "rs",
   "ignore": [
     ".git",
-    "node_modules/**/node_modules"
+    "*.spec.js",
+    "node_modules/*",
+    "dist/*"
   ],
   "verbose": true,
   "watch": ["server", "shared"],

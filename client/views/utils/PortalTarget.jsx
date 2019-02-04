@@ -82,7 +82,7 @@ export const PortalsContext = (WrappedComponent) => class PortalsContext extends
 
   render() {
     return <div className="PortalsContext">
-      <WrappedComponent {...this.props}/>;
+      <WrappedComponent {...this.props}/>
       <PortalTarget name='body'/>
     </div>
   }

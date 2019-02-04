@@ -22,6 +22,10 @@ export class TimeService {
   formatTimeOfDay(timestamp) {
     return moment.unix(timestamp / 1000).format('HH:mm:ss')
   }
+
+  formatHHMM(timestamp) {
+    return moment.unix(timestamp / 1000).format('HH:mm')
+  }
 }
 
 export default new TimeService();

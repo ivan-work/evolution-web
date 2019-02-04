@@ -1,31 +1,28 @@
 import React from 'react';
-import {connect} from 'react-redux';
-import {Snackbar} from 'react-mdl';
+import { compose, defaultProps} from 'recompose';
+import { connect } from 'react-redux';
+
+import Snackbar from '@material-ui/core/Snackbar';
+
 import {actionError} from '../../shared/actions/actions';
 
-export class ErrorReporter extends React.Component {
-  constructor(props) {
-    super(props);
-    this.clearError = this.props.clearError.bind(this);
-  }
+const TIMEOUT = 10e3;
+const anchorOrigin = {vertical: 'bottom', horizontal: 'right'};
 
-  render() {
-    const { error } = this.props;
-    return (<Snackbar
-        active={!!error}
-        onClick={this.clearError}
-        onTimeout={this.clearError}
-        action='Ok'
-      >Error: {error && error.message}</Snackbar>
-    );
-  }
-}
-
-export default connect(
-  (state) => ({
-    error: state.getIn(['error'])
-  }),
-  (dispatch) => ({
-    clearError: () => dispatch(actionError(null))
+export default compose(
+  defaultProps({
+    anchorOrigin
+    // , autoHideDuration: TIMEOUT
   })
-)(ErrorReporter);
+  , connect(
+    (state) => ({
+      message: state.error && state.error.message
+      , open: !!state.error
+    }),
+    (dispatch) => ({
+      onClose: () => dispatch(actionError(null))
+      , onClick: () => dispatch(actionError(null))
+    })
+  )
+  // , omitProps(['classes', 'close'])
+)(Snackbar);

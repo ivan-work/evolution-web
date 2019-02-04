@@ -2,7 +2,6 @@ import logger, {loggerOnline} from '~/shared/utils/logger';
 import {Map} from 'immutable';
 import {UserModel, RulesLoginPassword} from '../models/UserModel';
 import {GameModelClient} from '../models/game/GameModel';
-import {redirectTo} from '../utils';
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 import jwt from 'jsonwebtoken';
 import Validator from 'validatorjs';
@@ -181,11 +180,9 @@ export const authServerToClient = {
       user: user
       , online: Map(online).map(u => new UserModel(u).toOthers())
     }));
-    dispatch(redirectTo(redirect || '/'));
   }
   , loginUserFailure: ({error}) => (dispatch, getState) => {
     dispatch(loginUserFailure(error));
-    redirectToLogin(getState, (location) => dispatch(redirectTo(location)));
   }
   , onlineUpdate: ({user}) => onlineUpdate(UserModel.fromJS(user).toOthers())
   , logoutUser: ({userId}) => logoutUser(userId)
@@ -193,12 +190,4 @@ export const authServerToClient = {
     TimeService.setOffset(timestamp);
     return socketConnectClient(connectionId);
   }
-};
-
-export const redirectToLogin = (getState, redirectTo) => {
-  //let previousLocation = getState().getIn(['routing', 'locationBeforeTransitions', 'pathname'], '/');
-  //if (previousLocation !== '/login')
-  //  redirectTo('/login?redirect=' + previousLocation);
-  //else
-  redirectTo('/login');
 };

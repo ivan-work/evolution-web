@@ -1,5 +1,4 @@
 import {Map} from 'immutable';
-import {push} from 'react-router-redux';
 import React from 'react';
 import {mountClient} from '~/shared/test/test-helpers.jsx'
 import {GameModel, GameModelClient, TEST_DECK_SIZE, TEST_HAND_SIZE} from '../../shared/models/game/GameModel';

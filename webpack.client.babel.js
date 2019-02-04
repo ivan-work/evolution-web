@@ -2,16 +2,23 @@
  * COMMON WEBPACK CONFIGURATION
  */
 
-import path from 'path';
-import webpack from 'webpack';
-import jsonImporter from 'node-sass-json-importer';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import globals from './globals';
+const path = require('path');
+
+const globals = require('./globals');
+
+const webpack = require('webpack');
+
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+const jsonImporter = require('node-sass-json-importer');
 
 const isDevelopment = process.env.NODE_ENV === 'development';
+const isProfiling = process.env.PROFILE === 'true';
 
-export default {
-  devtool: isDevelopment ? 'eval' : 'source-map'
+module.exports = {
+  mode: isDevelopment ? 'development' : 'production'
+  , devtool: isDevelopment ? 'eval' : 'source-map'
   , entry: isDevelopment
     ? ['webpack-hot-middleware/client'
       , './client/index.jsx']
@@ -27,11 +34,17 @@ export default {
     //, modulesDirectories: ['client', 'shared', 'node_modules']
   }
   , target: 'web' // Make web variables accessible to webpack, e.g. window
-  , stats: false // Don't show stats in the console
+  // , stats: false // Don't show stats in the console
+  , optimization: {
+    splitChunks: {
+      chunks: 'all'
+    }
+  }
   , plugins: [
     new webpack.DefinePlugin(Object.assign({}, globals, {GLOBAL_BROWSER: 'true'}))
+    , new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
+    , new webpack.IgnorePlugin(/^\.\/(?!en)(.+)$/, /validatorjs\/src\/lang/)
     //, new webpack.optimize.CommonsChunkPlugin('common.js')
-    , isDevelopment ? null : new webpack.optimize.UglifyJsPlugin({sourceMap: true, compress: {warnings: false}})
     , isDevelopment ? new webpack.HotModuleReplacementPlugin({quiet: false}) : null
     , new HtmlWebpackPlugin({
       template: 'client/index.html'
@@ -50,18 +63,13 @@ export default {
         , minifyURLs: true
       }
     })
+    , isProfiling ? new BundleAnalyzerPlugin({analyzerMode: 'static'}) : null
   ].filter(p => p != null)
   , module: {
     rules: [{
       test: /\.jsx?$/, // Transform all .js files required somewhere with Babel
       loader: 'babel-loader',
-      exclude: /node_modules/,
-      query: {
-        presets: isDevelopment
-          ? ['es2015', 'react', 'react-hmre', 'stage-0']
-          : ['es2015', 'react', 'stage-0']
-        , plugins: ['babel-root-import', 'transform-class-properties']
-      }
+      exclude: /node_modules/
     }, {
       // Transform our own .css files with PostCSS and CSS-modules
       test: /(\.css|\.scss)$/,
@@ -73,7 +81,7 @@ export default {
           loader: 'sass-loader'
           , options: {
             sourceMap: isDevelopment
-            , importer: jsonImporter
+            , importer: jsonImporter()
           }
         }]
     }, {
@@ -84,7 +92,7 @@ export default {
       // So, no need for ExtractTextPlugin here.
       test: /\.css$/,
       include: /node_modules/,
-      loaders: ['style-loader', 'css-loader?minimize=false']
+      loaders: ['style-loader', 'css-loader']
     }, {
       test: /\.(eot|svg|ttf|woff|woff2)$/,
       loader: 'file-loader'

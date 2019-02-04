@@ -29,7 +29,7 @@ import {
 } from './actions';
 import {appPlaySound} from '../../client/actions/app';
 import {gameNextPlayer as Reduce_gameNextPlayer} from '../../server/reducers/games-rdx-server';
-import {redirectTo} from '../utils';
+import {redirectTo} from '../utils/history';
 import {selectGame, selectUsersInGame} from '../selectors';
 
 import {
@@ -818,11 +818,11 @@ export const animalDeath = (gameId, type, animalId, data) => ({
 export const gameServerToClient = {
   gameInit: ({game, userId}, currentUserId) => (dispatch) => {
     dispatch(gameInit(GameModelClient.fromServer(game, userId)));
-    dispatch(redirectTo('/room'));
+    redirectTo('/room');
   }
   , gameCreateSuccess: (({game}, currentUserId) => (dispatch) => {
     dispatch(gameCreateSuccess(GameModelClient.fromServer(game, currentUserId)));
-    dispatch(redirectTo('/room'));
+    redirectTo('/room');
   })
   , gameCreateNotify: ({roomId, gameId}) => gameCreateNotify(roomId, gameId)
   , gameStart: ({gameId}) => gameStart(gameId)

@@ -1,119 +1,155 @@
-import {List} from 'immutable';
-import React from 'react';
+import React, {Fragment} from 'react';
 import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes';
 import T from 'i18n-react';
+import {compose, lifecycle, withProps, withState, withStateHandlers} from "recompose";
 import {connect} from 'react-redux';
-import {Textfield} from 'react-mdl';
 
+import Typography from "@material-ui/core/Typography/Typography";
+import TextField from '@material-ui/core/TextField';
+import Button from "@material-ui/core/Button/Button";
+import withStyles from "@material-ui/core/styles/withStyles";
+
+import {List} from 'immutable';
 import TimeService from '../services/TimeService';
 
-import {MessageModel, CHAT_TARGET_TYPE} from '../../shared/models/ChatModel';
+import {CHAT_TARGET_TYPE} from '../../shared/models/ChatModel';
 import {chatMessageRequest} from '../../shared/actions/actions';
 
-import './Chat.scss';
-
-export class Chat extends React.Component {
-  static propTypes = {
-    chatTargetType: PropTypes.oneOf([CHAT_TARGET_TYPE.GLOBAL, CHAT_TARGET_TYPE.ROOM]).isRequired
-    , roomId: PropTypes.string
-    // @connect
-    , messages: RIP.listOf(PropTypes.instanceOf(MessageModel)).isRequired
-    , $chatMessage: PropTypes.func.isRequired
-  };
-
-  constructor(props) {
-    super(props);
-    this.onMessageChange = this.onMessageChange.bind(this);
-    this.onMessageSend = this.onMessageSend.bind(this);
-    this.renderMessage = this.renderMessage.bind(this);
-    this.setupWindow = this.setupWindow.bind(this);
-    this.handleScroll = this.handleScroll.bind(this);
-    this.state = {message: '', offset: 0, atBottom: true}
+const styles = theme => ({
+  root: {
+    display: 'flex'
+    , flexDirection: 'column'
+    , minHeight: '10em'
+    , height: '100%'
   }
-
-  onMessageChange(message) {
-    this.setState({message});
+  , window: {
+    overflowY: 'auto'
+    , overflowX: 'none'
+    , flex: '1 1 0'
   }
+  , input: {
+    width: '100%'
+  }
+});
 
-  onMessageSend(e) {
-    if (e.keyCode === 13 && this.state.message.trim().length > 0) {
-      const {chatTargetType, roomId} = this.props;
-      this.props.$chatMessage(roomId, chatTargetType, this.state.message);
-      this.setState({message: ''})
+const messageStyles = theme => ({
+  messageRoot: {
+    fontSize: '0.85em'
+    , display: 'block'
+    , lineHeight: '1.2em'
+  }
+  , messageLogin: {}
+  , messageTime: {
+    fontSize: '12px'
+    , color: theme.palette.text.secondary
+  }
+  , messageText: {
+    wordBreak: 'break-all'
+  }
+});
+
+const ChatMessage = withStyles(messageStyles)(({classes, message}) => {
+  const {timestamp, from, fromLogin, to, toType} = message;
+  const text = from !== 0 ? message.text : T.translate(message.text);
+  return (
+    <Typography className={classes.messageRoot}>
+      <span className={classes.messageLogin}>{fromLogin}</span>
+      <span className={classes.messageTime}> [{TimeService.formatHHMM(timestamp)}]: </span>
+      {/*<span className={classes.messageText}>: </span>*/}
+      <span className={classes.messageText}>{text}</span>
+    </Typography>
+  );
+});
+
+const ChatWindow = compose(
+  connect((state, {chatTargetType, roomId}) => {
+    let path = null;
+    switch (chatTargetType) {
+      case CHAT_TARGET_TYPE.GLOBAL:
+        path = ['chat', 'messages'];
+        break;
+      case CHAT_TARGET_TYPE.ROOM:
+        path = ['rooms', roomId, 'chat', 'messages'];
+        break;
     }
-  }
-
-  setupWindow(chatWindow) {
-    this.chatWindow = chatWindow;
-  }
-
-  handleScroll(e) {
-    if (this.chatWindow) {
-      const target = this.chatWindow;
-      this.setState({atBottom: Math.abs(target.scrollHeight - target.scrollTop - target.offsetHeight) < 1});
+    return {messages: state.getIn(path, List())}
+  })
+  , withState('atBottom', 'setAtBottom', true)
+  , withProps(({atBottom, setAtBottom}) => {
+    const chatWindowRef = React.createRef();
+    return {
+      chatWindowRef: chatWindowRef
+      , scrollToBottom: () => {
+        const chatWindow = chatWindowRef.current;
+        if (chatWindow) {
+          chatWindow.scrollTop = chatWindow.scrollHeight - chatWindow.offsetHeight;
+        }
+      }
+      , handleScroll: () => {
+        const chatWindow = chatWindowRef.current;
+        if (chatWindow) {
+          const bottom = Math.abs(chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.offsetHeight) < 1;
+          if (bottom !== atBottom) {
+            setAtBottom(bottom);
+          }
+        }
+      }
     }
-  };
-
-  componentDidMount() {
-    this.componentRendered()
-  }
-
-  componentDidUpdate() {
-    this.componentRendered()
-  }
-
-  componentRendered() {
-    if (this.state.atBottom && this.chatWindow) {
-      this.chatWindow.scrollTop = this.chatWindow.scrollHeight - this.chatWindow.offsetHeight;
+  })
+  , lifecycle({
+    componentDidMount() {
+      this.componentRendered(this.props);
     }
-  }
+    , componentDidUpdate() {
+      this.componentRendered(this.props)
+    }
+    , componentRendered: ({scrollToBottom, atBottom}) => atBottom && scrollToBottom()
+  })
+)(({className, chatWindowRef, messages, atBottom, scrollToBottom, handleScroll}) => {
+  return (<Fragment>
+    {!atBottom && <Button size="small"
+                          onClick={scrollToBottom}>v</Button>}
+    <div className={className} ref={chatWindowRef} onScroll={handleScroll}>
+      {messages.map(message => <ChatMessage key={message.timestamp + message.from} message={message}/>)}
+    </div>
+  </Fragment>)
+});
 
-  render() {
-    const {messages} = this.props;
-    return (<div className='Chat'>
-      <div className='ChatWindow' ref={this.setupWindow} onScroll={this.handleScroll}>
-        {messages.map(this.renderMessage)}
-      </div>
-      <div className='ChatInput'>
-        <Textfield
-          label={T.translate('App.Chat.EnterMessage')}
-          placeholder={T.translate('App.Chat.EnterMessage')}
-          value={this.state.message}
-          maxLength={127}
-          onChange={({target}) => this.onMessageChange(target.value)}
-          onKeyUp={this.onMessageSend}/>
-      </div>
-    </div>);
-  }
+const ChatInput = compose(
+  connect(null, (dispatch, {roomId, chatTargetType}) => ({
+    sendMessage: (message) => dispatch(chatMessageRequest(roomId, chatTargetType, message))
+  }))
+  , withStateHandlers({message: ''}, {
+    onMessageChange: () => (e) => ({message: e.target.value})
+    , onMessageSend: ({message}, {sendMessage}) => (e) => {
+      if (e.keyCode === 13 && message.trim().length > 0) {
+        sendMessage(message);
+        return {message: ''};
+      }
+    }
+  })
+)(({className, message, onMessageChange, onMessageSend}) => (
+  <TextField className={className}
+             placeholder={T.translate('App.Chat.EnterMessage')}
+             value={message}
+             maxLength={255}
+             onChange={onMessageChange}
+             autoComplete={'off'}
+             onKeyUp={onMessageSend}/>
+));
 
-  renderMessage({timestamp, from, fromLogin, to, toType, text}) {
-    if (from === 0) text = T.translate(text);
-    return (<div key={timestamp + from}>
-      <div className='ChatTime'>
-        <span>[{TimeService.formatTimeOfDay(timestamp)}]</span>
-      </div>
-      <div className='ChatMessage'>
-        <strong>{fromLogin}: </strong>
-        <span>{text}</span>
-      </div>
-    </div>);
-  }
-}
 
-export default connect((state, props) => {
-  let messages = List();
-  switch (props.chatTargetType) {
-    case CHAT_TARGET_TYPE.GLOBAL:
-      messages = state.getIn(['chat', 'messages'], List())
-      break;
-    case CHAT_TARGET_TYPE.ROOM:
-      messages = state.getIn(['rooms', props.roomId, 'chat', 'messages'], List())
-      break;
-  }
-  return {
-    messages
-  }
-}, (dispatch) => ({
-  $chatMessage: (...args) => dispatch(chatMessageRequest(...args))
-}))(Chat);
+export const Chat = ({classes, roomId, chatTargetType}) => (
+  <div className={classes.root}>
+    <ChatWindow className={classes.window} roomId={roomId} chatTargetType={chatTargetType}/>
+    <ChatInput className={classes.input} roomId={roomId} chatTargetType={chatTargetType}/>
+  </div>
+);
+
+Chat.propTypes = {
+  chatTargetType: PropTypes.oneOf([CHAT_TARGET_TYPE.GLOBAL, CHAT_TARGET_TYPE.ROOM]).isRequired
+  , roomId: PropTypes.string
+};
+
+export default compose(withStyles(styles))(Chat);

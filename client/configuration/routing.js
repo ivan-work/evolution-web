@@ -1,5 +1,4 @@
 import {Map} from 'immutable';
-import { browserHistory } from 'react-router';
 import { syncHistoryWithStore as $syncHistoryWithStore, routerMiddleware, LOCATION_CHANGE } from 'react-router-redux';
 
 const routerReducerState = Map({

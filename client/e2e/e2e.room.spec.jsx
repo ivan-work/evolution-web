@@ -1,5 +1,4 @@
 import {Map} from 'immutable';
-import {push} from 'react-router-redux';
 import {roomCreateRequest, roomJoinRequest} from '../../shared/actions/actions';
 
 //import React from 'react';

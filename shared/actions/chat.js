@@ -1,4 +1,4 @@
-import {loggerChat} from '~/shared/utils/logger';
+import {loggerChat} from '../utils/logger';
 import {to$, server$toRoom, server$toUsers} from './generic';
 
 import {ChatModel, MessageModel, CHAT_TARGET_TYPE} from '../models/ChatModel';

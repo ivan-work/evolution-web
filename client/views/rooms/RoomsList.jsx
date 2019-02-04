@@ -4,7 +4,10 @@ import RIP from 'react-immutable-proptypes';
 import T from 'i18n-react';
 import {connect} from 'react-redux';
 
-import {List, ListItem, IconButton} from 'react-mdl';
+// import {List, ListItem, IconButton} from 'react-mdl';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import IconButton from '@material-ui/core/IconButton';
 
 import {roomJoinRequestSoft, roomSpectateRequestSoft} from '../../../shared/actions/actions';
 import {PHASE} from '../../../shared/models/game/GameModel';

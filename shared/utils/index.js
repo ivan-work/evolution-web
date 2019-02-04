@@ -1,10 +1,3 @@
-import {Provider} from 'react-redux';
-import {push} from 'react-router-redux';
-
-export function redirectTo(...args) {
-  return push(...args);
-}
-
 export function createConstants(...constants) {
   return constants.reduce((acc, constant) => {
     acc[constant] = constant;

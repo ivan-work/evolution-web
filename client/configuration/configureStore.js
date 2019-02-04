@@ -13,15 +13,16 @@ class ClientRecord extends Record({
   , room: void 0
   , rooms: void 0
   , user: void 0
-  , routing: void 0
   , chat: void 0
 }) {
 }
 
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
 export default (reducer, initialState, middleware = [], appliedMiddleware = []) => createStore(
   reducer
   , new ClientRecord(initialState)
-  , compose(
+  , composeEnhancers(
     applyMiddleware(
       store => next => action => {
         try {

@@ -8,6 +8,13 @@ App:
     Twitter: Sign in with Twitter
   Name: Evolution
   Online: Online
+  Misc:
+    VKGroup: VK Group
+    Changelog: Changelog
+    Agree: Yes # Yes: Да => true: Да WTF???
+    Disagree: No # Yes: Да => true: Да WTF???
+    FAQ: FAQ
+    FAQ_HREF: 'https://github.com/ivan-work/evolution-web/blob/master/faq-ru.md'
   Chat:
     Label: Chat
     EnterMessage: ...

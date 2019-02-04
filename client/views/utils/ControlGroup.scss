@@ -1,17 +1,16 @@
 .ControlGroup {
   margin: 0 0 0 1em;
   border: 1px solid rgba(255, 255, 255, .25);
-  display: inline-block;
+  display: flex;
+  align-items: center;
 
   .title {
     display: inline-block;
     margin: 0 1em;
-    &:after {
-      content: ':'
-    }
+    vertical-align: middle;
   }
 
   .body {
-    display: inline-block;
+    display: flex;
   }
 }

@@ -19,7 +19,7 @@ import {
 import {appPlaySound} from '../../client/actions/app';
 import {toUser$Client, server$toUsers, server$toRoom} from './generic';
 
-import {redirectTo} from '../utils';
+import {redirectTo} from '../utils/history';
 import {selectRoom, selectGame, selectUsersInRoom} from '../selectors';
 
 import {
@@ -92,7 +92,7 @@ export const server$roomCreate = (room) => (dispatch, getState) => dispatch(Obje
 
 export const roomJoinRequestSoft = (roomId) => (dispatch, getState) => (
   getState().get('room') === roomId && getState().get('rooms').find(r => ~r.users.indexOf(getState().getIn(['user', 'id'])))
-    ? dispatch(redirectTo(`/room`))
+    ? redirectTo(`/room`)
     : dispatch(roomJoinRequest(roomId))
 );
 
@@ -134,7 +134,7 @@ export const server$roomJoin = (roomId, userId) => (dispatch, getState) => {
 
 export const roomSpectateRequestSoft = (roomId) => (dispatch, getState) => (
   getState().get('room') === roomId && getState().get('rooms').find(r => ~r.spectators.indexOf(getState().getIn(['user', 'id'])))
-    ? dispatch(redirectTo(`/room`))
+    ? redirectTo(`/room`)
     : dispatch(roomSpectateRequest(roomId))
 );
 
@@ -220,7 +220,7 @@ export const roomExitRequest = () => (dispatch, getState) => {
     , meta: {server: true}
   });
   dispatch(roomExitSelf());
-  dispatch(redirectTo(`/`));
+  redirectTo(`/`);
 };
 
 const roomExit = (roomId, userId) => ({
@@ -507,7 +507,7 @@ export const roomsServerToClient = {
   }
   , roomJoinSelf: ({roomId, userId, room}, currentUserId) => (dispatch, getState) => {
     dispatch(roomJoinSelf(roomId, userId, RoomModel.fromJS(room)));
-    dispatch(redirectTo(`/room`));
+    redirectTo(`/room`);
   }
   , roomSpectate: ({roomId, userId}) => roomSpectate(roomId, userId)
   , roomSpectateSelf: ({roomId, userId, room, game}, currentUserId) => (dispatch, getState) => {
@@ -515,14 +515,14 @@ export const roomsServerToClient = {
     if (game) {
       dispatch(gameInit(GameModelClient.fromServer(game)));
     }
-    dispatch(redirectTo(`/room`));
+    redirectTo(`/room`);
   }
   , roomExit: ({roomId, userId}, currentUserId) => (dispatch, getState) => {
     dispatch(roomExit(roomId, userId));
     if (currentUserId === userId) {
       dispatch(roomExitSelf());
       if (isUserRouterInGame(getState, roomId))
-        dispatch(redirectTo(`/`));
+        redirectTo(`/`);
     }
   }
   , roomDestroy: ({roomId}) => roomDestroy(roomId)
@@ -534,7 +534,7 @@ export const roomsServerToClient = {
     dispatch(roomStartVoting(roomId, timestamp));
     if (isUserInPlayers(selectRoom(getState, roomId), currentUserId)) {
       if (!isUserRouterInGame(getState, roomId)) {
-        dispatch(redirectTo(`/room`));
+        redirectTo(`/room`);
       }
       dispatch(appPlaySound('START_D2'));
     }

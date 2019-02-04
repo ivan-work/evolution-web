@@ -1,92 +1,52 @@
 import React from 'react';
 import T from 'i18n-react';
+import {compose} from 'recompose';
 import {connect} from 'react-redux';
-import {Button, Textfield} from 'react-mdl';
 
-import {loginUserFormRequest, loginUserTokenRequest} from '../../shared/actions/actions';
-import Validator from 'validatorjs';
-import {RulesLoginPassword} from '../../shared/models/UserModel';
 
+import {Redirect} from 'react-router';
 import LocationService from '../services/LocationService';
-import VKAPILogin from './auth/VKAPILogin.jsx';
+import Grid from "@material-ui/core/Grid";
+import Paper from "@material-ui/core/Paper";
+import {withStyles} from "@material-ui/core/styles";
 
-export class Login extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.login = this.login.bind(this);
-    this.state = {};
-    this.state.form = {};
-    this.state.form.login = '';
-    this.state.form.password = '';
-    this.state.form.redirectTo = LocationService.getLocationQuery().redirect;
-    this.state.validation = new Validator(this.state.form, RulesLoginPassword);
+import TextLogin from "./auth/TextLogin";
+import VKAPILogin from './auth/VKAPILogin';
+
+const styles = theme => ({
+  loginOption: {
+    padding: theme.spacing.unit * 3
+    , margin: theme.spacing.unit
   }
+});
 
-  login(e) {
-    e.preventDefault();
-    const {form} = this.state;
-    this.props.$loginUser(form.redirectTo, form.login, form.password);
-  }
 
-  formOnChange(key, target) {
-    const {form} = this.state;
-    form[key] = target.value;
-    const validation = new Validator(form, RulesLoginPassword);
-    validation.passes();
-    this.setState({form, validation});
-  }
+export const Login = ({classes, isAuthenticated}) => {
+  return (
+    <Grid container
+          justify="space-evenly"
+          alignItems="center"
+    >
+      {isAuthenticated && <Redirect to={'/'}/>}
+      <Grid item>
+        <Paper className={classes.loginOption}>
+          <TextLogin/>
+        </Paper>
+      </Grid>
+      <Grid item>
+        <Paper className={classes.loginOption}>
+          <VKAPILogin/>
+        </Paper>
+      </Grid>
+    </Grid>
+  );
+};
 
-  render() {
-    return (
-      <div className="layout-padding flex-row">
-        {//!this.props.locationQuery.form ? null :
-          <div className="layout-padding">
-            <form role='form'>
-              <div>
-                <Textfield
-                  type='text'
-                  floatingLabel
-                  value={this.state.form.login}
-                  onChange={({target}) => this.formOnChange('login', target)}
-                  error={this.state.validation.errors.errors.login}
-                  autoComplete='off'
-                  label={T.translate('App.Login.Username')}
-                />
-              </div>
-              {/*<div>*/}
-                {/*<Textfield*/}
-                  {/*type='text'*/}
-                  {/*floatingLabel*/}
-                  {/*value={this.state.form.password}*/}
-                  {/*onChange={({target}) => this.formOnChange('password', target)}*/}
-                  {/*error={this.state.validation.errors.errors.password}*/}
-                  {/*autoComplete='off'*/}
-                  {/*label={T.translate('App.Login.Password')}*/}
-                {/*/>*/}
-              {/*</div>*/}
-              <div>
-                <Button
-                  id='Login'
-                  type='submit'
-                  raised colored
-                  onClick={this.login}
-                >{T.translate('App.Login.Login')}
-                </Button>
-              </div>
-            </form>
-          </div>}
-        <div className="layout-padding">
-          <VKAPILogin $loginUser={this.props.$loginUser}/>
-        </div>
-      </div>
-    );
-  }
-}
-
-export const LoginView = connect(
-  (state) => ({}),
-  (dispatch) => ({
-    $loginUser: (...args) => dispatch(loginUserFormRequest(...args))
-  })
+export default compose(
+  withStyles(styles)
+  , connect(
+    (state) => ({
+      isAuthenticated: !!state.user
+    })
+  )
 )(Login);
-

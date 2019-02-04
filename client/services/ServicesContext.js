@@ -19,6 +19,7 @@ export const ServicesContext = (WrappedComponentClass) => class ServicesContext 
   }
 
   componentWillMount() {
+    console.log(this.props, this.context)
   }
 
   render() {
