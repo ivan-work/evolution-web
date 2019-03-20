@@ -68,8 +68,13 @@ module.exports = {
   , module: {
     rules: [{
       test: /\.jsx?$/, // Transform all .js files required somewhere with Babel
-      loader: 'babel-loader',
-      exclude: /node_modules/
+      exclude: /node_modules/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: ["@babel/preset-env", "@babel/preset-react"]
+        }
+      }
     }, {
       // Transform our own .css files with PostCSS and CSS-modules
       test: /(\.css|\.scss)$/,

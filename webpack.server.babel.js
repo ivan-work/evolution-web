@@ -27,7 +27,11 @@ export default {
     __dirname: true
   }
   , plugins: [
-    isDevelopment ? new webpack.BannerPlugin({banner: 'require("source-map-support").install();', raw: true, entryOnly: false}) : null
+    isDevelopment ? new webpack.BannerPlugin({
+      banner: 'require("source-map-support").install();',
+      raw: true,
+      entryOnly: false
+    }) : null
     //, isDevelopment ? new webpack.HotModuleReplacementPlugin({quiet: false}) : null
     , new webpack.IgnorePlugin(/\.(css|less|mp3)$/)
   ].filter(p => p !== null)
@@ -35,9 +39,14 @@ export default {
   , module: {
     rules: [{
       test: /\.js$/, // Transform all .js files required somewhere with Babel
-      loader: 'babel-loader',
-      exclude: /node_modules/
+      exclude: /node_modules/,
+      use: {
+        loader: 'babel-loader'
+      },
       //query: ['es2015', 'stage-0']
     }]
+  }
+  , optimization: {
+    nodeEnv: false // https://github.com/webpack/webpack/issues/6934
   }
 };

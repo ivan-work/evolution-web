@@ -1,12 +1,13 @@
 {
   "presets": [
-    "@babel/preset-env",
-    "@babel/preset-react"
+    "@babel/preset-env"
   ],
   "plugins": [
     "@babel/plugin-syntax-dynamic-import",
     "@babel/plugin-proposal-class-properties",
     "@babel/plugin-proposal-export-default-from",
-    "babel-plugin-root-import"
+    "babel-plugin-root-import",
+    "@babel/plugin-transform-runtime",
+    "@babel/plugin-transform-modules-commonjs"
   ]
 }
