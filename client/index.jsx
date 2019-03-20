@@ -21,12 +21,12 @@ setHistory(history);
 import * as reducers from './reducers'
 
 // Styles
-// import './styles/reset.scss';
+import './styles/reset.scss';
 // import 'react-mdl/extra/material.min.css'
 // import 'react-mdl/extra/css/material.teal-indigo.min.css'
 // import 'react-mdl/extra/material.min.js'
-// import './styles/style.scss';
-// import 'rc-tooltip/assets/bootstrap_white.css'
+import './styles/style.scss';
+import 'rc-tooltip/assets/bootstrap_white.css'
 
 // Services
 import {animationMiddleware} from './services/AnimationService';
@@ -35,7 +35,10 @@ const reducer = combineReducers({
   ...reducers
 });
 
-const socketClient = makeSocketClient(window.location.host, {forceNew: true});
+const APP_HOST = process.env.APP_HOST || window.location.host;
+console.log(`Initializing new socket client (${APP_HOST})`);
+
+const socketClient = makeSocketClient(APP_HOST, {forceNew: process.env.NODE_ENV === 'production'});
 
 const store = configureStore(reducer, void 0, [
   animationMiddleware()
@@ -57,7 +60,7 @@ const render = () => {
   })
 };
 if (module.hot) {
-  module.hot.accept(render);
+  module.hot.accept('./app/Root', render);
 }
 render();
 

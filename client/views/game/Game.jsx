@@ -4,8 +4,10 @@ import RIP from 'react-immutable-proptypes'
 import T from 'i18n-react'
 import {connect} from 'react-redux';
 import {compose} from 'redux';
-import * as MDL from 'react-mdl'
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+
+import Button from "@material-ui/core/Button/Button";
+import Card from "@material-ui/core/Card/Card";
 
 // shared
 import {GameModel, PHASE} from '../../../shared/models/game/GameModel';
@@ -15,6 +17,7 @@ import {traitAnswerRequest, roomExitRequest} from '../../../shared/actions/actio
 import {DragDropContext} from 'react-dnd';
 import TouchBackend from 'react-dnd-touch-backend';
 import TestBackend from 'react-dnd-test-backend';
+
 const backend = !process.env.TEST ? TouchBackend({enableMouseEvents: true}) : TestBackend;
 
 import CustomDragLayer from './dnd/CustomDragLayer.jsx';
@@ -41,112 +44,139 @@ import TraitDefenceDialog from './ui/TraitDefenceDialog.jsx'
 import DeckSticker from './ui/DeckSticker.jsx';
 
 import GameSticker from './ui/GameSticker.jsx';
-import PlayersSticker from "./ui/PlayersSticker.jsx";
+
+import withStyles from "@material-ui/core/styles/withStyles";
 
 import Chat from '../Chat.jsx';
 import PlayerSticker from "./PlayerSticker.jsx";
+import Grid from "@material-ui/core/Grid/Grid";
+import Paper from "@material-ui/core/Paper/Paper";
+import Typography from "@material-ui/core/Typography/Typography";
+import PlayersList from "./ui/PlayersList";
 
-const SHADOW = 2;
+const SHADOW = 8;
+
+const styles = theme => ({
+  root: {
+    flex: '1 1 0'
+    , flexWrap: 'nowrap'
+    , overflowX: 'hidden'
+    , overflowY: 'auto'
+    , font: '12px Roboto, Arial'
+  }
+  , padding: {
+    padding: theme.spacing.unit
+  }
+  , stickerRow: {
+    flex: '1 1 0'
+    , flexWrap: 'nowrap'
+    , minHeight: 200
+  }
+  , stickerRowFirst: {
+    flex: '0 1 auto'
+    , flexWrap: 'nowrap'
+    // , minHeight: 100
+  }
+  , sticker: {
+    flex: '1 1 0'
+    , minWidth: 0 // Hack for flex-basis: 0 to work
+    , margin: 1
+  }
+});
 
 export class Game extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
   render() {
-    const {game, $traitAnswer, $exit} = this.props;
+    const {classes, game, $traitAnswer} = this.props;
 
     const playerIndex = game.getPlayer() && game.getPlayer().index;
     const players = game.sortPlayersFromIndex(game.players, playerIndex);
 
-    return <div className="Game-wrapper">
-      <GameTimedOutDialog game={game}/>
-      <TraitIntellectDialog game={game} $traitAnswer={$traitAnswer}/>
-      <TraitDefenceDialog game={game} $traitAnswer={$traitAnswer}/>
+    return (
+      <Grid container direction='column' className={`Game-wrapper Game ${classes.root}`}>
+        <GameTimedOutDialog game={game}/>
+        <TraitIntellectDialog game={game} $traitAnswer={$traitAnswer}/>
+        <TraitDefenceDialog game={game} $traitAnswer={$traitAnswer}/>
+        <Portal target='header'>
+          <ControlGroup name={T.translate('Game.Game')}>
+            <GameScoreboardFinal game={game}/>
+          </ControlGroup>
+        </Portal>
 
-      <Portal target='header'>
-        <ControlGroup name={T.translate('Game.Game')}>
-          {/*DEBUG*/}
-          {/*<MDL.Button onClick={() => this.setState({reversed: !this.state.reversed})}>DEBUG</MDL.Button>*/}
-          <MDL.Button id="Game$Exit" onClick={$exit}>{T.translate('App.Room.$Exit')}</MDL.Button>
-          <GameScoreboardFinal game={game}/>
-        </ControlGroup>
-      </Portal>
+        <Grid item container className={`${classes.stickerRowFirst}`} wrap='nowrap'>
+          <Paper className={`PlayersStickerCard Short ${classes.sticker} ${classes.padding}`}>
+            <PlayersList game={game}/>
+          </Paper>
 
-
-      <div className='Game'>
-        <div className='row'>
-          <MDL.Card shadow={SHADOW} className='PlayersStickerCard Short'>
-            <PlayersSticker game={game}/>
-          </MDL.Card>
-          <MDL.Card shadow={SHADOW} className='DeckStickerCard Short'>
+          <Paper className={`DeckStickerCard Short ${classes.sticker} ${classes.padding}`}>
             <DeckSticker game={game}/>
-          </MDL.Card>
-          <MDL.Card shadow={SHADOW} className='GameStickerCard Short'>
+          </Paper>
+          <Paper className={`GameStickerCard Short ${classes.sticker} ${classes.padding}`}>
             <GameSticker game={game}/>
-          </MDL.Card>
-          <MDL.Card shadow={SHADOW} className='FoodCard'>
-            <h6>{T.translate('Game.UI.FoodBase')}{game.status.phase === PHASE.FEEDING && <span> ({game.food})</span>}:</h6>
+          </Paper>
+
+          <Paper className={`FoodCard ${classes.sticker} ${classes.padding}`}>
+            <Typography variant='h6'>{T.translate('Game.UI.FoodBase')}{game.status.phase === PHASE.FEEDING && <span> ({game.food})</span>}:</Typography>
             <div className='GameShellContainer'>
-              {game.continents.get('standard').shells.map((shell) => <TraitShell key={shell.id} game={game} trait={shell}/>).toList()}
+              {game.continents.get('standard').shells.map((shell) =>
+                <TraitShell key={shell.id} game={game} trait={shell}/>).toList()}
             </div>
             <GameFoodContainer game={game} food={game.food}/>
-          </MDL.Card>
-          <MDL.Card shadow={SHADOW} className='ChatCard'>
-            <h6>{T.translate('App.Chat.Label')}:</h6>
-            <Chat chatTargetType='ROOM' roomId={game.roomId}/>
-          </MDL.Card>
-        </div>
-        <div className='row'>
-          {/*<MDL.Card shadow={SHADOW}>Player</MDL.Card>*/}
-          {this.renderPlayer(game, players, 0)}
-          {(players.size > 3) && this.renderPlayer(game, players, 1)}
-          {(players.size > 5) && this.renderPlayer(game, players, 2)}
-          {(players.size > 7) && this.renderPlayer(game, players, 3)}
-          {/*<MDL.Card shadow={SHADOW}>Player6</MDL.Card>*/}
-        </div>
-        <div className='row'>
-          {/*<MDL.Card shadow={SHADOW}>Player6</MDL.Card>*/}
-          {(players.size > 7) && this.renderPlayer(game, players, 7)}
-          {(players.size > 6) && this.renderPlayer(game, players, 6)}
-          {(players.size > 5) && this.renderPlayer(game, players, 5)}
-          {(players.size > 4) && this.renderPlayer(game, players, 4)}
-          {(players.size > 3 && players.size < 8) && this.renderPlayer(game, players, 3)}
-          {(players.size > 2 && players.size < 6) && this.renderPlayer(game, players, 2)}
-          {(players.size > 1 && players.size < 4) && this.renderPlayer(game, players, 1)}
-          {/*<MDL.Card shadow={SHADOW}>Player6</MDL.Card>*/}
-        </div>
-      </div>
+          </Paper>
 
-      <CustomDragLayer />
-    </div>
+          <Paper shadow={SHADOW} className={`ChatCard ${classes.sticker}`}>
+            <Chat chatTargetType='ROOM' roomId={game.roomId}/>
+          </Paper>
+        </Grid>
+
+        <Grid item container className={`${classes.stickerRow}`}>
+          {this.renderPlayer(players.get(0))}
+          {(players.size > 3) && this.renderPlayer(players.get(1))}
+          {(players.size > 5) && this.renderPlayer(players.get(2))}
+          {(players.size > 7) && this.renderPlayer(players.get(3))}
+        </Grid>
+
+        <Grid item container className={`${classes.stickerRow}`}>
+          {(players.size > 7) && this.renderPlayer(players.get(7))}
+          {(players.size > 6) && this.renderPlayer(players.get(6))}
+          {(players.size > 5) && this.renderPlayer(players.get(5))}
+          {(players.size > 4) && this.renderPlayer(players.get(4))}
+          {(players.size > 3 && players.size < 8) && this.renderPlayer(players.get(3))}
+          {(players.size > 2 && players.size < 6) && this.renderPlayer(players.get(2))}
+          {(players.size > 1 && players.size < 4) && this.renderPlayer(players.get(1))}
+        </Grid>
+
+        <CustomDragLayer/>
+      </Grid>
+    );
   }
 
-  renderPlayer(game, players, index) {
-    const player = players.get(index);
+  renderPlayer(player) {
+    const {classes, game} = this.props;
     if (!player) return null;
     return (
-      <MDL.Card shadow={SHADOW} className='PlayerStickerCard'>
+      <Grid item className={`PlayerStickerCard ${classes.sticker}`}>
         <PlayerSticker key={player.id} game={game} player={player}/>
-      </MDL.Card>);
+      </Grid>);
   }
 }
 
 export const GameView = compose(
-  AnimationServiceContext(createAnimationServiceConfig())
+  withStyles(styles)
   , DragDropContext(backend)
   , connect((state, props) => {
       const game = state.get('game');
       const user = state.get('user');
       const roomId = state.get('room');
       const room = state.getIn(['rooms', roomId]);
-      return {game, user, roomId, room}
+      const lastAction = state.get('animation');
+      return {game, user, roomId, room, lastAction}
     }
     , (dispatch) => ({
       $traitAnswer: (...args) => dispatch(traitAnswerRequest(...args))
       , $exit: () => dispatch(roomExitRequest())
     })
-  ))(Game);
+  )
+  , AnimationServiceContext(createAnimationServiceConfig())
+)(Game);
 
 export default GameView;

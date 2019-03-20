@@ -3,12 +3,14 @@ import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes'
 import T from 'i18n-react';
 
-import {Dialog} from '../../utils/Dialog.jsx';
-import {DialogTitle, DialogContent, Button} from 'react-mdl';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
 
 import {TraitRecombination} from '../../../../shared/models/game/evolution/traitsData';
 import {Animal} from "../animals/Animal";
 import {AnimalTrait} from "../animals/AnimalTrait";
+import Button from "@material-ui/core/Button/Button";
 
 const INITIAL_STATE = {traits: []};
 
@@ -52,7 +54,7 @@ export default class TraitRecombinationDialog extends React.Component {
   render() {
     const {game, recombinationQuestion} = this.props;
     const {animal, trait} = recombinationQuestion;
-    return (<Dialog show={!!animal} onBackdropClick={this.onBackdropClick}>
+    return (<Dialog open={!!animal} onClose={this.onBackdropClick}>
       <DialogTitle>{T.translate('Game.UI.TraitRecombinationDialog.Title')}</DialogTitle>
       {!!animal && this.renderDialogContent()}
     </Dialog>);
@@ -75,7 +77,7 @@ export default class TraitRecombinationDialog extends React.Component {
           {this.renderAnimal(animal2, traits2, 1)}
         </div>
         <div className='actions'>
-          <Button primary raised disabled={this.validate()} onClick={this.confirmAction}>
+          <Button variant='contained' color='primary' disabled={this.validate()} onClick={this.confirmAction}>
             {T.translate('Game.UI.TraitRecombinationDialog.Action')}
           </Button>
         </div>

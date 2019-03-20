@@ -4,7 +4,12 @@ import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes'
 import T from 'i18n-react'
 
-import * as MDL from 'react-mdl';
+import IconArrowUp from '@material-ui/icons/KeyboardArrowUp';
+import IconArrowDown from '@material-ui/icons/KeyboardArrowDown';
+import IconArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
+import IconArrowRight from '@material-ui/icons/KeyboardArrowRight';
+import IconZoomIn from '@material-ui/icons/ZoomIn';
+import IconZoomOut from '@material-ui/icons/ZoomOut';
 
 import PlayerWrapper from './PlayerWrapper.jsx';
 import User from '../utils/User.jsx';
@@ -15,8 +20,8 @@ const scrollSpeed = 6;
 const SCALE_THRESHOLD = 20;
 
 import styles from '../../styles.json';
-const {PLAYER_STICKER_ARROW_SIZE} = styles;
 
+const {PLAYER_STICKER_ARROW_SIZE} = styles;
 
 export default class PlayerSticker extends React.Component {
   static getContainerById(id) {
@@ -192,12 +197,6 @@ export default class PlayerSticker extends React.Component {
     this.$isMounted = false;
   }
 
-  // componentDidUpdate(prevProps, prevState) {
-  //   if (this.div && !prevState.showCards && this.state.showCards) {
-  //     // this.div.scrollTop = this.div.scrollHeight;
-  //   }
-  // }
-
   render() {
     const {game, player} = this.props;
     const isUser = game.userId === player.id;
@@ -214,22 +213,17 @@ export default class PlayerSticker extends React.Component {
           <PlayerWrapper game={game} player={player} showCards={this.state.showCards} ref={this.setupInner}/>
         </div>
 
-        {this.state.scrollX !== this.state.scrollWidth &&
-        <MDL.Icon className='arrow arrow-left' name='keyboard_arrow_left'/>}
-        {this.state.scrollX !== -this.state.scrollWidth &&
-        <MDL.Icon className='arrow arrow-right' name='keyboard_arrow_right'/>}
-        {this.state.scrollY !== this.state.scrollHeight &&
-        <MDL.Icon className='arrow arrow-top' name='keyboard_arrow_up'/>}
-        {this.state.scrollY !== 0 && <MDL.Icon className='arrow arrow-bottom' name='keyboard_arrow_down'/>}
+        {this.state.scrollX !== this.state.scrollWidth && <IconArrowLeft className='arrow arrow-left'/>}
+        {this.state.scrollX !== -this.state.scrollWidth && <IconArrowRight className='arrow arrow-right'/>}
+        {this.state.scrollY !== this.state.scrollHeight && <IconArrowUp className='arrow arrow-top'/>}
+        {this.state.scrollY !== 0 && <IconArrowDown className='arrow arrow-bottom'/>}
       </div>
       <div className={'CardCollectionIcon' + (isUser ? ' pointer' : '') + (game.isPlayerTurn(player) ? ' active' : '')}
            onClick={this.onCardCollectionIconClick}>
-
         <User id={player.id}/>
         ({player.hand.size})
-        {isUser && <MDL.Icon name={this.state.showCards ? 'keyboard_arrow_down' : 'keyboard_arrow_up'}/>}
-        <MDL.Icon name={this.state.scale === this.state.minScale ? 'zoom_in' : 'zoom_out'} onClick={this.switchZoom}/>
-        {/*{this.state.scale}/{this.state.minScale} {this.state.scrollX}/{this.state.scrollWidth} {this.state.scrollY}/{this.state.scrollHeight}*/}
+        {isUser && (this.state.showCards ? <IconArrowDown/> : <IconArrowUp/>)}
+        {this.state.scale === this.state.minScale ? <IconZoomIn onClick={this.switchZoom}/> : <IconZoomOut onClick={this.switchZoom}/>}
       </div>
     </div>);
   }

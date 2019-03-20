@@ -1,8 +1,13 @@
 import React from 'react'
 import T from 'i18n-react'
-import {IconButton, Tooltip} from 'react-mdl';
-import {DialogTitle, DialogContent} from 'react-mdl';
-import {Dialog} from '../../utils/Dialog.jsx';
+
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import Button from "@material-ui/core/Button";
+import Tooltip from '@material-ui/core/Tooltip';
+
+import IconLog from '@material-ui/icons/List';
 
 import User from '../../utils/User.jsx';
 import AnimalText from '../animals/AnimalText.jsx';
@@ -86,22 +91,22 @@ export default class GameLog extends React.Component {
 
   render() {
     const {game} = this.props;
-    return (<div>
-      <Tooltip label={T.translate('Game.Log.Label')}>
-        <IconButton raised
-                    onClick={this.showLog}
-                    name={'list'}/>
-      </Tooltip>
-      <Dialog onBackdropClick={this.hideLog} show={this.state.showLog}>
-        <DialogTitle>{T.translate('Game.Log.Label')}</DialogTitle>
-        <DialogContent className='GameLog'>
-          {game.log.map((logItem, index) => (
-            <div className='LogItem' key={index}>
-              <span className='LogTime'>[{TimeService.formatTimeOfDay(logItem.timestamp)}]</span>&nbsp;
-              <span className='LogMessage'>{GameLog.LogItemToText(logItem.message)}</span>
-            </div>))}
-        </DialogContent>
-      </Dialog>
-    </div>);
+    return (
+      <span>
+        <Tooltip title={T.translate('Game.Log.Label')}>
+          <Button size='small' className='GameLogButton' onClick={this.showLog}> <IconLog /> </Button>
+        </Tooltip>
+        <Dialog onBackdropClick={this.hideLog} open={!!this.state.showLog}>
+          <DialogTitle>{T.translate('Game.Log.Label')}</DialogTitle>
+          <DialogContent className='GameLog'>
+            {game.log.map((logItem, index) => (
+              <div className='LogItem' key={index}>
+                <span className='LogTime'>[{TimeService.formatTimeOfDay(logItem.timestamp)}]</span>&nbsp;
+                <span className='LogMessage'>{GameLog.LogItemToText(logItem.message)}</span>
+              </div>))}
+          </DialogContent>
+        </Dialog>
+      </span>
+    );
   }
 }

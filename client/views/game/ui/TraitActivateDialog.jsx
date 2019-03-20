@@ -2,8 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes';
 import T from 'i18n-react';
-import {Dialog} from '../../utils/Dialog.jsx';
-import {DialogTitle, DialogContent, Button} from 'react-mdl';
+
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
+
 import AnimalTraitIcon from '../animals/AnimalTraitIcon.jsx';
 
 import {Timer} from '../../utils/Timer.jsx';
@@ -11,6 +15,7 @@ import {AnimalModel} from '../../../../shared/models/game/evolution/AnimalModel'
 import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 
 import './TraitActivateDialog.scss';
+import Button from "@material-ui/core/Button/Button";
 
 export default class TraitActivateDialog extends React.Component {
   static propTypes = {
@@ -26,7 +31,7 @@ export default class TraitActivateDialog extends React.Component {
     const {traits, onSelectTrait} = this.props;
     const onBackdropClick = !onSelectTrait ? () => 0
       : () => onSelectTrait(null);
-    return (<Dialog show={!!traits} onBackdropClick={onBackdropClick}>
+    return (<Dialog open={!!traits} onBackdropClick={onBackdropClick}>
       <DialogTitle>{T.translate('Game.UI.TraitActivateDialog.Title')}</DialogTitle>
       {!!traits && this.renderDialogContent()}
     </Dialog>);
@@ -44,7 +49,7 @@ export default class TraitActivateDialog extends React.Component {
               <AnimalTraitIcon trait={trait}/>
             </div>
           )}
-          {allowNothing && <div className='Item'><Button raised onClick={() => onSelectTrait(true)}>
+          {allowNothing && <div className='Item'><Button variant='contained' onClick={() => onSelectTrait(true)}>
             {T.translate('Game.UI.TraitActivateDialog.Nothing')}
           </Button></div>}
         </div>

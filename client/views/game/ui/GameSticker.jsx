@@ -5,7 +5,7 @@ import T from 'i18n-react';
 import cn from 'classnames';
 import {connect} from 'react-redux';
 
-import * as MDL from 'react-mdl';
+import Button from '@material-ui/core/Button';
 
 import {GameModel, GameModelClient, PHASE} from '../../../../shared/models/game/GameModel';
 import {traitAmbushContinueRequest} from '../../../../shared/actions/actions';
@@ -16,6 +16,7 @@ import GameLog from '../ui/GameLog.jsx';
 import Pause from '../ui/Pause.jsx';
 
 import {Timer} from '../../utils/Timer.jsx';
+import Typography from "@material-ui/core/Typography/Typography";
 
 export class GameSticker extends React.PureComponent {
   static propTypes = {
@@ -36,34 +37,30 @@ export class GameSticker extends React.PureComponent {
     const {game, $traitAmbushContinue} = this.props;
     const {status, settings, question} = game;
     return (<div className="GameSticker">
-      <span>
-        <h6>{T.translate('Game.UI.Status.Title')}:</h6>
-      </span>
-      <ul>
-        <li className='line'>
-          <span className='key'>{T.translate('Game.UI.Status.Turn')}:&nbsp;</span>
-          <span className='value'>{status.turn}</span>
-          &nbsp;/&nbsp;
-          <span className='key'>{T.translate('Game.UI.Status.Round')}:&nbsp;</span>
-          <span className='value'>{status.round}</span>
-        </li>
-        <li className='line'>
-          <span className='key'></span>
-          <span className='value'>{T.translate('Game.Phase.' + status.phase)}</span>
-        </li>
-        <li className='line'>
-          <span className='key'>{T.translate('Game.UI.Status.Time')}:&nbsp;</span>
-          <span className='value'>
+      <div className='line'>
+        <span className='key'>{T.translate('Game.UI.Status.Turn')}:&nbsp;</span>
+        <span className='value'>{status.turn}</span>
+        &nbsp;/&nbsp;
+        <span className='key'>{T.translate('Game.UI.Status.Round')}:&nbsp;</span>
+        <span className='value'>{status.round}</span>
+      </div>
+      <div className='line'>
+        <span className='key'></span>
+        <span className='value'>{T.translate('Game.Phase.' + status.phase)}</span>
+      </div>
+      <div className='line'>
+        <span className='key'>{T.translate('Game.UI.Status.Time')}:&nbsp;</span>
+        <span className='value'>
+          {/*@formatter:off*/}
           {(game.status.paused ? <span>{T.translate('Game.UI.Status.Pause')}</span>
-            : !!question ? <Timer start={question.time} duration={settings.timeTraitResponse}/>
-            : status.phase === PHASE.REGENERATION ?
-            <Timer start={status.turnStartTime} duration={settings.timeTraitResponse}/>
-            : status.phase === PHASE.AMBUSH ? <Timer start={status.turnStartTime} duration={settings.timeAmbush}/>
-            : status.turnStartTime != null ? <Timer start={status.turnStartTime} duration={status.turnDuration}/>
-            : '-')}
+          : question ? <Timer start={question.time} duration={settings.timeTraitResponse}/>
+          : status.phase === PHASE.REGENERATION ? <Timer start={status.turnStartTime} duration={settings.timeTraitResponse}/>
+          : status.phase === PHASE.AMBUSH ? <Timer start={status.turnStartTime} duration={settings.timeAmbush}/>
+          : status.turnStartTime != null ? <Timer start={status.turnStartTime} duration={status.turnDuration}/>
+          : '-')}
+          {/*@formatter:on*/}
           </span>
-        </li>
-      </ul>
+      </div>
       <div className='controls'>
         <GameLog game={game}/>
         <Pause/>
@@ -71,9 +68,10 @@ export class GameSticker extends React.PureComponent {
       <div className='flex'/>
       {game.status.phase !== PHASE.AMBUSH && <GameEndTurnButton game={game}/>}
       {game.status.phase === PHASE.AMBUSH &&
-      <MDL.Button raised accent disabled={!this.playerHasAmbushes()} onClick={$traitAmbushContinue}>
+      <Button variant='contained' color='secondary' size='small' disabled={!this.playerHasAmbushes()}
+              onClick={$traitAmbushContinue}>
         {T.translate('Game.UI.EndAmbush')}
-      </MDL.Button>}
+      </Button>}
     </div>);
   }
 }

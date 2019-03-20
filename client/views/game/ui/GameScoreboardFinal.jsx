@@ -1,12 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import T from 'i18n-react';
-import * as MDL from 'react-mdl';
-
 import cn from 'classnames';
 
+import Button from '@material-ui/core/Button';
+
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
+
 import {GameModelClient, PHASE} from '../../../../shared/models/game/GameModel';
-import {Dialog, DialogActions} from '../../utils/Dialog.jsx';
 
 import User from '../../utils/User.jsx'
 
@@ -33,18 +37,18 @@ export default class GameScoreboardFinal extends React.PureComponent {
 
     return <span>
       {game.status.phase === PHASE.FINAL
-      && <MDL.Button className="ShowScoreboardFinal"
+      && <Button className="ShowScoreboardFinal"
                      onClick={() => this.setState({show: true})}>
         {T.translate('Game.UI.Scores.Label')}
-      </MDL.Button>
+      </Button>
       }
-      <Dialog show={this.state.show}>
-        {this.state.show && <MDL.DialogTitle>
+      <Dialog open={this.state.show}>
+        {this.state.show && <DialogTitle>
           {T.translate('Game.UI.Scores.Winner')}: <strong><User id={game.winnerId}/></strong>
-        </MDL.DialogTitle>}
-        <MDL.DialogContent>{this.renderDialogContent()}</MDL.DialogContent>
+        </DialogTitle>}
+        <DialogContent>{this.renderDialogContent()}</DialogContent>
         <DialogActions>
-          <MDL.Button type='button' raised primary onClick={() => this.setState({show: false})}>OK</MDL.Button>
+          <Button type='button' variant='contained' color='primary' onClick={() => this.setState({show: false})}>OK</Button>
         </DialogActions>
       </Dialog>
     </span>

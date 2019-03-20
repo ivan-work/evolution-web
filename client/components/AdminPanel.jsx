@@ -4,6 +4,7 @@ import {Map, List, fromJS} from 'immutable';
 
 import {RoomSectionView} from './AdminPanelSections/RoomSection.jsx';
 import {GameSectionView} from './AdminPanelSections/GameSection.jsx';
+import {compose} from "recompose";
 
 export class AdminPanel extends Component {
   constructor(props) {
@@ -44,19 +45,21 @@ export class AdminPanel extends Component {
   }
 }
 
-export const AdminPanelView = connect(
-  (state) => {
-    const userId = state.getIn(['user', 'id'], '%USERNAME%');
-    const roomId = state.get('room');
-    const room = state.getIn(['rooms', roomId]);
-    const visible = state.getIn(['app', 'showAdminPanel']) || process.env.NODE_ENV === 'development';
-    return {
-      roomId
-      , userId
-      , room
-      , visible
-      //, online: state.getIn(['online'], Map())
+export default compose(
+  connect(
+    (state) => {
+      const userId = state.getIn(['user', 'id'], '%USERNAME%');
+      const roomId = state.get('room');
+      const room = state.getIn(['rooms', roomId]);
+      const visible = state.getIn(['app', 'adminMode']) || process.env.NODE_ENV === 'development';
+      return {
+        roomId
+        , userId
+        , room
+        , visible
+        //, online: state.getIn(['online'], Map())
+      }
     }
-  }
-  , (dispatch) => ({})
+    , (dispatch) => ({})
+  )
 )(AdminPanel);

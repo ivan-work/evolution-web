@@ -1,7 +1,7 @@
 import {createStore, compose, applyMiddleware} from 'redux'
 
 // Basic Middleware
-import {Record} from 'immutable';
+import {Record, Map} from 'immutable';
 import thunk from 'redux-thunk';
 import {reduxTimeoutMiddleware} from '../../shared/utils/reduxTimeout'
 
@@ -14,6 +14,7 @@ class ClientRecord extends Record({
   , rooms: void 0
   , user: void 0
   , chat: void 0
+  , animation: void 0
 }) {
 }
 

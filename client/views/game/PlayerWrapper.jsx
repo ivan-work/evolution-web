@@ -5,7 +5,6 @@ import T from 'i18n-react';
 import cn from 'classnames';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
-import * as MDL from 'react-mdl';
 import {connect} from 'react-redux';
 import {compose} from 'redux';
 

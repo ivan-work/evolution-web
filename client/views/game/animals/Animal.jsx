@@ -1,7 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import classnames from 'classnames';
-import {Icon} from 'react-mdl';
+
+import IconFull from '@material-ui/icons/SentimentVerySatisfied';
+import IconEnough from '@material-ui/icons/SentimentSatisfied';
+import IconHungry from '@material-ui/icons/SentimentVeryDissatisfied';
+
+import IconFlagPoisoned from '@material-ui/icons/SmokingRooms';
+import IconFlagHibernated from '@material-ui/icons/Snooze';
+import IconFlagShell from '@material-ui/icons/Home';
+import IconFlagRegeneration from '@material-ui/icons/GetApp';
+import IconFlagShy from '@material-ui/icons/Report';
 
 import {DropTarget} from 'react-dnd';
 import {DND_ITEM_TYPE} from './../dnd/DND_ITEM_TYPE';
@@ -41,9 +50,9 @@ class Animal extends React.Component {
   }
 
   renderFoodStatus(animal) {
-    return (animal.isFull() ? <Icon name='sentiment_very_satisfied'/>
-      : animal.canSurvive() ? <Icon name='sentiment_neutral'/>
-        : <Icon name='sentiment_very_dissatisfied'/>);
+    return (animal.isFull() ? <IconFull/>
+      : animal.canSurvive() ? <IconEnough/>
+        : <IconHungry/>);
   }
 
   render() {
@@ -78,19 +87,11 @@ class Animal extends React.Component {
   renderAnimalBody(animal, game) {
     return (<div id={'AnimalBody' + animal.id} className='inner'>
       {game && game.status.phase === PHASE.FEEDING && this.renderFoodStatus(animal, game)}
-
-      {/*{<span className='material-icons Flag Poisoned'>smoking_rooms</span>}*/}
-      {/*{<span className='material-icons Flag Hibernated'>snooze</span>}*/}
-      {/*{<span className='material-icons Flag Shell'>home</span>}*/}
-      {/*{<span className='material-icons Flag Regeneration'>get_app</span>}*/}
-      {/*{<span className='material-icons Flag Shy'>report</span>}*/}
-
-
-      {animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) && <span className='material-icons Flag Poisoned'>smoking_rooms</span>}
-      {animal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && <span className='material-icons Flag Hibernated'>snooze</span>}
-      {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <span className='material-icons Flag Shell'>home</span>}
-      {animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION) && <span className='material-icons Flag Regeneration'>get_app</span>}
-      {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHY) && <span className='material-icons Flag Shy'>report</span>}
+      {animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) && <IconFlagPoisoned className='Flag Poisoned'/>}
+      {animal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && <IconFlagHibernated className='Flag Hibernated'/>}
+      {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <IconFlagShell className='Flag Shell'/>}
+      {animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION) && <IconFlagRegeneration className='Flag Regeneration'/>}
+      {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHY) && <IconFlagShy className='Flag Shy'/>}
       <div className='AnimalFoodContainer'>
         {animal.food < 5
           ? Array.from({length: animal.food}).map((u, index) => <Food key={index}/>)

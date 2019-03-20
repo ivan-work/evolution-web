@@ -20,7 +20,7 @@ export const chatInit = (globalChat) => ({
 
 export const chatMessageRequest = (to, toType, text) => (dispatch) => {
   if (text === '/admin') {
-    dispatch({type: 'appShowAdminPanel', data: null});
+    dispatch({type: 'setAdminMode', data: null});
   } else {
     dispatch({
       type: 'chatMessageRequest'

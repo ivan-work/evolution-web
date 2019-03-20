@@ -1,8 +1,18 @@
 import React from 'react';
 import T from 'i18n-react';
 import {connect} from 'react-redux';
-import {Dialog} from '../utils/Dialog.jsx';
-import {DialogTitle, DialogContent, Button, Icon, ListItem} from 'react-mdl';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
+import Button from '@material-ui/core/Button';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+
+import IconVotePending from '@material-ui/icons/Snooze';
+import IconVoteYes from '@material-ui/icons/Check';
+import IconVoteNo from '@material-ui/icons/Close';
 
 import TimeService from '../../services/TimeService';
 import {Timer} from '../utils/Timer.jsx';
@@ -14,70 +24,61 @@ import {passesChecks} from '../../../shared/actions/checks';
 import {isUserInPlayers, checkStartVotingIsInProgress} from '../../../shared/actions/rooms.checks';
 
 const shouldShow = (room, userId) => (isUserInPlayers(room, userId)
-&& passesChecks(() => checkStartVotingIsInProgress(room, TimeService.getServerTimestamp())));
+  && passesChecks(() => checkStartVotingIsInProgress(room, TimeService.getServerTimestamp())));
 
 export class RoomStartVotingDialog extends React.Component {
-  static propTypes = {};
-
-  constructor(props) {
-    super(props);
-    this.$vote = props.$vote;
-  }
-
   render() {
     const {room, userId} = this.props;
 
-    const show = room.votingForStart && room.votingForStart.showOnClient
-      && shouldShow(room, userId);
+    const open = !!(room.votingForStart && room.votingForStart.showOnClient && shouldShow(room, userId));
 
     return (
-      <div>
-        <Dialog show={show}>
-          <DialogTitle>
-            {T.translate('App.Room.StartVoting_Title')}&nbsp;
-            {room.votingForStart &&
-            <Timer start={room.votingForStart.timestamp} duration={VotingModel.START_VOTING_TIMEOUT}/>}
-          </DialogTitle>
-          {show && room.votingForStart && this.renderDialogContent()}
-        </Dialog>
-      </div>);
+      <Dialog open={open}>
+        <DialogTitle>
+          {T.translate('App.Room.StartVoting_Title')}&nbsp;
+          {room.votingForStart &&
+          <Timer start={room.votingForStart.timestamp} duration={VotingModel.START_VOTING_TIMEOUT}/>}
+        </DialogTitle>
+        {open && room.votingForStart && this.renderDialogContent()}
+      </Dialog>
+    );
   }
 
   renderDialogContent() {
-    const {room, userId} = this.props;
+    const {room, userId, $voteYes, $voteNo} = this.props;
     return (<DialogContent>
-      <UsersList list={room.users}>
-        {(user) => (<ListItem className='small'>
-          <div>{this.renderVoteState(user.id)} {user.login}</div>
-        </ListItem>)}
-      </UsersList>
-      <div style={{display: 'flex', justifyContent: 'space-around'}}>
-        <Button raised primary disabled={!isUserInPlayers(room, userId)}
-                onClick={this.$vote(true)}>{T.translate('App.Misc.Agree')}</Button>
-        <Button raised primary disabled={!isUserInPlayers(room, userId)}
-                onClick={this.$vote(false)}>{T.translate('App.Misc.Disagree')}</Button>
-      </div>
+      <UsersList list={room.users}>{this.renderUserVote}</UsersList>
+      <DialogActions>
+        <Button variant={"contained"} color={"primary"} disabled={!isUserInPlayers(room, userId)}
+                onClick={$voteYes}>{T.translate('App.Misc.Agree')}</Button>
+        <Button variant={"contained"} color={"primary"} disabled={!isUserInPlayers(room, userId)}
+                onClick={$voteNo}>{T.translate('App.Misc.Disagree')}</Button>
+      </DialogActions>
     </DialogContent>);
   }
 
-  renderVoteState(userId) {
+  renderUserVote = ({user}) => {
     const {room} = this.props;
 
-    if (!room.votingForStart) return null;
+    // if (!room.votingForStart) return null;
 
-    const state = room.votingForStart.votes.get(userId);
-    const props = {style: {}};
+    const vote = room.votingForStart.votes.get(user.id);
+    let Icon = IconVotePending;
 
-    if (state === true) {
-      props.name = 'check';
-      props.style.color = 'green'
-    } else if (state === false) {
-      props.name = 'close';
-      props.style.color = 'red';
-    } else {
-      props.name = 'snooze';
+    if (vote === true) {
+      Icon = IconVoteYes;
+      // props.style.color = 'green'
+    } else if (vote === false) {
+      Icon = IconVoteNo;
+      // props.style.color = 'red';
     }
-    return <Icon {...props}/>
+
+    return (
+      <ListItem>
+        <ListItemText primary={user.login}/>
+        <ListItemSecondaryAction><Icon/></ListItemSecondaryAction>
+      </ListItem>
+    );
   }
 }
 
@@ -87,7 +88,8 @@ export const RoomStartVotingDialogView = connect(
     , userId: state.getIn(['user', 'id'])
   })
   , (dispatch, props) => ({
-    $vote: (vote) => () => dispatch(roomStartVoteActionRequest(vote))
+    $voteYes: () => dispatch(roomStartVoteActionRequest(true))
+    , $voteNo: () => dispatch(roomStartVoteActionRequest(false))
   })
 )(RoomStartVotingDialog);
 
@@ -99,7 +101,7 @@ export class RoomStartVotingTimer extends React.Component {
     return (<span>
       {T.translate('App.Room.StartVoting_InProgress')}&nbsp;
       <Timer start={room.votingForStart.timestamp} duration={VotingModel.START_VOTING_TIMEOUT}/>
-      </span>);
+    </span>);
   }
 }
 

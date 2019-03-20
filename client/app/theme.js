@@ -21,9 +21,11 @@ const theme = createMuiTheme({
     useNextVariants: true
     , h1: {
       fontSize: '2.0em'
+      , fontWeight: '400'
     }
     , h2: {
       fontSize: '1.8em'
+      , fontWeight: '400'
     }
     , h3: {
       fontSize: '1.6em'
@@ -35,11 +37,11 @@ const theme = createMuiTheme({
     }
     , h5: {
       fontSize: '1.2em'
-      , fontWeight: '500'
+      , fontWeight: '400'
     }
     , h6: {
       fontSize: '1.1em'
-      , fontWeight: '500'
+      , fontWeight: '400'
     }
     , button: {
       lineHeight: 1.25

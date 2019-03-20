@@ -10,23 +10,25 @@ import Button from '@material-ui/core/Button';
 import Toolbar from '@material-ui/core/Toolbar';
 import {withStyles} from '@material-ui/core/styles';
 
-import Scrollbar from 'react-custom-scrollbars';
-
-import {AdminPanelView} from '../../components/AdminPanel.jsx'
+import AdminControlGroup from '../../components/AdminControlGroup.jsx'
 import {PortalTarget} from "../../views/utils/PortalTarget"
 import {TranslationSwitchView} from '../../components/TranslationSwitch.jsx'
 
 import SettingVolume from "./SettingVolume";
+import SettingUIv3 from "./SettingUIv3";
 import RoomControlGroup from "../../views/rooms/RoomControlGroup";
 import {Portal} from "../../views/utils/Portal";
 import Link from "@material-ui/core/Link/Link";
 import {redirectTo} from "../../../shared/utils/history";
+import Hidden from "@material-ui/core/Hidden";
 
 const styles = theme => ({
   title: {
-    cursor: 'pointer'
+    overflow: 'hidden'
+    , minWidth: '1em'
   }
   , portal: {
+    whiteSpace: 'nowrap'
     // overflowY: 'hidden'
     // , overflowX: 'auto'
   }
@@ -42,20 +44,23 @@ export const AppBar = ({classes}) => (
   <MUIAppBar>
     <Toolbar>
       {/*<TranslationSwitchView/>*/}
-
-      <Link onClick={() => redirectTo('/')}
-            className={classes.title}
-            variant="h4"
-            color="inherit">
-        {T.translate('App.Name')}
-      </Link>
-      &nbsp;
-      <Typography variant="caption" color="inherit" className={classes.title}>v{GLOBAL_VERSION}</Typography>
+      <div className={classes.title}>
+        <Link onClick={() => redirectTo('/')}
+              variant="h4"
+              color="inherit">
+            {T.translate('App.Name')}
+        </Link>
+        &nbsp;
+        <Typography inline variant="caption" color="inherit">v{GLOBAL_VERSION}</Typography>
+      </div>
 
       <SettingVolume/>
 
+      <SettingUIv3/>
+
       <div className={classes.portal}>
         <RoomControlGroup/>
+        <AdminControlGroup/>
         {/*<Scrollbar>*/}
         {/*<PortalTarget name='header'/>*/}
         {/*</Scrollbar>*/}

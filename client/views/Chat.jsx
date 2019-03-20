@@ -27,6 +27,7 @@ const styles = theme => ({
     overflowY: 'auto'
     , overflowX: 'none'
     , flex: '1 1 0'
+    , textAlign: 'left'
   }
   , input: {
     width: '100%'
@@ -79,7 +80,7 @@ const ChatWindow = compose(
   , withProps(({atBottom, setAtBottom}) => {
     const chatWindowRef = React.createRef();
     return {
-      chatWindowRef: chatWindowRef
+      chatWindowRef
       , scrollToBottom: () => {
         const chatWindow = chatWindowRef.current;
         if (chatWindow) {

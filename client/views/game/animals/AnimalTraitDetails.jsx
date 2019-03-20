@@ -20,7 +20,7 @@ export default class AnimalTraitDetails extends React.PureComponent {
       .replace(/\$EAT/g, T.translate('Game.TraitDesc.$EAT'))
       .replace(/\$CDRound/g, T.translate('Game.TraitDesc.$CDRound'))
       .replace(/\$CDTurn/g, T.translate('Game.TraitDesc.$CDTurn'))
-      .replace(/\$A/g, `<img class='icon' src='${gecko}'/>`)
+      .replace(/\$A/g, `<img class='icon' src='${gecko}' width='1em'/>`)
       .replace(/\$F/g, `<i class='icon material-icons'>spa</i>`)
 
     const className = classnames({

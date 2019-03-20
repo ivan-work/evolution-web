@@ -1,10 +1,9 @@
-import React, {Fragment} from 'react';
+import React from 'react';
 import PropTypes from 'prop-types'
 import T from 'i18n-react';
 import {connect} from 'react-redux';
 
 import TimeService from '../../services/TimeService';
-import {ControlGroup} from './../utils/ControlGroup.jsx';
 import Button from '@material-ui/core/Button';
 import {RoomModel} from '../../../shared/models/RoomModel';
 
@@ -17,103 +16,84 @@ import {
 } from '../../../shared/actions/actions';
 import {failsChecks} from '../../../shared/actions/checks';
 import {checkCanJoinRoomToPlay} from '../../../shared/actions/rooms.checks';
-import {branch, compose, renderNothing, withProps, withStateHandlers} from "recompose";
+import {
+  branch,
+  compose,
+  renderNothing,
+  withProps,
+  withStateHandlers
+} from "recompose";
 import Menu from "@material-ui/core/Menu/Menu";
 import MenuItem from "@material-ui/core/MenuItem/MenuItem";
+import {Route, Router, withRouter} from "react-router";
 
-/*
- * RoomControlGroup
- * */
-
-const buttonProps = {
-  variant: 'outlined'
-  , color: 'inherit'
-};
-
-// export const RoomControlGroup = ({userId, room, inRoom, $back, $exit, $start, $roomJoin, $roomSpectate}) => (
-//   <ControlGroup name={T.translate('App.Room.Room')}>
-//     <Button id="Room$Back" {...buttonProps}
-//             onClick={$back}>
-//       {T.translate('App.Room.$Back')}
-//     </Button>
-//     <Button id="Room$Exit" {...buttonProps}
-//             onClick={$exit}>
-//       {T.translate('App.Room.$Exit')}
-//     </Button>
-//     {inRoom && !!~room.spectators.indexOf(userId)
-//     && <Button id="Room$Play" {...buttonProps}
-//                disabled={failsChecks(() => checkCanJoinRoomToPlay(room, userId))}
-//                onClick={$roomJoin}>
-//       {T.translate('App.Room.$Play')}
-//     </Button>}
-//     {inRoom && !!~room.users.indexOf(userId)
-//     && <Button id="Room$Spectate" {...buttonProps}
-//                onClick={$roomSpectate}>
-//       {T.translate('App.Room.$Spectate')}
-//     </Button>}
-//     <Button id="Room$Start" {...buttonProps}
-//             disabled={!room.checkCanStart(userId, TimeService.getServerTimestamp())}
-//             onClick={$start}>
-//       {T.translate('App.Room.$Start')}
-//     </Button>
-//   </ControlGroup>
-// );
-
-export const AppBarMenu = compose(
+export const RoomControlGroupMenu = compose(
   withStateHandlers({anchorEl: null}
     , {
       openMenu: () => (e) => ({anchorEl: e.target})
       , closeMenu: () => () => ({anchorEl: null})
+      , $back: () => () => {
+        redirectTo('/room');
+        return {anchorEl: null}
+      }
     })
-)(({text, anchorEl, openMenu, closeMenu, children}) => (
-  <div>
-    <Button color='primary'
-            variant='contained'
-            onClick={openMenu}>{text}</Button>
-    {children(anchorEl, closeMenu)}
-  </div>
-));
+)(
+  ({
+     text, anchorEl, openMenu, closeMenu
+     , userId, room, inRoom, game
+     , $back, $exit, $start, $roomJoin, $roomSpectate
+   }) => (
+    <>
+      <Button color='primary'
+              variant='contained'
+              onClick={openMenu}>
+        {text}
+      </Button>
+      <Menu open={Boolean(anchorEl)}
+            anchorEl={anchorEl}
+            onClose={closeMenu}>
 
-export const RoomControlGroup = ({userId, room, inRoom, $back, $exit, $start, $roomJoin, $roomSpectate}) => (
-  <div>
-    <AppBarMenu text={`${room.name}`}>
-      {(anchorEl, closeMenu) => (
-        <Fragment>{JSON.stringify(inRoom)}
-        <Menu open={Boolean(anchorEl)}
-              anchorEl={anchorEl}
-              onClose={closeMenu}>
-          <MenuItem onClick={$back}>{JSON.stringify(inRoom)}</MenuItem>
-          {!inRoom && <MenuItem onClick={$back}>{T.translate('App.Room.$Back')}</MenuItem>}
-          <MenuItem onClick={$exit}>
-            {T.translate('App.Room.$Exit')}
-          </MenuItem>
-          {inRoom && !!~room.spectators.indexOf(userId)
-          && <MenuItem onClick={$roomJoin}
-                       disabled={failsChecks(() => checkCanJoinRoomToPlay(room, userId))}>
-            {T.translate('App.Room.$Play')}
-          </MenuItem>}
-          {inRoom && !!~room.users.indexOf(userId)
-          && <MenuItem onClick={$roomSpectate}>
-            {T.translate('App.Room.$Spectate')}
-          </MenuItem>}
-          <MenuItem onClick={$start}
-                    disabled={!room.checkCanStart(userId, TimeService.getServerTimestamp())}>
-            {T.translate('App.Room.$Start')}
-          </MenuItem>
-        </Menu></Fragment>
-      )}
-    </AppBarMenu>
+        {!inRoom && <MenuItem onClick={$back}>{T.translate('App.Room.$Back')}</MenuItem>}
 
+        {!game && <MenuItem onClick={$start}
+                  disabled={!room.checkCanStart(userId, TimeService.getServerTimestamp())}>
+          {T.translate('App.Room.$Start')}
+        </MenuItem>}
 
-  </div>
+        {!game && !!~room.spectators.indexOf(userId)
+        && <MenuItem onClick={$roomJoin}
+                     disabled={failsChecks(() => checkCanJoinRoomToPlay(room, userId))}>
+          {T.translate('App.Room.$Play')}
+        </MenuItem>}
+
+        {!game && !!~room.users.indexOf(userId)
+        && <MenuItem onClick={$roomSpectate}>
+          {T.translate('App.Room.$Spectate')}
+        </MenuItem>}
+
+        <MenuItem onClick={$exit}>{T.translate('App.Room.$Exit')}</MenuItem>
+      </Menu>
+    </>
+  ));
+
+// https://github.com/acdlite/recompose/issues/467
+export const RoomControlGroup = (
+  ({history, room, ...props}) => (
+    <Router history={history}>
+      <Route render={({location}) => {
+        const inRoom = !!~location.pathname.indexOf('room');
+        return (
+          <RoomControlGroupMenu text={`${room.name}`} room={room} inRoom={inRoom} {...props}/>
+        )
+      }}/>
+    </Router>
+  )
 );
 
 RoomControlGroup.propTypes = {
   userId: PropTypes.string.isRequired
   , roomId: PropTypes.string.isRequired
   , room: PropTypes.instanceOf(RoomModel)
-  , inRoom: PropTypes.bool.isRequired
-  , $back: PropTypes.func.isRequired
   , $exit: PropTypes.func.isRequired
   , $start: PropTypes.func.isRequired
   , $roomJoin: PropTypes.func.isRequired
@@ -124,25 +104,23 @@ export const RoomControlGroupView = compose(
   connect(
     (state) => {
       const roomId = state.get('room');
-      const inRoom = !!~window.location.pathname.indexOf('room');
-      console.log({inRoom});
       return {
         roomId
-        , inRoom
         , room: state.getIn(['rooms', roomId])
+        , game: state.getIn(['game'])
         , userId: state.getIn(['user', 'id'])
       }
     }
     , {roomExitRequest, roomStartVotingRequest, roomJoinRequest, roomSpectateRequest}
   )
-  , withProps(({roomId, inRoom, roomExitRequest, roomStartVotingRequest, roomJoinRequest, roomSpectateRequest}) => ({
-    $back: () => redirectTo('/room')
-    , $exit: roomExitRequest
-    , $start: () => roomStartVotingRequest(roomId)
+  , withProps(({roomId, inRoom, roomExitRequest, roomStartVotingRequest, roomJoinRequest, roomSpectateRequest, location}) => ({
+    $exit: roomExitRequest
+    , $start: roomStartVotingRequest
     , $roomJoin: () => roomJoinRequest(roomId)
     , $roomSpectate: () => roomSpectateRequest(roomId)
   }))
   , branch(({room}) => !room, renderNothing)
+  , withRouter
 )(RoomControlGroup);
 
 export default RoomControlGroupView;

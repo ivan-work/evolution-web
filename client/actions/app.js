@@ -23,6 +23,11 @@ export const appChangeSound = (value) => ({
   , data: value
 });
 
+export const appUseUIv3 = (value) => ({
+  type: 'appUseUIv3'
+  , data: value
+});
+
 const SHOULD_PLAY_AUDIO = GLOBAL_BROWSER && process.env.NODE_ENV !== 'test' && window && window.Audio;
 
 const AUDIO_FILES = {};

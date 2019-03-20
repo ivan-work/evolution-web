@@ -1,13 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import T from 'i18n-react';
-import {Button, Radio, Checkbox, Tooltip, Icon} from 'react-mdl';
+import {compose} from "recompose";
+import {connect} from "react-redux";
 
-import MDLForm from '../utils/Form.jsx';
+import Grid from "@material-ui/core/Grid/Grid";
+import Tooltip from '@material-ui/core/Tooltip';
+import withStyles from "@material-ui/core/styles/withStyles";
+import IconCardsTooltip from '@material-ui/icons/HelpOutline';
+
+import EvoCheckbox from "../../components/EvoCheckbox";
+import EVOForm, {Textfield, Checkbox, Submit} from '../utils/Form.jsx';
+
 import {RoomModel} from '../../../shared/models/RoomModel';
 import {Deck_Base, Deck_TimeToFly, Deck_ContinentsShort, Deck_Bonus} from '../../../shared/models/game/GameSettings';
 import {SettingsRules, SETTINGS_MINUTES} from '../../../shared/models/game/GameSettings';
 import * as cards from '../../../shared/models/game/evolution/cards';
+import {roomEditSettingsRequest} from "../../../shared/actions/rooms";
 
 const makeDeckHelp = (deck) => (
   <div>
@@ -20,29 +29,38 @@ const makeDeckHelp = (deck) => (
     })}
   </div>);
 
-const propsToForm = (props) => ({
-  name: props.room.name
-  , maxPlayers: props.room.settings.maxPlayers
-  , timeTurn: props.room.settings.timeTurn / SETTINGS_MINUTES
-  , timeTraitResponse: props.room.settings.timeTraitResponse / SETTINGS_MINUTES
-  , randomPlayers: props.room.settings.randomPlayers
-  , halfDeck: props.room.settings.halfDeck
-  , addon_timeToFly: props.room.settings.addon_timeToFly
-  , addon_continents: props.room.settings.addon_continents
-  , addon_bonus: props.room.settings.addon_bonus
-  , addon_plantarium: props.room.settings.addon_plantarium
+const propsToForm = (room) => ({
+  name: room.name
+  , maxPlayers: room.settings.maxPlayers
+  , timeTurn: room.settings.timeTurn / SETTINGS_MINUTES
+  , timeTraitResponse: room.settings.timeTraitResponse / SETTINGS_MINUTES
+  , randomPlayers: room.settings.randomPlayers
+  , halfDeck: room.settings.halfDeck
+  , addon_timeToFly: room.settings.addon_timeToFly
+  , addon_continents: room.settings.addon_continents
+  , addon_bonus: room.settings.addon_bonus
+  , addon_plantarium: room.settings.addon_plantarium
 });
 
-export default class RoomSettings extends React.Component {
+const styles = theme => ({
+});
+
+const RoomAddonRow = ({name, deck}) => (
+  <Grid container alignItems='center' justify='space-between'>
+    <Checkbox name={name} color='primary'/>
+    <Tooltip title={deck} placement="left">
+      <IconCardsTooltip/>
+    </Tooltip>
+  </Grid>
+);
+
+export class RoomSettings extends React.Component {
   static propTypes = {
-    room: PropTypes.instanceOf(RoomModel)
-    , userId: PropTypes.string.isRequired
-    , $roomEditSettings: PropTypes.func.isRequired
+    roomId: PropTypes.string.isRequired
   };
 
   constructor(props) {
     super(props);
-    this.formSubmit = this.formSubmit.bind(this);
     this.Deck_Base_help = makeDeckHelp(Deck_Base);
     this.Deck_TimeToFly_help = makeDeckHelp(Deck_TimeToFly);
     this.Deck_ContinentsShort_help = makeDeckHelp(Deck_ContinentsShort);
@@ -53,56 +71,53 @@ export default class RoomSettings extends React.Component {
     return this.props.room.users.get(0) === this.props.userId;
   }
 
-  formSubmit(model) {
-    this.props.$roomEditSettings(model);
-  }
-
   render() {
-    return (<MDLForm
-      i18nPath='App.Room.Settings'
-      model={propsToForm(this.props)}
-      rules={SettingsRules}
-      disabled={!this.isHost()}
-      onSubmit={this.formSubmit}>
-      <div><MDLForm.Textfield name='name'/></div>
-      <div><MDLForm.Textfield name='maxPlayers'/></div>
-      <div><MDLForm.Textfield name='timeTurn'/></div>
-      <div><MDLForm.Textfield name='timeTraitResponse'/></div>
-      <div><MDLForm.Checkbox name='randomPlayers'/></div>
-      <div className='flex-row'>
-        <Checkbox checked={true}
-                  label={T.translate('App.Room.Settings.addon_base')}
-                  disabled={true}/>
-        <Tooltip label={this.Deck_Base_help} position="left">
-          <Icon name="help_outline"/>
-        </Tooltip>
-      </div>
-      <div>
-        <MDLForm.Checkbox name='halfDeck'/>
-      </div>
-      <div className='flex-row'>
-        <MDLForm.Checkbox name='addon_timeToFly'/>
-        <Tooltip label={this.Deck_TimeToFly_help} position="left">
-          <Icon name="help_outline"/>
-        </Tooltip>
-      </div>
-      <div className='flex-row'>
-        <MDLForm.Checkbox name='addon_continents'/>
-        <Tooltip label={this.Deck_ContinentsShort_help} position="left">
-          <Icon name="help_outline"/>
-        </Tooltip>
-      </div>
-      <div className='flex-row'>
-        <MDLForm.Checkbox name='addon_bonus'/>
-        <Tooltip label={this.Deck_Bonus_help} position="left">
-          <Icon name="help_outline"/>
-        </Tooltip>
-      </div>
-      <div>
-        <MDLForm.Submit id='RoomSettings$Submit'>
+    return (
+      <EVOForm
+        i18nPath='App.Room.Settings'
+        model={propsToForm(this.props.room)}
+        rules={SettingsRules}
+        disabled={!this.isHost()}
+        onSubmit={this.props.roomEditSettingsRequest}>
+        <Textfield name='name' fullWidth={true}/>
+        <Textfield name='maxPlayers' fullWidth={true}/>
+        <Textfield name='timeTurn' fullWidth={true}/>
+        <Textfield name='timeTraitResponse' fullWidth={true}/>
+
+        <Checkbox name='randomPlayers' color='primary'/>
+
+        <Grid container alignItems='center' justify='space-between'>
+          <EvoCheckbox checked={true}
+                       disabled={true}
+                       color='primary'
+                       label={T.translate('App.Room.Settings.addon_base')}
+          />
+          <Tooltip title={this.Deck_Base_help} placement="left">
+            <IconCardsTooltip/>
+          </Tooltip>
+        </Grid>
+
+        <Checkbox name='halfDeck' color='primary'/>
+
+        <RoomAddonRow name='addon_timeToFly' deck={this.Deck_TimeToFly_help}/>
+        <RoomAddonRow name='addon_continents' deck={this.Deck_ContinentsShort_help}/>
+        <RoomAddonRow name='addon_bonus' deck={this.Deck_Bonus_help}/>
+
+        <Submit id='RoomSettings$Submit' variant='contained' color='primary' size='large'>
           {T.translate('App.Room.$Edit')}
-        </MDLForm.Submit>
-      </div>
-    </MDLForm>);
+        </Submit>
+      </EVOForm>
+    );
   }
 }
+
+export default compose(
+  connect(
+    (state, {roomId}) => ({
+      userId: state.getIn(['user', 'id'])
+      , room: state.getIn(['rooms', roomId])
+    })
+    , {roomEditSettingsRequest}
+  )
+  , withStyles(styles)
+)(RoomSettings);

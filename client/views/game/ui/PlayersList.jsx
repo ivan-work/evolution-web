@@ -7,17 +7,11 @@ import {connect} from 'react-redux';
 
 import {GameModel, GameModelClient} from '../../../../shared/models/game/GameModel';
 
-import {
-  Icon
-  , Badge
-  , Tooltip as MDLTooltip
-  , IconButton
-  , ListItem
-  , ListItemAction
-  , ListItemContent
-} from 'react-mdl';
+import Badge from '@material-ui/core/Badge'
+import Tooltip from '../../utils/WhiteTooltip'
 
-import Tooltip from 'rc-tooltip';
+import IconPause from '@material-ui/icons/Pause'
+
 import User from '../../utils/User.jsx';
 import UsersList from '../../utils/UsersList.jsx';
 
@@ -25,11 +19,28 @@ import {
   roomKickRequest,
   roomBanRequest
 } from '../../../../shared/actions/actions';
+import {UserAsListItemWithActions} from "../../utils/User";
+import Typography from "@material-ui/core/Typography/Typography";
 
 export class PlayersList extends React.PureComponent {
   static propTypes = {
     game: PropTypes.instanceOf(GameModelClient).isRequired
   };
+
+  render() {
+    const {game} = this.props;
+    return <div className='PlayersList'>
+      <Typography variant='h4'
+                  style={{display: 'inline-block'}}>
+        {T.translate('App.Room.Players')}:
+      </Typography>
+      {this.renderSpectators()}
+      <div className='PlayersListUL'>
+        {game.sortPlayersFromIndex(game.players)
+          .map(player => this.renderPlayer(game, player))}
+      </div>
+    </div>
+  }
 
   renderPlayer(game, player) {
     const className = cn({
@@ -37,55 +48,34 @@ export class PlayersList extends React.PureComponent {
       , isPlayerTurn: game.isPlayerTurn(player.id)
       , ended: player.ended
     });
-    return <li key={player.id} className={className}>
-      <User id={player.id}/> {player.getWantsPause() && <Icon name='pause'/>}
-    </li>
-  }
-
-  render() {
-    const {game} = this.props;
-    return <ul className='PlayersList'>
-      <h6 style={{display: 'inline-block'}}>
-        {T.translate('App.Room.Players')}:
-      </h6>
-      {this.renderSpectators()}
-      {game.sortPlayersFromIndex(game.players)
-        .map(player => this.renderPlayer(game, player))}
-    </ul>
+    return <div key={player.id} className={className}>
+      <User id={player.id}/> {player.getWantsPause() && <IconPause className='Icon'/>}
+    </div>
   }
 
   renderSpectators() {
     const spectatorsList = this.props.spectatorsList;
-    return (spectatorsList.size > 0 && <Tooltip
-      overlay={this.renderSpectatorsList()}>
+    return (
+      spectatorsList.size > 0 && <Tooltip title={this.renderSpectatorsList()} interactive>
       <span>
-        <Badge text={spectatorsList.size}>&nbsp;</Badge>
+        <Badge badgeContent={spectatorsList.size} color='secondary'>&nbsp;</Badge>
       </span>
-    </Tooltip>)
-    // return (spectatorsList.size > 0 && <span>
-    //     <Badge text={spectatorsList.size}>&nbsp;</Badge>
-    //   </span>)
+      </Tooltip>
+    )
   }
 
   renderSpectatorsList() {
     const {isHost, spectatorsList, $Kick, $Ban} = this.props;
 
     return (<div>
-      <h1>{T.translate('App.Room.Spectators')}</h1>
-      <UsersList list={spectatorsList} className=''>
-        {(user) => (
-          <ListItem className='small'>
-            <ListItemContent>{user.login}</ListItemContent>
-            <ListItemAction>
-              {isHost && <MDLTooltip label={T.translate('App.Room.$Kick')}>
-                <IconButton name='clear' onClick={() => $Kick(user.id)}/>
-              </MDLTooltip>}
-              {isHost && <MDLTooltip label={T.translate('App.Room.$Ban')}>
-                <IconButton name='block' onClick={() => $Ban(user.id)}/>
-              </MDLTooltip>}
-            </ListItemAction>
-          </ListItem>)}
-      </UsersList>
+      <Typography variant='h4'>{T.translate('App.Room.Spectators')}</Typography>
+      <UsersList list={spectatorsList}>{({user}) => (
+        <UserAsListItemWithActions user={user}
+                                   userId={null}
+                                   isHost={isHost}
+                                   roomKickRequest={$Kick}
+                                   roomBanRequest={$Ban}/>
+      )}</UsersList>
     </div>);
   }
 }

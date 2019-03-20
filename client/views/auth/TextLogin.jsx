@@ -43,7 +43,7 @@ export const TextLogin = compose(
   ({form, validation, formOnChange, formOnSubmit}) => (
     <form noValidate autoComplete={'off'}>
       <EvoTextField
-        id="login"
+        name="login"
         label={T.translate('App.Login.Username')}
         value={form.login}
         onChange={formOnChange}

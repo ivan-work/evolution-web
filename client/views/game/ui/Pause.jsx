@@ -2,11 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types'
 import T from 'i18n-react';
 import {connect} from 'react-redux';
-import {Button, IconButton} from 'react-mdl';
+
+import IconPause from '@material-ui/icons/Pause';
+import IconPlay from '@material-ui/icons/PlayArrow';
+
+import Button from '@material-ui/core/Button';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import {gameSetUserWantsPauseRequest} from '../../../../shared/actions/actions';
 
-import Tooltip from '../../utils/Tooltip.jsx';
+// import Tooltip from '../../utils/Tooltip.jsx';
 
 export class Pause extends React.Component {
   static propTypes = {
@@ -17,19 +22,19 @@ export class Pause extends React.Component {
     const {isPlayer, wantsPause, gamePaused, $wantsPauseRequest} = this.props;
 
     return (
-      <div>
-        <Tooltip overlay={(
-          <span>
+      <Tooltip title={(
+        <span>
             {T.translate(wantsPause ? 'Game.UI.Pause' : 'Game.UI.Unpause')}
-            <br/>
-            {T.translate(!gamePaused ? 'Game.UI.Pause_Desc' : 'Game.UI.Unpause_Desc')}
+          <br/>
+          {T.translate(!gamePaused ? 'Game.UI.Pause_Desc' : 'Game.UI.Unpause_Desc')}
           </span>)}>
-          <IconButton raised
-                      disabled={!isPlayer}
-                      onClick={$wantsPauseRequest(!wantsPause)}
-                      name={!wantsPause ? 'pause' : 'play_arrow'}/>
-        </Tooltip>
-      </div>);
+        <Button size='small'
+                disabled={!isPlayer}
+                onClick={$wantsPauseRequest(!wantsPause)}>
+          {wantsPause ? <IconPlay/> : <IconPause/>}
+        </Button>
+      </Tooltip>
+    );
   }
 }
 

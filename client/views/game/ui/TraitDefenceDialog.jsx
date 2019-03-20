@@ -1,8 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import T from 'i18n-react';
-import {Dialog} from '../../utils/Dialog.jsx';
-import {Button, DialogTitle, DialogContent} from 'react-mdl';
+
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
 
 import {Timer} from '../../utils/Timer.jsx';
 import {Animal} from '../animals/Animal.jsx';
@@ -25,7 +27,7 @@ export class TraitDefenceDialog extends React.Component {
   render() {
     const {game} = this.props;
     const show = game.question && game.question.id && game.question.type === QuestionRecord.DEFENSE;
-    return (<Dialog show={show}>
+    return (<Dialog open={!!show}>
       <DialogTitle>{T.translate('Game.UI.TraitDefenceDialog.Title')}</DialogTitle>
       {show && this.renderDialogContent()}
     </Dialog>);

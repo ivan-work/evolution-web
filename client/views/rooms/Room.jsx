@@ -2,136 +2,118 @@ import React from 'react';
 import PropTypes from 'prop-types'
 import T from 'i18n-react';
 import {connect} from 'react-redux';
-// import {
-//   IconButton
-//   , Card
-//   , CardText
-//   , Tooltip
-//   , List
-//   , ListItem
-//   , ListItemAction
-//   , ListItemContent
-// } from 'react-mdl';
+import {compose} from "recompose";
 
 import {RoomModel, VotingModel} from '../../../shared/models/RoomModel';
-
-import {Portal} from './../utils/Portal.jsx';
 
 import Chat from '../Chat.jsx';
 import UsersList from '../utils/UsersList.jsx';
 
-import RoomControlGroup from './RoomControlGroup.jsx';
 import RoomSettings from './RoomSettings.jsx';
-import RoomSettingsView from './RoomSettingsView.jsx';
 import RoomStartVotingDialog, {RoomStartVotingTimer} from './RoomStartVotingDialog.jsx';
 
 import {
-  roomEditSettingsRequest,
   roomKickRequest,
   roomBanRequest,
   roomUnbanRequest
 } from '../../../shared/actions/actions';
 
-export default () => (<div>
-</div>);
+import Typography from "@material-ui/core/Typography/Typography";
+import Grid from "@material-ui/core/Grid/Grid";
+import Paper from "@material-ui/core/Paper/Paper";
+import withStyles from "@material-ui/core/styles/withStyles";
 
-// export class Room extends React.Component {
-//   static propTypes = {
-//     room: PropTypes.instanceOf(RoomModel)
-//     , userId: PropTypes.string.isRequired
-//     , $roomEditSettings: PropTypes.func.isRequired
-//   };
-//
-//   constructor(props) {
-//     super(props);
-//     this.renderUser = this.renderUser.bind(this);
-//     this.renderBannedUser = this.renderBannedUser.bind(this);
-//   }
-//
-//   render() {
-//     const {room, userId} = this.props;
-//     const isHost = room.users.get(0) === userId;
-//
-//     return (<div className='Room'>
-//       <Portal target='header'>
-//         <RoomControlGroup inRoom={true}/>
-//       </Portal>
-//       <h1>{T.translate('App.Room.Room')} «{room.name}» <RoomStartVotingTimer room={room}/></h1>
-//       <RoomStartVotingDialog/>
-//       <div className='flex-row'>
-//         <Card className='RoomSettings'>
-//           <CardText>
-//             {/*{isHost ? <RoomSettings {...this.props}/> : <RoomSettingsView settings={room.settings}/>}*/}
-//             <RoomSettings {...this.props}/>
-//           </CardText>
-//         </Card>
-//         <Card>
-//           <CardText>
-//             <h4>{T.translate('App.Chat.Label')}</h4>
-//             <Chat chatTargetType='ROOM' roomId={room.id}/>
-//           </CardText>
-//         </Card>
-//         <Card>
-//           <CardText>
-//             <h4>{T.translate('App.Room.Players')} ({room.users.size}/{room.settings.maxPlayers}):</h4>
-//             <UsersList list={room.users}>{this.renderUser}</UsersList>
-//             <h4>{T.translate('App.Room.Spectators')}:</h4>
-//             <UsersList list={room.spectators}>{this.renderUser}</UsersList>
-//             {room.banlist.size > 0 && (<div>
-//               <h4>{T.translate('App.Room.Banned')}:</h4>
-//               <UsersList list={room.banlist}>{this.renderBannedUser}</UsersList>
-//             </div>)}
-//           </CardText>
-//         </Card>
-//       </div>
-//     </div>);
-//   }
-//
-//   renderUser(user) {
-//     const {room, userId, $Kick, $Ban, $Unban} = this.props;
-//     const isHost = room.users.get(0) === userId;
-//     return (<ListItem key={user.id} className='small'>
-//       <ListItemContent>{user.login}</ListItemContent>
-//       <ListItemAction>
-//         {user.id !== userId && isHost && <Tooltip label={T.translate('App.Room.$Kick')}>
-//           <IconButton name='clear' onClick={() => $Kick(user.id)}/>
-//         </Tooltip>}
-//         {user.id !== userId && isHost && <Tooltip label={T.translate('App.Room.$Ban')}>
-//           <IconButton name='block' onClick={() => $Ban(user.id)}/>
-//         </Tooltip>}
-//       </ListItemAction>
-//     </ListItem>);
-//   }
-//
-//   renderBannedUser(user) {
-//     const {room, userId, $Kick, $Ban, $Unban} = this.props;
-//     const isHost = room.users.get(0) === userId;
-//     return (<ListItem key={user.id} className='small'>
-//       <ListItemContent>{user.login}</ListItemContent>
-//       <ListItemAction>
-//         {user.id !== userId && isHost && <Tooltip label={T.translate('App.Room.$Unban')}>
-//           <IconButton name='remove_circle_outline' onClick={() => $Unban(user.id)}/>
-//         </Tooltip>}
-//       </ListItemAction>
-//     </ListItem>);
-//   }
-// }
-//
-// export const RoomView = connect(
-//   (state, props) => {
-//     const roomId = state.get('room');
-//     return {
-//       roomId
-//       , room: state.getIn(['rooms', roomId])
-//       , userId: state.getIn(['user', 'id'])
-//     }
-//   }
-//   , (dispatch) => ({
-//     $roomEditSettings: (settings) => dispatch(roomEditSettingsRequest(settings))
-//     , $Kick: (userId) => dispatch(roomKickRequest(userId))
-//     , $Ban: (userId) => dispatch(roomBanRequest(userId))
-//     , $Unban: (userId) => dispatch(roomUnbanRequest(userId))
-//   })
-// )(Room);
-//
-// export default RoomView
+import IconUnbanUser from '@material-ui/icons/RemoveCircleOutline';
+
+import Tooltip from "@material-ui/core/Tooltip/Tooltip";
+import IconButton from "@material-ui/core/IconButton/IconButton";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction/ListItemSecondaryAction";
+import {UserAsListItem, UserAsListItemWithActions} from "../utils/User";
+
+const styles = theme => ({
+  root: {
+    margin: theme.spacing.unit
+  }
+  , container: {}
+  , column: {}
+  , columnPaper: {
+    padding: theme.spacing.unit
+    , flex: '1'
+  }
+});
+
+export class Room extends React.PureComponent {
+  renderUser = ({user}) => {
+    const {roomKickRequest, roomBanRequest, isHost, userId} = this.props;
+    return (
+      <UserAsListItemWithActions user={user} userId={userId} isHost={isHost} roomKickRequest={roomKickRequest} roomBanRequest={roomBanRequest}/>
+    );
+  };
+
+  renderBannedUser = ({user}) => {
+    const {roomUnbanRequest, isHost, userId} = this.props;
+    return (
+      <UserAsListItem user={user} actions={
+        user.id !== userId && isHost && <ListItemSecondaryAction>
+          <Tooltip title={T.translate('App.Room.$Unban')}>
+            <IconButton onClick={() => roomUnbanRequest(user.id)}><IconUnbanUser/></IconButton>
+          </Tooltip>
+        </ListItemSecondaryAction>}
+      />);
+  };
+
+  render() {
+    const {classes, room} = this.props;
+    return (
+      <div className={classes.root}>
+        <RoomStartVotingDialog/>
+        <Typography variant='h3'>
+          {T.translate('App.Room.Room')}&nbsp;«{room.name}»&nbsp;
+          <RoomStartVotingTimer room={room}/>
+        </Typography>
+        <Grid container className={classes.container} spacing={8}>
+          <Grid container item className={classes.column} xs={4}>
+            <Paper className={classes.columnPaper}>
+              <RoomSettings roomId={room.id}/>
+            </Paper>
+          </Grid>
+          <Grid container item className={classes.column} xs={4}>
+            <Paper className={classes.columnPaper}>
+              <Chat chatTargetType='ROOM' roomId={room.id}/>
+            </Paper>
+          </Grid>
+          <Grid container item className={classes.column} xs={4}>
+            <Paper className={classes.columnPaper}>
+              <Typography variant='h6'>
+                {T.translate('App.Room.Players')} ({room.users.size}/{room.settings.maxPlayers}):
+              </Typography>
+              <UsersList list={room.users}>{this.renderUser}</UsersList>
+              <Typography variant='h6'>{T.translate('App.Room.Spectators')}:</Typography>
+              <UsersList list={room.spectators}>{this.renderUser}</UsersList>
+              {room.banlist.size > 0 && (<div>
+                <Typography variant='h6'>{T.translate('App.Room.Banned')}:</Typography>
+                <UsersList list={room.banlist}>{this.renderBannedUser}</UsersList>
+              </div>)}
+            </Paper>
+          </Grid>
+        </Grid>
+      </div>
+    );
+  }
+}
+
+export default compose(
+  withStyles(styles)
+  , connect((state) => {
+      const roomId = state.get('room');
+      const room = state.getIn(['rooms', roomId]);
+      const userId = state.getIn(['user', 'id']);
+      return {
+        roomId
+        , room
+        , userId
+        , isHost: room.users.get(0) === userId
+      }
+    }
+    , {roomKickRequest, roomBanRequest, roomUnbanRequest})
+)(Room);

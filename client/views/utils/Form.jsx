@@ -1,143 +1,144 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import T from 'i18n-react';
-import * as MDL from 'react-mdl'
 import Validator from 'validatorjs';
 import shallowEqual from 'fbjs/lib/shallowEqual'
+
+import EvoTextField from "../../components/EvoTextField";
+import EvoCheckbox from "../../components/EvoCheckbox";
+import Button from "@material-ui/core/Button/Button";
+
+const FormContext = React.createContext();
 
 export default class Form extends React.Component {
   static propTypes = {
     i18nPath: PropTypes.string.isRequired
     , model: PropTypes.object.isRequired
     , onSubmit: PropTypes.func.isRequired
+    , rules: PropTypes.object
     , disabled: PropTypes.bool
   };
-
-  static childContextTypes = {form: PropTypes.object};
-
-  getChildContext() {
-    return {form: this};
-  }
 
   constructor(props) {
     super(props);
     const {model, rules} = props;
     this.onChange = this.onChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
-    this.initialModel = model;
-    this.state = {};
-    this.state.model = model;
-    this.state.validation = new Validator(this.state.model, rules);
-    this.state.dirty = false;
+
+    this.state = {
+      model
+      , validation: new Validator(model, rules)
+      , dirty: false
+    };
   }
 
-  componentWillReceiveProps({model}) {
-    if (this.props.disabled) {
+  componentWillReceiveProps({model, disabled}) {
+    // update disabled form for other users
+    if (disabled) {
       this.setState({model})
     }
   }
 
   onChange(name, value) {
+    const {disabled, rules} = this.props;
     const {model} = this.state;
-    if (!this.props.disabled && model[name] != value) {
+    if (!disabled && model[name] != value) {
       model[name] = value;
-      const validation = new Validator(model, this.props.rules);
+      const validation = new Validator(model, rules);
       validation.passes();
       this.setState({model, validation, dirty: true});
     }
   }
 
   onSubmit() {
-    const model = this.state.model;
+    const {onSubmit} = this.props;
+    const {model} = this.state;
     this.setState({model, dirty: false});
-    this.props.onSubmit(model);
+    onSubmit(model);
   }
 
   render() {
-    return <div>
-      {this.props.children}
-    </div>
+    const {i18nPath, disabled} = this.props;
+    const {model, validation, dirty} = this.state;
+
+    const childContext = {
+      i18nPath
+      , model
+      , validation
+      , dirty
+      , disabled
+      , onChange: this.onChange
+      , onSubmit: this.onSubmit
+    };
+
+    return <form>
+      <FormContext.Provider value={childContext}>
+        {this.props.children}
+      </FormContext.Provider>
+    </form>
   }
 }
 
 export class Textfield extends React.Component {
   static propTypes = {name: PropTypes.string.isRequired};
+  static contextType = FormContext;
 
-  static contextTypes = {form: PropTypes.object.isRequired};
-
-  render() {
-    const {name} = this.props;
-    const onChange = this.context.form.onChange;
-    const {i18nPath, disabled} = this.context.form.props;
-    const {model, validation} = this.context.form.state;
-    return (<MDL.Textfield floatingLabel
-                           label={T.translate(i18nPath + '.' + name)}
-                           value={model[name] || ''}
-                           disabled={disabled}
-                           error={validation.errors.errors[name]}
-                           onChange={({target}) => onChange(name, target.value)}/>)
-  }
-}
-
-export class RadioGroup extends React.Component {
-  static propTypes = {name: PropTypes.string.isRequired};
-
-  static contextTypes = {form: PropTypes.object.isRequired};
+  onInputChange = ({target}) => {
+    this.context.onChange(target.name, target.value);
+  };
 
   render() {
     const {name} = this.props;
-    const onChange = this.context.form.onChange;
-    const {model, validation} = this.context.form.state;
-    return (<MDL.RadioGroup
+    const {i18nPath, model, validation, disabled} = this.context;
+
+    return (<EvoTextField
       name={name}
-      value={model[name]}
-      onChange={({target}) => onChange(name, target.value)}>
-      {this.props.children}
-    </MDL.RadioGroup>);
+      label={T.translate(i18nPath + '.' + name)}
+      value={model[name] || ''}
+      disabled={disabled}
+      error={validation.errors.errors[name]}
+      onChange={this.onInputChange}
+      {...this.props}
+    />);
   }
 }
 
 export class Checkbox extends React.Component {
   static propTypes = {name: PropTypes.string.isRequired};
+  static contextType = FormContext;
 
-  static contextTypes = {form: PropTypes.object.isRequired};
+  onInputChange = ({target}) => {
+    this.context.onChange(target.value, target.checked); // HTML Checkbox API is awesome /s
+  };
 
   render() {
-    const {name, disabled: thisDisabled} = this.props;
-    const onChange = this.context.form.onChange;
-    const {i18nPath, disabled: formDisabled} = this.context.form.props;
-    const {model, validation} = this.context.form.state;
-    return (<MDL.Checkbox checked={model[name]}
-                          label={T.translate(i18nPath + '.' + name)}
-                          value={name}
-                          disabled={thisDisabled || formDisabled}
-                          onChange={({target}) => onChange(name, target.checked)}/>)
+    const {name, disabled: thisDisabled, ...props} = this.props;
+    const {i18nPath, model, disabled: formDisabled, onChange} = this.context;
+    return (
+      <EvoCheckbox checked={model[name]}
+                   value={name}
+                   label={T.translate(i18nPath + '.' + name)}
+                   disabled={thisDisabled || formDisabled}
+                   onChange={this.onInputChange}
+                   {...props}
+      />
+    );
   }
 }
 
 export class Submit extends React.Component {
-  static propTypes = {id: PropTypes.string.isRequired};
-
-  static contextTypes = {form: PropTypes.object.isRequired};
+  static contextType = FormContext;
 
   render() {
-    const {children, id} = this.props;
-    const onSubmit = this.context.form.onSubmit;
-    const {disabled} = this.context.form.props;
-    const {model, validation, dirty} = this.context.form.state;
-    return (<MDL.Button primary raised
-                        id={id}
-                        disabled={disabled || !dirty || validation.fails()}
-                        onClick={onSubmit}>
+    const {children, ...props} = this.props;
+    const {validation, dirty, disabled, onSubmit} = this.context;
+    return (<Button disabled={disabled || !dirty || validation.fails()}
+                    onClick={onSubmit}
+                    {...props}>
       {children}
-    </MDL.Button>);
+    </Button>);
   }
 }
-
-Form.Textfield = Textfield;
-Form.RadioGroup = RadioGroup;
-Form.Submit = Submit;
-Form.Checkbox = Checkbox;
 
 
 

@@ -3,6 +3,10 @@
 
 // @formatter:off
 
+html, body {
+  overflow: hidden; // To prevent bug with incorrect tooltips
+}
+
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
   margin: 0;
   font-family: "Roboto","Helvetica","Arial",sans-serif;
@@ -42,7 +46,7 @@ a[disabled] {
 }
 
 .flex {
-  flex: 1 1 0;
+  flex: 1 1 auto;
 }
 
 .flex-row {
@@ -50,7 +54,13 @@ a[disabled] {
   flex-direction: row;
 }
 
+.displayFlex {
+  display: flex;
+}
+
 .invisible {visibility: hidden;}
+
+.hidden {display: none;}
 
 // MDL
 
@@ -61,19 +71,3 @@ a[disabled] {
   flex-direction: column;
   //height: 100%;
 }
-
-// fix for header
-.mdl-navigation.header {flex-grow: 1;}
-
-// fix for header ControlGroup colors
-.mdl-navigation.header .mdl-button {color: white; &[disabled] {color: gray;}}
-
-// Too much padding
-.mdl-card__title {padding-bottom: 0;}
-
-.mdl-card__supporting-text {padding-top: 0;}
-
-.mdl-list {padding: 0;}
-
-.mdl-list__item.small {padding: 8px; min-height: 24px;}
-// @formatter:on

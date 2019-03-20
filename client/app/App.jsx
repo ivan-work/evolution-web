@@ -31,28 +31,30 @@ const styles = theme => ({
   }
 });
 
-export const App = ({children, location, sound, appChangeSound, classes, history}) => (
-  <div className={classes.root}>
-    <CssBaseline/>
-    <AppBar/>
-    <ErrorReporter/>
-    <div className={classes.content}>
-      <div className={classes.appBarSpacer}/>
-      <Router history={history}>
-        {routes}
-      </Router>
+export const App = ({children, sound, appChangeSound, classes, history, location}) => {
+  return (
+    <div className={classes.root}>
+      <CssBaseline/>
+      <AppBar/>
+      <ErrorReporter/>
+      <div className={classes.content}>
+        <div className={classes.appBarSpacer}/>
+        <Router history={history}>
+          {routes}
+        </Router>
+      </div>
+      <svg width="100%" height="100%"
+           style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
+        <PortalTarget name='game-svg' container='g'/>
+      </svg>
+      <div width="100%" height="100%"
+           style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
+        <PortalTarget name='tooltips'/>
+      </div>
+      {/*<AdminPanelView location={location}/>*/}
     </div>
-    <svg width="100%" height="100%"
-         style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
-      <PortalTarget name='game-svg' container='g'/>
-    </svg>
-    <div width="100%" height="100%"
-         style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
-      <PortalTarget name='tooltips'/>
-    </div>
-    {/*<AdminPanelView location={location}/>*/}
-  </div>
-);
+  );
+}
 
 export const AppView = compose(
   PortalsContext

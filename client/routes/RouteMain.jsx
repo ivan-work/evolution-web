@@ -22,15 +22,19 @@ import IconCreateRoom from "@material-ui/icons/AddCircle";
 const styles = theme => ({
   root: {
     flex: '1'
+    , flexWrap: 'wrap-reverse'
   }
-  , column: {
-    // flex: '1'
-  }
+  , column: {}
   , columnPaper: {
     padding: theme.spacing.unit
-    // , margin: theme.spacing.unit
     , flex: '1'
-    , minHeight: '20em'
+  }
+  , columnTitle: {
+    whiteSpace: 'nowrap'
+  }
+  , rowOnline: {
+    marginBottom: theme.spacing.unit / 2
+    , padding: theme.spacing.unit
   }
 });
 
@@ -71,33 +75,25 @@ const OnlineWidget = connect((state) => ({
 export const RouteMain = ({classes}) => {
   // console.log();
   return (
-    <Grid className={classes.root} container spacing={8}>
-      {/*<Portal target='header'>*/}
-        {/*/!*<MainPageControlGroup/>*!/*/}
-        {/*/!*{this.props.room && <RoomControlGroup/>}*!/*/}
-      {/*</Portal>*/}
-      <Grid xs={4} item container className={classes.column}>
-        <Paper className={classes.columnPaper}>
-          <Typography variant="h3">{T.translate('App.Rooms.Rooms')}: <CreateRoom/> </Typography>
-          {/*<RoomsList/>*/}
-        </Paper>
-      </Grid>
-      <Grid xs={4} item container className={classes.column}>
-        <Paper className={classes.columnPaper}>
-          {/*<Grid container direction={"column"}>*/}
-          {/*<Grid item className={classes.inner}>*/}
-          <Chat chatTargetType='GLOBAL'/>
-          {/*</Grid>*/}
-          {/*</Grid>*/}
-        </Paper>
-      </Grid>
-      <Grid xs={4} item container className={classes.column}>
-        <Paper className={classes.columnPaper}>
+    <Fragment>
+        <Paper className={classes.rowOnline}>
           <OnlineWidget/>
-          {/*<Chat4 chatTargetType='GLOBAL'/>*/}
         </Paper>
+      <Grid className={classes.root} container spacing={8}>
+        <Grid xs item container className={classes.column}>
+          <Paper className={classes.columnPaper}>
+            <Typography className={classes.columnTitle} variant="h4">{T.translate('App.Rooms.Rooms')}: <CreateRoom/>
+            </Typography>
+            <RoomsList/>
+          </Paper>
+        </Grid>
+        <Grid xs item container className={classes.column}>
+          <Paper className={classes.columnPaper}>
+            <Chat chatTargetType='GLOBAL'/>
+          </Paper>
+        </Grid>
       </Grid>
-    </Grid>
+    </Fragment>
   );
 };
 
