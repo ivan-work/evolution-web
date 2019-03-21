@@ -19,7 +19,7 @@ const styles = {
 };
 
 export const PlayerHand = ({classes, children, showHand, toggleHand}) => (
-  <div className={classes.handWrapper}>
+  <Paper className={classes.handWrapper}>
     <Paper className={classes.handWrapperToolbar}>
       <IconButton onClick={toggleHand}>
         {showHand ? <IconArrowDown/> : <IconArrowUp/>}
@@ -29,7 +29,7 @@ export const PlayerHand = ({classes, children, showHand, toggleHand}) => (
       {/*</Fab>*/}
     </Paper>
     {showHand && <div className={classes.handWrapperBody}>{children}</div>}
-  </div>
+  </Paper>
 );
 
 export default compose(

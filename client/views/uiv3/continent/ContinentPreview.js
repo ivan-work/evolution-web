@@ -27,15 +27,30 @@ const styles = {
     , margin: 2
     , flex: '0 0 auto'
     , overflow: 'hidden'
+    , position: 'relative'
   }
-  , animalPreviewToolbar: {
+  , animalPreviewText: {
+    fontSize: 16
+    , fontWeight: 500
+    , color: '#555'
+    , textAlign: 'center'
+    , position: 'absolute'
+    , top: 0, left: 0, right: 0
+    , zIndex: 2
   }
   , animalPreviewTraitsContainer: {
+    display: 'flex'
+    , flexFlow: 'column-reverse nowrap'
+    , position: 'absolute'
+    , top: 0
+    , opacity: .5
   }
   , animalTraitPreview: {
     width: GameStyles.animalPreview.width
-    , height: 5
-    , borderBottom: '1px solid black'
+    , height: 4
+    , background: '#ccc'
+    , marginTop: 1
+    , ...GameStyles.addTraitColors('background')
   }
 };
 
@@ -61,10 +76,11 @@ export const AnimalPreview = withStyles(styles)(({classes, animal}) => {
   // const color = getAnimalPreviewColor(animal);
   return (
     <div className={classes.animalPreview}>
-      <div className={classes.animalPreviewToolbar}>
-      </div>
+      <Typography className={classes.animalPreviewText}>{animal.traits.size}</Typography>
       <div className={classes.animalPreviewTraitsContainer}>
-        {traitsList.map(trait => <AnimalTraitPreview key={trait.id} trait={trait}/>)}
+        {traitsList
+          .filter(({type, linkId}) => type === tt.TraitCarnivorous || type === tt.TraitSwimming || !!linkId)
+          .map(trait => <AnimalTraitPreview key={trait.id} trait={trait}/>)}
       </div>
     </div>
   )
@@ -81,6 +97,9 @@ export const AnimalPreview = withStyles(styles)(({classes, animal}) => {
 
 export const AnimalTraitPreview = withStyles(styles)(({classes, trait}) => (
   <div className={`${classes.animalTraitPreview} ${trait.type}`}>
+    {/*<Typography className={classes.animalTraitPreviewText}>*/}
+      {/*{T.translate('Game.Trait.' + trait.type)}*/}
+    {/*</Typography>*/}
   </div>
 ));
 

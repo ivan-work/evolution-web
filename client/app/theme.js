@@ -3,6 +3,8 @@ import {createMuiTheme} from "@material-ui/core";
 import primary from '@material-ui/core/colors/green';
 import secondary from '@material-ui/core/colors/amber';
 
+import accentBackground from '@material-ui/core/colors/blue';
+
 const theme = createMuiTheme({
   style: {
     flex: {
@@ -14,8 +16,12 @@ const theme = createMuiTheme({
       light: primary[400]
       , main: primary[600]
       , dark: primary[800]
-    },
-    secondary: secondary
+    }
+    , secondary: secondary
+    , tertiary: accentBackground
+    , background: {
+      accent: accentBackground[700]
+    }
   }
   , typography: {
     useNextVariants: true

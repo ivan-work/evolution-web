@@ -24,7 +24,7 @@ export const SettingUIv3 = ({uiv3, toggleSetting, disabled}) => (
 export default compose(
   connect((state) => ({
       uiv3: state.getIn(['app', 'uiv3'])
-      , disabled: !state.getIn(['app', 'adminMode'])
+      // , disabled: !state.getIn(['app', 'adminMode'])
     })
     , {appUseUIv3}
   )

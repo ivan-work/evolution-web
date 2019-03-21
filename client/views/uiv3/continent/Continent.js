@@ -31,6 +31,7 @@ const styles = {
     , justifyContent: 'center'
     , alignContent: 'start'
     , minWidth: (GameStyles.defaultWidth + 20) * 3
+    , minHeight: (GameStyles.animal.height + 20)
     // , flexFlow: 'column wrap'
     // , alignItems: 'flex-start'
   }
@@ -52,13 +53,16 @@ const styles = {
     alignSelf: 'flex-end'
   }
   , animalTraitsContainerInner: {
-    overflowX: 'hidden'
+    display: 'flex'
+    , flexFlow: 'column-reverse nowrap'
+    , overflowX: 'hidden'
   }
   , trait: {
     ...GameStyles.animalTrait
   }
   , traitText: {
     fontSize: 14
+    , ...GameStyles.addTraitColors('color')
   }
   , animalFood: {}
 };
@@ -98,7 +102,7 @@ export const Animal = withStyles(styles)(({classes, animal, game}) => (
       className={classes.animalTraitsContainer}
       autoHeight
       autoHeightMin={0}
-      autoHeightMax={240}>
+      autoHeightMax={110}>
       <div className={classes.animalTraitsContainerInner}>
         {animal.traits.toList().map(trait => <Trait key={trait.id} trait={trait}/>)}
       </div>
@@ -108,7 +112,7 @@ export const Animal = withStyles(styles)(({classes, animal, game}) => (
 
 export const Trait = withStyles(styles)(({classes, trait}) => (
   <div className={classes.trait}>
-    <Typography className={classes.traitText}>
+    <Typography className={`${classes.traitText} ${trait.type}`}>
       <span>{T.translate('Game.Trait.' + trait.type)}</span>
       <span>{trait.getDataModel().food > 0 ? ' +' + trait.getDataModel().food : null}</span>
     </Typography>

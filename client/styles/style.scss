@@ -5,6 +5,7 @@
 
 html, body {
   overflow: hidden; // To prevent bug with incorrect tooltips
+  height: 100%
 }
 
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
@@ -58,9 +59,17 @@ a[disabled] {
   display: flex;
 }
 
-.invisible {visibility: hidden;}
+.invisible {
+  visibility: hidden;
+}
 
-.hidden {display: none;}
+.hidden {
+  display: none;
+}
+
+.icon {
+  width: 1em;
+}
 
 // MDL
 

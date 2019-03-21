@@ -1,8 +1,9 @@
 import React, {Fragment} from 'react';
 import PropTypes from 'prop-types'
+import cn from 'classnames';
 import RIP from 'react-immutable-proptypes';
 import T from 'i18n-react';
-import {compose, lifecycle, withProps, withState, withStateHandlers} from "recompose";
+import {compose, lifecycle, withProps, withState, withStateHandlers, setPropTypes} from "recompose";
 import {connect} from 'react-redux';
 
 import Typography from "@material-ui/core/Typography/Typography";
@@ -15,6 +16,7 @@ import TimeService from '../services/TimeService';
 
 import {CHAT_TARGET_TYPE} from '../../shared/models/ChatModel';
 import {chatMessageRequest} from '../../shared/actions/actions';
+import GameStyles from "./uiv3/GameStyles";
 
 const styles = theme => ({
   root: {
@@ -39,8 +41,20 @@ const messageStyles = theme => ({
     fontSize: '0.85em'
     , display: 'block'
     , lineHeight: '1.2em'
+    , '&.short': {
+      ...GameStyles.ellipsis
+    }
   }
-  , messageLogin: {}
+  , messageLogin: {
+    fontWeight: 500
+    , '.short &': {
+      ...GameStyles.ellipsis
+      , display: 'inline-block'
+      , verticalAlign: 'top'
+      , maxWidth: '2em'
+      , textOverflow: 'clip'
+    }
+  }
   , messageTime: {
     fontSize: '12px'
     , color: theme.palette.text.secondary
@@ -50,21 +64,12 @@ const messageStyles = theme => ({
   }
 });
 
-const ChatMessage = withStyles(messageStyles)(({classes, message}) => {
-  const {timestamp, from, fromLogin, to, toType} = message;
-  const text = from !== 0 ? message.text : T.translate(message.text);
-  return (
-    <Typography className={classes.messageRoot}>
-      <span className={classes.messageLogin}>{fromLogin}</span>
-      <span className={classes.messageTime}> [{TimeService.formatHHMM(timestamp)}]: </span>
-      {/*<span className={classes.messageText}>: </span>*/}
-      <span className={classes.messageText}>{text}</span>
-    </Typography>
-  );
-});
-
-const ChatWindow = compose(
-  connect((state, {chatTargetType, roomId}) => {
+export const enhanceWithChat = compose(
+  setPropTypes({
+    chatTargetType: PropTypes.oneOf(Object.values(CHAT_TARGET_TYPE)).isRequired
+    , roomId: PropTypes.string
+  })
+  , connect((state, {chatTargetType, roomId}) => {
     let path = null;
     switch (chatTargetType) {
       case CHAT_TARGET_TYPE.GLOBAL:
@@ -76,6 +81,10 @@ const ChatWindow = compose(
     }
     return {messages: state.getIn(path, List())}
   })
+);
+
+export const ChatWindow = compose(
+  enhanceWithChat
   , withState('atBottom', 'setAtBottom', true)
   , withProps(({atBottom, setAtBottom}) => {
     const chatWindowRef = React.createRef();
@@ -115,6 +124,22 @@ const ChatWindow = compose(
       {messages.map(message => <ChatMessage key={message.timestamp + message.from} message={message}/>)}
     </div>
   </Fragment>)
+});
+
+export const ChatMessage = withStyles(messageStyles)(({classes, message, short}) => {
+  const {timestamp, from, fromLogin, to, toType} = message;
+  const text = from !== 0 ? message.text : T.translate(message.text);
+  return (
+    <Typography className={cn({
+      [classes.messageRoot]: true
+      , short
+    })}>
+      <span className={classes.messageLogin}>{fromLogin}</span>
+      {!short && <span className={classes.messageTime}> [{TimeService.formatHHMM(timestamp)}]</span>}
+      <span className={classes.messageText}>: </span>
+      <span className={classes.messageText}>{text}</span>
+    </Typography>
+  );
 });
 
 const ChatInput = compose(

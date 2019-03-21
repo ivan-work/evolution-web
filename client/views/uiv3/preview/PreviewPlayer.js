@@ -21,8 +21,8 @@ const styles = theme => ({
   }
 });
 
-const PreviewPlayer = ({classes, player, previewProps}) => (
-  <PreviewTab className={classes.previewPlayer} {...previewProps}>
+const PreviewPlayer = ({classes, player, focusId, focusControls}) => (
+  <PreviewTab className={classes.previewPlayer} focusId={focusId} {...focusControls}>
     <ContinentPreview playerId={player.id}/>
     <Typography className={classes.userInfo}>
       <User id={player.id}/>&nbsp;({player.hand.size})
@@ -31,18 +31,4 @@ const PreviewPlayer = ({classes, player, previewProps}) => (
 );
 export default compose(
   withStyles(styles)
-  , withProps(({focus, setHoverFocus, setClickFocus, player}) => {
-    const focusData = {type: FOCUS_TYPE.PLAYER, data: player.id};
-    const isHovered = focus.hover && focus.hover.data === player.id;
-    const isSelected = focus.click && focus.click.data === player.id;
-    return {
-      previewProps: {
-        setHoverFocus
-        , setClickFocus
-        , focusData
-        , isHovered
-        , isSelected
-      }
-    }
-  })
 )(PreviewPlayer);

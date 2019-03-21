@@ -1,4 +1,4 @@
-import logger from '~/shared/utils/logger';
+import logger from '../../shared/utils/logger';
 import {promisify} from '../../shared/utils/index';
 import querystring from 'querystring';
 import request from 'request';
@@ -9,7 +9,7 @@ import {server$injectUser} from '../../shared/actions/actions';
 
 const API_VERSION = process.env.VK_API_VERSION || '5.73';
 
-export const server$oauthVKRegister = (protocol, host, code) => (dispatch, getState) => {
+export const server$oauthVKRegister = (protocol = 'http', host, code) => (dispatch, getState) => {
   const VK_API_ACCESS_TOKEN = {
     client_id: process.env.VK_API_ID
     , client_secret: process.env.VK_API_SECRET

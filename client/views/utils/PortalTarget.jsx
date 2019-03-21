@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Fragment} from 'react';
 import PropTypes from 'prop-types'
 
 export const PortalsContext = (WrappedComponent) => class PortalsContext extends React.PureComponent {
@@ -81,10 +81,10 @@ export const PortalsContext = (WrappedComponent) => class PortalsContext extends
   }
 
   render() {
-    return <div className="PortalsContext">
+    return <Fragment>
       <WrappedComponent {...this.props}/>
       <PortalTarget name='body'/>
-    </div>
+    </Fragment>
   }
 };
 

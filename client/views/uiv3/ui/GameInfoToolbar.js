@@ -15,6 +15,9 @@ import GameLog from "../../game/ui/GameLog";
 import GameEndTurnButton from './GameEndTurnButton.jsx';
 
 import {PHASE} from '../../../../shared/models/game/GameModel';
+import IconArrowUp from "@material-ui/icons/KeyboardArrowUp";
+import IconArrowDown from "@material-ui/icons/KeyboardArrowDown";
+import Button from "@material-ui/core/Button/Button";
 
 const styles = theme => ({
   GameToolbarContainer: {
@@ -59,7 +62,14 @@ const renderTime = (game) => (
 );
 /*@formatter:on*/
 
-export const GameToolbar = ({classes, game}) => {
+const TogglePreview = ({preview, togglePreview}) => (
+  <Button size='small'
+          onClick={togglePreview}>
+    {preview ? <IconArrowUp/> : <IconArrowDown/>}
+  </Button>
+);
+
+export const GameToolbar = ({classes, game, previewControls}) => {
   return (
     <Paper elevation={1} className={classes.GameToolbarContainer}>
       <div className={classes.GameToolbar}>
@@ -88,6 +98,7 @@ export const GameToolbar = ({classes, game}) => {
         <div className={classes.statement}>
           <GameLog game={game}/>
           <Pause/>
+          <TogglePreview {...previewControls}/>
         </div>
       </div>
     </Paper>

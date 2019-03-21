@@ -2,22 +2,22 @@ import React from 'react';
 import PropTypes from 'prop-types'
 import {connect} from 'react-redux';
 
-import ListItem from "@material-ui/core/ListItem/ListItem";
-import ListItemText from "@material-ui/core/ListItemText/ListItemText";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction/ListItemSecondaryAction";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import T from "i18n-react";
 
-import IconButton from "@material-ui/core/IconButton/IconButton";
+import IconButton from "@material-ui/core/IconButton";
 import IconKickUser from '@material-ui/icons/Clear';
 import IconBanUser from '@material-ui/icons/Block';
-import Typography from "@material-ui/core/Typography/Typography";
+import Typography from "@material-ui/core/Typography";
 
 const defaultUser = (id) => ({
   id, login: '---'
 });
 
-export const UserAsSimple = ({user}) => <Typography inline>{user.login}</Typography>;
+export const UserAsSimple = ({user}) => <Typography inline component='span'>{user.login}</Typography>;
 
 export const UserAsListItem = ({user, actions}) => (<ListItem key={user.id}>
   <ListItemText primary={user.login}/>

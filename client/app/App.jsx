@@ -18,12 +18,12 @@ import ErrorReporter from '../components/ErrorReporter.jsx';
 const styles = theme => ({
   root: {
     display: 'flex'
+    , height: '100%'
   }
   , appBarSpacer: theme.mixins.toolbar
   , content: {
     flexGrow: 1
     //, padding: theme.spacing.unit
-    , height: '100vh'
     , overflow: 'hidden'
 
     , display: 'flex'

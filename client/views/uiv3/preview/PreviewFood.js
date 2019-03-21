@@ -17,25 +17,11 @@ const styles = theme => ({
   , food: {}
 });
 
-const PreviewFood = ({classes, game, previewProps}) => (
-  <PreviewTab className={classes.previewFood} {...previewProps}>
+const PreviewFood = ({classes, game, focusId, focusControls}) => (
+  <PreviewTab className={classes.previewFood} focusId={focusId} {...focusControls}>
     {Array.from({length: game.food}).map((u, index) => <IconFood key={index} className={classes.food}/>)}
   </PreviewTab>
 );
 export default compose(
   withStyles(styles)
-  , withProps(({focus, setHoverFocus, setClickFocus}) => {
-    const focusData = {type: FOCUS_TYPE.FOOD};
-    const isHovered = focus.hover && focus.hover.type === FOCUS_TYPE.FOOD;
-    const isSelected = focus.click && focus.click.type === FOCUS_TYPE.FOOD;
-    return {
-      previewProps: {
-        setHoverFocus
-        , setClickFocus
-        , focusData
-        , isHovered
-        , isSelected
-      }
-    }
-  })
 )(PreviewFood);
