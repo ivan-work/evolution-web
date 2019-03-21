@@ -32,11 +32,17 @@ export const RoomControlGroupMenu = compose(
     , {
       openMenu: () => (e) => ({anchorEl: e.target})
       , closeMenu: () => () => ({anchorEl: null})
-      , $back: () => () => {
-        redirectTo('/room');
-        return {anchorEl: null}
-      }
     })
+  , withProps(({$start, closeMenu}) => ({
+    $start: () => {
+      $start();
+      closeMenu();
+    }
+    , $back: () => {
+      redirectTo('/room');
+      closeMenu();
+    }
+  }))
 )(
   ({
      text, anchorEl, openMenu, closeMenu
@@ -113,7 +119,7 @@ export const RoomControlGroupView = compose(
     }
     , {roomExitRequest, roomStartVotingRequest, roomJoinRequest, roomSpectateRequest}
   )
-  , withProps(({roomId, inRoom, roomExitRequest, roomStartVotingRequest, roomJoinRequest, roomSpectateRequest, location}) => ({
+  , withProps(({roomId, inRoom, roomExitRequest, roomStartVotingRequest, roomJoinRequest, roomSpectateRequest}) => ({
     $exit: roomExitRequest
     , $start: roomStartVotingRequest
     , $roomJoin: () => roomJoinRequest(roomId)

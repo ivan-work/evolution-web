@@ -3,7 +3,7 @@
 
 // @formatter:off
 
-html, body {
+html, body, #app {
   overflow: hidden; // To prevent bug with incorrect tooltips
   height: 100%
 }

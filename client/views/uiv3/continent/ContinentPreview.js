@@ -76,7 +76,7 @@ export const AnimalPreview = withStyles(styles)(({classes, animal}) => {
   // const color = getAnimalPreviewColor(animal);
   return (
     <div className={classes.animalPreview}>
-      <Typography className={classes.animalPreviewText}>{animal.traits.size}</Typography>
+      {animal.traits.size > 0 && <Typography className={classes.animalPreviewText}>{animal.traits.size}</Typography>}
       <div className={classes.animalPreviewTraitsContainer}>
         {traitsList
           .filter(({type, linkId}) => type === tt.TraitCarnivorous || type === tt.TraitSwimming || !!linkId)
