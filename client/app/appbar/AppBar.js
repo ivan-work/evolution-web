@@ -62,7 +62,7 @@ export const AppBar = ({classes}) => (
         <RoomControlGroup/>
         <AdminControlGroup/>
         {/*<Scrollbar>*/}
-        {/*<PortalTarget name='header'/>*/}
+        <PortalTarget name='header'/>
         {/*</Scrollbar>*/}
       </div>
 

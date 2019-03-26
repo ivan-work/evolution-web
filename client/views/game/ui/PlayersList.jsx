@@ -19,7 +19,7 @@ import {
   roomKickRequest,
   roomBanRequest
 } from '../../../../shared/actions/actions';
-import {UserAsListItemWithActions} from "../../utils/User";
+import {UserVariants} from "../../utils/User";
 import Typography from "@material-ui/core/Typography/Typography";
 
 export class PlayersList extends React.PureComponent {
@@ -48,9 +48,9 @@ export class PlayersList extends React.PureComponent {
       , isPlayerTurn: game.isPlayerTurn(player.id)
       , ended: player.ended
     });
-    return <div key={player.id} className={className}>
-      <User id={player.id}/> {player.getWantsPause() && <IconPause className='Icon'/>}
-    </div>
+    return <Typography key={player.id} className={className}>
+      <User id={player.id} variant='simple'/> {player.getWantsPause() && <IconPause className='Icon'/>}
+    </Typography>
   }
 
   renderSpectators() {
@@ -70,11 +70,11 @@ export class PlayersList extends React.PureComponent {
     return (<div>
       <Typography variant='h4'>{T.translate('App.Room.Spectators')}</Typography>
       <UsersList list={spectatorsList}>{({user}) => (
-        <UserAsListItemWithActions user={user}
-                                   userId={null}
-                                   isHost={isHost}
-                                   roomKickRequest={$Kick}
-                                   roomBanRequest={$Ban}/>
+        <UserVariants.listItemWithActions user={user}
+                                          userId={null}
+                                          isHost={isHost}
+                                          roomKickRequest={$Kick}
+                                          roomBanRequest={$Ban}/>
       )}</UsersList>
     </div>);
   }

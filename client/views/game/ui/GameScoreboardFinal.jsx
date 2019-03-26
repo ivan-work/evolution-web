@@ -12,7 +12,12 @@ import DialogActions from '@material-ui/core/DialogActions';
 
 import {GameModelClient, PHASE} from '../../../../shared/models/game/GameModel';
 
-import User from '../../utils/User.jsx'
+import User from "../../utils/User";
+import Table from "@material-ui/core/Table";
+import TableRow from "@material-ui/core/TableRow";
+import TableCell from "@material-ui/core/TableCell";
+import TableHead from "@material-ui/core/TableHead";
+import TableBody from "@material-ui/core/TableBody";
 
 export default class GameScoreboardFinal extends React.PureComponent {
   constructor(props) {
@@ -38,17 +43,20 @@ export default class GameScoreboardFinal extends React.PureComponent {
     return <span>
       {game.status.phase === PHASE.FINAL
       && <Button className="ShowScoreboardFinal"
-                     onClick={() => this.setState({show: true})}>
+                 variant='contained'
+                 color='secondary'
+                 onClick={() => this.setState({show: true})}>
         {T.translate('Game.UI.Scores.Label')}
       </Button>
       }
       <Dialog open={this.state.show}>
         {this.state.show && <DialogTitle>
-          {T.translate('Game.UI.Scores.Winner')}: <strong><User id={game.winnerId}/></strong>
+          {T.translate('Game.UI.Scores.Winner')}: <User id={game.winnerId} variant='simple'/>
         </DialogTitle>}
         <DialogContent>{this.renderDialogContent()}</DialogContent>
         <DialogActions>
-          <Button type='button' variant='contained' color='primary' onClick={() => this.setState({show: false})}>OK</Button>
+          <Button type='button' variant='contained' color='primary'
+                  onClick={() => this.setState({show: false})}>OK</Button>
         </DialogActions>
       </Dialog>
     </span>
@@ -58,22 +66,25 @@ export default class GameScoreboardFinal extends React.PureComponent {
     const {game} = this.props;
 
     return (
-      game.scoreboardFinal && <table className='mdl-data-table'>
-        <tbody>
-        <tr>
-          <th className='mdl-data-table__cell--non-numeric'>{T.translate('Game.UI.Scores.TablePlayer')}</th>
-          <th>{T.translate('Game.UI.Scores.TableScoreNormal')}</th>
-          <th>{T.translate('Game.UI.Scores.TableScoreDead')}</th>
-        </tr>
-        {game.scoreboardFinal.map(({playerId, playing, scoreNormal, scoreDead}) =>
-          <tr key={playerId}
-              className={cn({'bold': game.winnerId === playerId})}>
-            <td className='mdl-data-table__cell--non-numeric'><User id={playerId}/></td>
-            <td>{scoreNormal}</td>
-            <td>{scoreDead}</td>
-          </tr>)}
-        </tbody>
-      </table>
+      game.scoreboardFinal && <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>{T.translate('Game.UI.Scores.TablePlayer')}</TableCell>
+            <TableCell align='center'>{T.translate('Game.UI.Scores.TableScoreNormal')}</TableCell>
+            <TableCell align='center'>{T.translate('Game.UI.Scores.TableScoreDead')}</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {game.scoreboardFinal.map(({playerId, playing, scoreNormal, scoreDead}) => (
+            <TableRow key={playerId}
+                      className={cn({'bold': game.winnerId === playerId})}>
+              <TableCell><User id={playerId}/></TableCell>
+              <TableCell align='center'>{scoreNormal}</TableCell>
+              <TableCell align='center'>{scoreDead}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     )
   }
 }

@@ -17,35 +17,46 @@ const defaultUser = (id) => ({
   id, login: '---'
 });
 
-export const UserAsSimple = ({user}) => <Typography inline component='span'>{user.login}</Typography>;
-
-export const UserAsListItem = ({user, actions}) => (<ListItem key={user.id}>
-  <ListItemText primary={user.login}/>
-  {!!actions ? actions : null}
-</ListItem>);
-
-export const UserAsListItemWithActions = ({user, userId, isHost, roomKickRequest, roomBanRequest}) => (
-  <UserAsListItem user={user} actions={
-    user.id !== userId && isHost && <ListItemSecondaryAction>
-      <Tooltip title={T.translate('App.Room.$Kick')}>
-        <IconButton onClick={() => roomKickRequest(user.id)}><IconKickUser/></IconButton>
-      </Tooltip>
-      <Tooltip title={T.translate('App.Room.$Ban')}>
-        <IconButton onClick={() => roomBanRequest(user.id)}><IconBanUser/></IconButton>
-      </Tooltip>
-    </ListItemSecondaryAction>}
-  />
-);
+export const UserVariants = {
+  simple: ({user}) => <span className='User'>{user.login}</span>
+  , typography: ({user}) => (
+    <Typography className='User' inline color='inherit' component='span'>
+      {user.login}
+    </Typography>
+  )
+  , listItem: ({user, actions}) => (
+    <ListItem key={user.id} className='User'>
+      <ListItemText primary={user.login}/>
+      {!!actions ? actions : null}
+    </ListItem>
+  )
+  , listItemWithActions: ({user, userId, isHost, roomKickRequest, roomBanRequest}) => (
+    <UserVariants.listItem user={user} actions={
+      user.id !== userId && isHost && <ListItemSecondaryAction>
+        <Tooltip title={T.translate('App.Room.$Kick')}>
+          <IconButton onClick={() => roomKickRequest(user.id)}><IconKickUser/></IconButton>
+        </Tooltip>
+        <Tooltip title={T.translate('App.Room.$Ban')}>
+          <IconButton onClick={() => roomBanRequest(user.id)}><IconBanUser/></IconButton>
+        </Tooltip>
+      </ListItemSecondaryAction>}
+    />
+  )
+};
 
 export const UserConnected = connect(
   (state, {id}) => ({
     id
     , user: state.getIn(['online', id], defaultUser(id))
   })
-)(({children, ...props}) => children ? children(props) : UserAsSimple(props));
+)(({children, variant, ...props}) => children ? children(props) : UserVariants[variant](props));
 
 UserConnected.propTypes = {
-  id: PropTypes.string.isRequired
+  id: PropTypes.string.isRequired,
+  variant: PropTypes.oneOf(['simple', 'typography', 'listItem', 'listItemWithActions'])
+};
+UserConnected.defaultProps = {
+  variant: 'typography'
 };
 
 UserConnected.asListItem = ({id, login}) => (<ListItem className='small'>{login}</ListItem>);

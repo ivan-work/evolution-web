@@ -28,7 +28,7 @@ import IconUnbanUser from '@material-ui/icons/RemoveCircleOutline';
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import IconButton from "@material-ui/core/IconButton/IconButton";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction/ListItemSecondaryAction";
-import {UserAsListItem, UserAsListItemWithActions} from "../utils/User";
+import {UserVariants} from "../utils/User";
 
 const styles = theme => ({
   root: {
@@ -46,7 +46,7 @@ export class Room extends React.PureComponent {
   renderUser = ({user}) => {
     const {roomKickRequest, roomBanRequest, isHost, userId} = this.props;
     return (
-      <UserAsListItemWithActions user={user} userId={userId} isHost={isHost} roomKickRequest={roomKickRequest} roomBanRequest={roomBanRequest}/>
+      <UserVariants.listItemWithActions user={user} userId={userId} isHost={isHost} roomKickRequest={roomKickRequest} roomBanRequest={roomBanRequest}/>
     );
   };
 

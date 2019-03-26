@@ -31,12 +31,10 @@ $MARGIN: 1px;
     .PlayersList {
       min-width: 160px;
       max-width: 160px;
-      line-height: 1.4em;
+      //line-height: 1.4em;
       max-height: 180px;
 
       .Player {
-        font-size: 1.2em;
-        height: 2em;
         @include ellipsis();
       }
       .isPlayerTurn {

@@ -25,7 +25,7 @@ const PreviewPlayer = ({classes, player, focusId, focusControls}) => (
   <PreviewTab className={classes.previewPlayer} focusId={focusId} {...focusControls}>
     <ContinentPreview playerId={player.id}/>
     <Typography className={classes.userInfo}>
-      <User id={player.id}/>&nbsp;({player.hand.size})
+      <User variant='simple' id={player.id}/>&nbsp;({player.hand.size})
     </Typography>
   </PreviewTab>
 );

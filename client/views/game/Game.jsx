@@ -97,9 +97,7 @@ export class Game extends React.Component {
         <TraitIntellectDialog game={game} $traitAnswer={$traitAnswer}/>
         <TraitDefenceDialog game={game} $traitAnswer={$traitAnswer}/>
         <Portal target='header'>
-          <ControlGroup name={T.translate('Game.Game')}>
-            <GameScoreboardFinal game={game}/>
-          </ControlGroup>
+          <GameScoreboardFinal game={game}/>
         </Portal>
 
         <Grid item container className={`${classes.stickerRowFirst}`} wrap='nowrap'>
