@@ -32,37 +32,61 @@ const styles = {
     , alignContent: 'start'
     , minWidth: (GameStyles.defaultWidth + 20) * 3
     , minHeight: (GameStyles.animal.height + 20)
-    // , flexFlow: 'column wrap'
-    // , alignItems: 'flex-start'
+    , alignItems: 'flex-start'
   }
   , animal: {
     ...GameStyles.animal
     , display: 'flex'
-    , flexDirection: 'column'
-    , justifyContent: 'space-between'
+    , flexFlow: 'column wrap'
+    // , justifyContent: 'flex-end'
     , margin: 10
-    , flex: '0 0 auto'
-    , background: `url(${geckoHR}) 50% 50% no-repeat`
-    , backgroundSize: '60%'
+    , background: `url(${geckoHR}) 0% 50% no-repeat`
+    , backgroundSize: `${GameStyles.defaultWidth}px ${GameStyles.defaultWidth}px`
   }
   , animalToolbar: {
-    height: '2em',
     textAlign: 'center'
+    , height: 44
+    // , justifySelf: 'flex-start'
   }
   , animalTraitsContainer: {
     alignSelf: 'flex-end'
   }
   , animalTraitsContainerInner: {
-    display: 'flex'
-    , flexFlow: 'column-reverse nowrap'
-    , overflowX: 'hidden'
+    alignSelf: 'flex-end'
+    // , display: 'flex'
+    // , flexFlow: 'column wrap'
+    // , overflowX: 'hidden'
   }
   , trait: {
     ...GameStyles.animalTrait
+    // , display: 'inline-block'
+    // , float: 'left'
   }
+  // , columnWidthHack: {
+  //   background: 'red'
+  //   , height: 2
+  //   , '&:after': {
+  //     content: '"x"'
+  //     , display: 'block'
+  //     , clear: 'both'
+  //   }
+  //   // , visibility: 'collapsed'
+  //   , '&:nth-last-child(n+7)': {
+  //     width: GameStyles.defaultWidth * 2
+  //   }
+  //   , '&:nth-last-child(n+12)': {
+  //     width: GameStyles.defaultWidth * 3
+  //   }
+  //   // visibility: 'collapsed'
+  // }
   , traitText: {
     fontSize: 14
     , ...GameStyles.addTraitColors('color')
+    , display: 'flex'
+    , '& .name': {
+      ...GameStyles.ellipsis
+      , flex: '1 1 0'
+    }
   }
   , animalFood: {}
 };
@@ -78,12 +102,24 @@ export const Continent = ({classes, game, player}) => (
 export const renderAnimalFood = animal => (
   animal.isFull() ? <IconFull/>
     : animal.canSurvive() ? <IconEnough/>
-      : <IconHungry/>
+    : <IconHungry/>
 );
 
+const calcWidth = (e) => {
+  if (e) {
+    if (e.children.length > 20) {
+      e.style.width = GameStyles.defaultWidth * 4 + 'px'
+    } else if (e.children.length > 13) {
+      e.style.width = GameStyles.defaultWidth * 3 + 'px'
+    } else if (e.children.length > 6) {
+      e.style.width = GameStyles.defaultWidth * 2 + 'px'
+    }
+  }
+};
 
 export const Animal = withStyles(styles)(({classes, animal, game}) => (
-  <div className={classes.animal}>
+  <div className={classes.animal} ref={calcWidth}>
+    {/*<div className={'magic ' + classes.columnWidthHack}/>*/}
     <div className={classes.animalToolbar}>
       {game && game.status.phase === PHASE.FEEDING && renderAnimalFood(animal)}
       {animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) && <IconFlagPoisoned className='Flag Poisoned'/>}
@@ -98,23 +134,23 @@ export const Animal = withStyles(styles)(({classes, animal, game}) => (
       {/*{<IconFlagRegeneration className='Flag Regeneration'/>}*/}
       {/*{<IconFlagShy className='Flag Shy'/>}*/}
     </div>
-    <Scrollbars
-      className={classes.animalTraitsContainer}
-      autoHeight
-      autoHeightMin={0}
-      autoHeightMax={110}>
-      <div className={classes.animalTraitsContainerInner}>
-        {animal.traits.toList().map(trait => <Trait key={trait.id} trait={trait}/>)}
-      </div>
-    </Scrollbars>
+    {/*<Scrollbars*/}
+    {/*className={classes.animalTraitsContainer}*/}
+    {/*autoHeight*/}
+    {/*autoHeightMin={0}*/}
+    {/*autoHeightMax={110}>*/}
+    {/*<div className={classes.animalTraitsContainerInner}>*/}
+    {animal.traits.toList().map(trait => <Trait key={trait.id} trait={trait}/>)}
+    {/*</div>*/}
+    {/*</Scrollbars>*/}
   </div>
 ));
 
 export const Trait = withStyles(styles)(({classes, trait}) => (
-  <div className={classes.trait}>
+  <div className={`trait ${classes.trait}`}>
     <Typography className={`${classes.traitText} ${trait.type}`}>
-      <span>{T.translate('Game.Trait.' + trait.type)}</span>
-      <span>{trait.getDataModel().food > 0 ? ' +' + trait.getDataModel().food : null}</span>
+      <span className='name'>{T.translate('Game.Trait.' + trait.type)}</span>
+      <span className='food'>{trait.getDataModel().food > 0 ? ' +' + trait.getDataModel().food : null}</span>
     </Typography>
   </div>
 ));

@@ -62,7 +62,7 @@ const styles = theme => ({
     , flexWrap: 'nowrap'
     , overflowX: 'hidden'
     , overflowY: 'auto'
-    , font: '12px Roboto, Arial'
+    , font: '16px Roboto, Arial'
   }
   , padding: {
     padding: theme.spacing.unit

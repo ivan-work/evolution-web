@@ -1,15 +1,16 @@
 @import '../../../styles/variables';
 
+
 .AnimalTrait {
   width: 100%;
   height: $ANIMAL_TRAIT_HEIGHT;
 
   font-family: Roboto, Helvetica, Arial, sans-serif;
-  font-size: 10px;
+  //font-size: 16px;
 
   border-bottom: 1px solid #ccc;
   box-sizing: border-box;
-  background: #fff;
+  background-color: #fff;
 
   text-align: center;
 
@@ -17,7 +18,7 @@
 
   &.disabled {
     color: #333;
-    background: #999;
+    background-color: #999;
     border-color: #999;
   }
 
@@ -27,8 +28,8 @@
     -ms-user-select: none;
     user-select: none;
 
-    padding: .3em .05em;
-    line-height: 1em;
+    padding: 0 1px;
+    //line-height: 1em;
 
     display: flex;
   }

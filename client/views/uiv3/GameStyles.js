@@ -1,3 +1,4 @@
+import {lighten, darken} from '@material-ui/core/styles/colorManipulator'
 const defaultCardColor = '#F5F7F3';
 const defaultWidth = 120;
 
@@ -23,6 +24,18 @@ const addTraitColors = (property) => Object.entries(TraitColors)
     , {}
   );
 
+const animalTrait = {
+  textAlign: 'center'
+  , width: defaultWidth - 2
+  , height: 20
+  , background: lighten(defaultCardColor, .1)
+  , boxShadow: '1px 1px 2px #999'
+  , margin: '0 1px 2px'
+  // , borderTop: '1px solid #ccc'
+  // , borderBottom: '1px solid #ccc'
+  , boxSizing: 'border-box'
+};
+
 export default {
   defaultCardColor
   , defaultWidth
@@ -35,19 +48,16 @@ export default {
     , boxShadow: '1px 1px 5px black'
   }
   , animal: {
-    width: defaultWidth
+    backgroundColor: defaultCardColor
+    , minWidth: defaultWidth
+    // , width: defaultWidth
     // , minHeight: defaultWidth
-    , height: defaultWidth / 3 * 4
-    , backgroundColor: defaultCardColor
+    , height: (animalTrait.height + 2) * 8
 
     , borderRadius: 5
     , boxShadow: '1px 1px 5px black'
   }
-  , animalTrait: {
-    textAlign: 'center'
-    , background: defaultCardColor
-    , borderTop: '1px solid #aaa'
-  }
+  , animalTrait
   , animalPreview: {
     width: 18
     , height: 24

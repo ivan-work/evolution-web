@@ -6,7 +6,9 @@ $DEATH_ANIMATION_TIME: .5s;
   position: relative;
   width: $ANIMAL_WIDTH;
 
-  background: #fff;
+  background: url(../../../assets/gfx/geckoHR-opacity.svg) 50% 100% no-repeat;
+  background-size: $ANIMAL_WIDTH / 2;
+  background-color: #fff;
   border: 1px solid #ccc;
   box-sizing: border-box;
   border-radius: 2px;

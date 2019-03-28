@@ -1,10 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import T from 'i18n-react';
+
+import {branch, compose, renderNothing, withProps, withStateHandlers} from "recompose";
 import {connect} from 'react-redux';
+import {Route, Router, withRouter} from "react-router";
+
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
+import withStyles from '@material-ui/core/styles/withStyles';
 
 import TimeService from '../../services/TimeService';
-import Button from '@material-ui/core/Button';
 import {RoomModel} from '../../../shared/models/RoomModel';
 
 import {redirectTo} from "../../../shared/utils/history";
@@ -16,19 +26,22 @@ import {
 } from '../../../shared/actions/actions';
 import {failsChecks} from '../../../shared/actions/checks';
 import {checkCanJoinRoomToPlay} from '../../../shared/actions/rooms.checks';
-import {
-  branch,
-  compose,
-  renderNothing,
-  withProps,
-  withStateHandlers
-} from "recompose";
-import Menu from "@material-ui/core/Menu/Menu";
-import MenuItem from "@material-ui/core/MenuItem/MenuItem";
-import {Route, Router, withRouter} from "react-router";
+
+const styles = theme => ({
+  menuItem: {
+    outline: 'none'
+  }
+  , menuItemText: {
+    padding: 0
+  }
+  , menuItemTextPrimary: {
+    color: theme.palette.primary.dark
+  }
+});
 
 export const RoomControlGroupMenu = compose(
-  withStateHandlers({anchorEl: null}
+  withStyles(styles)
+  , withStateHandlers({anchorEl: null}
     , {
       openMenu: () => (e) => ({anchorEl: e.target})
       , closeMenu: () => () => ({anchorEl: null})
@@ -45,7 +58,7 @@ export const RoomControlGroupMenu = compose(
   }))
 )(
   ({
-     text, anchorEl, openMenu, closeMenu
+     classes, text, anchorEl, openMenu, closeMenu
      , userId, room, inRoom, game
      , $back, $exit, $start, $roomJoin, $roomSpectate
    }) => (
@@ -53,16 +66,20 @@ export const RoomControlGroupMenu = compose(
       <Button color='primary'
               variant='contained'
               onClick={openMenu}>
-        {text}
+        {T.translate('App.Room.Room')}
       </Button>
       <Menu open={Boolean(anchorEl)}
             anchorEl={anchorEl}
             onClose={closeMenu}>
+        <ListItem className={classes.menuItem}>
+          <ListItemText classes={{root: classes.menuItemText, primary: classes.menuItemTextPrimary}} primary={text}/>
+          {/*<Typography className={classes.menuItem}>{text}</Typography>*/}
+        </ListItem>
 
         {!inRoom && <MenuItem onClick={$back}>{T.translate('App.Room.$Back')}</MenuItem>}
 
         {!game && <MenuItem onClick={$start}
-                  disabled={!room.checkCanStart(userId, TimeService.getServerTimestamp())}>
+                            disabled={!room.checkCanStart(userId, TimeService.getServerTimestamp())}>
           {T.translate('App.Room.$Start')}
         </MenuItem>}
 

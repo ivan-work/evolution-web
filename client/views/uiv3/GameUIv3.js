@@ -78,7 +78,7 @@ const styles = theme => ({
       }
     }
     , '&.FOOD': {minWidth: 150, maxWidth: 300}
-    , '&.CHAT': {minWidth: 200}
+    , '&.CHAT': {minWidth: 300, maxWidth: '50%'}
     , '&.PLAYER': {minWidth: 200}
     , '&.highlight': {
       background: theme.palette.tertiary[50]
@@ -97,9 +97,9 @@ export const GameUIv3 = ({classes, game, currentPlayerId, focusHover, focusSelec
   return (
     <Grid container direction='column' className={classes.GameUIv3Container}>
       {preview && <Grid item container className={classes.gridPreviews}>
-        <PreviewChat game={game}
-                     focusId='CHAT'
-                     focusControls={focusControls}/>
+        {/*<PreviewChat game={game}*/}
+                     {/*focusId='CHAT'*/}
+                     {/*focusControls={focusControls}/>*/}
         <PreviewFood game={game}
                      focusId='FOOD'
                      focusControls={focusControls}/>

@@ -53,7 +53,7 @@ export class Room extends React.PureComponent {
   renderBannedUser = ({user}) => {
     const {roomUnbanRequest, isHost, userId} = this.props;
     return (
-      <UserAsListItem user={user} actions={
+      <UserVariants.listItem user={user} actions={
         user.id !== userId && isHost && <ListItemSecondaryAction>
           <Tooltip title={T.translate('App.Room.$Unban')}>
             <IconButton onClick={() => roomUnbanRequest(user.id)}><IconUnbanUser/></IconButton>

@@ -30,7 +30,7 @@ export class PlayersList extends React.PureComponent {
   render() {
     const {game} = this.props;
     return <div className='PlayersList'>
-      <Typography variant='h4'
+      <Typography variant='h6'
                   style={{display: 'inline-block'}}>
         {T.translate('App.Room.Players')}:
       </Typography>
