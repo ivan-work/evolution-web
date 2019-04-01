@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types'
 import T from 'i18n-react';
 
+import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -76,9 +77,10 @@ export class TraitDefenceDialog extends React.Component {
         && this.renderOther(otherTraits, $traitAnswer.bind(null))}
 
         {allowNothing && <div className="Row">
-          <div className='Item'><Button raised onClick={() => $traitAnswer(true)}>
-            {T.translate('Game.UI.TraitActivateDialog.Nothing')}
-          </Button>
+          <div className='Item'>
+            <Button variant='contained' onClick={() => $traitAnswer(true)}>
+              {T.translate('Game.UI.TraitActivateDialog.Nothing')}
+            </Button>
           </div>
         </div>}
         <h1>
