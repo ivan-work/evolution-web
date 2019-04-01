@@ -5,6 +5,7 @@ export * from './base';
 export * from './ttf';
 export * from './cons';
 export * from './bonus';
+export * from './plantarium';
 
 export const CardUnknown = {
   type: 'CardUnknown'

@@ -528,7 +528,7 @@ const server$gameDistributeCards = (gameId) => (dispatch, getState) => {
     if (!player.playing) return;
     playersWantedCards[player.id] = 1;
     if (player.continent.size === 0 && player.hand.size === 0) {
-      playersWantedCards[player.id] = 6;
+      playersWantedCards[player.id] = game.getStartingHandCount();
     } else {
       player.someAnimal((animal) => {
         if (!animal.hasTrait(tt.TraitRstrategy) && !animal.flags.has(TRAIT_ANIMAL_FLAG.REGENERATION)) {

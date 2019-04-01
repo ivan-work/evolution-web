@@ -1,0 +1,9 @@
+export const PlantFungus = 'PlantFungus'; // гриб
+export const PlantGrass = 'PlantGrass'; // злак
+export const PlantPerennial = 'PlantPerennial'; // многолетник
+export const PlantLegume = 'PlantLegume'; // бобовое
+export const PlantLiana = 'PlantLiana'; // лиана
+export const PlantFruits = 'PlantFruits'; // плодовое
+export const PlantSucculent = 'PlantSucculent'; // суккулент
+export const PlantCarnivorous = 'PlantCarnivorous'; // Хищное
+export const PlantEphemeral = 'PlantEphemeral'; // однолетник

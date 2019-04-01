@@ -1,5 +1,7 @@
 import {List, Map, Record} from 'immutable';
 import * as cardsData from './evolution/cards/index';
+import makeCard from "./evolution/cards/makeCard";
+import * as traits from "./evolution/traitTypes";
 
 export const SETTINGS_PLAYERS = [2, 8];
 
@@ -191,4 +193,16 @@ export const Deck_Bonus = [
   , [3, cardsData.CardHomeothermyAndFatTissue.type]
   , [3, cardsData.CardShyAndSwimming.type]
   , [3, cardsData.CardShyAndCarnivorous.type]
+];
+
+export const Deck_Plantarium = [
+  [4, cardsData.CardRootVegetableAndFatTissue.type]
+  , [4, cardsData.CardHoneyAndMassive.type]
+  , [4, cardsData.CardMycorrhizaAndSwimming.type]
+  , [4, cardsData.CardAquaticAndBurrowing.type]
+  , [4, cardsData.CardOfficinalisAndCarnivorous.type]
+  , [4, cardsData.CardProteinRichAndSwimming.type]
+  , [4, cardsData.CardTreeAndCarnivorous.type]
+  , [4, cardsData.CardParasiticPlant.type]
+  , [4, cardsData.CardParasiticAndCommunication.type]
 ];

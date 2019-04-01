@@ -13,7 +13,13 @@ import EvoCheckbox from "../../components/EvoCheckbox";
 import EVOForm, {Textfield, Checkbox, Submit} from '../utils/Form.jsx';
 
 import {RoomModel} from '../../../shared/models/RoomModel';
-import {Deck_Base, Deck_TimeToFly, Deck_ContinentsShort, Deck_Bonus} from '../../../shared/models/game/GameSettings';
+import {
+  Deck_Base,
+  Deck_TimeToFly,
+  Deck_ContinentsShort,
+  Deck_Bonus,
+  Deck_Plantarium
+} from '../../../shared/models/game/GameSettings';
 import {SettingsRules, SETTINGS_MINUTES} from '../../../shared/models/game/GameSettings';
 import * as cards from '../../../shared/models/game/evolution/cards';
 import {roomEditSettingsRequest} from "../../../shared/actions/rooms";
@@ -65,6 +71,7 @@ export class RoomSettings extends React.Component {
     this.Deck_TimeToFly_help = makeDeckHelp(Deck_TimeToFly);
     this.Deck_ContinentsShort_help = makeDeckHelp(Deck_ContinentsShort);
     this.Deck_Bonus_help = makeDeckHelp(Deck_Bonus);
+    this.Deck_Plantarium_help = makeDeckHelp(Deck_Plantarium);
   }
 
   isHost() {
@@ -102,6 +109,7 @@ export class RoomSettings extends React.Component {
         <RoomAddonRow name='addon_timeToFly' deck={this.Deck_TimeToFly_help}/>
         <RoomAddonRow name='addon_continents' deck={this.Deck_ContinentsShort_help}/>
         <RoomAddonRow name='addon_bonus' deck={this.Deck_Bonus_help}/>
+        {process.env.NODE_ENV === 'development' && <RoomAddonRow name='addon_plantarium' deck={this.Deck_Plantarium_help}/>}
 
         <Submit id='RoomSettings$Submit' variant='contained' color='primary' size='large'>
           {T.translate('App.Room.$Edit')}
