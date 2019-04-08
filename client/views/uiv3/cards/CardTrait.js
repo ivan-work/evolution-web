@@ -16,7 +16,7 @@ const traitStyles = theme => ({
     flex: 1
     , textAlign: 'center'
     , fontSize: 16
-    , wordBreak: 'break-all'
+    , overflowWrap: 'break-word'
   }
   , single: {
 

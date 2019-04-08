@@ -22,7 +22,7 @@ const styles = theme => ({
   root: {
     display: 'flex'
     , flexDirection: 'column'
-    , minHeight: '10em'
+    , minHeight: '7em'
     , height: '100%'
   }
   , window: {
@@ -31,8 +31,11 @@ const styles = theme => ({
     , flex: '1 1 0'
     , textAlign: 'left'
   }
+  , inputArea: {
+    display: 'flex'
+  }
   , input: {
-    width: '100%'
+    flex: '1 1 0'
   }
 });
 
@@ -60,7 +63,7 @@ const messageStyles = theme => ({
     , color: theme.palette.text.secondary
   }
   , messageText: {
-    wordBreak: 'break-all'
+    overflowWrap: 'break-word'
   }
 });
 
@@ -68,8 +71,9 @@ export const enhanceWithChat = compose(
   setPropTypes({
     chatTargetType: PropTypes.oneOf(Object.values(CHAT_TARGET_TYPE)).isRequired
     , roomId: PropTypes.string
+    , length: PropTypes.number
   })
-  , connect((state, {chatTargetType, roomId}) => {
+  , connect((state, {chatTargetType, roomId, length = 100}) => {
     let path = null;
     switch (chatTargetType) {
       case CHAT_TARGET_TYPE.GLOBAL:
@@ -79,52 +83,17 @@ export const enhanceWithChat = compose(
         path = ['rooms', roomId, 'chat', 'messages'];
         break;
     }
-    return {messages: state.getIn(path, List())}
+    return {messages: state.getIn(path, List()).takeLast(length)}
   })
 );
 
 export const ChatWindow = compose(
   enhanceWithChat
-  , withState('atBottom', 'setAtBottom', true)
-  , withProps(({atBottom, setAtBottom}) => {
-    const chatWindowRef = React.createRef();
-    return {
-      chatWindowRef
-      , scrollToBottom: () => {
-        const chatWindow = chatWindowRef.current;
-        if (chatWindow) {
-          chatWindow.scrollTop = chatWindow.scrollHeight - chatWindow.offsetHeight;
-        }
-      }
-      , handleScroll: () => {
-        const chatWindow = chatWindowRef.current;
-        if (chatWindow) {
-          const bottom = Math.abs(chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.offsetHeight) < 1;
-          if (bottom !== atBottom) {
-            setAtBottom(bottom);
-          }
-        }
-      }
-    }
-  })
-  , lifecycle({
-    componentDidMount() {
-      this.componentRendered(this.props);
-    }
-    , componentDidUpdate() {
-      this.componentRendered(this.props)
-    }
-    , componentRendered: ({scrollToBottom, atBottom}) => atBottom && scrollToBottom()
-  })
-)(({className, chatWindowRef, messages, atBottom, scrollToBottom, handleScroll}) => {
-  return (<Fragment>
-    {!atBottom && <Button size="small"
-                          onClick={scrollToBottom}>v</Button>}
-    <div className={className} ref={chatWindowRef} onScroll={handleScroll}>
-      {messages.map(message => <ChatMessage key={message.timestamp + message.from} message={message}/>)}
-    </div>
-  </Fragment>)
-});
+)(({messages}) => (
+  <Fragment>
+    {messages.map(message => <ChatMessage key={message.timestamp + message.from} message={message}/>)}
+  </Fragment>
+));
 
 export const ChatMessage = withStyles(messageStyles)(({classes, message, short}) => {
   const {timestamp, from, fromLogin, to, toType} = message;
@@ -165,17 +134,64 @@ const ChatInput = compose(
              onKeyUp={onMessageSend}/>
 ));
 
+const chatWindowRef = React.createRef();
 
-export const Chat = ({classes, roomId, chatTargetType}) => (
+export const Chat = compose(
+  setPropTypes({
+    chatTargetType: PropTypes.oneOf([CHAT_TARGET_TYPE.GLOBAL, CHAT_TARGET_TYPE.ROOM]).isRequired
+    , roomId: PropTypes.string
+  })
+  , withStyles(styles)
+  , withState('atBottom', 'setAtBottom', true)
+  , withProps(({atBottom, setAtBottom}) => {
+    return {
+      chatWindowRef
+      , scrollToBottom: () => {
+        const chatWindow = chatWindowRef.current;
+        if (chatWindow) {
+          chatWindow.scrollTop = chatWindow.scrollHeight - chatWindow.offsetHeight;
+        }
+      }
+      , handleScroll: () => {
+        const chatWindow = chatWindowRef.current;
+        if (chatWindow) {
+          const bottom = Math.abs(chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.offsetHeight) < 1;
+          if (bottom !== atBottom) {
+            setAtBottom(bottom);
+          }
+        }
+      }
+    }
+  })
+  , lifecycle({
+    componentDidMount() {
+      this.componentRendered(this.props);
+    }
+    , componentDidUpdate() {
+      this.componentRendered(this.props)
+    }
+    , componentRendered: ({scrollToBottom, atBottom}) => atBottom && scrollToBottom()
+  })
+)(({classes, roomId, chatTargetType, atBottom, scrollToBottom, chatWindowRef, handleScroll}) => (
   <div className={classes.root}>
-    <ChatWindow className={classes.window} roomId={roomId} chatTargetType={chatTargetType}/>
-    <ChatInput className={classes.input} roomId={roomId} chatTargetType={chatTargetType}/>
+    <div className={classes.window} ref={chatWindowRef} onScroll={handleScroll}>
+      <ChatWindow {...{roomId, chatTargetType}}/>
+    </div>
+    <div className={classes.inputArea}>
+      <ChatInput className={classes.input} roomId={roomId} chatTargetType={chatTargetType}/>
+      {!atBottom && <Button size="small" variant='text' onClick={scrollToBottom}>v</Button>}
+    </div>
   </div>
-);
+));
 
-Chat.propTypes = {
-  chatTargetType: PropTypes.oneOf([CHAT_TARGET_TYPE.GLOBAL, CHAT_TARGET_TYPE.ROOM]).isRequired
-  , roomId: PropTypes.string
-};
 
-export default compose(withStyles(styles))(Chat);
+{/*<div className={classes.root}>*/}
+  {/*<div className={className} ref={chatWindowRef} onScroll={handleScroll}>*/}
+    {/*<ChatWindow className={classes.window} {...{roomId, chatTargetType, chatWindowRef, handleScroll}}/>*/}
+  {/*</div>*/}
+  {/*<div className={classes.inputArea}>*/}
+    {/*<ChatInput className={classes.input} roomId={roomId} chatTargetType={chatTargetType}/>*/}
+    {/*{!atBottom && <Button size="small" variant='text' onClick={scrollToBottom}>v</Button>}*/}
+  {/*</div>*/}
+{/*</div>*/}
+export default Chat;

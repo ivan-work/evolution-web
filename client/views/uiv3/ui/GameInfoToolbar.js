@@ -33,9 +33,6 @@ const styles = theme => ({
   }
   , statement: {
     marginLeft: '1em'
-    // , '&:after': {
-    //   content: "';'"
-    // }
   }
   , key: {
     fontWeight: 500
@@ -62,14 +59,14 @@ const renderTime = (game) => (
 );
 /*@formatter:on*/
 
-const TogglePreview = ({preview, togglePreview}) => (
+const ToggleCompress = ({compress, toggleCompress}) => (
   <Button size='small'
-          onClick={togglePreview}>
-    {preview ? <IconArrowUp/> : <IconArrowDown/>}
+          onClick={toggleCompress}>
+    {compress ? <IconArrowUp/> : <IconArrowDown/>}
   </Button>
 );
 
-export const GameToolbar = ({classes, game, previewControls}) => {
+export const GameToolbar = ({classes, game, compressControls}) => {
   return (
     <Paper elevation={1} className={classes.GameToolbarContainer}>
       <div className={classes.GameToolbar}>
@@ -98,7 +95,7 @@ export const GameToolbar = ({classes, game, previewControls}) => {
         <div className={classes.statement}>
           <GameLog game={game}/>
           <Pause/>
-          <TogglePreview {...previewControls}/>
+          <ToggleCompress {...compressControls}/>
         </div>
       </div>
     </Paper>

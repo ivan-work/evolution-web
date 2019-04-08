@@ -9,12 +9,12 @@ import pick from 'lodash/pick';
 
 const styles = {
   handContainer: {
-    // display: 'flex'
-    overflow: 'auto'
+    display: 'flex'
   }
   , hand: {
     display: 'flex'
-    , margin: 2
+    , flexFlow: 'row wrap'
+    , margin: '2px auto'
     // , overflow: 'auto'
   }
   , card: {
