@@ -379,11 +379,13 @@ export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
       return dispatch(server$gameEndTurn(gameId, userId));
     case PHASE.FEEDING:
       game = selectGame(getState, gameId);
+      const gameHasNoQuestions = !game.question;
+      const playerHasNoOptions = !doesPlayerHasOptions(game, userId);
       const timeout = dispatch(checkTimeout(makeTurnTimeoutId(gameId)));
+      const playerHasNoTimeouts = !timeout;
+      const gameIsNotPaused = !game.status.paused;
 
-      // logger.info(`PlayerActed ${!!timeout} ${timeout}`);
-      // logger.info(`doesPlayerHasOptions ${doesPlayerHasOptions(selectGame(getState, gameId), userId)}`);
-      if (!game.question && (!timeout || !doesPlayerHasOptions(game, userId))) {
+      if (gameHasNoQuestions && (playerHasNoOptions || (gameIsNotPaused && playerHasNoTimeouts))) {
         return dispatch(server$gameEndTurn(gameId, userId));
       }
   }

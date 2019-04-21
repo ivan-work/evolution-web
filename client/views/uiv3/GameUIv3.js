@@ -18,7 +18,8 @@ import Continent from "./continent/Continent";
 
 import {chatMessageRequest} from "../../../shared/actions/chat";
 import {debugMirrorPlayer} from "../../actions/debug";
-import Food from "./food/Food";
+import {InteractiveFood} from "./food/Food";
+import {CurrentInteractionDebug, InteractionManagerProvider} from './InteractionManager'
 
 const styles = theme => ({
   GameUIv3Container: {
@@ -70,7 +71,7 @@ const styles = theme => ({
     , flexFlow: 'row wrap'
   }
   , gridHand: {}
-  
+
   , PlayerWrapper: {
     display: 'flex'
     , flexFlow: 'column nowrap'
@@ -98,33 +99,38 @@ const styles = theme => ({
 
 export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
   return (
-    <Grid container direction='column' className={classes.GameUIv3Container}>
-      <Grid item className={classes.gridGameToolbar}>
-        <GameInfoToolbar game={game} compressControls={{compress, toggleCompress}}/>
-      </Grid>
-      <Grid item container direction='column' className={classes.GameUIv3}>
-        <Grid item className={classes.gridMiscRow}>
-          {!compress && <Paper className={classes.gridMiscItem + ' PlayersList ' + cn({'Compressed': compress})}>
-            <PlayersList game={game}/>
-          </Paper>}
-          <Paper className={classes.gridMiscItem + ' Food ' + cn({'Compressed': compress})}>
-            <FoodWrapper game={game}/>
-          </Paper>
-          <Paper className={classes.gridMiscItem + ' Chat ' + cn({'Compressed': compress})}>
-            {!compress ? <ChatWrapper game={game}/> : <ChatWrapperSmall game={game}/>}
-          </Paper>
+    <InteractionManagerProvider>
+      <Grid container direction='column' className={classes.GameUIv3Container}>
+        <Grid item className={classes.gridGameToolbar}>
+          <GameInfoToolbar game={game} compressControls={{compress, toggleCompress}}/>
         </Grid>
-        <Grid item className={classes.gridPlayers}>
-          {game.sortPlayersFromIndex(game.players).map((player) => (
-            <PlayerWrapper key={player.id} playerId={player.id} classes={classes} game={game}/>
-          ))}
+        <Grid item container direction='column' className={classes.GameUIv3}>
+          <CurrentInteractionDebug/>
+          <Grid item className={classes.gridMiscRow}>
+            {!compress && <Paper className={classes.gridMiscItem + ' PlayersList ' + cn({'Compressed': compress})}>
+              <PlayersList game={game}/>
+            </Paper>}
+            <Paper className={classes.gridMiscItem + ' Food ' + cn({'Compressed': compress})}>
+              <FoodWrapper game={game}/>
+            </Paper>
+            <Paper className={classes.gridMiscItem + ' Chat ' + cn({'Compressed': compress})}>
+              {!compress ? <ChatWrapper game={game}/> : <ChatWrapperSmall game={game}/>}
+            </Paper>
+          </Grid>
+          <Grid item className={classes.gridPlayers}>
+            {game.sortPlayersFromIndex(game.players).map((player) => (
+              <PlayerWrapper key={player.id} playerId={player.id} classes={classes} game={game}/>
+            ))}
+          </Grid>
         </Grid>
       </Grid>
-    </Grid>
+    </InteractionManagerProvider>
   );
 };
 
-export const FoodWrapper = ({game}) => <Fragment>{repeat(game.food, 0).map((_, i) => <Food key={i}/>)}</Fragment>;
+export const FoodWrapper = ({game}) => <Fragment>
+  {repeat(game.food, i => <InteractiveFood key={i}/>)}
+</Fragment>;
 
 export const ChatWrapper = ({game}) => <Chat chatTargetType='ROOM' roomId={game.roomId}/>;
 
@@ -159,7 +165,7 @@ export default compose(
     mirrorPlayer() {
       if (process.env.NODE_ENV !== 'development') return;
       if (this.props.game.players.size === 1) {
-        this.props.debugMirrorPlayer({limit: 5});
+        this.props.debugMirrorPlayer({limit: 10});
       }
       // else if (this.props.game.players.size === 2) {
       //   this.props.debugMirrorPlayer({limit: 1});

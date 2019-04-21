@@ -37,7 +37,8 @@ export const PlayerUser = withStyles(styles)(({classes, game, playerId}) => {
   });
   return (
     <Typography key={playerId} className={className}>
-      <User id={playerId} variant='simple'/>
+      <User id={playerId} variant='simple'/>&nbsp;
+      ({player.hand.size})
       {player.getWantsPause() && <IconPause className={classes.Icon}/>}
     </Typography>
   )

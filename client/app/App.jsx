@@ -14,6 +14,7 @@ import {AdminPanelView} from '../components/AdminPanel.jsx'
 import {PortalsContext, PortalTarget} from '../views/utils/PortalTarget.jsx'
 import {TranslationSwitchView} from '../components/TranslationSwitch.jsx'
 import ErrorReporter from '../components/ErrorReporter.jsx';
+import AppModal from "./modals/AppModal";
 
 const styles = theme => ({
   root: {
@@ -37,6 +38,7 @@ export const App = ({children, sound, appChangeSound, classes, history, location
       <CssBaseline/>
       <AppBar/>
       <ErrorReporter/>
+      <AppModal/>
       <div className={classes.content}>
         <div className={classes.appBarSpacer}/>
         <Router history={history}>

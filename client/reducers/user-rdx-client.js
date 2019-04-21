@@ -6,8 +6,8 @@ const getInitialUser = () => {
   let user = null;
   if (typeof (window) != 'undefined') {
     user = (process.env.NODE_ENV === 'production'
-      ? window.localStorage
-      : window.sessionStorage).getItem('user');
+      ? localStorage
+      : sessionStorage).getItem('user');
   }
   if (user != null) {
     user = JSON.parse(user);
@@ -25,14 +25,14 @@ const getInitialUser = () => {
 export const reducer = createReducer(getInitialUser(), {
   loginUser: (state, {user}) => {
     (process.env.NODE_ENV === 'production'
-      ? window.localStorage
-      : window.sessionStorage).setItem('user', JSON.stringify(user));
+      ? localStorage
+      : sessionStorage).setItem('user', JSON.stringify(user));
     return UserModel.fromJS(user);
   }
   , loginUserFailure: (user, data) => {
     (process.env.NODE_ENV === 'production'
-      ? window.localStorage
-      : window.sessionStorage).removeItem('user');
+      ? localStorage
+      : sessionStorage).removeItem('user');
     return null;
   }
   , chatMessageUser: (user, {message}) => user.update('chat', chat => chat.receiveMessage(message))

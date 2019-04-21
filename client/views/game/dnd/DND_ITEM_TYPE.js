@@ -2,6 +2,7 @@ export const DND_ITEM_TYPE = {
   CARD: 'CARD'
   , FOOD: 'FOOD'
   , TRAIT: 'TRAIT'
+  , CARD_TRAIT: 'CARD_TRAIT'
   , TRAIT_SHELL: 'TRAIT_SHELL'
   , ANIMAL_LINK: 'ANIMAL_LINK'
 };

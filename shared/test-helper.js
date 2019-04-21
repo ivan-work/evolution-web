@@ -1,8 +1,7 @@
-//require('source-map-support').install();
-if (!global._babelPolyfill) {
-  require('babel-polyfill');
-}
-import polyfills from '../shared/utils/polyfills'
+// require('@babel/register');
+// require('@babel/polyfill');
+import '../shared/utils/polyfills'
+
 import logger from '../shared/utils/logger';
 import chai from 'chai';
 import sinon from 'sinon';
@@ -34,8 +33,8 @@ global.navigator = {
   userAgent: 'node.js'
 };
 
-global.window.localStorage = require('./test/setup-local-storage-mock').default();
-global.window.sessionStorage = require('./test/setup-local-storage-mock').default();
+global.localStorage = require('./test/setup-local-storage-mock').default();
+global.sessionStorage = require('./test/setup-local-storage-mock').default();
 
 global.window.matchMedia = window.matchMedia || (() => ({
   matches: false
@@ -43,27 +42,12 @@ global.window.matchMedia = window.matchMedia || (() => ({
   , removeListener: () => null
 }));
 
-// https://github.com/tleunen/react-mdl/issues/193
-require('react-mdl/extra/material');
-global.Element = global.window.Element;
-global.CustomEvent = global.window.CustomEvent;
-global.HTMLElement = global.window.HTMLElement;
-//global.Event = global.window.Event;
-global.NodeList = global.window.NodeList;
-global.Node = global.window.Node;
-// for react-measure
-global.ResizeObserver = function () {
-  this.observe = () => {
-  };
-  this.disconnect = () => {
-  };
-};
 
 global.clock = (start) => {
   if (!start) return process.hrtime();
   var end = process.hrtime(start);
   return Math.round((end[0] * 1000) + (end[1] / 1000000));
-}
+};
 
 // https://stackoverflow.com/questions/26867535/calling-setstate-in-jsdom-based-tests-causing-cannot-render-markup-in-a-worker
 require('fbjs/lib/ExecutionEnvironment').canUseDOM = true;
@@ -82,8 +66,8 @@ import {reduxTimeoutMiddleware} from './utils/reduxTimeout';
 import {reduxQuestion} from './utils/reduxQuestion';
 import {combineReducers} from 'redux-immutable';
 import * as actions from './actions/actions';
-import {createMemoryHistory} from 'react-router';
-import {routerReducer, appRouterMiddleware, syncHistoryWithStore} from '../client/configuration/routing';
+import {createMemoryHistory} from 'history';
+// import {routerReducer, appRouterMiddleware, syncHistoryWithStore} from '../client/configuration/routing';
 
 const clientReducers = require('../client/reducers/index');
 const serverReducers = require('../server/reducers/index');
@@ -143,16 +127,15 @@ global.mockServerStore = function (initialServerState) {
 };
 
 import T from 'i18n-react';
-import ruru from '../i18n/ru-ru.yml';
+// import ruru from '../i18n/ru-ru.yml';
 
-T.setTexts(ruru[0]);
+// T.setTexts(ruru[0]);
 
 global.mockClientStore = function (initialClientState) {
   const ioClient = syncSocketIOClient();
   const history = createMemoryHistory('/');
-  const clientStore = configureStore(combineReducers({...clientReducers, routing: routerReducer}), initialClientState, [
-    appRouterMiddleware(history)
-    , store => next => action => {
+  const clientStore = configureStore(combineReducers({...clientReducers}), initialClientState, [
+    store => next => action => {
       clientStore.actions.push(action);
       return next(action);
     }

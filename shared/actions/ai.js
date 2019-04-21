@@ -106,17 +106,19 @@ export const searchPlayerOptions = (game, playerId, successFn) => {
       if (!traitData.transient && traitData.playerControllable && !trait.checkActionFails(game, animal)) {
         switch (traitData.targetType) {
           case TRAIT_TARGET_TYPE.ANIMAL:
-            const exampleTarget = allAnimals.find((targetAid) => {
-              if (passesChecks(() => checkTraitActivation_Animal(game, animal, trait, targetAid)))
-                return true;
-            });
-            if (exampleTarget) return successFn(makeOption.traitActivateRequest(animal.id, trait, exampleTarget));
+            const exampleTarget = allAnimals.find((targetAid) => passesChecks(() =>
+              checkTraitActivation_Animal(game, animal, trait, targetAid))
+            );
+            if (exampleTarget) {
+              return successFn(makeOption.traitActivateRequest(animal.id, trait, exampleTarget));
+            }
+            break;
           case TRAIT_TARGET_TYPE.TWO_TRAITS:
             return successFn(makeOption.traitActivateRequest(animal.id, trait));
           case TRAIT_TARGET_TYPE.TRAIT:
             return successFn(makeOption.traitActivateRequest(animal.id, trait));
           case TRAIT_TARGET_TYPE.NONE:
-            return successFn(makeOption.traitActivateRequest(animal.id, trait));
+            return successFn(makeOption.traitActivateRequest(animal.id, trait, trait.linkAnimalId));
         }
       }
     });
