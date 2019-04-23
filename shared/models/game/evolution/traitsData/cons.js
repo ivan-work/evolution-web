@@ -142,7 +142,8 @@ export const TraitRecombination = {
   }
   , checkTarget: (game, targetAnimal, targetTrait) => (!targetTrait.getDataModel().hidden && !(targetTrait.isLinked())) // Copypaste of TraitNeoplasm =/
   , getTargets: (game, targetAnimal, targetTrait) => targetAnimal.traits
-    .filter(t => TraitRecombination.checkTarget(null, null, t)).toList()
+    .filter(t => TraitRecombination.checkTarget(game, targetAnimal, t))
+    .toList()
 };
 
 export const TraitHerding = {type: tt.TraitHerding};

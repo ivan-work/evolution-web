@@ -9,7 +9,7 @@ const TraitGeneralColors = {
   Parasitic: '#909'
   , Fat: '#D60'
   , Attack: {
-    text:  '#600'
+    text: '#600'
     , textActive: '#600'
     , fillActive: '#E99'
     , textActiveHover: '#FEE'
@@ -24,6 +24,8 @@ const TraitGeneralColors = {
   , fillActiveHover: '#060'
   , textValue: '#000'
   , fillValue: '#FC3'
+  , textDisabled: '#333'
+  , fillDisabled: '#999'
 };
 
 const defaultColorConfig = {
@@ -35,6 +37,8 @@ const defaultColorConfig = {
   , fillActiveHover: TraitGeneralColors.fillActiveHover
   , textValue: TraitGeneralColors.textValue
   , fillValue: TraitGeneralColors.fillValue
+  , textDisabled: TraitGeneralColors.textDisabled
+  , fillDisabled: TraitGeneralColors.fillDisabled
 };
 
 const TraitColors = {
@@ -105,6 +109,13 @@ const animalBase = {
   , borderRadius: 5
   , boxShadow: '1px 1px 5px black'
 };
+const animalCanInteract = {
+  cursor: 'pointer'
+  , boxShadow: '0px 1px 5px 5px green'
+  , '&:hover': {
+    boxShadow: '0px 1px 5px 5px red'
+  }
+};
 const animal = {
   ...animalBase
   , backgroundColor: defaultCardColor
@@ -114,11 +125,16 @@ const animal = {
 
   , background: `url(${geckoHR}) 0% 50% no-repeat`
   , backgroundSize: `${defaultWidth}px ${defaultWidth}px`
+
+  , '&.canInteract': animalCanInteract
+  , transition: 'box-shadow .25s'
 };
 
 export default {
   defaultCardColor
   , defaultWidth
+  , defaultColorConfig
+  , TraitColors
   , card: {
     width: 90
     , height: 90 / 3 * 4
@@ -128,6 +144,7 @@ export default {
     , boxShadow: '1px 1px 5px black'
   }
   , animalBase
+  , animalCanInteract
   , animal
   , animalTrait
   , animalPreview: {

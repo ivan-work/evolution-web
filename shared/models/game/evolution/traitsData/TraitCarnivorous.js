@@ -184,7 +184,7 @@ export const TraitCarnivorous = {
           possibleDefenses.push(defenseTrait);
         } else if (defenseTrait.type === tt.TraitTailLoss) {
           traitTailLoss = defenseTrait;
-          traitTailLossTargets = TraitTailLoss.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
+          traitTailLossTargets = TraitTailLoss.getTargets(game, targetAnimal, traitTailLoss, sourceAnimal, trait);
           possibleDefenseTargets += traitTailLossTargets.size;
           if (traitTailLossTargets.size > 0) possibleDefenses.push(defenseTrait);
         } else if (defenseTrait.type === tt.TraitShell) {
@@ -192,7 +192,7 @@ export const TraitCarnivorous = {
           possibleDefenses.push(defenseTrait);
         } else if (defenseTrait.type === tt.TraitMimicry) {
           traitMimicry = defenseTrait;
-          traitMimicryTargets = TraitMimicry.getTargets(game, sourceAnimal, TraitCarnivorous, targetAnimal);
+          traitMimicryTargets = TraitMimicry.getTargets(game, targetAnimal, traitMimicry, sourceAnimal, trait);
           possibleDefenseTargets += traitMimicryTargets.size;
           if (traitMimicryTargets.size > 0) possibleDefenses.push(defenseTrait);
         } else if (defenseTrait.type === tt.TraitCnidocytes) {

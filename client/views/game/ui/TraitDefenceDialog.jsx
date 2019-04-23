@@ -38,18 +38,19 @@ export class TraitDefenceDialog extends React.Component {
     const {game, $traitAnswer} = this.props;
     const {sourceAid, sourcePid, targetAid, targetPid, time} = game.question;
     const attackAnimal = game.locateAnimal(sourceAid, sourcePid);
+    const traitCarnivorous = attackAnimal.hasTrait(tt.TraitCarnivorous);
     const targetAnimal = game.locateAnimal(targetAid, targetPid);
 
     const traitTailLoss = targetAnimal.hasTrait(TraitTailLoss.type);
     const targetsTailLoss = traitTailLoss
       && !checkIfTraitDisabledByIntellect(attackAnimal, traitTailLoss)
-      && TraitTailLoss.getTargets(game, attackAnimal, TraitCarnivorous, targetAnimal);
+      && TraitTailLoss.getTargets(game, targetAnimal, traitTailLoss, attackAnimal, traitCarnivorous);
 
     const traitMimicry = targetAnimal.hasTrait(TraitMimicry.type);
     const targetsMimicry = traitMimicry
       && !traitMimicry.checkActionFails(game, targetAnimal)
       && !checkIfTraitDisabledByIntellect(attackAnimal, traitMimicry)
-      && TraitMimicry.getTargets(game, attackAnimal, TraitCarnivorous, targetAnimal);
+      && TraitMimicry.getTargets(game, targetAnimal, traitMimicry, attackAnimal, traitCarnivorous);
 
     const otherTraits = [
       targetAnimal.hasTrait(tt.TraitShell)

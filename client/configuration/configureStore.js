@@ -15,6 +15,7 @@ const ClientRecord = Record({
   , user: void 0
   , chat: void 0
   , modal: void 0
+  , animation: void 0 // TODO-uiv3 REMOVE this shit
 }, 'ClientRecord');
 
 const composeEnhancers = process.env.TEST ? compose : window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

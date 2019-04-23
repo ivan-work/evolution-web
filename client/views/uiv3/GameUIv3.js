@@ -1,8 +1,9 @@
 import React, {Fragment} from 'react';
 import cn from 'classnames';
-import {compose, lifecycle, withStateHandlers} from "recompose";
+import {compose, lifecycle, nest, withStateHandlers} from "recompose";
 import {connect} from "react-redux";
 import repeat from 'lodash/times';
+import wrap from '../utils/wrap';
 
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
@@ -19,7 +20,13 @@ import Continent from "./continent/Continent";
 import {chatMessageRequest} from "../../../shared/actions/chat";
 import {debugMirrorPlayer} from "../../actions/debug";
 import {InteractiveFood} from "./food/Food";
-import {CurrentInteractionDebug, InteractionManagerProvider} from './InteractionManager'
+import {InteractionContext, InteractionManagerProvider} from './InteractionManager'
+import {SVGContextProvider, SVGContextSpy} from "./SVGContext";
+import GameSVGOverlay from "./GameSVGOverlay";
+import GameTimedOutDialog from "./ui/GameTimedOutDialog";
+import QuestionIntellect from "./ui/QuestionIntellect";
+import QuestionDefence from "./ui/QuestionDefence";
+import {InteractiveShell} from "./food/Shell";
 
 const styles = theme => ({
   GameUIv3Container: {
@@ -33,6 +40,7 @@ const styles = theme => ({
     , overflowY: 'auto'
     , scrollBehavior: 'smooth'
     , flexWrap: 'nowrap'
+    , position: 'relative'
   }
   , gridGameToolbar: {
     background: theme.palette.background.paper
@@ -50,8 +58,8 @@ const styles = theme => ({
     , minHeight: '4em'
     , maxHeight: 140
     , '&.Compressed': {
-      maxHeight: 24
-      , minHeight: 24
+      maxHeight: 36
+      , minHeight: 36
     }
     , '&.PlayersList': {
       minWidth: 180
@@ -97,38 +105,55 @@ const styles = theme => ({
   }
 });
 
+export class SVGContextInteractionSpy extends React.PureComponent {
+  static contextType = InteractionContext;
+
+  render() {
+    console.log(this.context.interaction);
+    return <SVGContextSpy watch={this.context.interaction}/>
+  }
+}
+
 export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
   return (
-    <InteractionManagerProvider>
-      <Grid container direction='column' className={classes.GameUIv3Container}>
-        <Grid item className={classes.gridGameToolbar}>
-          <GameInfoToolbar game={game} compressControls={{compress, toggleCompress}}/>
+    <Grid container direction='column' className={classes.GameUIv3Container}>
+      <Grid item className={classes.gridGameToolbar}>
+        <GameInfoToolbar game={game} compressControls={{compress, toggleCompress}}/>
+      </Grid>
+      <Grid item container direction='column' className={classes.GameUIv3}>
+
+        {/*<CurrentInteractionDebug/>*/}
+        <GameSVGOverlay/>
+        <SVGContextInteractionSpy/>
+        {/*<SVGContextSpy compress={!!compress}/>*/}
+        {/*{JSON.stringify(!!compress)}*/}
+        <GameTimedOutDialog/>
+        <QuestionIntellect/>
+        <QuestionDefence/>
+
+        <Grid item className={classes.gridMiscRow}>
+          {!compress && <Paper className={classes.gridMiscItem + ' PlayersList ' + cn({'Compressed': compress})}>
+            <PlayersList game={game}/>
+          </Paper>}
+          <Paper className={classes.gridMiscItem + ' Food ' + cn({'Compressed': compress})}>
+            <FoodWrapper game={game}/>
+          </Paper>
+          <Paper className={classes.gridMiscItem + ' Chat ' + cn({'Compressed': compress})}>
+            {!compress ? <ChatWrapper game={game}/> : <ChatWrapperSmall game={game}/>}
+          </Paper>
         </Grid>
-        <Grid item container direction='column' className={classes.GameUIv3}>
-          <CurrentInteractionDebug/>
-          <Grid item className={classes.gridMiscRow}>
-            {!compress && <Paper className={classes.gridMiscItem + ' PlayersList ' + cn({'Compressed': compress})}>
-              <PlayersList game={game}/>
-            </Paper>}
-            <Paper className={classes.gridMiscItem + ' Food ' + cn({'Compressed': compress})}>
-              <FoodWrapper game={game}/>
-            </Paper>
-            <Paper className={classes.gridMiscItem + ' Chat ' + cn({'Compressed': compress})}>
-              {!compress ? <ChatWrapper game={game}/> : <ChatWrapperSmall game={game}/>}
-            </Paper>
-          </Grid>
-          <Grid item className={classes.gridPlayers}>
-            {game.sortPlayersFromIndex(game.players).map((player) => (
-              <PlayerWrapper key={player.id} playerId={player.id} classes={classes} game={game}/>
-            ))}
-          </Grid>
+        <Grid item className={classes.gridPlayers}>
+          {game.sortPlayersFromIndex(game.players).map((player) => (
+            <PlayerWrapper key={player.id} playerId={player.id} classes={classes} game={game}/>
+          ))}
         </Grid>
       </Grid>
-    </InteractionManagerProvider>
+    </Grid>
   );
 };
 
 export const FoodWrapper = ({game}) => <Fragment>
+  {game.continents.get('standard').shells.map((trait) => <InteractiveShell key={trait.id} trait={trait}/>).toList()}
   {repeat(game.food, i => <InteractiveFood key={i}/>)}
 </Fragment>;
 
@@ -156,6 +181,8 @@ export default compose(
     const currentPlayerId = game.getPlayer() ? game.getPlayer().id : null;
     return {game, currentPlayerId}
   })
+  , wrap(SVGContextProvider)
+  , wrap(InteractionManagerProvider)
   , withStateHandlers(({compress: false}), {
     toggleCompress: ({compress}) => () => ({compress: !compress})
   })

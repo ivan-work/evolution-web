@@ -13,6 +13,7 @@ import {InteractionTarget} from "../InteractionManager";
 import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";
 import {gameDeployAnimalRequest} from "../../../../shared/actions/game";
 import {PHASE} from "../../../../shared/models/game/GameModel";
+import {SVGContextSpy} from "../SVGContext";
 
 const styles = {
   continent: {
@@ -27,15 +28,15 @@ const styles = {
 
     , '& .ContinentZone': {
       ...GameStyles.animalBase
-      , minWidth: 0
-      , transition: 'min-width .25s'
+      , display: 'none'
+      , minWidth: GameStyles.animalBase.minWidth / 2
+      // , minWidth: 0
+      // , transition: 'min-width .25s'
     }
     , '& .ContinentZone.canInteract': {
-      cursor: 'pointer'
-      , minWidth: GameStyles.animalBase.minWidth / 3
-    }
-    , '& .ContinentZone.canInteract:hover': {
-      minWidth: GameStyles.animalBase.minWidth
+      display: 'block'
+      , ...GameStyles.animalCanInteract
+      , transition: GameStyles.animal.transition
     }
   }
 };

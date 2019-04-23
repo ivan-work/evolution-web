@@ -712,7 +712,7 @@ export const server$traitDefenceAnswer = (gameId, questionId, traitId, targetId)
 
   const defenceAnimal = checkPlayerHasAnimal(game, question.targetPid, question.targetAid);
   if (traitId !== true) {
-    const {trait: defenceTrait, target} = checkTraitActivation(game, defenceAnimal, traitId, targetId);
+    const {trait: defenceTrait, target} = checkTraitActivation(game, defenceAnimal, traitId, targetId, attackAnimal, attackTrait);
 
     if (checkIfTraitDisabledByIntellect(attackAnimal, defenceTrait))
       throw new ActionCheckError(`server$traitDefenceAnswer@Game(${game.id})`

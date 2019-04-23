@@ -9,6 +9,7 @@ import IconArrowUp from '@material-ui/icons/KeyboardArrowUp';
 import IconArrowDown from '@material-ui/icons/KeyboardArrowDown';
 import IconButton from "@material-ui/core/IconButton/IconButton";
 import Fab from "@material-ui/core/Fab";
+import {SVGContextSpy} from "./SVGContext";
 
 const styles = {
   handWrapper: {}
@@ -24,9 +25,7 @@ export const PlayerHand = ({classes, children, showHand, toggleHand}) => (
       <IconButton onClick={toggleHand}>
         {showHand ? <IconArrowDown/> : <IconArrowUp/>}
       </IconButton>
-      {/*<Fab size='small' onClick={toggleHand}>*/}
-        {/*{showHand ? <IconArrowDown/> : <IconArrowUp/>}*/}
-      {/*</Fab>*/}
+      <SVGContextSpy watch={showHand}/>
     </Paper>
     {showHand && <div className={classes.handWrapperBody}>{children}</div>}
   </Paper>

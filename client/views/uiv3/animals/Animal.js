@@ -1,7 +1,8 @@
 import React, {Fragment} from 'react';
+import PropTypes from "prop-types";
 import T from "i18n-react";
 import cn from "classnames";
-import {compose} from "recompose";
+import {compose, setDisplayName, setPropTypes} from "recompose";
 import {connect} from "react-redux";
 import withStyles from '@material-ui/core/styles/withStyles';
 import repeat from 'lodash/times';
@@ -36,6 +37,7 @@ import {InteractionTarget} from "../InteractionManager";
 import {TraitModel} from "../../../../shared/models/game/evolution/TraitModel";
 import {gameDeployRegeneratedAnimalRequest, gameDeployTraitRequest} from "../../../../shared/actions/game";
 import * as tt from "../../../../shared/models/game/evolution/traitTypes";
+import {AnimalModel} from "../../../../shared/models/game/evolution/AnimalModel";
 
 const styles = theme => ({
   animal: {
@@ -53,17 +55,12 @@ const styles = theme => ({
       fontSize: 24
       , fill: 'orange'
     }
-    , '&.canInteract': {
-      cursor: 'pointer'
-      , boxShadow: '0px 1px 5px 5px green;'
-    }
   }
   , animalToolbar: {
     textAlign: 'center'
     , height: 44
     , maxWidth: GameStyles.animal.minWidth
     , lineHeight: 0
-    // , justifySelf: 'flex-start'
   }
 });
 
@@ -90,50 +87,56 @@ const AnimalFoodContainer = ({food}) => (food < 4
   : <NumberedAnimalFood food={food}/>);
 //endregion
 
-const calcWidth = (e) => {
-  if (e) {
-    if (e.children.length > (1 + 6 + 8 + 8)) {
-      e.style.width = GameStyles.defaultWidth * 4 + 'px'
-    } else if (e.children.length > (1 + 6 + 8)) {
-      e.style.width = GameStyles.defaultWidth * 3 + 'px'
-    } else if (e.children.length > (1 + 6)) {
-      e.style.width = GameStyles.defaultWidth * 2 + 'px'
-    }
-  }
-};
+const calcWidthF = x => Math.floor(x / 8) + 1;
+const calcWidth = (e) => e ? e.style.width = GameStyles.defaultWidth * calcWidthF(e.children.length) + 'px' : void 0;
 
-export const Animal = withStyles(styles)(({classes, animal, game, canInteract, acceptInteraction}) => (
-  <div className={cn(
+export const BaseAnimal = (({classes, animal, game, children, canInteract, acceptInteraction}) => {
+  const cnAnimal = cn(
     classes.animal
     , {canInteract}
-  )} ref={calcWidth} onClick={acceptInteraction}>
-    <div className={classes.animalToolbar}>
-      <div>
-        {/*{renderAnimalFood(animal)}*/}
-        {game && game.status.phase === PHASE.FEEDING && <AnimalFoodStatus animal={animal}/>}
-        {game && game.status.phase === PHASE.FEEDING && <AnimalFoodContainer food={animal.getFood()}/>}
+  );
+  const traitList = children || (animal.traits.toList()
+    .reverse()
+    .map(trait => <AnimalTrait key={trait.id}
+                               trait={trait}
+                               sourceAnimal={animal}/>));
+  return (
+    <div className={cnAnimal} ref={calcWidth} onClickCapture={acceptInteraction}>
+      <div className={classes.animalToolbar}>
+        <div>
+          {/*{renderAnimalFood(animal)}*/}
+          {game && game.status.phase === PHASE.FEEDING && <AnimalFoodStatus animal={animal}/>}
+          {game && game.status.phase === PHASE.FEEDING && <AnimalFoodContainer food={animal.getFood()}/>}
+        </div>
+        <div>
+          {animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) && <IconFlagPoisoned className='AnimalIcon'/>}
+          {animal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && <IconFlagHibernated className='AnimalIcon'/>}
+          {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <IconFlagShell className='AnimalIcon'/>}
+          {animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION) && <IconFlagRegeneration className='AnimalIcon'/>}
+          {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHY) && <IconFlagShy className='AnimalIcon'/>}
+          {/*{<IconFlagPoisoned className='Flag Poisoned'/>}*/}
+          {/*{<IconFlagHibernated className='Flag Hibernated'/>}*/}
+          {/*{<IconFlagShell className='Flag Shell'/>}*/}
+          {/*{<IconFlagRegeneration className='Flag Regeneration'/>}*/}
+          {/*{<IconFlagShy className='Flag Shy'/>}*/}
+        </div>
       </div>
-      <div>
-        {animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) && <IconFlagPoisoned className='AnimalIcon'/>}
-        {animal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && <IconFlagHibernated className='AnimalIcon'/>}
-        {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <IconFlagShell className='AnimalIcon'/>}
-        {animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION) && <IconFlagRegeneration className='AnimalIcon'/>}
-        {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHY) && <IconFlagShy className='AnimalIcon'/>}
-        {/*{<IconFlagPoisoned className='Flag Poisoned'/>}*/}
-        {/*{<IconFlagHibernated className='Flag Hibernated'/>}*/}
-        {/*{<IconFlagShell className='Flag Shell'/>}*/}
-        {/*{<IconFlagRegeneration className='Flag Regeneration'/>}*/}
-        {/*{<IconFlagShy className='Flag Shy'/>}*/}
-      </div>
+      {traitList}
     </div>
-    {animal.traits.toList().map(trait => <AnimalTrait key={trait.id} trait={trait} sourceAnimal={animal}/>)}
-  </div>
-));
+  )
+});
 
-Animal.displayName = 'Animal';
+export const Animal = compose(
+  setDisplayName('Animal')
+  , setPropTypes({animal: PropTypes.instanceOf(AnimalModel).isRequired})
+  , withStyles(styles)
+  , connect(({game}) => ({game}))
+)(BaseAnimal);
 
 export const InteractiveAnimal = compose(
-  connect(({game}, {animal}) => {
+  setDisplayName('InteractiveAnimal')
+  , setPropTypes({animal: PropTypes.instanceOf(AnimalModel).isRequired})
+  , connect(({game}, {animal}) => {
     return {
       game
       , isUserAnimal: game.userId === animal.ownerId
@@ -239,48 +242,14 @@ export const InteractiveAnimal = compose(
         }
 
         case DND_ITEM_TYPE.TRAIT: {
-          switch (game.status.phase) {
-            case PHASE.FEEDING:
-              const {sourceAnimal, trait} = item;
-
-              if (trait.type === tt.TraitMetamorphose) {
-                // this.setState({
-                //   metamorphoseQuestion: {
-                //     animal, trait
-                //     , onSelectTrait: (targetTraitId) => {
-                //       !!targetTraitId && $traitActivate(animal.id, trait.id, targetTraitId);
-                //       this.setState(INITIAL_STATE)
-                //     }
-                //   }
-                // });
-              }
-              else if (trait.type === tt.TraitRecombination) {
-                // this.setState({
-                //   recombinationQuestion: {
-                //     animal, trait
-                //     , onSelectTrait: (traits) => {
-                //       if (!!traits && !!traits[0] && !!traits[1]) {
-                //         $traitActivate(animal.id, trait.id, ...traits);
-                //       }
-                //       this.setState(INITIAL_STATE)
-                //     }
-                //   }
-                // });
-              } else {
-                traitActivateRequest(sourceAnimal.id, trait.id, animal.id);
-              }
-
-              break;
-            case PHASE.AMBUSH:
-              traitAmbushActivateRequest(animal.id, !game.getIn(['ambush', 'ambushers', animal.id]));
-              break;
-          }
+          const {sourceAnimal, trait} = item;
+          traitActivateRequest(sourceAnimal.id, trait.id, animal.id);
           break;
         }
 
         case DND_ITEM_TYPE.TRAIT_SHELL: {
           const {trait} = item;
-          props.onTraitShellDropped(animal, trait);
+          traitTakeShellRequest(animal.id, trait.id);
           break;
         }
       }

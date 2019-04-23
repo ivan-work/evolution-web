@@ -9,6 +9,12 @@ export const CurrentInteractionDebug = () => (<InteractionContext.Consumer>
   </pre>}
 </InteractionContext.Consumer>);
 
+const stopEvent = e => {
+  //https://stackoverflow.com/questions/24415631/reactjs-syntheticevent-stoppropagation-only-works-with-react-events
+  e.stopPropagation();
+  e.nativeEvent.stopImmediatePropagation();
+};
+
 export const InteractionSource = (type, {canStart, onStart}) => compose(
   fromRenderProps(InteractionContext.Consumer, (im) => ({im}))
   , withProps((props) => ({
@@ -16,6 +22,7 @@ export const InteractionSource = (type, {canStart, onStart}) => compose(
   }))
   , withHandlers({
     startInteraction: ({im, canStart, ...props}) => (e) => {
+      stopEvent(e);
       if (canStart) {
         const interactionData = onStart(props);
         if (interactionData !== false) {
@@ -41,9 +48,10 @@ export const InteractionTarget = (types = [], {
   , withHandlers({
     acceptInteraction: ({im, canInteract, ...props}) => (e) => {
       if (canInteract) {
+        stopEvent(e);
         Promise.resolve(onInteract(props, im.interaction))
           .then((interactionResult) => {
-            console.log('Interaction ended with:', interactionResult);
+            // console.log('Interaction ended with:', interactionResult);
             if (interactionResult && typeof interactionResult === 'object') {
               return im.startInteraction(interactionResult.type, interactionResult.data);
             } else {
@@ -61,6 +69,21 @@ export class InteractionManagerProvider extends React.PureComponent {
   startInteraction = (type, item) => this.setState({interaction: {type, item}});
 
   cancelInteraction = () => this.setState({interaction: null});
+
+  handleGlobalClick = () => {
+    if (this.state.interaction) {
+      console.log(`im.handleGlobalClick`, this.state.interaction.type, this.state.interaction.data);
+      this.cancelInteraction();
+    }
+  };
+
+  componentDidMount() {
+    document.addEventListener('click', this.handleGlobalClick);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('click', this.handleGlobalClick);
+  }
 
   render() {
     const im = {
