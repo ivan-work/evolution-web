@@ -1,4 +1,4 @@
-
+import logger from '../../utils/logger';
 import {
   traitTakeFoodRequest
   , gameEndTurnRequest
@@ -68,15 +68,17 @@ deck: 10 camo
 food: 1
 phase: feeding
 players:
-  - continent: $Q carn fat graz, $W carn fat=true fat=true, $E carn fat=true fat=true
+  - continent: $Q carn fat wait, $W carn fat fat, $E ++ carn
   - continent: $A +, $S +, $D +, $F +
 `);
-    const {selectGame, selectAnimal, selectPlayer} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(traitActivateRequest('$Q', tt.TraitCarnivorous, '$A'));
 
-    expect(selectPlayer(User1).continent).size(3);
-    expect(selectAnimal(User0, 0).getFood()).equal(2);
+    expect(findAnimal('$Q')).ok;
+    expect(findAnimal('$Q').getFood()).equal(2);
+    expect(findAnimal('$W')).ok;
+    expect(findAnimal('$E')).ok;
 
     expect(selectGame().status.turn, 'turn').equal(0);
     expect(selectGame().status.round, 'round').equal(0);
@@ -93,16 +95,28 @@ players:
     }, serverStore, clientStore0, clientStore1);
 
     clientStore0.dispatch(gameEndTurnRequest());
+    expect(selectGame().status.round, 'round').equal(1);
 
     clientStore0.dispatch(traitActivateRequest('$W', tt.TraitCarnivorous, '$S'));
     expect(selectPlayer(User1).continent).size(2);
 
-    expect(selectAnimal(User0, 0).getFood()).equal(2);
-    expect(selectAnimal(User0, 1).getFood()).equal(2);
+    expect(findAnimal('$Q')).ok;
+    expect(findAnimal('$Q').getFood()).equal(2);
+    expect(findAnimal('$W')).ok;
+    expect(findAnimal('$W').getFood()).equal(2);
+    expect(findAnimal('$E')).ok;
 
     clientStore0.dispatch(gameEndTurnRequest()); // Ending turn after a hunt
+    expect(selectGame().status.round, 'round').equal(2);
+    logger.verbose('Automatically take the food');
     clientStore0.dispatch(gameEndTurnRequest()); // Automatically take the food
-    clientStore0.dispatch(gameEndTurnRequest()); // Skipping turn;
+    expect(findAnimal('$Q').getFoodAndFat()).equal(3);
+    logger.verbose('skip turn to end');
+    clientStore0.dispatch(gameEndTurnRequest()); // pass round
+    expect(selectGame().status.round, 'round').equal(3);
+    clientStore0.dispatch(gameEndTurnRequest()); // pass turn
+
+    console.log(selectGame().status)
     expect(selectGame().status.turn, 'turn').equal(1);
     expect(selectGame().status.phase).equal(PHASE.DEPLOY);
     clientStore1.dispatch(gameEndTurnRequest());

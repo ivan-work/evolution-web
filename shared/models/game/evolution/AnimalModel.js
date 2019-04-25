@@ -147,7 +147,7 @@ export class AnimalModel extends Record({
   canSurvive() {
     return this.isSaturated()
       || this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)
-      || this.getFoodAndFat() >= this.foodSize
+      || this.getFood() >= this.foodSize
   }
 
   getEatingBlockers(game) {
