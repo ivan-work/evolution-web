@@ -9,7 +9,7 @@ import configureStore from './configuration/configureStore'
 import {makeSocketClient, socketStore, socketMiddleware} from './configuration/socket';
 
 // History
-import createBrowserHistory from 'history/createBrowserHistory';
+import {createBrowserHistory} from 'history';
 
 const history = createBrowserHistory();
 
@@ -29,7 +29,8 @@ import './styles/style.scss';
 import 'rc-tooltip/assets/bootstrap_white.css'
 
 // Services
-import {animationMiddleware} from './services/AnimationService';
+// import {animationMiddleware} from './services/AnimationService';
+import {uiv3animationMiddleware} from './reducers/animations-rdx-client';
 
 const reducer = combineReducers({
   ...reducers
@@ -41,7 +42,9 @@ console.log(`Initializing new socket client (${APP_HOST})`);
 const socketClient = makeSocketClient(APP_HOST, {forceNew: process.env.NODE_ENV === 'production'});
 
 const store = configureStore(reducer, void 0, [
-  animationMiddleware()
+  // animationMiddleware()
+  // ,
+  uiv3animationMiddleware()
   , socketMiddleware(socketClient)
 ]);
 

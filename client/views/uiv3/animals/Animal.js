@@ -1,8 +1,9 @@
 import React, {Fragment} from 'react';
+import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import T from "i18n-react";
 import cn from "classnames";
-import {compose, setDisplayName, setPropTypes} from "recompose";
+import {compose, lifecycle, setDisplayName, setPropTypes} from "recompose";
 import {connect} from "react-redux";
 import withStyles from '@material-ui/core/styles/withStyles';
 import repeat from 'lodash/times';
@@ -38,10 +39,12 @@ import {TraitModel} from "../../../../shared/models/game/evolution/TraitModel";
 import {gameDeployRegeneratedAnimalRequest, gameDeployTraitRequest} from "../../../../shared/actions/game";
 import * as tt from "../../../../shared/models/game/evolution/traitTypes";
 import {AnimalModel} from "../../../../shared/models/game/evolution/AnimalModel";
+import {animationCompleted, animationSubscribe, animationUnsubscribe} from "../../../reducers/animations-rdx-client";
 
 const styles = theme => ({
   animal: {
     ...GameStyles.animal
+    , 'will-change': 'transform'
     , '& .AnimalIcon': {
       verticalAlign: 'middle'
     }
@@ -88,43 +91,64 @@ const AnimalFoodContainer = ({food}) => (food < 4
 //endregion
 
 const calcWidthF = x => Math.floor(x / 8) + 1;
-const calcWidth = (e) => e ? e.style.width = GameStyles.defaultWidth * calcWidthF(e.children.length) + 'px' : void 0;
+const calcWidth = (e) => e.style.width = GameStyles.defaultWidth * calcWidthF(e.children.length) + 'px';
 
-export const BaseAnimal = (({classes, animal, game, children, canInteract, acceptInteraction}) => {
-  const cnAnimal = cn(
-    classes.animal
-    , {canInteract}
-  );
-  const traitList = children || (animal.traits.toList()
-    .reverse()
-    .map(trait => <AnimalTrait key={trait.id}
-                               trait={trait}
-                               sourceAnimal={animal}/>));
-  return (
-    <div className={cnAnimal} ref={calcWidth} onClickCapture={acceptInteraction}>
-      <div className={classes.animalToolbar}>
-        <div>
-          {/*{renderAnimalFood(animal)}*/}
-          {game && game.status.phase === PHASE.FEEDING && <AnimalFoodStatus animal={animal}/>}
-          {game && game.status.phase === PHASE.FEEDING && <AnimalFoodContainer food={animal.getFood()}/>}
+export class BaseAnimal extends React.PureComponent {
+  fixAnimalWidth = () => this.animalRef && calcWidth(this.animalRef);
+
+  setAnimalRef = (e) => {
+    this.animalRef = e;
+    this.fixAnimalWidth();
+    if (this.props.animationRef) {
+      this.props.animationRef.current = e;
+    }
+    console.log('REF SET');
+  };
+
+  componentDidUpdate() {
+    this.fixAnimalWidth();
+  }
+
+  render() {
+    const {classes, animal, game, children, canInteract, acceptInteraction} = this.props;
+
+    const cnAnimal = cn(
+      classes.animal
+      , {canInteract}
+    );
+
+    const traitList = children || (animal.traits.toList()
+      .reverse()
+      .map(trait => <AnimalTrait key={trait.id}
+                                 trait={trait}
+                                 sourceAnimal={animal}/>));
+
+    return (
+      <div className={cnAnimal} ref={this.setAnimalRef} onClickCapture={acceptInteraction}>
+        <div className={classes.animalToolbar}>
+          <div>
+            {/*{renderAnimalFood(animal)}*/}
+            {game && game.status.phase === PHASE.FEEDING && <AnimalFoodStatus animal={animal}/>}
+            {game && game.status.phase === PHASE.FEEDING && <AnimalFoodContainer food={animal.getFood()}/>}
+          </div>
+          <div>
+            {animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) && <IconFlagPoisoned className='AnimalIcon'/>}
+            {animal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && <IconFlagHibernated className='AnimalIcon'/>}
+            {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <IconFlagShell className='AnimalIcon'/>}
+            {animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION) && <IconFlagRegeneration className='AnimalIcon'/>}
+            {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHY) && <IconFlagShy className='AnimalIcon'/>}
+            {/*{<IconFlagPoisoned className='Flag Poisoned'/>}*/}
+            {/*{<IconFlagHibernated className='Flag Hibernated'/>}*/}
+            {/*{<IconFlagShell className='Flag Shell'/>}*/}
+            {/*{<IconFlagRegeneration className='Flag Regeneration'/>}*/}
+            {/*{<IconFlagShy className='Flag Shy'/>}*/}
+          </div>
         </div>
-        <div>
-          {animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) && <IconFlagPoisoned className='AnimalIcon'/>}
-          {animal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && <IconFlagHibernated className='AnimalIcon'/>}
-          {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <IconFlagShell className='AnimalIcon'/>}
-          {animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION) && <IconFlagRegeneration className='AnimalIcon'/>}
-          {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHY) && <IconFlagShy className='AnimalIcon'/>}
-          {/*{<IconFlagPoisoned className='Flag Poisoned'/>}*/}
-          {/*{<IconFlagHibernated className='Flag Hibernated'/>}*/}
-          {/*{<IconFlagShell className='Flag Shell'/>}*/}
-          {/*{<IconFlagRegeneration className='Flag Regeneration'/>}*/}
-          {/*{<IconFlagShy className='Flag Shy'/>}*/}
-        </div>
+        {traitList}
       </div>
-      {traitList}
-    </div>
-  )
-});
+    );
+  }
+}
 
 export const Animal = compose(
   setDisplayName('Animal')
@@ -133,9 +157,74 @@ export const Animal = compose(
   , connect(({game}) => ({game}))
 )(BaseAnimal);
 
+export const Animated = (config) => {
+  return compose(
+    connect(({animations}, props) => {
+      const animation = animations.current.find(animation => {
+        return config.checkAnimation(animation, props) && !!config.animations[animation.type];
+      });
+      return ({
+        animation
+      })
+    }, {animationSubscribe, animationUnsubscribe, animationCompleted})
+    , lifecycle({
+      componentDidMount() {
+        this.subscription = animationSubscribe(Object.keys(config));
+      }
+      , componentWillUnmount() {
+        animationUnsubscribe(this.subscription);
+      }
+      , componentDidUpdate({animation: prevAnimation}) {
+        const {animation: currentAnimation, animationCompleted} = this.props;
+        if (!!currentAnimation && currentAnimation !== prevAnimation) {
+          const element = ReactDOM.findDOMNode(this);
+          Promise.resolve(config.animations[currentAnimation.type](element))
+            .then((data) => {
+              console.log('resolved', data);
+              animationCompleted(currentAnimation.id);
+            });
+        }
+      }
+    })
+  )
+};
+
 export const InteractiveAnimal = compose(
   setDisplayName('InteractiveAnimal')
   , setPropTypes({animal: PropTypes.instanceOf(AnimalModel).isRequired})
+  // , Animated({
+  //   gameFoodTake_Start: {
+  //     type: 'gameFoodTake_Start'
+  //     , checkAction: (action) => {
+  //       return animal.id === action.data.animalId
+  //     }
+  //     , animation: (element) => {
+  //       return Velocity(element, {
+  //         translateY: -GameStyles.animal.height
+  //       }, 500)
+  //     }
+  //     , gameFoodTake_End: (element) => {
+  //       return Velocity(element, {
+  //         translateY: 0
+  //       }, 250)
+  //     }
+  //   }
+  // })
+  // , Animated({
+  //   checkAnimation: (animation, {animal}) => animation.data === animal.id
+  //   , animations: {
+  //     gameFoodTake_Start: (element) => {
+  //       return Velocity(element, {
+  //         translateY: -GameStyles.animal.height
+  //       }, 500)
+  //     }
+  //     , gameFoodTake_End: (element) => {
+  //       return Velocity(element, {
+  //         translateY: 0
+  //       }, 250)
+  //     }
+  //   }
+  // })
   , connect(({game}, {animal}) => {
     return {
       game

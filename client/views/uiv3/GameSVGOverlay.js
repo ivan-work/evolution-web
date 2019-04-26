@@ -82,7 +82,7 @@ export class GameSVGOverlay extends React.Component {
   };
 
   updateSVG = () => {
-    console.log('GameSVGOverlay.updateSVG()');
+    // console.log('GameSVGOverlay.updateSVG()');
     const {classes} = this.props;
     if (this.overlayRef.current) {
       const basebbx = this.overlayRef.current.getBoundingClientRect();

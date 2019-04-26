@@ -109,7 +109,6 @@ export class SVGContextInteractionSpy extends React.PureComponent {
   static contextType = InteractionContext;
 
   render() {
-    console.log(this.context.interaction);
     return <SVGContextSpy watch={this.context.interaction}/>
   }
 }
@@ -191,9 +190,9 @@ export default compose(
   , lifecycle({
     mirrorPlayer() {
       if (process.env.NODE_ENV !== 'development') return;
-      if (this.props.game.players.size === 1) {
-        this.props.debugMirrorPlayer({limit: 10});
-      }
+      // if (this.props.game.players.size === 1) {
+      //   this.props.debugMirrorPlayer({limit: 10});
+      // }
       // else if (this.props.game.players.size === 2) {
       //   this.props.debugMirrorPlayer({limit: 1});
       // } else if (this.props.game.players.size === 3) {

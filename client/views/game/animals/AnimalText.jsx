@@ -14,7 +14,7 @@ export const AnimalText = ({animal, select}) =>(
     {!!animal && <span>
       ({animal.slice(1)
         .map((trait, index) => (
-          <span className={index === select ? '' : ''}>
+          <span key={trait.id} className={index === select ? '' : ''}>
             {T.translate('Game.Trait.' + trait)}
           </span>))
         .map((item, index) => [index > 0 && ', ', item])
