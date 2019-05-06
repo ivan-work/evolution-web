@@ -99,7 +99,7 @@ export default class GameLog extends React.Component {
         <Dialog onBackdropClick={this.hideLog} open={!!this.state.showLog}>
           <DialogTitle>{T.translate('Game.Log.Label')}</DialogTitle>
           <DialogContent className='GameLog'>
-            {game.log.map((logItem, index) => (
+            {game.log.slice().reverse().map((logItem, index) => (
               <div className='LogItem' key={index}>
                 <span className='LogTime'>[{TimeService.formatTimeOfDay(logItem.timestamp)}]</span>&nbsp;
                 <span className='LogMessage'>{GameLog.LogItemToText(logItem.message)}</span>
