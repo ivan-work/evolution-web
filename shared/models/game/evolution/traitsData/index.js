@@ -135,6 +135,7 @@ export const TraitPiracy = {
   , action: (game, sourceAnimal, traitPiracy, targetAnimal) => dispatch => {
     dispatch(server$traitStartCooldown(game.id, traitPiracy, sourceAnimal));
     dispatch(server$startFeeding(game.id, sourceAnimal.id, 1, tt.TraitPiracy, targetAnimal.id));
+    dispatch(server$traitNotify_End(game.id, sourceAnimal.id, traitPiracy, targetAnimal.id));
     return true;
   }
   , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game) && sourceAnimal.getNeededFood() > 0

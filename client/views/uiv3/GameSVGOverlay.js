@@ -53,7 +53,7 @@ export class GameSVGOverlay extends React.Component {
   }
 
   componentDidUpdate() {
-    this.updateSVG();
+    this.debounceUpdateSVG();
   }
 
   mountLinkedTrait = (animalLinkedTraitComponent) => {
@@ -82,7 +82,7 @@ export class GameSVGOverlay extends React.Component {
   };
 
   updateSVG = () => {
-    console.log('GameSVGOverlay.updateSVG()');
+    // console.log('GameSVGOverlay.updateSVG()');
     const {classes} = this.props;
     if (this.overlayRef.current) {
       const basebbx = this.overlayRef.current.getBoundingClientRect();
@@ -169,7 +169,7 @@ export class GameSVGOverlay extends React.Component {
     }
   };
 
-  debounceUpdateSVG = debounce(this.updateSVG, 50);
+  debounceUpdateSVG = debounce(this.updateSVG, 500);
 
   render() {
     const {classes} = this.props;

@@ -70,11 +70,7 @@ export class PlayersList extends React.PureComponent {
     return (<div>
       <Typography variant='h4'>{T.translate('App.Room.Spectators')}</Typography>
       <UsersList list={spectatorsList}>{({user}) => (
-        <UserVariants.listItemWithActions user={user}
-                                          userId={null}
-                                          isHost={isHost}
-                                          roomKickRequest={$Kick}
-                                          roomBanRequest={$Ban}/>
+        <UserVariants.listItem user={user}/>
       )}</UsersList>
     </div>);
   }

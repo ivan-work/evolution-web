@@ -22,6 +22,7 @@ const format = (str, arr) => str.replace(DATA_REGEX, (match, number) => typeof a
 import replace from 'react-string-replace';
 
 import './GameLog.scss';
+import Food from "../../uiv3/food/Food";
 
 const customLog = {
   gameGiveCards: (message, values) => {
@@ -71,7 +72,7 @@ export default class GameLog extends React.Component {
 
     return replace(logItemWithData, VIEW_REGEX, (match, index) => {
       if (/\$Player@([\w\-]+)/.test(match)) {
-        return <strong key={match.slice(8)}><User id={match.slice(8)}/></strong>;
+        return <strong key={match.slice(8)}><User id={match.slice(8)} variant='simple'/></strong>;
       } else if (/\$Animal@(\d)/.test(match)) {
         const valueIndex = match.slice(8, 9);
         return <AnimalText key={index} animal={values[valueIndex]}/>;
@@ -82,7 +83,7 @@ export default class GameLog extends React.Component {
       } else if (/\$A/.test(match)) {
         return <AnimalText key={index}/>
       } else if (/\$F/.test(match)) {
-        return <i key={index} className='icon material-icons'>spa</i>
+        return <Food className='Food' key={index}/>
       } else {
         return match;
       }

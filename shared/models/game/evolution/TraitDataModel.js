@@ -6,6 +6,8 @@ import {CARD_TARGET_TYPE, CTT_PARAMETER} from './constants';
 export const TRAIT_DATA_PLACEMENT_ERRORS = {
   HIDDEN: 'HIDDEN'
   , MULTIPLE: 'MULTIPLE'
+  , CTT_SELF: 'CTT_SELF'
+  , CTT_ENEMY: 'CTT_ENEMY'
 };
 
 /**
@@ -58,7 +60,17 @@ export class TraitDataModel extends Record({
     });
   }
 
-  checkTraitPlacementFails(animal) {
+  checkTraitPlacementFails_User(animal, userId) {
+    if (this.cardTargetType & CTT_PARAMETER.SELF)
+      if (animal.ownerId !== userId)
+        return TRAIT_DATA_PLACEMENT_ERRORS.CTT_SELF;
+    if (this.cardTargetType & CTT_PARAMETER.ENEMY)
+      if (animal.ownerId === userId)
+        return TRAIT_DATA_PLACEMENT_ERRORS.CTT_ENEMY;
+    return false;
+  }
+
+  checkTraitPlacementFails(animal, userId) {
     if (!(this.cardTargetType & CTT_PARAMETER.LINK) && !this.multiple && animal.hasTrait(this.type, true)) return TRAIT_DATA_PLACEMENT_ERRORS.MULTIPLE;
     if (this.hidden) return TRAIT_DATA_PLACEMENT_ERRORS.HIDDEN;
     if (this.checkTraitPlacement && !this.checkTraitPlacement(animal)) return this.type;

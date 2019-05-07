@@ -9,7 +9,7 @@ export class SVGContextProvider extends React.PureComponent {
     this.svgOverlayComponent = svgOverlayComponent;
   };
 
-  updateSVGOverlay = () => this.svgOverlayComponent && this.svgOverlayComponent.updateSVG();
+  updateSVGOverlay = () => this.svgOverlayComponent && this.svgOverlayComponent.debounceUpdateSVG();
 
   unmountSVGOverlay = () => {
     this.svgOverlayComponent = null;
@@ -49,11 +49,12 @@ export class SVGContextSpy extends React.PureComponent {
   static contextType = SVGContext;
 
   componentDidUpdate() {
+    // console.log('Spy updated: ', this.props.name, this.props.watch);
     this.context.updateSVGOverlay();
   }
 
   render() {
-    return null;
+    return this.props.children || null;
     // return <span>{JSON.stringify(this.props.watch)}</span>;
   }
 }

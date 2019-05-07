@@ -21,9 +21,12 @@ import {openQuestionMetamorphose, openQuestionRecombination} from "../../../acti
 import {traitActivateRequest, traitAmbushActivateRequest} from "../../../../shared/actions/trait";
 import styled from "../../../styles/styled";
 import AnimalLinkedTrait from "./AnimalLinkedTrait";
+import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
 
 export const AnimalTraitBody = styled('div')({
   ...GameStyles.animalTrait
+  , willChange: 'background'
+  , transition: 'background .5s'
   , ...GameStyles.addTraitColors((colorConfig) => ({
     background: colorConfig.fill
     , '& .AnimalTraitText': {
@@ -62,7 +65,16 @@ export const AnimalTraitBody = styled('div')({
         , fontWeight: 500
       }
     }
+    , '&.source': {
+      background: colorConfig.fillSource
+      , '& .AnimalTraitText': {
+        color: colorConfig.textSource
+      }
+    }
   }))
+  , '&.animation': {
+    background: '#0F0 !important'
+  }
 });
 
 export class TraitBase extends React.PureComponent {
@@ -79,6 +91,7 @@ export class TraitBase extends React.PureComponent {
       , {
         canStart
         , value: trait.value
+        , source: trait.linkSource
         , disabled: disabled || trait.disabled
       }
     );
@@ -175,4 +188,6 @@ export const InteractiveTrait = compose(
   })
 )(TraitBase);
 
-export default AnimalTraitWrapper;
+const AnimatedTraitHOC = AnimatedHOC(({trait}) => `AnimalTrait#${trait.id}`);
+
+export default AnimatedTraitHOC(AnimalTraitWrapper);

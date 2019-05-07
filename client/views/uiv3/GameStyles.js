@@ -29,7 +29,7 @@ const TraitGeneralColors = {
 };
 
 const defaultColorConfig = {
-  text: TraitGeneralColors.Text
+  text: TraitGeneralColors.text
   , fill: TraitGeneralColors.fill
   , textActive: TraitGeneralColors.textActive
   , fillActive: TraitGeneralColors.fillActive
@@ -64,6 +64,8 @@ const TraitColors = {
   }
   , [tt.TraitSymbiosis]: {
     text: '#F06'
+    , textSource: '#FFF'
+    , fillSource: '#FAA'
   }
   , [tt.TraitRecombination]: {
     text: '#3AA'
@@ -111,9 +113,9 @@ const animalBase = {
 };
 const animalCanInteract = {
   cursor: 'pointer'
-  , boxShadow: '0px 1px 5px 5px green'
+  , boxShadow: `0px 0px 4px 4px #060`
   , '&:hover': {
-    boxShadow: '0px 1px 5px 5px red'
+    boxShadow: '0px 0px 4px 4px red'
   }
 };
 const animal = {

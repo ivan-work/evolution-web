@@ -21,12 +21,16 @@ import {chatMessageRequest} from "../../../shared/actions/chat";
 import {debugMirrorPlayer} from "../../actions/debug";
 import {InteractiveFood} from "./food/Food";
 import {InteractionContext, InteractionManagerProvider} from './InteractionManager'
-import {SVGContextProvider, SVGContextSpy} from "./SVGContext";
+import {SVGContext, SVGContextProvider, SVGContextSpy} from "./SVGContext";
 import GameSVGOverlay from "./GameSVGOverlay";
 import GameTimedOutDialog from "./ui/GameTimedOutDialog";
 import QuestionIntellect from "./ui/QuestionIntellect";
 import QuestionDefence from "./ui/QuestionDefence";
 import {InteractiveShell} from "./food/Shell";
+import AnimatedHOC from "../../services/AnimationService/AnimatedHOC";
+import GameStyles from "./GameStyles";
+import Measure from 'react-measure';
+import playerBackground from '@material-ui/core/colors/teal';
 
 const styles = theme => ({
   GameUIv3Container: {
@@ -77,23 +81,41 @@ const styles = theme => ({
     flex: '1 1 auto'
     , display: 'flex'
     , flexFlow: 'row wrap'
+    // , [`@media (max-width:1800px)`]: {
+    //   '& .PlayerWrapper': {
+    //     minWidth: '33%'
+    //     , background: 'red'
+    //   }
+    // }
+    // , [`@media (max-width:1400px)`]: {
+    //   '& .PlayerWrapper': {
+    //     minWidth: '50%'
+    //     , background: 'blue'
+    //   }
+    // }
+    // , [`@media (max-width:1000px)`]: {
+    //   '& .PlayerWrapper': {
+    //     minWidth: '100%'
+    //     , background: 'green'
+    //   }
+    // }
   }
   , gridHand: {}
 
   , PlayerWrapper: {
     display: 'flex'
     , flexFlow: 'column nowrap'
+    // , flex: '1 1 0'
 
     , margin: 2
 
-    , flex: '1 1 auto'
-    , maxWidth: '100%'
-    // , minHeight: GameStyles.animal.height * 1.2 + 60
-    // , maxHeight: GameStyles.animal.height * 2.2 + 60
+    , flex: '1 1 0'
+    , minWidth: GameStyles.defaultWidth * 4
+    // , maxWidth: '100%'
 
     , textAlign: 'center'
-    , '&.highlight': {
-      background: theme.palette.tertiary[50]
+    , '&.isUserTurn': {
+      background: '#F3FFFA'
     }
   }
   , isPlayerTurn: {
@@ -109,10 +131,13 @@ export class SVGContextInteractionSpy extends React.PureComponent {
   static contextType = InteractionContext;
 
   render() {
-    console.log(this.context.interaction);
-    return <SVGContextSpy watch={this.context.interaction}/>
+    return <SVGContextSpy name='SVGContextInteractionSpy' watch={this.context.interaction}/>
   }
 }
+
+// const SVGContextStoreSpy = connect((state) => ({animation: state.animation}))(
+//   ({animation}) => <SVGContextSpy name='Animation Spy' watch={animation}/>
+// );
 
 export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
   return (
@@ -143,7 +168,7 @@ export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
           </Paper>
         </Grid>
         <Grid item className={classes.gridPlayers}>
-          {game.sortPlayersFromIndex(game.players).map((player) => (
+          {game.sortPlayersFromIndex(game.players, 0).map((player) => (
             <PlayerWrapper key={player.id} playerId={player.id} classes={classes} game={game}/>
           ))}
         </Grid>
@@ -152,10 +177,12 @@ export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
   );
 };
 
-export const FoodWrapper = ({game}) => <Fragment>
-  {game.continents.get('standard').shells.map((trait) => <InteractiveShell key={trait.id} trait={trait}/>).toList()}
-  {repeat(game.food, i => <InteractiveFood key={i}/>)}
-</Fragment>;
+export const FoodWrapper = AnimatedHOC(() => `FoodContainer`)(
+  ({game}) => <div className='FoodContainer' style={{height: '100%'}}>
+    {game.continents.get('standard').shells.map((trait) => <InteractiveShell key={trait.id} trait={trait}/>).toList()}
+    {repeat(game.food, i => <InteractiveFood key={i}/>)}
+  </div>
+);
 
 export const ChatWrapper = ({game}) => <Chat chatTargetType='ROOM' roomId={game.roomId}/>;
 
@@ -163,12 +190,19 @@ export const ChatWrapperSmall = ({game}) => <ChatWindow chatTargetType='ROOM' ro
 
 export const PlayerWrapper = ({classes, playerId, game}) => {
   const currentPlayerId = game.getPlayer() ? game.getPlayer().id : null;
-  return <Paper id={playerId} className={`${classes.PlayerWrapper}`}>
+  const isUserWrapper = currentPlayerId === playerId;
+  const isPlayerTurn = game.isPlayerTurn();
+  const className = cn(classes.PlayerWrapper, 'PlayerWrapper', {
+    isUserWrapper
+    , isPlayerTurn
+    , isUserTurn: isUserWrapper && isPlayerTurn
+  });
+  return <Paper id={playerId} className={className}>
     <PlayerUser game={game} playerId={playerId}/>
     <div className={classes.ContinentContainer}>
       <Continent playerId={playerId}/>
     </div>
-    {currentPlayerId === playerId && <Grid item className={classes.gridHand}>
+    {isUserWrapper && <Grid item className={classes.gridHand}>
       <PlayerHandWrapper><PlayerHand/></PlayerHandWrapper>
     </Grid>}
   </Paper>
@@ -191,9 +225,9 @@ export default compose(
   , lifecycle({
     mirrorPlayer() {
       if (process.env.NODE_ENV !== 'development') return;
-      if (this.props.game.players.size === 1) {
-        this.props.debugMirrorPlayer({limit: 10});
-      }
+      // if (this.props.game.players.size === 1) {
+      //   this.props.debugMirrorPlayer({limit: 10});
+      // }
       // else if (this.props.game.players.size === 2) {
       //   this.props.debugMirrorPlayer({limit: 1});
       // } else if (this.props.game.players.size === 3) {

@@ -5,7 +5,6 @@ import RIP from 'react-immutable-proptypes';
 // Validation
 import {CardModel} from '../../../../shared/models/game/CardModel';
 
-import {AnimationServiceRef} from '../../../services/AnimationService';
 import {Card} from './Card.jsx';
 
 import './Deck.scss';
@@ -37,15 +36,14 @@ export class Deck extends React.PureComponent {
   }
 }
 
-export const DeckView = AnimationServiceRef(({deck, connectRef}) => (
-  <Deck ref={connectRef('Deck')}>
+export const DeckView = ({deck}) => (
+  <Deck>
     {deck.map((cardModel, i) => <Card key={i} card={cardModel}/>)}
   </Deck>
-));
+);
 
 DeckView.propTypes = {
   deck: RIP.listOf(PropTypes.instanceOf(CardModel)).isRequired
-  //, connectRef: PropTypes.func.isRequired
 };
 
 export default DeckView;
