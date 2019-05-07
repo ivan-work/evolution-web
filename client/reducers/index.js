@@ -7,7 +7,6 @@ export {reducer as app} from './app-rdx-client';
 export {reducer as error} from './error-rdx-client';
 export {reducer as chat} from './chat-rdx-client';
 export {reducer as animation} from './animation-rdx-client';
-export {reducer as animations} from './animations-rdx-client';
 export {reducer as modal} from './modal-rdx-client';
 
 //export data from './data';

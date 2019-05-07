@@ -1,49 +1,31 @@
 import ReactDOM from 'react-dom';
 import Velocity from 'velocity-animate'
 
-import {gameGiveCards, gameGiveCardsOther} from './gameGiveCards';
-
 import * as localTraits from './traits';
 
-// [actionName]: (done, actionData, getState, componentProps)
-export const createAnimationServiceConfig = () => ({
-  animations: ({subscribe, getRef}) => {
-    subscribe('gameGiveCards', ({userId, cards}, getState) => {
-      const game = getState().get('game');
-      if (game.userId === userId)
-        return gameGiveCards(game, cards, getRef);
-      else
-        return gameGiveCardsOther(userId, game.deck.size, cards, getRef)
-    });
-
-    subscribe('traitNotify_Start', ((actionData, getState) => {
+export default {
+  traitNotify_Start: [
+    (manager, actionData) => {
       const {sourceAid, traitId, traitType, targetId} = actionData;
       if (localTraits[traitType + '_Start']) {
-        return localTraits[traitType + '_Start'](actionData);
+        return localTraits[traitType + '_Start'](manager, actionData);
       } else {
-        return localTraits.pingTrait(traitId);
+        return localTraits.pingTrait(manager, traitId);
       }
-    }));
-
-    subscribe('traitNotify_End', (actionData, getState) => {
-      // console.log('traitNotify_End', actionData);
+    }
+  ]
+  , traitNotify_End: [
+    (manager, actionData) => {
       const {sourceAid, traitId, traitType, targetId} = actionData;
       if (localTraits[traitType + '_End']) {
-        return localTraits[traitType + '_End'](actionData);
+        return localTraits[traitType + '_End'](manager, actionData);
       }
-    });
-
-    subscribe('gameFoodTake_Start', (actionData, getState) =>
-      localTraits.gameFoodTake_Start(actionData));
-
-    subscribe('gameFoodTake_End', (actionData, getState) =>
-      localTraits.gameFoodTake_End(actionData));
-
-    // subscribe('animalDeath', (actionData, getState) => {
-    //   const {animalId} = actionData;
-    //   const AnimalHtml = document.getElementById('Animal' + animalId);
-    //   if (AnimalHtml) AnimalHtml.classList.add('Death');
-    //   else console.warn('No AnimalHtml for ', animalId);
-    // });
-  }
-});
+    }
+  ]
+  , gameFoodTake_Start: [
+    localTraits.gameFoodTake_Start
+  ]
+  , gameFoodTake_End: [
+    localTraits.gameFoodTake_End
+  ]
+};

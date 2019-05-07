@@ -53,7 +53,7 @@ export class GameSVGOverlay extends React.Component {
   }
 
   componentDidUpdate() {
-    this.updateSVG();
+    this.debounceUpdateSVG();
   }
 
   mountLinkedTrait = (animalLinkedTraitComponent) => {
@@ -169,7 +169,7 @@ export class GameSVGOverlay extends React.Component {
     }
   };
 
-  debounceUpdateSVG = debounce(this.updateSVG, 50);
+  debounceUpdateSVG = debounce(this.updateSVG, 500);
 
   render() {
     const {classes} = this.props;

@@ -3,11 +3,14 @@ import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import T from "i18n-react";
 import cn from "classnames";
-import {compose, lifecycle, setDisplayName, setPropTypes} from "recompose";
+
+import {compose, setDisplayName, setPropTypes} from "recompose";
 import {connect} from "react-redux";
 import withStyles from '@material-ui/core/styles/withStyles';
+import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
+
 import repeat from 'lodash/times';
-import noop from 'lodash/noop';
+
 
 import GameStyles from "../GameStyles";
 import Typography from "@material-ui/core/Typography/Typography";
@@ -25,26 +28,46 @@ import IconFlagHibernated from '@material-ui/icons/Snooze';
 import IconFlagShell from '@material-ui/icons/Home';
 import IconFlagRegeneration from '@material-ui/icons/GetApp';
 import IconFlagShy from '@material-ui/icons/Report';
+
 import Food from "../food/Food";
 import AnimalTrait from "./AnimalTrait";
+
 import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";
+import {InteractionTarget} from "../InteractionManager";
+
+import {gameDeployRegeneratedAnimalRequest, gameDeployTraitRequest} from "../../../../shared/actions/game";
 import {
   traitActivateRequest,
   traitAmbushActivateRequest,
   traitTakeFoodRequest,
   traitTakeShellRequest
 } from "../../../../shared/actions/trait";
-import {InteractionTarget} from "../InteractionManager";
+
 import {TraitModel} from "../../../../shared/models/game/evolution/TraitModel";
-import {gameDeployRegeneratedAnimalRequest, gameDeployTraitRequest} from "../../../../shared/actions/game";
-import * as tt from "../../../../shared/models/game/evolution/traitTypes";
 import {AnimalModel} from "../../../../shared/models/game/evolution/AnimalModel";
-import {animationCompleted, animationSubscribe, animationUnsubscribe} from "../../../reducers/animations-rdx-client";
+
+import {AT_DEATH} from "../animations";
+import {SVGContextSpy} from "../SVGContext";
+
+const DEATH_ANIMATION_TIME = `${AT_DEATH}ms`;
 
 const styles = theme => ({
   animal: {
     ...GameStyles.animal
+    , transition: 'background-color 1s'
     , 'will-change': 'transform'
+    , '&.Animate_Death-leave': {
+      backgroundColor: 'black'
+      , maxWidth: 0
+      , minWidth: 0
+      , margin: 0
+      , transform: 'scaleX(0)'
+      // , transition: 'background-color ${DEATH_ANIMATION_TIME}, max-width ${DEATH_ANIMATION_TIME}, min-width ${DEATH_ANIMATION_TIME}, margin ${DEATH_ANIMATION_TIME}'
+      , transition: `linear ${DEATH_ANIMATION_TIME}`
+      , '& .AnimalTrait2': {
+        visibility: 'hidden'
+      }
+    }
     , '& .AnimalIcon': {
       verticalAlign: 'middle'
     }
@@ -57,6 +80,9 @@ const styles = theme => ({
     , '& .AnimalIconFood': {
       fontSize: 24
       , fill: 'orange'
+    }
+    , '&.velocity-animating': {
+      zIndex: 2
     }
   }
   , animalToolbar: {
@@ -99,10 +125,6 @@ export class BaseAnimal extends React.PureComponent {
   setAnimalRef = (e) => {
     this.animalRef = e;
     this.fixAnimalWidth();
-    if (this.props.animationRef) {
-      this.props.animationRef.current = e;
-    }
-    console.log('REF SET');
   };
 
   componentDidUpdate() {
@@ -145,6 +167,7 @@ export class BaseAnimal extends React.PureComponent {
           </div>
         </div>
         {traitList}
+        {/*<SVGContextSpy name='Animal Spy' watch={animal.traits}/>*/}
       </div>
     );
   }
@@ -157,78 +180,13 @@ export const Animal = compose(
   , connect(({game}) => ({game}))
 )(BaseAnimal);
 
-export const Animated = (config) => {
-  return compose(
-    connect(({animations}, props) => {
-      const animation = animations.current.find(animation => {
-        return config.checkAnimation(animation, props) && !!config.animations[animation.type];
-      });
-      return ({
-        animation
-      })
-    }, {animationSubscribe, animationUnsubscribe, animationCompleted})
-    , lifecycle({
-      componentDidMount() {
-        this.subscription = animationSubscribe(Object.keys(config));
-      }
-      , componentWillUnmount() {
-        animationUnsubscribe(this.subscription);
-      }
-      , componentDidUpdate({animation: prevAnimation}) {
-        const {animation: currentAnimation, animationCompleted} = this.props;
-        if (!!currentAnimation && currentAnimation !== prevAnimation) {
-          const element = ReactDOM.findDOMNode(this);
-          Promise.resolve(config.animations[currentAnimation.type](element))
-            .then((data) => {
-              console.log('resolved', data);
-              animationCompleted(currentAnimation.id);
-            });
-        }
-      }
-    })
-  )
-};
-
 export const InteractiveAnimal = compose(
   setDisplayName('InteractiveAnimal')
   , setPropTypes({animal: PropTypes.instanceOf(AnimalModel).isRequired})
-  // , Animated({
-  //   gameFoodTake_Start: {
-  //     type: 'gameFoodTake_Start'
-  //     , checkAction: (action) => {
-  //       return animal.id === action.data.animalId
-  //     }
-  //     , animation: (element) => {
-  //       return Velocity(element, {
-  //         translateY: -GameStyles.animal.height
-  //       }, 500)
-  //     }
-  //     , gameFoodTake_End: (element) => {
-  //       return Velocity(element, {
-  //         translateY: 0
-  //       }, 250)
-  //     }
-  //   }
-  // })
-  // , Animated({
-  //   checkAnimation: (animation, {animal}) => animation.data === animal.id
-  //   , animations: {
-  //     gameFoodTake_Start: (element) => {
-  //       return Velocity(element, {
-  //         translateY: -GameStyles.animal.height
-  //       }, 500)
-  //     }
-  //     , gameFoodTake_End: (element) => {
-  //       return Velocity(element, {
-  //         translateY: 0
-  //       }, 250)
-  //     }
-  //   }
-  // })
   , connect(({game}, {animal}) => {
     return {
       game
-      , isUserAnimal: game.userId === animal.ownerId
+      , userId: game.userId
     }
   }, {
     // PHASE.DEPLOY
@@ -242,14 +200,14 @@ export const InteractiveAnimal = compose(
     , gameDeployRegeneratedAnimalRequest
   })
   , InteractionTarget([DND_ITEM_TYPE.CARD_TRAIT, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT, DND_ITEM_TYPE.TRAIT_SHELL, DND_ITEM_TYPE.ANIMAL_LINK], {
-    canInteract: ({game, isUserAnimal, animal}, {type, item}) => {
+    canInteract: ({game, userId, animal}, {type, item}) => {
       switch (type) {
         case DND_ITEM_TYPE.CARD_TRAIT: {
           switch (game.status.phase) {
             case PHASE.DEPLOY:
               const {traitType} = item;
               const traitData = TraitModel.new(traitType).getDataModel();
-              return !traitData.checkTraitPlacementFails(animal);
+              return !traitData.checkTraitPlacementFails_User(animal, userId) && !traitData.checkTraitPlacementFails(animal);
             case PHASE.REGENERATION:
               return animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION);
             default:
@@ -266,7 +224,7 @@ export const InteractiveAnimal = compose(
           );
         }
         case DND_ITEM_TYPE.FOOD:
-          return isUserAnimal && animal.canEat(game);
+          return userId === animal.ownerId && animal.canEat(game);
         case DND_ITEM_TYPE.TRAIT: {
           const {trait, sourceAnimal} = item;
           const targetCheck = !trait.getDataModel().checkTarget || trait.getDataModel().checkTarget(game, sourceAnimal, animal);
@@ -274,7 +232,7 @@ export const InteractiveAnimal = compose(
         }
         case DND_ITEM_TYPE.TRAIT_SHELL: {
           const {trait} = item;
-          return !trait.getDataModel().checkTraitPlacementFails(animal);
+          return !trait.getDataModel().checkTraitPlacementFails_User(animal, userId) && !trait.getDataModel().checkTraitPlacementFails(animal);
         }
         default:
           return true;
@@ -346,4 +304,4 @@ export const InteractiveAnimal = compose(
   })
 )(Animal);
 
-export default InteractiveAnimal;
+export const AnimatedAnimal = AnimatedHOC(({animal}) => `Animal#${animal.id}`)(InteractiveAnimal);

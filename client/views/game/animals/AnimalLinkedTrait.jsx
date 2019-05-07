@@ -1,13 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types'
-import ReactDOM from 'react-dom';
-import T from 'i18n-react';
-import cn from 'classnames';
-
-import Tooltip from 'rc-tooltip';
-import {Portal} from '../../utils/Portal.jsx';
-import {AnimalTrait, ClickAnimalTrait} from './AnimalTrait.jsx';
-import AnimalTraitArrowMarker from './AnimalTraitArrowMarker.jsx';
 
 import {ANIMAL_TRAIT_HEIGHT} from '../../../styles.json';
 

@@ -29,7 +29,7 @@ const TraitGeneralColors = {
 };
 
 const defaultColorConfig = {
-  text: TraitGeneralColors.Text
+  text: TraitGeneralColors.text
   , fill: TraitGeneralColors.fill
   , textActive: TraitGeneralColors.textActive
   , fillActive: TraitGeneralColors.fillActive
@@ -64,6 +64,8 @@ const TraitColors = {
   }
   , [tt.TraitSymbiosis]: {
     text: '#F06'
+    , textSource: '#FFF'
+    , fillSource: '#FAA'
   }
   , [tt.TraitRecombination]: {
     text: '#3AA'

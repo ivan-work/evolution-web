@@ -8,11 +8,13 @@ import withStyles from '@material-ui/core/styles/withStyles';
 
 import GameStyles from "../GameStyles";
 
-import Animal from '../animals/Animal';
+import {AnimatedAnimal} from '../animals/Animal';
 import {InteractionTarget} from "../InteractionManager";
 import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";
 import {gameDeployAnimalRequest} from "../../../../shared/actions/game";
 import {PHASE} from "../../../../shared/models/game/GameModel";
+import CSSTransitionGroup from "react-transition-group/CSSTransitionGroup";
+import {AT_DEATH} from "../animations";
 import {SVGContextSpy} from "../SVGContext";
 
 const styles = {
@@ -65,19 +67,26 @@ const getZoneList = (continent) => {
 
 const renderZoneListDeploy = (continent) => {
   return getZoneList(continent).map((animal, index) => (
-    animal ? <Animal key={animal.id} animal={animal}/>
+    animal ? <AnimatedAnimal key={animal.id} animal={animal}/>
       : <InteractiveContinentZone key={index} index={index / 2}/>
   ))
 };
 
 const renderZoneListOther = (continent) => {
-  return continent.map(animal => <Animal key={animal.id} animal={animal}/>)
+  return continent.map(animal => <AnimatedAnimal key={animal.id} animal={animal}/>)
 };
 
 export const Continent = ({classes, renderZoneList, continent}) => (
-  <div className={classes.continent}>
+  <CSSTransitionGroup component="div"
+                      className={classes.continent}
+                      transitionName="Animate_Death"
+                      transitionEnterTimeout={1}
+                      transitionLeaveTimeout={AT_DEATH}>
     {renderZoneList(continent)}
-  </div>
+    {/*<SVGContextSpy name='Continent Spy' watch={continent.size}>*/}
+      {/*<span/>*/}
+    {/*</SVGContextSpy>*/}
+  </CSSTransitionGroup>
 );
 
 export default compose(

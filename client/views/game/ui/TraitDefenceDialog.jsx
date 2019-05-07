@@ -9,7 +9,6 @@ import DialogContent from '@material-ui/core/DialogContent';
 
 import {Timer} from '../../utils/Timer.jsx';
 import {Animal} from '../animals/Animal.jsx';
-import {AnimalTrait} from '../animals/AnimalTrait.jsx';
 import AnimalTraitIcon from '../animals/AnimalTraitIcon.jsx';
 
 import {QuestionRecord} from '../../../../shared/models/game/GameModel.js';

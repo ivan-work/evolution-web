@@ -25,7 +25,7 @@ export const PlayerHand = ({classes, children, showHand, toggleHand}) => (
       <IconButton onClick={toggleHand}>
         {showHand ? <IconArrowDown/> : <IconArrowUp/>}
       </IconButton>
-      <SVGContextSpy watch={showHand}/>
+      <SVGContextSpy name='Hand Spy' watch={showHand}/>
     </Paper>
     {showHand && <div className={classes.handWrapperBody}>{children}</div>}
   </Paper>

@@ -21,12 +21,13 @@ import {chatMessageRequest} from "../../../shared/actions/chat";
 import {debugMirrorPlayer} from "../../actions/debug";
 import {InteractiveFood} from "./food/Food";
 import {InteractionContext, InteractionManagerProvider} from './InteractionManager'
-import {SVGContextProvider, SVGContextSpy} from "./SVGContext";
+import {SVGContext, SVGContextProvider, SVGContextSpy} from "./SVGContext";
 import GameSVGOverlay from "./GameSVGOverlay";
 import GameTimedOutDialog from "./ui/GameTimedOutDialog";
 import QuestionIntellect from "./ui/QuestionIntellect";
 import QuestionDefence from "./ui/QuestionDefence";
 import {InteractiveShell} from "./food/Shell";
+import AnimatedHOC from "../../services/AnimationService/AnimatedHOC";
 
 const styles = theme => ({
   GameUIv3Container: {
@@ -109,9 +110,13 @@ export class SVGContextInteractionSpy extends React.PureComponent {
   static contextType = InteractionContext;
 
   render() {
-    return <SVGContextSpy watch={this.context.interaction}/>
+    return <SVGContextSpy name='SVGContextInteractionSpy' watch={this.context.interaction}/>
   }
 }
+
+// const SVGContextStoreSpy = connect((state) => ({animation: state.animation}))(
+//   ({animation}) => <SVGContextSpy name='Animation Spy' watch={animation}/>
+// );
 
 export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
   return (
@@ -142,7 +147,7 @@ export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
           </Paper>
         </Grid>
         <Grid item className={classes.gridPlayers}>
-          {game.sortPlayersFromIndex(game.players).map((player) => (
+          {game.sortPlayersFromIndex(game.players, 0).map((player) => (
             <PlayerWrapper key={player.id} playerId={player.id} classes={classes} game={game}/>
           ))}
         </Grid>
@@ -151,10 +156,12 @@ export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
   );
 };
 
-export const FoodWrapper = ({game}) => <Fragment>
-  {game.continents.get('standard').shells.map((trait) => <InteractiveShell key={trait.id} trait={trait}/>).toList()}
-  {repeat(game.food, i => <InteractiveFood key={i}/>)}
-</Fragment>;
+export const FoodWrapper = AnimatedHOC(() => `FoodContainer`)(
+  ({game}) => <div className='FoodContainer' style={{height: '100%'}}>
+    {game.continents.get('standard').shells.map((trait) => <InteractiveShell key={trait.id} trait={trait}/>).toList()}
+    {repeat(game.food, i => <InteractiveFood key={i}/>)}
+  </div>
+);
 
 export const ChatWrapper = ({game}) => <Chat chatTargetType='ROOM' roomId={game.roomId}/>;
 
