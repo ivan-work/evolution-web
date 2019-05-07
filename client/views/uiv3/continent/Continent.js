@@ -98,6 +98,7 @@ export default compose(
     const renderZoneList = isUserContinent && isDeploy ? renderZoneListDeploy : renderZoneListOther;
     return {
       renderZoneList
+      , isUserContinent
       , continent: player.continent.toList()
     }
   })

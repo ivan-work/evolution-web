@@ -28,6 +28,9 @@ import QuestionIntellect from "./ui/QuestionIntellect";
 import QuestionDefence from "./ui/QuestionDefence";
 import {InteractiveShell} from "./food/Shell";
 import AnimatedHOC from "../../services/AnimationService/AnimatedHOC";
+import GameStyles from "./GameStyles";
+import Measure from 'react-measure';
+import playerBackground from '@material-ui/core/colors/teal';
 
 const styles = theme => ({
   GameUIv3Container: {
@@ -78,23 +81,41 @@ const styles = theme => ({
     flex: '1 1 auto'
     , display: 'flex'
     , flexFlow: 'row wrap'
+    // , [`@media (max-width:1800px)`]: {
+    //   '& .PlayerWrapper': {
+    //     minWidth: '33%'
+    //     , background: 'red'
+    //   }
+    // }
+    // , [`@media (max-width:1400px)`]: {
+    //   '& .PlayerWrapper': {
+    //     minWidth: '50%'
+    //     , background: 'blue'
+    //   }
+    // }
+    // , [`@media (max-width:1000px)`]: {
+    //   '& .PlayerWrapper': {
+    //     minWidth: '100%'
+    //     , background: 'green'
+    //   }
+    // }
   }
   , gridHand: {}
 
   , PlayerWrapper: {
     display: 'flex'
     , flexFlow: 'column nowrap'
+    // , flex: '1 1 0'
 
     , margin: 2
 
-    , flex: '1 1 auto'
-    , maxWidth: '100%'
-    // , minHeight: GameStyles.animal.height * 1.2 + 60
-    // , maxHeight: GameStyles.animal.height * 2.2 + 60
+    , flex: '1 1 0'
+    , minWidth: GameStyles.defaultWidth * 4
+    // , maxWidth: '100%'
 
     , textAlign: 'center'
-    , '&.highlight': {
-      background: theme.palette.tertiary[50]
+    , '&.isUserTurn': {
+      background: '#F3FFFA'
     }
   }
   , isPlayerTurn: {
@@ -169,12 +190,19 @@ export const ChatWrapperSmall = ({game}) => <ChatWindow chatTargetType='ROOM' ro
 
 export const PlayerWrapper = ({classes, playerId, game}) => {
   const currentPlayerId = game.getPlayer() ? game.getPlayer().id : null;
-  return <Paper id={playerId} className={`${classes.PlayerWrapper}`}>
+  const isUserWrapper = currentPlayerId === playerId;
+  const isPlayerTurn = game.isPlayerTurn();
+  const className = cn(classes.PlayerWrapper, 'PlayerWrapper', {
+    isUserWrapper
+    , isPlayerTurn
+    , isUserTurn: isUserWrapper && isPlayerTurn
+  });
+  return <Paper id={playerId} className={className}>
     <PlayerUser game={game} playerId={playerId}/>
     <div className={classes.ContinentContainer}>
       <Continent playerId={playerId}/>
     </div>
-    {currentPlayerId === playerId && <Grid item className={classes.gridHand}>
+    {isUserWrapper && <Grid item className={classes.gridHand}>
       <PlayerHandWrapper><PlayerHand/></PlayerHandWrapper>
     </Grid>}
   </Paper>

@@ -2,16 +2,15 @@ import {AT_LONG, AT_MEDIUM, AT_SHORT} from "./animations";
 
 export const pingTrait = (manager, {traitId, traitType}) => {
   const TraitHtml = manager.getAnimalTrait(traitId);
-  console.log('pinging', traitType, traitId, TraitHtml);
+  // console.log('pinging', traitType, traitId, TraitHtml);
 
   if (!TraitHtml) return;
 
-
-  TraitHtml.classList.add('Animate');
+  TraitHtml.classList.add('animation');
 
   return new Promise((resolve) => setTimeout(() => {
     const TraitHtml = manager.getAnimalTrait(traitId);
-    if (TraitHtml) TraitHtml.classList.remove('Animate');
+    if (TraitHtml) TraitHtml.classList.remove('animation');
     resolve();
   }, AT_MEDIUM));
 };

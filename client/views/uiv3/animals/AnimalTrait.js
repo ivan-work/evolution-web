@@ -25,6 +25,8 @@ import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
 
 export const AnimalTraitBody = styled('div')({
   ...GameStyles.animalTrait
+  , willChange: 'background'
+  , transition: 'background .5s'
   , ...GameStyles.addTraitColors((colorConfig) => ({
     background: colorConfig.fill
     , '& .AnimalTraitText': {
@@ -67,12 +69,11 @@ export const AnimalTraitBody = styled('div')({
       background: colorConfig.fillSource
       , '& .AnimalTraitText': {
         color: colorConfig.textSource
-        , fontWeight: 500
       }
     }
   }))
-  , '&.Animate': {
-    backgroundColor: '#0F0 !important'
+  , '&.animation': {
+    background: '#0F0 !important'
   }
 });
 

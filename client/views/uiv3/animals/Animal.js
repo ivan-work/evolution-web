@@ -64,7 +64,7 @@ const styles = theme => ({
       , transform: 'scaleX(0)'
       // , transition: 'background-color ${DEATH_ANIMATION_TIME}, max-width ${DEATH_ANIMATION_TIME}, min-width ${DEATH_ANIMATION_TIME}, margin ${DEATH_ANIMATION_TIME}'
       , transition: `linear ${DEATH_ANIMATION_TIME}`
-      , '& .AnimalTrait2': {
+      , '& > div': {
         visibility: 'hidden'
       }
     }

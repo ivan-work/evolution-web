@@ -15,6 +15,7 @@ const styles = {
     display: 'flex'
     , flexFlow: 'row wrap'
     , margin: '2px auto'
+    , justifyContent: 'center'
     // , overflow: 'auto'
   }
   , Card: {

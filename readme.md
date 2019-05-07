@@ -1,28 +1,26 @@
 # Evolution-web
 
 ### Install
-1. clone 
-2. ```$ npm i```
-3. ```$ cp .env.sample .env```
-4. fill .env
+1. clone
+1. ```$ npm i```
+1. ```$ cp .env.sample .env```
+1. fill .env
 
 ### Run
 
-####dev:
+#### dev:1
 ```
 $ npm start
 ```
 
-####prod: 
+#### prod:
 ```
 $ NODE_ENV=production
 $ npm run build
 $ npm run server:start
 ```
 
-#### tests:
+#### test:
 ```
-$ LOG_LEVEL=warn gulp test:shared
-or
-$ gulp test:client
+$ LOG_LEVEL=warn npm run test:shared
 ```
