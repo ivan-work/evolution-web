@@ -41,7 +41,7 @@ export default compose(
     } else if (isAmbush) {
       return {
         color: 'secondary'
-        , disabled: playerHasAmbushes(game)
+        , disabled: !playerHasAmbushes(game)
         , onClick: $traitAmbushContinue
         , text: T.translate('Game.UI.EndAmbush')
       }

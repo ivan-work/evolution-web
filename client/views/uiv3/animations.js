@@ -14,6 +14,7 @@ export default {
       if (animalHTML && foodHTML) {
         const animalbbx = animalHTML.getBoundingClientRect();
         const foodbbx = foodHTML.getBoundingClientRect();
+        animalHTML.classList.add('onTop');
         animalHTML.classList.add('animation-stoppable');
         return Velocity(animalHTML, {
           translateX: foodbbx.x + foodbbx.width / 2 - animalbbx.x - animalbbx.width / 2
@@ -30,6 +31,7 @@ export default {
     (manager, {animalId}) => {
       const animalHTML = manager.getAnimal(animalId);
       if (animalHTML) {
+        animalHTML.classList.remove('onTop');
         return Velocity(animalHTML, {
           translateX: 0
           , translateY: 0

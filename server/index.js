@@ -1,5 +1,5 @@
 import globals from '../globals';
-import logger from '~/shared/utils/logger'
+import logger, {loggerOnline} from '../shared/utils/logger'
 import http from 'http';
 import express from 'express';
 import configureStore from './configureStore';
@@ -27,6 +27,7 @@ database.ready.then(() => {
   server.on('error', onError);
   server.on('listening', onListening);
   server.listen(app.get('port'), () => {
+    loggerOnline.info('Server started');
     console.log('App is running at http://localhost:%d in %s mode', app.get('port'), app.get('env'));
     console.log('Press CTRL-C to stop\n');
   });

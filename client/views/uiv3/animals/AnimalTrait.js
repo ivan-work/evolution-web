@@ -2,7 +2,7 @@ import React from 'react';
 import T from "i18n-react";
 import cn from "classnames";
 
-import {compose} from "recompose";
+import {compose, withHandlers} from "recompose";
 import {connect} from "react-redux";
 import withStyles from '@material-ui/core/styles/withStyles';
 
@@ -84,13 +84,13 @@ export class TraitBase extends React.PureComponent {
   };
 
   render() {
-    const {trait, canStart, disabled} = this.props;
+    const {trait, canStart, value, disabled} = this.props;
     const cnAnimalTrait = cn(
       'AnimalTrait2'
       , trait.type
       , {
         canStart
-        , value: trait.value
+        , value: value || trait.value
         , source: trait.linkSource
         , disabled: disabled || trait.disabled
       }
@@ -169,9 +169,11 @@ export const InteractiveTraitRecombination = compose(
 export const InteractiveTraitAmbush = compose(
   connect((state, props) => ({
     canStart: checkCanStartAmbush(state, props)
-  }), (dispatch, {trait, sourceAnimal}) => ({
-    startInteraction: () => dispatch(traitAmbushActivateRequest(sourceAnimal.id, trait.value))
+    , value: state.game.getIn(['ambush', 'ambushers', props.sourceAnimal.id])
   }))
+  , withHandlers({
+    startInteraction: ({dispatch, sourceAnimal, value}) => () => dispatch(traitAmbushActivateRequest(sourceAnimal.id, !value))
+  })
 )(TraitBase);
 
 export const InteractiveTraitClickable = compose(

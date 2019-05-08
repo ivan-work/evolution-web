@@ -26,7 +26,7 @@ export const InteractionSource = (type, {canStart, onStart}) => compose(
       if (canStart) {
         const interactionData = onStart(props);
         if (interactionData !== false) {
-          console.log(`im.startInteraction`, type, interactionData);
+          // console.log(`im.startInteraction`, type, interactionData);
           return im.startInteraction(type, interactionData);
         }
       }
@@ -72,7 +72,7 @@ export class InteractionManagerProvider extends React.PureComponent {
 
   handleGlobalClick = () => {
     if (this.state.interaction) {
-      console.log(`im.handleGlobalClick`, this.state.interaction.type, this.state.interaction.data);
+      // console.log(`im.handleGlobalClick`, this.state.interaction.type, this.state.interaction.data);
       this.cancelInteraction();
     }
   };

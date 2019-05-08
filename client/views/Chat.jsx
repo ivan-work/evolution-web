@@ -14,7 +14,7 @@ import withStyles from "@material-ui/core/styles/withStyles";
 import {List} from 'immutable';
 import TimeService from '../services/TimeService';
 
-import {CHAT_TARGET_TYPE} from '../../shared/models/ChatModel';
+import {CHAT_MESSAGE_LENGTH, CHAT_TARGET_TYPE} from '../../shared/models/ChatModel';
 import {chatMessageRequest} from '../../shared/actions/actions';
 import GameStyles from "./uiv3/GameStyles";
 
@@ -128,7 +128,9 @@ const ChatInput = compose(
   <TextField className={className}
              placeholder={T.translate('App.Chat.EnterMessage')}
              value={message}
-             maxLength={255}
+             inputProps={{
+               maxLength: CHAT_MESSAGE_LENGTH
+             }}
              onChange={onMessageChange}
              autoComplete={'off'}
              onKeyUp={onMessageSend}/>
@@ -185,13 +187,22 @@ export const Chat = compose(
 ));
 
 
-{/*<div className={classes.root}>*/}
-  {/*<div className={className} ref={chatWindowRef} onScroll={handleScroll}>*/}
-    {/*<ChatWindow className={classes.window} {...{roomId, chatTargetType, chatWindowRef, handleScroll}}/>*/}
-  {/*</div>*/}
-  {/*<div className={classes.inputArea}>*/}
-    {/*<ChatInput className={classes.input} roomId={roomId} chatTargetType={chatTargetType}/>*/}
-    {/*{!atBottom && <Button size="small" variant='text' onClick={scrollToBottom}>v</Button>}*/}
-  {/*</div>*/}
-{/*</div>*/}
+{/*<div className={classes.root}>*/
+}
+{/*<div className={className} ref={chatWindowRef} onScroll={handleScroll}>*/
+}
+{/*<ChatWindow className={classes.window} {...{roomId, chatTargetType, chatWindowRef, handleScroll}}/>*/
+}
+{/*</div>*/
+}
+{/*<div className={classes.inputArea}>*/
+}
+{/*<ChatInput className={classes.input} roomId={roomId} chatTargetType={chatTargetType}/>*/
+}
+{/*{!atBottom && <Button size="small" variant='text' onClick={scrollToBottom}>v</Button>}*/
+}
+{/*</div>*/
+}
+{/*</div>*/
+}
 export default Chat;
