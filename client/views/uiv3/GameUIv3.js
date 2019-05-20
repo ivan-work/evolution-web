@@ -1,29 +1,36 @@
-import {Set} from 'immutable';
-
-import React from 'react';
-import {compose, lifecycle, withStateHandlers} from "recompose";
+import React, {Fragment} from 'react';
+import cn from 'classnames';
+import {compose, lifecycle, nest, withStateHandlers} from "recompose";
 import {connect} from "react-redux";
+import repeat from 'lodash/times';
+import wrap from '../utils/wrap';
+
+import Grid from "@material-ui/core/Grid";
+import Paper from "@material-ui/core/Paper";
 import withStyles from '@material-ui/core/styles/withStyles';
 
-import Chat from "../Chat";
-import Grid from "@material-ui/core/Grid/Grid";
-import PlayerHand from "./PlayerHand";
-import Continent from "./continent/Continent";
-import ContinentPreview from "./continent/ContinentPreview";
-import {debugMirrorPlayer} from "../../actions/debug";
-import PreviewTab from "./preview/PreviewTab";
-import PreviewPlayer from "./preview/PreviewPlayer";
-import PreviewFood from "./preview/PreviewFood";
-// import GamePreviews from "./GamePreviews";
-import IconFood from '@material-ui/icons/Spa';
-import User from "../utils/User";
+import Chat, {ChatWindow} from "../Chat";
 import PlayerHandWrapper from "./PlayerHandWrapper";
+import PlayerHand from "./PlayerHand";
 import GameInfoToolbar from "./ui/GameInfoToolbar";
-import Paper from "@material-ui/core/Paper/Paper";
-import PreviewChat from "./preview/PreviewChat";
+import PlayersList from "./ui/PlayersList";
+import PlayerUser from "./ui/PlayerUser";
+import Continent from "./continent/Continent";
+
 import {chatMessageRequest} from "../../../shared/actions/chat";
+import {debugMirrorPlayer} from "../../actions/debug";
+import {InteractiveFood} from "./food/Food";
+import {InteractionContext, InteractionManagerProvider} from './InteractionManager'
+import {SVGContext, SVGContextProvider, SVGContextSpy} from "./SVGContext";
+import GameSVGOverlay from "./GameSVGOverlay";
+import GameTimedOutDialog from "./ui/GameTimedOutDialog";
+import QuestionIntellect from "./ui/QuestionIntellect";
+import QuestionDefence from "./ui/QuestionDefence";
+import {InteractiveShell} from "./food/Shell";
+import AnimatedHOC from "../../services/AnimationService/AnimatedHOC";
 import GameStyles from "./GameStyles";
-import LocationService from "../../services/LocationService";
+import Measure from 'react-measure';
+import playerBackground from '@material-ui/core/colors/teal';
 
 const styles = theme => ({
   GameUIv3Container: {
@@ -37,13 +44,7 @@ const styles = theme => ({
     , overflowY: 'auto'
     , scrollBehavior: 'smooth'
     , flexWrap: 'nowrap'
-  }
-  , gridPreviews: {
-    background: theme.palette.background.paper
-    , flexWrap: 'wrap'
-    , justifyContent: 'space-evenly'
-    , marginTop: 2
-    , flex: '0 0 auto'
+    , position: 'relative'
   }
   , gridGameToolbar: {
     background: theme.palette.background.paper
@@ -51,135 +52,160 @@ const styles = theme => ({
     , marginBottom: 2
     // marginTop: theme.spacing.unit
   }
-  , gridFocus: {
+  , gridMiscRow: {
+    display: 'flex'
+    , flexFlow: 'row wrap'
+  }
+  , gridMiscItem: {
+    flex: '1 1 0'
+    , margin: 1
+    , minHeight: '4em'
+    , maxHeight: 140
+    , '&.Compressed': {
+      maxHeight: 36
+      , minHeight: 36
+    }
+    , '&.PlayersList': {
+      minWidth: 180
+      , maxWidth: 320
+      , overflowY: 'auto'
+    }
+    , '&.Food': {
+      minWidth: 140
+    }
+    , '&.Chat': {
+      minWidth: 320
+    }
+  }
+  , gridPlayers: {
     flex: '1 1 auto'
     , display: 'flex'
     , flexFlow: 'row wrap'
+    // , [`@media (max-width:1800px)`]: {
+    //   '& .PlayerWrapper': {
+    //     minWidth: '33%'
+    //     , background: 'red'
+    //   }
+    // }
+    // , [`@media (max-width:1400px)`]: {
+    //   '& .PlayerWrapper': {
+    //     minWidth: '50%'
+    //     , background: 'blue'
+    //   }
+    // }
+    // , [`@media (max-width:1000px)`]: {
+    //   '& .PlayerWrapper': {
+    //     minWidth: '100%'
+    //     , background: 'green'
+    //   }
+    // }
   }
-  , gridHand: {
-    marginTop: 2
-    , flex: '1 1 auto'
-  }
-  , FocusContainer: {
+  , gridHand: {}
+
+  , PlayerWrapper: {
     display: 'flex'
     , flexFlow: 'column nowrap'
+    // , flex: '1 1 0'
 
     , margin: 2
 
-    , flex: '1 1 auto'
-    , maxWidth: '100%'
-    // , minHeight: GameStyles.animal.height * 1.2 + 60
-    // , maxHeight: GameStyles.animal.height * 2.2 + 60
+    , flex: '1 1 0'
+    , minWidth: GameStyles.defaultWidth * 4
+    // , maxWidth: '100%'
 
     , textAlign: 'center'
-    , '&.hideWhenSmall': {
-      [theme.breakpoints.down('md')]: {
-        display: 'none'
-      }
-    }
-    , '&.FOOD': {minWidth: 150, maxWidth: 300}
-    , '&.CHAT': {minWidth: 300, maxWidth: '50%'}
-    , '&.PLAYER': {minWidth: 200}
-    , '&.highlight': {
-      background: theme.palette.tertiary[50]
+    , '&.isUserTurn': {
+      background: '#F3FFFA'
     }
   }
-  , FocusScroll: {
+  , isPlayerTurn: {
+    background: '#dfd'
+  }
+  , ContinentContainer: {
     display: 'flex'
     , flex: '1 1 auto'
   }
 });
 
-export const GameUIv3 = ({classes, game, currentPlayerId, focusHover, focusSelect, setHoverFocus, setClickFocus, preview, togglePreview}) => {
-  const focusControls = {
-    setHoverFocus, setClickFocus, focusHover, focusSelect
-  };
+export class SVGContextInteractionSpy extends React.PureComponent {
+  static contextType = InteractionContext;
+
+  render() {
+    return <SVGContextSpy name='SVGContextInteractionSpy' watch={this.context.interaction}/>
+  }
+}
+
+// const SVGContextStoreSpy = connect((state) => ({animation: state.animation}))(
+//   ({animation}) => <SVGContextSpy name='Animation Spy' watch={animation}/>
+// );
+
+export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
   return (
     <Grid container direction='column' className={classes.GameUIv3Container}>
-      {preview && <Grid item container className={classes.gridPreviews}>
-        {/*<PreviewChat game={game}*/}
-                     {/*focusId='CHAT'*/}
-                     {/*focusControls={focusControls}/>*/}
-        <PreviewFood game={game}
-                     focusId='FOOD'
-                     focusControls={focusControls}/>
-        {game.players.toList().map(player => (
-          <PreviewPlayer key={player.id}
-                         player={player}
-                         focusId={player.id}
-                         focusControls={focusControls}
-          />
-        ))}
-      </Grid>}
       <Grid item className={classes.gridGameToolbar}>
-        <GameInfoToolbar game={game} previewControls={{preview, togglePreview}}/>
+        <GameInfoToolbar game={game} compressControls={{compress, toggleCompress}}/>
       </Grid>
       <Grid item container direction='column' className={classes.GameUIv3}>
-        {/*<Chat chatTargetType='ROOM' roomId={game.roomId}/>*/}
-        {/*{JSON.stringify(focus, null, ' ')}*/}
-        <Grid item className={classes.gridFocus}>
-          <FocusedElement focusId={'FOOD'} classes={classes} game={game}/>
-          <FocusedElement focusId={'CHAT'} classes={classes} game={game}/>
-          {game.players.toList().map((player) => (
-            <FocusedElement key={player.id} focusId={player.id} classes={classes} game={game}/>
+
+        {/*<CurrentInteractionDebug/>*/}
+        <GameSVGOverlay/>
+        <SVGContextInteractionSpy/>
+        {/*<SVGContextSpy compress={!!compress}/>*/}
+        {/*{JSON.stringify(!!compress)}*/}
+        <GameTimedOutDialog/>
+        <QuestionIntellect/>
+        <QuestionDefence/>
+
+        <Grid item className={classes.gridMiscRow}>
+          {!compress && <Paper className={classes.gridMiscItem + ' PlayersList ' + cn({'Compressed': compress})}>
+            <PlayersList game={game}/>
+          </Paper>}
+          <Paper className={classes.gridMiscItem + ' Food ' + cn({'Compressed': compress})}>
+            <FoodWrapper game={game}/>
+          </Paper>
+          <Paper className={classes.gridMiscItem + ' Chat ' + cn({'Compressed': compress})}>
+            {!compress ? <ChatWrapper game={game}/> : <ChatWrapperSmall game={game}/>}
+          </Paper>
+        </Grid>
+        <Grid item className={classes.gridPlayers}>
+          {game.sortPlayersFromIndex(game.players, 0).map((player) => (
+            <PlayerWrapper key={player.id} playerId={player.id} classes={classes} game={game}/>
           ))}
-
-          {/*{currentPlayerId && <FocusedElement focusId={currentPlayerId} classes={classes} game={game}/>}*/}
-          {/*{focusSelect.has('FOOD') && <FocusedElement focusId={'FOOD'} classes={classes} game={game}/>}*/}
-          {/*{*/}
-          {/*focusSelect.map((focusId) => (*/}
-          {/*focusId !== currentPlayerId*/}
-          {/*&& focusId !== 'FOOD'*/}
-          {/*&& focusId !== 'CHAT'*/}
-          {/*&& focusSelect.has(focusId)*/}
-          {/*&& <FocusedElement key={focusId} focusId={focusId} classes={classes} game={game}/>*/}
-          {/*))*/}
-          {/*}*/}
-          {/*{focusSelect.has('CHAT') && <FocusedElement focusId={'CHAT'} classes={classes} game={game}/>}*/}
-
-
-          {/*{currentPlayerId && <FocusedElement classes={classes}*/}
-          {/*game={game}*/}
-          {/*hideWhenSmall*/}
-          {/*focus={{type: FOCUS_TYPE.PLAYER, data: currentPlayerId}}/>}*/}
-          {/*<FocusedElement classes={classes}*/}
-          {/*game={game}*/}
-          {/*focus={focus.hover || focus.click || {type: FOCUS_TYPE.PLAYER, data: currentPlayerId}}/>*/}
-          {/*<Continent playerId={game.getPlayer().id}/>*/}
         </Grid>
       </Grid>
     </Grid>
   );
 };
 
-export const FocusedElement = ({classes, focusId, hideWhenSmall, game}) => {
-  const currentPlayerId = game.getPlayer() ? game.getPlayer().id : null;
-  const locationHash = LocationService.getLocationHash();
+export const FoodWrapper = AnimatedHOC(() => `FoodContainer`)(
+  ({game}) => <div className='FoodContainer' style={{height: '100%'}}>
+    {game.continents.get('standard').shells.map((trait) => <InteractiveShell key={trait.id} trait={trait}/>).toList()}
+    {repeat(game.food, i => <InteractiveFood key={i}/>)}
+  </div>
+);
 
-  if (focusId === 'FOOD') {
-    return <Paper id={focusId}
-                  className={`${classes.FocusContainer} ${focusId} ${locationHash === focusId ? 'highlight' : ''}`}>
-      {Array.from({length: game.food}).map((u, index) => 'F ')}
-    </Paper>;
-  } else if (focusId === 'CHAT') {
-    return <Paper id={focusId}
-                  className={`${classes.FocusContainer} ${focusId} ${locationHash === focusId ? 'highlight' : ''}`}>
-      <Chat chatTargetType='ROOM' roomId={game.roomId}/>
-    </Paper>;
-  } else if (focusId) {
-    return <Paper id={focusId}
-                  className={`${classes.FocusContainer} PLAYER ${focusId} ${locationHash === focusId ? 'highlight' : ''}`}>
-      <User id={focusId}/>
-      <div className={classes.FocusScroll}>
-        <Continent playerId={focusId}/>
-      </div>
-      {currentPlayerId === focusId && <Grid item className={classes.gridHand}>
-        <PlayerHandWrapper><PlayerHand/></PlayerHandWrapper>
-      </Grid>}
-    </Paper>
-  } else {
-    return null;
-  }
+export const ChatWrapper = ({game}) => <Chat chatTargetType='ROOM' roomId={game.roomId}/>;
+
+export const ChatWrapperSmall = ({game}) => <ChatWindow chatTargetType='ROOM' roomId={game.roomId} length={1}/>;
+
+export const PlayerWrapper = ({classes, playerId, game}) => {
+  const currentPlayerId = game.getPlayer() ? game.getPlayer().id : null;
+  const isUserWrapper = currentPlayerId === playerId;
+  const isPlayerTurn = game.isPlayerTurn();
+  const className = cn(classes.PlayerWrapper, 'PlayerWrapper', {
+    isUserWrapper
+    , isPlayerTurn
+    , isUserTurn: isUserWrapper && isPlayerTurn
+  });
+  return <Paper id={playerId} className={className}>
+    <PlayerUser game={game} playerId={playerId}/>
+    <div className={classes.ContinentContainer}>
+      <Continent playerId={playerId}/>
+    </div>
+    {isUserWrapper && <Grid item className={classes.gridHand}>
+      <PlayerHandWrapper><PlayerHand/></PlayerHandWrapper>
+    </Grid>}
+  </Paper>
 };
 
 export default compose(
@@ -189,38 +215,28 @@ export default compose(
     const currentPlayerId = game.getPlayer() ? game.getPlayer().id : null;
     return {game, currentPlayerId}
   })
-  , withStateHandlers(({currentPlayerId}) => ({
-    preview: true
-    , focus: Set(['CHAT', 'FOOD', currentPlayerId])
-    , focusSelect: Set(['CHAT', 'FOOD', currentPlayerId])
-    , focusHover: null
-  }), {
-    togglePreview: ({preview}) => () => ({preview: !preview})
-    , setHoverFocus: () => (focusHover) => ({focusHover})
-    , setClickFocus: ({focusSelect}) => (focusId, flag = false) => {
-      return ({
-        focusSelect: flag
-          ? focusSelect.add(focusId)
-          : focusSelect.remove(focusId)
-      })
-    }
+  , wrap(SVGContextProvider)
+  , wrap(InteractionManagerProvider)
+  , withStateHandlers(({compress: false}), {
+    toggleCompress: ({compress}) => () => ({compress: !compress})
   })
   // debug
   , connect(null, {debugMirrorPlayer, chatMessageRequest})
   , lifecycle({
     mirrorPlayer() {
       if (process.env.NODE_ENV !== 'development') return;
-      if (this.props.game.players.size === 1) {
-        this.props.debugMirrorPlayer();
-      } else if (this.props.game.players.size === 2) {
-        this.props.debugMirrorPlayer({limit: 1});
-      } else if (this.props.game.players.size === 3) {
-        this.props.debugMirrorPlayer({limit: 2});
-      } else if (this.props.game.players.size === 4) {
-        this.props.debugMirrorPlayer({limit: 5});
-      } else if (this.props.game.players.size === 5) {
-        this.props.debugMirrorPlayer({limit: 8});
-      }
+      // if (this.props.game.players.size === 1) {
+      //   this.props.debugMirrorPlayer({limit: 10});
+      // }
+      // else if (this.props.game.players.size === 2) {
+      //   this.props.debugMirrorPlayer({limit: 1});
+      // } else if (this.props.game.players.size === 3) {
+      //   this.props.debugMirrorPlayer({limit: 2});
+      // } else if (this.props.game.players.size === 4) {
+      //   this.props.debugMirrorPlayer({limit: 5});
+      // } else if (this.props.game.players.size === 5) {
+      //   this.props.debugMirrorPlayer({limit: 8});
+      // }
     },
     componentDidMount() {
       this.mirrorPlayer();

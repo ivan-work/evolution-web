@@ -17,22 +17,23 @@ deck: 12 camo
 phase: feeding
 food: 0
 players:
-  - continent: $A carn, $B carn, $C carn, $Waiter fat=true
+  - continent: $A carn, $B carn, $C carn, $W wait +
   - continent: $X pois, $Y pois
 `);
-    const {selectGame, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-    expect(selectTrait(User1, 0, 0).type).equal('TraitPoisonous');
-    expect(selectTrait(User1, 1, 0).type).equal('TraitPoisonous');
+    const {selectGame, selectPlayer, selectAnimal, findAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$X'));
-    expect(selectAnimal(User0, 0).hasFlag(TRAIT_ANIMAL_FLAG.POISONED)).true;
+    expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.POISONED), '$A is poisoned').true;
+    clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$B', 'TraitCarnivorous', '$Y'));
-    expect(selectAnimal(User0, 1).hasFlag(TRAIT_ANIMAL_FLAG.POISONED)).true;
+    expect(findAnimal('$B').hasFlag(TRAIT_ANIMAL_FLAG.POISONED), '$B is poisoned').true;
+    clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$C', 'TraitCarnivorous', '$B'));
     expect(selectAnimal(User0, 1).hasFlag(TRAIT_ANIMAL_FLAG.POISONED)).not.true;
     expect(selectAnimal(User0, 1).getFoodAndFat()).equal(2);
+    clientStore0.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(gameEndTurnRequest());
 
     // DEPLOY 1

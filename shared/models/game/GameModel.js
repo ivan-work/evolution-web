@@ -1,3 +1,4 @@
+import logger from '../../utils/logger';
 import {Record, Map, OrderedMap, Range, List} from 'immutable';
 
 import {PlayerModel} from './PlayerModel';
@@ -245,7 +246,7 @@ export class GameModel extends Record({
     // TODO question
     return this
       .set('deck', this.deck.map(card => card.toClient()))
-      .set('players', this.players.map(player => player.toClient()))
+      .set('players', this.players.map(player => player.toClient()).entrySeq().toJS())
       .remove('huntingCallbacks')
   }
 

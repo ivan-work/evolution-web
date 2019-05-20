@@ -10,6 +10,7 @@ import {TraitModel} from './evolution/TraitModel';
 import * as cardsData from './evolution/cards/index';
 import {TraitNeoplasm} from './evolution/traitsData';
 import yaml from 'yaml-js';
+import logger from "../../utils/logger";
 
 const searchCardClasses = (name) => Object.keys(cardsData)
   .find(cardType => ~cardType.toLowerCase().indexOf(name.toLowerCase()));
@@ -99,15 +100,14 @@ export const parseFromRoom = (room, string = '') => {
   const deck = parseCardList(seed.deck || '').map(card => card.toClient());
 
   const players = room.users.reduce((result, id, index) => {
-    result[id] = new PlayerModel({
+    return [...result, [id, new PlayerModel({
       id
       , hand: parseCardList(seed.players && seed.players[index] && seed.players[index].hand || '')
       , continent: parseAnimalList(id, seed.players && seed.players[index] && seed.players[index].continent || '')
       , index
       , ended: false
-    }).toClient();
-    return result;
-  }, {});
+    }).toClient()]];
+  }, []);
 
   return GameModel.fromServer(new GameModel({
     id: uuid.v4()

@@ -10,10 +10,10 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import {withStyles} from '@material-ui/core/styles';
 
 import AppBar from './appbar/AppBar';
-import {AdminPanelView} from '../components/AdminPanel.jsx'
 import {PortalsContext, PortalTarget} from '../views/utils/PortalTarget.jsx'
 import {TranslationSwitchView} from '../components/TranslationSwitch.jsx'
 import ErrorReporter from '../components/ErrorReporter.jsx';
+import AppModal from "./modals/AppModal";
 
 const styles = theme => ({
   root: {
@@ -37,6 +37,7 @@ export const App = ({children, sound, appChangeSound, classes, history, location
       <CssBaseline/>
       <AppBar/>
       <ErrorReporter/>
+      <AppModal/>
       <div className={classes.content}>
         <div className={classes.appBarSpacer}/>
         <Router history={history}>
@@ -51,7 +52,6 @@ export const App = ({children, sound, appChangeSound, classes, history, location
            style={{position: 'absolute', left: '0', top: '0', zIndex: 100, pointerEvents: 'none'}}>
         <PortalTarget name='tooltips'/>
       </div>
-      {/*<AdminPanelView location={location}/>*/}
     </div>
   );
 }

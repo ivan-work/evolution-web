@@ -25,10 +25,6 @@ import CustomDragLayer from './dnd/CustomDragLayer.jsx';
 // Style
 import './Game.scss'
 
-// Animations
-import {AnimationServiceContext} from '../../services/AnimationService';
-import {createAnimationServiceConfig} from './animations';
-
 // Components
 import {Portal} from '../utils/Portal.jsx';
 import {ControlGroup} from '../utils/ControlGroup.jsx';
@@ -174,7 +170,6 @@ export const GameView = compose(
       , $exit: () => dispatch(roomExitRequest())
     })
   )
-  , AnimationServiceContext(createAnimationServiceConfig())
 )(Game);
 
 export default GameView;

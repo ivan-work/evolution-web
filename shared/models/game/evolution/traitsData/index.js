@@ -99,14 +99,17 @@ export const TraitMimicry = {
     dispatch(server$traitStartCooldown(game.id, traitMimicry, mimicryAnimal));
     return dispatch(server$traitActivate(game, attackAnimal, attackTrait, newTargetAnimal));
   }
-  , getTargets: (game, attackAnimal, attackTraitData, mimicryAnimal) => {
-    return game.getPlayer(mimicryAnimal.ownerId).continent.filter((animal) =>
-      mimicryAnimal.id !== animal.id
-      && attackAnimal.id !== animal.id
+  , checkTarget: (game, mimicryAnimal, targetAnimal, attackAnimal, attackTrait) => {
+    return mimicryAnimal.id !== targetAnimal.id
+      && attackAnimal.id !== targetAnimal.id
       //&& !animal.hasTrait(tt.TraitMimicry)
       //&& (!animal.hasTrait(tt.TraitMimicry) || animal.hasTrait(tt.TraitMimicry) && animal.hasTrait(tt.TraitMimicry).checkActionFails(game, animal))
-      && attackTraitData.checkTarget(game, attackAnimal, animal)
-    ).toList();
+      && attackTrait.getDataModel().checkTarget(game, attackAnimal, targetAnimal)
+  }
+  , getTargets: (game, mimicryAnimal, traitMimicry, attackAnimal, attackTrait) => {
+    return game.getPlayer(mimicryAnimal.ownerId).continent.filter((targetAnimal) => (
+      TraitMimicry.checkTarget(game, mimicryAnimal, targetAnimal, attackAnimal, attackTrait)
+    )).toList();
   }
 };
 
@@ -132,6 +135,7 @@ export const TraitPiracy = {
   , action: (game, sourceAnimal, traitPiracy, targetAnimal) => dispatch => {
     dispatch(server$traitStartCooldown(game.id, traitPiracy, sourceAnimal));
     dispatch(server$startFeeding(game.id, sourceAnimal.id, 1, tt.TraitPiracy, targetAnimal.id));
+    dispatch(server$traitNotify_End(game.id, sourceAnimal.id, traitPiracy, targetAnimal.id));
     return true;
   }
   , $checkAction: (game, sourceAnimal) => sourceAnimal.canEat(game) && sourceAnimal.getNeededFood() > 0
@@ -144,9 +148,10 @@ export const TraitTailLoss = {
   , cooldowns: fromJS([
     [tt.TraitTailLoss, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
-  , getTargets: (game, attackAnimal, attackTraitData, defenseAnimal) => defenseAnimal.getTraits()
+  , checkTarget: (game, sourceAnimal, targetTrait) => targetTrait.type !== tt.TraitTrematode
+  , getTargets: (game, defenseAnimal, defenseTrait, attackAnimal, attackTrait) => defenseAnimal.getTraits()
     .toList()
-    .filter(t => t.type !== tt.TraitTrematode)
+    .filter(t => TraitTailLoss.checkTarget(game, defenseAnimal, t))
   , action: (game, targetAnimal, trait, targetTrait, attackAnimal, attackTrait) => (dispatch, getState) => {
     dispatch(server$traitAnimalRemoveTrait(game, targetAnimal, targetTrait));
 
@@ -237,9 +242,9 @@ export const TraitCooperation = {
   , $checkAction: (game, animal, trait) => {
     const linkedAnimal = trait.findLinkedAnimal(game, animal);
     return (game.food > 0
-    && trait.value
-    && !!linkedAnimal
-    && linkedAnimal.canEat(game));
+      && trait.value
+      && !!linkedAnimal
+      && linkedAnimal.canEat(game));
   }
   , customFns: {
     eventNextPlayer: (trait) => trait.set('value', false)

@@ -188,4 +188,29 @@ players:
 
     expect(selectGame().status.round, 'round changed').equal(1);
   });
+
+  it('$A > $B (mimi) > $C error', () => {
+    const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+food: 10
+deck: 20 camo
+players:
+  - continent: $A carn, $B mimi, $C camo, $D, $E
+`);
+    const {selectGame, selectPlayer, findAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
+
+    expectUnchanged('Cannot mimicry to camouflaged $C', () => {
+      clientStore0.dispatch(traitAnswerRequest('TraitMimicry', '$C'));
+    }, serverStore, clientStore0);
+
+    expect(findAnimal('$A'), '$A is alive').ok;
+    expect(findAnimal('$B'), '$B is alive').ok;
+    expect(findAnimal('$C'), '$C is alive').ok;
+    expect(findAnimal('$D'), '$D is alive').ok;
+    expect(findAnimal('$E'), '$E is alive').ok;
+
+    expect(findAnimal('$A').getFoodAndFat()).equal(0);
+  });
 });

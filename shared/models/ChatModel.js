@@ -1,6 +1,7 @@
 import {Record, List} from 'immutable';
 
 const CHAT_SIZE = 80;
+export const CHAT_MESSAGE_LENGTH = 255;
 
 export const CHAT_TARGET_TYPE = {
   'GLOBAL': 'GLOBAL'

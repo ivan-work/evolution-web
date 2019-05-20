@@ -1,7 +1,7 @@
 import {loggerChat} from '../utils/logger';
 import {to$, server$toRoom, server$toUsers} from './generic';
 
-import {ChatModel, MessageModel, CHAT_TARGET_TYPE} from '../models/ChatModel';
+import {ChatModel, MessageModel, CHAT_TARGET_TYPE, CHAT_MESSAGE_LENGTH} from '../models/ChatModel';
 import {ActionCheckError} from '../models/ActionCheckError';
 
 const CHAT_WHITELIST_REGEX = /[^\wа-яА-ЯёЁ\d\s\?!\.,\(\):]/gmi;
@@ -49,7 +49,7 @@ export const server$chatMessage = (to, toType, text, from) => (dispatch, getStat
   const validText = text
     .trim()
     // .replace(CHAT_WHITELIST_REGEX, '')
-    .slice(0, 127);
+    .slice(0, CHAT_MESSAGE_LENGTH);
   if (validText.length === 0) {
     throw new ActionCheckError('chatMessageRequest not valid');
   }

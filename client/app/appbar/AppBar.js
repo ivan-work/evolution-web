@@ -21,6 +21,7 @@ import {Portal} from "../../views/utils/Portal";
 import Link from "@material-ui/core/Link/Link";
 import {redirectTo} from "../../../shared/utils/history";
 import Hidden from "@material-ui/core/Hidden";
+import GameScoreboardFinal from "../../views/game/ui/GameScoreboardFinal";
 
 const styles = theme => ({
   title: {
@@ -61,8 +62,9 @@ export const AppBar = ({classes}) => (
       <div className={classes.portal}>
         <RoomControlGroup/>
         <AdminControlGroup/>
+        <GameScoreboardFinal/>
         {/*<Scrollbar>*/}
-        <PortalTarget name='header'/>
+        {/*<PortalTarget name='header'/>*/}
         {/*</Scrollbar>*/}
       </div>
 

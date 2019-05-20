@@ -21,7 +21,6 @@ import {CardCollection} from './cards/CardCollection.jsx';
 import DragCard from './cards/Card.jsx';
 import {DropAnimal} from './animals/Animal.jsx';
 import Continent from './continent/Continent.jsx';
-import {AnimationServiceRef} from '../../services/AnimationService';
 
 import {GameModelClient, PHASE} from '../../../shared/models/game/GameModel';
 import {PlayerModel} from '../../../shared/models/game/PlayerModel';
@@ -43,7 +42,6 @@ export class PlayerWrapper extends Component {
   static propTypes = {
     game: PropTypes.instanceOf(GameModelClient).isRequired
     , player: PropTypes.instanceOf(PlayerModel).isRequired
-    , connectRef: PropTypes.func.isRequired
   };
 
   constructor(props) {
@@ -140,7 +138,6 @@ export class PlayerWrapper extends Component {
   renderCard(cardModel, dragEnabled, isUser) {
     return (<DragCard
       key={cardModel.id}
-      ref={this.props.connectRef('Card#' + cardModel.id)}
       card={cardModel}
       isUser={isUser}
       dragEnabled={dragEnabled}/>);
@@ -176,7 +173,6 @@ export class PlayerWrapper extends Component {
     const onAnimalLink = isDeploy ? this.$deployLinkedTrait : this.$noop;
     return (
       <DropAnimal
-        ref={this.props.connectRef('Animal#' + animal.id)}
         key={animal.id}
         game={game}
         model={animal}
@@ -205,7 +201,6 @@ export const PlayerWrapperView = compose(
         , $deployRegeneratedAnimal: (...args) => dispatch(gameDeployRegeneratedAnimalRequest(...args))
       }
     }))
-  , AnimationServiceRef
 )(PlayerWrapper);
 
 export default PlayerWrapperView;

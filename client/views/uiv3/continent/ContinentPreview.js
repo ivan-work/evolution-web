@@ -50,7 +50,7 @@ const styles = {
     , height: 4
     , background: '#ccc'
     , marginTop: 1
-    , ...GameStyles.addTraitColors('background')
+    // , ...GameStyles.addTraitColors('background')
   }
 };
 

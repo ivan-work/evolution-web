@@ -71,12 +71,14 @@ a[disabled] {
   width: 1em;
 }
 
-// MDL
-
-// @formatter:off
-.mdl-layout__content {
-  overflow-x: auto;
-  display: flex;
-  flex-direction: column;
-  //height: 100%;
+.onTop {
+  z-index: 5;
+}
+.animationGhostSource {
+  opacity: .25;
+}
+.animationGhostTarget {
+  position: absolute;
+  left: 0; top: 0;
+  margin: 0;
 }

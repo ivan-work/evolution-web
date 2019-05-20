@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {Fragment} from 'react';
 import PropTypes from 'prop-types'
 import T from 'i18n-react';
 import cn from 'classnames';
+import {connect} from "react-redux";
 
 import Button from '@material-ui/core/Button';
 
@@ -18,17 +19,14 @@ import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableBody from "@material-ui/core/TableBody";
+import {branch, compose, renderNothing} from "recompose";
 
-export default class GameScoreboardFinal extends React.PureComponent {
+export class GameScoreboardFinal extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {show: false};
     this.showedOnce = false;
   }
-
-  static propTypes = {
-    game: PropTypes.instanceOf(GameModelClient).isRequired
-  };
 
   componentDidUpdate() {
     if (!this.showedOnce && this.props.game.status.phase === PHASE.FINAL) {
@@ -40,15 +38,13 @@ export default class GameScoreboardFinal extends React.PureComponent {
   render() {
     const {game} = this.props;
 
-    return <span>
-      {game.status.phase === PHASE.FINAL
-      && <Button className="ShowScoreboardFinal"
+    return <Fragment>
+      <Button className="ShowScoreboardFinal"
                  variant='contained'
                  color='secondary'
                  onClick={() => this.setState({show: true})}>
         {T.translate('Game.UI.Scores.Label')}
       </Button>
-      }
       <Dialog open={this.state.show}>
         {this.state.show && <DialogTitle>
           {T.translate('Game.UI.Scores.Winner')}: <User id={game.winnerId} variant='simple'/>
@@ -59,7 +55,7 @@ export default class GameScoreboardFinal extends React.PureComponent {
                   onClick={() => this.setState({show: false})}>OK</Button>
         </DialogActions>
       </Dialog>
-    </span>
+    </Fragment>
   }
 
   renderDialogContent() {
@@ -88,3 +84,8 @@ export default class GameScoreboardFinal extends React.PureComponent {
     )
   }
 }
+
+export default compose(
+  connect(({game}) => ({game}))
+  , branch(({game}) => !(game && game.status.phase === PHASE.FINAL), renderNothing)
+)(GameScoreboardFinal)

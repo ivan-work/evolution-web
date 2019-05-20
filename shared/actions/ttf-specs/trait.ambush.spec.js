@@ -458,7 +458,7 @@ players:
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
   });
 
-  it(`Ambush at the end of turn`, () => {
+  it(`Ambush on cooperation at the end of turn`, () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: feeding
@@ -471,10 +471,16 @@ settings:
   timeTraitResponse: 100
 `);
     const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    // User0 takes food with $Q
     clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+    // Game enters AMBUSH phase for $Q
     expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+    // User1 skips AMBUSH for $Q
     clientStore1.dispatch(traitAmbushContinueRequest());
+
+    // Game returns to FEEDING phase because $Q has option to share food with $W
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
+    // User0 waits all his time
     serverStore.dispatch(testShiftTime(100));
 
     expect(selectGame().status.phase).equal(PHASE.AMBUSH);
@@ -485,7 +491,46 @@ settings:
     expect(selectGame().status.currentPlayer).equal(User1.id);
   });
 
-  it(`Ambush at the end of turn with multiple targets`, () => {
+  it(`Ambush on cooperation at the end of turn with multiple targets PAUSED`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 10
+players:
+  - continent: $Q coop$W coop$E, $W, $E
+  - continent: $A carn ambu wait, $B carn ambu wait
+`);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+
+    clientStore1.dispatch(traitAmbushContinueRequest());
+
+    expect(selectGame().status.phase).equal(PHASE.FEEDING);
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    // Hunt for $W
+    console.log('Hunt for $W')
+    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+    // Activate both animals:
+    clientStore1.dispatch(traitAmbushActivateRequest('$A'));
+    clientStore1.dispatch(traitAmbushActivateRequest('$B'));
+
+    expect(selectGame().status.phase).equal(PHASE.FEEDING);
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    // Hunt for $E
+    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+    clientStore1.dispatch(traitAmbushActivateRequest('$B'));
+
+
+    expect(selectGame().status.phase).equal(PHASE.FEEDING);
+    expect(selectGame().status.currentPlayer).equal(User1.id);
+    expect(findAnimal('$A').getFood()).equal(2);
+    expect(findAnimal('$B').getFood()).equal(2);
+  });
+
+  it(`Ambush on cooperation at the end of turn with multiple targets UNPAUSED`, () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: feeding
@@ -500,21 +545,26 @@ settings:
     const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
     clientStore0.dispatch(traitTakeFoodRequest('$Q'));
     expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+
     clientStore1.dispatch(traitAmbushContinueRequest());
+
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
     serverStore.dispatch(testShiftTime(100));
 
-    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
-
     // Hunt for $W
+    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
+    // Activate both animals:
     clientStore1.dispatch(traitAmbushActivateRequest('$A'));
     clientStore1.dispatch(traitAmbushActivateRequest('$B'));
 
     // Hunt for $E
+    expect(selectGame().status.phase).equal(PHASE.AMBUSH);
     clientStore1.dispatch(traitAmbushActivateRequest('$B'));
+
 
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
     expect(findAnimal('$A').getFood()).equal(2);
+    expect(findAnimal('$B').getFood()).equal(2);
     expect(selectGame().status.currentPlayer).equal(User1.id);
     expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)].remaining).equal(100);
   });

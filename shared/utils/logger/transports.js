@@ -30,7 +30,7 @@ const formatter = function (options) {
 
 export const consoleTransport = {
   level: process.env.LOG_LEVEL || 'verbose'
-  , handleExceptions: true
+  , handleExceptions: false
   , json: false
   , colorize: true
   , formatter

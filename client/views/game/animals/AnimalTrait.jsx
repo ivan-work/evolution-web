@@ -15,8 +15,9 @@ import AnimalTraitDetails from './AnimalTraitDetails.jsx';
 import Tooltip from '../../utils/Tooltip.jsx';
 
 import '../animals/AnimalTrait.scss';
+import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
 
-class AnimalTrait extends React.PureComponent {
+class AnimalTraitBase extends React.PureComponent {
   static propTypes = {
     trait: PropTypes.instanceOf(TraitModel).isRequired
     , enableTooltip: PropTypes.bool
@@ -30,12 +31,16 @@ class AnimalTrait extends React.PureComponent {
   render() {
     const {trait, className, enableTooltip} = this.props;
 
-    const classNames = classnames(Object.assign({
-      AnimalTrait: true
-      , [trait.type]: true
-      , value: trait.value
-      , disabled: trait.disabled
-    }, this.classNames || {}));
+    const classNames = classnames(
+      'AnimalTrait'
+      , trait.type
+      , {
+        value: trait.value
+        , disabled: trait.disabled
+      }
+      , this.classNames
+      , className
+    );
 
     return (<div id={'AnimalTrait' + trait.id} className={classNames + (!!className ? ' ' + className : '')}>
       <Tooltip
@@ -52,7 +57,7 @@ class AnimalTrait extends React.PureComponent {
   }
 }
 
-const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
+const DragAnimalTraitBase = DragSource(DND_ITEM_TYPE.TRAIT
   , {
     beginDrag: ({trait, sourceAnimal}) => ({trait, sourceAnimal})
     , canDrag: ({trait, sourceAnimal, game}, monitor) => (
@@ -67,7 +72,7 @@ const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
     , isDragging: monitor.isDragging()
     , canDrag: monitor.canDrag()
   })
-)(class extends AnimalTrait {
+)(class extends AnimalTraitBase {
   static displayName = 'AnimalTrait';
   static propTypes = {
     // by parent
@@ -92,7 +97,7 @@ const DragAnimalTrait = DragSource(DND_ITEM_TYPE.TRAIT
   }
 });
 
-class ClickAnimalTrait extends AnimalTrait {
+class ClickAnimalTraitBase extends AnimalTraitBase {
   static propTypes = {
     // by parent
     trait: PropTypes.instanceOf(TraitModel).isRequired
@@ -127,7 +132,7 @@ class ClickAnimalTrait extends AnimalTrait {
     this.classNames = {
       pointer: active
       , active
-      , ClickAnimalTrait
+      , 'ClickAnimalTrait': true
       , value
     };
     return (active
@@ -136,8 +141,6 @@ class ClickAnimalTrait extends AnimalTrait {
   };
 }
 
-export {
-  AnimalTrait
-  , DragAnimalTrait
-  , ClickAnimalTrait
-}
+export const AnimalTrait = AnimalTraitBase;
+export const DragAnimalTrait = AnimatedHOC(({trait}) => `AnimalTrait#${trait.id}`)(DragAnimalTraitBase);
+export const ClickAnimalTrait = AnimatedHOC(({trait}) => `AnimalTrait#${trait.id}`)(ClickAnimalTraitBase);

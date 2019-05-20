@@ -9,15 +9,16 @@ import pick from 'lodash/pick';
 
 const styles = {
   handContainer: {
-    // display: 'flex'
-    overflow: 'auto'
+    display: 'flex'
   }
   , hand: {
     display: 'flex'
-    , margin: 2
+    , flexFlow: 'row wrap'
+    , margin: '2px auto'
+    , justifyContent: 'center'
     // , overflow: 'auto'
   }
-  , card: {
+  , Card: {
     flex: '0 0 auto'
     , margin: 2
     , boxSizing: 'border-box'
@@ -28,7 +29,7 @@ export const PlayerHand = ({classes, game, player}) => (
   <div className={classes.handContainer}>
     <div className={classes.hand}>
       {player.hand.map((card) => (
-        <Card key={card.id} card={card} classes={pick(classes, 'card')}/>
+        <Card key={card.id} card={card} classes={pick(classes, 'Card')}/>
       ))}
     </div>
   </div>

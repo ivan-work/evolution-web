@@ -52,7 +52,7 @@ export const checkTraitActivation = (game, animal, traitId, ...targets) => {
   return {trait, target};
 };
 
-export const checkTraitActivation_Animal = (game, sourceAnimal, trait, targetAid) => {
+export const checkTraitActivation_Animal = (game, sourceAnimal, trait, targetAid, ...targets) => {
   const gameId = game.id;
   if (sourceAnimal.id === targetAid) {
     throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
@@ -64,7 +64,7 @@ export const checkTraitActivation_Animal = (game, sourceAnimal, trait, targetAid
     throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
       , 'Animal(%s):Trait(%s) cant locate Animal(%s)', sourceAnimal.id, trait.type, targetAid)
   }
-  if (trait.getDataModel().checkTarget && !trait.getDataModel().checkTarget(game, sourceAnimal, targetAnimal)) {
+  if (trait.getDataModel().checkTarget && !trait.getDataModel().checkTarget(game, sourceAnimal, targetAnimal, ...targets)) {
     throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
       , 'Animal(%s):Trait(%s) checkTarget on Animal(%s) failed', sourceAnimal.id, trait.type, targetAnimal.id)
   }

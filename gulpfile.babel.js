@@ -3,9 +3,7 @@
 import './globals';
 
 const gulp = require('gulp');
-const gutil = require('gulp-util');
 const mocha = require('gulp-mocha');
-const watch = require('gulp-watch');
 
 let watching = false;
 
@@ -14,33 +12,40 @@ const TEST_PATH_SHARED = ['shared/**/*.spec.js'];
 const TEST_PATH_SERVER = ['server/**/*.spec.js'];
 const TEST_PATH_CLIENT = ['client/**/*.spec.js', 'client/**/*.spec.jsx'];
 
-const testWatch = (paths) => gulp.src(paths)
+const testWatch = (paths) => () => gulp.src(paths)
   .pipe(mocha({
     bail: true
-    , require: ['source-map-support/register', 'ignore-styles', './shared/test-helper.js']
-    // , require: ['source-map-support/register', 'ignore-styles', './shared/test-helper.js']
+    , require: [
+      '@babel/register'
+      , '@babel/polyfill'
+      , 'source-map-support/register'
+      , 'ignore-styles'
+      , './globals'
+      , './shared/test-helper.js'
+    ]
   }))
   .on('error', function (e) {
-    gutil.log(e);
+    console.error(e);
     this.emit('end');
   });
 
-gulp.task('test:setup', () => {
+gulp.task('test:setup', (done) => {
   watching = true;
   process.env.TEST = true;
   process.env.NODE_ENV = 'test';
   process.env.JWT_SECRET = 'secret';
-  process.env.DEBUG = '*';
+  // process.env.DEBUG = '*';
+  done();
 });
 
-gulp.task('test:shared:single', ['test:setup'], () =>  testWatch(TEST_PATH_SHARED));
-gulp.task('test:shared', ['test:shared:single'], () =>  gulp.watch(TEST_PATH_WATCH, ['test:shared:single']));
+gulp.task('test:shared:once', gulp.series('test:setup', testWatch(TEST_PATH_SHARED)));
+gulp.task('test:shared', gulp.series('test:shared:once', () => gulp.watch(TEST_PATH_WATCH, gulp.series('test:shared:once'))));
 
-gulp.task('test:server:single', ['test:setup'], () =>  testWatch(TEST_PATH_SERVER));
-gulp.task('test:server', ['test:server:single'], () =>  gulp.watch(TEST_PATH_WATCH, ['test:server:single']));
-
-gulp.task('test:client:single', ['test:setup'], () =>  testWatch(TEST_PATH_CLIENT));
-gulp.task('test:client', ['test:client:single'], () =>  gulp.watch(TEST_PATH_WATCH, ['test:client:single']));
-
-gulp.task('test:all:single', ['test:setup'], () =>  testWatch([].concat(TEST_PATH_SERVER, TEST_PATH_SHARED, TEST_PATH_CLIENT)));
-gulp.task('test:all', ['test:all:single'], () =>  gulp.watch(TEST_PATH_WATCH, ['test:all:single']));
+// gulp.task('test:server:once', ['test:setup'], () =>  testWatch(TEST_PATH_SERVER));
+// gulp.task('test:server', ['test:server:once'], () =>  gulp.watch(TEST_PATH_WATCH, ['test:server:once']));
+//
+// gulp.task('test:client:once', ['test:setup'], () =>  testWatch(TEST_PATH_CLIENT));
+// gulp.task('test:client', ['test:client:once'], () =>  gulp.watch(TEST_PATH_WATCH, ['test:client:once']));
+//
+// gulp.task('test:all:once', ['test:setup'], () =>  testWatch([].concat(TEST_PATH_SERVER, TEST_PATH_SHARED, TEST_PATH_CLIENT)));
+// gulp.task('test:all', ['test:all:once'], () =>  gulp.watch(TEST_PATH_WATCH, ['test:all:once']));

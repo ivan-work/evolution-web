@@ -1,11 +1,11 @@
 import {createStore, compose, applyMiddleware} from 'redux'
 
 // Basic Middleware
-import {Record, Map} from 'immutable';
+import {Record} from 'immutable';
 import thunk from 'redux-thunk';
 import {reduxTimeoutMiddleware} from '../../shared/utils/reduxTimeout'
 
-class ClientRecord extends Record({
+const ClientRecord = Record({
   app: void 0
   , error: void 0
   , game: void 0
@@ -14,15 +14,15 @@ class ClientRecord extends Record({
   , rooms: void 0
   , user: void 0
   , chat: void 0
+  , modal: void 0
   , animation: void 0
-}) {
-}
+}, 'ClientRecord');
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const composeEnhancers = process.env.TEST ? compose : window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 export default (reducer, initialState, middleware = [], appliedMiddleware = []) => createStore(
   reducer
-  , new ClientRecord(initialState)
+  , ClientRecord(initialState)
   , composeEnhancers(
     applyMiddleware(
       store => next => action => {

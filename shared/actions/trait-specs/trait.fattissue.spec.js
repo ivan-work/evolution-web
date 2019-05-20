@@ -42,64 +42,6 @@ players:
     });
   });
   describe('Feeding:', () => {
-    // AUTO FAT PROCESSING - disabled by rules. TODO delete on sight
-    it.skip('FatTissue test', () => {
-      const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
-      const gameId = ParseGame(`
-deck: 12 CardGrazingAndFatTissue
-phase: feeding
-food: 7
-players:
-  - continent: $A fat carn, $B fat fat fat, $Waiter,  $C
-`);
-      const {selectGame, selectCard, selectPlayer, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
-
-      expect(selectTrait(User0, 0, 0).type).equal('TraitFatTissue');
-
-      clientStore0.dispatch(traitTakeFoodRequest('$A'));
-      //$A+ fat carn, $B fat fat
-
-      clientStore0.dispatch(traitTakeFoodRequest('$A'));
-      //$A++ fat carn, $B fat fat
-
-      clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$C'));
-
-      expect(selectPlayer(User0).continent).size(3);
-
-      // selectAnimal(User0, 1)
-
-      clientStore0.dispatch(traitTakeFoodRequest('$B'));
-      clientStore0.dispatch(traitTakeFoodRequest('$B'));
-      clientStore0.dispatch(traitTakeFoodRequest('$B'));
-      clientStore0.dispatch(traitTakeFoodRequest('$B'));
-
-      expect(selectAnimal(User0, 0).getFoodAndFat(), '$A.getFoodAndFat()').equal(3);
-      expect(selectAnimal(User0, 1).getFoodAndFat()).equal(4);
-
-      clientStore0.dispatch(traitTakeFoodRequest('$Waiter'));
-
-      expect(selectGame().status.phase, 'Turn 2, deploy').equal(PHASE.DEPLOY);
-
-      clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$B', true));
-      clientStore0.dispatch(gameEndTurnRequest());
-
-      expect(selectGame().status.phase, 'Turn 2, feed').equal(PHASE.FEEDING);
-      serverStore.dispatch(testHackGame(gameId, game => game.set('food', 0)));
-      clientStore0.dispatch(gameEndTurnRequest());
-
-
-      expect(selectGame().status.phase, 'Turn 3, deploy').equal(PHASE.DEPLOY);
-      expect(selectGame().status.turn, 'Turn 3, deploy turn').equal(2);
-
-      expect(selectPlayer(User0).continent).size(1);
-      expect(selectAnimal(User0, 0).traits).size(4);
-      expect(selectAnimal(User0, 0).getFoodAndFat(), 'food').equal(2);
-      expect(selectTrait(User0, 0, 0).value, '0').equal(false);
-      expect(selectTrait(User0, 0, 1).value, '1').equal(true);
-      expect(selectTrait(User0, 0, 2).value, '2').equal(true);
-      expect(selectTrait(User0, 0, 3).value, '3').equal(false);
-    });
-
     it('FatTissue activation', () => {
       const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
@@ -134,6 +76,22 @@ players:
         clientStore0.dispatch(traitActivateRequest('$A', selectTrait(User0, 0, 3).id));
         clientStore0.dispatch(traitActivateRequest('$B', selectTrait(User0, 0, 0).id));
       }, serverStore, clientStore0);
+    });
+
+    it('FatTissue waiting', () => {
+      const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+      const gameId = ParseGame(`
+deck: 12 camo
+phase: feeding
+food: 0
+players:
+  - continent: $A fat=true wait, $B
+`);
+      const {selectGame, findAnimal, findTrait} = makeGameSelectors(serverStore.getState, gameId);
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      expect(selectGame().status.phase).equal(PHASE.DEPLOY);
+      expect(findAnimal('$A')).null;
     });
   });
 });

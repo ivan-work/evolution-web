@@ -4,4 +4,3 @@ node_modules
 /dist/
 /server/config/config.js
 stats.json
-package-lock.json

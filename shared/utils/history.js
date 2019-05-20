@@ -1,6 +1,6 @@
 let history = {
   push() {
-    console.error('history not set')
+    // console.error('history not set')
   }
 };
 

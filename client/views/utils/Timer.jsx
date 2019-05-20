@@ -1,13 +1,21 @@
 import React from 'react';
+import cn from 'classnames';
 import PropTypes from 'prop-types'
 
 // function for testing wrong client time;
 import TimeService from '../../services/TimeService';
 
+import './Timer.scss';
+
 export class Timer extends React.Component {
   static propTypes = {
     start: PropTypes.number.isRequired
     , duration: PropTypes.number.isRequired
+    , warning: PropTypes.number
+  };
+
+  static defaultProps = {
+    warning: 20e3
   };
 
   constructor(props) {
@@ -45,7 +53,11 @@ export class Timer extends React.Component {
   }
 
   render() {
-    return <span>{this.renderTime(this.state.time)}</span>
+    const className = cn(
+      'Timer', {
+        'Timer_Warning': this.state.time <= this.props.warning
+      });
+    return <span className={className}>{this.renderTime(this.state.time)}</span>
   }
 
   renderTime(time) {

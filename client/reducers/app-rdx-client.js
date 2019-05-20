@@ -23,7 +23,7 @@ const saveValue = (key, value) => {
 const getInitialState = () => Map({
   lang: loadValue('lang', langCodes.hasOwnProperty(window.navigator.language) ? window.navigator.language : 'ru-ru')
   , sound: 'true' === loadValue('sound', 'true')
-  , uiv3: 'true' === loadValue('uiv3', 'false')
+  , uiv3: 'true' === loadValue('uiv3', 'true')
   , adminMode: process.env.NODE_ENV !== 'production'
 });
 

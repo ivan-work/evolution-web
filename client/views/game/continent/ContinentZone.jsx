@@ -33,7 +33,7 @@ export class ContinentZone extends React.PureComponent {
   }
 }
 
-export default compose(connect(() => ({})
+export default compose(connect(null
   , (dispatch) => ({
     $deployAnimal: (...args) => dispatch(gameDeployAnimalRequest(...args))
   }))

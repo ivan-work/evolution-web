@@ -1,18 +1,16 @@
-export const pingTrait = (traitId) => {
-  const TraitHtml = document.getElementById('AnimalTrait' + traitId);
+export const pingTrait = (manager, traitId) => {
+  const TraitHtml = manager.getAnimalTrait(traitId);
   if (!TraitHtml) return;
   TraitHtml.classList.add('Animate');
   return new Promise((resolve) => setTimeout(() => {
-    const TraitHtml = document.getElementById('AnimalTrait' + traitId);
+    const TraitHtml = manager.getAnimalTrait(traitId);
     if (TraitHtml) TraitHtml.classList.remove('Animate');
     resolve();
   }, 500));
 };
 
-export const TraitCarnivorous_Start = ({sourceAid, targetId}) => {
-  const SourceAnimalHtml = document.getElementById('Animal' + sourceAid);
-  const TargetAnimalHtml = document.getElementById('Animal' + targetId);
-  // console.log('TraitCarnivorous_Start');
+export const TraitCarnivorous_Start = (manager, {sourceAid, targetId}) => {
+  const SourceAnimalHtml = manager.getAnimal(sourceAid);
 
   return Velocity(SourceAnimalHtml, {
     translateX: 0
@@ -20,10 +18,8 @@ export const TraitCarnivorous_Start = ({sourceAid, targetId}) => {
   }, 500);
 };
 
-export const TraitCarnivorous_End = ({sourceAid, targetId}) => {
-  const SourceAnimalHtml = document.getElementById('Animal' + sourceAid);
-  const TargetAnimalHtml = document.getElementById('Animal' + targetId);
-  // console.log('TraitCarnivorous_End');
+export const TraitCarnivorous_End = (manager, {sourceAid, targetId}) => {
+  const SourceAnimalHtml = manager.getAnimal(sourceAid);
 
   return Velocity(SourceAnimalHtml, {
     translateX: 0
@@ -32,8 +28,8 @@ export const TraitCarnivorous_End = ({sourceAid, targetId}) => {
 };
 
 
-export const gameFoodTake_Start = ({animalId}) => {
-  const AnimalHtml = document.getElementById('Animal' + animalId);
+export const gameFoodTake_Start = (manager, {animalId}) => {
+  const AnimalHtml = manager.getAnimal(animalId);
 
   if (AnimalHtml)
     return Velocity(AnimalHtml, {
@@ -42,8 +38,8 @@ export const gameFoodTake_Start = ({animalId}) => {
     }, 500);
 };
 
-export const gameFoodTake_End = ({animalId}) => {
-  const AnimalHtml = document.getElementById('Animal' + animalId);
+export const gameFoodTake_End = (manager, {animalId}) => {
+  const AnimalHtml = manager.getAnimal(animalId);
 
   if (AnimalHtml)
     return Velocity(AnimalHtml, {

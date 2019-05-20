@@ -5,7 +5,7 @@ import secondary from '@material-ui/core/colors/amber';
 
 import accentBackground from '@material-ui/core/colors/blue';
 
-const theme = createMuiTheme({
+const theme = {
   style: {
     flex: {
       off: '0 0 auto'
@@ -53,7 +53,7 @@ const theme = createMuiTheme({
       lineHeight: 1.25
     }
   }
-});
+};
 
 // theme.style = {
 //   noFlex: {
@@ -61,4 +61,4 @@ const theme = createMuiTheme({
 //   }
 // };
 
-export default theme;
+export default createMuiTheme(theme);

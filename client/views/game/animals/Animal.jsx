@@ -28,8 +28,9 @@ import {Food} from './../food/Food.jsx';
 
 import '../animals/Animal.scss';
 import Tooltip from '../../utils/Tooltip.jsx';
+import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
 
-class Animal extends React.Component {
+class AnimalBase extends React.Component {
   static propTypes = {
     model: PropTypes.instanceOf(AnimalModel).isRequired
   };
@@ -101,7 +102,51 @@ class Animal extends React.Component {
   }
 }
 
-const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT, DND_ITEM_TYPE.TRAIT_SHELL, DND_ITEM_TYPE.ANIMAL_LINK], {
+class DropAnimalBase extends AnimalBase {
+  static displayName = 'Animal';
+  static propTypes = {
+    game: PropTypes.object.isRequired
+    // by DnD
+    , connectDropTarget: PropTypes.func.isRequired
+    , isOver: PropTypes.bool.isRequired
+    , canDrop: PropTypes.bool.isRequired
+    // by direct
+    , isUserAnimal: PropTypes.bool
+    , onCardDropped: PropTypes.func.isRequired
+    , onFoodDropped: PropTypes.func.isRequired
+    , onTraitDropped: PropTypes.func.isRequired
+    , onTraitShellDropped: PropTypes.func.isRequired
+    , onAnimalLink: PropTypes.func.isRequired
+  };
+
+  renderTrait(trait, animal) {
+    if (trait.isLinked()) {
+      if (trait.getDataModel().playerControllable) {
+        return <AnimalLinkedTrait trait={trait} sourceAnimal={animal}>
+          <ClickAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}
+                            onClick={() => this.props.onTraitDropped(animal, trait)}/>
+        </AnimalLinkedTrait>
+      } else {
+        return <AnimalLinkedTrait trait={trait} sourceAnimal={animal}>
+          <AnimalTrait trait={trait}/>
+        </AnimalLinkedTrait>
+      }
+    } else if (trait.getDataModel().playerControllable && trait.getDataModel().targetType === TRAIT_TARGET_TYPE.ANIMAL) {
+      return <DragAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}/>;
+    } else if (trait.getDataModel().playerControllable || trait.type === 'TraitAmbush') {
+      return <ClickAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}
+                               onClick={() => this.props.onTraitDropped(animal, trait, this.props.game)}/>;
+    } else {
+      return <AnimalTrait trait={trait}/>;
+    }
+  }
+
+  render() {
+    return this.props.connectDropTarget(super.render());
+  }
+}
+
+const DropAnimalBaseDT = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT, DND_ITEM_TYPE.TRAIT_SHELL, DND_ITEM_TYPE.ANIMAL_LINK], {
   drop(props, monitor, component) {
     switch (monitor.getItemType()) {
       case DND_ITEM_TYPE.CARD:
@@ -176,52 +221,8 @@ const DropAnimal = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND_ITEM_
   connectDropTarget: connect.dropTarget(),
   isOver: monitor.isOver(),
   canDrop: monitor.canDrop()
-}))(class extends Animal {
-    static displayName = 'Animal';
-    static propTypes = {
-      game: PropTypes.object.isRequired
-      // by DnD
-      , connectDropTarget: PropTypes.func.isRequired
-      , isOver: PropTypes.bool.isRequired
-      , canDrop: PropTypes.bool.isRequired
-      // by direct
-      , isUserAnimal: PropTypes.bool
-      , onCardDropped: PropTypes.func.isRequired
-      , onFoodDropped: PropTypes.func.isRequired
-      , onTraitDropped: PropTypes.func.isRequired
-      , onTraitShellDropped: PropTypes.func.isRequired
-      , onAnimalLink: PropTypes.func.isRequired
-    };
+}))(DropAnimalBase);
 
-    renderTrait(trait, animal) {
-      if (trait.isLinked()) {
-        if (trait.getDataModel().playerControllable) {
-          return <AnimalLinkedTrait trait={trait} sourceAnimal={animal}>
-            <ClickAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}
-                              onClick={() => this.props.onTraitDropped(animal, trait)}/>
-          </AnimalLinkedTrait>
-        } else {
-          return <AnimalLinkedTrait trait={trait} sourceAnimal={animal}>
-            <AnimalTrait trait={trait}/>
-          </AnimalLinkedTrait>
-        }
-      } else if (trait.getDataModel().playerControllable && trait.getDataModel().targetType === TRAIT_TARGET_TYPE.ANIMAL) {
-        return <DragAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}/>;
-      } else if (trait.getDataModel().playerControllable || trait.type === 'TraitAmbush') {
-        return <ClickAnimalTrait trait={trait} game={this.props.game} sourceAnimal={animal}
-                                 onClick={() => this.props.onTraitDropped(animal, trait, this.props.game)}/>;
-      } else {
-        return <AnimalTrait trait={trait}/>;
-      }
-    }
+export const Animal = AnimalBase;
 
-    render() {
-      return this.props.connectDropTarget(super.render());
-    }
-  }
-);
-
-export {
-  Animal
-  , DropAnimal
-};
+export const DropAnimal = AnimatedHOC(({model}) => `Animal#${model.id}`)(DropAnimalBaseDT);

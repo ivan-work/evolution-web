@@ -2,13 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types'
 import T from 'i18n-react';
 
+import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 
 import {Timer} from '../../utils/Timer.jsx';
 import {Animal} from '../animals/Animal.jsx';
-import {AnimalTrait} from '../animals/AnimalTrait.jsx';
 import AnimalTraitIcon from '../animals/AnimalTraitIcon.jsx';
 
 import {QuestionRecord} from '../../../../shared/models/game/GameModel.js';
@@ -37,18 +37,19 @@ export class TraitDefenceDialog extends React.Component {
     const {game, $traitAnswer} = this.props;
     const {sourceAid, sourcePid, targetAid, targetPid, time} = game.question;
     const attackAnimal = game.locateAnimal(sourceAid, sourcePid);
+    const traitCarnivorous = attackAnimal.hasTrait(tt.TraitCarnivorous);
     const targetAnimal = game.locateAnimal(targetAid, targetPid);
 
     const traitTailLoss = targetAnimal.hasTrait(TraitTailLoss.type);
     const targetsTailLoss = traitTailLoss
       && !checkIfTraitDisabledByIntellect(attackAnimal, traitTailLoss)
-      && TraitTailLoss.getTargets(game, attackAnimal, TraitCarnivorous, targetAnimal);
+      && TraitTailLoss.getTargets(game, targetAnimal, traitTailLoss, attackAnimal, traitCarnivorous);
 
     const traitMimicry = targetAnimal.hasTrait(TraitMimicry.type);
     const targetsMimicry = traitMimicry
       && !traitMimicry.checkActionFails(game, targetAnimal)
       && !checkIfTraitDisabledByIntellect(attackAnimal, traitMimicry)
-      && TraitMimicry.getTargets(game, attackAnimal, TraitCarnivorous, targetAnimal);
+      && TraitMimicry.getTargets(game, targetAnimal, traitMimicry, attackAnimal, traitCarnivorous);
 
     const otherTraits = [
       targetAnimal.hasTrait(tt.TraitShell)
@@ -76,9 +77,10 @@ export class TraitDefenceDialog extends React.Component {
         && this.renderOther(otherTraits, $traitAnswer.bind(null))}
 
         {allowNothing && <div className="Row">
-          <div className='Item'><Button raised onClick={() => $traitAnswer(true)}>
-            {T.translate('Game.UI.TraitActivateDialog.Nothing')}
-          </Button>
+          <div className='Item'>
+            <Button variant='contained' onClick={() => $traitAnswer(true)}>
+              {T.translate('Game.UI.TraitActivateDialog.Nothing')}
+            </Button>
           </div>
         </div>}
         <h1>
