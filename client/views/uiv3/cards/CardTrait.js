@@ -5,7 +5,7 @@ import cn from "classnames";
 import Typography from "@material-ui/core/Typography/Typography";
 import withStyles from "@material-ui/core/styles/withStyles";
 
-import Tooltip from "../../utils/WhiteTooltip";
+import WhiteTooltip from "../../utils/WhiteTooltip";
 
 import AnimalTraitDetails from "../animals/AnimalTraitDetails";
 
@@ -46,7 +46,7 @@ const CardTraitBody = ({classes, trait, single, double, invert, canStart, startI
   const traitModel = TraitModel.new(trait);
   const traitFood = traitModel.getDataModel().food;
   return (
-    <Tooltip placement='top' title={<AnimalTraitDetails trait={traitModel}/>}>
+    <WhiteTooltip placement='top' title={<AnimalTraitDetails trait={traitModel}/>}>
       <Typography className={cn(classes.CardTrait, {
         [classes.single]: single
         , [classes.double]: double
@@ -59,7 +59,7 @@ const CardTraitBody = ({classes, trait, single, double, invert, canStart, startI
           <span className='food'>{traitFood > 0 ? ' +' + traitFood : null}</span>
         </span>
       </Typography>
-    </Tooltip>
+    </WhiteTooltip>
   );
 };
 

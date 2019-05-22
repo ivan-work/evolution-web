@@ -1,7 +1,8 @@
 import React from 'react';
+import PropTypes from "prop-types";
 
 import {connect} from "react-redux";
-import {compose, withHandlers, branch, renderNothing, renderComponent} from "recompose";
+import {compose, withHandlers, branch, renderNothing, renderComponent, setPropTypes, setDisplayName} from "recompose";
 
 import {appIgnoreUser, appUnignoreUser} from "../actions/app";
 
@@ -9,11 +10,17 @@ import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconIgnore from '@material-ui/icons/MicOff';
 import IconUnignore from '@material-ui/icons/Mic';
+import WhiteTooltip from "../views/utils/WhiteTooltip";
 
 const WhiteButtonStyle = {fontSize: 12, padding: 0, color: 'white'};
+const ButtonStyle = {fontSize: 12, padding: 0};
 
 export const IgnoreButton = compose(
-  connect((state, {userId}) => {
+  setDisplayName('IgnoreButton$')
+  , setPropTypes({
+    userId: PropTypes.string.isRequired
+  })
+  , connect((state, {userId}) => {
       const appUserId = state.getIn(['user', 'id']);
       const appIgnoredUser = state.getIn(['app', 'ignoreList']).has(userId);
       return {hide: appUserId === userId || appIgnoredUser}
@@ -24,14 +31,18 @@ export const IgnoreButton = compose(
   , withHandlers({onClick: ({appIgnoreUser, userId}) => e => appIgnoreUser(userId)})
 )(({onClick}) => (
   <Tooltip title={'ignore'} placement='right'>
-    <IconButton style={WhiteButtonStyle} size='small' onClick={onClick}>
+    <IconButton style={ButtonStyle} size='small' onClick={onClick}>
       <IconIgnore/>
     </IconButton>
   </Tooltip>
 ));
 
 export const UnignoreButton = compose(
-  connect((state, {userId}) => {
+  setDisplayName('UnignoreButton$')
+  , setPropTypes({
+    userId: PropTypes.string.isRequired
+  })
+  , connect((state, {userId}) => {
       const appUserId = state.getIn(['user', 'id']);
       const appIgnoredUser = state.getIn(['app', 'ignoreList']).has(userId);
       return {hide: appUserId === userId || !appIgnoredUser}
@@ -42,7 +53,7 @@ export const UnignoreButton = compose(
   , withHandlers({onClick: ({appUnignoreUser, userId}) => e => appUnignoreUser(userId)})
 )(({onClick}) => (
   <Tooltip title={'unignore'} placement='right'>
-    <IconButton style={WhiteButtonStyle} size='small' onClick={onClick}>
+    <IconButton style={ButtonStyle} size='small' onClick={onClick}>
       <IconUnignore/>
     </IconButton>
   </Tooltip>
@@ -51,7 +62,11 @@ export const UnignoreButton = compose(
 const RenderChildrenHOC = renderComponent(({children}) => children);
 
 export const IgnoreUnignoreTooltip = compose(
-  connect((state, {userId}) => {
+  setDisplayName('IgnoreUnignoreTooltip$')
+  , setPropTypes({
+    userId: PropTypes.string.isRequired
+  })
+  , connect((state, {userId}) => {
     const appUserId = state.getIn(['user', 'id']);
     const appIgnoredUser = state.getIn(['app', 'ignoreList']).has(userId);
     return {
@@ -60,15 +75,15 @@ export const IgnoreUnignoreTooltip = compose(
     }
   })
   , branch(({hideIgnore, hideUnignore}) => hideIgnore && hideUnignore, RenderChildrenHOC)
-)(({children, userId, hideIgnore, hideUnignore, ...props}) => (
-  <Tooltip interactive title={(
+)(({children, userId, hideIgnore, hideUnignore, dispatch, ...props}) => (
+  <WhiteTooltip interactive title={(
     <span>
       {!hideIgnore && <IgnoreButton userId={userId}/>}
       {!hideUnignore && <UnignoreButton userId={userId}/>}
     </span>
   )} placement='right' {...props}>
     {children}
-  </Tooltip>
+  </WhiteTooltip>
 ));
 
 export default IgnoreUnignoreTooltip;

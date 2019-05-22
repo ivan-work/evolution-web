@@ -23,4 +23,5 @@ $ npm run server:start
 #### test:
 ```
 $ LOG_LEVEL=warn npm run test:shared
+$ LOG_LEVEL=warn npm run test:shared:once
 ```

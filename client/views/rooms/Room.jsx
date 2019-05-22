@@ -27,7 +27,7 @@ import IconUnbanUser from '@material-ui/icons/RemoveCircleOutline';
 
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import IconButton from "@material-ui/core/IconButton/IconButton";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction/ListItemSecondaryAction";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import {UserVariants} from "../utils/User";
 
 const styles = theme => ({
