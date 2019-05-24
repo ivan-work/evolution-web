@@ -92,7 +92,8 @@
     "winston": "^2.4.4",
     "winston-google-spreadsheet": "0.0.5",
     "winston-null": "^2.0.0",
-    "yaml-js": "^0.2.3"
+    "yaml-js": "^0.2.3",
+    "invariant": "latest"
   },
   "devDependencies": {
     "@babel/node": "^7.2.2",

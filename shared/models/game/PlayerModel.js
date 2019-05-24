@@ -40,7 +40,7 @@ export class PlayerModel extends Record({
       ? null
       : new PlayerModel(js)
         .set('hand', List(js.hand).map(card => CardModel.fromServer(card)))
-        .set('continent', OrderedMap(js.continent).map(animalModel => AnimalModel.fromServer(animalModel)));
+        .set('continent', OrderedMap(js.continent).map(AnimalModel.fromServer));
   }
 
   static new(userId, index) {
@@ -55,6 +55,10 @@ export class PlayerModel extends Record({
 
   getCard(index) {
     return this.hand.get(index);
+  }
+
+  findCard(id) {
+    return this.hand.find(card => card.id === id);
   }
 
   /**

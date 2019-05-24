@@ -20,6 +20,12 @@ export const selectAnimal = (game, user, animalIndex) =>
 export const selectTrait = (game, user, animalIndex, traitIndex) =>
   selectAnimal(game, user, animalIndex).traits.toArray()[traitIndex];
 
+export const findTrait = (game, animalId, traitType, index = 0) => game.locateAnimal(animalId).traits.toIndexedSeq()
+  .filter(t => t.type === traitType).get(index);
+
+export const findPlantTrait = (game, plantId, traitType, index = 0) => game.getPlant(plantId).traits.toIndexedSeq()
+  .filter(t => t.type === traitType).get(index);
+
 export const selectUsersInRoom = (getState, roomId) => {
   const room = selectRoom(getState, roomId);
   return [].concat(
@@ -44,8 +50,10 @@ export const makeGameSelectors = (getState, gameId) => ({
   , selectTrait: (user, animalIndex, traitIndex) => selectTrait(selectGame(getState, gameId), user, animalIndex, traitIndex)
   , selectTraitId: (user, animalIndex, traitIndex) => selectTrait(selectGame(getState, gameId), user, animalIndex, traitIndex).id
 
-  , findTrait: (animalId, traitType, index = 0) => selectGame(getState, gameId).locateAnimal(animalId).traits.toArray()
-    .filter(t => t.type === traitType)[index]
+  , findPlant: (plantId) => selectGame(getState, gameId).getPlant(plantId)
+
+  , findTrait: (animalId, traitType, index = 0) => findTrait(selectGame(getState, gameId), animalId, traitType, index)
+  , findPlantTrait: (plantId, traitType, index = 0) => findPlantTrait(selectGame(getState, gameId), plantId, traitType, index)
 });
 
 export const makeClientGameSelectors = (getState, gameId, i) => ({
@@ -55,6 +63,11 @@ export const makeClientGameSelectors = (getState, gameId, i) => ({
 
   , ['selectAnimal' + i]: (user, animalIndex) => selectAnimal(getState().get('game'), user, animalIndex)
   , ['findAnimal' + i]: (animalId) => getState().get('game').locateAnimal(animalId)
+
+  , ['findPlant' + i]: (plantId) => getState().get('game').getPlant(plantId)
+
+  , ['findTrait' + i]: (animalId, traitType, index = 0) => findTrait(getState().get('game'), animalId, traitType, index)
+  , ['findPlantTrait' + i]: (plantId, traitType, index = 0) => findPlantTrait(getState().get('game'), plantId, traitType, index)
 
   , ['selectTrait' + i]: (user, animalIndex, traitIndex) => selectTrait(getState().get('game'), user, animalIndex, traitIndex)
 });

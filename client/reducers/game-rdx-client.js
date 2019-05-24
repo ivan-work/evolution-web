@@ -12,6 +12,7 @@ import {
   , gameDeployAnimalFromHand
   , gameDeployAnimalFromDeck
   , gameDeployTrait
+  , gameDeployPlantTraits
   , gameDeployRegeneratedAnimal
   , gameEndTurn
   , gamePlayerLeft
@@ -20,6 +21,8 @@ import {
   , gameSetUserTimedOut
   , gameSetUserWantsPause
   , gameSetPaused
+  , gameSpawnPlants
+  , gameDeployPlant
   , traitAmbushActivate
   , gameAmbushPrepareStart
   , gameAmbushPrepareEnd
@@ -27,6 +30,7 @@ import {
   , gameAmbushAttackEnd
   , playerActed
   , animalDeath
+  , plantDeath
   , traitMoveFood
   , startCooldown
   , traitQuestion
@@ -55,6 +59,7 @@ export const reducer = createReducer(null, {
   , gameDeployAnimalFromHand
   , gameDeployAnimalFromDeck
   , gameDeployTrait
+  , gameDeployPlantTraits
   , gameDeployRegeneratedAnimal
   , gameEndTurn
   , gamePlayerLeft
@@ -63,6 +68,8 @@ export const reducer = createReducer(null, {
   , gameSetUserTimedOut
   , gameSetUserWantsPause
   , gameSetPaused
+  , gameSpawnPlants
+  , gameDeployPlant
   , traitAmbushActivate
   , gameAmbushPrepareStart
   , gameAmbushPrepareEnd
@@ -70,6 +77,7 @@ export const reducer = createReducer(null, {
   , gameAmbushAttackEnd
   , playerActed
   , animalDeath
+  , plantDeath
   , traitMoveFood
   , startCooldown
   , traitQuestion

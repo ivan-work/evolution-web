@@ -116,7 +116,6 @@ players:
     expect(selectGame().status.round, 'round').equal(3);
     clientStore0.dispatch(gameEndTurnRequest()); // pass turn
 
-    console.log(selectGame().status)
     expect(selectGame().status.turn, 'turn').equal(1);
     expect(selectGame().status.phase).equal(PHASE.DEPLOY);
     clientStore1.dispatch(gameEndTurnRequest());

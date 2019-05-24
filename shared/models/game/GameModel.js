@@ -6,12 +6,13 @@ import {CardModel} from './CardModel';
 import {TraitModel} from './evolution/TraitModel';
 import {CooldownList} from './CooldownList';
 import {
-  SettingsRecord,
-  Deck_Base,
-  Deck_TimeToFly,
-  Deck_ContinentsShort,
-  Deck_Bonus,
-  Deck_Plantarium
+  SettingsRecord
+  , Deck_Base
+  , Deck_TimeToFly
+  , Deck_ContinentsShort
+  , Deck_Bonus
+  , Deck_Plantarium
+  , PlantDeck_Plantarium
 } from './GameSettings';
 
 import uuid from 'uuid';
@@ -19,9 +20,8 @@ import {ensureParameter} from '../../utils';
 import {getIntRandom} from '../../utils/randomGenerator';
 import {selectUserName} from '../../selectors';
 
-import {parseFromRoom, parseCardList, parseAnimalList} from './GameModel.parse';
-
 import * as tt from './evolution/traitTypes';
+import PlantModel from "./evolution/plantarium/PlantModel";
 
 export const TEST_DECK_SIZE = 84;
 export const TEST_HAND_SIZE = 6;
@@ -34,6 +34,10 @@ export const PHASE = {
   , EXTINCTION: 'EXTINCTION'
   , REGENERATION: 'REGENERATION'
   , FINAL: 'FINAL'
+};
+
+export const AREA = {
+  STANDARD: 'STANDARD'
 };
 
 export const StatusRecord = Record({
@@ -117,23 +121,28 @@ export class AmbushRecord extends Record({
   }
 }
 
-export class ContinentRecord extends Record({
+class AreaRecord extends Record({
   id: null
   , shells: Map()
-  , food: Map()
+  , food: 0
+  , plants: OrderedMap()
 }) {
   static fromJS(js) {
     return js == null
       ? null
-      : new ContinentRecord({
+      : new AreaRecord({
         ...js
-        , shells: Map(js.shells).map(shell => TraitModel.fromServer(shell))
+        , shells: Map(js.shells).map(TraitModel.fromServer)
       });
+  }
+
+  toClient() {
+    return this
+      .toJS()
   }
 }
 
-const ContinentsStandard = Map({standard: new ContinentRecord({id: 'standard'})});
-const ContinentsAddon = Map({});
+const AreasStandard = Map({[AREA.STANDARD]: new AreaRecord({id: AREA.STANDARD})});
 
 const rollDice = () => getIntRandom(1, 6);
 
@@ -156,8 +165,10 @@ const GameModelData = {
   , roomId: null
   , timeCreated: null
   , deck: null
+  , pdeck: null
   , players: OrderedMap()
-  , continents: ContinentsStandard
+  , plants: OrderedMap()
+  , areas: AreasStandard
   , observers: List()
   , log: List()
   , food: -1
@@ -172,17 +183,24 @@ const GameModelData = {
 
 // global.locateAnimalTime = 0;
 
+export const generateDeck = (config, shuffle) => {
+  const result = config.reduce((result, [count, type]) => result
+    .concat(Array.from({length: count})
+      .map(u => CardModel.new(type))), []);
+  return List(shuffle ? doShuffle(result) : result);
+};
+
+export const generatePlantDeck = (config, shuffle) => {
+  const result = config.reduce((result, [count, type]) => result
+    .concat(Array.from({length: count})
+      .map(u => type)), []);
+  return List(shuffle ? doShuffle(result) : result);
+};
+
 export class GameModel extends Record({
   ...GameModelData
   , huntingCallbacks: List()
 }) {
-  static generateDeck(config, shuffle) {
-    const result = config.reduce((result, [count, type]) => result
-      .concat(Array.from({length: count})
-        .map(u => CardModel.new(type))), []);
-    return List(shuffle ? doShuffle(result) : result);
-  }
-
   generateFood() {
     let aedificatorFood = 0;
     this.someAnimal((animal, continent, player) => {
@@ -193,11 +211,13 @@ export class GameModel extends Record({
 
   static new(room) {
     let deck = Deck_Base;
+    let pdeck = [];
 
     if (room.settings.addon_timeToFly) deck = deck.concat(Deck_TimeToFly);
     if (room.settings.addon_continents) deck = deck.concat(Deck_ContinentsShort);
     if (room.settings.addon_bonus) deck = deck.concat(Deck_Bonus);
     if (room.settings.addon_plantarium) deck = deck.concat(Deck_Plantarium);
+    if (room.settings.addon_plantarium) deck = deck.concat(PlantDeck_Plantarium);
 
     if (room.settings.halfDeck) deck = deck.map(([count, type]) => [Math.ceil(count / 2), type]);
 
@@ -210,7 +230,8 @@ export class GameModel extends Record({
       id: uuid.v4()
       , roomId: room.id
       , timeCreated: Date.now()
-      , deck: GameModel.generateDeck(deck, true)
+      , deck: generateDeck(deck, true)
+      , pdeck: generatePlantDeck(pdeck, true)
       , players
       , settings: room.settings
     })
@@ -224,8 +245,10 @@ export class GameModel extends Record({
       : new GameModel({
         ...js
         , deck: List(js.deck).map(c => CardModel.fromServer(c))
+        , pdeck: js.pdeck ? List(js.pdeck) : null
         , players: OrderedMap(js.players).map(PlayerModel.fromServer).sort((p1, p2) => p1.index > p2.index)
-        , continents: Map(js.continents).map(ContinentRecord.fromJS)
+        , areas: Map(js.areas).map(AreaRecord.fromJS)
+        , plants: OrderedMap(js.plants).map(PlantModel.fromJS)
         , status: new StatusRecord(js.status)
         , question: QuestionRecord.fromJS(js.question)
         , cooldowns: CooldownList.fromServer(js.cooldowns)
@@ -246,7 +269,10 @@ export class GameModel extends Record({
     // TODO question
     return this
       .set('deck', this.deck.map(card => card.toClient()))
-      .set('players', this.players.map(player => player.toClient()).entrySeq().toJS())
+      .set('pdeck', null)
+      .set('players', this.players.map(player => player.toClient()).entrySeq())
+      .set('plants', this.plants.map(plant => plant.toClient()).entrySeq())
+      .set('areas', this.areas.map(area => area.toClient()))
       .remove('huntingCallbacks')
   }
 
@@ -295,12 +321,32 @@ export class GameModel extends Record({
       : this.players.get(pid);
   }
 
-  getContinent() {
-    return this.continents.get('standard');
+  getArea() {
+    return this.areas.get(AREA.STANDARD);
+  }
+
+  getFood() {
+    if (this.isPlantarium()) {
+      return 0;
+    } else {
+      return this.food;
+    }
+  }
+
+  isPlantarium() {
+    return this.settings.addon_plantarium;
+  }
+
+  getPlant(plantId) {
+    return this.plants.get(plantId);
+  }
+
+  mapPlants(cb) {
+    return this.update('plants', plants => plants.map(cb));
   }
 
   getStartingHandCount() {
-    return this.settings.addon_plantarium ? 8 : 6;
+    return this.isPlantarium() ? 8 : 6;
   }
 
   // TODO remove
@@ -330,7 +376,14 @@ export class GameModel extends Record({
 
   locateTrait(traitId, animalId, playerId = null) {
     const animal = this.locateAnimal(animalId, playerId);
-    return animal ? animal.traits.get(traitId) : null;
+    if (animal) {
+      return animal.traits.get(traitId);
+    }
+    const plant = this.getPlant(animalId);
+    if (plant) {
+      return plant.traits.get(traitId);
+    }
+    return null;
   }
 
   locateCard(cardId) {
@@ -382,12 +435,13 @@ export class GameModelClient extends Record({
   }
 }
 
-GameModel.parse = parseFromRoom;
-GameModel.parseCardList = parseCardList;
-GameModel.parseAnimalList = parseAnimalList;
+GameModelClient.prototype.getArea = GameModel.prototype.getArea;
+GameModelClient.prototype.getPlant = GameModel.prototype.getPlant;
+GameModelClient.prototype.isPlantarium = GameModel.prototype.isPlantarium;
 GameModelClient.prototype.sortPlayersFromIndex = GameModel.prototype.sortPlayersFromIndex;
 GameModelClient.prototype.getActualPlayers = GameModel.prototype.getActualPlayers;
 GameModelClient.prototype.someAnimal = GameModel.prototype.someAnimal;
+GameModelClient.prototype.mapPlants = GameModel.prototype.mapPlants;
 GameModelClient.prototype.getPlayerCard = GameModel.prototype.getPlayerCard;
 GameModelClient.prototype.locateAnimal = GameModel.prototype.locateAnimal;
 GameModelClient.prototype.locateTrait = GameModel.prototype.locateTrait;

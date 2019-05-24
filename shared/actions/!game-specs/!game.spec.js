@@ -213,6 +213,7 @@ players:
     expect(selectPlayer1(User0).getIn(['hand', 0, 'type'])).not.equal('CardSharpVision');
 
     const traitCamouflage = selectTrait(User0, 0, 0);
+    console.log(selectTrait(User0, 0, 0).toJS(), selectTrait0(User0, 0, 0).toJS())
     expect(selectTrait0(User0, 0, 0)).equal(traitCamouflage);
     expect(selectTrait1(User0, 0, 0)).equal(traitCamouflage);
 

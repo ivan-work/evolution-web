@@ -1,12 +1,31 @@
 import {Record} from 'immutable';
 import uuid from 'uuid';
 import {TraitDataModel} from './TraitDataModel';
-import * as traitTypes from './traitTypes/index'
+import * as tt from './traitTypes'
+import * as ptt from './plantarium/plantTraitTypes'
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import {TRAIT_ANIMAL_FLAG} from './constants';
+import PlantTraitDataModel from "./PlantTraitDataModel";
 
-export const TraitData = Object.keys(traitTypes)
+export const TraitData = Object.keys(tt)
   .reduce((result, traitType) => Object.assign(result, {[traitType]: TraitDataModel.new(traitType)}), {});
+
+export const PlantTraitData = Object.keys(ptt)
+  .reduce((result, traitType) => Object.assign(result, {[traitType]: PlantTraitDataModel.new(traitType)}), {});
+
+export const parseTrait = (type) => {
+  return Object.keys(tt)
+    .find(traitType => ~traitType.toLowerCase().indexOf(type.toLowerCase()));
+};
+
+export const parsePlantTrait = (type) => {
+  return Object.keys(ptt)
+    .find(traitType => ~traitType.toLowerCase().indexOf(type.toLowerCase()));
+};
+
+export const getTraitDataModel = (traitType) => {
+  return TraitData[traitType] || PlantTraitData[traitType];
+};
 
 export class TraitModel extends Record({
   type: null
@@ -19,11 +38,14 @@ export class TraitModel extends Record({
   , value: false // for fat
   , disabled: false // for neoplasm
   , cooldown: null
+  , covers: 0
 }) {
   static new(type) {
+    const data = getTraitDataModel(type);
     return TraitModel.fromServer({
       id: uuid.v4()
       , type
+      , covers: data.coverSlots
     });
   }
 
@@ -34,13 +56,9 @@ export class TraitModel extends Record({
     //.set('dataModel', TraitDataModel.new(js.type));
   }
 
-  static parse(type) {
-    return Object.keys(traitTypes)
-      .find(traitType => ~traitType.toLowerCase().indexOf(type.toLowerCase()));
-  }
-
   static LinkBetweenCheck(traitType, animal1, animal2) {
-    return (animal1.hasTrait(traitType)
+    return (!!traitType
+      && animal1.hasTrait(traitType)
       && animal2.hasTrait(traitType)
       && animal1.traits.some((trait) => trait.type === traitType && (trait.hostAnimalId === animal2.id || trait.linkAnimalId === animal2.id))
     );
@@ -72,15 +90,16 @@ export class TraitModel extends Record({
     return this.id === id || this.type === id;
   }
 
-  // TODO remove
+  // TODO remove. somehow, it's rly not easy
   attachTo(animal) {
     return this
       .set('ownerId', animal.ownerId)
       .set('hostAnimalId', animal.id);
   }
 
+  // TODO extract to separate function
   getDataModel() {
-    return TraitData[this.type];
+    return getTraitDataModel(this.type);
   }
 
   disable() {
@@ -129,6 +148,7 @@ export class TraitModel extends Record({
   }
 
   toOthers() {
+    console.log(this.type);
     const traitData = this.getDataModel();
     let result = this;
     if (traitData.transient) result = result.set('value', false);
@@ -149,5 +169,11 @@ export class TraitModel extends Record({
       }
     }
     return this.getDataModel().score + this.getDataModel().food;
+  }
+
+  //
+
+  getCovers() {
+    return this.covers;
   }
 }

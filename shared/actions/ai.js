@@ -9,7 +9,12 @@ import {
 } from '../models/game/evolution/constants';
 import {startCooldown} from './actions';
 import {passesChecks, failsChecks, checkGamePhase, checkPlayerCanAct} from './checks';
-import {checkAnimalCanEatFails, checkTraitActivation_Animal, checkAnimalCanTakeShellFails} from './trait.checks';
+import {
+  getErrorOfAnimalEatingFromGame,
+  checkTraitActivation_Animal,
+  checkAnimalCanTakeShellFails,
+  getErrorOfAnimalEatingFromPlant
+} from './trait.checks';
 import {selectGame} from '../selectors';
 
 const makeOption = {
@@ -46,7 +51,8 @@ export class Option extends Record({
   type: null
   , text: null
   , cooldownAction: null
-}) {}
+}) {
+}
 
 export const doesPlayerHasOptions = (game, playerId) => {
   logger.debug('?doesPlayerHasOptions:', playerId, game.getPlayer(playerId).acted);
@@ -69,12 +75,6 @@ export const doesPlayerHasOptions = (game, playerId) => {
   return true;
 };
 
-export const getFeedingOption = (game, playerId) => {
-  return game.getPlayer(playerId).continent.find((animal) => {
-    if (!checkAnimalCanEatFails(game, animal)) return animal.id;
-  });
-};
-
 export const doesOptionExist = (game, playerId) => {
   return searchPlayerOptions(game, playerId, (option) => true);
 };
@@ -94,10 +94,10 @@ export const searchPlayerOptions = (game, playerId, successFn) => {
   const allAnimals = game.players.reduce((result, player) => result.concat(player.continent.keySeq().toArray()), []);
 
   return game.getPlayer(playerId).someAnimal((animal) => {
-    if (!checkAnimalCanEatFails(game, animal))
+    if (!getErrorOfAnimalEatingFromGame(game, animal))
       return successFn(makeOption.traitTakeFoodRequest(animal.id));
 
-    if (game.getContinent().shells.size > 0 && !checkAnimalCanTakeShellFails(game, animal))
+    if (game.getArea().shells.size > 0 && !checkAnimalCanTakeShellFails(game, animal))
       return successFn(makeOption.traitTakeShellRequest(animal.id));
 
     return animal.traits.some((trait) => {

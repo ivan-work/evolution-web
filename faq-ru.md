@@ -8,6 +8,8 @@
 
 Правила: https://vk.com/doc-36567706_134818567
 
+Правила растений: https://hobbyworld.ru/download/rules/evo-plant_rus.pdf
+
 ## Баги и ошибки
 
 ### Я нашел ошибку!

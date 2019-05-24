@@ -179,8 +179,8 @@ export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
 
 export const FoodWrapper = AnimatedHOC(() => `FoodContainer`)(
   ({game}) => <div className='FoodContainer' style={{height: '100%'}}>
-    {game.continents.get('standard').shells.map((trait) => <InteractiveShell key={trait.id} trait={trait}/>).toList()}
-    {repeat(game.food, i => <InteractiveFood key={i}/>)}
+    {game.getArea().shells.map((trait) => <InteractiveShell key={trait.id} trait={trait}/>).toList()}
+    {repeat(game.getFood(), i => <InteractiveFood key={i}/>)}
   </div>
 );
 

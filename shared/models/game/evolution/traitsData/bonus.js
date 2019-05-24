@@ -33,10 +33,10 @@ export const TraitHomeothermy = {
   , cooldowns: fromJS([
     [tt.TraitHomeothermy, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
-  , $checkAction: (game, animal, traitSpec) => game.food > 0 && (animal.canEat(game) && animal.getNeededFood() > 0)
+  , $checkAction: (game, animal, traitSpec) => game.getFood() > 0 && (animal.canEat(game) && animal.getNeededFood() > 0)
   , action: (game, animal, trait) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, trait, animal));
-    dispatch(server$startFeedingFromGame(game.id, animal.id, 1));
+    dispatch(server$startFeedingFromGame(game.id, animal.id));
     return true;
   }
 };

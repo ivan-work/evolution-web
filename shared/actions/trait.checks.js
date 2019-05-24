@@ -2,24 +2,16 @@ import {ActionCheckError} from '../models/ActionCheckError';
 import {
   checkGameDefined
   , checkGameHasUser
-  , checkPlayerHasAnimal
+  , checkPlayerHasAnimal, getErrorInList
 } from './checks';
 
 import * as tt from '../models/game/evolution/traitTypes';
+import ERRORS from './errors'
 
 import {
   TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_LINK, TRAIT_ANIMAL_FLAG
 } from '../models/game/evolution/constants';
-
-const ERRORS = {
-  GAME_FOOD: 'GAME_FOOD'
-  , COOLDOWN: 'COOLDOWN'
-  , ANIMAL_CANT_EAT: 'ANIMAL_CANT_EAT'
-  , TRAIT_MULTIPLE: 'TRAIT_MULTIPLE'
-  , TRAIT_REGENERATION_TRAIT_MAX: 'TRAIT_REGENERATION_TRAIT_MAX'
-  , TRAIT_REGENERATION_DEAD: 'TRAIT_REGENERATION_DEAD'
-};
 
 export const checkTraitActivation = (game, animal, traitId, ...targets) => {
   const gameId = game.id;
@@ -115,20 +107,24 @@ export const checkTraitActivation_TwoTraits = (game, sourceAnimal, trait, trait1
   return [trait1, trait2];
 };
 
-export const checkAnimalCanEat = (game, animal) => {
-  if (game.food < 1)
-    throw new ActionCheckError(`traitTakeFoodRequest@Game(${game.id})`, 'Not enough food (%s)', game.food)
-  if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, animal.ownerId, animal.id))
-    throw new ActionCheckError(`traitTakeFoodRequest@Game(${game.id})`, 'Cooldown active')
-  if (!animal.canEat(game))
-    throw new ActionCheckError(`traitTakeFoodRequest@Game(${game.id})`, `Animal(%s) can't eat`, animal)
-};
-
-export const checkAnimalCanEatFails = (game, animal) => {
-  if (game.food < 1) return ERRORS.GAME_FOOD;
+export const getErrorOfAnimalEating = (game, animal) => {
   if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, animal.ownerId, animal.id)) return ERRORS.COOLDOWN;
   if (!animal.canEat(game)) return ERRORS.ANIMAL_CANT_EAT;
   return false;
+};
+
+export const getErrorOfAnimalEatingFromGame = (game, animal) => {
+  if (game.getFood() < 1) return ERRORS.GAME_FOOD;
+  return getErrorOfAnimalEating(game, animal);
+};
+
+export const getErrorOfAnimalEatingFromPlant = (game, animal, plant) => {
+  if (plant.getFood() < 1) return ERRORS.PLANT_FOOD;
+
+  return (
+    getErrorOfAnimalEating(game, animal)
+    || getErrorInList(plant.getTraits(), trait => trait.getDataModel().getErrorOfFoodIntake(game, plant, animal))
+  );
 };
 
 export const checkAnimalCanTakeShellFails = (game, animal) => {

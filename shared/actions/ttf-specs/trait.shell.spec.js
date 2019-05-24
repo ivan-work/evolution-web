@@ -73,13 +73,13 @@ players:
     expect(selectGame().status.turn).equal(1);
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
 
-    expect(selectGame().getContinent().shells).size(1);
+    expect(selectGame().getArea().shells).size(1);
 
     expectUnchanged('$B cant take shell', () => {
-      clientStore0.dispatch(traitTakeShellRequest('$B', selectGame().getContinent().shells.first().id));
+      clientStore0.dispatch(traitTakeShellRequest('$B', selectGame().getArea().shells.first().id));
     }, serverStore, clientStore0);
 
-    clientStore0.dispatch(traitTakeShellRequest('$C', selectGame().getContinent().shells.first().id));
+    clientStore0.dispatch(traitTakeShellRequest('$C', selectGame().getArea().shells.first().id));
 
     expect(selectAnimal(User0, 0).traits).size(1);
     expect(selectAnimal(User0, 1).traits).size(1);

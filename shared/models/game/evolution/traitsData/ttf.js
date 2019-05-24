@@ -23,7 +23,7 @@ import {
   , server$game
   , startCooldown
   , server$gameDeployAnimalFromDeck
-  , server$tryNeoplasmDeath
+  , server$tryNeoplasmDeath, server$startFeedingCooldown, server$startCooldownList, getFeedingCooldownList
 } from '../../../../actions/actions';
 
 import {selectGame} from '../../../../selectors';
@@ -40,16 +40,16 @@ export const TraitMetamorphose = {
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: (game, sourceAnimal, traitMetamorphose, targetTrait) => (dispatch, getState) => {
-    dispatch(server$traitAnimalRemoveTrait(game, sourceAnimal, targetTrait));
     dispatch(server$traitStartCooldown(game.id, traitMetamorphose, sourceAnimal));
 
     dispatch(server$startFeeding(game.id, sourceAnimal.id, 1, tt.TraitMetamorphose));
 
-    dispatch(server$tryNeoplasmDeath(game.id, sourceAnimal));
+    dispatch(server$traitAnimalRemoveTrait(game, sourceAnimal, targetTrait));
 
     return true;
   }
-  , $checkAction: (game, sourceAnimal) => sourceAnimal.getWantedFood() > 0 && sourceAnimal.getEatingBlockers(game).length <= 1
+  , $checkAction: (game, sourceAnimal) =>
+    sourceAnimal.getWantedFood() > 0 && sourceAnimal.getEatingBlockers(game).length <= 1
   , checkTarget: (game, sourceAnimal, targetTrait) => {
     const eatingBlockers = sourceAnimal.getEatingBlockers(game);
     if (eatingBlockers.length === 0)
@@ -101,9 +101,12 @@ export const TraitInkCloud = {
     [tt.TraitInkCloud, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
   ])
   , action: (game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait) => (dispatch) => {
-    dispatch(server$game(game.id, startCooldown(game.id, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, attackAnimal.ownerId)));
-    // dispatch(server$game(game.id, startCooldown(game.id, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, attackAnimal.ownerId)));
-    dispatch(server$game(game.id, startCooldown(game.id, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.TRAIT, attackTrait.id)));
+    dispatch(server$startCooldownList(game.id, [
+      startCooldown(game.id, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, attackAnimal.ownerId)
+      , startCooldown(game.id, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.TRAIT, attackTrait.id)
+    ]));
+
+
     dispatch(server$traitStartCooldown(game.id, defenceTrait, defenceAnimal));
     dispatch(endHuntNoCd(game.id, attackAnimal, attackTrait, defenceAnimal));
     return true;
@@ -125,7 +128,7 @@ export const TraitSpecA = {
     return true;
   }
   , $checkAction: (game, animal, traitSpec) => (animal.canEat(game)
-  && !game.someAnimal((animal) => animal.traits.some(trait => trait.id !== traitSpec.id && trait.type === traitSpec.type)))
+    && !game.someAnimal((animal) => animal.traits.some(trait => trait.id !== traitSpec.id && trait.type === traitSpec.type)))
 };
 
 export const TraitSpecB = {

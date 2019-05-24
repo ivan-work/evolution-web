@@ -172,7 +172,7 @@ players:
     clientStore0.dispatch(traitAnswerRequest(tt.TraitIntellect, tt.TraitShell));
     clientStore0.dispatch(gameEndTurnRequest());
 
-    clientStore0.dispatch(traitTakeShellRequest('$Regen', selectGame().getContinent().shells.first().id));
+    clientStore0.dispatch(traitTakeShellRequest('$Regen', selectGame().getArea().shells.first().id));
     expect(findAnimal('$Regen').traits, '$Regen.traits.size').size(2);
   });
 
@@ -191,7 +191,7 @@ players:
     clientStore0.dispatch(gameEndTurnRequest());
 
     expectUnchanged(`$Regen can't take shell when .traits.size > 1`, () => {
-      clientStore0.dispatch(traitTakeShellRequest('$Regen', selectGame().getContinent().shells.first().id));
+      clientStore0.dispatch(traitTakeShellRequest('$Regen', selectGame().getArea().shells.first().id));
     }, serverStore, clientStore0);
     expect(findAnimal('$Regen').traits, '$Regen.traits.size').size(2);
   });
@@ -214,12 +214,12 @@ players:
     clientStore0.dispatch(gameEndTurnRequest());
 
     expectUnchanged(`$Regen can't take shell when dead`, () => {
-      clientStore0.dispatch(traitTakeShellRequest('$Regen', selectGame().getContinent().shells.first().id));
+      clientStore0.dispatch(traitTakeShellRequest('$Regen', selectGame().getArea().shells.first().id));
     }, serverStore, clientStore0);
     expect(findAnimal('$Regen').traits, '$Regen.traits.size').size(1);
 
     expectChanged(`$CarnShell can take shell`, () => {
-      clientStore0.dispatch(traitTakeShellRequest('$CarnShell', selectGame().getContinent().shells.first().id));
+      clientStore0.dispatch(traitTakeShellRequest('$CarnShell', selectGame().getArea().shells.first().id));
     }, serverStore, clientStore0);
     expect(findAnimal('$CarnShell').traits, '$CarnShell.traits.size').size(3);
   });

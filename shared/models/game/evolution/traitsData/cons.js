@@ -87,7 +87,7 @@ export const TraitCnidocytes = {
     paralyze: (game, sourceAnimal, traitCnidocytes, targetAnimal) => dispatch => {
       const gameId = game.id;
       dispatch(server$traitStartCooldown(gameId, traitCnidocytes, sourceAnimal));
-      dispatch(traitAddHuntingCallback(gameId, (game) => (dispatch, getState) => {
+      dispatch(traitAddHuntingCallback(gameId, void 0, (game) => (dispatch, getState) => {
         dispatch(server$game(gameId, traitParalyze(game.id, targetAnimal.id)));
       }));
     }

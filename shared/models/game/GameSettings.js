@@ -1,7 +1,6 @@
 import {List, Map, Record} from 'immutable';
 import * as cardsData from './evolution/cards/index';
-import makeCard from "./evolution/cards/makeCard";
-import * as traits from "./evolution/traitTypes";
+import * as pt from "./evolution/plantarium/plantTypes";
 
 export const SETTINGS_PLAYERS = [2, 8];
 
@@ -205,4 +204,16 @@ export const Deck_Plantarium = [
   , [4, cardsData.CardTreeAndCarnivorous.type]
   , [4, cardsData.CardParasiticPlant.type]
   , [4, cardsData.CardParasiticAndCommunication.type]
+];
+
+export const PlantDeck_Plantarium = [
+  [4, pt.PlantFungus]
+  , [4, pt.PlantGrass]
+  , [4, pt.PlantPerennial]
+  , [4, pt.PlantLegume]
+  , [4, pt.PlantLiana]
+  , [4, pt.PlantFruits]
+  , [4, pt.PlantSucculent]
+  , [4, pt.PlantCarnivorous]
+  , [4, pt.PlantEphemeral]
 ];

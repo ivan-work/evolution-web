@@ -19,7 +19,7 @@ const styles = theme => ({
 
 const PreviewFood = ({classes, game, focusId, focusControls}) => (
   <PreviewTab className={classes.previewFood} focusId={focusId} {...focusControls}>
-    {Array.from({length: game.food}).map((u, index) => <IconFood key={index} className={classes.food}/>)}
+    {Array.from({length: game.getFood()}).map((u, index) => <IconFood key={index} className={classes.food}/>)}
   </PreviewTab>
 );
 export default compose(

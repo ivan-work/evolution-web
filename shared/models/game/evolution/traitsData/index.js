@@ -155,7 +155,7 @@ export const TraitTailLoss = {
   , action: (game, targetAnimal, trait, targetTrait, attackAnimal, attackTrait) => (dispatch, getState) => {
     dispatch(server$traitAnimalRemoveTrait(game, targetAnimal, targetTrait));
 
-    dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
+    dispatch(traitAddHuntingCallback(game.id, void 0, (game) => dispatch => {
       dispatch(server$startFeeding(game.id, attackAnimal.id, 1, tt.TraitTailLoss, targetAnimal.id));
     }));
 
@@ -178,7 +178,7 @@ export const TraitGrazing = {
     dispatch(server$traitGrazeFood(game.id, 1, sourceAnimal));
     return true;
   }
-  , $checkAction: (game, sourceAnimal) => game.food > 0
+  , $checkAction: (game, sourceAnimal) => game.getFood() > 0
 };
 
 export const TraitMassive = {
@@ -237,11 +237,11 @@ export const TraitCooperation = {
     dispatch(server$traitStartCooldown(game.id, trait1, animal1));
     dispatch(server$traitStartCooldown(game.id, trait2, animal2));
 
-    return dispatch(server$startFeedingFromGame(game.id, animal2.id, 1, animal.id, autoShare));
+    return dispatch(server$startFeedingFromGame(game.id, animal2.id, 1, 'GAME', 'GAME', animal.id, autoShare));
   }
   , $checkAction: (game, animal, trait) => {
     const linkedAnimal = trait.findLinkedAnimal(game, animal);
-    return (game.food > 0
+    return (game.getFood() > 0
       && trait.value
       && !!linkedAnimal
       && linkedAnimal.canEat(game));

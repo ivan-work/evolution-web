@@ -510,7 +510,6 @@ players:
     clientStore0.dispatch(gameEndTurnRequest());
 
     // Hunt for $W
-    console.log('Hunt for $W')
     expect(selectGame().status.phase).equal(PHASE.AMBUSH);
     // Activate both animals:
     clientStore1.dispatch(traitAmbushActivateRequest('$A'));
@@ -604,5 +603,25 @@ settings:
     expect(findAnimal('$D').getFood()).equal(0);
     expect(selectGame().status.currentPlayer).equal(User1.id);
     expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)].remaining).equal(100);
+  });
+
+  it(`Ambush of scavenger that mimicries to another target`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 10
+players:
+  - continent: $Q scav mimi, $W
+  - continent: $A carn ambu
+`);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+
+    clientStore1.dispatch(traitAmbushActivateRequest('$A'));
+
+    expect(findAnimal('$Q').getFood()).equal(1);
+    expect(findAnimal('$W')).not.ok;
+    expect(findAnimal('$A').getFood()).equal(2);
+    expect(selectGame().getFood()).equal(10);
   });
 });

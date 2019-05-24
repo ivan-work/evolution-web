@@ -109,12 +109,12 @@ export class Game extends React.Component {
           </Paper>
 
           <Paper className={`FoodCard ${classes.sticker} ${classes.padding}`}>
-            <Typography variant='h6'>{T.translate('Game.UI.FoodBase')}{game.status.phase === PHASE.FEEDING && <span> ({game.food})</span>}:</Typography>
+            <Typography variant='h6'>{T.translate('Game.UI.FoodBase')}{game.status.phase === PHASE.FEEDING && <span> ({game.getFood()})</span>}:</Typography>
             <div className='GameShellContainer'>
-              {game.continents.get('standard').shells.map((shell) =>
+              {game.getArea().shells.map((shell) =>
                 <TraitShell key={shell.id} game={game} trait={shell}/>).toList()}
             </div>
-            <GameFoodContainer game={game} food={game.food}/>
+            <GameFoodContainer game={game} food={game.getFood()}/>
           </Paper>
 
           <Paper shadow={SHADOW} className={`ChatCard ${classes.sticker}`}>

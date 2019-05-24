@@ -138,7 +138,7 @@ export const TraitCarnivorous = {
         game = selectGame(getState, game.id);
         const revealledAnglerfish = game.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
         if (TraitCarnivorous.checkTarget(game, revealledAnglerfish, sourceAnimal)) {
-          dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
+          dispatch(traitAddHuntingCallback(game.id, void 0, (game) => dispatch => {
             const animal = game.locateAnimal(animalAnglerfish.id, animalAnglerfish.ownerId);
             if (animal) {
               const traitIntellect = animal.hasTrait(tt.TraitIntellect);
@@ -241,7 +241,7 @@ export const TraitCarnivorous = {
 
     const traitShy = targetAnimal.hasTrait(tt.TraitShy);
     if (traitShy) {
-      dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
+      dispatch(traitAddHuntingCallback(game.id, void 0, (game) => dispatch => {
         const animal = game.locateAnimal(targetAnimal.id);
         const traitShy = animal.hasTrait(tt.TraitShy);
         if (traitShy) dispatch(traitShy.getDataModel().action(game, targetAnimal, traitShy));
@@ -303,8 +303,10 @@ export const TraitCarnivorous = {
 
         dispatch(server$traitKillAnimal(game.id, sourceAnimal, targetAnimal));
 
-        dispatch(traitAddHuntingCallback(game.id, (game) => dispatch => {
-          dispatch(server$startFeeding(game.id, sourceAnimal.id, 2, 'TraitCarnivorous'));
+        logger.debug('traitAddHuntingCallback: TraitCarnivorous');
+        dispatch(traitAddHuntingCallback(game.id, 0, (game) => dispatch => {
+          logger.debug('traitHuntingCallback(TraitCarnivorous)');
+          dispatch(server$startFeeding(game.id, sourceAnimal.id, 2, tt.TraitCarnivorous));
 
           // Scavenge
           const currentPlayerIndex = game.getPlayer(sourceAnimal.ownerId).index;

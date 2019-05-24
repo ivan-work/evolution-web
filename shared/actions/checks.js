@@ -42,14 +42,25 @@ export const failsChecks = (checks) => {
   return false;
 };
 
-export const throwError = (check) => {
-  let result = check();
-  if (result) throw new ActionCheckError(result);
+export const throwError = (possibleError) => {
+  let result = possibleError;
+  if (result) throw new ActionCheckError('ActionCheckError', result);
 };
 
-export const checkGameCanStart = (room) => {
-  if (room.validateCanStart() === void 0)
-    throw new ActionCheckError(`checkGameDefined`, 'Cannot find game');
+export const getErrorInList = (list, cb) => {
+  let error;
+  list.some(item => {
+    return error = cb(item);
+  });
+  return error;
+};
+
+export const checkGameHasPlant = (game, plantId) => {
+  const plant = game.plants.get(plantId);
+  if (!plant) {
+    throw new ActionCheckError(`checkGameHasPlant(${game.id})`, 'Plant#%s not found', plantId);
+  }
+  return plant;
 };
 
 export const checkGameDefined = (game) => {
@@ -63,11 +74,11 @@ export const checkGameHasUser = (game, userId) => {
 };
 
 export const checkPlayerHasCard = (game, userId, cardId) => {
-  const cardIndex = game.players.get(userId).hand.findIndex(card => card.id === cardId);
-  if (!~cardIndex) {
+  const card = game.getPlayer(userId).findCard(cardId);
+  if (!card) {
     throw new ActionCheckError(`checkPlayerHasCard(${game.id})`, 'Card#%s not found in Player#%s', cardId, userId);
   }
-  return cardIndex;
+  return card;
 };
 
 export const checkPlayerHasAnimal = (game, userId, animalId) => {
