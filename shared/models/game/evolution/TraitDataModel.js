@@ -1,7 +1,7 @@
 import {Record} from 'immutable';
 import * as traitsData from './traitsData/index'
 import * as tt from './traitTypes'
-import {CARD_TARGET_TYPE, CTT_PARAMETER} from './constants';
+import {CARD_TARGET_TYPE, CTT_PARAMETER, TRAIT_ANIMAL_FLAG} from './constants';
 import TraitDataModelBaseProps from "./TraitDataModelBaseProps";
 import ERRORS from '../../../actions/errors';
 
@@ -12,9 +12,6 @@ const TraitDataModelProps = {
   , checkTraitPlacement: null // (animal) => boolean // if trait is allowed to be placed on this animal
   , optional: false // On defense traits, can choose to suicide animal
   // (game, sourceAnimal, trait:TraitModel, targetAnimal/targetTrait/none, attackTrait/none, attackAnimal/none) => should return (dispatch, getState)
-  , $checkAction: null // if trait is allowed to be clicked? (game, sourceAnimal) => boolean
-  , checkTarget: null // if target is valid? (game, sourceAnimal, targetAnimal) => boolean
-  , coverSlots: 0 // for plant traits. I'm sorry. I'll refactor this, someday
 };
 
 /**
@@ -37,7 +34,7 @@ const TraitDataModelProps = {
  * @property {boolean} [optional: false] - On defence traits, can choose to suicide animal instead of using it
  * @property {callback} checkTraitPlacement: null // (animal) => boolean - if trait is allowed to be placed on this animal
  * @property {callback} $checkAction: null // if trait is allowed to be clicked? (game, sourceAnimal) => boolean
- * @property {callback} checkTarget: null // if target is valid? (game, sourceAnimal, targetAnimal) => boolean
+ * @property {callback} getErrorOfUseOnTarget: null // if target is valid? (game, sourceAnimal, targetAnimal) => boolean
  */
 
 export class TraitDataModel extends Record(TraitDataModelProps) {
@@ -48,6 +45,18 @@ export class TraitDataModel extends Record(TraitDataModelProps) {
       ...traitData
     });
   }
+
+  getErrorOfUse(game, animal, trait, ...targets) {
+    if (trait.disabled) return ERRORS.TRAIT_ACTION_DISABLED;
+    if (animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) return ERRORS.TRAIT_REGENERATION_DEAD;
+    // if (!this.action) return ERRORS.TRAIT_ACTION_NOT_EXISTS;
+
+    if (this.cooldowns && this.cooldowns
+      .some(([link]) => game.cooldowns.checkFor(link, animal.ownerId, animal.id, trait.id)))
+      return ERRORS.COOLDOWN;
+
+    return this._getErrorOfUse(game, animal, trait, ...targets);
+  };
 
   checkTraitPlacementFails_User(animal, userId) {
     if (this.cardTargetType & CTT_PARAMETER.SELF)
@@ -64,8 +73,10 @@ export class TraitDataModel extends Record(TraitDataModelProps) {
     if (this.hidden) return ERRORS.TRAIT_PLACEMENT_HIDDEN;
     if (this.checkTraitPlacement && !this.checkTraitPlacement(animal)) return this.type;
     if (animal.hasTrait(tt.TraitRegeneration) && (
-        this.food > 0 || animal.traits.filter(t => !t.getDataModel().hidden).size >= 2
-      )) return tt.TraitRegeneration;
+      this.food > 0 || animal.traits.filter(t => !t.getDataModel().hidden).size >= 2
+    )) return tt.TraitRegeneration;
     return false;
   }
 }
+
+export default TraitDataModel;

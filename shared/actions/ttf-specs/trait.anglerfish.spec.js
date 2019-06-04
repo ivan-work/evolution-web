@@ -96,19 +96,22 @@ settings:
     clientStore0.dispatch(traitAnswerRequest(tt.TraitTailLoss, tt.TraitCarnivorous));
     expect(findAnimal('$Q')).ok;
 
-    expect(selectPlayer(User0).acted).true;
+    expect(selectPlayer(User0).acted, 'selectPlayer(User0).acted').true;
     expect(selectGame().status.round).equal(0);
     clientStore0.dispatch(gameEndTurnRequest());
 
     expect(selectGame().status.round).equal(1);
     clientStore0.dispatch(traitActivateRequest('$W', tt.TraitCarnivorous, '$S'));
     expect(findAnimal('$W')).ok;
+    expect(findAnimal('$S')).ok;
+    expect(selectGame().status.round).equal(1);
+    expect(selectPlayer(User0).acted, 'selectPlayer(User0).acted').true;
     clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore1.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$E', tt.TraitCarnivorous, '$D'));
-    expect(selectGame().question).ok;
+    expect(selectGame().question, 'Question should be ok').ok;
     clientStore1.dispatch(traitAnswerRequest(tt.TraitIntellect, tt.TraitTailLoss));
     expect(selectGame().question).null;
 

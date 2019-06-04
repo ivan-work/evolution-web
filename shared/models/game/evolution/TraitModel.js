@@ -1,10 +1,13 @@
 import {Record} from 'immutable';
 import uuid from 'uuid';
-import {TraitDataModel} from './TraitDataModel';
+
 import * as tt from './traitTypes'
 import * as ptt from './plantarium/plantTraitTypes'
+
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import {TRAIT_ANIMAL_FLAG} from './constants';
+
+import {TraitDataModel} from './TraitDataModel';
 import PlantTraitDataModel from "./PlantTraitDataModel";
 
 export const TraitData = Object.keys(tt)
@@ -13,8 +16,10 @@ export const TraitData = Object.keys(tt)
 export const PlantTraitData = Object.keys(ptt)
   .reduce((result, traitType) => Object.assign(result, {[traitType]: PlantTraitDataModel.new(traitType)}), {});
 
+const traitTypes = Object.keys(tt)
+  .sort((a, b) => a.length - b.length);
 export const parseTrait = (type) => {
-  return Object.keys(tt)
+  return traitTypes
     .find(traitType => ~traitType.toLowerCase().indexOf(type.toLowerCase()));
 };
 
@@ -124,23 +129,8 @@ export class TraitModel extends Record({
       , this.ownerId)
   }
 
-  checkActionFails(game, sourceAnimal) {
-    const traitData = this.getDataModel();
-    if (this.disabled) return 'Trait is disabled';
-    if (sourceAnimal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) return 'Regeneration';
-    if (!traitData.action) return 'Trait has no .action';
-    if (this.isOnCooldown(game, sourceAnimal)) return 'Trait has cooldown';
-    // Either no $checkAction or it is passing
-    if (traitData.$checkAction && !traitData.$checkAction(game, sourceAnimal, this))
-      return '$checkAction fails';
-    return false;
-  };
-
-  isOnCooldown(game, sourceAnimal) {
-    const traitData = this.getDataModel();
-    return !!(traitData.cooldowns
-      && traitData.cooldowns.some(([link, place]) => game.cooldowns.checkFor(link, sourceAnimal.ownerId, sourceAnimal.id, this.id))
-    );
+  getErrorOfUse(game, animal, ...targets) {
+    return this.getDataModel().getErrorOfUse(game, animal, this, ...targets)
   }
 
   toClient() {
@@ -148,7 +138,6 @@ export class TraitModel extends Record({
   }
 
   toOthers() {
-    console.log(this.type);
     const traitData = this.getDataModel();
     let result = this;
     if (traitData.transient) result = result.set('value', false);

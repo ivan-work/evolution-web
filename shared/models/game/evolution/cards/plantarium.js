@@ -22,4 +22,4 @@ export const CardOfficinalisAndCarnivorous = makeCard(ptt.PlantTraitOfficinalis,
 export const CardProteinRichAndSwimming = makeCard(ptt.PlantTraitProteinRich, tt.TraitSwimming);
 export const CardTreeAndCarnivorous = makeCard(ptt.PlantTraitTree, tt.TraitCarnivorous);
 export const CardParasiticPlant = makeCard(ptt.PlantTraitParasiticPlant);
-export const CardParasiticAndCommunication = makeCard(ptt.PlantTraitSpiky, tt.TraitCommunication);
+export const CardSpikyAndCommunication = makeCard(ptt.PlantTraitSpiky, tt.TraitCommunication);

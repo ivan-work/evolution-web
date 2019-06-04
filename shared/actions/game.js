@@ -30,7 +30,6 @@ import {
   , server$autoFoodSharing
 } from './actions';
 import {appPlaySound} from '../../client/actions/app';
-import {gameNextPlayer as Reduce_gameNextPlayer} from '../../server/reducers/games-rdx-server';
 import {redirectTo} from '../utils/history';
 import {selectGame, selectUsersInGame} from '../selectors';
 
@@ -356,9 +355,9 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
   // if isDefaultTurn is true, then player performed default turn\
   // and there's second server$gameEndTurn is coming. So we finish this one.
   if (isDefaultTurn) return;
-  logger.debug('server$gameEndTurn:', userId);
   let game = selectGame(getState, gameId);
   const acted = selectGame(getState, gameId).getPlayer(userId).acted;
+  logger.debug(`server$gameEndTurn: ${userId} (${game.getPlayer(userId).acted})`);
 
   dispatch(server$gameCancelTurnTimeout(gameId));
 
@@ -507,12 +506,11 @@ const server$gameNextPlayer = (gameId, startSearchFromId) => (dispatch, getState
 
       if (!player.playing) return false;
 
-      const nextGame = Reduce_gameNextPlayer(game, {playerId: player.id});
-
       switch (game.status.phase) {
         case PHASE.DEPLOY:
           return !player.ended;
         case PHASE.FEEDING:
+          const nextGame = game.gameNextPlayer(player.id);
           // console.log('doesOptionExist', player.id, getOptions(nextGame, player.id).map(o => o.text))
           return doesOptionExist(nextGame, player.id);
         default:
@@ -735,7 +733,7 @@ export const gameClientToServer = {
     if (!(game.status.phase === PHASE.FEEDING || game.status.phase === PHASE.DEPLOY)) {
       throw new ActionCheckError(`checkGamePhase@Game(${game.id})`, 'Wrong phase (%s)', game.status.phase);
     }
-    logger.verbose('gameEndTurnRequest:', userId);
+    logger.verbose(`gameEndTurnRequest: ${userId} (${game.getPlayer(userId).acted})`);
     dispatch(server$gameEndTurn(gameId, userId));
   }
   , gameDeployAnimalRequest: ({gameId, cardId, animalPosition = 0}, {userId}) => (dispatch, getState) => {

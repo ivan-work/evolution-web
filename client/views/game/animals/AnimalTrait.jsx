@@ -64,7 +64,7 @@ const DragAnimalTraitBase = DragSource(DND_ITEM_TYPE.TRAIT
       game.isPlayerTurn()
       && game.status.phase === PHASE.FEEDING
       && sourceAnimal.ownerId === game.userId
-      && !trait.checkActionFails(game, sourceAnimal)
+      && !trait.getErrorOfUse(game, sourceAnimal)
     )
   }
   , (connect, monitor) => ({
@@ -115,12 +115,12 @@ class ClickAnimalTraitBase extends AnimalTraitBase {
       && (( // Normal trait
         (game.isPlayerTurn() || trait.getDataModel().transient)
         && game.status.phase === PHASE.FEEDING
-        && !trait.checkActionFails(game, sourceAnimal)
+        && !trait.getErrorOfUse(game, sourceAnimal)
       ) || ( // Ambush
         trait.type === tt.TraitAmbush
         && game.status.phase === PHASE.AMBUSH
         && traitCarnivorous
-        && !traitCarnivorous.checkActionFails(game, sourceAnimal)
+        && !traitCarnivorous.getErrorOfUse(game, sourceAnimal)
       ))
     );
     const value = (trait.value

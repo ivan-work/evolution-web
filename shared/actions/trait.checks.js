@@ -6,12 +6,16 @@ import {
 } from './checks';
 
 import * as tt from '../models/game/evolution/traitTypes';
+import * as pt from '../models/game/evolution/plantarium/plantTypes';
+import * as ptt from '../models/game/evolution/plantarium/plantTraitTypes';
 import ERRORS from './errors'
 
 import {
   TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_LINK, TRAIT_ANIMAL_FLAG
 } from '../models/game/evolution/constants';
+import {countUnavoidableDefenses, getStaticDefenses} from "../models/game/evolution/traitsData/TraitCarnivorous";
+import {getTraitDataModel} from "../models/game/evolution/TraitModel";
 
 export const checkTraitActivation = (game, animal, traitId, ...targets) => {
   const gameId = game.id;
@@ -19,11 +23,14 @@ export const checkTraitActivation = (game, animal, traitId, ...targets) => {
   if (!trait) {
     throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s) doesnt have Trait(%s)', animal.id, traitId)
   }
-  const reason = trait.checkActionFails(game, animal);
+  const reason = trait.getErrorOfUse(game, animal, ...targets);
   if (!!reason) {
     throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
       , `Animal(%s):Trait(%s) checkAction ${reason}`, animal.id, trait.type)
   }
+  return trait;
+};
+export const checkTraitActivation_Target = (game, animal, trait, ...targets) => {
   let target = null;
   switch (trait.getDataModel().targetType) {
     case TRAIT_TARGET_TYPE.ANIMAL:
@@ -41,11 +48,12 @@ export const checkTraitActivation = (game, animal, traitId, ...targets) => {
       throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
         , 'Animal(%s):Trait(%s) unknown target type %s', animal.id, trait.type, trait.getDataModel().targetType)
   }
-  return {trait, target};
+  return target;
 };
 
 export const checkTraitActivation_Animal = (game, sourceAnimal, trait, targetAid, ...targets) => {
   const gameId = game.id;
+  let error;
   if (sourceAnimal.id === targetAid) {
     throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
       , 'Animal(%s):Trait(%s) cant target self', sourceAnimal.id, trait.type)
@@ -56,9 +64,10 @@ export const checkTraitActivation_Animal = (game, sourceAnimal, trait, targetAid
     throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
       , 'Animal(%s):Trait(%s) cant locate Animal(%s)', sourceAnimal.id, trait.type, targetAid)
   }
-  if (trait.getDataModel().checkTarget && !trait.getDataModel().checkTarget(game, sourceAnimal, targetAnimal, ...targets)) {
+  error = trait.getDataModel().getErrorOfUseOnTarget(game, sourceAnimal, targetAnimal, ...targets);
+  if (error) {
     throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
-      , 'Animal(%s):Trait(%s) checkTarget on Animal(%s) failed', sourceAnimal.id, trait.type, targetAnimal.id)
+      , 'Animal(%s):Trait(%s) checkTarget on Animal(%s) failed', sourceAnimal.id, trait.type, targetAnimal.id, error)
   }
   return targetAnimal;
 };
@@ -70,7 +79,7 @@ export const checkTraitActivation_Trait = (game, sourceAnimal, trait, traitId) =
     throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
       , 'Animal(%s):Trait#%s cant find Trait#%s', sourceAnimal.id, trait.type, traitId)
   }
-  if (trait.getDataModel().checkTarget && !trait.getDataModel().checkTarget(game, sourceAnimal, targetTrait)) {
+  if (trait.getDataModel().getErrorOfUseOnTarget(game, sourceAnimal, targetTrait)) {
     throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
       , 'Animal(%s):Trait(%s) checkTarget on Trait@%s failed', sourceAnimal.id, trait.type, targetTrait.type)
   }
@@ -96,11 +105,11 @@ export const checkTraitActivation_TwoTraits = (game, sourceAnimal, trait, trait1
     throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
       , 'Animal(%s):Trait#%s cant find Trait#%s', sourceAnimal.id, trait.type, trait2Id)
   }
-  if (trait.getDataModel().checkTarget && !trait.getDataModel().checkTarget(game, sourceAnimal, trait1)) {
+  if (trait.getDataModel().getErrorOfUseOnTarget(game, sourceAnimal, trait1)) {
     throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
       , 'Animal(%s):Trait(%s) checkTarget on Trait@%s failed', sourceAnimal.id, trait.type, trait1.type)
   }
-  if (trait.getDataModel().checkTarget && !trait.getDataModel().checkTarget(game, sourceAnimal, trait2)) {
+  if (trait.getDataModel().getErrorOfUseOnTarget(game, sourceAnimal, trait2)) {
     throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
       , 'Animal(%s):Trait(%s) checkTarget on Trait@%s failed', linkedAnimal.id, trait.type, trait2type)
   }
@@ -109,7 +118,7 @@ export const checkTraitActivation_TwoTraits = (game, sourceAnimal, trait, trait1
 
 export const getErrorOfAnimalEating = (game, animal) => {
   if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, animal.ownerId, animal.id)) return ERRORS.COOLDOWN;
-  if (!animal.canEat(game)) return ERRORS.ANIMAL_CANT_EAT;
+  if (!animal.canEat(game)) return ERRORS.ANIMAL_DONT_WANT_FOOD;
   return false;
 };
 
@@ -127,6 +136,18 @@ export const getErrorOfAnimalEatingFromPlant = (game, animal, plant) => {
   );
 };
 
+export const getErrorOfPlantCounterAttack = (game, animal, plant) => {
+  if (plant.type !== pt.PlantCarnivorous) return ERRORS.COUNTERATTACK_WRONG_TYPE;
+
+  const unavoidable = countUnavoidableDefenses(game, plant, animal);
+  if (unavoidable > 0) return ERRORS.TRAIT_ATTACK_UNAVOIDABLE;
+
+  const defenses = getStaticDefenses(game, plant, animal);
+  if (defenses.length > 1) return ERRORS.TRAIT_ATTACK_TOO_MUCH_DEFENSES;
+
+  return getTraitDataModel(ptt.PlantTraitHiddenCarnivorous).getErrorOfUse(game, plant);
+};
+
 export const checkAnimalCanTakeShellFails = (game, animal) => {
   if (animal.hasTrait(tt.TraitShell, true)) return ERRORS.TRAIT_MULTIPLE;
   if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, animal.ownerId, animal.id)) return ERRORS.COOLDOWN;
@@ -138,6 +159,6 @@ export const checkAnimalCanTakeShellFails = (game, animal) => {
 };
 
 export const checkIfTraitDisabledByIntellect = (attackAnimal, defenseTrait) => {
-  const traitIntellect = attackAnimal.hasTrait('TraitIntellect');
+  const traitIntellect = attackAnimal.hasTrait(tt.TraitIntellect);
   return traitIntellect && (traitIntellect.value === defenseTrait.id || traitIntellect.value === defenseTrait.type);
 };

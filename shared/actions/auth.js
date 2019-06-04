@@ -1,7 +1,6 @@
 import logger, {loggerOnline} from '~/shared/utils/logger';
 import {Map} from 'immutable';
 import {UserModel, RulesLoginPassword} from '../models/UserModel';
-import {GameModelClient} from '../models/game/GameModel';
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 import jwt from 'jsonwebtoken';
 import Validator from 'validatorjs';

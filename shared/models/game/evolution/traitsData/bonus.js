@@ -9,14 +9,13 @@ import {
   , CTT_PARAMETER
   , TRAIT_ANIMAL_FLAG
 } from '../constants';
+import ERRORS from '../../../../actions/errors';
 
 import {
-  server$startFeedingFromGame
-  , server$traitActivate
-  , server$traitStartCooldown
-  , server$traitAnimalRemoveTrait
-  , server$traitSetAnimalFlag
-  , server$traitNotify_End
+server$startFeedingFromGame
+, server$traitStartCooldown
+, server$traitSetAnimalFlag
+, server$traitNotify_End
 } from '../../../../actions/actions';
 
 import * as tt from '../traitTypes';
@@ -33,7 +32,11 @@ export const TraitHomeothermy = {
   , cooldowns: fromJS([
     [tt.TraitHomeothermy, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
-  , $checkAction: (game, animal, traitSpec) => game.getFood() > 0 && (animal.canEat(game) && animal.getNeededFood() > 0)
+  , _getErrorOfUse: (game, animal, traitSpec) => {
+    if (game.getFood() === 0) return ERRORS.GAME_FOOD;
+    if (!animal.canEat(game)) return ERRORS.ANIMAL_DONT_WANT_FOOD;
+    if (animal.getNeededFood() === 0) return ERRORS.ANIMAL_DONT_NEED_FOOD;
+  }
   , action: (game, animal, trait) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, trait, animal));
     dispatch(server$startFeedingFromGame(game.id, animal.id));

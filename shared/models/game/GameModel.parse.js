@@ -106,11 +106,7 @@ export const parseAnimalList = (userId, string) => {
       .set(a2.id, a2.traitAttach(trait2));
   });
   return animalsMap
-    .map(a => TraitNeoplasm.customFns.actionProcess(a))
-  // .map(a => {
-  //   console.log(a.traits.map(t => t.type).toArray())
-  //   return a;
-  // });
+    .map(a => TraitNeoplasm.customFns.actionProcess(a));
 };
 
 export const parsePlantsList = (string) => {
@@ -125,34 +121,35 @@ export const parsePlantsList = (string) => {
       invariant(!!type, `parsePlantsList wrong plant type: (${rawType})`);
       const plant = PlantModel.new(type).set('food', 0).set('covers', 0);
       return props.reduce((plant, prop) => {
-          prop = prop.trim();
-          if (/^\$.*$/.test(prop)) {
-            return prop.length > 1 ? plant.set('id', prop) : plant;
-          }
-          else if (/^\$.*$/.test(prop)) {
-            return prop.length > 1 ? plant.set('id', prop) : plant;
-          }
-          else if (/\$/.test(prop)) {
-            const [traitName, targetId] = prop.split('$');
-            links.push([plant.id, traitName, '$' + targetId]);
-            return plant;
-          }
-          else if (/^\++$/.test(prop)) {
-            return plant.set('food', prop.length)
-          }
-          else if (/^\*+$/.test(prop)) {
-            return plant.set('covers', prop.length)
-          }
-          else {
-            invariant(!!prop, `GameModel.parseAnimalList prop undefined: (${prop})`);
-            const type = parsePlantTrait(prop.split('=')[0]);
-            const value = prop.split('=')[1];
-            if (!type) throw new Error(`Cannot parse prop (${prop})`);
-            return plant.traitAttach(TraitModel.new(type).set('value', value), true);
-          }
-        }, plant)
+        prop = prop.trim();
+        if (/^\$.*$/.test(prop)) {
+          return prop.length > 1 ? plant.set('id', prop) : plant;
+        }
+        else if (/^\$.*$/.test(prop)) {
+          return prop.length > 1 ? plant.set('id', prop) : plant;
+        }
+        else if (/\$/.test(prop)) {
+          const [traitName, targetId] = prop.split('$');
+          links.push([plant.id, traitName, '$' + targetId]);
+          return plant;
+        }
+        else if (/^\++$/.test(prop)) {
+          return plant.set('food', prop.length)
+        }
+        else if (/^\*+$/.test(prop)) {
+          return plant.set('covers', prop.length)
+        }
+        else {
+          invariant(!!prop, `GameModel.parseAnimalList prop undefined: (${prop})`);
+          const type = parsePlantTrait(prop.split('=')[0]);
+          const value = prop.split('=')[1];
+          if (!type) throw new Error(`Cannot parse prop (${prop})`);
+          return plant.traitAttach(TraitModel.new(type).set('value', value), true);
+        }
+      }, plant)
     })
     .reduce((result, plant) => result.set(plant.id, plant), OrderedMap());
+
   links.forEach(([a1id, prop, a2id]) => {
     invariant(plantsMap.has(a1id), 'invalid linkable trait ' + [a1id, prop, a2id]);
     invariant(plantsMap.has(a2id), 'invalid linkable trait ' + [a1id, prop, a2id]);
@@ -198,7 +195,7 @@ export const parseFromRoom = (room, string = '') => {
     , deck
     , pdeck
     , players
-    , plants: parsePlantsList(seed.plants || '')
+    , plants: parsePlantsList(seed.plants || '').map(p => p.toClient()).entrySeq()
     , settings: {
       ...seed.settings
     }

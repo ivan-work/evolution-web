@@ -4,6 +4,9 @@ import './globals';
 
 const gulp = require('gulp');
 const mocha = require('gulp-mocha');
+const flow = require('flow-bin');
+const execFile = require('child_process').execFile;
+const logger = require('./shared/utils/logger').default;
 
 let watching = false;
 
@@ -11,6 +14,22 @@ const TEST_PATH_WATCH = '{shared,server,client}/**/*.js*(x)';
 const TEST_PATH_SHARED = ['shared/**/*.spec.js'];
 const TEST_PATH_SERVER = ['server/**/*.spec.js'];
 const TEST_PATH_CLIENT = ['client/**/*.spec.js', 'client/**/*.spec.jsx'];
+
+function runFlow(cmd, callback) {
+  execFile(flow, cmd, {
+    cwd: module.__dirname
+  }, function (err, stdout, stderr) {
+    if (err && stdout.length > 0) {
+      callback(stdout);
+    }
+    else if (err) {
+      callback(err);
+    }
+    else {
+      callback();
+    }
+  });
+}
 
 const testWatch = (paths) => () => gulp.src(paths)
   .pipe(mocha({
@@ -25,7 +44,7 @@ const testWatch = (paths) => () => gulp.src(paths)
     ]
   }))
   .on('error', function (e) {
-    console.error(e);
+    logger.error(e);
     this.emit('end');
   });
 
@@ -38,6 +57,11 @@ gulp.task('test:setup', (done) => {
   done();
 });
 
+gulp.task('flow:check', (done) => {
+  runFlow(['check'], done);
+});
+
+// gulp.task('test:shared:once', gulp.series('test:setup', 'flow:check', testWatch(TEST_PATH_SHARED)));
 gulp.task('test:shared:once', gulp.series('test:setup', testWatch(TEST_PATH_SHARED)));
 gulp.task('test:shared', gulp.series('test:shared:once', () => gulp.watch(TEST_PATH_WATCH, gulp.series('test:shared:once'))));
 

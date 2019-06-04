@@ -120,11 +120,26 @@ players:
 
     clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
     clientStore0.dispatch(traitAnswerRequest(tt.TraitTailLoss, tt.TraitNeoplasm));
-    expect(findAnimal('$A').getFood()).equal(1);
-    expect(findAnimal('$B').getFood()).equal(0);
+    expect(findAnimal('$A').getFood(), '$A.getFood()').equal(1);
+    expect(findAnimal('$B').getFood(), '$B.getFood()').equal(0);
     clientStore0.dispatch(traitActivateRequest('$B', tt.TraitPiracy, '$A'));
-    expect(findAnimal('$A').getFood()).equal(0);
-    expect(findAnimal('$B').getFood()).equal(1);
+    expect(findAnimal('$A').getFood(), '$A.getFood()').equal(0);
+    expect(findAnimal('$B').getFood(), '$B.getFood()').equal(1);
+  });
+
+  it('Kills animal with linked traits', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A carn wait, $B comm$C neoplasm comm$D tail, $C, $D
+`);
+    const {findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitTailLoss, tt.TraitTailLoss));
+    expect(findAnimal('$A').getFood()).equal(1);
+    expect(findAnimal('$B')).null;
   });
 
   it('Kills instantly', () => {

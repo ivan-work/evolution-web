@@ -1,5 +1,4 @@
 import {Record, List, OrderedMap} from 'immutable';
-import {UserModel} from '../UserModel';
 import {CardModel} from './CardModel';
 import {AnimalModel} from './evolution/AnimalModel';
 

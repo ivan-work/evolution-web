@@ -202,15 +202,19 @@ players:
 food: 0
 phase: feeding
 players:
-  - continent: $Regen regen, $Shell shell, $CarnShell carn int, $CarnRegen carn, wait
+  - continent: $Regen regen, $Shell shell, $CarnShell carn int, $CarnRegen carn, $W wait
 `);
-    const {selectGame, selectPlayer, findCard, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
     clientStore0.dispatch(traitActivateRequest('$CarnShell', tt.TraitCarnivorous, '$Shell'));
+    expect(selectGame().getPlayer(User0).acted, 'User0 should have .acted false in the attack').false;
     clientStore0.dispatch(traitAnswerRequest(tt.TraitIntellect, tt.TraitShell));
+    expect(findAnimal('$Shell'), '$Shell dead').null;
+    expect(selectGame().getPlayer(User0).acted, 'User0 should have .acted after attack').true;
     clientStore0.dispatch(gameEndTurnRequest());
 
     clientStore0.dispatch(traitActivateRequest('$CarnRegen', tt.TraitCarnivorous, '$Regen'));
+    expect(selectGame().getPlayer(User0).acted, 'User0 should have .acted after 2nd attack').true;
     clientStore0.dispatch(gameEndTurnRequest());
 
     expectUnchanged(`$Regen can't take shell when dead`, () => {

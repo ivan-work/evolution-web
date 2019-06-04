@@ -9,8 +9,9 @@ import {
   , TRAIT_COOLDOWN_LINK
   , CARD_TARGET_TYPE
   , CARD_SOURCE
-  , TRAIT_ANIMAL_FLAG
+  , TRAIT_ANIMAL_FLAG, HUNT_FLAG
 } from '../constants';
+import ERRORS from '../../../../actions/errors';
 
 import {
   server$startFeeding
@@ -23,13 +24,22 @@ import {
   , server$game
   , startCooldown
   , server$gameDeployAnimalFromDeck
-  , server$tryNeoplasmDeath, server$startFeedingCooldown, server$startCooldownList, getFeedingCooldownList
+  , server$startCooldownList
+  , getFeedingCooldownList
+  , server$traitIntellectAnswer
 } from '../../../../actions/actions';
 
 import {selectGame} from '../../../../selectors';
 
-import {endHunt, endHuntNoCd, getStaticDefenses, getActiveDefenses, getAffectiveDefenses} from './TraitCarnivorous';
+import {
+  getStaticDefenses,
+  getActiveDefenses,
+  getAffectiveDefenses,
+  TraitCarnivorous
+} from './TraitCarnivorous';
 import * as tt from '../traitTypes';
+import {TraitMimicry, TraitTailLoss} from "./index";
+import {huntSetFlag, server$huntEnd} from "./hunt";
 
 export const TraitMetamorphose = {
   type: tt.TraitMetamorphose
@@ -48,14 +58,17 @@ export const TraitMetamorphose = {
 
     return true;
   }
-  , $checkAction: (game, sourceAnimal) =>
-    sourceAnimal.getWantedFood() > 0 && sourceAnimal.getEatingBlockers(game).length <= 1
-  , checkTarget: (game, sourceAnimal, targetTrait) => {
+  , _getErrorOfUse: (game, sourceAnimal) => {
+    if (sourceAnimal.getWantedFood() === 0) return ERRORS.ANIMAL_DONT_WANT_FOOD;
+    if (sourceAnimal.getEatingBlockers(game).length > 1) return ERRORS.ANIMAL_BLOCKED_FROM_FOOD;
+    return false;
+  }
+  , getErrorOfUseOnTarget: (game, sourceAnimal, targetTrait) => {
+    if (targetTrait.getDataModel().food > 0) return ERRORS.TRAIT_TARGETING_NO_FOOD_ON_TRAIT;
     const eatingBlockers = sourceAnimal.getEatingBlockers(game);
-    if (eatingBlockers.length === 0)
-      return targetTrait.getDataModel().food === 0;
-    else // length === 1
-      return targetTrait.id === eatingBlockers[0].id;
+    if (eatingBlockers.length > 1) return ERRORS.ANIMAL_BLOCKED_FROM_FOOD;
+    if (eatingBlockers.length === 1 && targetTrait.id !== eatingBlockers[0].id) return ERRORS.ANIMAL_BLOCKED_FROM_FOOD;
+    return false;
   }
   , getTargets: (game, sourceAnimal, traitMetamorphose) => {
     const eatingBlockers = sourceAnimal.getEatingBlockers(game);
@@ -73,11 +86,14 @@ export const TraitShell = {
   , cooldowns: fromJS([
     [tt.TraitShell, TRAIT_COOLDOWN_PLACE.ANIMAL, TRAIT_COOLDOWN_DURATION.TURN]
   ])
-  , $checkAction: (game) => game.status.phase !== PHASE.AMBUSH
+  , _getErrorOfUse: (game) => {
+    if (game.status.phase !== PHASE.FEEDING) return ERRORS.GAME_WRONG_PHASE;
+    return false;
+  }
   , action: (game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait) => (dispatch) => {
     dispatch(server$traitStartCooldown(game.id, defenceTrait, defenceAnimal));
     dispatch(server$traitSetAnimalFlag(game, defenceAnimal, TRAIT_ANIMAL_FLAG.SHELL, true));
-    dispatch(endHunt(game, attackAnimal, attackTrait, defenceAnimal));
+    dispatch(server$huntEnd(game.id));
     return true;
   }
   , customFns: {
@@ -106,9 +122,9 @@ export const TraitInkCloud = {
       , startCooldown(game.id, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.TRAIT, attackTrait.id)
     ]));
 
-
     dispatch(server$traitStartCooldown(game.id, defenceTrait, defenceAnimal));
-    dispatch(endHuntNoCd(game.id, attackAnimal, attackTrait, defenceAnimal));
+    dispatch(huntSetFlag(game.id, HUNT_FLAG.TRAIT_INK_CLOUD));
+    dispatch(server$huntEnd(game.id));
     return true;
   }
 };
@@ -127,8 +143,14 @@ export const TraitSpecA = {
     dispatch(server$startFeeding(game.id, animal.id, 1, trait.type));
     return true;
   }
-  , $checkAction: (game, animal, traitSpec) => (animal.canEat(game)
-    && !game.someAnimal((animal) => animal.traits.some(trait => trait.id !== traitSpec.id && trait.type === traitSpec.type)))
+  , _getErrorOfUse: (game, animal, traitSpec) => {
+    if (!animal.canEat(game)) return ERRORS.ANIMAL_BLOCKED_FROM_FOOD;
+    if (game.someAnimal((animal) => {
+      const trait = animal.hasTrait(traitSpec.type);
+      return traitSpec.id !== trait.id;
+    })) return ERRORS.TRAIT_ACTION_SPECIFIC;
+    return false;
+  }
 };
 
 export const TraitSpecB = {
@@ -141,10 +163,18 @@ export const TraitSpecB = {
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: TraitSpecA.action
-  , $checkAction: TraitSpecA.$checkAction
+  , _getErrorOfUse: TraitSpecA._getErrorOfUse
 };
 
-export const TraitFlight = {type: tt.TraitFlight};
+export const TraitFlight = {
+  type: tt.TraitFlight
+  , _getErrorOfUse: (game, sourceAnimal, traitFlight, targetAnimal) => {
+    // console.log(sourceAnimal.toString(), targetAnimal.toString());
+    // console.log(sourceAnimal.getTraits(true).size, targetAnimal.getTraits(true).size);
+    if (sourceAnimal.getTraits(true).size < targetAnimal.getTraits(true).size) return ERRORS.TRAIT_ACTION_SPECIFIC;
+    return false;
+  }
+};
 
 export const TraitViviparous = {
   type: tt.TraitViviparous
@@ -157,12 +187,17 @@ export const TraitViviparous = {
     dispatch(server$traitStartCooldown(game.id, trait, sourceAnimal));
     dispatch(server$gameDeployAnimalFromDeck(game.id, sourceAnimal, animal => animal.set('food', 1)));
   }
-  , $checkAction: (game, animal, traitSpec) => animal.isSaturated(game) && game.deck.size > 0
+  , _getErrorOfUse: (game, animal) => {
+    if (!animal.isSaturated(game)) return ERRORS.TRAIT_TARGETING_ANIMAL_SATURATED;
+    if (game.deck.size === 0) return ERRORS.GAME_LAST_TURN;
+    return false;
+  }
 };
 
 export const TraitAmbush = {
   type: tt.TraitAmbush
 };
+
 export const TraitIntellect = {
   type: tt.TraitIntellect
   , targetType: TRAIT_TARGET_TYPE.TRAIT
@@ -172,10 +207,11 @@ export const TraitIntellect = {
   ])
   , getTargets: (game) => {
     const sourceAnimal = game.locateAnimal(game.question.sourceAid, game.question.sourcePid);
+    const attackTrait = game.locateTrait(game.question.traitId, game.question.sourceAid, game.question.sourcePid);
     const targetAnimal = game.locateAnimal(game.question.targetAid, game.question.targetPid);
     return [].concat(
       getStaticDefenses(game, sourceAnimal, targetAnimal)
-      , getActiveDefenses(game, sourceAnimal, targetAnimal)
+      , getActiveDefenses(game, sourceAnimal, attackTrait, targetAnimal)
       , getAffectiveDefenses(game, sourceAnimal, targetAnimal));
   }
   , action: (game, sourceAnimal, traitIntellect, targetTraitId) => (dispatch, getState) => {
@@ -184,6 +220,19 @@ export const TraitIntellect = {
       dispatch(server$traitStartCooldown(game.id, traitIntellect, sourceAnimal));
     }
     return false;
+  }
+  , customFns: {
+    defaultTarget: (game, sourceAnimal, attackTrait, targetAnimal) => {
+      const activeDefence = getActiveDefenses(game, sourceAnimal, attackTrait, targetAnimal)[0];
+      if (activeDefence) {
+        return activeDefence.id;
+      }
+      const affectiveDefence = getAffectiveDefenses(game, sourceAnimal, targetAnimal)[0];
+      if (affectiveDefence) {
+        return affectiveDefence.id;
+      }
+      return true;
+    }
   }
 };
 
@@ -194,7 +243,10 @@ export const TraitAnglerfish = {
   , transient: true
   , hidden: true
   , score: 0
-  , $checkAction: (game, animal, traitSpec) => animal.traits.size === 1
+  , _getErrorOfUse: (game, animal) => {
+    if (animal.getTraits(true) > 0) return ERRORS.TRAIT_ACTION_SPECIFIC;
+    return false;
+  }
   , action: (game, sourceAnimal, trait) => (dispatch) => {
     dispatch(server$traitSetValue(game, sourceAnimal, trait, !trait.value));
     return false;

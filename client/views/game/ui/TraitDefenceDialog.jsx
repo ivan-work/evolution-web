@@ -47,7 +47,7 @@ export class TraitDefenceDialog extends React.Component {
 
     const traitMimicry = targetAnimal.hasTrait(TraitMimicry.type);
     const targetsMimicry = traitMimicry
-      && !traitMimicry.checkActionFails(game, targetAnimal)
+      && !traitMimicry.getErrorOfUse(game, targetAnimal, attackAnimal, traitCarnivorous)
       && !checkIfTraitDisabledByIntellect(attackAnimal, traitMimicry)
       && TraitMimicry.getTargets(game, targetAnimal, traitMimicry, attackAnimal, traitCarnivorous);
 
@@ -57,7 +57,7 @@ export class TraitDefenceDialog extends React.Component {
       , targetAnimal.hasTrait(tt.TraitRunning)
       , targetAnimal.hasTrait(tt.TraitCnidocytes)
     ].filter(t => !!t // Really has trait
-      && !t.checkActionFails(game, targetAnimal) // And can activate it
+      && !t.getErrorOfUse(game, targetAnimal) // And can activate it
       && !checkIfTraitDisabledByIntellect(attackAnimal, t) // And it's not blocked by attacking intellect
     );
 

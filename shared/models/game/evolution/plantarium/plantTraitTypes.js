@@ -1,4 +1,7 @@
 // Plantarium
+export const PlantTraitHiddenIntellect = 'PlantTraitHiddenIntellect';
+export const PlantTraitHiddenCarnivorous = 'PlantTraitHiddenCarnivorous';
+
 export const PlantTraitRootVegetable = 'PlantTraitRootVegetable';
 export const PlantTraitHoney = 'PlantTraitHoney';
 export const PlantTraitMycorrhiza = 'PlantTraitMycorrhiza';

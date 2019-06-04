@@ -3,14 +3,14 @@ import * as plantTraitsData from './plantarium/plantTraitsData'
 import {CARD_TARGET_TYPE, CTT_PARAMETER} from './constants';
 import TraitDataModelBaseProps from "./TraitDataModelBaseProps";
 import ERRORS from '../../../actions/errors';
+import identity from "lodash/identity";
 
 const PlantTraitDataModelProps = {
   ...TraitDataModelBaseProps
   , coverSlots: 0
   , _getErrorOfTraitPlacement: () => false
   , _getErrorOfFoodIntake: () => false
-  , _getErrorOfUseAction: () => false
-  , _getErrorOfUseOnTarget: () => false
+  , _getErrorOfUse: () => false
 };
 
 /**
@@ -42,6 +42,18 @@ export default class PlantTraitDataModel extends Record(PlantTraitDataModelProps
     });
   }
 
+  // TODO remove _trait from params
+  getErrorOfUse(game, plant, _trait, ...targets) {
+    const trait = plant.hasTrait(this.type, true);
+    if (!trait) return ERRORS.TRAIT_ACTION_NO_TRAIT;
+    if (trait.disabled) return ERRORS.TRAIT_ACTION_DISABLED;
+    if (this.cooldowns && this.cooldowns
+      .some(([link]) => game.cooldowns.checkFor(link, null, plant.id, trait.id)))
+      return ERRORS.COOLDOWN;
+
+    return this._getErrorOfUse(game, plant, trait, ...targets);
+  };
+
   getErrorOfTraitPlacement(game, plant) {
     if (!(this.cardTargetType & CTT_PARAMETER.LINK) && !this.multiple && plant.hasTrait(this.type, true)) return ERRORS.TRAIT_PLACEMENT_MULTIPLE;
     if (this.hidden) return ERRORS.TRAIT_PLACEMENT_HIDDEN;
@@ -49,14 +61,6 @@ export default class PlantTraitDataModel extends Record(PlantTraitDataModelProps
   }
 
   getErrorOfFoodIntake(game, plant, animal) {
-    return this._getErrorOfFoodIntake(game, plant, animal)
-  }
-
-  getErrorOfUseAction(game, plant, animal) {
-    return this._getErrorOfFoodIntake(game, plant, animal)
-  }
-
-  getErrorOfUseOnTarget(game, plant, animal) {
     return this._getErrorOfFoodIntake(game, plant, animal)
   }
 }

@@ -12,6 +12,9 @@ const TraitDataModelBaseProps = {
   , action: null // action function
   , getTargets: null // get list of available target for an active trait (game, sourceAnimal) => list of targets
   , customFns: {} // Object of custom trait functions
+  , _getErrorOfUse: () => false
+  , getErrorOfUseOnTarget: () => false
+  , coverSlots: 0
 };
 
 export default TraitDataModelBaseProps;

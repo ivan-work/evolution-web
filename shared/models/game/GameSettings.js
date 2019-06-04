@@ -203,7 +203,7 @@ export const Deck_Plantarium = [
   , [4, cardsData.CardProteinRichAndSwimming.type]
   , [4, cardsData.CardTreeAndCarnivorous.type]
   , [4, cardsData.CardParasiticPlant.type]
-  , [4, cardsData.CardParasiticAndCommunication.type]
+  , [4, cardsData.CardSpikyAndCommunication.type]
 ];
 
 export const PlantDeck_Plantarium = [

@@ -1,25 +1,18 @@
 import logger from '~/shared/utils/logger';
 import {createReducer, ensureParameter, validateParameter} from '../../shared/utils';
 import {getRandom} from '../../shared/utils/randomGenerator';
-import {Map, List, OrderedMap} from 'immutable';
-import {GameModel, QuestionRecord, PHASE, AREA} from '../../shared/models/game/GameModel';
-import {CardModel} from '../../shared/models/game/CardModel';
-import {CooldownList} from '../../shared/models/game/CooldownList';
-import {AnimalModel} from '../../shared/models/game/evolution/AnimalModel';
-import {TraitModel, TraitData} from '../../shared/models/game/evolution/TraitModel';
-import {TraitDataModel} from '../../shared/models/game/evolution/TraitDataModel';
+import {Map, List, OrderedMap, fromJS} from 'immutable';
+import {PHASE, AREA, HuntRecord} from '../../shared/models/game/GameModel';
+import {getTraitDataModel} from '../../shared/models/game/evolution/TraitModel';
 import {
-  CTT_PARAMETER,
   TRAIT_TARGET_TYPE,
   TRAIT_ANIMAL_FLAG,
   ANIMAL_DEATH_REASON
 } from '../../shared/models/game/evolution/constants';
 import * as tt from '../../shared/models/game/evolution/traitTypes';
 import * as pt from '../../shared/models/game/evolution/plantarium/plantTypes';
-import {PlantFungus as PlantFungusTypeData} from '../../shared/models/game/evolution/plantarium/plantTypeData';
 
 import {TraitNeoplasm} from '../../shared/models/game/evolution/traitsData/cons';
-import PlantModel from "../../shared/models/game/evolution/plantarium/PlantModel";
 
 /**
  * TRAITS
@@ -48,13 +41,7 @@ const logAnimalById = (game, animalId) => {
 };
 
 const logTrait = (game, traitId) => {
-  if (!!TraitData[traitId]) {
-    return traitId;
-  } else {
-    return traitId;
-    // const {trait} = game.locateTrait(traitId);
-    // return trait && trait.type;
-  }
+  return traitId;
 };
 
 /**
@@ -129,12 +116,16 @@ export const gameDeployPlantTraits = (game, {cardId, traits}) => {
     .update(addToGameLog(['gameDeployTrait', cardOwnerId, traits[0].type].concat(plants)));
 };
 
+export const traitAnimalAttachTrait = (game, {sourcePid, sourceAid, trait}) => game
+  .updateIn(['players', sourcePid, 'continent', sourceAid], animal => animal.traitAttach(trait));
+
 export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) => {
   const deadAnimals = [];
   return game
     .updateIn(['players', sourcePid, 'continent'], continent => continent
       .map(animal => animal
         .update(animal => {
+          // Drop trait disabling after loss of neoplasm
           if (animal.getIn(['traits', traitId, 'type']) === tt.TraitNeoplasm && !animal.hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)) {
             return animal.update('traits', traits => traits.map(trait => trait.set('disabled', false)))
           }
@@ -142,8 +133,9 @@ export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) =>
         })
         .traitDetach(trait => trait.id === traitId || trait.linkId === traitId)
         .update(animal => {
-          if (animal.traits.last() && animal.traits.last().type === tt.TraitNeoplasm)
+          if (TraitNeoplasm.customFns.shouldKillAnimal(animal)) {
             deadAnimals.push(animal.id);
+          }
           return animal;
         })
       ))
@@ -152,8 +144,13 @@ export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) =>
       , game));
 };
 
-export const traitAnimalAttachTrait = (game, {sourcePid, sourceAid, trait}) => game
-  .updateIn(['players', sourcePid, 'continent', sourceAid], animal => animal.traitAttach(trait));
+export const traitAttachToPlant = (game, {plantId, trait}) => game
+  .updateIn(['plants', plantId], plant => plant.traitAttach(trait));
+
+export const traitDetachFromPlant = (game, {plantId, traitId}) => {
+  return game
+    .updateIn(['plants', plantId], plant => plant.traitDetach(trait => trait.id === traitId || trait.linkId === traitId));
+};
 
 export const playerActed = (game, {userId}) => {
   return game
@@ -175,15 +172,7 @@ export const gameNextRound = (game, {}) => game
   .update(addToGameLog(['gameNextRound']));
 
 export const gameNextPlayer = (game, {playerId}) => game
-  .setIn(['status', 'currentPlayer'], playerId)
-  .update('cooldowns', cooldowns => cooldowns.eventNextPlayer())
-  .update('players', players => players.map(player => player
-    .update('continent', continent => continent.map(animal => animal
-      .update('traits', traits => traits.map(trait => trait.getDataModel().customFns.eventNextPlayer
-        ? trait.getDataModel().customFns.eventNextPlayer(trait)
-        : trait))
-    ))
-  ))
+  .gameNextPlayer(playerId)
   .update(addToGameLog(['gameNextPlayer', playerId]));
 
 export const gameAddTurnTimeout = (game, {turnStartTime, turnDuration}) => game
@@ -243,21 +232,17 @@ const processNeoplasm = (game) => {
   let deadAnimals = [];
   return game
     .update('players', players => players.map(player => player.update('continent', continent => continent
-        .map(animal => {
-          const traitNeoplasm = animal.hasTrait(tt.TraitNeoplasm);
-          if (!traitNeoplasm) return animal;
-          const updatedAnimal = TraitNeoplasm.customFns.actionMoveInAnimal(animal);
-          if (updatedAnimal) {
-            return TraitNeoplasm.customFns.actionProcess(updatedAnimal);
-          } else {
-            deadAnimals.push(animal.id);
-            return animal;
-          }
-        })
-      // .map(animal => {
-      //   console.log(animal.traits);
-      //   return animal;
-      // })
+      .map(animal => {
+        const traitNeoplasm = animal.hasTrait(tt.TraitNeoplasm);
+        if (!traitNeoplasm) return animal;
+        const updatedAnimal = TraitNeoplasm.customFns.actionMoveInAnimal(animal);
+        if (updatedAnimal) {
+          return TraitNeoplasm.customFns.actionProcess(updatedAnimal);
+        } else {
+          deadAnimals.push(animal.id);
+          return animal;
+        }
+      })
     )))
     .update(game => deadAnimals.reduce(
       (game, animalId) => animalDeath(game, {type: ANIMAL_DEATH_REASON.NEOPLASM, animalId})
@@ -448,8 +433,15 @@ export const traitSetAnimalFlag = (game, {sourceAid, flag, on}) => {
 
 export const traitSetValue = (game, {sourceAid, traitId, value}) => {
   const animal = game.locateAnimal(sourceAid);
-  return game
-    .setIn(['players', animal.ownerId, 'continent', animal.id, 'traits', traitId, 'value'], value);
+  const plant = game.getPlant(sourceAid);
+  if (animal) {
+    return game.setIn(['players', animal.ownerId, 'continent', animal.id, 'traits', traitId, 'value'], value);
+  } else if (plant) {
+    return game.setIn(['plants', plant.id, 'traits', traitId, 'value'], value);
+  } else {
+    logger.error(`Cannot traitSetValue for ${sourceAid} (${traitId} ${value})`);
+    return game;
+  }
 };
 
 const traitNotify_Start_getTarget = {
@@ -465,7 +457,7 @@ const traitNotify_Start_getTarget = {
 export const traitNotify_Start = (game, {sourceAid, traitId, traitType, targets}) => {
   if (targets[0] === true) return game;
   const animal = game.locateAnimal(sourceAid);
-  const targetType = TraitDataModel.new(traitType).targetType;
+  const targetType = getTraitDataModel(traitType).targetType;
   const getTarget = traitNotify_Start_getTarget[traitType]
     || traitNotify_Start_getTarget[targetType]
     || traitNotify_Start_getTarget.default;
@@ -496,10 +488,23 @@ export const gameAmbushAttackEnd = (game) => game
   .setIn(['status', 'phase'], PHASE.FEEDING)
   .removeIn(['ambush']);
 
-// No need to exports, serverside-only
-const traitAddHuntingCallback = (game, {index, callback}) => game
-  .update('huntingCallbacks', (list) => list.insert(index !== void 0 ? index : list.size, callback));
-const traitClearHuntingCallbacks = (game, {}) => game.set('huntingCallbacks', List());
+export const huntStart = (game, {type, attackEntityId, attackPlayerId}) => game
+  .update('hunts', hunts => hunts.unshift(HuntRecord({
+    type
+    , attackEntityId
+    , attackPlayerId
+  })));
+export const huntSetTarget = (game, {attackTraitId, attackTraitType, targetAid, targetPid}) => game
+  .setIn(['hunts', 0, 'attackTraitId'], attackTraitId)
+  .setIn(['hunts', 0, 'attackTraitType'], attackTraitType)
+  .setIn(['hunts', 0, 'targetAid'], targetAid)
+  .setIn(['hunts', 0, 'targetPid'], targetPid);
+
+export const huntSetFlag = (game, {key, value}) => game.updateIn(['hunts', 0, 'flags'], flags => flags.add(key));
+
+export const huntUnsetFlag = (game, {key, value}) => game.updateIn(['hunts', 0, 'flags'], flags => flags.remove(key));
+
+export const huntEnd = (game, {}) => game.update('hunts', hunts => hunts.shift());
 
 // region Plantarium
 export const gameSpawnPlants = (game, {plants}) => game
@@ -554,6 +559,8 @@ export const reducer = createReducer(Map(), {
   , traitAnswerSuccess: (state, data) => state.update(data.gameId, game => traitAnswerSuccess(game, data))
   , traitAnimalAttachTrait: (state, data) => state.update(data.gameId, game => traitAnimalAttachTrait(game, data))
   , traitAnimalRemoveTrait: (state, data) => state.update(data.gameId, game => traitAnimalRemoveTrait(game, data))
+  , traitAttachToPlant: (state, data) => state.update(data.gameId, game => traitAttachToPlant(game, data))
+  , traitDetachFromPlant: (state, data) => state.update(data.gameId, game => traitDetachFromPlant(game, data))
   , traitConvertFat: (state, data) => state.update(data.gameId, game => traitConvertFat(game, data))
   , traitGrazeFood: (state, data) => state.update(data.gameId, game => traitGrazeFood(game, data))
   , traitParalyze: (state, data) => state.update(data.gameId, game => traitParalyze(game, data))
@@ -562,10 +569,13 @@ export const reducer = createReducer(Map(), {
   , traitNotify_Start: (state, data) => state.update(data.gameId, game => traitNotify_Start(game, data))
   // , traitNotify_End: (state, data) => state.update(data.gameId, game => traitNotify_End(game, data))
   , traitTakeShell: (state, data) => state.update(data.gameId, game => traitTakeShell(game, data))
-  , traitAddHuntingCallback: (state, data) => state.update(data.gameId, game => traitAddHuntingCallback(game, data))
-  , traitClearHuntingCallbacks: (state, data) => state.update(data.gameId, game =>
-    traitClearHuntingCallbacks(game, data))
   , testHackGame: (state, data) => state.update(data.gameId, data.callback)
+
+  , huntStart: (state, data) => state.update(data.gameId, game => huntStart(game, data))
+  , huntSetTarget: (state, data) => state.update(data.gameId, game => huntSetTarget(game, data))
+  , huntSetFlag: (state, data) => state.update(data.gameId, game => huntSetFlag(game, data))
+  , huntUnsetFlag: (state, data) => state.update(data.gameId, game => huntUnsetFlag(game, data))
+  , huntEnd: (state, data) => state.update(data.gameId, game => huntEnd(game, data))
 
   , gameSpawnPlants: (state, data) => state.update(data.gameId, game => gameSpawnPlants(game, data))
   , gameDeployPlant: (state, data) => state.update(data.gameId, game => gameDeployPlant(game, data))

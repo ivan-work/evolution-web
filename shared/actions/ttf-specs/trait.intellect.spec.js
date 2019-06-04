@@ -65,6 +65,28 @@ players:
     expect(selectPlayer(User1).continent, 'User1.continent').size(1);
   });
 
+  it('Static: 0, Possible: 1', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A carn int wait
+  - continent: $B + run tail
+`);
+    const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    replaceGetRandom(() => 0, () => {
+      clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
+      expect(selectGame().question, 'Intellect Question').ok;
+      expect(clientStore0.getState().getIn(['game', 'question', 'id']), 'Intellect Question0').ok;
+      expect(clientStore1.getState().getIn(['game', 'question', 'id']), 'Intellect Question1').null;
+      clientStore0.dispatch(traitAnswerRequest('TraitIntellect', 'TraitTailLoss'));
+
+      expect(selectAnimal(User0, 0).getFood(), 'Animal#A.getFood()').equal(2);
+      expect(selectPlayer(User1).continent, 'User1.continent').size(0);
+    });
+  });
+
   it('Static: 0, Possible: 2', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
@@ -158,7 +180,7 @@ players:
       clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
       clientStore0.dispatch(traitAnswerRequest('TraitIntellect', true));
     });
-    expect(selectGame().question).null;
+    expect(selectGame().question, 'selectGame().question').null;
     expect(findAnimal('$B').getFood()).equal(0);
   });
 

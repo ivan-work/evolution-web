@@ -1,4 +1,6 @@
+import * as ptt from './plantTraitTypes';
 import * as pt from './plantTypes';
+import {TraitModel} from "../TraitModel";
 
 // однолетник
 export const PlantEphemeral = {
@@ -109,6 +111,9 @@ export const PlantCarnivorous = {
   , coverSlots: 0
   , startingFood: 2
   , maxFood: 6
+  , onNewPlant: (plant) => plant
+    .traitAttach(TraitModel.new(ptt.PlantTraitHiddenCarnivorous))
+    .traitAttach(TraitModel.new(ptt.PlantTraitHiddenIntellect))
 };
 export const PlantParasite = {
   type: pt.PlantParasite

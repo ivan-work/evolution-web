@@ -35,7 +35,7 @@ export default class PlantModel extends Record({
       , food: data.startingFood
       , covers: data.coverSlots
       , data
-    });
+    }).update(data.onNewPlant);
   }
 
   static fromJS(js) {

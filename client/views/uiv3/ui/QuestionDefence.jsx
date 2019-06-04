@@ -1,43 +1,40 @@
 import React from 'react';
 import T from "i18n-react";
+import PropTypes from "prop-types";
 
 import {branch, compose, renderNothing, withState} from "recompose";
 import {connect} from 'react-redux';
 import withStyles from "@material-ui/core/styles/withStyles";
-
-import {TraitMimicry, TraitTailLoss} from '../../../../shared/models/game/evolution/traitsData/index';
 
 import Typography from "@material-ui/core/Typography";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
+import SvgIcon from '@material-ui/core/SvgIcon';
 
+import User from "../../utils/User";
 import Dialog from "../../../app/modals/Dialog";
 import {Timer} from "../../utils/Timer";
 import {Animal} from "../animals/Animal";
 import AnimalTraitChooseList from "./AnimalTraitChooseList";
 
-import {traitAnswerRequest} from "../../../../shared/actions/trait";
-import {QuestionRecord} from "../../../../shared/models/game/GameModel";
-import {checkIfTraitDisabledByIntellect} from "../../../../shared/actions/trait.checks";
-import * as tt from "../../../../shared/models/game/evolution/traitTypes";
-import User from "../../utils/User";
-// import IconAttack from '@material-ui/icons/KeyboardArrowRight';
-import SvgIcon from '@material-ui/core/SvgIcon';
 import GameStyles from "../GameStyles";
-import * as PropTypes from "prop-types";
+
+import * as tt from "../../../../shared/models/game/evolution/traitTypes";
+
+import {TraitMimicry, TraitTailLoss} from '../../../../shared/models/game/evolution/traitsData';
+import {getTraitDataModel} from "../../../../shared/models/game/evolution/TraitModel";
+import {QuestionRecord} from "../../../../shared/models/game/GameModel";
+
+import {checkIfTraitDisabledByIntellect} from "../../../../shared/actions/trait.checks";
+import {traitAnswerRequest} from "../../../../shared/actions/trait";
 
 const IconAttack = (props) => (
   <SvgIcon {...props} viewBox={'8 9 8 6'}>
     <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
   </SvgIcon>
 );
-// const IconAttack = (props) => (
-//   <svg {...props} viewBox={'8 5 10 10'}>
-//     <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
-//   </svg>
-// );
 
 const styles = {
   content: {
@@ -92,7 +89,7 @@ class QuestionDefence extends React.PureComponent {
 
     const traitMimicry = targetAnimal.hasTrait(tt.TraitMimicry);
     const targetsMimicry = traitMimicry
-      && !traitMimicry.checkActionFails(game, targetAnimal)
+      && !traitMimicry.getErrorOfUse(game, targetAnimal, attackAnimal, traitCarnivorous)
       && !checkIfTraitDisabledByIntellect(attackAnimal, traitMimicry)
       && TraitMimicry.getTargets(game, targetAnimal, traitMimicry, attackAnimal, traitCarnivorous);
 
@@ -102,13 +99,13 @@ class QuestionDefence extends React.PureComponent {
       , targetAnimal.hasTrait(tt.TraitRunning)
       , targetAnimal.hasTrait(tt.TraitCnidocytes)
     ].filter(t => !!t // Really has trait
-      && !t.checkActionFails(game, targetAnimal) // And can activate it
+      && !t.getErrorOfUse(game, targetAnimal) // And can activate it
       && !checkIfTraitDisabledByIntellect(attackAnimal, t) // And it's not blocked by attacking intellect
     );
 
     return otherTraits.every(t => t.getDataModel().optional)
-      && !(traitTailLoss && targetsTailLoss.size > 0)
-      && !(traitMimicry && targetsMimicry.size > 0);
+      && !(traitTailLoss && targetsTailLoss && targetsTailLoss.size > 0)
+      && !(traitMimicry && targetsMimicry && targetsMimicry.size > 0);
   };
 
   getMode = () => {
@@ -126,14 +123,14 @@ class QuestionDefence extends React.PureComponent {
           }
           case tt.TraitMimicry: {
             const targets = TraitMimicry.getTargets(game, targetAnimal, trait, attackAnimal, traitCarnivorous);
-            return !trait.checkActionFails(game, targetAnimal)
+            return !trait.getErrorOfUse(game, targetAnimal)
               && targets && targets.size > 0;
           }
           case tt.TraitShell:
           case tt.TraitInkCloud:
           case tt.TraitRunning:
           case tt.TraitCnidocytes: {
-            return !trait.checkActionFails(game, targetAnimal);
+            return !trait.getErrorOfUse(game, targetAnimal);
           }
         }
       }
@@ -153,7 +150,7 @@ class QuestionDefence extends React.PureComponent {
       switch (selectedTrait.type) {
         case tt.TraitTailLoss:
           return {
-            checkTrait: trait => TraitTailLoss.checkTarget(game, targetAnimal, trait)
+            checkTrait: trait => !getTraitDataModel(tt.TraitTailLoss).getErrorOfUseOnTarget(game, targetAnimal, trait)
             , onSelectTrait: (trait) => e => traitAnswerRequest(selectedTrait.id, trait.id)
           };
         case tt.TraitMimicry:
@@ -236,7 +233,7 @@ class QuestionDefence extends React.PureComponent {
     const traitCarnivorous = attackAnimal.hasTrait(tt.TraitCarnivorous);
     const traitMimicry = targetAnimal.hasTrait(tt.TraitMimicry);
     const targetsMimicry = traitMimicry
-      && !traitMimicry.checkActionFails(game, targetAnimal)
+      && !traitMimicry.getErrorOfUse(game, targetAnimal, attackAnimal, traitCarnivorous)
       && !checkIfTraitDisabledByIntellect(attackAnimal, traitMimicry)
       && TraitMimicry.getTargets(game, targetAnimal, traitMimicry, attackAnimal, traitCarnivorous);
     return (

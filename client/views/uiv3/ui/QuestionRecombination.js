@@ -1,26 +1,30 @@
 import React, {Fragment} from 'react';
 import T from "i18n-react";
+
 import {compose} from "recompose";
 import {connect} from "react-redux";
+import withStyles from "@material-ui/core/styles/withStyles";
 
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
-import withStyles from "@material-ui/core/styles/withStyles";
+import Button from "@material-ui/core/Button";
 
 import IconArrowRight from "@material-ui/icons/ArrowForward";
 import IconArrowLeft from "@material-ui/icons/ArrowBack";
 
-import {TraitRecombination} from "../../../../shared/models/game/evolution/traitsData/index";
+import AnimalTraitChooseList from "./AnimalTraitChooseList";
+
+import GameStyles from "../GameStyles";
+
+import * as tt from "../../../../shared/models/game/evolution/traitTypes";
+
+import {Animal} from "../animals/Animal";
+import {TraitBase} from "../animals/AnimalTrait";
 
 import {closeDialog} from "../../../actions/modal";
 import {traitActivateRequest} from "../../../../shared/actions/trait";
-import GameStyles from "../GameStyles";
-import {Animal} from "../animals/Animal";
-import {TraitBase} from "../animals/AnimalTrait";
-import noop from "lodash/noop";
-import Button from "@material-ui/core/Button/Button";
-import AnimalTraitChooseList from "./AnimalTraitChooseList";
+import {getTraitDataModel} from "../../../../shared/models/game/evolution/TraitModel";
 
 const styles = {
   content: {
@@ -72,8 +76,8 @@ export class QuestionRecombination extends React.PureComponent {
     const {trait, sourceAnimal} = data;
     const animal1 = sourceAnimal;
     const animal2 = trait.findLinkedAnimal(game, animal1);
-    const checkTrait1 = TraitRecombination.checkTarget.bind(null, game, animal1);
-    const checkTrait2 = TraitRecombination.checkTarget.bind(null, game, animal2);
+    const checkTrait1 = (targetTrait) => !getTraitDataModel(tt.TraitRecombination).getErrorOfUseOnTarget(game, animal1, targetTrait);
+    const checkTrait2 = (targetTrait) => !getTraitDataModel(tt.TraitRecombination).getErrorOfUseOnTarget(game, animal2, targetTrait);
     return (
       <Fragment>
         <DialogTitle>{T.translate('Game.UI.TraitRecombinationDialog.Title')}</DialogTitle>

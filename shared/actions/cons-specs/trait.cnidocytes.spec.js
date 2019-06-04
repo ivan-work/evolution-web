@@ -15,12 +15,12 @@ import {replaceGetRandom} from '../../utils/randomGenerator';
 import {makeGameSelectors} from '../../selectors';
 
 describe('TraitCnidocytes:', () => {
-  it('Works with running and ink', () => {
+  it('Works with running', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 phase: feeding
 players:
-  - continent: $A carn, $B carn, $C run ink cnid wait
+  - continent: $A carn, $C run cnid wait
 `);
 
     const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
@@ -28,15 +28,28 @@ players:
     replaceGetRandom(() => 1, () => {
       clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$C'));
       clientStore0.dispatch(traitAnswerRequest(tt.TraitCnidocytes));
-      clientStore0.dispatch(traitAnswerRequest(tt.TraitRunning));
-      expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
+    });
+    expect(selectGame().question, `Game shouldn't have question`).null
+    expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
+    expect(findAnimal('$A')).ok;
+    expect(findAnimal('$C')).ok;
+  });
 
-      clientStore0.dispatch(gameEndTurnRequest());
+  it('Works with ink', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A carn, $C ink cnid wait
+`);
 
-      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$C'));
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    replaceGetRandom(() => 1, () => {
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$C'));
       clientStore0.dispatch(traitAnswerRequest(tt.TraitCnidocytes));
       clientStore0.dispatch(traitAnswerRequest(tt.TraitInkCloud));
-      expect(findAnimal('$B').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
+      expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
     });
   });
 
@@ -53,6 +66,26 @@ players:
     clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
 
     expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
+  });
+
+  it('Works with mimicry', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A carn, $B mimi cnid, $C, $D, $W wait
+`);
+
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitCnidocytes));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitMimicry, '$C'));
+
+    expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
+    expect(findAnimal('$B')).ok;
+    expect(findAnimal('$C')).null;
+    expect(findAnimal('$D')).ok;
   });
 
   it('Symbiosis', () => {

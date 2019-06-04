@@ -1,5 +1,5 @@
 import logger from '../../utils/logger';
-import {Record, Map, OrderedMap, Range, List} from 'immutable';
+import {Record, Map, OrderedMap, Set, List} from 'immutable';
 
 import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
@@ -53,8 +53,8 @@ export const StatusRecord = Record({
 
 export class QuestionRecord extends Record({
   id: null
-  , userId: null
   , type: null
+  , userId: null
   , time: null
   , sourcePid: null
   , sourceAid: null
@@ -62,9 +62,8 @@ export class QuestionRecord extends Record({
   , targetPid: null
   , targetAid: null
   , turnRemainingTime: null
-  , defaultAction: null
 }) {
-  static new(type, userId, sourceAnimal, traitId, targetAnimal, turnRemainingTime, defaultAction) {
+  static new(type, userId, sourceAnimal, traitId, targetAnimal, turnRemainingTime) {
     return new QuestionRecord({
       id: uuid.v4()
       , type
@@ -76,12 +75,13 @@ export class QuestionRecord extends Record({
       , targetAid: targetAnimal.id
       , time: Date.now()
       , turnRemainingTime
-      , defaultAction
     });
   }
 
   static DEFENSE = 'DEFENSE';
   static INTELLECT = 'INTELLECT';
+
+  static PLANT_COUNTERATTACK = 'PLANT_COUNTERATTACK';
 
   static fromJS(js) {
     return js == null ? null : new QuestionRecord(js);
@@ -92,7 +92,7 @@ export class QuestionRecord extends Record({
   }
 
   toClient() {
-    return this.set('defaultAction', null);
+    return this;
   }
 }
 
@@ -137,10 +137,20 @@ class AreaRecord extends Record({
   }
 
   toClient() {
-    return this
-      .toJS()
+    return this;
   }
 }
+
+export const HuntRecord = Record({
+  type: null
+  , attackEntityId: null
+  , attackPlayerId: null
+  , attackTraitId: null
+  , attackTraitType: null
+  , targetAid: null
+  , targetPid: null
+  , flags: Set()
+});
 
 const AreasStandard = Map({[AREA.STANDARD]: new AreaRecord({id: AREA.STANDARD})});
 
@@ -199,7 +209,7 @@ export const generatePlantDeck = (config, shuffle) => {
 
 export class GameModel extends Record({
   ...GameModelData
-  , huntingCallbacks: List()
+  , hunts: List()
 }) {
   generateFood() {
     let aedificatorFood = 0;
@@ -254,7 +264,7 @@ export class GameModel extends Record({
         , cooldowns: CooldownList.fromServer(js.cooldowns)
         , settings: SettingsRecord.fromJS(js.settings)
         , log: List(js.log)
-        , huntingCallbacks: List()
+        , hunts: List(js.hunts.map(HuntRecord))
         , ambush: AmbushRecord.fromServer(js.ambush)
       });
   }
@@ -273,7 +283,7 @@ export class GameModel extends Record({
       .set('players', this.players.map(player => player.toClient()).entrySeq())
       .set('plants', this.plants.map(plant => plant.toClient()).entrySeq())
       .set('areas', this.areas.map(area => area.toClient()))
-      .remove('huntingCallbacks')
+      .remove('hunts')
   }
 
   toDatabase(getState, finished) {
@@ -405,6 +415,19 @@ export class GameModel extends Record({
     const playersList = players.toList();
     return playersList.slice(index).concat(playersList.slice(0, index));
   }
+
+  gameNextPlayer(playerId) {
+    return this
+      .setIn(['status', 'currentPlayer'], playerId)
+      .update('cooldowns', cooldowns => cooldowns.eventNextPlayer())
+      .update('players', players => players.map(player => player
+        .update('continent', continent => continent.map(animal => animal
+          .update('traits', traits => traits.map(trait => trait.getDataModel().customFns.eventNextPlayer
+            ? trait.getDataModel().customFns.eventNextPlayer(trait)
+            : trait))
+        ))
+      ))
+  }
 }
 
 export class GameModelClient extends Record({
@@ -435,6 +458,7 @@ export class GameModelClient extends Record({
   }
 }
 
+GameModelClient.prototype.getFood = GameModel.prototype.getFood;
 GameModelClient.prototype.getArea = GameModel.prototype.getArea;
 GameModelClient.prototype.getPlant = GameModel.prototype.getPlant;
 GameModelClient.prototype.isPlantarium = GameModel.prototype.isPlantarium;
@@ -446,6 +470,7 @@ GameModelClient.prototype.getPlayerCard = GameModel.prototype.getPlayerCard;
 GameModelClient.prototype.locateAnimal = GameModel.prototype.locateAnimal;
 GameModelClient.prototype.locateTrait = GameModel.prototype.locateTrait;
 GameModelClient.prototype.locateCard = GameModel.prototype.locateCard;
+GameModelClient.prototype.gameNextPlayer = GameModel.prototype.gameNextPlayer;
 
 // TODO move to utils
 function doShuffle(array) {

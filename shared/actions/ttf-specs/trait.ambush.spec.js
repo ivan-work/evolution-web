@@ -12,7 +12,7 @@ import {testShiftTime} from '../../utils/reduxTimeout'
 import {PHASE} from '../../models/game/GameModel';
 import * as tt from '../../models/game/evolution/traitTypes';
 
-import {makeGameSelectors} from '../../selectors';
+import {makeClientGameSelectors, makeGameSelectors} from '../../selectors';
 
 describe('TraitAmbush:', () => {
   it('Simple attack', () => {
@@ -71,6 +71,30 @@ settings:
     expect(findAnimal('$A').getFood(), '$A should get food').equal(1);
 
     expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)].remaining).equal(50);
+  });
+
+  it('User acted after failed food request', () => {
+    const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 4
+players:
+  - continent: $A, $B wait
+  - continent: $C ambush carn
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectPlayer0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
+
+    clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    clientStore1.dispatch(traitAmbushActivateRequest('$C'));
+
+    expect(findAnimal('$A'), '$A dead').null;
+    expect(findAnimal('$B'), '$B ok').ok;
+    expect(findAnimal('$C').getFood(), '$C should ambush $A').equal(2);
+    expect(selectPlayer0().acted, 'User0 acted').true;
+    expectUnchanged('User0 has cooldown on food', () => {
+      clientStore0.dispatch(traitTakeFoodRequest('$B'));
+    }, serverStore, clientStore0);
   });
 
   it('Complex defence, timeout', () => {
@@ -336,7 +360,7 @@ players:
   });
 
   it('Ink Cloud + TailLoss vs Ambush + Intellect', () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0}, {User1, clientStore1}] = mockGame(2);
+    const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
 phase: feeding
@@ -347,13 +371,14 @@ players:
 `);
 
     const {selectGame, selectPlayer} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame0, selectPlayer0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
 
     clientStore0.dispatch(traitTakeFoodRequest('$Q'));
     clientStore1.dispatch(traitAmbushActivateRequest('$A'));
-    clientStore1.dispatch(traitAnswerRequest('TraitIntellect', 'TraitTailLoss'));
+    clientStore1.dispatch(traitAnswerRequest(tt.TraitIntellect, tt.TraitTailLoss));
     clientStore0.dispatch(traitAnswerRequest(tt.TraitInkCloud));
 
-    expect(selectPlayer(User0).continent).size(1);
+    expect(selectPlayer0().continent, 'selectPlayer0().continent').size(1);
     expect(selectGame().food).equal(3);
 
     clientStore1.dispatch(traitTakeFoodRequest('$A'));
@@ -364,7 +389,7 @@ players:
     clientStore0.dispatch(traitTakeFoodRequest('$Q'));
     clientStore1.dispatch(traitAmbushActivateRequest('$A'));
 
-    expect(selectPlayer(User0).continent).size(0);
+    expect(selectPlayer0().continent, 'selectPlayer0().continent after ambush').size(0);
     expect(selectGame().food).equal(2);
   });
 
@@ -585,22 +610,25 @@ settings:
     clientStore1.dispatch(traitAmbushContinueRequest());
     serverStore.dispatch(testShiftTime(100));
 
+    expect(findAnimal('$Q').getFood(), '$Q.getFood()').equal(1);
+
     // $A attacks $W, eats $E
     clientStore1.dispatch(traitAmbushActivateRequest('$A'));
     clientStore1.dispatch(traitAmbushContinueRequest());
 
     clientStore0.dispatch(traitAnswerRequest(tt.TraitMimicry, '$E'));
 
+    expect(findAnimal('$A').getFood(), '$A.getFood()').equal(2);
+    expect(findAnimal('$E')).null;
+
     // $S attacks $D, eats $D
     clientStore1.dispatch(traitAmbushActivateRequest('$S'));
     clientStore1.dispatch(traitAmbushContinueRequest());
 
-    expect(findAnimal('$Q').getFood()).equal(1);
-    expect(findAnimal('$W').getFood()).equal(1);
-    expect(findAnimal('$E')).null;
-    expect(findAnimal('$A').getFood()).equal(2);
-    expect(findAnimal('$S').getFood()).equal(2);
-    expect(findAnimal('$D').getFood()).equal(0);
+    expect(findAnimal('$S').getFood(), '$S.getFood()').equal(2);
+
+    expect(findAnimal('$W').getFood(), '$W.getFood()').equal(1);
+    expect(findAnimal('$D').getFood(), '$D.getFood()').equal(0);
     expect(selectGame().status.currentPlayer).equal(User1.id);
     expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)].remaining).equal(100);
   });
@@ -623,5 +651,53 @@ players:
     expect(findAnimal('$W')).not.ok;
     expect(findAnimal('$A').getFood()).equal(2);
     expect(selectGame().getFood()).equal(10);
+  });
+
+  it('Ambush on anglerfish', () => {
+    const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 4
+players:
+  - continent: $A, $B angler=true, $C wait
+  - continent: $Z ambush carn
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    clientStore1.dispatch(traitAmbushActivateRequest('$Z'));
+
+    expect(findAnimal('$A'), '$A ok').ok;
+    expect(findAnimal('$B'), '$B ok').ok;
+    expect(findAnimal('$C'), '$C ok').ok;
+    expect(findAnimal('$Z'), '$Z dead').null;
+
+    expect(findAnimal('$A').getFood(), '$A.getFood()').equal(1);
+    expect(findAnimal('$B').getFood(), '$B.getFood()').equal(2);
+  });
+
+  it('Double ambush on anglerfish', () => {
+    const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 4
+players:
+  - continent: $A, $B angler=true, $C wait
+  - continent: $Z ambush carn, $X amb carn
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitTakeFoodRequest('$A'));
+    clientStore1.dispatch(traitAmbushActivateRequest('$Z'));
+    clientStore1.dispatch(traitAmbushActivateRequest('$X'));
+
+    expect(findAnimal('$A'), '$A dead').null;
+    expect(findAnimal('$B'), '$B ok').ok;
+    expect(findAnimal('$C'), '$C ok').ok;
+    expect(findAnimal('$Z'), '$Z dead').null;
+    expect(findAnimal('$X'), '$X ok').ok;
+
+    expect(findAnimal('$B').getFood(), '$B.getFood()').equal(2);
+    expect(findAnimal('$X').getFood(), '$X.getFood()').equal(2);
   });
 });

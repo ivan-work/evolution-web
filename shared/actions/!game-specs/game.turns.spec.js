@@ -17,7 +17,7 @@ describe('Game (TURNS):', function () {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: prepare
-deck: 50 camo
+deck: 20 camo
 `);
     const {selectGame, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
@@ -79,7 +79,7 @@ deck: 50 camo
   it('status.roundPlayer', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
     const gameId = ParseGame(`
-deck: 50 camo
+deck: 20 camo
 players:
   - continent: $A
   - continent: $B

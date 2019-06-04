@@ -196,8 +196,8 @@ const DropAnimalBaseDT = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND
         return props.isUserAnimal && props.model.canEat(props.game);
       case DND_ITEM_TYPE.TRAIT: {
         const {trait, sourceAnimal} = monitor.getItem();
-        const targetCheck = !trait.getDataModel().checkTarget || trait.getDataModel().checkTarget(props.game, sourceAnimal, props.model);
-        return sourceAnimal.id !== props.model.id && targetCheck;
+        const targetError = trait.getDataModel().getErrorOfUseOnTarget(props.game, sourceAnimal, props.model);
+        return sourceAnimal.id !== props.model.id && !targetError;
       }
       case DND_ITEM_TYPE.TRAIT_SHELL: {
         const {model: animal} = props;

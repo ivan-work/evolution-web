@@ -103,7 +103,7 @@ export const searchPlayerOptions = (game, playerId, successFn) => {
     return animal.traits.some((trait) => {
       const traitData = trait.getDataModel();
 
-      if (!traitData.transient && traitData.playerControllable && !trait.checkActionFails(game, animal)) {
+      if (!traitData.transient && traitData.playerControllable && !trait.getErrorOfUse(game, animal)) {
         switch (traitData.targetType) {
           case TRAIT_TARGET_TYPE.ANIMAL:
             const exampleTarget = allAnimals.find((targetAid) => passesChecks(() =>

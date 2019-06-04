@@ -1,28 +1,27 @@
 import logger from '~/shared/utils/logger';
 import {List, fromJS, OrderedMap} from 'immutable';
-import {AnimalModel} from '../AnimalModel';
+
 import {
   TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_DURATION
   , TRAIT_COOLDOWN_PLACE
-  , CARD_TARGET_TYPE
+  , CARD_TARGET_TYPE, HUNT_FLAG, ANIMAL_DEATH_REASON
 } from '../constants';
+import ERRORS from '../../../../actions/errors';
+
+import * as tt from '../traitTypes';
 
 import {
   server$traitNotify_End
   , server$traitStartCooldown
   , server$traitAnimalAttachTrait
   , server$traitAnimalRemoveTrait
-  , traitAddHuntingCallback
-  , server$traitActivate
-  , server$game
-  , traitParalyze
   , server$tryNeoplasmDeath
 } from '../../../../actions/actions';
 
 import {selectGame} from '../../../../selectors';
-
-import * as tt from '../traitTypes';
+import {huntSetFlag, server$huntProcess} from "./hunt";
+import {AnimalModel} from "../AnimalModel";
 
 export const TraitAedificator = {type: tt.TraitAedificator};
 
@@ -31,6 +30,16 @@ export const TraitNeoplasm = {
   , cardTargetType: CARD_TARGET_TYPE.ANIMAL_ENEMY
   , customFns: {
     canBeDisabled: (trait) => (!trait.getDataModel().hidden && !trait.isLinked())
+    , shouldKillAnimal: (animal) => {
+      const animalTraitsArray = animal.traits.toArray();
+      const neoplasmIndex = animalTraitsArray.findIndex(t => t.type === tt.TraitNeoplasm);
+      return (
+        ~neoplasmIndex
+        && !animalTraitsArray
+          .slice(neoplasmIndex + 1)
+          .some((trait, index) => TraitNeoplasm.customFns.canBeDisabled(trait))
+      );
+    }
     , actionMoveInAnimal: (animal) => {
       let animalTraitArray = animal.traits.toArray();
       const currentIndex = animalTraitArray.findIndex((t) => t.type === tt.TraitNeoplasm);
@@ -81,32 +90,24 @@ export const TraitCnidocytes = {
   ])
   , action: (game, defenceAnimal, traitCnidocytes, target, attackAnimal, attackTrait) => (dispatch) => {
     dispatch(TraitCnidocytes.customFns.paralyze(game, defenceAnimal, traitCnidocytes, attackAnimal));
-    return dispatch(server$traitActivate(game, attackAnimal, attackTrait, defenceAnimal));
+    dispatch(server$huntProcess(game.id));
+  }
+  , getErrorOfUseOnTarget: (game, sourceAnimal, targetTrait, targetAnimal) => {
+    if (!(targetAnimal instanceof AnimalModel)) return ERRORS.TRAIT_TARGETING_TYPE_ANIMAL;
+    return false
   }
   , customFns: {
     paralyze: (game, sourceAnimal, traitCnidocytes, targetAnimal) => dispatch => {
       const gameId = game.id;
       dispatch(server$traitStartCooldown(gameId, traitCnidocytes, sourceAnimal));
-      dispatch(traitAddHuntingCallback(gameId, void 0, (game) => (dispatch, getState) => {
-        dispatch(server$game(gameId, traitParalyze(game.id, targetAnimal.id)));
-      }));
+      logger.debug(`traitAddHuntingCallback: TraitCnidocytes`);
+      dispatch(huntSetFlag(gameId, HUNT_FLAG.PARALYZE));
     }
   }
 };
 
 const recombinateTrait = (trait) => trait.set('value', false).set('disabled', false);
-const recombinateAnimalTrait = (game, animal, traitRecombination, trait1, trait2) => (dispatch, getState) => {
-  dispatch(server$traitAnimalRemoveTrait(game, animal, trait1));
 
-  game = selectGame(getState, game.id);
-  animal = game.locateAnimal(animal.id, animal.ownerId);
-  if (!trait2.getDataModel().checkTraitPlacementFails(animal)) {
-    dispatch(server$traitAnimalAttachTrait(game, animal, recombinateTrait(trait2)));
-  }
-  dispatch(server$traitStartCooldown(game.id, traitRecombination, animal));
-
-  dispatch(server$tryNeoplasmDeath(game.id, animal));
-};
 export const TraitRecombination = {
   type: tt.TraitRecombination
   , targetType: TRAIT_TARGET_TYPE.TWO_TRAITS
@@ -135,14 +136,19 @@ export const TraitRecombination = {
     dispatch(server$tryNeoplasmDeath(game.id, animal2));
     return true;
   }
-  , $checkAction: (game, sourceAnimal, traitRecombination) => {
+  , _getErrorOfUse: (game, sourceAnimal, traitRecombination) => {
     const linkedAnimal = traitRecombination.findLinkedAnimal(game, sourceAnimal);
-    return (TraitRecombination.getTargets(game, sourceAnimal).size > 0
-    && TraitRecombination.getTargets(game, linkedAnimal).size > 0);
+    if (
+      TraitRecombination.getTargets(game, sourceAnimal).size === 0
+      || TraitRecombination.getTargets(game, linkedAnimal).size === 0
+    ) return ERRORS.TRAIT_ACTION_NO_TARGETS;
   }
-  , checkTarget: (game, targetAnimal, targetTrait) => (!targetTrait.getDataModel().hidden && !(targetTrait.isLinked())) // Copypaste of TraitNeoplasm =/
+  , getErrorOfUseOnTarget: (game, targetAnimal, targetTrait) => {
+    if (targetTrait.getDataModel().hidden) return ERRORS.TRAIT_TARGETING_HIDDEN;
+    if (targetTrait.isLinked()) return ERRORS.TRAIT_TARGETING_LINKED;
+  }
   , getTargets: (game, targetAnimal, targetTrait) => targetAnimal.traits
-    .filter(t => TraitRecombination.checkTarget(game, targetAnimal, t))
+    .filter(t => !TraitRecombination.getErrorOfUseOnTarget(game, targetAnimal, t))
     .toList()
 };
 

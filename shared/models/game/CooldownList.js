@@ -2,7 +2,8 @@ import {Record, List, Map} from 'immutable';
 import {TRAIT_COOLDOWN_DURATION, TRAIT_COOLDOWN_PLACE, TRAIT_COOLDOWN_LINK} from './evolution/constants';
 
 export class CooldownList extends Record(
-  Object.keys(TRAIT_COOLDOWN_PLACE).reduce((result, key) => ({...result, [key]: Map()}), {})) {
+  Object.keys(TRAIT_COOLDOWN_PLACE).reduce((result, key) => ({...result, [key]: Map()}), {})
+) {
 
   static new() {
     return new CooldownList()
@@ -26,8 +27,9 @@ export class CooldownList extends Record(
     const global = this.getIn([TRAIT_COOLDOWN_PLACE.GAME, 'default', link]);
     const player = this.getIn([TRAIT_COOLDOWN_PLACE.PLAYER, playerId, link]);
     const animal = this.getIn([TRAIT_COOLDOWN_PLACE.ANIMAL, animalId, link]);
+    const plant = this.getIn([TRAIT_COOLDOWN_PLACE.PLANT, animalId, link]);
     const trait = this.getIn([TRAIT_COOLDOWN_PLACE.TRAIT, traitId, link]);
-    return !!global || !!player || !!animal || !!trait;
+    return !!global || !!player || !!animal || !!plant || !!trait;
   }
 
   updateDuration(durationUpdateFn) {

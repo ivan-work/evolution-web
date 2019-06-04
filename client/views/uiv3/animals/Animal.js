@@ -227,8 +227,8 @@ export const InteractiveAnimal = compose(
           return userId === animal.ownerId && animal.canEat(game);
         case DND_ITEM_TYPE.TRAIT: {
           const {trait, sourceAnimal} = item;
-          const targetCheck = !trait.getDataModel().checkTarget || trait.getDataModel().checkTarget(game, sourceAnimal, animal);
-          return sourceAnimal.id !== animal.id && targetCheck;
+          const targetError = trait.getDataModel().getErrorOfUseOnTarget(game, sourceAnimal, animal);
+          return sourceAnimal.id !== animal.id && !targetError;
         }
         case DND_ITEM_TYPE.TRAIT_SHELL: {
           const {trait} = item;

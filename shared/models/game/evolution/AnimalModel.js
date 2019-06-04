@@ -9,7 +9,7 @@ import {
   TraitHibernation,
   TraitAnglerfish,
   TraitNeoplasm
-} from './traitTypes/index';
+} from './traitTypes';
 import {TRAIT_ANIMAL_FLAG, CTT_PARAMETER} from './constants';
 
 /**
@@ -59,8 +59,8 @@ export class AnimalModel extends Record({
     return `Animal#${this.id}(${this.getFood()}/${this.foodSize}+${this.getFat()}/${this.fatSize})[${this.traits.toArray().map(t => t.type)}]`;
   }
 
-  getTraits() {
-    return this.traits.filter(trait => !trait.disabled && !trait.getDataModel().hidden)
+  getTraits(withDisabled) {
+    return this.traits.filter(trait => !trait.getDataModel().hidden && (withDisabled || !trait.disabled))
   }
 
   hasTrait(typeOrId, ignoreDisable) {

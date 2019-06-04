@@ -1,7 +1,7 @@
 import logger from '~/shared/utils/logger';
 
 export default (trait1, trait2) => {
-  const type = `Card${trait1}${trait2 ? 'And' + trait2 : ''}`.replace(/Trait/g, '');
+  const type = `Card${trait1}${trait2 ? 'And' + trait2 : ''}`.replace(/(Plant)?Trait/g, '');
   //logger.debug(`${name}`);
   return {
     type

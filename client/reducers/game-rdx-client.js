@@ -37,6 +37,8 @@ import {
   , traitAnswerSuccess
   , traitAnimalRemoveTrait
   , traitAnimalAttachTrait
+  , traitAttachToPlant
+  , traitDetachFromPlant
   , traitGrazeFood
   , traitParalyze
   , traitConvertFat
@@ -84,6 +86,8 @@ export const reducer = createReducer(null, {
   , traitAnswerSuccess
   , traitAnimalRemoveTrait
   , traitAnimalAttachTrait
+  , traitAttachToPlant
+  , traitDetachFromPlant
   , traitGrazeFood
   , traitParalyze
   , traitConvertFat

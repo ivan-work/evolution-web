@@ -141,7 +141,7 @@ const checkCanStart = ({game}, {trait, sourceAnimal}) => (
   checkCanStartBase(game, sourceAnimal)
   && (game.isPlayerTurn() || trait.getDataModel().transient)
   && game.status.phase === PHASE.FEEDING
-  && !trait.checkActionFails(game, sourceAnimal)
+  && !trait.getErrorOfUse(game, sourceAnimal)
 );
 
 const checkCanStartAmbush = ({game}, {trait, sourceAnimal}) => {
@@ -150,7 +150,7 @@ const checkCanStartAmbush = ({game}, {trait, sourceAnimal}) => {
     checkCanStartBase(game, sourceAnimal)
     && game.status.phase === PHASE.AMBUSH
     && traitCarnivorous
-    && !traitCarnivorous.checkActionFails(game, sourceAnimal)
+    && !traitCarnivorous.getErrorOfUse(game, sourceAnimal)
   )
 };
 

@@ -3,7 +3,7 @@ import uuid from 'uuid';
 
 import {CARD_TARGET_TYPE} from './evolution/constants';
 
-import {TraitModel} from './evolution/TraitModel'
+import {getTraitDataModel} from './evolution/TraitModel'
 import * as cardsData from './evolution/cards/index'
 
 
@@ -54,7 +54,7 @@ export class CardModel extends Record({
   }
 
   getTraitDataModel(alternateTrait) {
-    return TraitModel.new(!alternateTrait ? this.trait1 : this.trait2).getDataModel();
+    return getTraitDataModel(!alternateTrait ? this.trait1 : this.trait2);
   }
 
   toString() {

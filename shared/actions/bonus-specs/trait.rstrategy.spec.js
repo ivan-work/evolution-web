@@ -57,12 +57,21 @@ players:
 deck: 11 camo
 phase: feeding
 players:
-  - continent: $A carn, $B rstr regen
+  - continent: $A carn, $B rstr regen, $W wait
 `);
     const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
     clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+    expect(findAnimal('$A')).ok;
+    expect(findAnimal('$A').getFood(), '$A.getFood()').equal(2);
+    expect(findAnimal('$B')).ok;
+    expect(findAnimal('$W')).ok;
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(gameEndTurnRequest());
     expect(selectGame().status.turn).equal(1);
     expect(selectGame().status.phase).equal(PHASE.DEPLOY);
+    expect(findAnimal('$A'), '$A still alive').ok;
+    expect(findAnimal('$B'), '$B still alive').ok;
+    expect(findAnimal('$W'), '$W still alive').null;
     expect(selectPlayer(User0).hand, '(User0).hand').size(2);
     expect(selectPlayer(User0).continent, '(User0).continent').size(2);
   });

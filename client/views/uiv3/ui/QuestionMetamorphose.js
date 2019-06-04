@@ -1,19 +1,23 @@
 import React, {Fragment} from 'react';
 import T from "i18n-react";
+
 import {compose} from "recompose";
 import {connect} from "react-redux";
+import withStyles from "@material-ui/core/styles/withStyles";
 
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
-import withStyles from "@material-ui/core/styles/withStyles";
 
-import {TraitMetamorphose} from "../../../../shared/models/game/evolution/traitsData/index";
+import {Animal} from "../animals/Animal";
+import AnimalTraitChooseList from "./AnimalTraitChooseList";
+
+import * as tt from "../../../../shared/models/game/evolution/traitTypes";
+
+import {getTraitDataModel} from "../../../../shared/models/game/evolution/TraitModel";
 
 import {traitActivateRequest} from "../../../../shared/actions/trait";
 import {closeDialog} from "../../../actions/modal";
 
-import {Animal} from "../animals/Animal";
-import AnimalTraitChooseList from "./AnimalTraitChooseList";
 
 const styles = {
   content: {
@@ -26,7 +30,7 @@ const styles = {
 
 export const QuestionMetamorphose = (({classes, game, data, traitActivateRequest, closeDialog}) => {
   const {trait, sourceAnimal} = data;
-  const checkTrait = TraitMetamorphose.checkTarget.bind(null, game, sourceAnimal);
+  const checkTrait = (targetTrait) => !getTraitDataModel(tt.TraitMetamorphose).getErrorOfUseOnTarget(game, sourceAnimal, targetTrait);
   const onSelectTrait = (targetTrait) => e => {
     if (!!targetTrait) {
       traitActivateRequest(sourceAnimal.id, trait.id, targetTrait.id);

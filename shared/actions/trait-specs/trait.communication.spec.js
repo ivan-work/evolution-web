@@ -232,7 +232,7 @@ players:
       const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
-      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitPiracy, '$A'));
+      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitPiracy, '$A')); // #WARNING
       expect(findAnimal('$A').getFoodAndFat(), 'Animal $A.getFoodAndFat()').equal(2);
       expect(findAnimal('$B').getFoodAndFat(), 'Animal $B.getFoodAndFat()').equal(1);
     });
