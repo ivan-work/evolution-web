@@ -100,13 +100,13 @@ players:
     clientStore0.dispatch(gameDeployPlantTraitRequest(cardIds[0], '$eph'));
     expect(selectGame().plants, 'game.plants.size').size(3);
     expect(findPlant('$eph').traits).size(1);
-    expect(findPlant('$eph').traits.first().type).equal(ptt.PlantTraitParasiticPlantLink);
+    expect(findPlant('$eph').traits.first().type).equal(ptt.PlantTraitParasiticLink);
     expect(findPlant('$eph').traits.first().linkSource).equal(true);
     const linkedTrait = findPlant('$eph').traits.first().findLinkedTrait(selectGame());
     const parasiticPlant = selectGame().getPlant(linkedTrait.hostAnimalId);
     expect(parasiticPlant).ok;
     expect(parasiticPlant.traits).size(1);
-    expect(parasiticPlant.traits.first().type).equal(ptt.PlantTraitParasiticPlantLink);
+    expect(parasiticPlant.traits.first().type).equal(ptt.PlantTraitParasiticLink);
     expect(parasiticPlant.traits.first().linkSource).equal(false);
   });
 });

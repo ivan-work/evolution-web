@@ -96,18 +96,41 @@ export class QuestionRecord extends Record({
   }
 }
 
+const FeedingData = {
+  gameId: null
+  , targetAid: null
+  , targetPid: null
+  , amount: 1
+  , sourceType: 'GAME'
+  , sourceId: 'GAME'
+  , helperId: null
+  , auto: false
+};
+
+export class FeedingRecord extends Record(FeedingData) {
+  static new(gameId, animal, amount, sourceType, sourceId, helperId, auto) {
+    return new FeedingRecord({
+      gameId,
+      targetAid: animal.id,
+      targetPid: animal.ownerId,
+      amount,
+      sourceType,
+      sourceId,
+      helperId,
+      auto
+    });
+  }
+}
+
 export class AmbushRecord extends Record({
-  targets: null
+  targets: List()
   , targetPlayerId: null
-  , ambushers: null
+  , ambushers: OrderedMap()
   , turnRemainingTime: null
 }) {
-  static new(animal, ambushers, turnRemainingTime) {
+  static new(turnRemainingTime) {
     return new AmbushRecord({
-      targets: List.of(animal.id)
-      , targetPlayerId: animal.ownerId
-      , ambushers: ambushers.reduce((result, animalId) => result.set(animalId, null), OrderedMap())
-      , turnRemainingTime
+      turnRemainingTime
     })
   }
 

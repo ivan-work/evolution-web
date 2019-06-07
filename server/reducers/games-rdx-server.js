@@ -2,7 +2,7 @@ import logger from '~/shared/utils/logger';
 import {createReducer, ensureParameter, validateParameter} from '../../shared/utils';
 import {getRandom} from '../../shared/utils/randomGenerator';
 import {Map, List, OrderedMap, fromJS} from 'immutable';
-import {PHASE, AREA, HuntRecord} from '../../shared/models/game/GameModel';
+import {PHASE, AREA, HuntRecord, AmbushRecord} from '../../shared/models/game/GameModel';
 import {getTraitDataModel} from '../../shared/models/game/evolution/TraitModel';
 import {
   TRAIT_TARGET_TYPE,
@@ -475,12 +475,14 @@ export const traitTakeShell = (game, {continentId, animalId, trait}) => {
 
 export const traitAmbushActivate = (game, {animalId, on}) => game
   .setIn(['ambush', 'ambushers', animalId], on);
-export const gameAmbushPushTarget = (game, {animalId}) => game
-  .updateIn(['ambush', 'targets'], targets => targets.push(animalId));
+export const gameAmbushPushTarget = (game, {feedingRecord}) => game
+  .updateIn(['ambush', 'targets'], targets => targets.push(feedingRecord));
 export const gameAmbushShiftTarget = (game, {}) => game
   .updateIn(['ambush', 'targets'], targets => targets.shift());
-export const gameAmbushPrepareStart = (game, {ambushRecord}) => game
-  .setIn(['ambush'], ambushRecord);
+export const gameAmbushSetAmbushers = (game, {ambushers}) => game
+  .setIn(['ambush', 'ambushers'], ambushers.reduce((result, animalId) => result.set(animalId, null), OrderedMap()));
+export const gameAmbushPrepareStart = (game, {turnRemainingTime}) => game
+  .setIn(['ambush'], AmbushRecord.new(turnRemainingTime));
 export const gameAmbushPrepareEnd = (game) => game;
 export const gameAmbushAttackStart = (game) => game
   .update('cooldowns', cooldowns => cooldowns.eventNextAction());
@@ -515,6 +517,10 @@ export const gameSpawnPlants = (game, {plants}) => game
 export const gameDeployPlant = (game, {plant}) => game
   .setIn(['plants', plant.id], plant)
   .update(addToGameLog(['gameDeployPlant', logPlant(plant)]));
+
+export const gamePlantUpdateFood = (game, {plantId, amount}) => game
+  .updateIn(['plants', plantId], plant => plant.receiveFood(amount))
+  .update(addToGameLog(['gamePlantUpdateFood', logPlant(game.getPlant(plantId)), amount]));
 // endregion
 
 export const reducer = createReducer(Map(), {
@@ -541,12 +547,13 @@ export const reducer = createReducer(Map(), {
   , gameSetPaused: (state, data) => state.update(data.gameId, game => gameSetPaused(game, data))
 
   , traitAmbushActivate: (state, data) => state.update(data.gameId, game => traitAmbushActivate(game, data))
-  , gameAmbushPushTarget: (state, data) => state.update(data.gameId, game => gameAmbushPushTarget(game, data))
-  , gameAmbushShiftTarget: (state, data) => state.update(data.gameId, game => gameAmbushShiftTarget(game, data))
   , gameAmbushPrepareStart: (state, data) => state.update(data.gameId, game => gameAmbushPrepareStart(game, data))
   , gameAmbushPrepareEnd: (state, data) => state.update(data.gameId, game => gameAmbushPrepareEnd(game, data))
   , gameAmbushAttackStart: (state, data) => state.update(data.gameId, game => gameAmbushAttackStart(game, data))
   , gameAmbushAttackEnd: (state, data) => state.update(data.gameId, game => gameAmbushAttackEnd(game, data))
+  , gameAmbushPushTarget: (state, data) => state.update(data.gameId, game => gameAmbushPushTarget(game, data))
+  , gameAmbushShiftTarget: (state, data) => state.update(data.gameId, game => gameAmbushShiftTarget(game, data))
+  , gameAmbushSetAmbushers: (state, data) => state.update(data.gameId, game => gameAmbushSetAmbushers(game, data))
 
   , playerActed: (state, data) => state.update(data.gameId, game => playerActed(game, data))
   , animalDeath: (state, data) => state.update(data.gameId, game => animalDeath(game, data))
@@ -579,4 +586,5 @@ export const reducer = createReducer(Map(), {
 
   , gameSpawnPlants: (state, data) => state.update(data.gameId, game => gameSpawnPlants(game, data))
   , gameDeployPlant: (state, data) => state.update(data.gameId, game => gameDeployPlant(game, data))
+  , gamePlantUpdateFood: (state, data) => state.update(data.gameId, game => gamePlantUpdateFood(game, data))
 });

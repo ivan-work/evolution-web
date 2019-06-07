@@ -77,38 +77,6 @@ players:
     expect(findPlant('$per').traits).size(1);
     expect(findPlant('$per').traits.first().type).equal(ptt.PlantTraitMycorrhiza);
   });
-
-  it('Player can deploy parasitic plant', () => {
-    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
-    const gameId = ParseGame(`
-settings:
-  addon_plantarium: true
-phase: deploy
-plants: PlantEphemeral $eph ++\
-  , PlantPerennial $per ++
-deck: 5 camo
-players:
-  - hand: 4 ParasiticPlant
-`);
-    const {selectGame, findPlant} = makeGameSelectors(serverStore.getState, gameId);
-    const {selectGame0, selectPlayer0, findPlant0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
-    const cardIds = selectPlayer0().hand.map(({id}) => id).toArray();
-
-    expectUnchanged(`Can't deploy ParasiticPlant to animal`, () => {
-      clientStore0.dispatch(gameDeployTraitRequest(cardIds[0], '$A'))
-    }, serverStore, clientStore0);
-    clientStore0.dispatch(gameDeployPlantTraitRequest(cardIds[0], '$eph'));
-    expect(selectGame().plants, 'game.plants.size').size(3);
-    expect(findPlant('$eph').traits).size(1);
-    expect(findPlant('$eph').traits.first().type).equal(ptt.PlantTraitParasiticPlantLink);
-    expect(findPlant('$eph').traits.first().linkSource).equal(true);
-    const linkedTrait = findPlant('$eph').traits.first().findLinkedTrait(selectGame());
-    const parasiticPlant = selectGame().getPlant(linkedTrait.hostAnimalId);
-    expect(parasiticPlant).ok;
-    expect(parasiticPlant.traits).size(1);
-    expect(parasiticPlant.traits.first().type).equal(ptt.PlantTraitParasiticPlantLink);
-    expect(parasiticPlant.traits.first().linkSource).equal(false);
-  });
 });
 
 

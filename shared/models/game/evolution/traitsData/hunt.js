@@ -5,8 +5,8 @@ import {getTraitDataModel, TraitModel} from "../TraitModel";
 import * as tt from "../traitTypes";
 import * as ptt from "../plantarium/plantTraitTypes";
 import {
-  clearCooldown,
-  server$gameAmbushAttackStart,
+  clearCooldown, getFeedingCooldownList,
+  server$gameAmbushAttackStart, server$startCooldownList,
   server$startFeeding,
   server$startFeedingFromGame,
   server$traitActivate,
@@ -20,7 +20,7 @@ import {
   traitParalyze, traitQuestion
 } from "../../../../actions/trait";
 import {HUNT_FLAG, TRAIT_COOLDOWN_LINK, TRAIT_COOLDOWN_PLACE} from "../constants";
-import {getErrorOfAnimalEatingFromPlant} from "../../../../actions/trait.checks";
+import {getErrorOfAnimalEatingFromPlant, getErrorOfAnimalEatingFromPlantNoCD} from "../../../../actions/trait.checks";
 import {
   findAnglerfish,
   findDefaultActiveDefence,
@@ -32,6 +32,8 @@ import {
 import {TraitMimicry, TraitTailLoss} from "./index";
 import {QuestionRecord} from "../../GameModel";
 import {server$playerActed} from "../../../../actions/game";
+import {AnimalModel} from "../AnimalModel";
+import {server$gamePlantUpdateFood} from "../../../../actions/game.plantarium";
 
 export const HUNT_TYPE = {ANIMAL: 'ANIMAL', PLANT: 'PLANT'};
 
@@ -116,6 +118,7 @@ export const server$huntProcess = (gameId) => (dispatch, getState) => {
 
   let animalAnglerfish = findAnglerfish(game, targetAnimal);
   if (animalAnglerfish) {
+    logger.debug(`server$huntProcess/Anglerfish/${animalAnglerfish.id}`);
     const traitAnglerfish = animalAnglerfish.traits.first();
 
     const newTraitCarnivorous = TraitModel.new(tt.TraitCarnivorous);
@@ -140,10 +143,18 @@ export const server$huntProcess = (gameId) => (dispatch, getState) => {
         }
         break;
       case HUNT_TYPE.PLANT:
-        if (!getErrorOfAnimalEatingFromPlant(game, animalAnglerfish, attackEntity)) {
+        dispatch(server$huntEnd(gameId));
+        const newGame = selectGame(getState, gameId);
+        const newPlant = newGame.getPlant(attackEntity.id);
+        const anglerfishShouldEat = (
+          animalAnglerfish.id !== targetAnimal.id
+          && !getErrorOfAnimalEatingFromPlantNoCD(newGame, animalAnglerfish, newPlant)
+        );
+        logger.debug(`server$huntProcess/Anglerfish/anglerfishShouldEat/${animalAnglerfish.id}: ${anglerfishShouldEat}`);
+        dispatch(server$traitAnimalRemoveTrait(newGame, animalAnglerfish, newTraitIntellect));
+        if (anglerfishShouldEat) {
           dispatch(server$startFeedingFromGame(gameId, animalAnglerfish.id, 1, 'PLANT', attackEntity.id));
         }
-        dispatch(server$traitAnimalRemoveTrait(game, animalAnglerfish, newTraitIntellect));
         break;
     }
 
@@ -239,6 +250,7 @@ export const server$huntProcess = (gameId) => (dispatch, getState) => {
     if (hunt.type === HUNT_TYPE.ANIMAL) {
       return dispatch(server$huntKill_Animal(gameId));
     } else {
+      dispatch(huntSetFlag(gameId, HUNT_FLAG.FEED_ATTACKING_PLANT));
       return dispatch(server$huntKill(gameId));
     }
   }
@@ -288,7 +300,12 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
   const attackTrait = game.locateTrait(hunt.attackTraitId, hunt.attackEntityId);
   const targetAnimal = game.locateAnimal(hunt.targetAid);
 
-  logger.debug(`traitHuntingCallbacks${debugHuntFlags(game)}`);
+  logger.verbose(`server$huntEnd [START]: ${debugHunts(game)}`);
+
+  if (huntGetFlag(game, HUNT_FLAG.FEED_FROM_PLANT)) {
+    dispatch(server$startCooldownList(gameId, getFeedingCooldownList(gameId, hunt.targetPid)));
+  }
+
   if (attackEntity) {
     const traitIntellect = attackEntity.hasTrait(tt.TraitIntellect) || attackEntity.hasTrait(ptt.PlantTraitHiddenIntellect);
     if (!!traitIntellect && traitIntellect.value === true) dispatch(server$traitSetValue(game, attackEntity, traitIntellect, false));
@@ -319,7 +336,14 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
       }));
     }
     if (huntGetFlag(game, HUNT_FLAG.FEED_FROM_TAIL_LOSS)) {
-      dispatch(server$startFeeding(gameId, attackEntity.id, 1, tt.TraitTailLoss, attackEntity.id));
+      if (attackEntity instanceof AnimalModel) {
+        dispatch(server$startFeeding(gameId, attackEntity.id, 1, tt.TraitTailLoss, attackEntity.id));
+      } else {
+        dispatch(server$gamePlantUpdateFood(gameId, attackEntity.id, 1, tt.TraitCarnivorous));
+      }
+    }
+    if (huntGetFlag(game, HUNT_FLAG.FEED_ATTACKING_PLANT)) {
+      dispatch(server$gamePlantUpdateFood(gameId, attackEntity.id, 2, tt.TraitCarnivorous));
     }
   }
 
@@ -331,9 +355,12 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
       }
     }
     if (huntGetFlag(game, HUNT_FLAG.FEED_FROM_PLANT)) {
-      dispatch(server$startFeeding(gameId, targetAnimal.id, 1, 'PLANT', attackEntity.id));
+      if (!getErrorOfAnimalEatingFromPlant(game, targetAnimal, attackEntity)) {
+        dispatch(server$startFeedingFromGame(gameId, targetAnimal.id, 1, 'PLANT', attackEntity.id));
+      }
     }
   }
+
   dispatch(huntEnd(gameId));
 
   if (attackEntity && attackTrait) {
@@ -346,15 +373,19 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
     dispatch(server$gameAmbushAttackStart(gameId));
   }
 
-  logger.verbose(`server$huntEnd: ${hunt.attackEntityId} > ${hunt.targetAid} ${debugHuntFlags(game)}`);
+  logger.verbose(`server$huntEnd [END]: ${debugHunts(game)}`);
+
   if (gameGetHunt(selectGame(getState, gameId))) {
+    logger.info(`ENDING ANOTHER HUNT: ${debugHunts(game)}`);
     dispatch(server$huntEnd(gameId));
-  } else {
-    if (!huntGetFlag(game, HUNT_FLAG.AMBUSH) && hunt.attackPlayerId) {
-      dispatch(server$playerActed(gameId, hunt.attackPlayerId));
-    }
-    if (huntGetFlag(game, HUNT_FLAG.FEED_FROM_PLANT)) {
-      dispatch(server$playerActed(gameId, hunt.targetPid));
-    }
+  }
+  if (!huntGetFlag(game, HUNT_FLAG.AMBUSH) && hunt.attackPlayerId) {
+    dispatch(server$playerActed(gameId, hunt.attackPlayerId));
+  }
+  if (huntGetFlag(game, HUNT_FLAG.FEED_FROM_PLANT)) {
+    dispatch(server$playerActed(gameId, hunt.targetPid));
+  }
+  if (huntGetFlag(game, HUNT_FLAG.PLANT_ATTACK)) {
+    dispatch(server$playerActed(gameId, game.status.currentPlayer));
   }
 };

@@ -18,12 +18,8 @@ import {
 } from './index';
 
 import * as tt from '../traitTypes/index';
-import {clearCooldown, traitAmbushActivate} from "../../../../actions/trait";
 import {
-  gameGetHunt,
   huntGetFlag,
-  huntSetTarget,
-  server$huntProcess,
   server$huntStart_Animal
 } from "./hunt";
 import * as ptt from "../plantarium/plantTraitTypes";

@@ -309,12 +309,12 @@ settings:
         expect(findPlant('$B').traits.first(), 'ServerGame().plants.$B.traits[0]').ok;
         expect(findPlant('$B').traits.first().type, 'ServerGame().plants.$B.traits[0].type').equal(ptt.PlantTraitMycorrhiza);
         expect(findPlant('$B').traits.last(), 'ServerGame().plants.$B.traits[1]').ok;
-        expect(findPlant('$B').traits.last().type, 'ServerGame().plants.$B.traits[1].type').equal(ptt.PlantTraitParasiticPlantLink);
+        expect(findPlant('$B').traits.last().type, 'ServerGame().plants.$B.traits[1].type').equal(ptt.PlantTraitParasiticLink);
 
         expect(findPlant('$C'), 'ServerGame().plants.$C').instanceOf(PlantModel);
         expect(findPlant('$C').type, 'ServerGame().plants.$C.type').equal(pt.PlantParasite);
         expect(findPlant('$C').traits.first(), 'ServerGame().plants.$C.traits[0]').ok;
-        expect(findPlant('$C').traits.first().type, 'ServerGame().plants.$C.traits[0].type').equal(ptt.PlantTraitParasiticPlantLink);
+        expect(findPlant('$C').traits.first().type, 'ServerGame().plants.$C.traits[0].type').equal(ptt.PlantTraitParasiticLink);
 
         expect(selectGame0().plants, 'ClientGame0().plants is an OrderedMap').instanceOf(OrderedMap);
 
@@ -328,12 +328,12 @@ settings:
         expect(findPlant0('$B').traits.first(), 'ServerGame().plants.$B.traits[0]').ok;
         expect(findPlant0('$B').traits.first().type, 'ServerGame().plants.$B.traits[0].type').equal(ptt.PlantTraitMycorrhiza);
         expect(findPlant0('$B').traits.last(), 'ServerGame().plants.$B.traits[1]').ok;
-        expect(findPlant0('$B').traits.last().type, 'ServerGame().plants.$B.traits[1].type').equal(ptt.PlantTraitParasiticPlantLink);
+        expect(findPlant0('$B').traits.last().type, 'ServerGame().plants.$B.traits[1].type').equal(ptt.PlantTraitParasiticLink);
 
         expect(findPlant0('$C'), 'ServerGame().plants.$C').instanceOf(PlantModel);
         expect(findPlant0('$C').type, 'ServerGame().plants.$C.type').equal(pt.PlantParasite);
         expect(findPlant0('$C').traits.first(), 'ServerGame().plants.$C.traits[0]').ok;
-        expect(findPlant0('$C').traits.first().type, 'ServerGame().plants.$C.traits[0].type').equal(ptt.PlantTraitParasiticPlantLink);
+        expect(findPlant0('$C').traits.first().type, 'ServerGame().plants.$C.traits[0].type').equal(ptt.PlantTraitParasiticLink);
       });
 
       it('ParseGame covers', () => {

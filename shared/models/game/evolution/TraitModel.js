@@ -5,10 +5,17 @@ import * as tt from './traitTypes'
 import * as ptt from './plantarium/plantTraitTypes'
 
 import {ActionCheckError} from '~/shared/models/ActionCheckError';
-import {TRAIT_ANIMAL_FLAG} from './constants';
+import {TRAIT_ANIMAL_FLAG, TRAIT_TARGET_TYPE} from './constants';
 
 import {TraitDataModel} from './TraitDataModel';
 import PlantTraitDataModel from "./PlantTraitDataModel";
+import {
+  checkTraitActivation_Animal,
+  checkTraitActivation_Trait,
+  checkTraitActivation_TwoTraits
+} from "../../../actions/trait.checks";
+import {throwError} from "../../../actions/checks";
+import ERRORS from "../../../actions/errors";
 
 export const TraitData = Object.keys(tt)
   .reduce((result, traitType) => Object.assign(result, {[traitType]: TraitDataModel.new(traitType)}), {});
@@ -164,5 +171,39 @@ export class TraitModel extends Record({
 
   getCovers() {
     return this.covers;
+  }
+
+  getTarget(game, entity, ...targets) {
+    const trait = this;
+    switch (trait.getDataModel().targetType) {
+      case TRAIT_TARGET_TYPE.ANIMAL:
+        const animal = game.locateAnimal(targets[0]);
+        throwError(!animal && ERRORS.TRAIT_ACTION_NO_TARGETS);
+        return animal;
+      case TRAIT_TARGET_TYPE.TRAIT:
+        const targetTrait = entity.hasTrait(targets[0], true);
+        throwError(!animal && ERRORS.TRAIT_ACTION_NO_TARGETS);
+        return targetTrait;
+      case TRAIT_TARGET_TYPE.TWO_TRAITS:
+        const linkedAnimal = game.locateAnimal(entity.id === trait.hostAnimalId
+          ? trait.linkAnimalId
+          : trait.hostAnimalId);
+        throwError(!linkedAnimal && ERRORS.TRAIT_ACTION_NO_TARGETS);
+
+        const trait1 = entity.hasTrait(targets[0], true);
+        throwError(!trait1 && ERRORS.TRAIT_ACTION_NO_TARGETS);
+        const trait2 = linkedAnimal.hasTrait(targets[1], true);
+        throwError(!trait2 && ERRORS.TRAIT_ACTION_NO_TARGETS);
+
+        throwError(trait.getDataModel().getErrorOfUseOnTarget(game, entity, trait1));
+        throwError(trait.getDataModel().getErrorOfUseOnTarget(game, linkedAnimal, trait2));
+
+        return [trait1, trait2];
+      case TRAIT_TARGET_TYPE.NONE:
+        return null;
+      default:
+        throw new ActionCheckError(`server$traitActivate@Game(${game.id})`
+          , 'Animal(%s):Trait(%s) unknown target type %s', entity.id, this.type, this.getDataModel().targetType)
+    }
   }
 }

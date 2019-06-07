@@ -12,4 +12,4 @@ export const PlantTraitTree = 'PlantTraitTree';
 export const PlantTraitParasiticPlant = 'PlantTraitParasiticPlant';
 export const PlantTraitSpiky = 'PlantTraitSpiky';
 
-export const PlantTraitParasiticPlantLink = 'PlantTraitParasiticPlantLink';
+export const PlantTraitParasiticLink = 'PlantTraitParasiticLink';

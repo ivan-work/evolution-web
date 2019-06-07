@@ -28,6 +28,8 @@ import {
   , gameAmbushPrepareEnd
   , gameAmbushAttackStart
   , gameAmbushAttackEnd
+  , gameAmbushSetAmbushers
+  , gamePlantUpdateFood
   , playerActed
   , animalDeath
   , plantDeath
@@ -77,6 +79,8 @@ export const reducer = createReducer(null, {
   , gameAmbushPrepareEnd
   , gameAmbushAttackStart
   , gameAmbushAttackEnd
+  , gameAmbushSetAmbushers
+  , gamePlantUpdateFood
   , playerActed
   , animalDeath
   , plantDeath

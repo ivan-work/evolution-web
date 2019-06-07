@@ -74,4 +74,8 @@ export class PlayerModel extends Record({
   someAnimal(cb) {
     return this.continent.some(animal => cb(animal, null, this));
   }
+
+  debugAnimals() {
+    return this.continent.map(a => a.toString()).toArray();
+  }
 }

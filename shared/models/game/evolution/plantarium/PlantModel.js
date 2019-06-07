@@ -53,7 +53,7 @@ export default class PlantModel extends Record({
   }
 
   toString() {
-    return `Plant#${this.id}(${this.getFood()}/${this.foodSize}+${this.getFat()}/${this.fatSize})[${this.traits.toArray().map(t => t.type)}]`;
+    return `Plant#${this.id}(${this.getFood()}/${this.maxFood})[${this.traits.toArray().map(t => t.type)}]`;
   }
 
   getTraits() {
@@ -119,75 +119,16 @@ export default class PlantModel extends Record({
     return this.food;
   }
 
-  getFat() {
-    return this.traits.filter(trait => trait.type === TraitFatTissue && trait.value && !trait.disabled).size
-  }
-
-  getFoodAndFat() {
-    return this.getFood() + this.getFat();
-  }
-
-  getNeededFood() {
-    return Math.max(0, this.foodSize - this.getFood());
-  }
-
-  getWantedFood() {
-    return (this.foodSize + this.fatSize) - (this.getFood() + this.getFat());
-  }
-
-  isSaturated() {
-    return this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
-      || this.getNeededFood() <= 0;
-  }
-
-  isFull() {
-    return this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)
-      || this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)
-      || this.getWantedFood() <= 0;
-  }
-
   canSurvive() {
-    return this.isSaturated()
-      || this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)
-      || this.getFood() >= this.foodSize
-  }
-
-  getEatingBlockers(game) {
-    let eatingBlockers = [];
-    eatingBlockers = eatingBlockers.concat(this.traits
-      .filter(trait => {
-        if (trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === this.id) {
-          const hostAnimal = game.locateAnimal(trait.linkAnimalId, trait.ownerId);
-          const linkedTrait = game.locateTrait(trait.linkId, trait.linkAnimalId, trait.ownerId);
-          return !linkedTrait.disabled && !hostAnimal.isSaturated();
-        }
-      }).toArray());
-    const traitShell = this.hasTrait(TraitShell);
-    if (this.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && traitShell) eatingBlockers.push(traitShell);
-    const traitHibernation = this.hasTrait(TraitHibernation);
-    if (this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && TraitHibernation) eatingBlockers.push(traitHibernation);
-    return eatingBlockers;
+    return this.getFood() >= 0
   }
 
   canEat(game) {
-    return this.getWantedFood() > 0
-      && !this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)
-      && this.getEatingBlockers(game).length === 0;
+    return this.getFood() < this.data.maxFood;
   }
 
   receiveFood(amount) {
-    const needOfFood = this.getNeededFood();
-    const amountForFood = Math.min(needOfFood, amount);
-    let amountForFat = amount - amountForFood;
-
     return this
-      .set('food', this.getFood() + amountForFood)
-      .update('traits', traits => traits
-        .reverse()
-        .map(trait => (trait.type === TraitFatTissue && !trait.value && !trait.disabled
-          ? trait.set('value', amountForFat-- > 0)
-          : trait))
-        .reverse()
-      );
+      .set('food', Math.max(0, Math.min(this.getFood() + amount, this.data.maxFood)));
   }
 }

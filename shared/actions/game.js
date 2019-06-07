@@ -350,6 +350,7 @@ export const server$defaultTurn = (gameId, userId) => (dispatch, getState) => {
 };
 
 export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
+  logger.debug(`game/server$gameEndTurn attempt`);
   if (!dispatch(server$autoFoodSharing(gameId, userId))) return;
   const isDefaultTurn = !!dispatch(server$defaultTurn(gameId, userId));
   // if isDefaultTurn is true, then player performed default turn\
@@ -416,8 +417,9 @@ export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
       const timeout = dispatch(checkTimeout(makeTurnTimeoutId(gameId)));
       const playerHasNoTimeouts = !timeout;
       const gameIsNotPaused = !game.status.paused;
+      const gameIsNotOnHunt = !game.hunt;
 
-      if (gameHasNoQuestions && (playerHasNoOptions || (gameIsNotPaused && playerHasNoTimeouts))) {
+      if (gameHasNoQuestions && gameIsNotOnHunt && (playerHasNoOptions || (gameIsNotPaused && playerHasNoTimeouts))) {
         return dispatch(server$gameEndTurn(gameId, userId));
       }
   }
@@ -849,7 +851,7 @@ export const gameClientToServer = {
         const linkedPlant = PlantModel.new(pt.PlantParasite);
         dispatch(server$gameDeployPlant(gameId, linkedPlant));
         traits = TraitModel.LinkBetween(
-          ptt.PlantTraitParasiticPlantLink
+          ptt.PlantTraitParasiticLink
           , plant
           , linkedPlant
         );

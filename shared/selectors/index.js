@@ -11,8 +11,7 @@ export const selectUserName = (getState, userId) => getState().getIn(['users', u
 export const selectGame = (getState, gameId) =>
   getState().getIn(['games', gameId]);
 
-export const selectPlayer = (game, user) =>
-  game.getPlayer(user);
+export const selectPlayer = (game, user) => game.getPlayer(user);
 
 export const selectAnimal = (game, user, animalIndex) =>
   selectPlayer(game, user).continent.toArray()[animalIndex];
@@ -40,20 +39,26 @@ export const selectUsersInGame = (getState, gameId) =>
 export const makeGameSelectors = (getState, gameId) => ({
   selectGame: () => selectGame(getState, gameId)
   , selectPlayer: (user) => selectPlayer(selectGame(getState, gameId), user)
+  , findPlayerByIdx: (index) => selectGame(getState, gameId).players.find(p => p.index === index)
 
   , selectCard: (user, cardIndex) => selectGame(getState, gameId).getPlayer(user).getCard(cardIndex)
-  , findCard: (user, type) => selectGame(getState, gameId).getPlayer(user).hand.find(c => c.trait1 === type || c.trait2 === type).id
+  , findCard: (user, type) => selectPlayer(selectGame(getState, gameId), user)
+    .hand.find(c => c.trait1 === type || c.trait2 === type).id
 
   , selectAnimal: (user, animalIndex) => selectAnimal(selectGame(getState, gameId), user, animalIndex)
   , findAnimal: (animalId) => selectGame(getState, gameId).locateAnimal(animalId)
 
-  , selectTrait: (user, animalIndex, traitIndex) => selectTrait(selectGame(getState, gameId), user, animalIndex, traitIndex)
-  , selectTraitId: (user, animalIndex, traitIndex) => selectTrait(selectGame(getState, gameId), user, animalIndex, traitIndex).id
+  , selectTrait: (user, animalIndex, traitIndex) =>
+    selectTrait(selectGame(getState, gameId), user, animalIndex, traitIndex)
+  , selectTraitId: (user, animalIndex, traitIndex) =>
+    selectTrait(selectGame(getState, gameId), user, animalIndex, traitIndex).id
 
   , findPlant: (plantId) => selectGame(getState, gameId).getPlant(plantId)
 
-  , findTrait: (animalId, traitType, index = 0) => findTrait(selectGame(getState, gameId), animalId, traitType, index)
-  , findPlantTrait: (plantId, traitType, index = 0) => findPlantTrait(selectGame(getState, gameId), plantId, traitType, index)
+  , findTrait: (animalId, traitType, index = 0) =>
+    findTrait(selectGame(getState, gameId), animalId, traitType, index)
+  , findPlantTrait: (plantId, traitType, index = 0) =>
+    findPlantTrait(selectGame(getState, gameId), plantId, traitType, index)
 });
 
 export const makeClientGameSelectors = (getState, gameId, i) => ({
@@ -66,10 +71,13 @@ export const makeClientGameSelectors = (getState, gameId, i) => ({
 
   , ['findPlant' + i]: (plantId) => getState().get('game').getPlant(plantId)
 
-  , ['findTrait' + i]: (animalId, traitType, index = 0) => findTrait(getState().get('game'), animalId, traitType, index)
-  , ['findPlantTrait' + i]: (plantId, traitType, index = 0) => findPlantTrait(getState().get('game'), plantId, traitType, index)
+  , ['findTrait' + i]: (animalId, traitType, index = 0) =>
+    findTrait(getState().get('game'), animalId, traitType, index)
+  , ['findPlantTrait' + i]: (plantId, traitType, index = 0) =>
+    findPlantTrait(getState().get('game'), plantId, traitType, index)
 
-  , ['selectTrait' + i]: (user, animalIndex, traitIndex) => selectTrait(getState().get('game'), user, animalIndex, traitIndex)
+  , ['selectTrait' + i]: (user, animalIndex, traitIndex) =>
+    selectTrait(getState().get('game'), user, animalIndex, traitIndex)
 });
 
 export const selectClientRoute = (getState) => getState().getIn(['routing', 'locationBeforeTransitions', 'pathname']);

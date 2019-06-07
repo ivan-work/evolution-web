@@ -4,28 +4,29 @@ import {List} from 'immutable';
 import {selectGame} from "../selectors";
 import {server$game} from "./generic";
 import PlantModel from "../models/game/evolution/plantarium/PlantModel";
+import {server$autoFoodSharing, server$startCooldownList, server$traitActivate, startCooldown} from "./trait";
 import {
-  checkGameDefined,
+  checkGameDefined, checkGameHasAnimal,
   checkGameHasPlant,
   checkGameHasUser,
   checkGamePhase,
   checkPlayerCanAct,
   checkPlayerHasAnimal, throwError
 } from "./checks";
-import {ActionCheckError} from "../models/ActionCheckError";
 import {PHASE} from "../models/game/GameModel";
-import {getErrorOfAnimalEatingFromGame} from "./trait.checks";
-import {TRAIT_COOLDOWN_DURATION, TRAIT_COOLDOWN_LINK, TRAIT_COOLDOWN_PLACE} from "../models/game/evolution/constants";
-import * as tt from "../models/game/evolution/traitTypes";
 import {
-  gameFoodTake_End,
-  gameFoodTake_Start,
-  getFeedingCooldownList,
-  server$autoFoodSharing, server$gameAmbushPrepareStart, server$startCooldownList, server$startFeeding,
-  server$startFeedingFromGame,
-  server$takeFoodRequest,
-  startCooldown
-} from "./trait";
+  checkTraitActivation,
+  getErrorOfEntityTraitActivation,
+  getErrorOfPlantAttack,
+  getErrorOfPlantCounterAttack
+} from "./trait.checks";
+import {server$huntStart_Plant} from "../models/game/evolution/traitsData/hunt";
+import {
+  HUNT_FLAG,
+  TRAIT_COOLDOWN_DURATION,
+  TRAIT_COOLDOWN_LINK,
+  TRAIT_COOLDOWN_PLACE
+} from "../models/game/evolution/constants";
 import {server$playerActed} from "./game";
 
 // region game
@@ -47,17 +48,85 @@ export const gameDeployPlant = (gameId, plant) => ({
 export const server$gameDeployPlant = (gameId, plant) => server$game(gameId, gameDeployPlant(gameId, plant));
 //endregion
 
+// region plants
+export const gamePlantAttackRequest = (plantId, targetId) => (dispatch, getState) => dispatch({
+  type: 'gamePlantAttackRequest'
+  , data: {
+    gameId: getState().getIn(['game', 'id'])
+    , plantId
+    , targetId
+  }
+  , meta: {server: true}
+});
+
+const gamePlantUpdateFood = (gameId, plantId, amount) => ({
+  type: 'gamePlantUpdateFood',
+  data: {gameId, plantId, amount}
+});
+
+export const server$gamePlantUpdateFood = (gameId, plantId, amount) => server$game(gameId, gamePlantUpdateFood(gameId, plantId, amount));
+
+export const plantTraitActivateRequest = (gameId, plantId, traitId, ...targets) => (dispatch, getState) => dispatch({
+  type: 'plantTraitActivateRequest'
+  , data: {
+    gameId: getState().getIn(['game', 'id'])
+    , plantId
+    , traitId
+    , targets
+  }
+  , meta: {server: true}
+});
+// endregion
+
 // region animal
+
 // endregion
 
 export const plantsClientToServer = {
-  animalTakePlantFoodRequest: ({gameId, animalId, plantId}, {userId}) => (dispatch, getState) => {
+  gamePlantAttackRequest: ({gameId, plantId, targetId}, {userId}) => (dispatch, getState) => {
+    if (!dispatch(server$autoFoodSharing(gameId, userId))) return;
+    const game = selectGame(getState, gameId);
+    checkGameDefined(game);
+    checkGameHasUser(game, userId);
+    checkGamePhase(game, PHASE.FEEDING);
+    checkPlayerCanAct(game, userId);
+    const animal = checkGameHasAnimal(game, targetId);
+    const plant = checkGameHasPlant(game, plantId);
+    throwError(getErrorOfPlantAttack(game, animal, plant, userId));
+    dispatch(server$startCooldownList(gameId, [
+      startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)
+    ]));
+    dispatch(server$huntStart_Plant(gameId, plant, animal, HUNT_FLAG.PLANT_ATTACK));
+  }
+  , plantTraitActivateRequest: ({gameId, plantId, traitId, targets}, {userId}) => (dispatch, getState) => {
+    logger.verbose('plantTraitActivateRequest', gameId, plantId, traitId, ...targets);
+    let game = selectGame(getState, gameId);
+    checkGameDefined(game);
+    checkGameHasUser(game, userId);
+    checkGamePhase(game, PHASE.FEEDING);
+    const plant = checkGameHasPlant(game, plantId);
+    const trait = plant.hasTrait(traitId);
+    throwError(getErrorOfEntityTraitActivation(game, plant, trait, ...targets));
+
+    if (!trait.getDataModel().transient) checkPlayerCanAct(game, userId);
+
+    const target = trait.getTarget(game, plant, ...targets);
+
+    logger.debug('plantTraitActivateRequest', gameId, sourceAid, traitId, ...targets);
+    const result = dispatch(server$traitActivate(gameId, plantId, trait, target));
+    if (result === void 0) {
+      throw new Error(`traitActivateRequest@Game(${gameId}): Animal(${plantId})-${trait.type}-(${targets.join(' ')}) result undefined`);
+    }
+    if (result) {
+      dispatch(server$playerActed(gameId, userId));
+    }
   }
 };
 
 export const plantsServerToClient = {
   gameSpawnPlants: ({gameId, plants}) => gameSpawnPlants(gameId, List(plants).map(PlantModel.fromJS))
   , gameDeployPlant: ({gameId, plant}) => gameDeployPlant(gameId, PlantModel.fromJS(plant))
+  , gamePlantUpdateFood: ({gameId, plantId, amount}) => gamePlantUpdateFood(gameId, plantId, amount)
 //   gameInit: ({game, userId}, currentUserId) => (dispatch) => {
 //     dispatch(gameInit(GameModelClient.fromServer(game, userId)));
 //     redirectTo('/room');

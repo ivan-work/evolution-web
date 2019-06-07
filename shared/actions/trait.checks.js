@@ -30,6 +30,13 @@ export const checkTraitActivation = (game, animal, traitId, ...targets) => {
   }
   return trait;
 };
+
+export const getErrorOfEntityTraitActivation = (game, entity, trait, ...targets) => {
+  const gameId = game.id;
+  if (!trait) return ERRORS.TRAIT_ACTION_NO_TRAIT;
+  return trait.getErrorOfUse(game, entity, ...targets);
+};
+
 export const checkTraitActivation_Target = (game, animal, trait, ...targets) => {
   let target = null;
   switch (trait.getDataModel().targetType) {
@@ -116,18 +123,26 @@ export const checkTraitActivation_TwoTraits = (game, sourceAnimal, trait, trait1
   return [trait1, trait2];
 };
 
+export const getErrorOfEatingCooldown = (game, playerId, animalId) => {
+  if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, playerId, animalId)) return ERRORS.COOLDOWN;
+  return false;
+};
+
 export const getErrorOfAnimalEating = (game, animal) => {
-  if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, animal.ownerId, animal.id)) return ERRORS.COOLDOWN;
   if (!animal.canEat(game)) return ERRORS.ANIMAL_DONT_WANT_FOOD;
   return false;
 };
 
 export const getErrorOfAnimalEatingFromGame = (game, animal) => {
+  if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, animal.ownerId, animal.id)) return ERRORS.COOLDOWN;
   if (game.getFood() < 1) return ERRORS.GAME_FOOD;
-  return getErrorOfAnimalEating(game, animal);
+  return (
+    getErrorOfEatingCooldown(game, animal.ownerId, animal.id)
+    || getErrorOfAnimalEating(game, animal)
+  );
 };
 
-export const getErrorOfAnimalEatingFromPlant = (game, animal, plant) => {
+export const getErrorOfAnimalEatingFromPlantNoCD = (game, animal, plant) => {
   if (plant.getFood() < 1) return ERRORS.PLANT_FOOD;
 
   return (
@@ -136,16 +151,34 @@ export const getErrorOfAnimalEatingFromPlant = (game, animal, plant) => {
   );
 };
 
-export const getErrorOfPlantCounterAttack = (game, animal, plant) => {
+export const getErrorOfAnimalEatingFromPlant = (game, animal, plant) => (
+  getErrorOfEatingCooldown(game, animal.ownerId, animal.id)
+  || getErrorOfAnimalEatingFromPlantNoCD(game, animal, plant)
+);
+
+export const getErrorOfPlantAttackBase = (game, animal, plant) => {
   if (plant.type !== pt.PlantCarnivorous) return ERRORS.COUNTERATTACK_WRONG_TYPE;
 
   const unavoidable = countUnavoidableDefenses(game, plant, animal);
   if (unavoidable > 0) return ERRORS.TRAIT_ATTACK_UNAVOIDABLE;
 
+  return getTraitDataModel(ptt.PlantTraitHiddenCarnivorous).getErrorOfUse(game, plant);
+};
+
+export const getErrorOfPlantAttack = (game, animal, plant, playerId) => {
+  if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, playerId)) return ERRORS.COOLDOWN;
+
+  const defenses = getStaticDefenses(game, plant, animal);
+  if (defenses.length > 0) return ERRORS.TRAIT_ATTACK_TOO_MUCH_DEFENSES;
+
+  return getErrorOfPlantAttackBase(game, animal, plant);
+};
+
+export const getErrorOfPlantCounterAttack = (game, animal, plant) => {
   const defenses = getStaticDefenses(game, plant, animal);
   if (defenses.length > 1) return ERRORS.TRAIT_ATTACK_TOO_MUCH_DEFENSES;
 
-  return getTraitDataModel(ptt.PlantTraitHiddenCarnivorous).getErrorOfUse(game, plant);
+  return getErrorOfPlantAttackBase(game, animal, plant);
 };
 
 export const checkAnimalCanTakeShellFails = (game, animal) => {

@@ -81,6 +81,14 @@ export const checkPlayerHasCard = (game, userId, cardId) => {
   return card;
 };
 
+export const checkGameHasAnimal = (game, animalId) => {
+  const animal = game.locateAnimal(animalId);
+  if (!animal) {
+    throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Animal#%s not found in game', animalId);
+  }
+  return animal;
+};
+
 export const checkPlayerHasAnimal = (game, userId, animalId) => {
   const animal = game.locateAnimal(animalId, userId);
   if (!animal) {
