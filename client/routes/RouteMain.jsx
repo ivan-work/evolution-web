@@ -1,23 +1,25 @@
 import React, {Fragment} from 'react';
 import T from 'i18n-react';
+
 import {branch, compose, renderNothing} from 'recompose';
 import {connect} from 'react-redux';
+import withStyles from "@material-ui/core/styles/withStyles";
 
-import UsersList from '../views/utils/UsersList.jsx';
-import RoomsList from '../views/rooms/RoomsList.jsx';
-import Chat from '../views/Chat.jsx';
-import {Portal} from '../views/utils/Portal.jsx';
-import ControlGroup from '../views/utils/ControlGroup';
-import RoomControlGroup from '../views/rooms/RoomControlGroup.jsx';
-
-import {roomCreateRequest} from '../../shared/actions/actions';
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
-import withStyles from "@material-ui/core/styles/withStyles";
+import Tooltip from "@material-ui/core/Tooltip";
 import Typography from "@material-ui/core/Typography/Typography";
 import Button from "@material-ui/core/Button/Button";
 import IconButton from "@material-ui/core/IconButton";
 import IconCreateRoom from "@material-ui/icons/AddCircle";
+
+import RoomsList from '../views/rooms/RoomsList';
+import Chat from '../views/Chat.jsx';
+import ControlGroup from '../views/utils/ControlGroup';
+import IgnoreUnignoreTooltip from "../components/IgnoreUnignoreTooltip";
+
+import {roomCreateRequest} from '../../shared/actions/actions';
+
 
 const styles = theme => ({
   root: {
@@ -67,7 +69,7 @@ const OnlineWidget = connect((state) => ({
   <Typography>
     {online.map((user, index) => <Fragment key={user.id}>
       {!!index && ', '}
-      {user.login}
+      <IgnoreUnignoreTooltip userId={user.id}><span>{user.login}</span></IgnoreUnignoreTooltip>
     </Fragment>)}
   </Typography>
 </Fragment>));
@@ -76,9 +78,9 @@ export const RouteMain = ({classes}) => {
   // console.log();
   return (
     <Fragment>
-        <Paper className={classes.rowOnline}>
-          <OnlineWidget/>
-        </Paper>
+      <Paper className={classes.rowOnline}>
+        <OnlineWidget/>
+      </Paper>
       <Grid className={classes.root} container spacing={8}>
         <Grid xs item container className={classes.column}>
           <Paper className={classes.columnPaper}>

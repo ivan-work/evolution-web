@@ -9,7 +9,7 @@ export const appChangeLanguage = (langCode) => (dispatch) => {
     .then(r => r.json())
     .then(r => {
       T.setTexts(r);
-      console.log('texts SET')
+      console.log('texts SET');
       dispatch({
         type: 'appChangeLanguage'
         , data: langCode
@@ -26,6 +26,16 @@ export const appChangeSound = (value) => ({
 export const appUseUIv3 = (value) => ({
   type: 'appUseUIv3'
   , data: value
+});
+
+export const appIgnoreUser = (userId) => ({
+  type: 'appIgnoreUser'
+  , data: {userId}
+});
+
+export const appUnignoreUser = (userId) => ({
+  type: 'appUnignoreUser'
+  , data: {userId}
 });
 
 const SHOULD_PLAY_AUDIO = GLOBAL_BROWSER && process.env.NODE_ENV !== 'test' && window && window.Audio;

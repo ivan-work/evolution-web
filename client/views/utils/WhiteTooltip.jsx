@@ -9,7 +9,10 @@ const styles = theme => ({
   }
   , tooltip: {
     backgroundColor: theme.palette.common.white
-    , width: 500
+    // , width: 500
+    , color: theme.palette.text.primary
+    , fontSize: 'inherit'
+    , zIndex: theme.zIndex.tooltip - 1
   }
 });
 

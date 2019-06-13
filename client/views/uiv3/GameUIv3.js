@@ -1,6 +1,6 @@
-import React, {Fragment} from 'react';
+import React from 'react';
 import cn from 'classnames';
-import {compose, lifecycle, nest, withStateHandlers} from "recompose";
+import {compose, lifecycle, withStateHandlers} from "recompose";
 import {connect} from "react-redux";
 import repeat from 'lodash/times';
 import wrap from '../utils/wrap';
@@ -21,7 +21,7 @@ import {chatMessageRequest} from "../../../shared/actions/chat";
 import {debugMirrorPlayer} from "../../actions/debug";
 import {InteractiveFood} from "./food/Food";
 import {InteractionContext, InteractionManagerProvider} from './InteractionManager'
-import {SVGContext, SVGContextProvider, SVGContextSpy} from "./SVGContext";
+import {SVGContextProvider, SVGContextSpy} from "./SVGContext";
 import GameSVGOverlay from "./GameSVGOverlay";
 import GameTimedOutDialog from "./ui/GameTimedOutDialog";
 import QuestionIntellect from "./ui/QuestionIntellect";
@@ -29,8 +29,6 @@ import QuestionDefence from "./ui/QuestionDefence";
 import {InteractiveShell} from "./food/Shell";
 import AnimatedHOC from "../../services/AnimationService/AnimatedHOC";
 import GameStyles from "./GameStyles";
-import Measure from 'react-measure';
-import playerBackground from '@material-ui/core/colors/teal';
 
 const styles = theme => ({
   GameUIv3Container: {
@@ -50,7 +48,6 @@ const styles = theme => ({
     background: theme.palette.background.paper
     , marginTop: 2
     , marginBottom: 2
-    // marginTop: theme.spacing.unit
   }
   , gridMiscRow: {
     display: 'flex'
@@ -81,37 +78,17 @@ const styles = theme => ({
     flex: '1 1 auto'
     , display: 'flex'
     , flexFlow: 'row wrap'
-    // , [`@media (max-width:1800px)`]: {
-    //   '& .PlayerWrapper': {
-    //     minWidth: '33%'
-    //     , background: 'red'
-    //   }
-    // }
-    // , [`@media (max-width:1400px)`]: {
-    //   '& .PlayerWrapper': {
-    //     minWidth: '50%'
-    //     , background: 'blue'
-    //   }
-    // }
-    // , [`@media (max-width:1000px)`]: {
-    //   '& .PlayerWrapper': {
-    //     minWidth: '100%'
-    //     , background: 'green'
-    //   }
-    // }
   }
   , gridHand: {}
 
   , PlayerWrapper: {
     display: 'flex'
     , flexFlow: 'column nowrap'
-    // , flex: '1 1 0'
 
     , margin: 2
 
     , flex: '1 1 0'
     , minWidth: GameStyles.defaultWidth * 4
-    // , maxWidth: '100%'
 
     , textAlign: 'center'
     , '&.isUserTurn': {
@@ -135,10 +112,6 @@ export class SVGContextInteractionSpy extends React.PureComponent {
   }
 }
 
-// const SVGContextStoreSpy = connect((state) => ({animation: state.animation}))(
-//   ({animation}) => <SVGContextSpy name='Animation Spy' watch={animation}/>
-// );
-
 export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
   return (
     <Grid container direction='column' className={classes.GameUIv3Container}>
@@ -147,11 +120,8 @@ export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
       </Grid>
       <Grid item container direction='column' className={classes.GameUIv3}>
 
-        {/*<CurrentInteractionDebug/>*/}
         <GameSVGOverlay/>
         <SVGContextInteractionSpy/>
-        {/*<SVGContextSpy compress={!!compress}/>*/}
-        {/*{JSON.stringify(!!compress)}*/}
         <GameTimedOutDialog/>
         <QuestionIntellect/>
         <QuestionDefence/>
@@ -169,7 +139,7 @@ export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
         </Grid>
         <Grid item className={classes.gridPlayers}>
           {game.sortPlayersFromIndex(game.players, 0).map((player) => (
-            <PlayerWrapper key={player.id} playerId={player.id} classes={classes} game={game}/>
+            (player.playing || player.continent.size > 0) && <PlayerWrapper key={player.id} playerId={player.id} classes={classes} game={game}/>
           ))}
         </Grid>
       </Grid>

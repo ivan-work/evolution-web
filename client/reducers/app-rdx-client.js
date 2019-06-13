@@ -1,4 +1,4 @@
-import {Map} from 'immutable';
+import {Map, OrderedSet} from 'immutable';
 import {createReducer} from '~/shared/utils';
 import langCodes from '../../i18n';
 
@@ -6,9 +6,20 @@ const loadValue = (key, defValue) => {
   let value = null;
   if (!process.env.TEST) {
     try {
-      value = window.localStorage.getItem(key);
+      value = JSON.parse(window.localStorage.getItem(key));
     } catch (e) {
-      console.warn('Error in app-rdx-client', e);
+      window.localStorage.removeItem(key);
+    }
+    return value !== null ? value : defValue;
+  }
+};
+
+const loadJSONValue = (key, defValue) => {
+  let value = null;
+  if (!process.env.TEST) {
+    try {
+      value = JSON.parse(window.localStorage.getItem(key));
+    } catch (e) {
       window.localStorage.removeItem(key);
     }
     return value !== null ? value : defValue;
@@ -16,15 +27,16 @@ const loadValue = (key, defValue) => {
 };
 
 const saveValue = (key, value) => {
-  if (!process.env.TEST) window.localStorage.setItem(key, '' + value);
+  if (!process.env.TEST) window.localStorage.setItem(key, JSON.stringify(value));
   return value;
 };
 
 const getInitialState = () => Map({
   lang: loadValue('lang', langCodes.hasOwnProperty(window.navigator.language) ? window.navigator.language : 'ru-ru')
-  , sound: 'true' === loadValue('sound', 'true')
-  , uiv3: 'true' === loadValue('uiv3', 'true')
+  , sound: loadValue('sound', true)
+  , uiv3: loadValue('uiv3', true)
   , adminMode: process.env.NODE_ENV !== 'production'
+  , ignoreList: OrderedSet(loadValue('ignoreList', []))
 });
 
 export const reducer = createReducer(getInitialState(), {
@@ -33,4 +45,14 @@ export const reducer = createReducer(getInitialState(), {
   , setAdminMode: (state, data) => state.set('adminMode', !state.get('adminMode'))
   , socketConnectClient: (state, {connectionId}) => state.set('connectionId', connectionId)
   , appUseUIv3: (state, data) => state.set('uiv3', saveValue('uiv3', data))
+  , appIgnoreUser: (state, {userId}) => {
+    const ignoreList = state.get('ignoreList').takeLast(99).add(userId);
+    saveValue('ignoreList', ignoreList.toJS());
+    return state.set('ignoreList', ignoreList);
+  }
+  , appUnignoreUser: (state, {userId}) => {
+    const ignoreList = state.get('ignoreList').remove(userId);
+    saveValue('ignoreList', ignoreList.toJS());
+    return state.set('ignoreList', ignoreList);
+  }
 });

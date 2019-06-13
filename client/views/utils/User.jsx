@@ -25,7 +25,7 @@ export const UserVariants = {
     </Typography>
   )
   , listItem: ({user, actions}) => (
-    <ListItem key={user.id} className='User'>
+    <ListItem key={user.id} className='User' style={{width: 'auto'}}>
       <ListItemText primary={user.login}/>
       {!!actions ? actions : null}
     </ListItem>
@@ -58,7 +58,5 @@ UserConnected.propTypes = {
 UserConnected.defaultProps = {
   variant: 'typography'
 };
-
-UserConnected.asListItem = ({id, login}) => (<ListItem className='small'>{login}</ListItem>);
 
 export default UserConnected;

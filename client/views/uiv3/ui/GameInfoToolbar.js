@@ -18,6 +18,7 @@ import {PHASE} from '../../../../shared/models/game/GameModel';
 import IconArrowUp from "@material-ui/icons/KeyboardArrowUp";
 import IconArrowDown from "@material-ui/icons/KeyboardArrowDown";
 import Button from "@material-ui/core/Button/Button";
+import {SpectatorsStatement} from "./SpectatorsList";
 
 const styles = theme => ({
   GameToolbarContainer: {
@@ -78,6 +79,10 @@ export const GameToolbar = ({classes, game, compressControls}) => {
           <span className={classes.key}>{T.translate('Game.UI.Status.Round')}:&nbsp;</span>
           <span className={classes.value}>{game.status.round}</span>
         </Typography>
+        <Typography className={classes.statement}>
+          <span className={classes.key}>{T.translate('Game.UI.Deck')}:&nbsp;</span>
+          <span className={classes.value}>{game.deck.size}</span>
+        </Typography>
         <div className={classes.statement}>
           <GameEndTurnButton game={game}/>
         </div>
@@ -88,10 +93,7 @@ export const GameToolbar = ({classes, game, compressControls}) => {
         <Typography className={classes.statement}>
           <span className={classes.value}>{T.translate('Game.Phase.' + game.status.phase)}</span>
         </Typography>
-        <Typography className={classes.statement}>
-          <span className={classes.key}>{T.translate('Game.UI.Deck')}:&nbsp;</span>
-          <span className={classes.value}>{game.deck.size}</span>
-        </Typography>
+        <SpectatorsStatement classes={classes}/>
         <div className={classes.statement}>
           <GameLog game={game}/>
           <Pause/>

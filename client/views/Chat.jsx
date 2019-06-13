@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import cn from 'classnames';
 import RIP from 'react-immutable-proptypes';
 import T from 'i18n-react';
-import {compose, lifecycle, withProps, withState, withStateHandlers, setPropTypes} from "recompose";
+import {compose, lifecycle, withProps, withState, withStateHandlers, setPropTypes, withHandlers} from "recompose";
 import {connect} from 'react-redux';
 
 import Typography from "@material-ui/core/Typography/Typography";
@@ -17,6 +17,7 @@ import TimeService from '../services/TimeService';
 import {CHAT_MESSAGE_LENGTH, CHAT_TARGET_TYPE} from '../../shared/models/ChatModel';
 import {chatMessageRequest} from '../../shared/actions/actions';
 import GameStyles from "./uiv3/GameStyles";
+import IgnoreUnignoreTooltip from "../components/IgnoreUnignoreTooltip";
 
 const styles = theme => ({
   root: {
@@ -74,6 +75,7 @@ export const enhanceWithChat = compose(
     , length: PropTypes.number
   })
   , connect((state, {chatTargetType, roomId, length = 100}) => {
+    const ignoreList = state.app.get('ignoreList');
     let path = null;
     switch (chatTargetType) {
       case CHAT_TARGET_TYPE.GLOBAL:
@@ -83,7 +85,12 @@ export const enhanceWithChat = compose(
         path = ['rooms', roomId, 'chat', 'messages'];
         break;
     }
-    return {messages: state.getIn(path, List()).takeLast(length)}
+    return {
+      messages: state
+        .getIn(path, List())
+        .filter(({from}) => !ignoreList.has(from))
+        .takeLast(length)
+    };
   })
 );
 
@@ -103,7 +110,9 @@ export const ChatMessage = withStyles(messageStyles)(({classes, message, short})
       [classes.messageRoot]: true
       , short
     })}>
-      <span className={classes.messageLogin}>{fromLogin}</span>
+      <IgnoreUnignoreTooltip userId={from}>
+        <span className={classes.messageLogin}>{fromLogin}</span>
+      </IgnoreUnignoreTooltip>
       {!short && <span className={classes.messageTime}> [{TimeService.formatHHMM(timestamp)}]</span>}
       <span className={classes.messageText}>: </span>
       <span className={classes.messageText}>{text}</span>
@@ -186,23 +195,4 @@ export const Chat = compose(
   </div>
 ));
 
-
-{/*<div className={classes.root}>*/
-}
-{/*<div className={className} ref={chatWindowRef} onScroll={handleScroll}>*/
-}
-{/*<ChatWindow className={classes.window} {...{roomId, chatTargetType, chatWindowRef, handleScroll}}/>*/
-}
-{/*</div>*/
-}
-{/*<div className={classes.inputArea}>*/
-}
-{/*<ChatInput className={classes.input} roomId={roomId} chatTargetType={chatTargetType}/>*/
-}
-{/*{!atBottom && <Button size="small" variant='text' onClick={scrollToBottom}>v</Button>}*/
-}
-{/*</div>*/
-}
-{/*</div>*/
-}
 export default Chat;
