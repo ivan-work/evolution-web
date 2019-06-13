@@ -253,7 +253,7 @@ players:
     clientStore0.dispatch(roomCreateRequest());
     const roomId = serverStore.getState().get('rooms').first().id;
     const ClientGame1 = () => clientStore1.getState().get('game');
-    clientStore0.dispatch(roomJoinRequest(roomId));
+    // clientStore0.dispatch(roomJoinRequest(roomId)); //already in room
     clientStore1.dispatch(roomJoinRequest(roomId));
     clientStore0.dispatch(roomStartVotingRequest());
     clientStore1.dispatch(roomStartVoteActionRequest(true));
@@ -272,7 +272,7 @@ players:
     clientStore0.dispatch(roomCreateRequest());
     const roomId = serverStore.getState().get('rooms').first().id;
     const ClientGame1 = () => clientStore1.getState().get('game');
-    clientStore0.dispatch(roomJoinRequest(roomId));
+    // clientStore0.dispatch(roomJoinRequest(roomId)); // already in room
     clientStore1.dispatch(roomJoinRequest(roomId));
     clientStore0.dispatch(roomStartVotingRequest());
     clientStore1.dispatch(roomStartVoteActionRequest(true));

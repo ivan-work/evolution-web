@@ -7,6 +7,7 @@ export const errorMiddleware = (interceptor = () => null) => store => next => ac
     return next(action);
   } catch (error) {
     let actionType = action.type ? `(${action.type})` : '';
+    if (process.env.TEST) throw error;
     if (error instanceof ActionCheckError) {
       logger.warn(`${error.name}${actionType}: ` + util.format(error.message, ...error.data));
     } else {
@@ -19,7 +20,6 @@ export const errorMiddleware = (interceptor = () => null) => store => next => ac
         logger.error(`GenericError${actionType}:`, error);
         logger.error(`LOGGER ERROR ${actionType}:`, loggerError);
       }
-      // if (process.env.TEST) throw error;
     }
     return error;
     //next(action);

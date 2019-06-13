@@ -15,6 +15,7 @@ import * as ptt from "./plantTraitTypes";
 import {TraitCarnivorous, TraitIntellect} from "../traitsData";
 import {server$huntStart_Plant} from "../traitsData/hunt";
 import {server$gamePlantUpdateFood} from "../../../../actions/game.plantarium";
+import {getFeedingCooldownList, server$startCooldownList, server$traitStartCooldown} from "../../../../actions/trait";
 
 export const PlantTraitHiddenCarnivorous = Object.assign({}, TraitCarnivorous, {
   type: ptt.PlantTraitHiddenCarnivorous
@@ -77,6 +78,7 @@ export const PlantTraitOfficinalis = {
 export const PlantTraitProteinRich = {
   type: ptt.PlantTraitProteinRich
   , cardTargetType: CARD_TARGET_TYPE.PLANT
+  , fruit: true
 };
 export const PlantTraitParasiticPlant = {
   type: ptt.PlantTraitParasiticPlant
@@ -90,21 +92,22 @@ export const PlantTraitParasiticLink = {
     [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , _getErrorOfUse: (game, plant, trait) => {
+    if (game.cooldowns.checkFor())
     if (!trait.linkSource) return ERRORS.TRAIT_ACTION_ONLY_LINK_SOURCE;
-    return false;
-  }
-  , getErrorOfUseOnTarget: (game, plant, trait) => {
     const linkedPlant = game.getPlant(trait.linkAnimalId);
     if (!linkedPlant) return ERRORS.TRAIT_ACTION_NO_TARGETS;
-    if (!linkedPlant.getFood() > 1) return ERRORS.TRAIT_TARGETING_ANIMAL_NO_FOOD;
+    if (linkedPlant.getFood() <= 1) return ERRORS.TRAIT_TARGETING_ANIMAL_NO_FOOD;
     return false;
   }
-  , action: (game, sourcePlant, trait) => (dispatch, getState) => {
-    dispatch(server$gamePlantUpdateFood(game.id, trait.hostAnimalId, -1));
-    dispatch(server$gamePlantUpdateFood(game.id, trait.linkAnimalId, 1));
+  , action: (game, playerId, sourcePlant, traitParasiteLink) => (dispatch, getState) => {
+    dispatch(server$startCooldownList(game.id, getFeedingCooldownList(game.id, playerId)));
+    dispatch(server$gamePlantUpdateFood(game.id, traitParasiteLink.hostAnimalId, 1));
+    dispatch(server$gamePlantUpdateFood(game.id, traitParasiteLink.linkAnimalId, -1));
+    return true;
   }
 };
 export const PlantTraitSpiky = {
   type: ptt.PlantTraitSpiky
   , cardTargetType: CARD_TARGET_TYPE.PLANT
+  , coverSlots: 3
 };

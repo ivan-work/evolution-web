@@ -17,6 +17,8 @@ import {
 } from './trait.checks';
 import {selectGame} from '../selectors';
 
+const logOptions = false;
+
 const makeOption = {
   traitTakeFoodRequest: (animalId) => {
     return new Option({
@@ -55,7 +57,7 @@ export class Option extends Record({
 }
 
 export const doesPlayerHasOptions = (game, playerId) => {
-  logger.debug('?doesPlayerHasOptions:', playerId, game.getPlayer(playerId).acted);
+  logger.debug(`endturn/doesPlayer(${playerId}, ${game.getPlayer(playerId).acted}) has options?`);
   const hasError = failsChecks(() => {
     checkGamePhase(game, PHASE.FEEDING);
     checkPlayerCanAct(game, playerId);
@@ -63,7 +65,7 @@ export const doesPlayerHasOptions = (game, playerId) => {
   if (!!hasError) {
     // logger.warn(hasError.name + hasError.message, ...hasError.data);
   } else if (!doesOptionExist(game, playerId)) {
-    logger.debug('AutoTurn for:' + playerId);
+    logger.debug('AutoTurn for: ' + playerId);
     return false;
   } else {
     if (process.env.LOG_LEVEL === 'debug') {
@@ -92,17 +94,21 @@ export const getOptions = (game, playerId) => {
 
 export const searchPlayerOptions = (game, playerId, successFn) => {
   const allAnimals = game.players.reduce((result, player) => result.concat(player.continent.keySeq().toArray()), []);
+  logOptions && logger.debug(`endturn/options/search/player/${playerId}`);
 
   return game.getPlayer(playerId).someAnimal((animal) => {
+    logOptions && logger.debug(`endturn/options/search/animal/${animal.id}/food/${getErrorOfAnimalEatingFromGame(game, animal)}`);
     if (!getErrorOfAnimalEatingFromGame(game, animal))
       return successFn(makeOption.traitTakeFoodRequest(animal.id));
 
+    logOptions && logger.debug(`endturn/options/search/animal/${animal.id}/shell/${game.getArea().shells.size},${checkAnimalCanTakeShellFails(game, animal)}`);
     if (game.getArea().shells.size > 0 && !checkAnimalCanTakeShellFails(game, animal))
       return successFn(makeOption.traitTakeShellRequest(animal.id));
 
     return animal.traits.some((trait) => {
       const traitData = trait.getDataModel();
 
+      logOptions && logger.debug(`endturn/options/search/animal/${animal.id}/trait/${trait.type}/${trait.getErrorOfUse(game, animal)}`);
       if (!traitData.transient && traitData.playerControllable && !trait.getErrorOfUse(game, animal)) {
         switch (traitData.targetType) {
           case TRAIT_TARGET_TYPE.ANIMAL:

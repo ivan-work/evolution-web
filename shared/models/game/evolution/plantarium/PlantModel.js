@@ -3,14 +3,6 @@ import invariant from 'invariant';
 import uuid from 'uuid';
 import {TraitModel} from '../TraitModel';
 
-import {
-  TraitFatTissue,
-  TraitSymbiosis,
-  TraitShell,
-  TraitHibernation,
-  TraitAnglerfish,
-  TraitNeoplasm
-} from '../traitTypes/index';
 import {TRAIT_ANIMAL_FLAG, CTT_PARAMETER} from '../constants';
 import PlantDataModel from "./PlantDataModel";
 
@@ -24,6 +16,8 @@ export default class PlantModel extends Record({
   , data: null
   , food: 0
   , covers: 0
+  , coverSlots: 0
+  , fruit: false
   , traits: OrderedMap()
   , flags: Map()
 }) {
@@ -35,7 +29,8 @@ export default class PlantModel extends Record({
       , food: data.startingFood
       , covers: data.coverSlots
       , data
-    }).update(data.onNewPlant);
+    }).update(data.onNewPlant)
+      .recalculate();
   }
 
   static fromJS(js) {
@@ -43,7 +38,8 @@ export default class PlantModel extends Record({
       ? null
       : new PlantModel(js)
         .set('traits', OrderedMap(js.traits).map(TraitModel.fromServer))
-        .set('data', PlantDataModel.new(js.type));
+        .set('data', PlantDataModel.new(js.type))
+        .recalculate();
   }
 
   toClient() {
@@ -53,7 +49,7 @@ export default class PlantModel extends Record({
   }
 
   toString() {
-    return `Plant#${this.id}(${this.getFood()}/${this.maxFood})[${this.traits.toArray().map(t => t.type)}]`;
+    return `${this.data.type}#${this.id}(${this.getFood()}/${this.data.maxFood})[${this.traits.toArray().map(t => t.type)}]`;
   }
 
   getTraits() {
@@ -61,7 +57,13 @@ export default class PlantModel extends Record({
   }
 
   hasTrait(typeOrId, ignoreDisable) {
-    return this.traits.find(trait => (ignoreDisable || !trait.disabled) && (trait.type === typeOrId || trait.id === typeOrId))
+    const trait = this.traits.get(typeOrId);
+    if (trait && (ignoreDisable || !trait.disabled)) return trait;
+    return this.findTrait(typeOrId, ignoreDisable);
+  }
+
+  findTrait(typeOrId, ignoreDisable) {
+    return this.traits.find(trait => (ignoreDisable || !trait.disabled) && (trait.type === typeOrId || trait.id === typeOrId));
   }
 
   traitAttach(trait, forced) {
@@ -74,29 +76,21 @@ export default class PlantModel extends Record({
     //   : OrderedMap().set(attachedTrait.id, attachedTrait).concat(this.traits)); // .unshift()
     return this
       .set('traits', updatedTraits)
-    //   .recalculateFood();
+      .recalculate();
   }
 
   traitDetach(lookup) {
     const traits = this.traits.filterNot(lookup);
     return this
       .set('traits', traits)
-      // .recalculateFood();
+      .recalculate();
   }
 
-  recalculateFood() {
-    let foodSize = 1;
-    let fatSize = 0;
-    this.traits.forEach(trait => {
-      // if (trait.isLinked() && trait.findLinkedTrait(game).disabled) return;
-      if (trait.disabled) return;
-      if (trait.type === TraitFatTissue && !trait.disabled) fatSize++;
-      foodSize += trait.getDataModel().food;
-    });
+  recalculate() {
+    const coverSlots = this.data.coverSlots + this.getTraits(true).reduce((result, trait) => result + trait.getDataModel().coverSlots, 0);
     return this
-      .set('foodSize', foodSize)
-      .set('fatSize', fatSize)
-      .set('food', Math.min(this.food, foodSize))
+      .set('fruit', this.data.fruit || this.getTraits(true).some(trait => trait.getDataModel().fruit))
+      .set('coverSlots', coverSlots);
   }
 
   getCovers() {
@@ -109,6 +103,10 @@ export default class PlantModel extends Record({
    */
   hasFlag(flag) {
     return !!this.flags.get(flag);
+  }
+
+  isFruit() {
+    return this.fruit;
   }
 
   /**

@@ -48,12 +48,11 @@ const propsToForm = (room) => ({
   , addon_plantarium: room.settings.addon_plantarium
 });
 
-const styles = theme => ({
-});
+const styles = theme => ({});
 
-const RoomAddonRow = ({name, deck}) => (
+const RoomAddonRow = ({name, deck, disabled}) => (
   <Grid container alignItems='center' justify='space-between'>
-    <Checkbox name={name} color='primary'/>
+    <Checkbox name={name} color='primary' disabled={disabled}/>
     <Tooltip title={deck} placement="left">
       <IconCardsTooltip/>
     </Tooltip>
@@ -109,7 +108,7 @@ export class RoomSettings extends React.Component {
         <RoomAddonRow name='addon_timeToFly' deck={this.Deck_TimeToFly_help}/>
         <RoomAddonRow name='addon_continents' deck={this.Deck_ContinentsShort_help}/>
         <RoomAddonRow name='addon_bonus' deck={this.Deck_Bonus_help}/>
-        {process.env.NODE_ENV === 'development' && <RoomAddonRow name='addon_plantarium' deck={this.Deck_Plantarium_help}/>}
+        <RoomAddonRow name='addon_plantarium' deck={this.Deck_Plantarium_help} disabled={!this.props.isAdmin}/>
 
         <Submit id='RoomSettings$Submit' variant='contained' color='primary' size='large'>
           {T.translate('App.Room.$Edit')}
@@ -124,6 +123,7 @@ export default compose(
     (state, {roomId}) => ({
       userId: state.getIn(['user', 'id'])
       , room: state.getIn(['rooms', roomId])
+      , isAdmin: state.getIn(['app', 'adminMode'])
     })
     , {roomEditSettingsRequest}
   )

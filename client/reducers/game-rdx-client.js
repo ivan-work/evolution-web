@@ -48,6 +48,7 @@ import {
   , traitSetValue
   , traitNotify_Start
   , traitTakeShell
+  , traitTakeCover
 } from '../../server/reducers/games-rdx-server';
 
 export const reducer = createReducer(null, {
@@ -99,6 +100,7 @@ export const reducer = createReducer(null, {
   , traitSetValue
   , traitNotify_Start
   , traitTakeShell
+  , traitTakeCover
   , debugMirrorPlayer: (game, {limit = 100}) => {
     const player = game.players.first();
     const updateId = id => id + '' + game.players.size;

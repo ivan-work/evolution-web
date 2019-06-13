@@ -93,16 +93,13 @@ const mixinActions = (store => {
 });
 
 global.mockServerStore = function (initialServerState) {
-  const errorInterceptor = () => {
-    console.log('intercepted')
-  };
   const ioServer = syncSocketIOServer();
   const timeouts = {};
   const serverStore = createStore(
     combineReducers({...serverReducers})
     , new ServerRecord(initialServerState)
     , applyMiddleware(
-      serverErrorMiddleware(errorInterceptor)
+      serverErrorMiddleware()
       , thunk
       , reduxQuestion()
       , reduxTimeoutMiddleware(timeouts, true)
@@ -118,8 +115,6 @@ global.mockServerStore = function (initialServerState) {
   serverStore.getSocket = () => ioServer;
 
   serverStore.getTimeouts = () => timeouts;
-
-  serverStore.errorInterceptor = errorInterceptor;
 
   mixinActions(serverStore);
 
@@ -165,15 +160,23 @@ global.mockClientStore = function (initialClientState) {
   return clientStore
 };
 
+// TODO - replace this with expectError
 global.expectUnchanged = (msg, cb, ...stores) => {
   const LOG_LEVEL = logger.transports.console.level;
-  logger.transports.console.level = 'error';
+  // logger.transports.console.level = 'error';
   let previousStates = stores.map(store => store.getState());
-  cb();
+  try {
+    cb();
+  } catch (e) {
+  }
   stores.forEach((store, i) => {
     expect(store.getState().toJS(), msg).eql(previousStates[i].toJS());
   });
-  logger.transports.console.level = LOG_LEVEL;
+  // logger.transports.console.level = LOG_LEVEL;
+};
+
+global.expectError = (desc, errorMsg, cb) => {
+  expect(cb, desc).throw(errorMsg);
 };
 
 global.expectChanged = (msg, cb, ...stores) => {

@@ -318,11 +318,11 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
       const traitIntellect = attackEntity.hasTrait(tt.TraitIntellect);
       if (traitIntellect) dispatch(server$traitAnimalRemoveTrait(game, attackEntity, traitIntellect));
     }
-    if (huntGetFlag(game, HUNT_FLAG.PARALYZE)) {
-      dispatch(server$game(gameId, traitParalyze(gameId, hunt.attackEntityId)));
-    }
     if (huntGetFlag(game, HUNT_FLAG.FEED_FROM_KILL)) {
       dispatch(server$startFeeding(gameId, attackEntity.id, 2, tt.TraitCarnivorous));
+    }
+    if (huntGetFlag(game, HUNT_FLAG.PARALYZE)) {
+      dispatch(server$game(gameId, traitParalyze(gameId, hunt.attackEntityId)));
     }
     if (huntGetFlag(game, HUNT_FLAG.FEED_SCAVENGERS)) {
       const currentPlayerIndex = game.getPlayer(attackEntity.ownerId || game.status.currentPlayer).index;

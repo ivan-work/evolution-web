@@ -78,6 +78,9 @@ export const parseAnimalList = (userId, string) => {
         if (/^\$.*$/.test(prop)) {
           return prop.length > 1 ? animal.set('id', prop) : animal;
         }
+        if (/^!.*$/.test(prop)) {
+          return animal.setIn(['flags', prop], true);
+        }
         else if (/\$/.test(prop)) {
           const [traitName, targetId] = prop.split('$');
           links.push([animal.id, traitName, '$' + targetId]);
@@ -151,8 +154,8 @@ export const parsePlantsList = (string) => {
     .reduce((result, plant) => result.set(plant.id, plant), OrderedMap());
 
   links.forEach(([a1id, prop, a2id]) => {
-    invariant(plantsMap.has(a1id), 'invalid linkable trait ' + [a1id, prop, a2id]);
-    invariant(plantsMap.has(a2id), 'invalid linkable trait ' + [a1id, prop, a2id]);
+    invariant(plantsMap.has(a1id), `invalid link(${[a1id, prop, a2id]}): no ${a1id} found in ${plantsMap.keySeq().toJS()}`);
+    invariant(plantsMap.has(a2id), `invalid link(${[a1id, prop, a2id]}): no ${a2id} found in ${plantsMap.keySeq().toJS()}`);
     const a1 = plantsMap.get(a1id);
     const a2 = plantsMap.get(a2id);
     const [trait1, trait2] = TraitModel.LinkBetween(parsePlantTrait(prop), a1, a2);

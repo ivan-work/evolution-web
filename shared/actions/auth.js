@@ -128,16 +128,16 @@ export const server$injectUser = (id, login) => (dispatch) => {
  */
 
 const customErrorReport = (customErrorAction, fn) => (dispatch, getState) => {
-  const result = dispatch(fn);
-  if (result instanceof Error) {
-    dispatch(customErrorAction(result));
+  try {
+    dispatch(fn);
+  } catch (error) {
+    dispatch(customErrorAction(error));
   }
-  return result;
 };
 
 export const authClientToServer = {
   loginUserFormRequest: ({redirect = '/', login = void 0, password = void 0}, {connectionId}) =>
-    customErrorReport((dispatch) => Object.assign(loginUserFailure(), {meta: {socketId: connectionId}}), (dispatch, getState) => {
+    customErrorReport(() => Object.assign(loginUserFailure(), {meta: {socketId: connectionId}}), (dispatch, getState) => {
       const validation = new Validator({login, password}, RulesLoginPassword);
       if (validation.fails()) throw new ActionCheckError('loginUserFormRequest', 'validation failed: %s', JSON.stringify(validation.errors.all()));
 
@@ -149,7 +149,7 @@ export const authClientToServer = {
       dispatch(server$loginUser(user, redirect));
     })
   , loginUserTokenRequest: ({redirect = '/', token}, {connectionId}) =>
-    customErrorReport((dispatch) => Object.assign(loginUserFailure(), {meta: {socketId: connectionId}}), (dispatch, getState) => {
+    customErrorReport(() => Object.assign(loginUserFailure(), {meta: {socketId: connectionId}}), (dispatch, getState) => {
       logger.silly('server$loginExistingUser', connectionId);
       try {
         jwt.verify(token, process.env.JWT_SECRET);

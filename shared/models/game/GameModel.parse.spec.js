@@ -290,7 +290,7 @@ settings:
         const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
         const gameId = ParseGame(`
 phase: deploy
-plants: fung $A myco$B, fung $B plantlink$C, para $C
+plants: fung $A myco$B, fung $B ParasiticLink$C, para $C
 settings:
   addon_plantarium: true
 `);

@@ -36,33 +36,31 @@ import {
   , checkGamePhase
   , checkPlayerHasAnimal
   , checkPlayerCanAct
-  , checkPlayerTurn
   , throwError
   , passesChecks, checkGameHasPlant
 } from './checks';
 
 import {
   getErrorOfAnimalEatingFromGame
-  ,
-  checkTraitActivation
-  ,
-  checkAnimalCanTakeShellFails
-  ,
-  checkIfTraitDisabledByIntellect,
-  getErrorOfAnimalEatingFromPlant,
-  getErrorOfPlantCounterAttack,
-  checkTraitActivation_Target, getErrorOfEntityTraitActivation
+  , checkTraitActivation
+  , checkAnimalCanTakeShellFails
+  , checkIfTraitDisabledByIntellect
+  , getErrorOfAnimalEatingFromPlant
+  , getErrorOfPlantCounterAttack
+  , checkTraitActivation_Target
+  , getErrorOfEntityTraitActivation, getErrorOfAnimalTakingCover, getErrorOfAnimalEatingFromPlantNoCD
 } from './trait.checks';
 
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 import {findDefaultActiveDefence} from "../models/game/evolution/traitsData/TraitCarnivorous";
 import {
-  huntSetFlag,
-  server$huntEnd,
-  server$huntKill_Animal,
-  server$huntProcess, server$huntStart_Plant
+  huntSetFlag
+  , server$huntProcess
+  , server$huntStart_Plant
 } from "../models/game/evolution/traitsData/hunt";
 import * as ptt from "../models/game/evolution/plantarium/plantTraitTypes";
+import {logTarget} from "./log.util";
+import {server$takeCardFromRandomPlayer} from "./game.plantarium";
 
 /**
  * Activation
@@ -79,14 +77,6 @@ export const traitActivateRequest = (sourceAid, traitId, ...targets) => (dispatc
   , data: {gameId: getState().get('game').id, sourceAid, traitId, targets}
   , meta: {server: true}
 });
-
-const logTarget = (result = [], target) => {
-  if (Array.isArray(target)) target.reduce(logTarget, result);
-  else if (!!target && !!target.type) result.push(target.type);
-  else if (!!target && !!target.id) result.push(target.id);
-  else result.push(target);
-  return result;
-};
 
 export const server$traitActivate = (gameId, sourceAid, trait, ...targets) => (dispatch, getState) => {
   const logTargets = (targets || []).reduce(logTarget, []);
@@ -108,10 +98,18 @@ export const traitTakeShellRequest = (animalId, traitId) => (dispatch, getState)
   , meta: {server: true}
 });
 
-/**
- * Cooldowns
- */
+export const traitTakeCoverRequest = (animalId, plantId) => (dispatch, getState) => dispatch({
+  type: 'traitTakeCoverRequest'
+  , data: {gameId: getState().get('game').id, animalId, plantId}
+  , meta: {server: true}
+});
 
+export const traitTakeCover = (gameId, animalId, plantId) => ({
+  type: 'traitTakeCover'
+  , data: {gameId, animalId, plantId}
+});
+
+// region Cooldowns
 // Transport action
 export const startCooldown = (gameId, link, duration, place, placeId) => ({
   type: 'startCooldown'
@@ -155,6 +153,7 @@ export const getFeedingCooldownList = (gameId, playerId) => [
   startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, playerId)
   , startCooldown(gameId, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, playerId)
 ];
+// endregion
 
 /**
  * Local Traits
@@ -546,21 +545,43 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
   let game = selectGame(getState, gameId);
   const animal = game.locateAnimal(animalId);
 
+  if (sourceType === 'PLANT') {
+    const sourcePlant = game.getPlant(sourceId);
+    if (sourcePlant.hasTrait(ptt.PlantTraitHoney)) {
+      dispatch(server$takeCardFromRandomPlayer(game, animal.ownerId));
+    }
+    if (sourcePlant.hasTrait(ptt.PlantTraitOfficinalis)) {
+      dispatch(server$traitSetAnimalFlag(game, animal, TRAIT_ANIMAL_FLAG.PARALYSED, true));
+    }
+    if (sourcePlant.hasTrait(ptt.PlantTraitProteinRich)) {
+      amount = 2
+    }
+  }
+
   dispatch(server$game(gameId, traitMoveFood(gameId, animalId, amount, sourceType, sourceId)));
 
   autoShare = !!autoShare || game.status.currentPlayer !== animal.ownerId;
 
   animal.getTraits().forEach(trait => {
     game = selectGame(getState, gameId);
-    if (trait.type === tt.TraitCommunication || (sourceType === 'GAME' && trait.type === tt.TraitCooperation)) {
-      trait = trait.set('value', true); // Hack =( to avoid checkActionFails checking for trait.value
+    let useTrait = (trait.type === tt.TraitCommunication || (sourceType === 'GAME' && trait.type === tt.TraitCooperation));
+    if (trait.type === tt.TraitCooperation && sourceType === 'PLANT') {
+      const plant = game.getPlant(sourceId);
+      useTrait = !getErrorOfAnimalEatingFromPlantNoCD(game, animal, plant);
+    }
+    if (useTrait) {
+      trait = trait.set('value', {sourceType, sourceId, autoShare: true}); // Hack =( to avoid checkActionFails checking for trait.value
       if (!trait.getErrorOfUse(game, animal)) {
         if (autoShare) {
-          dispatch(server$traitActivate(gameId, animalId, trait, true));
+          dispatch(server$traitActivate(gameId, animalId, trait));
         } else {
-          dispatch(server$traitSetValue(game, animal, trait, true));
+          dispatch(server$traitSetValue(game, animal, trait, {sourceType, sourceId}));
         }
       }
+    }
+
+    if (trait.type === tt.TraitPlantGrazing) {
+      dispatch(server$traitSetValue(game, animal, trait, sourceId));
     }
   });
 
@@ -922,6 +943,24 @@ export const traitClientToServer = {
     dispatch(server$game(gameId, traitTakeShell(gameId, 'standard', animalId, trait)));
     dispatch(server$playerActed(gameId, userId));
   }
+  , traitTakeCoverRequest: ({gameId, animalId, plantId}, {userId}) => (dispatch, getState) => {
+    const game = selectGame(getState, gameId);
+    checkGameDefined(game);
+    checkGameHasUser(game, userId);
+    checkGamePhase(game, PHASE.FEEDING);
+    checkPlayerCanAct(game, userId);
+
+    const animal = checkPlayerHasAnimal(game, userId, animalId);
+
+    if (!dispatch(server$autoFoodSharing(gameId, userId))) return;
+
+    const plant = checkGameHasPlant(game, plantId);
+    throwError(getErrorOfAnimalTakingCover(game, animal, plant));
+
+    dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
+    dispatch(server$game(gameId, traitTakeCover(gameId, animalId, plantId)));
+    dispatch(server$playerActed(gameId, userId));
+  }
   , traitAmbushActivateRequest: ({gameId, animalId, on}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
@@ -1053,6 +1092,7 @@ export const traitServerToClient = {
     traitSetAnimalFlag(gameId, sourceAid, flag, on)
   , traitTakeShell: ({gameId, continentId, animalId, trait}) =>
     traitTakeShell(gameId, continentId, animalId, TraitModel.fromServer(trait))
+  , traitTakeCover: ({gameId, animalId, plantId}) => traitTakeCover(gameId, animalId, plantId)
   , traitSetValue: ({gameId, sourceAid, traitId, value}) =>
     traitSetValue(gameId, sourceAid, traitId, value)
 };

@@ -31,10 +31,12 @@ export const checkTraitActivation = (game, animal, traitId, ...targets) => {
   return trait;
 };
 
-export const getErrorOfEntityTraitActivation = (game, entity, trait, ...targets) => {
-  const gameId = game.id;
+export const getErrorOfEntityTraitActivation = (game, playerId, entity, trait, ...targets) => {
   if (!trait) return ERRORS.TRAIT_ACTION_NO_TRAIT;
-  return trait.getErrorOfUse(game, entity, ...targets);
+  const traitData = trait.getDataModel();
+  if (traitData.cooldowns && traitData.cooldowns.some(([link]) => game.cooldowns.checkFor(link, playerId, entity.id, trait.id)))
+    return ERRORS.COOLDOWN;
+  return traitData.getErrorOfUse(game, entity, trait, ...targets);
 };
 
 export const checkTraitActivation_Target = (game, animal, trait, ...targets) => {
@@ -144,6 +146,7 @@ export const getErrorOfAnimalEatingFromGame = (game, animal) => {
 
 export const getErrorOfAnimalEatingFromPlantNoCD = (game, animal, plant) => {
   if (plant.getFood() < 1) return ERRORS.PLANT_FOOD;
+  if (animal.hasTrait(tt.TraitCarnivorous) && !plant.isFruit()) return ERRORS.PLANT_FOOD_FRUIT;
 
   return (
     getErrorOfAnimalEating(game, animal)
@@ -155,6 +158,14 @@ export const getErrorOfAnimalEatingFromPlant = (game, animal, plant) => (
   getErrorOfEatingCooldown(game, animal.ownerId, animal.id)
   || getErrorOfAnimalEatingFromPlantNoCD(game, animal, plant)
 );
+
+export const getErrorOfAnimalTakingCover = (game, animal, plant) => {
+  if (plant.covers === 0) return ERRORS.PLANT_COVERS_ZERO;
+  if (animal.hasFlag(TRAIT_ANIMAL_FLAG.IN_COVER)) return ERRORS.ANIMAL_IN_COVER;
+  return (
+    getErrorOfEatingCooldown(game, animal.ownerId, animal.id)
+  );
+};
 
 export const getErrorOfPlantAttackBase = (game, animal, plant) => {
   if (plant.type !== pt.PlantCarnivorous) return ERRORS.COUNTERATTACK_WRONG_TYPE;

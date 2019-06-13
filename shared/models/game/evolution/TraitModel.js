@@ -16,6 +16,7 @@ import {
 } from "../../../actions/trait.checks";
 import {throwError} from "../../../actions/checks";
 import ERRORS from "../../../actions/errors";
+import invariant from "invariant";
 
 export const TraitData = Object.keys(tt)
   .reduce((result, traitType) => Object.assign(result, {[traitType]: TraitDataModel.new(traitType)}), {});
@@ -54,6 +55,7 @@ export class TraitModel extends Record({
 }) {
   static new(type) {
     const data = getTraitDataModel(type);
+    invariant(!!data, `trait.data(${type}) is falsy`);
     return TraitModel.fromServer({
       id: uuid.v4()
       , type
@@ -130,6 +132,7 @@ export class TraitModel extends Record({
     return game.locateAnimal(this.hostAnimalId, this.ownerId);
   }
 
+  // TODO wtf? replace with game.locateAnimal(trait.linkAnimalId)
   findLinkedAnimal(game, animal) {
     return game.locateAnimal(
       animal.id === this.hostAnimalId ? this.linkAnimalId : this.hostAnimalId

@@ -5,7 +5,6 @@ import {
   traitActivateRequest,
   traitAmbushActivateRequest,
   traitAmbushContinueRequest,
-  traitAnswerRequest,
   traitTakeFoodRequest
 } from "../trait";
 import {gameEndTurnRequest} from "../game";

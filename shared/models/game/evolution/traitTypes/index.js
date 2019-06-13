@@ -12,6 +12,7 @@ export const TraitPiracy = 'TraitPiracy';
 export const TraitTailLoss = 'TraitTailLoss';
 export const TraitCommunication = 'TraitCommunication';
 export const TraitGrazing = 'TraitGrazing';
+export const TraitPlantGrazing = 'TraitPlantGrazing';
 export const TraitMassive = 'TraitMassive';
 export const TraitHibernation = 'TraitHibernation';
 export const TraitPoisonous = 'TraitPoisonous';

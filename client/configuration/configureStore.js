@@ -29,7 +29,8 @@ export default (reducer, initialState, middleware = [], appliedMiddleware = []) 
         try {
           return next(action);
         } catch (error) {
-          console.error(error);
+          if (process.env.TEST) throw error;
+          else console.error(error);
         }
       }
       , thunk

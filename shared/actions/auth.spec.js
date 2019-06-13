@@ -85,7 +85,7 @@ describe('Auth:', function () {
 
       clientStore0.dispatch(loginUserFormRequest('/test'));
 
-      expect(clientStore0.getState().get('user')).null;
+      expect(clientStore0.getState().get('user'), 'expect user as null').null;
     });
 
     it('User0 connects, User1 connects, User0 logins, User2 connects, User1 logins', () => {

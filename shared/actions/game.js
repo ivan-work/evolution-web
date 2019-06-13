@@ -55,6 +55,7 @@ import {parseFromRoom} from "../models/game/GameModel.parse";
 import {server$gameDeployPlant, server$gameSpawnPlants} from "./game.plantarium";
 import {getErrorOfAnimalEating, getErrorOfAnimalEatingFromGame, getErrorOfAnimalEatingFromPlant} from "./trait.checks";
 import PlantModel from "../models/game/evolution/plantarium/PlantModel";
+import PlantVisitor from "../models/game/evolution/plantarium/PlantsVisitor";
 
 // region Game
 // region Init
@@ -553,11 +554,10 @@ const server$gameExtinct = (gameId) => (dispatch, getState) => {
       dispatch(server$tryViviparous(gameId, animal.id)); // #fix plants wtf?
     }
   });
-  selectGame(getState, gameId).plants.forEach((plant) => {
-    if (plant.getFood() === 0 && !plant.data.surviveNoFood) {
-      dispatch(server$game(gameId, plantDeath(gameId, plant.id)));
-    }
-  });
+
+  const plantsVisitor = new PlantVisitor(selectGame(getState, gameId));
+  selectGame(getState, gameId).plants.forEach(plantsVisitor.visit);
+  plantsVisitor.deathRow.forEach(plantId => dispatch(server$game(gameId, plantDeath(gameId, plantId))));
 };
 // endregion
 
@@ -852,8 +852,8 @@ export const gameClientToServer = {
         dispatch(server$gameDeployPlant(gameId, linkedPlant));
         traits = TraitModel.LinkBetween(
           ptt.PlantTraitParasiticLink
-          , plant
           , linkedPlant
+          , plant
         );
       } else {
         traits = [TraitModel.new(traitData.type).set('hostAnimalId', plant.id)]; // Yes, yes, I know it's not animal (-__- )

@@ -3,111 +3,86 @@ import {PHASE} from '../../models/game/GameModel';
 import * as tt from '../../models/game/evolution/traitTypes';
 import * as ptt from '../../models/game/evolution/plantarium/plantTraitTypes';
 
-import {
-  gameDeployAnimalRequest
-} from '../actions';
-import {makeGameSelectors, makeClientGameSelectors} from '../../selectors'
-import {gameDeployPlantTraitRequest, gameDeployTraitRequest} from "../game";
+import {gameEndTurnRequest, traitActivateRequest} from '../actions';
+import {makeGameSelectors} from '../../selectors'
+import {gameDeployPlantTraitRequest} from "../game";
+import ERRORS from "../errors";
+import {traitTakeCoverRequest, traitTakeFoodRequest} from "../trait";
 
-describe.skip('[PLANTARIUM] Deploy:', function () {
-  it('Players can deploy plant traits', () => {
+describe('[PLANTARIUM] Covers:', function () {
+  it('Players can take covers', () => {
     const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
     const gameId = ParseGame(`
 settings:
   addon_plantarium: true
-phase: deploy
-plants: PlantEphemeral $eph ++\
-  , PlantPerennial $per ++
-deck: 5 camo
+deck: 5 spiky
+phase: feeding
+plants: Succ $suc * +++, Succ $suc2 *** +++
 players:
-  - hand: 4 aqua
-    continent: $A
+  - continent: $A carn, $B, $C, $W wait +
 `);
-    const {selectGame, findPlant} = makeGameSelectors(serverStore.getState, gameId);
-    const {selectGame0, selectPlayer0, findPlant0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
-    const cardIds = selectPlayer0().hand.map(({id}) => id).toArray();
+    const {selectGame, findPlant, findCard, findPlayerByIndex} = makeGameSelectors(serverStore.getState, gameId);
 
-    // Deploy PlantTraitAquatic as normal animal
-    clientStore0.dispatch(gameDeployAnimalRequest(cardIds[0], 0));
-    expect(selectPlayer0().continent.first()).ok;
+    clientStore0.dispatch(traitTakeCoverRequest('$B', '$suc'));
 
-    expectUnchanged(`Can't deploy PlantTraitAquatic to animal`, () => {
-      clientStore0.dispatch(gameDeployTraitRequest(cardIds[1], '$A'))
-    }, serverStore, clientStore0);
+    expectError(`$B can't take more this turn`, ERRORS.PLANT_COVERS_ZERO, () => {
+      clientStore0.dispatch(traitTakeCoverRequest('$B', '$suc'));
+    });
 
-    // Deploy PlantTraitAquatic to a plant
-    clientStore0.dispatch(gameDeployPlantTraitRequest(cardIds[1], '$eph'));
+    expectError(`$C can't take more because cooldown`, ERRORS.COOLDOWN, () => {
+      clientStore0.dispatch(traitTakeCoverRequest('$C', '$suc2'));
+    });
 
-    expect(findPlant('$eph').traits).size(1);
-    expect(findPlant('$eph').traits.first().type).equal(ptt.PlantTraitAquatic);
+    clientStore0.dispatch(traitActivateRequest('$W', tt.TraitWaiter));
+    clientStore0.dispatch(gameEndTurnRequest());
 
-    expectUnchanged(`Can't deploy another PlantTraitAquatic to plant`, () => {
-      clientStore0.dispatch(gameDeployTraitRequest(cardIds[2], '$A'))
-    }, serverStore, clientStore0);
-  });
+    expect(selectGame().status.turn, 'turn 0').equal(0);
+    expect(selectGame().status.round, 'round 1').equal(1);
 
-  it('Player can deploy linked PlantTrait', () => {
-    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
-    const gameId = ParseGame(`
-settings:
-  addon_plantarium: true
-phase: deploy
-plants: PlantEphemeral $eph ++\
-  , PlantPerennial $per ++
-deck: 5 camo
-players:
-  - hand: 4 Mycorrhiza
-    continent: $A
-`);
-    const {selectGame, findPlant} = makeGameSelectors(serverStore.getState, gameId);
-    const {selectGame0, selectPlayer0, findPlant0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
-    const cardIds = selectPlayer0().hand.map(({id}) => id).toArray();
+    expectError(`Can't take more next turn`, ERRORS.PLANT_COVERS_ZERO, () => {
+      clientStore0.dispatch(traitTakeCoverRequest('$B', '$suc'));
+    });
 
-    expectUnchanged(`Can't deploy PlantTraitMycorrhiza to animal`, () => {
-      clientStore0.dispatch(gameDeployTraitRequest(cardIds[0], '$A'))
-    }, serverStore, clientStore0);
-    expectUnchanged(`Can't deploy PlantTraitMycorrhiza to single plant`, () => {
-      clientStore0.dispatch(gameDeployPlantTraitRequest(cardIds[0], '$eph'))
-    }, serverStore, clientStore0);
+    expectError(`Can't take more next turn`, ERRORS.ANIMAL_IN_COVER, () => {
+      clientStore0.dispatch(traitTakeCoverRequest('$B', '$suc2'));
+    });
 
-    clientStore0.dispatch(gameDeployPlantTraitRequest(cardIds[0], '$eph', false, '$per'));
+    expectError(`Can't take more next turn`, ERRORS.PLANT_COVERS_ZERO, () => {
+      clientStore0.dispatch(traitTakeCoverRequest('$C', '$suc'));
+    });
 
-    expect(findPlant('$eph').traits).size(1);
-    expect(findPlant('$eph').traits.first().type).equal(ptt.PlantTraitMycorrhiza);
-    expect(findPlant('$per').traits).size(1);
-    expect(findPlant('$per').traits.first().type).equal(ptt.PlantTraitMycorrhiza);
-  });
+    expectError(`Can't take more next turn`, 'checkTarget', () => {
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+    });
 
-  it('Player can deploy parasitic plant', () => {
-    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
-    const gameId = ParseGame(`
-settings:
-  addon_plantarium: true
-phase: deploy
-plants: PlantEphemeral $eph ++\
-  , PlantPerennial $per ++
-deck: 5 camo
-players:
-  - hand: 4 ParasiticPlant
-`);
-    const {selectGame, findPlant} = makeGameSelectors(serverStore.getState, gameId);
-    const {selectGame0, selectPlayer0, findPlant0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
-    const cardIds = selectPlayer0().hand.map(({id}) => id).toArray();
+    clientStore0.dispatch(traitTakeFoodRequest('$A', '$suc'));
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(traitTakeFoodRequest('$A', '$suc2'));
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(traitTakeFoodRequest('$B', '$suc2'));
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(traitTakeFoodRequest('$C', '$suc2'));
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(gameEndTurnRequest());
 
-    expectUnchanged(`Can't deploy ParasiticPlant to animal`, () => {
-      clientStore0.dispatch(gameDeployTraitRequest(cardIds[0], '$A'))
-    }, serverStore, clientStore0);
-    clientStore0.dispatch(gameDeployPlantTraitRequest(cardIds[0], '$eph'));
-    expect(selectGame().plants, 'game.plants.size').size(3);
-    expect(findPlant('$eph').traits).size(1);
-    expect(findPlant('$eph').traits.first().type).equal(ptt.PlantTraitParasiticLink);
-    expect(findPlant('$eph').traits.first().linkSource).equal(true);
-    const linkedTrait = findPlant('$eph').traits.first().findLinkedTrait(selectGame());
-    const parasiticPlant = selectGame().getPlant(linkedTrait.hostAnimalId);
-    expect(parasiticPlant).ok;
-    expect(parasiticPlant.traits).size(1);
-    expect(parasiticPlant.traits.first().type).equal(ptt.PlantTraitParasiticLink);
-    expect(parasiticPlant.traits.first().linkSource).equal(false);
+    expect(selectGame().status.turn, 'turn 1').equal(1);
+
+    expect(findPlant('$suc2'), '$suc2 dead').not.ok;
+    expect(findPlant('$suc'), '$suc alive').ok;
+    expect(findPlant('$suc').covers, 'succ covers').equal(1);
+
+    const User0 = findPlayerByIndex(0);
+    clientStore0.dispatch(gameDeployPlantTraitRequest(findCard(User0, ptt.PlantTraitSpiky), '$suc'));
+
+    expect(findPlant('$suc').covers, 'deploy covers').equal(1);
+    expect(findPlant('$suc').coverSlots, 'deploy cover slots').equal(4);
+
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expect(selectGame().status.phase).equal(PHASE.FEEDING);
+
+    expect(findPlant('$suc').coverSlots, 'Spiky cover slots').equal(4);
+    expect(findPlant('$suc').covers, 'Spiky covers').equal(4);
   });
 });
 

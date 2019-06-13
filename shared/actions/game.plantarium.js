@@ -4,7 +4,13 @@ import {List} from 'immutable';
 import {selectGame} from "../selectors";
 import {server$game} from "./generic";
 import PlantModel from "../models/game/evolution/plantarium/PlantModel";
-import {server$autoFoodSharing, server$startCooldownList, server$traitActivate, startCooldown} from "./trait";
+import {
+  server$autoFoodSharing,
+  server$startCooldownList,
+  server$traitActivate,
+  server$traitNotify_Start,
+  startCooldown
+} from "./trait";
 import {
   checkGameDefined, checkGameHasAnimal,
   checkGameHasPlant,
@@ -28,6 +34,8 @@ import {
   TRAIT_COOLDOWN_PLACE
 } from "../models/game/evolution/constants";
 import {server$playerActed} from "./game";
+import {logTarget} from "./log.util";
+import {getIntRandom} from "../utils/randomGenerator";
 
 // region game
 export const gameSpawnPlants = (gameId, plants) => ({
@@ -66,7 +74,7 @@ const gamePlantUpdateFood = (gameId, plantId, amount) => ({
 
 export const server$gamePlantUpdateFood = (gameId, plantId, amount) => server$game(gameId, gamePlantUpdateFood(gameId, plantId, amount));
 
-export const plantTraitActivateRequest = (gameId, plantId, traitId, ...targets) => (dispatch, getState) => dispatch({
+export const plantTraitActivateRequest = (plantId, traitId, ...targets) => (dispatch, getState) => dispatch({
   type: 'plantTraitActivateRequest'
   , data: {
     gameId: getState().getIn(['game', 'id'])
@@ -76,10 +84,54 @@ export const plantTraitActivateRequest = (gameId, plantId, traitId, ...targets) 
   }
   , meta: {server: true}
 });
+
+export const server$plantTraitActivate = (gameId, playerId, sourceAid, trait, ...targets) => (dispatch, getState) => {
+  const logTargets = (targets || []).reduce(logTarget, []);
+  const game = selectGame(getState, gameId);
+  const sourceEntity = game.locateAnimal(sourceAid) || game.getPlant(sourceAid);
+  if (!trait.getDataModel().transient) {
+    dispatch(server$traitNotify_Start(game, sourceEntity, trait, ...logTargets));
+  }
+  logger.verbose('server$traitActivate:', sourceEntity.id, trait.type, ...logTargets);
+  const traitData = trait.getDataModel();
+  const result = dispatch(traitData.action(game, playerId, sourceEntity, trait, ...targets));
+  logger.debug(`server$traitActivate [RESULT]: ${trait.type} (${!!result})`);
+  return result;
+};
 // endregion
 
 // region animal
 
+// endregion
+
+// region traits
+const traitMoveCard = (gameId, fromPid, toPid, cardId) => ({
+  type: 'traitMoveCard'
+  , data: {gameId, fromPid, toPid, cardId}
+});
+
+export const server$traitMoveCard = (gameId, fromPid, toPid, cardId) => server$game(gameId, traitMoveCard(gameId, fromPid, toPid, cardId));
+
+export const server$takeCardFromRandomPlayer = (game, toPid) => (dispatch, getState) => {
+  let maxHand = 0;
+  let players = [];
+  game.getActualPlayers().forEach((player) => {
+    if (player.hand.size > maxHand) {
+      maxHand = player.hand.size;
+      players = [];
+    }
+    if (maxHand > 0 && player.hand.size === maxHand && player.id !== toPid) {
+      players.push(player.id);
+    }
+  });
+  if (players.length > 0) {
+    const fromPid = players[getIntRandom(0, players.length - 1)];
+    const fromHand = game.getPlayer(fromPid).hand;
+    const cardId = fromHand.get(getIntRandom(0, fromHand.size - 1)).id;
+    logger.debug(`traitMoveCard: ${fromPid} > ${toPid} ${cardId}`);
+    dispatch(server$traitMoveCard(game.id, fromPid, toPid, cardId));
+  }
+};
 // endregion
 
 export const plantsClientToServer = {
@@ -106,14 +158,14 @@ export const plantsClientToServer = {
     checkGamePhase(game, PHASE.FEEDING);
     const plant = checkGameHasPlant(game, plantId);
     const trait = plant.hasTrait(traitId);
-    throwError(getErrorOfEntityTraitActivation(game, plant, trait, ...targets));
+    throwError(getErrorOfEntityTraitActivation(game, userId, plant, trait, ...targets));
 
     if (!trait.getDataModel().transient) checkPlayerCanAct(game, userId);
 
     const target = trait.getTarget(game, plant, ...targets);
 
-    logger.debug('plantTraitActivateRequest', gameId, sourceAid, traitId, ...targets);
-    const result = dispatch(server$traitActivate(gameId, plantId, trait, target));
+    logger.debug('plantTraitActivateRequest', gameId, plantId, traitId, ...targets);
+    const result = dispatch(server$plantTraitActivate(gameId, userId, plantId, trait, target));
     if (result === void 0) {
       throw new Error(`traitActivateRequest@Game(${gameId}): Animal(${plantId})-${trait.type}-(${targets.join(' ')}) result undefined`);
     }
@@ -127,6 +179,7 @@ export const plantsServerToClient = {
   gameSpawnPlants: ({gameId, plants}) => gameSpawnPlants(gameId, List(plants).map(PlantModel.fromJS))
   , gameDeployPlant: ({gameId, plant}) => gameDeployPlant(gameId, PlantModel.fromJS(plant))
   , gamePlantUpdateFood: ({gameId, plantId, amount}) => gamePlantUpdateFood(gameId, plantId, amount)
+  , traitMoveCard: ({gameId, fromPid, toPid, cardId}) => traitMoveCard(gameId, fromPid, toPid, cardId)
 //   gameInit: ({game, userId}, currentUserId) => (dispatch) => {
 //     dispatch(gameInit(GameModelClient.fromServer(game, userId)));
 //     redirectTo('/room');

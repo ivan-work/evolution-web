@@ -19,7 +19,7 @@ export class CardModel extends Record({
     const cardData = cardsData[cardType];
     const id = forcedId ? forcedId // if Forced, then ok, forced
       : GLOBAL_BROWSER ? Math.floor(Math.random() * 0xFFFF) // else if browser (for testing)
-      : uuid.v4()
+      : uuid.v4();
     return CardModel.fromServer({
       id
       , ...cardData

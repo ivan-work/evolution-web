@@ -39,7 +39,7 @@ export const selectUsersInGame = (getState, gameId) =>
 export const makeGameSelectors = (getState, gameId) => ({
   selectGame: () => selectGame(getState, gameId)
   , selectPlayer: (user) => selectPlayer(selectGame(getState, gameId), user)
-  , findPlayerByIdx: (index) => selectGame(getState, gameId).players.find(p => p.index === index)
+  , findPlayerByIndex: (index) => selectGame(getState, gameId).players.find(p => p.index === index)
 
   , selectCard: (user, cardIndex) => selectGame(getState, gameId).getPlayer(user).getCard(cardIndex)
   , findCard: (user, type) => selectPlayer(selectGame(getState, gameId), user)

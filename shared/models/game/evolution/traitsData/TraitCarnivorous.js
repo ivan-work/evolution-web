@@ -30,6 +30,8 @@ export const countUnavoidableDefenses = (game, sourceAnimal, targetAnimal) => {
     defenses++;
   if (targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION))
     defenses++;
+  if (targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.IN_COVER))
+    defenses++;
   return defenses;
 };
 

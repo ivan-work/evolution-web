@@ -16,8 +16,9 @@ import {gamePlantAttackRequest, plantTraitActivateRequest} from "../game.plantar
 import * as ptt from "../../models/game/evolution/plantarium/plantTraitTypes";
 import * as pt from "../../models/game/evolution/plantarium/plantTypes";
 import {getErrorOfEatingCooldown} from "../trait.checks";
+import ERRORS from "../errors";
 
-describe.only('[PLANTARIUM] PlantCarnivorous:', function () {
+describe('[PLANTARIUM] PlantCarnivorous:', function () {
   describe('Deploy:', function () {
     it('Player can deploy parasitic plant', () => {
       const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
@@ -35,20 +36,22 @@ players:
       const {selectGame0, selectPlayer0, findPlant0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
       const cardIds = selectPlayer0().hand.map(({id}) => id).toArray();
 
-      expectUnchanged(`Can't deploy ParasiticPlant to animal`, () => {
+      // expectUnchanged(`Can't deploy ParasiticPlant to animal`, () => {
+      // }, serverStore, clientStore0);
+      expectError(`Can't deploy ParasiticPlant to animal`, `wrong target type`, () => {
         clientStore0.dispatch(gameDeployTraitRequest(cardIds[0], '$A'))
-      }, serverStore, clientStore0);
+      });
       clientStore0.dispatch(gameDeployPlantTraitRequest(cardIds[0], '$eph'));
       expect(selectGame().plants, 'game.plants.size').size(3);
       expect(findPlant('$eph').traits).size(1);
       expect(findPlant('$eph').traits.first().type).equal(ptt.PlantTraitParasiticLink);
-      expect(findPlant('$eph').traits.first().linkSource).equal(true);
+      expect(findPlant('$eph').traits.first().linkSource).equal(false);
       const linkedTrait = findPlant('$eph').traits.first().findLinkedTrait(selectGame());
       const parasiticPlant = selectGame().getPlant(linkedTrait.hostAnimalId);
       expect(parasiticPlant).ok;
       expect(parasiticPlant.traits).size(1);
       expect(parasiticPlant.traits.first().type).equal(ptt.PlantTraitParasiticLink);
-      expect(parasiticPlant.traits.first().linkSource).equal(false);
+      expect(parasiticPlant.traits.first().linkSource).equal(true);
     });
 
     it('Player can deploy parasitic plant', () => {
@@ -86,16 +89,43 @@ players:
 settings:
   addon_plantarium: true
 phase: feeding
-plants: PlantEphemeral $eph ++ parasiticlink$par, para $par
+plants: PlantEphemeral $eph +++, para $par parasiticlink$eph
 players:
-  -continent: $A, $B, wait
+  - continent: $A, $B, $W wait
 `);
-      const {selectGame, findPlayerByIdx, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+      const {selectGame, findPlayerByIndex, findPlant} = makeGameSelectors(serverStore.getState, gameId);
 
-      clientStore0.dispatch(plantTraitActivateRequest('$par', ptt.PlantTraitParasiticLink))
-      expect(findPlant('$eph').getFood()).equal(1).ok;
+      expect(findPlant('$eph').getTraits().first().linkSource, 'linkSource $eph').false;
+      expect(findPlant('$par').getTraits().first().linkSource, 'linkSource $par').true;
+
+      clientStore0.dispatch(plantTraitActivateRequest('$par', ptt.PlantTraitParasiticLink));
+      expect(findPlant('$eph').getFood()).equal(2).ok;
       expect(findPlant('$par').getFood()).equal(1).ok;
-      expect(getErrorOfEatingCooldown(selectGame(), findPlayerByIdx(0))).ok;
+      expect(selectGame().status.phase).equal(PHASE.FEEDING);
+      expect(getErrorOfEatingCooldown(selectGame(), findPlayerByIndex(0).id), 'error of eating cooldown').ok;
+      expectError(`cooldown for round 0`, ERRORS.COOLDOWN, () => {
+        clientStore0.dispatch(plantTraitActivateRequest('$par', ptt.PlantTraitParasiticLink));
+      });
+
+      clientStore0.dispatch(traitActivateRequest('$W', tt.TraitWaiter));
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      clientStore0.dispatch(plantTraitActivateRequest('$par', ptt.PlantTraitParasiticLink));
+      expect(findPlant('$eph').getFood()).equal(1).ok;
+      expect(findPlant('$par').getFood()).equal(2).ok;
+      expectError(`cooldown for round 1`, ERRORS.COOLDOWN, () => {
+        clientStore0.dispatch(plantTraitActivateRequest('$par', ptt.PlantTraitParasiticLink));
+      });
+
+      clientStore0.dispatch(traitActivateRequest('$W', tt.TraitWaiter));
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      expectError(`Can't use when 1 food left`, ERRORS.TRAIT_TARGETING_ANIMAL_NO_FOOD, () => {
+        clientStore0.dispatch(plantTraitActivateRequest('$par', ptt.PlantTraitParasiticLink));
+      });
+
+      expect(findPlant('$eph').getFood()).equal(1).ok;
+      expect(findPlant('$par').getFood()).equal(2).ok;
     });
   });
 });

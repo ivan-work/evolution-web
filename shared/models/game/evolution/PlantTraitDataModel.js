@@ -7,6 +7,7 @@ import identity from "lodash/identity";
 
 const PlantTraitDataModelProps = {
   ...TraitDataModelBaseProps
+  , fruit: false
   , coverSlots: 0
   , _getErrorOfTraitPlacement: () => false
   , _getErrorOfFoodIntake: () => false
@@ -42,9 +43,8 @@ export default class PlantTraitDataModel extends Record(PlantTraitDataModelProps
     });
   }
 
-  // TODO remove _trait from params
-  getErrorOfUse(game, plant, _trait, ...targets) {
-    const trait = plant.hasTrait(this.type, true);
+  getErrorOfUse(game, plant, trait, ...targets) {
+    if (!trait) trait = plant.hasTrait(this.type, true);
     if (!trait) return ERRORS.TRAIT_ACTION_NO_TRAIT;
     if (trait.disabled) return ERRORS.TRAIT_ACTION_DISABLED;
     if (this.cooldowns && this.cooldowns

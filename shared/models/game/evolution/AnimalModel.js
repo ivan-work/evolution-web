@@ -56,7 +56,7 @@ export class AnimalModel extends Record({
   }
 
   toString() {
-    return `Animal#${this.id}(${this.getFood()}/${this.foodSize}+${this.getFat()}/${this.fatSize})[${this.traits.toArray().map(t => t.type)}]`;
+    return `Animal#${this.id}(${this.getFood()}/${this.foodSize}+${this.getFat()}/${this.fatSize})[${this.traits.toArray().map(t => `${t.type}${t.value ? `#${t.value}` : ''}`)}]`;
   }
 
   getTraits(withDisabled) {

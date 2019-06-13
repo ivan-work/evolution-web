@@ -229,10 +229,12 @@ players:
   - continent: $A mass comm$B wait +, $B wait mass piracy 
   - continent: $X, $Y + mass
 `);
-      const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+      const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
-      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitPiracy, '$A')); // #WARNING
+      expectError(`Error since communication prevents from eating`, 'checkTarget', () => {
+        clientStore0.dispatch(traitActivateRequest('$B', tt.TraitPiracy, '$A'));
+      });
       expect(findAnimal('$A').getFoodAndFat(), 'Animal $A.getFoodAndFat()').equal(2);
       expect(findAnimal('$B').getFoodAndFat(), 'Animal $B.getFoodAndFat()').equal(1);
     });

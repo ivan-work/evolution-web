@@ -3,7 +3,7 @@ import {Record, Map, OrderedMap, Set, List} from 'immutable';
 
 import {PlayerModel} from './PlayerModel';
 import {CardModel} from './CardModel';
-import {TraitModel} from './evolution/TraitModel';
+import {getTraitDataModel, TraitModel} from './evolution/TraitModel';
 import {CooldownList} from './CooldownList';
 import {
   SettingsRecord
@@ -243,27 +243,41 @@ export class GameModel extends Record({
   }
 
   static new(room) {
-    let deck = Deck_Base;
+    let deckConfig = Deck_Base;
     let pdeck = [];
 
-    if (room.settings.addon_timeToFly) deck = deck.concat(Deck_TimeToFly);
-    if (room.settings.addon_continents) deck = deck.concat(Deck_ContinentsShort);
-    if (room.settings.addon_bonus) deck = deck.concat(Deck_Bonus);
-    if (room.settings.addon_plantarium) deck = deck.concat(Deck_Plantarium);
-    if (room.settings.addon_plantarium) deck = deck.concat(PlantDeck_Plantarium);
+    if (room.settings.addon_timeToFly) deckConfig = deckConfig.concat(Deck_TimeToFly);
+    if (room.settings.addon_continents) deckConfig = deckConfig.concat(Deck_ContinentsShort);
+    if (room.settings.addon_bonus) deckConfig = deckConfig.concat(Deck_Bonus);
+    if (room.settings.addon_plantarium) deckConfig = deckConfig.concat(Deck_Plantarium);
+    if (room.settings.addon_plantarium) pdeck = pdeck.concat(PlantDeck_Plantarium);
 
-    if (room.settings.halfDeck) deck = deck.map(([count, type]) => [Math.ceil(count / 2), type]);
+    if (room.settings.halfDeck) deckConfig = deckConfig.map(([count, type]) => [Math.ceil(count / 2), type]);
+
 
     const players = (room.settings.randomPlayers
         ? doShuffle(room.users.toArray())
         : room.users
     ).reduce((result, userId, index) => result.set(userId, PlayerModel.new(userId, index)), OrderedMap());
 
+    let deck = generateDeck(deckConfig, true);
+    if (room.settings.addon_plantarium) {
+      deck = deck.update(deck => deck.map(immcard => immcard.withMutations(card => {
+        if (card.trait1 && getTraitDataModel(card.trait1).replaceOnPlantarium) {
+          card.trait1 = getTraitDataModel(card.trait1).replaceOnPlantarium;
+        }
+        if (card.trait2 && getTraitDataModel(card.trait2).replaceOnPlantarium) {
+          card.trait2 = getTraitDataModel(card.trait2).replaceOnPlantarium;
+        }
+        return card;
+      })));
+    }
+
     return new GameModel({
       id: uuid.v4()
       , roomId: room.id
       , timeCreated: Date.now()
-      , deck: generateDeck(deck, true)
+      , deck
       , pdeck: generatePlantDeck(pdeck, true)
       , players
       , settings: room.settings

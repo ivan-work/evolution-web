@@ -14,6 +14,8 @@ import * as pt from '../../shared/models/game/evolution/plantarium/plantTypes';
 
 import {TraitNeoplasm} from '../../shared/models/game/evolution/traitsData/cons';
 
+const byId = id => object => object.id === id;
+
 /**
  * TRAITS
  */
@@ -197,7 +199,10 @@ export const gameStartTurn = (game) => {
     .updateIn(['status', 'turn'], turn => ++turn)
     .setIn(['status', 'roundPlayer'], nextRoundPlayerId)
     .setIn(['food'], 0)
-    .mapPlants(plant => plant.set('food', plant.data.produceFood(game, plant)))
+    .mapPlants(plant => plant
+      .set('food', plant.getFood() === 0 ? 1 : plant.data.produceFood(game, plant))
+      .set('covers', plant.coverSlots)
+    )
     .update('cooldowns', cooldowns => cooldowns.eventNextTurn());
 };
 
@@ -223,6 +228,7 @@ export const gameStartFeeding = (game, {food}) => {
   return game
     .update('players', players => players.map(player => player
       .set('ended', !player.playing)))
+    .update('plants', plants => plants.map(plant => plant.set('covers', plant.coverSlots)))
     .setIn(['food'], food)
     .setIn(['status', 'round'], 0)
     .update(processNeoplasm)
@@ -324,6 +330,14 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
   }
 };
 
+export const traitMoveCard = (game, {fromPid, toPid, cardId}) => {
+  const card = game.getPlayer(fromPid).hand.find(byId(cardId));
+  return game
+    .updateIn(['players', fromPid, 'hand'], hand => hand.filterNot(byId(cardId)))
+    .updateIn(['players', toPid, 'hand'], hand => hand.push(card))
+    .update(addToGameLog(['traitMoveCard', fromPid, toPid]));
+};
+
 export const animalDeath = (game, {type, animalId, data}) => {
   const animal = game.locateAnimal(animalId);
   const shell = animal.hasTrait(tt.TraitShell);
@@ -342,10 +356,10 @@ export const plantDeath = (game, {plantId}) => {
   const plant = game.getPlant(plantId);
   return game
     .removeIn(['plants', plantId])
-    // .updateIn(['players', animal.ownerId, 'continent'], continent => continent
-    //   .map(a => a.traitDetach(trait => trait.linkAnimalId === animal.id)))
-    // .updateIn(['areas', AREA.STANDARD, 'shells'], shells => shell ? shells.set(shell.id, shell) : shells)
-    .update(addToGameLog(['plantId', logPlant(plant)]));
+    .update('plants', plants => plants.map(p =>
+      p.traitDetach(trait => trait.linkAnimalId === plantId)
+    ))
+    .update(addToGameLog(['plantDeath', logPlant(plant)]));
 };
 
 export const startCooldown = (game, {link, duration, place, placeId}) =>
@@ -473,6 +487,15 @@ export const traitTakeShell = (game, {continentId, animalId, trait}) => {
     .update(addToGameLog(['traitTakeShell', logAnimal(animal)]));
 };
 
+
+export const traitTakeCover = (game, {animalId, plantId}) => {
+  const animal = game.locateAnimal(animalId);
+  return game
+    .updateIn(['plants', plantId, 'covers'], covers => covers - 1)
+    .update(game => traitSetAnimalFlag(game, {sourceAid: animalId, flag: TRAIT_ANIMAL_FLAG.IN_COVER, on: true}))
+    .update(addToGameLog(['traitTakeCover', logAnimal(animal), logPlant(game.getPlant(plantId))]));
+};
+
 export const traitAmbushActivate = (game, {animalId, on}) => game
   .setIn(['ambush', 'ambushers', animalId], on);
 export const gameAmbushPushTarget = (game, {feedingRecord}) => game
@@ -528,6 +551,7 @@ export const reducer = createReducer(Map(), {
   , gameDestroy: (state, data) => state.remove(data.gameId)
   , gameStart: (state, data) => state.update(data.gameId, game => gameStart(game, data))
   , gameGiveCards: (state, data) => state.update(data.gameId, game => gameGiveCards(game, data))
+
   , gameNextRound: (state, data) => state.update(data.gameId, game => gameNextRound(game, data))
   , gameNextPlayer: (state, data) => state.update(data.gameId, game => gameNextPlayer(game, data))
   , gameAddTurnTimeout: (state, data) => state.update(data.gameId, game => gameAddTurnTimeout(game, data))
@@ -560,6 +584,8 @@ export const reducer = createReducer(Map(), {
   , plantDeath: (state, data) => state.update(data.gameId, game => plantDeath(game, data))
 
   , traitMoveFood: (state, data) => state.update(data.gameId, game => traitMoveFood(game, data))
+  , traitMoveCard: (state, data) => state.update(data.gameId, game => traitMoveCard(game, data))
+
   , startCooldown: (state, data) => state.update(data.gameId, game => startCooldown(game, data))
   , clearCooldown: (state, data) => state.update(data.gameId, game => clearCooldown(game, data))
   , traitQuestion: (state, data) => state.update(data.gameId, game => traitQuestion(game, data))
@@ -576,6 +602,7 @@ export const reducer = createReducer(Map(), {
   , traitNotify_Start: (state, data) => state.update(data.gameId, game => traitNotify_Start(game, data))
   // , traitNotify_End: (state, data) => state.update(data.gameId, game => traitNotify_End(game, data))
   , traitTakeShell: (state, data) => state.update(data.gameId, game => traitTakeShell(game, data))
+  , traitTakeCover: (state, data) => state.update(data.gameId, game => traitTakeCover(game, data))
   , testHackGame: (state, data) => state.update(data.gameId, data.callback)
 
   , huntStart: (state, data) => state.update(data.gameId, game => huntStart(game, data))

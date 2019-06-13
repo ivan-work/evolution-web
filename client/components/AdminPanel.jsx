@@ -51,7 +51,7 @@ export default compose(
       const userId = state.getIn(['user', 'id'], '%USERNAME%');
       const roomId = state.get('room');
       const room = state.getIn(['rooms', roomId]);
-      const visible = state.getIn(['app', 'adminMode']) || process.env.NODE_ENV === 'development';
+      const visible = state.getIn(['app', 'adminMode']);
       return {
         roomId
         , userId

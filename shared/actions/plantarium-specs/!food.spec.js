@@ -5,6 +5,7 @@ import {
   gameEndTurnRequest
 } from '../actions';
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
+import ERRORS from "../errors";
 
 describe('[PLANTARIUM] !food.spec.js:', function () {
   it('PHASE.PREPARE', () => {
@@ -93,6 +94,25 @@ players:
       clientStore0.dispatch(gameEndTurnRequest());
 
       expect(selectGame().status.round, 'round 1').equal(1);
+    });
+
+    it(`Carnivorous can't eat from grasslike plant`, () => {
+      const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+      const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+phase: feeding
+plants: peren $per ++
+players:
+  - continent: $A carn wait
+`);
+      const {selectGame, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+
+      expectError(`Carnivorous can't eat from grasslike plant`, ERRORS.PLANT_FOOD_FRUIT, () => {
+        clientStore0.dispatch(traitTakeFoodRequest('$A', '$per'));
+      });
+      expect(selectGame().status.round, 'round 0').equal(0);
+      expect(findAnimal('$A').getFood()).equal(0);
     });
   });
 });

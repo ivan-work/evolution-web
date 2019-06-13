@@ -15,6 +15,7 @@ const TraitDataModelBaseProps = {
   , _getErrorOfUse: () => false
   , getErrorOfUseOnTarget: () => false
   , coverSlots: 0
+  , replaceOnPlantarium: null // replace this trait with the following if plantarium is active
 };
 
 export default TraitDataModelBaseProps;

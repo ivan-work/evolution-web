@@ -21,7 +21,7 @@ import {
   , server$traitSetValue
   , server$traitNotify_End
   , server$traitConvertFat
-  , server$tryViviparous
+  , server$tryViviparous, server$gamePlantUpdateFood
 } from '../../../../actions/actions';
 
 import {getIntRandom} from '../../../../utils/randomGenerator';
@@ -30,6 +30,7 @@ import * as tt from '../traitTypes';
 
 import {TraitCarnivorous} from './TraitCarnivorous';
 import {huntSetFlag, server$huntEnd, server$huntProcess} from "./hunt";
+import {getErrorOfAnimalEatingFromPlantNoCD} from "../../../../actions/trait.checks";
 
 export {TraitCarnivorous};
 export * from './ttf';
@@ -190,6 +191,7 @@ export const TraitTailLoss = {
 
 export const TraitGrazing = {
   type: tt.TraitGrazing
+  , replaceOnPlantarium: tt.TraitPlantGrazing
   , playerControllable: true
   , targetType: TRAIT_TARGET_TYPE.NONE
   , cooldowns: fromJS([
@@ -203,6 +205,30 @@ export const TraitGrazing = {
   , _getErrorOfUse: (game, sourceAnimal) => {
     if (game.getFood() === 0) return ERRORS.GAME_FOOD;
     return false;
+  }
+};
+
+export const TraitPlantGrazing = {
+  type: tt.TraitPlantGrazing
+  , playerControllable: true
+  , targetType: TRAIT_TARGET_TYPE.NONE
+  , cooldowns: fromJS([
+    [tt.TraitGrazing, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
+  ])
+  , _getErrorOfUse: (game, animal, trait) => {
+    if (!trait.value) return ERRORS.TRAIT_ACTION_NO_VALUE;
+    const plant = game.getPlant(trait.value);
+    if (plant.getFood() === 0) return ERRORS.TRAIT_ACTION_NO_TARGETS;
+    return false;
+  }
+  , action: (game, sourceAnimal, traitGrazing) => (dispatch) => {
+    dispatch(server$traitStartCooldown(game.id, traitGrazing, sourceAnimal));
+    dispatch(server$gamePlantUpdateFood(game.id, traitGrazing.value, -1));
+    dispatch(server$traitSetValue(game, sourceAnimal, traitGrazing, false));
+    return true;
+  }
+  , customFns: {
+    eventNextPlayer: (trait) => trait.set('value', false)
   }
 };
 
@@ -255,26 +281,35 @@ export const TraitCooperation = {
   , cooldowns: fromJS([
     [tt.TraitCooperation, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
-  , action: (game, animal, trait, autoShare) => (dispatch) => {
+  , _getErrorOfUse: (game, animal, trait) => {
+    const linkedAnimal = trait.findLinkedAnimal(game, animal);
+    if (!trait.value) return ERRORS.TRAIT_ACTION_NO_VALUE;
+    if (!linkedAnimal) return ERRORS.TRAIT_ACTION_NO_TARGETS;
+    if (!linkedAnimal.canEat(game)) return ERRORS.ANIMAL_DONT_WANT_FOOD;
+
+    const {sourceType, sourceId} = trait.value;
+    if (sourceType === 'GAME') {
+      if (game.getFood() === 0) return ERRORS.GAME_FOOD;
+    } else if (sourceType === 'PLANT') {
+      const plant = game.getPlant(sourceId);
+      return getErrorOfAnimalEatingFromPlantNoCD(game, linkedAnimal, plant)
+    }
+    return false;
+  }
+  , action: (game, animal, trait) => (dispatch) => {
     const animal1 = animal;
     const animal2 = trait.findLinkedAnimal(game, animal);
     const trait1 = trait;
     const trait2 = trait.findLinkedTrait(game);
+
+    const {sourceType, sourceId, autoShare} = trait.value;
 
     dispatch(server$traitSetValue(game, animal1, trait1, false));
 
     dispatch(server$traitStartCooldown(game.id, trait1, animal1));
     dispatch(server$traitStartCooldown(game.id, trait2, animal2));
 
-    return dispatch(server$startFeedingFromGame(game.id, animal2.id, 1, 'GAME', 'GAME', animal.id, autoShare));
-  }
-  , _getErrorOfUse: (game, animal, trait) => {
-    const linkedAnimal = trait.findLinkedAnimal(game, animal);
-    if (game.getFood() === 0) return ERRORS.GAME_FOOD;
-    if (!trait.value) return ERRORS.TRAIT_ACTION_NO_VALUE;
-    if (!linkedAnimal) return ERRORS.TRAIT_ACTION_NO_TARGETS;
-    if (!linkedAnimal.canEat(game)) return ERRORS.ANIMAL_DONT_WANT_FOOD;
-    return false;
+    return dispatch(server$startFeedingFromGame(game.id, animal2.id, 1, sourceType, sourceId, animal.id, autoShare));
   }
   , customFns: {
     eventNextPlayer: (trait) => trait.set('value', false)
@@ -289,11 +324,20 @@ export const TraitCommunication = {
   , cooldowns: fromJS([
     [tt.TraitCommunication, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
-  , action: (game, animal, trait, autoShare) => (dispatch) => {
+  , _getErrorOfUse: (game, animal, trait) => {
+    const linkedAnimal = trait.findLinkedAnimal(game, animal);
+    if (!trait.value) return ERRORS.TRAIT_ACTION_NO_VALUE;
+    if (!linkedAnimal) return ERRORS.TRAIT_ACTION_NO_TARGETS;
+    if (!linkedAnimal.canEat(game)) return ERRORS.ANIMAL_DONT_WANT_FOOD;
+    return false;
+  }
+  , action: (game, animal, trait) => (dispatch) => {
     const animal1 = animal;
     const animal2 = trait.findLinkedAnimal(game, animal);
     const trait1 = trait;
     const trait2 = trait.findLinkedTrait(game);
+
+    const {sourceType, sourceId, autoShare} = trait.value;
 
     dispatch(server$traitSetValue(game, animal1, trait1, false));
 
@@ -303,13 +347,6 @@ export const TraitCommunication = {
     dispatch(server$startFeeding(game.id, animal2.id, 1, tt.TraitCommunication, animal.id, autoShare));
 
     return true;
-  }
-  , _getErrorOfUse: (game, animal, trait) => {
-    const linkedAnimal = trait.findLinkedAnimal(game, animal);
-    if (!trait.value) return ERRORS.TRAIT_ACTION_NO_VALUE;
-    if (!linkedAnimal) return ERRORS.TRAIT_ACTION_NO_TARGETS;
-    if (!linkedAnimal.canEat(game)) return ERRORS.ANIMAL_DONT_WANT_FOOD;
-    return false;
   }
   , customFns: {
     eventNextPlayer: (trait) => trait.set('value', false)
