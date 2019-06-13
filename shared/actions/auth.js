@@ -127,13 +127,24 @@ export const server$injectUser = (id, login) => (dispatch) => {
  * Misc
  */
 
-const customErrorReport = (customErrorAction, fn) => (dispatch, getState) => {
+const customErrorReport_PROD = (customErrorAction, fn) => (dispatch, getState) => {
+  const result = dispatch(fn);
+  if (result instanceof Error) {
+    dispatch(customErrorAction(result));
+  }
+  return null;
+};
+
+const customErrorReport_TEST = (customErrorAction, fn) => (dispatch, getState) => {
   try {
     dispatch(fn);
   } catch (error) {
     dispatch(customErrorAction(error));
+    throw error;
   }
 };
+
+const customErrorReport = !process.env.TEST ? customErrorReport_PROD : customErrorReport_TEST;
 
 export const authClientToServer = {
   loginUserFormRequest: ({redirect = '/', login = void 0, password = void 0}, {connectionId}) =>

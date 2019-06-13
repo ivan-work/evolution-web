@@ -81,9 +81,18 @@ describe('Auth:', function () {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore(fromJS({
         user: new UserModel({id: '1234', token: 'hehe hehe hehe'})
-      })).connect(serverStore);
+      }));
 
-      clientStore0.dispatch(loginUserFormRequest('/test'));
+      expectError('Connect fails with error', 'Token', () => {
+        clientStore0.connect(serverStore);
+      });
+      console.log(serverStore.getActionTypes())
+      console.log(clientStore0.getActionTypes())
+      expect(clientStore0.getActions()[clientStore0.getActions().length - 1].type).equal('loginUserFailure');
+
+      expectError('loginUserFormRequest fails with error', 'validation', () => {
+        clientStore0.dispatch(loginUserFormRequest('/test'));
+      });
 
       expect(clientStore0.getState().get('user'), 'expect user as null').null;
     });
