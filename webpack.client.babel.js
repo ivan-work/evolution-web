@@ -18,7 +18,7 @@ const isProfiling = process.env.PROFILE === 'true';
 
 module.exports = {
   mode: isDevelopment ? 'development' : 'production'
-  , devtool: isDevelopment ? 'eval' : 'source-map'
+  , devtool: isDevelopment ? 'eval' : 'eval'//'source-map'
   , entry: isDevelopment
     ? ['webpack-hot-middleware/client'
       , './client/index.jsx']

@@ -27,7 +27,7 @@ import {
 
 import {selectRoom, selectGame, selectUsersInGame} from '../selectors';
 
-import {GameModel, PHASE, QuestionRecord, AmbushRecord, FeedingRecord} from '../models/game/GameModel';
+import {GameModel, PHASE, QuestionRecord, AmbushRecord, FeedingRecord, AREA} from '../models/game/GameModel';
 import * as tt from '../models/game/evolution/traitTypes';
 
 import {
@@ -940,7 +940,7 @@ export const traitClientToServer = {
       throw new ActionCheckError(`traitTakeShellRequest@Game(${game.id})`, 'Game doesnt have Trait(%s)', traitId);
 
     dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
-    dispatch(server$game(gameId, traitTakeShell(gameId, 'standard', animalId, trait)));
+    dispatch(server$game(gameId, traitTakeShell(gameId, AREA.STANDARD, animalId, trait)));
     dispatch(server$playerActed(gameId, userId));
   }
   , traitTakeCoverRequest: ({gameId, animalId, plantId}, {userId}) => (dispatch, getState) => {

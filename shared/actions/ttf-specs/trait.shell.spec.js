@@ -10,6 +10,7 @@ import {PHASE} from '../../models/game/GameModel';
 import * as tt from '../../models/game/evolution/traitTypes';
 
 import {makeGameSelectors} from '../../selectors';
+import ERRORS from "../errors";
 
 describe('TraitShell:', () => {
   it('Works + food', () => {
@@ -59,30 +60,73 @@ players:
     const gameId = ParseGame(`
 deck: 5 shell
 phase: feeding
-food: 
 players:
-  - continent: $A shell, $B shell +, $C +
+  - continent: $A +, $B +, $sh1 shell, $sh2 shell, $C carn shell, $W wait +
 `);
-    const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, findAnimal, findTrait, findPlayerByIndex} = makeGameSelectors(serverStore.getState, gameId);
 
+    expect(selectGame().getArea().shells).size(0);
+
+    clientStore0.dispatch(traitActivateRequest('$C', tt.TraitCarnivorous, '$sh2'));
+
+    clientStore0.dispatch(traitAnswerRequest(true));
+
+    expect(findAnimal('$sh2'), '$sh2 is dead').not.ok;
+    expect(selectGame().getArea().shells, 'shells amount').size(1);
+
+    clientStore0.dispatch(traitActivateRequest('$W', tt.TraitWaiter));
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(gameEndTurnRequest());
     clientStore0.dispatch(gameEndTurnRequest());
 
-    expect(selectGame().status.turn, 'turn deploy').equal(1);
+    expect(selectGame().status.turn, 'turn 1').equal(1);
     expect(selectGame().status.phase).equal(PHASE.DEPLOY);
+
+    expect(findAnimal('$A'), '$A is alive').ok;
+    expect(findAnimal('$B'), '$B is alive').ok;
+    expect(findAnimal('$C'), '$C is alive').ok;
+    expect(findAnimal('$W'), '$W is alive').ok;
+    expect(findAnimal('$sh1'), '$sh1 is dead').not.ok;
+    expect(findAnimal('$sh2'), '$sh2 is dead').not.ok;
+
+    expectError(`$A can't take shell on deploy`, 'phase', () => {
+      clientStore0.dispatch(traitTakeShellRequest('$A', selectGame().getArea().shells.first().id));
+    });
+
     clientStore0.dispatch(gameEndTurnRequest());
+
     expect(selectGame().status.turn).equal(1);
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
+    expect(selectGame().getArea().shells, 'shells amount').size(2);
 
-    expect(selectGame().getArea().shells).size(1);
+    expectError(`$C can't take shell (already has one)`, ERRORS.TRAIT_MULTIPLE, () => {
+      clientStore0.dispatch(traitTakeShellRequest('$C', selectGame().getArea().shells.first().id));
+    });
 
-    expectUnchanged('$B cant take shell', () => {
+    clientStore0.dispatch(traitTakeShellRequest('$A', selectGame().getArea().shells.first().id));
+
+    expect(findPlayerByIndex(0).acted).ok;
+
+    expect(findTrait('$A', tt.TraitShell)).ok;
+
+    expect(selectGame().getArea().shells, 'shells size after $A took one').size(1);
+
+    expectError(`$A can't take shell on cooldown`, ERRORS.TRAIT_MULTIPLE, () => {
+      clientStore0.dispatch(traitTakeShellRequest('$A', selectGame().getArea().shells.first().id));
+    });
+    expectError(`$B can't take shell on cooldown`, ERRORS.COOLDOWN, () => {
       clientStore0.dispatch(traitTakeShellRequest('$B', selectGame().getArea().shells.first().id));
-    }, serverStore, clientStore0);
+    });
 
-    clientStore0.dispatch(traitTakeShellRequest('$C', selectGame().getArea().shells.first().id));
+    clientStore0.dispatch(gameEndTurnRequest());
 
-    expect(selectAnimal(User0, 0).traits).size(1);
-    expect(selectAnimal(User0, 1).traits).size(1);
+    expectError(`$A can't take shell (already has one)`, ERRORS.TRAIT_MULTIPLE, () => {
+      clientStore0.dispatch(traitTakeShellRequest('$A', selectGame().getArea().shells.first().id));
+    });
+
+    clientStore0.dispatch(traitTakeShellRequest('$B', selectGame().getArea().shells.first().id));
+
+    expect(selectGame().getArea().shells).size(0);
   });
 
   it(`Can't use traits under shell`, () => {
@@ -108,20 +152,5 @@ players:
       clientStore0.dispatch(traitActivateRequest('$B', tt.TraitSpecB));
       clientStore0.dispatch(traitActivateRequest('$B', tt.TraitMetamorphose, tt.TraitSpecA));
     }, serverStore, clientStore0);
-  });
-
-  it(`Shell can suicide`, () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
-    const gameId = ParseGame(`
-phase: feeding
-players:
-  - continent: $A carn wait, $B shell
-`);
-    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
-
-    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
-    expect(selectGame().question).ok;
-    clientStore0.dispatch(traitAnswerRequest(true));
-    expect(findAnimal('$A').getFood()).equal(2);
   });
 });
