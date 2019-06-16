@@ -108,7 +108,7 @@ export class RoomSettings extends React.Component {
         <RoomAddonRow name='addon_timeToFly' deck={this.Deck_TimeToFly_help}/>
         <RoomAddonRow name='addon_continents' deck={this.Deck_ContinentsShort_help}/>
         <RoomAddonRow name='addon_bonus' deck={this.Deck_Bonus_help}/>
-        <RoomAddonRow name='addon_plantarium' deck={this.Deck_Plantarium_help} disabled={!this.props.isAdmin}/>
+        {this.props.isAdmin && <RoomAddonRow name='addon_plantarium' deck={this.Deck_Plantarium_help}/>}
 
         <Submit id='RoomSettings$Submit' variant='contained' color='primary' size='large'>
           {T.translate('App.Room.$Edit')}

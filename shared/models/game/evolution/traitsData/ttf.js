@@ -34,8 +34,7 @@ import {selectGame} from '../../../../selectors';
 import {
   getStaticDefenses,
   getActiveDefenses,
-  getAffectiveDefenses,
-  TraitCarnivorous
+  getAffectiveDefenses
 } from './TraitCarnivorous';
 import * as tt from '../traitTypes';
 import {TraitMimicry, TraitTailLoss} from "./index";
@@ -147,7 +146,7 @@ export const TraitSpecA = {
     if (!animal.canEat(game)) return ERRORS.ANIMAL_BLOCKED_FROM_FOOD;
     if (game.someAnimal((animal) => {
       const trait = animal.hasTrait(traitSpec.type);
-      return traitSpec.id !== trait.id;
+      return trait && trait.id !== traitSpec.id;
     })) return ERRORS.TRAIT_ACTION_SPECIFIC;
     return false;
   }
@@ -212,7 +211,8 @@ export const TraitIntellect = {
     return [].concat(
       getStaticDefenses(game, sourceAnimal, targetAnimal)
       , getActiveDefenses(game, sourceAnimal, attackTrait, targetAnimal)
-      , getAffectiveDefenses(game, sourceAnimal, targetAnimal));
+      , getAffectiveDefenses(game, sourceAnimal, targetAnimal)
+    );
   }
   , action: (game, sourceAnimal, traitIntellect, targetTraitId) => (dispatch, getState) => {
     dispatch(server$traitSetValue(game, sourceAnimal, traitIntellect, targetTraitId));

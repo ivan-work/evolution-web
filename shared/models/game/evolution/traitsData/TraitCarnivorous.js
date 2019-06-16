@@ -56,8 +56,7 @@ export const getAffectiveDefenses = (game, sourceAnimal, targetAnimal) =>
       (trait.type === tt.TraitPoisonous)
     )).toArray();
 
-export const getActiveDefenses = (game, attackEntity, attackTrait, targetAnimal) => {
-  const skipOptionalDefence = huntGetFlag(game, HUNT_FLAG.OPTIONAL_DEFENCE_OFF);
+export const getActiveDefenses = (game, attackEntity, attackTrait, targetAnimal, skipOptionalDefence) => {
   return targetAnimal.traits.filter((trait) => {
     return !trait.disabled && (
       (trait.type === tt.TraitRunning && !trait.getErrorOfUse(game, targetAnimal))
@@ -93,7 +92,8 @@ export const getIntellectValue = (attackEntity) => {
 
 export const findDefaultActiveDefence = (game, attackAnimal, attackTrait, targetAnimal) => {
   const disabledTid = getIntellectValue(attackAnimal);
-  const activeDefense = getActiveDefenses(game, attackAnimal, attackTrait, targetAnimal)
+  const skipOptionalDefence = huntGetFlag(game, HUNT_FLAG.OPTIONAL_DEFENCE_OFF);
+  const activeDefense = getActiveDefenses(game, attackAnimal, attackTrait, targetAnimal, skipOptionalDefence)
     .filter(t => !t.isEqual(disabledTid))[0];
   if (activeDefense) {
     if (activeDefense.type === tt.TraitTailLoss) {

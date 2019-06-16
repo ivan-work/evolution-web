@@ -8,6 +8,7 @@ import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
 import {replaceGetRandom} from '../../utils/randomGenerator';
+import * as tt from "../../models/game/evolution/traitTypes";
 
 describe('TraitSymbiosis:', () => {
   describe('Deploy:', () => {
@@ -233,6 +234,22 @@ players:
       expect(selectAnimal(User0, 1).getFoodAndFat(), 'Animal $B.getFoodAndFat()').equal(4);
       expect(selectAnimal(User0, 2).getFoodAndFat(), 'Animal $C.getFoodAndFat()').equal(2);
       expect(selectAnimal(User0, 3)).undefined;
+    });
+
+    it(`Feeds scavenger`, () => {
+      const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+      const gameId = ParseGame(`
+phase: feeding
+food: 8
+players:
+  - continent: $A scav symb$B, $B carn, $C, $W wait
+`);
+      const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$C'));
+
+      expect(findAnimal('$B').getFood()).equal(2);
+      expect(findAnimal('$A').getFood()).equal(1);
     });
   });
 

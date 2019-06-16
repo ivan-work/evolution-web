@@ -84,14 +84,12 @@ class QuestionDefence extends React.PureComponent {
     const traitCarnivorous = attackAnimal.hasTrait(tt.TraitCarnivorous);
     const traitTailLoss = targetAnimal.hasTrait(tt.TraitTailLoss);
     const targetsTailLoss = traitTailLoss
-      && !checkIfTraitDisabledByIntellect(attackAnimal, traitTailLoss)
-      && TraitTailLoss.getTargets(game, targetAnimal, traitTailLoss, attackAnimal, traitCarnivorous);
+      && !checkIfTraitDisabledByIntellect(attackAnimal, traitTailLoss);
 
     const traitMimicry = targetAnimal.hasTrait(tt.TraitMimicry);
     const targetsMimicry = traitMimicry
-      && !traitMimicry.getErrorOfUse(game, targetAnimal, attackAnimal, traitCarnivorous)
       && !checkIfTraitDisabledByIntellect(attackAnimal, traitMimicry)
-      && TraitMimicry.getTargets(game, targetAnimal, traitMimicry, attackAnimal, traitCarnivorous);
+      && !traitMimicry.getErrorOfUse(game, targetAnimal, attackAnimal, traitCarnivorous);
 
     const otherTraits = [
       targetAnimal.hasTrait(tt.TraitShell)
@@ -116,23 +114,7 @@ class QuestionDefence extends React.PureComponent {
     const defaultMode = {
       checkTrait: trait => {
         if (checkIfTraitDisabledByIntellect(attackAnimal, trait)) return;
-        switch (trait.type) {
-          case tt.TraitTailLoss: {
-            const targets = TraitTailLoss.getTargets(game, targetAnimal, trait, attackAnimal, traitCarnivorous);
-            return targets && targets.size > 0;
-          }
-          case tt.TraitMimicry: {
-            const targets = TraitMimicry.getTargets(game, targetAnimal, trait, attackAnimal, traitCarnivorous);
-            return !trait.getErrorOfUse(game, targetAnimal)
-              && targets && targets.size > 0;
-          }
-          case tt.TraitShell:
-          case tt.TraitInkCloud:
-          case tt.TraitRunning:
-          case tt.TraitCnidocytes: {
-            return !trait.getErrorOfUse(game, targetAnimal);
-          }
-        }
+        return !trait.getErrorOfUse(game, targetAnimal, attackAnimal, traitCarnivorous);
       }
       , onSelectTrait: trait => e => {
         switch (trait.type) {
@@ -232,10 +214,14 @@ class QuestionDefence extends React.PureComponent {
     const attackAnimal = this.getAttackAnimal();
     const traitCarnivorous = attackAnimal.hasTrait(tt.TraitCarnivorous);
     const traitMimicry = targetAnimal.hasTrait(tt.TraitMimicry);
-    const targetsMimicry = traitMimicry
+    const targetsMimicry = (
+      traitMimicry
+      && !!traitCarnivorous
       && !traitMimicry.getErrorOfUse(game, targetAnimal, attackAnimal, traitCarnivorous)
       && !checkIfTraitDisabledByIntellect(attackAnimal, traitMimicry)
-      && TraitMimicry.getTargets(game, targetAnimal, traitMimicry, attackAnimal, traitCarnivorous);
+      && TraitMimicry.getTargets(game, targetAnimal, traitMimicry, attackAnimal, traitCarnivorous)
+    );
+    if (!targetsMimicry) return;
     return (
       <div className={classes.mimicryAnimalContainer}>
         {targetsMimicry.map(animal => <Animal

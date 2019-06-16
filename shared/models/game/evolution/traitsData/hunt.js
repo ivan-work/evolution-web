@@ -11,8 +11,10 @@ import {
   server$startFeedingFromGame,
   server$traitActivate,
   server$traitAnimalAttachTrait,
-  server$traitAnimalRemoveTrait, server$traitDefenceAnswer, server$traitDefenceQuestion,
-  server$traitDetachFromPlant, server$traitIntellectAnswer, server$traitIntellectQuestion, server$traitKillAnimal,
+  server$traitAnimalRemoveTrait,
+  server$traitDefenceAnswer,
+  server$traitDefenceQuestion,
+  server$traitKillAnimal,
   server$traitNotify_End, server$traitQuestion,
   server$traitSetValue,
   server$traitStartCooldown,
@@ -182,7 +184,8 @@ export const server$huntProcess = (gameId) => (dispatch, getState) => {
   logger.debug(`server$huntProcess/${attackEntity.id}/Intellect/Status/ ${canUseIntellect}, ${disabledTraitId}`);
 
   let possibleDefenseTargets = 0;
-  const possibleDefenses = getActiveDefenses(game, attackEntity, attackTrait, targetAnimal)
+  const skipOptionalDefence = huntGetFlag(game, HUNT_FLAG.OPTIONAL_DEFENCE_OFF);
+  const possibleDefenses = getActiveDefenses(game, attackEntity, attackTrait, targetAnimal, skipOptionalDefence)
     .filter((defenseTrait) => {
       if (defenseTrait.isEqual(disabledTraitId)) return false;
 
@@ -325,6 +328,7 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
       dispatch(server$game(gameId, traitParalyze(gameId, hunt.attackEntityId)));
     }
     if (huntGetFlag(game, HUNT_FLAG.FEED_SCAVENGERS)) {
+      const game = selectGame(getState, gameId);
       const currentPlayerIndex = game.getPlayer(attackEntity.ownerId || game.status.currentPlayer).index;
 
       game.sortPlayersFromIndex(game.players, currentPlayerIndex).some(player => player.continent.some(animal => {
