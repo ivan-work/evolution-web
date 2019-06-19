@@ -65,6 +65,7 @@ const messageStyles = theme => ({
   }
   , messageText: {
     overflowWrap: 'break-word'
+    , wordBreak: 'break-all'
   }
 });
 

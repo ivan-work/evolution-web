@@ -9,12 +9,12 @@ export const appChangeLanguage = (langCode) => (dispatch) => {
     .then(r => r.json())
     .then(r => {
       T.setTexts(r);
-      console.log('texts SET');
       dispatch({
         type: 'appChangeLanguage'
         , data: langCode
       });
-      if (RootService.root) deepForceUpdate(RootService.root);
+      console.log('texts SET', !!RootService.root);
+      RootService.rootPromise.then((root) => deepForceUpdate(root));
     });
 };
 

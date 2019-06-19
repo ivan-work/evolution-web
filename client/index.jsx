@@ -52,13 +52,12 @@ socketStore(socketClient, store);
 import RootService from './services/RootService';
 
 const render = () => {
-  import('./app/Root').then(({Root}) => {
+  import('./app/Root').then(({default: Root}) => {
     // console.log(store.getState().toJS());
-    const $Root = ReactDOM.render(
-      <Root store={store} history={history}/>,
+    ReactDOM.render(
+      <Root store={store} history={history} ref={(root) => !!root && RootService.setRoot(root)}/>,
       document.getElementById('app')
     );
-    RootService.root = $Root;
   })
 };
 if (module.hot) {
@@ -67,4 +66,5 @@ if (module.hot) {
 render();
 
 import {appChangeLanguage} from './actions/app';
+
 store.dispatch(appChangeLanguage(store.getState().getIn(['app', 'lang'])));

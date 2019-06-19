@@ -8,14 +8,21 @@ import ErrorBoundry from './ErrorBoundry';
 import theme from './theme';
 import {Router} from "react-router";
 
-export const Root = ({store, history}) => (
-  <ErrorBoundry>
-    <MuiThemeProvider theme={theme}>
-      <Provider store={store}>
-        <Router history={history}>
-          <App history={history}/>
-        </Router>
-      </Provider>
-    </MuiThemeProvider>
-  </ErrorBoundry>
-);
+class Root extends React.PureComponent {
+  render() {
+    const {store, history} = this.props;
+    return (
+      <ErrorBoundry>
+        <MuiThemeProvider theme={theme}>
+          <Provider store={store}>
+            <Router history={history}>
+              <App history={history}/>
+            </Router>
+          </Provider>
+        </MuiThemeProvider>
+      </ErrorBoundry>
+    );
+  }
+}
+
+export default Root;

@@ -20,7 +20,6 @@ import RoomControlGroup from "../../views/rooms/RoomControlGroup";
 import {Portal} from "../../views/utils/Portal";
 import Link from "@material-ui/core/Link/Link";
 import {redirectTo} from "../../../shared/utils/history";
-import Hidden from "@material-ui/core/Hidden";
 import GameScoreboardFinal from "../../views/game/ui/GameScoreboardFinal";
 
 const styles = theme => ({

@@ -29,6 +29,10 @@ import QuestionDefence from "./ui/QuestionDefence";
 import {InteractiveShell} from "./food/Shell";
 import AnimatedHOC from "../../services/AnimationService/AnimatedHOC";
 import GameStyles from "./GameStyles";
+import Plant from "./plants/Plant";
+import FoodWrapper from "./food/FoodWrapper";
+import GameInfoToolbar2 from "./ui/GameInfoToolbar2";
+import PlantsContainer from "./plants/PlantsContainer";
 
 const styles = theme => ({
   GameUIv3Container: {
@@ -50,28 +54,58 @@ const styles = theme => ({
     , marginBottom: 2
   }
   , gridMiscRow: {
-    display: 'flex'
+    marginTop: 2
+    , display: 'flex'
     , flexFlow: 'row wrap'
+  }
+  , gridMiscSubRow: {
+    display: 'flex'
+    , flex: `1 1 0`
   }
   , gridMiscItem: {
     flex: '1 1 0'
     , margin: 1
-    , minHeight: '4em'
+    , minHeight: 140
     , maxHeight: 140
+    , [theme.breakpoints.down('sm')]: {
+      maxHeight: 180
+    }
+    , '&.PlayersList': {
+      overflowY: 'auto'
+      , minWidth: 180
+      , maxWidth: 340
+    }
+    , '&.Toolbar': {
+      minWidth: 250
+      , maxWidth: 360
+    }
+    , '&.Chat': {
+      minWidth: 200
+      , flex: '2 1 25%'
+    }
+    , '&.Food': {
+      minWidth: 70
+      , maxWidth: 320
+    }
     , '&.Compressed': {
       maxHeight: 36
       , minHeight: 36
-    }
-    , '&.PlayersList': {
-      minWidth: 180
-      , maxWidth: 320
-      , overflowY: 'auto'
-    }
-    , '&.Food': {
-      minWidth: 140
-    }
-    , '&.Chat': {
-      minWidth: 320
+      , minWidth: 'none'
+      , maxWidth: 'none'
+      , '&.Toolbar': {
+        minWidth: 500
+      }
+      , '& .Food': {
+        maxWidth: 140
+        , flex: '0 0 0'
+      }
+      , '& .Chat': {
+        minWidth: 100
+        , flex: '1 1 0'
+        , [theme.breakpoints.down('sm')]: {
+          display: 'none'
+        }
+      }
     }
   }
   , gridPlayers: {
@@ -112,12 +146,21 @@ export class SVGContextInteractionSpy extends React.PureComponent {
   }
 }
 
+// settings:
+//   addon_plantarium: true
+// deck: 5 carn
+// phase: feeding
+// food: 50
+// plants: PlantLiana $lia myco$per ++++++, PlantGrass $gra0 +++, PlantSucc spiky **** $per + myco$leg, PlantGrass $gra1 ++, PlantLegume $leg myco$lia +++, PlantCarn $car ++++++
+//   players:
+// - continent: carn run mimi wait, carn run mimi, carn run mimi, carn run mimi, carn run mimi, carn run mimi, $, $, $, $
+
 export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
   return (
     <Grid container direction='column' className={classes.GameUIv3Container}>
-      <Grid item className={classes.gridGameToolbar}>
-        <GameInfoToolbar game={game} compressControls={{compress, toggleCompress}}/>
-      </Grid>
+      {/*<Grid item className={classes.gridGameToolbar}>*/}
+      {/*<GameInfoToolbar2 game={game} compressControls={{compress, toggleCompress}}/>*/}
+      {/*</Grid>*/}
       <Grid item container direction='column' className={classes.GameUIv3}>
 
         <GameSVGOverlay/>
@@ -126,33 +169,33 @@ export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
         <QuestionIntellect/>
         <QuestionDefence/>
 
-        <Grid item className={classes.gridMiscRow}>
-          {!compress && <Paper className={classes.gridMiscItem + ' PlayersList ' + cn({'Compressed': compress})}>
+        <Grid item className={cn(classes.gridMiscRow, {'Compressed': compress})}>
+          {!compress && <Paper className={cn(classes.gridMiscItem, 'PlayersList', {'Compressed': compress})}>
             <PlayersList game={game}/>
           </Paper>}
-          <Paper className={classes.gridMiscItem + ' Food ' + cn({'Compressed': compress})}>
-            <FoodWrapper game={game}/>
+          <Paper className={cn(classes.gridMiscItem, 'Toolbar', {'Compressed': compress})}>
+            <GameInfoToolbar game={game} compressControls={{compress, toggleCompress}}/>
           </Paper>
-          <Paper className={classes.gridMiscItem + ' Chat ' + cn({'Compressed': compress})}>
-            {!compress ? <ChatWrapper game={game}/> : <ChatWrapperSmall game={game}/>}
-          </Paper>
+          <div className={classes.gridMiscSubRow}>
+            {!game.isPlantarium && <Paper className={cn(classes.gridMiscItem, 'Food', {'Compressed': compress})}>
+              <FoodWrapper game={game}/>
+            </Paper>}
+            <Paper className={cn(classes.gridMiscItem, 'Chat', {'Compressed': compress})}>
+              {!compress ? <ChatWrapper game={game}/> : <ChatWrapperSmall game={game}/>}
+            </Paper>
+          </div>
         </Grid>
         <Grid item className={classes.gridPlayers}>
+          {game.isPlantarium() && <PlantsContainer game={game}/>}
           {game.sortPlayersFromIndex(game.players, 0).map((player) => (
-            (player.playing || player.continent.size > 0) && <PlayerWrapper key={player.id} playerId={player.id} classes={classes} game={game}/>
+            (player.playing || player.continent.size > 0) &&
+            <PlayerWrapper key={player.id} playerId={player.id} classes={classes} game={game}/>
           ))}
         </Grid>
       </Grid>
     </Grid>
   );
 };
-
-export const FoodWrapper = AnimatedHOC(() => `FoodContainer`)(
-  ({game}) => <div className='FoodContainer' style={{height: '100%'}}>
-    {game.getArea().shells.map((trait) => <InteractiveShell key={trait.id} trait={trait}/>).toList()}
-    {repeat(game.getFood(), i => <InteractiveFood key={i}/>)}
-  </div>
-);
 
 export const ChatWrapper = ({game}) => <Chat chatTargetType='ROOM' roomId={game.roomId}/>;
 

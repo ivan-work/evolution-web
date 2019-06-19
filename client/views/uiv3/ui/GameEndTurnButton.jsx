@@ -18,11 +18,13 @@ const playerHasAmbushes = (game) => {
   }
 };
 
-export const GameEndTurnButton = ({render = true, color, disabled, onClick, text}) => (!render ? null
+export const GameEndTurnButton = ({render = true, color, disabled, onClick, text, fullWidth}) => (!render ? null
     : <Button color={color}
               variant='contained'
               disabled={disabled}
-              onClick={onClick}>{text}
+              fullWidth={fullWidth}
+              onClick={onClick}>
+      {text}
     </Button>
 );
 

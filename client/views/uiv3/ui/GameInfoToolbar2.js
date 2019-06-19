@@ -1,6 +1,5 @@
-import React, {Fragment} from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
 import T from 'i18n-react';
 
 import {compose} from "recompose";
@@ -22,43 +21,32 @@ import Button from "@material-ui/core/Button/Button";
 import {SpectatorsStatement} from "./SpectatorsList";
 
 const styles = theme => ({
-  GameToolbar: {
-    display: 'flex'
-    , height: '100%'
-    , justifyContent: 'space-between'
-    , flexFlow: 'column'
-    , padding: '0 4px'
-    , '&.compress': {
-      padding: '0'
-      , flexFlow: 'row'
-      , justifyContent: 'space-evenly'
-      , whiteSpace: 'nowrap'
-      , '& $row': {
-        display: 'none'
-      }
-    }
+  GameToolbarContainer: {
+    background: '#fefffe'
+    , padding: 2
   }
-  , row: {
+  , GameToolbar: {
     display: 'flex'
+    , justifyContent: 'space-evenly'
     , flexFlow: 'row wrap'
-    , justifyContent: 'center'
+    , maxWidth: 1024
+    , margin: `0 auto`
   }
   , statement: {
-    margin: '0 .25em'
+    marginLeft: '1em'
     , fontSize: '1em'
-    , textAlign: 'center'
-    , lineHeight: 1.25
   }
   , key: {
     fontWeight: 500
     , verticalAlign: 'middle'
+    , '&:after': {
+      display: 'block',
+      width: 5, height: 10, background: 'red',
+      content: '|'
+    }
   }
   , value: {
     verticalAlign: 'middle'
-    , wordBreak: 'nowrap'
-  }
-  , mark: {
-    color: 'red'
   }
 });
 
@@ -82,8 +70,8 @@ const ToggleCompress = ({compress, toggleCompress}) => (
 
 export const GameToolbar = ({classes, game, compressControls}) => {
   return (
-    <div className={cn(classes.GameToolbar, {compress: compressControls.compress})}>
-      <div className={classes.row}>
+    <Paper elevation={1} className={classes.GameToolbarContainer}>
+      <div className={classes.GameToolbar}>
         <Typography className={classes.statement}>
           <span className={classes.key}>{T.translate('Game.UI.Status.Turn')}:&nbsp;</span>
           <span className={classes.value}>{game.status.turn}</span>
@@ -92,15 +80,13 @@ export const GameToolbar = ({classes, game, compressControls}) => {
           <span className={classes.key}>{T.translate('Game.UI.Status.Round')}:&nbsp;</span>
           <span className={classes.value}>{game.status.round}</span>
         </Typography>
-      </div>
-      <div className={classes.row}>
-        <Typography className={cn(classes.statement, {[classes.mark]: game.deck.size === 0})}>
+        <Typography className={classes.statement}>
           <span className={classes.key}>{T.translate('Game.UI.Deck')}:&nbsp;</span>
           <span className={classes.value}>{game.deck.size}</span>
         </Typography>
-        <SpectatorsStatement classes={classes}/>
-      </div>
-      <div className={classes.row}>
+        <div className={classes.statement}>
+          <GameEndTurnButton game={game}/>
+        </div>
         <Typography className={classes.statement}>
           <span className={classes.key}>{T.translate('Game.UI.Status.Time')}:&nbsp;</span>
           <span className={classes.value}>{renderTime(game)}</span>
@@ -108,38 +94,14 @@ export const GameToolbar = ({classes, game, compressControls}) => {
         <Typography className={classes.statement}>
           <span className={classes.value}>{T.translate('Game.Phase.' + game.status.phase)}</span>
         </Typography>
-      </div>
-      <div className={classes.row}>
+        <SpectatorsStatement classes={classes}/>
         <div className={classes.statement}>
-          <GameEndTurnButton game={game}/>
-        </div>
-      </div>
-      <div className={classes.row}>
-        <div className={classes.row}>
-          {/*<GameEndTurnButton game={game}/>*/}
           <GameLog game={game}/>
           <Pause/>
           <ToggleCompress {...compressControls}/>
         </div>
       </div>
-      {compressControls.compress && (
-        <Fragment>
-          <Typography className={classes.statement}>
-            <span className={classes.value}>{T.translate('Game.Phase.' + game.status.phase)}</span>
-          </Typography>
-          <Typography className={classes.statement}>
-            <span className={classes.value}>({game.deck.size})</span>
-          </Typography>
-          <div className={classes.statement}>
-            <GameEndTurnButton game={game}/>
-          </div>
-          <Typography className={classes.statement}>
-            <span className={classes.value}>{renderTime(game)}</span>
-            <ToggleCompress {...compressControls}/>
-          </Typography>
-        </Fragment>
-      )}
-    </div>
+    </Paper>
   );
 };
 

@@ -177,7 +177,6 @@ export const Animal = compose(
   setDisplayName('Animal')
   , setPropTypes({animal: PropTypes.instanceOf(AnimalModel).isRequired})
   , withStyles(styles)
-  , connect(({game}) => ({game}))
 )(BaseAnimal);
 
 export const InteractiveAnimal = compose(
