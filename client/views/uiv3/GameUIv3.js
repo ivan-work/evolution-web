@@ -177,7 +177,7 @@ export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
             <GameInfoToolbar game={game} compressControls={{compress, toggleCompress}}/>
           </Paper>
           <div className={classes.gridMiscSubRow}>
-            {!game.isPlantarium && <Paper className={cn(classes.gridMiscItem, 'Food', {'Compressed': compress})}>
+            {!game.isPlantarium() && <Paper className={cn(classes.gridMiscItem, 'Food', {'Compressed': compress})}>
               <FoodWrapper game={game}/>
             </Paper>}
             <Paper className={cn(classes.gridMiscItem, 'Chat', {'Compressed': compress})}>

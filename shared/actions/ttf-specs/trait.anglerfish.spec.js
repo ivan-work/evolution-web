@@ -197,4 +197,25 @@ players:
 
     expect(selectAnimal(User0, 0).id).equal('$W');
   });
+
+  it(`#bug Anglerfish should die if it's under trematode`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 1 camo
+phase: feeding
+food: 5
+players:
+  - continent: $A angler=true trem$B, $B, $C carn, $D, $W wait
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$C', tt.TraitCarnivorous, '$D'));
+
+    expect(selectGame().question).not.ok;
+
+    expect(findAnimal('$D'), '$D is dead').not.ok;
+    expect(findAnimal('$C'), '$C is alive').ok;
+    expect(findAnimal('$A'), '$A is alive').ok;
+    expect(findAnimal('$A').getFood(), '$A.getFood').equal(0);
+  });
 });

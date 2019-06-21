@@ -244,7 +244,7 @@ export const TraitAnglerfish = {
   , hidden: true
   , score: 0
   , _getErrorOfUse: (game, animal) => {
-    if (animal.getTraits(true) > 0) return ERRORS.TRAIT_ACTION_SPECIFIC;
+    if (animal.getTraits(true).size > 0) return ERRORS.TRAIT_ACTION_SPECIFIC;
     return false;
   }
   , action: (game, sourceAnimal, trait) => (dispatch) => {
