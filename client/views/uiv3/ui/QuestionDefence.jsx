@@ -43,13 +43,13 @@ const styles = {
     , justifyContent: 'center'
     , alignItems: 'flex-end'
   }
-  , defenceContainer: {
+  , defenseContainer: {
     display: 'flex'
     , flexDirection: 'column'
     , textAlign: 'center'
     , alignItems: 'center'
   }
-  , defenceContainerTitle: {
+  , defenseContainerTitle: {
     // maxWidth: GameStyles.defaultWidth
   }
   , iconAttack: {
@@ -114,6 +114,7 @@ class QuestionDefence extends React.PureComponent {
     const defaultMode = {
       checkTrait: trait => {
         if (checkIfTraitDisabledByIntellect(attackAnimal, trait)) return;
+        if (!trait.defense) return;
         return !trait.getErrorOfUse(game, targetAnimal, attackAnimal, traitCarnivorous);
       }
       , onSelectTrait: trait => e => {
@@ -176,7 +177,7 @@ class QuestionDefence extends React.PureComponent {
           </Typography>}
 
           <div className={classes.content}>
-            <div className={classes.defenceContainer}>
+            <div className={classes.defenseContainer}>
               <Animal animal={attackAnimal}>
                 <AnimalTraitChooseList traitList={attackAnimal.traits.toList()}/>
               </Animal>

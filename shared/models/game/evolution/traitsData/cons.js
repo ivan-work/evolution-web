@@ -84,12 +84,13 @@ export const TraitRegeneration = {
 
 export const TraitCnidocytes = {
   type: tt.TraitCnidocytes
+  , defense: true
   , targetType: TRAIT_TARGET_TYPE.NONE
   , cooldowns: fromJS([
     [tt.TraitCnidocytes, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
-  , action: (game, defenceAnimal, traitCnidocytes, target, attackAnimal, attackTrait) => (dispatch) => {
-    dispatch(TraitCnidocytes.customFns.paralyze(game, defenceAnimal, traitCnidocytes, attackAnimal));
+  , action: (game, defenseAnimal, traitCnidocytes, target, attackAnimal, attackTrait) => (dispatch) => {
+    dispatch(TraitCnidocytes.customFns.paralyze(game, defenseAnimal, traitCnidocytes, attackAnimal));
     dispatch(server$huntProcess(game.id));
   }
   , getErrorOfUseOnTarget: (game, sourceAnimal, targetTrait, targetAnimal) => {

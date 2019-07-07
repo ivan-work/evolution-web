@@ -102,12 +102,12 @@ players:
       clientStore0.dispatch(traitAnswerRequest(tt.TraitIntellect, tt.TraitTailLoss));
 
       expect(selectPlayer0().acted, 'User0 acted').false;
-      expect(selectGame().question, 'question defence').ok;
+      expect(selectGame().question, 'question defense').ok;
 
       clientStore1.dispatch(traitAnswerRequest(tt.TraitCnidocytes));
 
       expect(selectPlayer0().acted, 'User0 acted').false;
-      expect(selectGame().question, 'question defence').ok;
+      expect(selectGame().question, 'question defense').ok;
 
       clientStore1.dispatch(traitAnswerRequest(tt.TraitShell));
 

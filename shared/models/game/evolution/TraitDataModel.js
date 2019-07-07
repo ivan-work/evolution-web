@@ -7,6 +7,7 @@ import ERRORS from '../../../actions/errors';
 
 const TraitDataModelProps = {
   ...TraitDataModelBaseProps
+  , defense: false
   , food: 0 // Amount of food required
   , score: 1 // Base score for trait. TODO rewrite every trait to use score only
   , checkTraitPlacement: null // (animal) => boolean // if trait is allowed to be placed on this animal
@@ -31,7 +32,7 @@ const TraitDataModelProps = {
  *
  * @property {number} [food: 0] - Amount of food required
  * @property {number} [score: 1] - Base score for trait. TODO rewrite every trait to use score only
- * @property {boolean} [optional: false] - On defence traits, can choose to suicide animal instead of using it
+ * @property {boolean} [optional: false] - On defense traits, can choose to suicide animal instead of using it
  * @property {callback} checkTraitPlacement: null // (animal) => boolean - if trait is allowed to be placed on this animal
  * @property {callback} $checkAction: null // if trait is allowed to be clicked? (game, sourceAnimal) => boolean
  * @property {callback} getErrorOfUseOnTarget: null // if target is valid? (game, sourceAnimal, targetAnimal) => boolean

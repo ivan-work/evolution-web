@@ -80,12 +80,13 @@ export const TraitSwimming = {
 
 export const TraitRunning = {
   type: tt.TraitRunning
+  , defense: true
   , targetType: TRAIT_TARGET_TYPE.NONE
   , cooldowns: fromJS([
     [tt.TraitRunning, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ACTIVATION]
   ])
-  , action: (game, defenceAnimal, traitRunning, target, attackAnimal, attackTrait) => (dispatch) => {
-    dispatch(server$traitStartCooldown(game.id, traitRunning, defenceAnimal));
+  , action: (game, defenseAnimal, traitRunning, target, attackAnimal, attackTrait) => (dispatch) => {
+    dispatch(server$traitStartCooldown(game.id, traitRunning, defenseAnimal));
     if (getIntRandom(0, 1) > 0) {
       dispatch(server$huntEnd(game.id));
       return true;
@@ -97,6 +98,7 @@ export const TraitRunning = {
 
 export const TraitMimicry = {
   type: tt.TraitMimicry
+  , defense: true
   , targetType: TRAIT_TARGET_TYPE.ANIMAL
   , cooldowns: fromJS([
     [tt.TraitMimicry, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ACTIVATION]
@@ -162,6 +164,7 @@ export const TraitPiracy = {
 
 export const TraitTailLoss = {
   type: tt.TraitTailLoss
+  , defense: true
   , targetType: TRAIT_TARGET_TYPE.TRAIT
   , cooldowns: fromJS([
     [tt.TraitTailLoss, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ACTIVATION]

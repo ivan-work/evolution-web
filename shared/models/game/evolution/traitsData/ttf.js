@@ -80,6 +80,7 @@ export const TraitMetamorphose = {
 
 export const TraitShell = {
   type: tt.TraitShell
+  , defense: true
   , targetType: TRAIT_TARGET_TYPE.NONE
   , optional: true
   , cooldowns: fromJS([
@@ -89,9 +90,9 @@ export const TraitShell = {
     if (game.status.phase !== PHASE.FEEDING) return ERRORS.GAME_WRONG_PHASE;
     return false;
   }
-  , action: (game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait) => (dispatch) => {
-    dispatch(server$traitStartCooldown(game.id, defenceTrait, defenceAnimal));
-    dispatch(server$traitSetAnimalFlag(game, defenceAnimal, TRAIT_ANIMAL_FLAG.SHELL, true));
+  , action: (game, defenseAnimal, defenseTrait, target, attackAnimal, attackTrait) => (dispatch) => {
+    dispatch(server$traitStartCooldown(game.id, defenseTrait, defenseAnimal));
+    dispatch(server$traitSetAnimalFlag(game, defenseAnimal, TRAIT_ANIMAL_FLAG.SHELL, true));
     dispatch(server$huntEnd(game.id));
     return true;
   }
@@ -110,18 +111,19 @@ export const TraitTrematode = {
 
 export const TraitInkCloud = {
   type: tt.TraitInkCloud
+  , defense: true
   , targetType: TRAIT_TARGET_TYPE.NONE
   , optional: true
   , cooldowns: fromJS([
     [tt.TraitInkCloud, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
   ])
-  , action: (game, defenceAnimal, defenceTrait, target, attackAnimal, attackTrait) => (dispatch) => {
+  , action: (game, defenseAnimal, defenseTrait, target, attackAnimal, attackTrait) => (dispatch) => {
     dispatch(server$startCooldownList(game.id, [
       startCooldown(game.id, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, attackAnimal.ownerId)
       , startCooldown(game.id, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.TRAIT, attackTrait.id)
     ]));
 
-    dispatch(server$traitStartCooldown(game.id, defenceTrait, defenceAnimal));
+    dispatch(server$traitStartCooldown(game.id, defenseTrait, defenseAnimal));
     dispatch(huntSetFlag(game.id, HUNT_FLAG.TRAIT_INK_CLOUD));
     dispatch(server$huntEnd(game.id));
     return true;

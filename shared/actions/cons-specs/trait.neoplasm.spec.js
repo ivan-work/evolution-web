@@ -95,7 +95,7 @@ players:
     expect(findAnimal('$A')).null;
   });
 
-  it('Disable defences', () => {
+  it('Disable defenses', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 phase: feeding

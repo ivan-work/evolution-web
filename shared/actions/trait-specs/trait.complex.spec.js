@@ -168,7 +168,7 @@ players:
     }, serverStore, clientStore0, clientStore1);
   });
 
-  it('Intellect defence mimicry', () => {
+  it('Intellect defense mimicry', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
 
     const gameId = ParseGame(`

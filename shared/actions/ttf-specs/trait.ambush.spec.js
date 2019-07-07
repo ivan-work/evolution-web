@@ -45,7 +45,7 @@ settings:
     expect(selectGame().status.phase).equal(PHASE.FEEDING);
   });
 
-  it('Simple defence', () => {
+  it('Simple defense', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
@@ -97,7 +97,7 @@ players:
     }, serverStore, clientStore0);
   });
 
-  it('Complex defence, timeout', () => {
+  it('Complex defense, timeout', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
@@ -128,7 +128,7 @@ settings:
     expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)].remaining).equal(50);
   });
 
-  it('Complex defence, manual', () => {
+  it('Complex defense, manual', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
@@ -699,5 +699,74 @@ players:
 
     expect(findAnimal('$B').getFood(), '$B.getFood()').equal(2);
     expect(findAnimal('$X').getFood(), '$X.getFood()').equal(2);
+  });
+
+  describe(`Self-Ambush`, () => {
+    it(`Can't ambush self`, () => {
+      const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+      const gameId = ParseGame(`
+phase: feeding
+food: 10
+players:
+  - continent: $Q home para, $W home para, $A carn ambush, $S carn ambush
+  - continent: $Z carn ambush para, $X carn ambush para
+`);
+      const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+      clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+
+      expect(selectGame().ambush, `Game is in ambush`).ok;
+      expect(selectGame().ambush.ambushers.keySeq().toArray()).eql(['$Z', '$X']);
+
+      clientStore1.dispatch(traitAmbushActivateRequest('$Z'));
+      clientStore1.dispatch(traitAmbushContinueRequest());
+
+      clientStore0.dispatch(traitActivateRequest('$W', tt.TraitHomeothermy));
+
+      expect(selectGame().ambush, `Game is in ambush`).ok;
+      expect(selectGame().ambush.ambushers.keySeq().toArray()).eql(['$X']);
+
+      clientStore1.dispatch(traitAmbushActivateRequest('$X'));
+
+      expect(findAnimal('$Q')).null;
+      expect(findAnimal('$W')).null;
+    });
+  });
+
+  describe.skip(`Self-Ambush`, () => {
+    it(`Can ambush self`, () => {
+      const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+      const gameId = ParseGame(`
+phase: feeding
+food: 10
+players:
+  - continent: $Q, $W, $A carn ambush, $S carn ambush
+  - continent: $R, $T, $Z carn ambush, $X carn ambush
+`);
+      const {selectGame, findAnimal, findPlayerByIndex} = makeGameSelectors(serverStore.getState, gameId);
+
+      clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+
+      expect(selectGame().ambush, `Game is in ambush`).ok;
+      expect(selectGame().ambush.ambushers.keySeq().toArray()).eql(['$A', '$S', '$Z', '$X']);
+
+      clientStore1.dispatch(traitAmbushContinueRequest());
+      clientStore0.dispatch(traitAmbushActivateRequest('$A', true));
+
+      expect(selectGame().ambush.ambushers.get('$A'), '$A ambush active').true;
+
+      clientStore0.dispatch(traitAmbushContinueRequest());
+
+      expect(findAnimal('$Q')).null;
+      expect(findPlayerByIndex(0).acted).true;
+      console.log(selectGame().cooldowns.toJS())
+
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      clientStore1.dispatch(traitTakeFoodRequest('$R'));
+
+      expect(selectGame().ambush, `Game is in ambush`).ok;
+      expect(selectGame().ambush.ambushers.keySeq().toArray()).eql(['$Z', '$X', '$S']);
+    });
   });
 });
