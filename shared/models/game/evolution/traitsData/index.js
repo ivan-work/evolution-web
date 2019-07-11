@@ -21,7 +21,7 @@ import {
   , server$traitSetValue
   , server$traitNotify_End
   , server$traitConvertFat
-  , server$tryViviparous, server$gamePlantUpdateFood
+  , server$gamePlantUpdateFood
 } from '../../../../actions/actions';
 
 import {getIntRandom} from '../../../../utils/randomGenerator';
@@ -31,6 +31,7 @@ import * as tt from '../traitTypes';
 import {TraitCarnivorous} from './TraitCarnivorous';
 import {huntSetFlag, server$huntEnd, server$huntProcess} from "./hunt";
 import {getErrorOfAnimalEatingFromPlantNoCD} from "../../../../actions/trait.checks";
+import {server$activateViviparous} from "../../../../actions/trait";
 
 export {TraitCarnivorous};
 export * from './ttf';
@@ -247,10 +248,12 @@ export const TraitHibernation = {
   , cooldowns: fromJS([
     [tt.TraitHibernation, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TWO_TURNS]
   ])
-  , action: (game, sourceAnimal, traitHibernation) => (dispatch) => {
-    dispatch(server$traitStartCooldown(game.id, traitHibernation, sourceAnimal));
-    dispatch(server$traitSetAnimalFlag(game, sourceAnimal, TRAIT_ANIMAL_FLAG.HIBERNATED));
-    dispatch(server$tryViviparous(game.id, sourceAnimal.id));
+  , action: (game, animal, traitHibernation) => (dispatch) => {
+    dispatch(server$traitStartCooldown(game.id, traitHibernation, animal));
+    dispatch(server$traitSetAnimalFlag(game, animal, TRAIT_ANIMAL_FLAG.HIBERNATED));
+    if (!animal.isSaturated(game)) {
+      dispatch(server$activateViviparous(game.id, animal.id));
+    }
     return true;
   }
   , _getErrorOfUse: (game, sourceAnimal) => {

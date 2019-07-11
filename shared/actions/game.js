@@ -23,8 +23,7 @@ import {db$gameEnd} from '../../server/actions/db';
 import {server$game, to$} from './generic';
 import {doesPlayerHasOptions, getFeedingOption, doesOptionExist, getOptions} from './ai';
 import {
-  server$tryViviparous
-  , server$takeFoodRequest
+  server$takeFoodRequest
   , server$questionPauseTimeout
   , server$questionResumeTimeout
   , server$autoFoodSharing
@@ -550,9 +549,11 @@ const server$gameExtinct = (gameId) => (dispatch, getState) => {
       dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.POISON, animal.id)));
     } else if (!animal.canSurvive()) {
       dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.STARVE, animal.id)));
-    } else {
-      dispatch(server$tryViviparous(gameId, animal.id)); // #fix plants wtf?
     }
+    // remove on sight
+    // else {
+    //   dispatch(server$tryViviparous(gameId, animal.id)); // #fix plants wtf?
+    // }
   });
 
   const plantsVisitor = new PlantVisitor(selectGame(getState, gameId));

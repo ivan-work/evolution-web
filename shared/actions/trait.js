@@ -168,7 +168,7 @@ const traitConvertFat = (gameId, sourceAid, traitId) => ({
 
 export const server$traitConvertFat = (gameId, sourceAnimal, trait) => (dispatch) => {
   dispatch(server$game(gameId, traitConvertFat(gameId, sourceAnimal.id, trait.id)));
-  dispatch(server$tryViviparous(gameId, sourceAnimal.id));
+  dispatch(server$activateViviparous(gameId, sourceAnimal.id));
 };
 
 const traitMoveFood = (gameId, animalId, amount, sourceType, sourceId) => ({
@@ -225,7 +225,7 @@ const traitAnimalAttachTrait = (gameId, sourcePid, sourceAid, trait) => ({
 export const server$traitAnimalAttachTrait = (game, animal, trait) =>
   server$game(game.id, traitAnimalAttachTrait(game.id, animal.ownerId, animal.id, trait));
 
-const traitAnimalRemoveTrait = (gameId, sourcePid, sourceAid, traitId) => ({
+export const traitAnimalRemoveTrait = (gameId, sourcePid, sourceAid, traitId) => ({
   type: 'traitAnimalRemoveTrait'
   , data: {gameId, sourcePid, sourceAid, traitId}
 });
@@ -239,6 +239,20 @@ export const server$traitAnimalRemoveTrait = (game, animal, trait) => (dispatch)
   dispatch(server$game(game.id, traitAnimalRemoveTrait(game.id, animal.ownerId, animal.id, trait.id)));
 };
 // endregion
+
+const traitAnimalRecombinateTraits = (gameId, player1id, player2id, animal1id, animal2id, trait1id, trait2id) => ({
+  type: 'traitAnimalRecombinateTraits'
+  , data: {gameId, player1id, player2id, animal1id, animal2id, trait1id, trait2id}
+});
+export const server$traitAnimalRecombinateTraits = (gameId, animal1, animal2, trait1, trait2) =>
+  server$game(gameId, traitAnimalRecombinateTraits(
+    gameId
+    , animal1.ownerId
+    , animal2.ownerId
+    , animal1.id
+    , animal2.id
+    , trait1.id
+    , trait2.id));
 
 // region traitAttachToPlant
 const traitAttachToPlant = (gameId, plantId, trait) => ({
@@ -272,13 +286,25 @@ const traitTakeShell = (gameId, continentId, animalId, trait) => ({
   , data: {gameId, continentId, animalId, trait}
 });
 
-export const server$tryViviparous = (gameId, animalId) => (dispatch, getState) => {
-  return passesChecks(() => {
-    const game = selectGame(getState, gameId);
-    const animal = game.locateAnimal(animalId);
-    const trait = checkTraitActivation(game, animal, tt.TraitViviparous);
-    return dispatch(server$traitActivate(gameId, animalId, trait));
-  })
+// remove after 1.0.23
+// export const server$tryViviparous = (gameId, animalId) => (dispatch, getState) => {
+//   return passesChecks(() => {
+//     const game = selectGame(getState, gameId);
+//     const animal = game.locateAnimal(animalId);
+//     const trait = checkTraitActivation(game, animal, tt.TraitViviparous);
+//     return dispatch(server$traitActivate(gameId, animalId, trait));
+//   })
+// };
+
+export const server$activateViviparous = (gameId, animalId) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  const animal = game.locateAnimal(animalId);
+  if (!animal) return;
+  const trait = animal.hasTrait(tt.TraitViviparous);
+  if (!trait) return;
+  const error = trait.getErrorOfUse(game, animal);
+  if (error) return;
+  dispatch(server$traitActivate(gameId, animalId, trait));
 };
 
 export const server$tryNeoplasmDeath = (gameId, sourceAnimal) => (dispatch, getState) => {
@@ -554,7 +580,8 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
   // logger.debug(`server$startFeeding: ${sourceId} feeds ${animalId} through ${sourceType} with (${amount})`);
   logger.debug(`server$startFeeding: ${animalId} gets ${amount} from ${sourceType}(${sourceId})`);
   let game = selectGame(getState, gameId);
-  const animal = game.locateAnimal(animalId);
+  let animal = game.locateAnimal(animalId);
+  const animalWasSaturated = animal.isSaturated();
 
   if (sourceType === 'PLANT') {
     const sourcePlant = game.getPlant(sourceId);
@@ -596,7 +623,12 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
     }
   });
 
-  dispatch(server$tryViviparous(gameId, animalId));
+  game = selectGame(getState, gameId);
+  animal = game.locateAnimal(animalId);
+  const animalIsSaturated = !!animal && animal.isSaturated();
+  if (!animalWasSaturated && animalIsSaturated) {
+    dispatch(server$activateViviparous(gameId, animalId));
+  }
 
   return true;
 };
@@ -1081,10 +1113,14 @@ export const traitServerToClient = {
     traitNotify_Start(gameId, sourceAid, traitId, traitType, targets)
   , traitNotify_End: ({gameId, sourceAid, traitId, traitType, targetId}, currentUserId) =>
     traitNotify_End(gameId, sourceAid, traitId, traitType, targetId)
+
   , traitAnimalRemoveTrait: ({gameId, sourcePid, sourceAid, traitId}) =>
     traitAnimalRemoveTrait(gameId, sourcePid, sourceAid, traitId)
   , traitAnimalAttachTrait: ({gameId, sourcePid, sourceAid, trait}) =>
     traitAnimalAttachTrait(gameId, sourcePid, sourceAid, TraitModel.fromServer(trait))
+  , traitAnimalRecombinateTraits: ({gameId, player1id, player2id, animal1id, animal2id, trait1id, trait2id}) =>
+    traitAnimalRecombinateTraits(gameId, player1id, player2id, animal1id, animal2id, trait1id, trait2id)
+
   , traitAttachToPlant: ({gameId, plantId, trait}) =>
     traitAttachToPlant(gameId, plantId, TraitModel.fromServer(trait))
   , traitDetachFromPlant: ({gameId, plantId, traitId}) =>

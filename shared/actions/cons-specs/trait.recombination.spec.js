@@ -125,12 +125,11 @@ players:
   it('BUG Recombination kills empty neoplasm', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
-deck: 10 camo
 phase: feeding
 players:
   - continent: $A recomb$B neoplasm wait, $B fat
 `);
-    const {selectGame, selectPlayer, findCard, findAnimal, findTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {findAnimal} = makeGameSelectors(serverStore.getState, gameId);
     const {findAnimal0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
 
     clientStore0.dispatch(traitActivateRequest('$A', tt.TraitRecombination, tt.TraitNeoplasm, tt.TraitFatTissue));
@@ -139,6 +138,23 @@ players:
     expect(findAnimal('$B')).null;
     expect(findAnimal0('$A')).ok;
     expect(findAnimal0('$B')).null;
+  });
+
+  it('Recombination+neoplasm on single animal', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+food: 12
+players:
+  - continent: $A neo fat=true recomb$B, $B fat=true
+`);
+    const {selectGame, findAnimal, findTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {findAnimal0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitRecombination, tt.TraitFatTissue, tt.TraitFatTissue));
+
+    expect(findAnimal('$A')).ok;
+    expect(findAnimal('$B')).ok;
   });
 
   it.skip('Recombination with regen drops all traits', () => {

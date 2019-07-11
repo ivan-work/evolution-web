@@ -146,6 +146,35 @@ export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) =>
       , game));
 };
 
+const recombinateTrait = (trait) => trait.set('value', false).set('disabled', false);
+
+export const traitAnimalRecombinateTraits = (game, {player1id, player2id, animal1id, animal2id, trait1id, trait2id}) => {
+  const trait1 = recombinateTrait(game.locateTrait(trait1id, animal1id, player1id));
+  const trait2 = recombinateTrait(game.locateTrait(trait2id, animal2id, player2id));
+
+  let animal1 = game.locateAnimal(animal1id, player1id)
+    .traitDetach(trait => trait.id === trait1id);
+  let animal2 = game.locateAnimal(animal2id, player2id)
+    .traitDetach(trait => trait.id === trait2id);
+
+  if (!trait2.getDataModel().checkTraitPlacementFails(animal1))
+    animal1 = animal1.traitAttach(trait2);
+  if (!trait1.getDataModel().checkTraitPlacementFails(animal2))
+    animal2 = animal2.traitAttach(trait1);
+
+  if (TraitNeoplasm.customFns.shouldKillAnimal(animal1)) {
+    game = animalDeath(game, {type: ANIMAL_DEATH_REASON.NEOPLASM, animalId: animal1id});
+  } else {
+    game = game.setIn(['players', player1id, 'continent', animal1id], animal1)
+  }
+  if (TraitNeoplasm.customFns.shouldKillAnimal(animal2)) {
+    game = animalDeath(game, {type: ANIMAL_DEATH_REASON.NEOPLASM, animalId: animal2id});
+  } else {
+    game = game.setIn(['players', player2id, 'continent', animal2id], animal2)
+  }
+  return game;
+};
+
 export const traitAttachToPlant = (game, {plantId, trait}) => game
   .updateIn(['plants', plantId], plant => plant.traitAttach(trait));
 
@@ -590,8 +619,11 @@ export const reducer = createReducer(Map(), {
   , clearCooldown: (state, data) => state.update(data.gameId, game => clearCooldown(game, data))
   , traitQuestion: (state, data) => state.update(data.gameId, game => traitQuestion(game, data))
   , traitAnswerSuccess: (state, data) => state.update(data.gameId, game => traitAnswerSuccess(game, data))
+
   , traitAnimalAttachTrait: (state, data) => state.update(data.gameId, game => traitAnimalAttachTrait(game, data))
   , traitAnimalRemoveTrait: (state, data) => state.update(data.gameId, game => traitAnimalRemoveTrait(game, data))
+  , traitAnimalRecombinateTraits: (state, data) => state.update(data.gameId, game => traitAnimalRecombinateTraits(game, data))
+
   , traitAttachToPlant: (state, data) => state.update(data.gameId, game => traitAttachToPlant(game, data))
   , traitDetachFromPlant: (state, data) => state.update(data.gameId, game => traitDetachFromPlant(game, data))
   , traitConvertFat: (state, data) => state.update(data.gameId, game => traitConvertFat(game, data))

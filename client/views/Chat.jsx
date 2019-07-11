@@ -28,7 +28,7 @@ const styles = theme => ({
   }
   , window: {
     overflowY: 'auto'
-    , overflowX: 'none'
+    , overflowX: 'hidden'
     , flex: '1 1 0'
     , textAlign: 'left'
   }

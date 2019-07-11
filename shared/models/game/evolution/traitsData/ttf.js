@@ -181,11 +181,11 @@ export const TraitViviparous = {
   type: tt.TraitViviparous
   , targetType: TRAIT_TARGET_TYPE.NONE
   , food: 1
-  , cooldowns: fromJS([
-    [tt.TraitViviparous, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
-  ])
+  // , cooldowns: fromJS([
+  //   [tt.TraitViviparous, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+  // ])
   , action: (game, sourceAnimal, trait) => (dispatch) => {
-    dispatch(server$traitStartCooldown(game.id, trait, sourceAnimal));
+    // dispatch(server$traitStartCooldown(game.id, trait, sourceAnimal));
     dispatch(server$gameDeployAnimalFromDeck(game.id, sourceAnimal, animal => animal.set('food', 1)));
   }
   , _getErrorOfUse: (game, animal) => {

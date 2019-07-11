@@ -37,8 +37,11 @@ import {
   , startCooldown
   , traitQuestion
   , traitAnswerSuccess
+
   , traitAnimalRemoveTrait
   , traitAnimalAttachTrait
+  , traitAnimalRecombinateTraits
+
   , traitAttachToPlant
   , traitDetachFromPlant
   , traitGrazeFood
@@ -89,8 +92,11 @@ export const reducer = createReducer(null, {
   , startCooldown
   , traitQuestion
   , traitAnswerSuccess
+
   , traitAnimalRemoveTrait
   , traitAnimalAttachTrait
+  , traitAnimalRecombinateTraits
+
   , traitAttachToPlant
   , traitDetachFromPlant
   , traitGrazeFood

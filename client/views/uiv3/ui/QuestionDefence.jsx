@@ -83,8 +83,6 @@ class QuestionDefence extends React.PureComponent {
     const attackAnimal = this.getAttackAnimal();
     const traitCarnivorous = attackAnimal.hasTrait(tt.TraitCarnivorous);
     const traitTailLoss = targetAnimal.hasTrait(tt.TraitTailLoss);
-    const targetsTailLoss = traitTailLoss
-      && !checkIfTraitDisabledByIntellect(attackAnimal, traitTailLoss);
 
     const traitMimicry = targetAnimal.hasTrait(tt.TraitMimicry);
     const targetsMimicry = traitMimicry
@@ -102,7 +100,7 @@ class QuestionDefence extends React.PureComponent {
     );
 
     return otherTraits.every(t => t.getDataModel().optional)
-      && !(traitTailLoss && targetsTailLoss && targetsTailLoss.size > 0)
+      && !traitTailLoss
       && !(traitMimicry && targetsMimicry && targetsMimicry.size > 0);
   };
 
@@ -114,7 +112,7 @@ class QuestionDefence extends React.PureComponent {
     const defaultMode = {
       checkTrait: trait => {
         if (checkIfTraitDisabledByIntellect(attackAnimal, trait)) return;
-        if (!trait.defense) return;
+        if (!trait.getDataModel().defense) return;
         return !trait.getErrorOfUse(game, targetAnimal, attackAnimal, traitCarnivorous);
       }
       , onSelectTrait: trait => e => {
