@@ -1,6 +1,6 @@
 {
   "name": "cards3",
-  "version": "1.0.22",
+  "version": "1.0.23",
   "description": "blahblah",
   "browser": {
     "jsonwebtoken": false,
