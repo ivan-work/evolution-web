@@ -131,7 +131,8 @@ export const TraitRecombination = {
   , _getErrorOfUse: (game, sourceAnimal, traitRecombination) => {
     const linkedAnimal = traitRecombination.findLinkedAnimal(game, sourceAnimal);
     if (
-      TraitRecombination.getTargets(game, sourceAnimal).size === 0
+      !linkedAnimal
+      || TraitRecombination.getTargets(game, sourceAnimal).size === 0
       || TraitRecombination.getTargets(game, linkedAnimal).size === 0
     ) return ERRORS.TRAIT_ACTION_NO_TARGETS;
   }

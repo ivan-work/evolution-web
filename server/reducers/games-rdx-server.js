@@ -154,8 +154,15 @@ export const traitAnimalRecombinateTraits = (game, {player1id, player2id, animal
 
   let animal1 = game.locateAnimal(animal1id, player1id)
     .traitDetach(trait => trait.id === trait1id);
+  if (trait1.type === tt.TraitNeoplasm && !animal1.hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)) {
+    animal1 = animal1.update('traits', traits => traits.map(trait => trait.set('disabled', false)));
+  }
+
   let animal2 = game.locateAnimal(animal2id, player2id)
     .traitDetach(trait => trait.id === trait2id);
+  if (trait2.type === tt.TraitNeoplasm && !animal2.hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)) {
+    animal2 = animal2.update('traits', traits => traits.map(trait => trait.set('disabled', false)));
+  }
 
   if (!trait2.getDataModel().checkTraitPlacementFails(animal1))
     animal1 = animal1.traitAttach(trait2);

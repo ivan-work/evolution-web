@@ -13,6 +13,7 @@ const styles = theme => ({
     , color: theme.palette.text.primary
     , fontSize: 'inherit'
     , zIndex: theme.zIndex.tooltip - 1
+    , boxShadow: '1px 1px 5px black'
   }
 });
 

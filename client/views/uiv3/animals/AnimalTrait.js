@@ -22,6 +22,8 @@ import {traitActivateRequest, traitAmbushActivateRequest} from "../../../../shar
 import styled from "../../../styles/styled";
 import AnimalLinkedTrait from "./AnimalLinkedTrait";
 import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
+import AnimalTraitDetails from "./AnimalTraitDetails";
+import WhiteTooltip from "../../utils/WhiteTooltip";
 
 export const AnimalTraitBody = styled('div')({
   ...GameStyles.animalTrait
@@ -96,12 +98,14 @@ export class TraitBase extends React.PureComponent {
       }
     );
     return (
-      <AnimalTraitBody className={cnAnimalTrait} onClick={this.onClick}>
-        <Typography className='AnimalTraitText'>
-          <span className='name'>{T.translate('Game.Trait.' + trait.type)}</span>
-          <span className='food'>{trait.getDataModel().food > 0 ? ' +' + trait.getDataModel().food : null}</span>
-        </Typography>
-      </AnimalTraitBody>
+      <WhiteTooltip placement='right' title={<AnimalTraitDetails trait={trait}/>}>
+        <AnimalTraitBody className={cnAnimalTrait} onClick={this.onClick}>
+          <Typography className='AnimalTraitText'>
+            <span className='name'>{T.translate('Game.Trait.' + trait.type)}</span>
+            <span className='food'>{trait.getDataModel().food > 0 ? ' +' + trait.getDataModel().food : null}</span>
+          </Typography>
+        </AnimalTraitBody>
+      </WhiteTooltip>
     )
   }
 }
