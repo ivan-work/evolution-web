@@ -39,6 +39,7 @@ export default class PlantModel extends Record({
       : new PlantModel(js)
         .set('traits', OrderedMap(js.traits).map(TraitModel.fromServer))
         .set('data', PlantDataModel.new(js.type))
+        .set('flags', Map(js.flags))
         .recalculate();
   }
 

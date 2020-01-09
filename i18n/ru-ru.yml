@@ -83,6 +83,7 @@ Game:
     Pause_Desc: Игра поставится на паузу когда все игроки нажмут эту кнопку.
     Unpause: Вы голосуете за продолжение игры.
     Unpause_Desc: Игра снимется с паузы когда большая половина игроков нажмет эту кнопку.
+    Plants: Растения
     Scores:
       Label: Счет
       Winner: Победитель
@@ -158,33 +159,6 @@ Game:
     PlantFungus: Гриб
     PlantCarnivorous: Хищное
     PlantParasite: Паразит
-  PlantTrait:
-    PlantTraitRootVegetable: Корнеплод
-    PlantTraitHoney: Медонос
-    PlantTraitMycorrhiza: Микориза
-    PlantTraitAquatic: Водное
-    PlantTraitOfficinalis: Лекарственное
-    PlantTraitProteinRich: Питательное
-    PlantTraitTree: Дерево
-    PlantTraitParasiticPlant:
-    PlantTraitSpiky: Колючее
-    PlantTraitParasiticLink: Паразит
-  PlantTraitDesc:
-    PlantTraitRootVegetable: Только $A со свойством $TraitBurrowing может брать $F с такого растения.
-    PlantTraitHoney: Если ваше $A получило $F с такого растения, заберите карту у игрока с наибольшем количеством карт в руке.
-    PlantTraitMycorrhiza: >-
-      Парное свойство.
-      Несколько растений связаны между собой с помощью $PlantTraitMycorrhiza: все они выживут, если хотя бы на одном из них есть $F.
-      Затем в конце фазы роста каждое из тех растений, на которых нет $F, получит $F.
-    PlantTraitAquatic: Только животное со свойством $TraitSwimming может брать $F с такого растения.
-    PlantTraitOfficinalis: >-
-      $A, получившее $F с такого растения, считается накормленным, но абсолютно все его свойства перестают действовать до конца фазы питания.
-      Действует только фишка убежища.
-    PlantTraitProteinRich: $A, получившее $F с такого растения, дополнительно получает $F. $TraitCarnivorous может брать еду с этого растения.
-    PlantTraitTree: Только $A со свойствами $TraitMassive и/или $TraitFlight может брать с такого растения. Дает фишку убежища.
-    PlantTraitParasiticPlant: $PlantTraitParasiticPlant считается самостоятельным растением.
-    PlantTraitSpiky: Дает три фишки убежища.
-    PlantTraitParasiticLink: Активируйте чтобы положить ЕДУ на паразита
   Trait:
     TraitSymbiosis      : Симбиоз
     TraitCommunication  : Сотрудничество
@@ -230,6 +204,20 @@ Game:
     TraitRstrategy      : r-Стратегия
     TraitHomeothermy    : Теплокровное
     TraitShy            : Пугливое
+
+    PlantTraitRootVegetable: Корнеплод
+    PlantTraitHoney: Медонос
+    PlantTraitMycorrhiza: Микориза
+    PlantTraitAquatic: Водное
+    PlantTraitOfficinalis: Лекарственное
+    PlantTraitProteinRich: Питательное
+    PlantTraitTree: Дерево
+    PlantTraitParasiticPlant:
+    PlantTraitSpiky: Колючее
+    PlantTraitParasiticLink: Паразит
+    PlantTraitHiddenCarnivorous: Хищное
+
+    TraitPlantGrazing: Топотун
   TraitDesc:
     $EAT: Активируется вместо взятия еды
     $CDRound: Можно использовать в каждом раунде
@@ -281,3 +269,21 @@ Game:
     TraitRstrategy      : Можно играть на любого игрока. Игрок не получает новых карт за $A с этим свойством. Вместо этого в начале хода две карты выкладываются как два новых $A игрока.
     TraitHomeothermy    : $CDRound. $A с этим свойством может получить дополнительно $F из кормовой базы.
     TraitShy            : Если $A было атаковано хищником, то в этот ход хищники больше не могут его атаковать.
+
+    PlantTraitRootVegetable: Только $A со свойством $TraitBurrowing может брать $F с такого растения.
+    PlantTraitHoney: Если ваше $A получило $F с такого растения, заберите карту у игрока с наибольшем количеством карт в руке.
+    PlantTraitMycorrhiza: >-
+      Парное свойство.
+      Несколько растений связаны между собой с помощью $PlantTraitMycorrhiza: все они выживут, если хотя бы на одном из них есть $F.
+      Затем в конце фазы роста каждое из тех растений, на которых нет $F, получит $F.
+    PlantTraitAquatic: Только животное со свойством $TraitSwimming может брать $F с такого растения.
+    PlantTraitOfficinalis: >-
+      $A, получившее $F с такого растения, считается накормленным, но абсолютно все его свойства перестают действовать до конца фазы питания.
+      Действует только фишка убежища.
+    PlantTraitProteinRich: $A, получившее $F с такого растения, дополнительно получает $F. $TraitCarnivorous может брать еду с этого растения.
+    PlantTraitTree: Только $A со свойствами $TraitMassive и/или $TraitFlight может брать с такого растения. Дает фишку убежища.
+    PlantTraitParasiticPlant: $PlantTraitParasiticPlant считается самостоятельным растением.
+    PlantTraitSpiky: Дает три фишки убежища.
+    PlantTraitParasiticLink: Активируйте чтобы положить ЕДУ на паразита
+
+    TraitPlantGrazing: Сначала $A получает $F с растения. Затем оно может уничтожить другую $F на этом же растении.

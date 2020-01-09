@@ -13,7 +13,7 @@ import {
   getErrorOfAnimalEatingFromGame,
   checkTraitActivation_Animal,
   checkAnimalCanTakeShellFails,
-  getErrorOfAnimalEatingFromPlant
+  getErrorOfAnimalEatingFromPlant, getErrorOfAnimalTakingCover
 } from './trait.checks';
 import {selectGame} from '../selectors';
 
@@ -24,6 +24,20 @@ const makeOption = {
     return new Option({
       type: 'traitTakeFoodRequest'
       , text: `traitTakeFoodRequest: ${animalId}`
+      // , cooldownAction: (gameId) => null//startCooldown(gameId, )
+    })
+  }
+  , traitTakeFoodPlantRequest: (animalId, plantId) => {
+    return new Option({
+      type: 'traitTakeFoodRequest'
+      , text: `traitTakeFoodRequest: ${animalId} from ${plantId}`
+      // , cooldownAction: (gameId) => null//startCooldown(gameId, )
+    })
+  }
+  , traitTakeCoverRequest: (animalId, plantId) => {
+    return new Option({
+      type: 'traitTakeCoverRequest'
+      , text: `traitTakeCoverRequest: ${animalId} from ${plantId}`
       // , cooldownAction: (gameId) => null//startCooldown(gameId, )
     })
   }
@@ -78,7 +92,10 @@ export const doesPlayerHasOptions = (game, playerId) => {
 };
 
 export const doesOptionExist = (game, playerId) => {
-  return searchPlayerOptions(game, playerId, (option) => true);
+  return searchPlayerOptions(game, playerId, (option) => {
+    logger.debug('endturn/option found:', option.text);
+    return true;
+  });
 };
 
 // takes too long time
@@ -94,21 +111,34 @@ export const getOptions = (game, playerId) => {
 
 export const searchPlayerOptions = (game, playerId, successFn) => {
   const allAnimals = game.players.reduce((result, player) => result.concat(player.continent.keySeq().toArray()), []);
-  logOptions && logger.debug(`endturn/options/search/player/${playerId}`);
+  logOptions && logger.debug(`endturn/options/search/${playerId}`);
 
   return game.getPlayer(playerId).someAnimal((animal) => {
-    logOptions && logger.debug(`endturn/options/search/animal/${animal.id}/food/${getErrorOfAnimalEatingFromGame(game, animal)}`);
+    logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/food/${getErrorOfAnimalEatingFromGame(game, animal)}`);
     if (!getErrorOfAnimalEatingFromGame(game, animal))
       return successFn(makeOption.traitTakeFoodRequest(animal.id));
 
-    logOptions && logger.debug(`endturn/options/search/animal/${animal.id}/shell/${game.getArea().shells.size},${checkAnimalCanTakeShellFails(game, animal)}`);
+    const plantResult = game.somePlant((plant) => {
+      logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/plant/${plant.id}`);
+      logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/plant/${plant.id}/food/${getErrorOfAnimalEatingFromPlant(game, animal, plant)}`);
+      if (!getErrorOfAnimalEatingFromPlant(game, animal, plant)) {
+        return successFn(makeOption.traitTakeFoodPlantRequest(animal.id, plant.id));
+      }
+
+      logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/plant/${plant.id}/food/${getErrorOfAnimalTakingCover(game, animal, plant)}`);
+      if (!getErrorOfAnimalTakingCover(game, animal, plant))
+        return successFn(makeOption.traitTakeCoverRequest(animal.id, plant.id));
+    });
+    if (plantResult) return plantResult;
+
+    logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/shell/${game.getArea().shells.size},${checkAnimalCanTakeShellFails(game, animal)}`);
     if (game.getArea().shells.size > 0 && !checkAnimalCanTakeShellFails(game, animal))
       return successFn(makeOption.traitTakeShellRequest(animal.id));
 
     return animal.traits.some((trait) => {
       const traitData = trait.getDataModel();
 
-      logOptions && logger.debug(`endturn/options/search/animal/${animal.id}/trait/${trait.type}/${trait.getErrorOfUse(game, animal)}`);
+      logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/trait/${trait.type}/${trait.getErrorOfUse(game, animal)}`);
       if (!traitData.transient && traitData.playerControllable && !trait.getErrorOfUse(game, animal)) {
         switch (traitData.targetType) {
           case TRAIT_TARGET_TYPE.ANIMAL:

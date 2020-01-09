@@ -7,17 +7,14 @@ import withStyles from "@material-ui/core/styles/withStyles";
 
 import WhiteTooltip from "../../utils/WhiteTooltip";
 
-import AnimalTraitDetails from "../animals/AnimalTraitDetails";
+import TraitDetails from "../traits/TraitDetails";
 
 import {TraitModel} from "../../../../shared/models/game/evolution/TraitModel";
-import {compose, withProps} from "recompose";
-import Button from "@material-ui/core/Button";
-import ButtonBase from "@material-ui/core/ButtonBase";
+import {compose} from "recompose";
 import connect from "react-redux/es/connect/connect";
 import {PHASE} from "../../../../shared/models/game/GameModel";
 import {InteractionSource} from "../InteractionManager";
 import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";
-import Card from "./Card";
 
 const traitStyles = theme => ({
   CardTrait: {
@@ -46,7 +43,7 @@ const CardTraitBody = ({classes, trait, single, double, invert, canStart, startI
   const traitModel = TraitModel.new(trait);
   const traitFood = traitModel.getDataModel().food;
   return (
-    <WhiteTooltip placement='top' title={<AnimalTraitDetails trait={traitModel}/>}>
+    <WhiteTooltip placement='top' title={<TraitDetails trait={traitModel}/>}>
       <Typography className={cn(classes.CardTrait, {
         [classes.single]: single
         , [classes.double]: double

@@ -173,7 +173,7 @@ export const parseFromRoom = (room, string = '') => {
   }, yaml.load(string));
 
   const deck = parseCardList(seed.deck || '').map(card => card.toClient());
-  const pdeck = seed.settings.addon_plantarium ? parsePlantDeck(seed.pdeck || '') : null;
+  const deckPlants = seed.settings.addon_plantarium ? parsePlantDeck(seed.deckPlants || '') : null;
 
   const players = room.users.reduce((result, id, index) => {
     return [...result, [id, new PlayerModel({
@@ -196,7 +196,7 @@ export const parseFromRoom = (room, string = '') => {
       , phase: parsePhase(seed.phase)
     })
     , deck
-    , pdeck
+    , deckPlants
     , players
     , plants: parsePlantsList(seed.plants || '').map(p => p.toClient()).entrySeq()
     , settings: {

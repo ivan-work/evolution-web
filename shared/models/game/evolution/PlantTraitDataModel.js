@@ -47,8 +47,14 @@ export default class PlantTraitDataModel extends Record(PlantTraitDataModelProps
     if (!trait) trait = plant.hasTrait(this.type, true);
     if (!trait) return ERRORS.TRAIT_ACTION_NO_TRAIT;
     if (trait.disabled) return ERRORS.TRAIT_ACTION_DISABLED;
+    console.log('getting error of ', plant.id,  trait.id)
     if (this.cooldowns && this.cooldowns
-      .some(([link]) => game.cooldowns.checkFor(link, null, plant.id, trait.id)))
+      .some(([link]) => {
+        const res = game.cooldowns.checkFor(link, null, plant.id, trait.id)
+        res && console.log('error in', game.cooldowns.toJS())
+        res && console.log('error in', link, plant.id, trait.id)
+        return res;
+      }))
       return ERRORS.COOLDOWN;
 
     return this._getErrorOfUse(game, plant, trait, ...targets);

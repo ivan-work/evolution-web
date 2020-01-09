@@ -14,7 +14,7 @@ describe('[PLANTARIUM] !food.spec.js:', function () {
 settings:
   addon_plantarium: true
 phase: prepare
-pdeck: fung, 2 eph
+deckPlants: fung, 2 eph
 deck: 20 camo
 `);
     expect(ServerGame().status.turn, 'turn').equal(0);

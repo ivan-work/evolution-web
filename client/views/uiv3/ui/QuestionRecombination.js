@@ -20,7 +20,7 @@ import GameStyles from "../GameStyles";
 import * as tt from "../../../../shared/models/game/evolution/traitTypes";
 
 import {Animal} from "../animals/Animal";
-import {TraitBase} from "../animals/AnimalTrait";
+import {AnimalTraitBase} from "../animals/AnimalTrait";
 
 import {closeDialog} from "../../../actions/modal";
 import {traitActivateRequest} from "../../../../shared/actions/trait";
@@ -139,9 +139,9 @@ const RecombinationAnimal = ({animal, selectedTrait, checkTrait, onSelectTrait})
 const RecombinationTrait = ({classes, selectedTrait, onDeselectTrait, right, left}) => (
   <div className={classes.recombinationTraitContainer}>
     {left && <IconArrowLeft/>}
-    <TraitBase trait={selectedTrait}
-               canStart={true}
-               startInteraction={onDeselectTrait}/>
+    <AnimalTraitBase trait={selectedTrait}
+                     canStart={true}
+                     startInteraction={onDeselectTrait}/>
     {right && <IconArrowRight/>}
   </div>
 );

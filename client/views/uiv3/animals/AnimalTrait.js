@@ -20,123 +20,41 @@ import * as tt from "../../../../shared/models/game/evolution/traitTypes";
 import {openQuestionMetamorphose, openQuestionRecombination} from "../../../actions/modal";
 import {traitActivateRequest, traitAmbushActivateRequest} from "../../../../shared/actions/trait";
 import styled from "../../../styles/styled";
-import AnimalLinkedTrait from "./AnimalLinkedTrait";
 import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
-import AnimalTraitDetails from "./AnimalTraitDetails";
 import WhiteTooltip from "../../utils/WhiteTooltip";
+import LinkedTrait from "../lineBetweenTraits/LinkedTrait";
+import {TraitBase} from "../traits/Trait";
+import LinkedTraitWrapper from "../lineBetweenTraits/LinkedTraitWrapper";
 
-export const AnimalTraitBody = styled('div')({
-  ...GameStyles.animalTrait
-  , willChange: 'background'
-  , transition: 'background .5s'
-  , ...GameStyles.addTraitColors((colorConfig) => ({
-    background: colorConfig.fill
-    , '& .AnimalTraitText': {
-      color: colorConfig.text
-      , fontSize: 14
-      , display: 'flex'
-      , '& .name': {
-        ...GameStyles.ellipsis
-        , flex: '1 1 0'
-      }
-    }
-    , '&.disabled': {
-      background: colorConfig.fillDisabled
-      , '& .AnimalTraitText': {
-        color: colorConfig.textDisabled
-      }
-    }
-    , '&.canStart': {
-      background: colorConfig.fillActive
-      , cursor: 'pointer'
-      , '& .AnimalTraitText': {
-        color: colorConfig.textActive
-        , fontWeight: 500
-      }
-      , '&:hover': {
-        background: colorConfig.fillActiveHover
-        , '& .AnimalTraitText': {
-          color: colorConfig.textActiveHover
-        }
-      }
-    }
-    , '&.value': {
-      background: colorConfig.fillValue
-      , '& .AnimalTraitText': {
-        color: colorConfig.textValue
-        , fontWeight: 500
-      }
-    }
-    , '&.source': {
-      background: colorConfig.fillSource
-      , '& .AnimalTraitText': {
-        color: colorConfig.textSource
-      }
-    }
-  }))
-  , '&.animation': {
-    background: '#0F0 !important'
-  }
-});
-
-export class TraitBase extends React.PureComponent {
-  onClick = e => {
-    const {canStart, startInteraction} = this.props;
-    canStart && startInteraction(e);
-  };
-
-  render() {
-    const {trait, canStart, value, disabled} = this.props;
-    const cnAnimalTrait = cn(
-      'AnimalTrait2'
-      , trait.type
-      , {
-        canStart
-        , value: value || trait.value
-        , source: trait.linkSource
-        , disabled: disabled || trait.disabled
-      }
-    );
-    return (
-      <WhiteTooltip placement='right' title={<AnimalTraitDetails trait={trait}/>}>
-        <AnimalTraitBody className={cnAnimalTrait} onClick={this.onClick}>
-          <Typography className='AnimalTraitText'>
-            <span className='name'>{T.translate('Game.Trait.' + trait.type)}</span>
-            <span className='food'>{trait.getDataModel().food > 0 ? ' +' + trait.getDataModel().food : null}</span>
-          </Typography>
-        </AnimalTraitBody>
-      </WhiteTooltip>
-    )
-  }
-}
+export const AnimalTraitBase = (props) => (
+  <TraitBase
+    {...props}
+    textComponent={
+      <>
+        <span className='name'>{T.translate('Game.Trait.' + props.trait.type)}</span>
+        <span className='food'>
+          {props.trait.getDataModel().food > 0 ? ' +' + props.trait.getDataModel().food : null}
+          </span>
+      </>
+    } />
+);
 
 const AnimalTrait = (props) => {
   const trait = props.trait;
   const traitDataModel = trait.getDataModel();
   if (trait.type === tt.TraitMetamorphose) {
-    return <InteractiveTraitMetamorphose {...props}/>;
+    return <InteractiveTraitMetamorphose {...props} />;
   } else if (trait.type === tt.TraitRecombination) {
-    return <InteractiveTraitRecombination {...props}/>;
+    return <InteractiveTraitRecombination {...props} />;
   } else if (trait.type === tt.TraitAmbush) {
-    return <InteractiveTraitAmbush {...props}/>;
+    return <InteractiveTraitAmbush {...props} />;
   } else if (traitDataModel.playerControllable && traitDataModel.targetType === TRAIT_TARGET_TYPE.ANIMAL) {
-    return <InteractiveTrait {...props}/>;
+    return <InteractiveTrait {...props} />;
   } else if (traitDataModel.playerControllable) {
-    return <InteractiveTraitClickable {...props}/>;
+    return <InteractiveTraitClickable {...props} />;
   } else {
-    return <TraitBase {...props}/>;
+    return <AnimalTraitBase {...props} />;
   }
-};
-
-export const AnimalTraitWrapper = (props) => {
-  if (props.trait.isLinked()) {
-    return (
-      <AnimalLinkedTrait trait={props.trait} sourceAnimal={props.sourceAnimal}>
-        <AnimalTrait {...props}/>
-      </AnimalLinkedTrait>
-    );
-  }
-  return <AnimalTrait {...props}/>;
 };
 
 const checkCanStartBase = (game, animal) => (game.userId === animal.ownerId);
@@ -162,13 +80,13 @@ export const InteractiveTraitMetamorphose = compose(
   connect((state, props) => ({canStart: checkCanStart(state, props)}), (dispatch, {trait, sourceAnimal}) => ({
     startInteraction: () => dispatch(openQuestionMetamorphose({trait, sourceAnimal}))
   }))
-)(TraitBase);
+)(AnimalTraitBase);
 
 export const InteractiveTraitRecombination = compose(
   connect((state, props) => ({canStart: checkCanStart(state, props)}), (dispatch, {trait, sourceAnimal}) => ({
     startInteraction: () => dispatch(openQuestionRecombination({trait, sourceAnimal}))
   }))
-)(TraitBase);
+)(AnimalTraitBase);
 
 export const InteractiveTraitAmbush = compose(
   connect((state, props) => ({
@@ -178,13 +96,15 @@ export const InteractiveTraitAmbush = compose(
   , withHandlers({
     startInteraction: ({dispatch, sourceAnimal, value}) => () => dispatch(traitAmbushActivateRequest(sourceAnimal.id, !value))
   })
-)(TraitBase);
+)(AnimalTraitBase);
 
 export const InteractiveTraitClickable = compose(
-  connect((state, props) => ({canStart: checkCanStart(state, props)}), (dispatch, {trait, sourceAnimal}) => ({
+  connect((state, props) => ({
+    canStart: checkCanStart(state, props)
+  }), (dispatch, {trait, sourceAnimal}) => ({
     startInteraction: () => dispatch(traitActivateRequest(sourceAnimal.id, trait.id))
   }))
-)(TraitBase);
+)(AnimalTraitBase);
 
 export const InteractiveTrait = compose(
   connect((state, props) => ({canStart: checkCanStart(state, props)}), {traitActivateRequest})
@@ -192,8 +112,14 @@ export const InteractiveTrait = compose(
     canStart: ({canStart}) => canStart
     , onStart: ({trait, sourceAnimal}) => ({trait, sourceAnimal})
   })
-)(TraitBase);
+)(AnimalTraitBase);
 
 const AnimatedTraitHOC = AnimatedHOC(({trait}) => `AnimalTrait#${trait.id}`);
+
+export const AnimalTraitWrapper = (props) => (
+  <LinkedTraitWrapper {...props}>
+    <AnimalTrait {...props} />
+  </LinkedTraitWrapper>
+);
 
 export default AnimatedTraitHOC(AnimalTraitWrapper);

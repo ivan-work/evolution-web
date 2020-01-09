@@ -4,13 +4,13 @@ import * as tt from '../../models/game/evolution/traitTypes';
 import * as ptt from '../../models/game/evolution/plantarium/plantTraitTypes';
 
 import {
-traitTakeFoodRequest,
-gameEndTurnRequest, traitActivateRequest
+  traitTakeFoodRequest,
+  gameEndTurnRequest, traitActivateRequest, gamePlantAttackRequest
 } from '../actions';
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors'
 
 describe('[PLANTARIUM] Grow Phase:', function () {
-  describe('Base grow:', function () {
+  describe('Base grow', function () {
     it('food = 0', () => {
       const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
       const gameId = ParseGame(`
@@ -202,7 +202,7 @@ players:
     });
   });
 
-  describe('Advanced grow:', function () {
+  describe('Advanced grow', function () {
     it('Fungus grow', () => {
       const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
       const gameId = ParseGame(`
@@ -249,6 +249,130 @@ players:
       expect(findPlant('$fun').getFood(), '$fun.getFood() at the start of turn 1').equals(2);
     });
   });
+
+  describe.only('After turn grow', function() {
+    it('Spawns new plants after turn', () => {
+      const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+      const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+phase: prepare
+deckPlants: PlantEphemeral, PlantPerennial, PlantLegume, PlantGrass,\
+PlantFruits, PlantSucculent, PlantLiana, PlantFungus, PlantCarnivorous
+deck: camo, pois
+players:
+  - hand: 1 camo
+`);
+      const {selectGame, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+      expect(selectGame().status.turn, 'turn').equal(0);
+      expect(selectGame().status.round, 'round').equal(0);
+      expect(selectGame().status.phase, 'phase').equal(PHASE.DEPLOY);
+
+      expect(selectGame().plants, 'plants').size(3);
+      expect(selectGame().deckPlants, 'deckPlants').size(6);
+
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      expect(selectGame().status.turn, 'turn').equal(0);
+      expect(selectGame().status.round, 'round').equal(0);
+      expect(selectGame().status.phase, 'phase').equal(PHASE.FEEDING);
+
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      expect(selectGame().status.turn, 'turn').equal(1);
+      expect(selectGame().status.round, 'round').equal(0);
+      expect(selectGame().status.phase, 'phase').equal(PHASE.DEPLOY);
+
+      expect(selectGame().plants, 'plants').size(4);
+      expect(selectGame().deckPlants, 'deckPlants').size(5);
+    });
+
+    it(`Doesn't throw error if the deck is too small`, () => {
+      const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+      const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+phase: prepare
+deckPlants: PlantEphemeral, PlantPerennial
+deck: camo, pois
+players:
+  - hand: 1 camo
+`);
+      const {selectGame, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+      expect(selectGame().status.turn, 'turn').equal(0);
+      expect(selectGame().status.round, 'round').equal(0);
+      expect(selectGame().status.phase, 'phase').equal(PHASE.DEPLOY);
+
+      expect(selectGame().plants, 'plants').size(2);
+      expect(selectGame().deckPlants, 'deckPlants').size(0);
+
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      expect(selectGame().status.turn, 'turn').equal(0);
+      expect(selectGame().status.round, 'round').equal(0);
+      expect(selectGame().status.phase, 'phase').equal(PHASE.FEEDING);
+
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      expect(selectGame().status.turn, 'turn').equal(1);
+      expect(selectGame().status.round, 'round').equal(0);
+      expect(selectGame().status.phase, 'phase').equal(PHASE.DEPLOY);
+
+      expect(selectGame().plants, 'plants').size(2);
+      expect(selectGame().deckPlants, 'deckPlants').size(0);
+    });
+
+    it(`Reuses discard pile`, () => {
+      const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+      const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+phase: prepare
+deckPlants: 3 PlantCarn
+plants: PlantPer $per
+deck: camo, pois, camo, pois, camo, pois, camo, pois, camo, pois, camo, pois, camo, pois, camo, pois, camo, pois
+players:
+  - hand: 1 camo
+    continent: $A pois, $B pois, $C pois, $D pois +
+`);
+      const {selectGame, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+      expect(selectGame().status.turn, 'turn').equal(0);
+      expect(selectGame().status.round, 'round').equal(0);
+      expect(selectGame().status.phase, 'phase').equal(PHASE.DEPLOY);
+
+      expect(selectGame().plants, 'plants').size(4);
+      expect(selectGame().deckPlants, 'deckPlants').size(0);
+
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      expect(selectGame().status.turn, 'turn').equal(0);
+      expect(selectGame().status.round, 'round').equal(0);
+      expect(selectGame().status.phase, 'phase').equal(PHASE.FEEDING);
+
+      const [plantPer, plantCarn1, plantCarn2, plantCarn3] = selectGame().plants.keySeq().toJS();
+
+      logger.verbose(`Plants are: ${[plantPer, plantCarn1, plantCarn2, plantCarn3]}`)
+
+      clientStore0.dispatch(gamePlantAttackRequest(plantCarn1, '$A'));
+
+      expect(findAnimal('$A')).null;
+      // console.log(findPlant(plantCarn1))
+      clientStore0.dispatch(gamePlantAttackRequest(plantCarn2, '$B'));
+      expect(findAnimal('$B')).null;
+
+      clientStore0.dispatch(gameEndTurnRequest());
+      expect(findAnimal('$C')).null;
+
+
+
+      // expect(selectGame().status.turn, 'turn').equal(1);
+      // expect(selectGame().status.round, 'round').equal(0);
+      // expect(selectGame().status.phase, 'phase').equal(PHASE.DEPLOY);
+      //
+      // expect(selectGame().plants, 'plants').size(4);
+      // expect(selectGame().deckPlants, 'deckPlants').size(5);
+    });
+  })
 });
 
 

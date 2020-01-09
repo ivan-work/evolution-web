@@ -104,7 +104,7 @@ export const server$gameCreateSuccess = (room) => (dispatch, getState) => {
   if (game.status.phase === PHASE.PREPARE) {
     dispatch(server$game(gameId, gameStart(gameId)));
     dispatch(server$gameDistributeCards(gameId));
-    game.isPlantarium() && dispatch(server$gameSpawnPlants(gameId, game.getActualPlayers().size + 1))
+    game.isPlantarium() && dispatch(server$gameSpawnPlants(gameId, game.getPlantsConfig().start))
   }
   dispatch(server$gamePlayerStart(gameId));
 };
@@ -358,7 +358,7 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
   if (isDefaultTurn) return;
   let game = selectGame(getState, gameId);
   const acted = selectGame(getState, gameId).getPlayer(userId).acted;
-  logger.debug(`server$gameEndTurn: ${userId} (${game.getPlayer(userId).acted})`);
+  logger.debug(`game/server$gameEndTurn: ${userId} (${game.getPlayer(userId).acted})`);
 
   dispatch(server$gameCancelTurnTimeout(gameId));
 
@@ -374,6 +374,8 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
 
   const nextPlayer = dispatch(server$gameNextPlayer(gameId, userId));
   if (nextPlayer) {
+    // logger.debug(`game/server$gameEndTurn: ${userId} => ${nextPlayer}`);
+    // do nothing if next player is available
   } else if (game.status.phase === PHASE.DEPLOY) {
     const food = game.generateFood();
     dispatch(server$gameStartPhase(gameId, PHASE.FEEDING, {food}));
@@ -491,7 +493,7 @@ export const server$gamePlayerContinue = (gameId, previousUserId) => (dispatch, 
 };
 
 const server$gameNextPlayer = (gameId, startSearchFromId) => (dispatch, getState) => {
-  // logger.debug('server$gameNextPlayer search start:', startSearchFromId);
+  logger.debug('server$gameNextPlayer search start:', startSearchFromId);
   const game = selectGame(getState, gameId);
 
   let nextRound = false;
@@ -614,7 +616,9 @@ export const server$gamePhaseEndRegeneration = (gameId) => (dispatch, getState) 
   if (selectGame(getState, gameId).deck.size > 0) {
     dispatch(server$gameDistributeCards(gameId));
     dispatch(server$gameDistributeAnimals(gameId));
-    // dispatch(server$gameGrowPlants(gameId));
+    if (game.isPlantarium()) {
+      dispatch(server$gameSpawnPlants(gameId, game.generatePlants()));
+    }
     dispatch(server$game(gameId, gameStartTurn(gameId)));
     dispatch(server$gameStartPhase(gameId, PHASE.DEPLOY));
     dispatch(server$gamePlayerStart(gameId));

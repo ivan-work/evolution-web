@@ -314,7 +314,7 @@ players:
     });
   });
 
-  describe('traitPlantAttackRequest', function () {
+  describe('gamePlantAttackRequest', function () {
     it(`orders attack`, () => {
       const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
       const gameId = ParseGame(`

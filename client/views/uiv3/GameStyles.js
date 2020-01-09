@@ -1,12 +1,19 @@
 import {lighten, darken} from '@material-ui/core/styles/colorManipulator'
 import geckoHR from '../../assets/gfx/geckoHR.svg';
 import * as tt from '../../../shared/models/game/evolution/traitTypes'
+import * as ptt from '../../../shared/models/game/evolution/plantarium/plantTraitTypes'
 
 const defaultCardColor = '#F5F7F3';
 const defaultWidth = 120;
 
 const TraitGeneralColors = {
-  Parasitic: '#909'
+  Parasitic: {
+    text: '#909'
+    , textActive: '#603'
+    , fillActive: '#FCF'
+    , textActiveHover: '#FEE'
+    , fillActiveHover: '#909'
+  }
   , Fat: '#D60'
   , Attack: {
     text: '#600'
@@ -47,15 +54,9 @@ const TraitColors = {
   , [tt.TraitSwimming]: {
     text: '#00F'
   }
-  , [tt.TraitParasite]: {
-    text: TraitGeneralColors.Parasitic
-  }
-  , [tt.TraitTrematode]: {
-    text: TraitGeneralColors.Parasitic
-  }
-  , [tt.TraitNeoplasm]: {
-    text: TraitGeneralColors.Parasitic
-  }
+  , [tt.TraitParasite]: TraitGeneralColors.Parasitic
+  , [tt.TraitTrematode]: TraitGeneralColors.Parasitic
+  , [tt.TraitNeoplasm]: TraitGeneralColors.Parasitic
   , [tt.TraitCommunication]: {
     text: '#99F'
   }
@@ -77,8 +78,12 @@ const TraitColors = {
     , textActiveHover: '#FFE'
     , fillActiveHover: '#F60'
   }
-  , 'AnimalTrait2': {}
+  , [ptt.PlantTraitParasiticLink]: TraitGeneralColors.Parasitic
+  , [ptt.PlantTraitMycorrhiza]: {
+    text: '#396'
+  }
 };
+TraitColors.Trait = {}; // default mapping
 
 const defaultMapper = ({text, fill}) => ({
   color: text
@@ -92,6 +97,16 @@ const addTraitColors = (mapper = defaultMapper) => Object.entries(TraitColors)
       [`&.${type}`]: mapper(colorConfig)
     })
   }, {});
+
+const gridContainerBase = {
+  display: 'flex'
+  , margin: '4px auto'
+  , flexFlow: 'row wrap'
+  , justifyContent: 'center'
+  , alignContent: 'start'
+  , alignItems: 'flex-start'
+
+};
 
 const animalTrait = {
   textAlign: 'center'
@@ -111,13 +126,15 @@ const animalBase = {
   , borderRadius: 5
   , boxShadow: '1px 1px 5px black'
 };
-const animalCanInteract = {
+
+const canInteract = {
   cursor: 'pointer'
   , boxShadow: `0px 0px 4px 4px #060`
   , '&:hover': {
     boxShadow: '0px 0px 4px 4px red'
   }
 };
+
 const animal = {
   ...animalBase
   , backgroundColor: defaultCardColor
@@ -128,8 +145,14 @@ const animal = {
   , background: `url(${geckoHR}) 0% 50% no-repeat`
   , backgroundSize: `${defaultWidth}px ${defaultWidth}px`
 
-  , '&.canInteract': animalCanInteract
+  , '&.canInteract': canInteract
   , transition: 'box-shadow .25s'
+};
+
+const plant = {
+  ...animalBase
+  , height: 'auto'
+  , '&.canInteract': canInteract
 };
 
 export default {
@@ -137,6 +160,7 @@ export default {
   , defaultWidth
   , defaultColorConfig
   , TraitColors
+  , gridContainerBase
   , card: {
     width: 90
     , height: 90 / 3 * 4
@@ -146,9 +170,10 @@ export default {
     , boxShadow: '1px 1px 5px black'
   }
   , animalBase
-  , animalCanInteract
+  , animalCanInteract: canInteract
   , animal
   , animalTrait
+  , plant
   , animalPreview: {
     width: 18
     , height: 24

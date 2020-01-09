@@ -234,16 +234,16 @@ settings:
     it('ParseGame is parsing plant deck', () => {
       const [{serverStore, ServerGame, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
       const gameId = ParseGame(`
-pdeck: fung
+deckPlants: fung
 phase: deploy
 settings:
   addon_plantarium: true
 `);
       expect(ServerGame().settings.addon_plantarium, 'ServerGame().settings.addon_plantarium').equal(true);
-      expect(ServerGame().pdeck, 'ServerGame().pdeck.size').size(1);
-      expect(ServerGame().pdeck.get(0), 'ServerGame().pdeck[0]').equal(pt.PlantFungus);
+      expect(ServerGame().deckPlants, 'ServerGame().deckPlants.size').size(1);
+      expect(ServerGame().deckPlants.get(0), 'ServerGame().deckPlants[0]').equal(pt.PlantFungus);
       expect(ClientGame0().settings.addon_plantarium, 'ClientGame0().settings.addon_plantarium').equal(true);
-      expect(ClientGame0().pdeck, 'ClientGame0().pdeck').null;
+      expect(ClientGame0().deckPlants, 'ClientGame0().deckPlants').null;
     });
 
     describe('Parsing Plants', () => {

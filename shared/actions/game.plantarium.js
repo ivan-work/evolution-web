@@ -45,9 +45,15 @@ export const gameSpawnPlants = (gameId, plants) => ({
 
 export const server$gameSpawnPlants = (gameId, count) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
-  const plants = game.pdeck.take(count).map(PlantModel.new);
+  let deck = game.deckPlants;
+  if (count > deck.size) {
+    // No shuffling because it's a feature creep
+    deck = deck.concat(game.deckPlantsDiscard);
+  }
+  const plants = deck.take(count).map(PlantModel.new);
   dispatch(server$game(gameId, gameSpawnPlants(gameId, plants)));
 };
+
 export const gameDeployPlant = (gameId, plant) => ({
   type: 'gameDeployPlant'
   , data: {gameId, plant}

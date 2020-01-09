@@ -259,7 +259,7 @@ export const gameStartDeploy = (game) => {
     .setIn(['status', 'round'], 0)
 };
 
-export const gameStartFeeding = (game, {food}) => {
+export const gameStartFeeding = (game, {food = 0}) => {
   ensureParameter(food, 'number');
   return game
     .update('players', players => players.map(player => player
@@ -395,6 +395,7 @@ export const plantDeath = (game, {plantId}) => {
     .update('plants', plants => plants.map(p =>
       p.traitDetach(trait => trait.linkAnimalId === plantId)
     ))
+    .update('deckPlantsDiscard', deck => !deck ? deck : deck.push(plant.type))
     .update(addToGameLog(['plantDeath', logPlant(plant)]));
 };
 
@@ -477,21 +478,24 @@ export const traitConvertFat = (game, {sourceAid, traitId}) => {
 
 export const traitSetAnimalFlag = (game, {sourceAid, flag, on}) => {
   const animal = game.locateAnimal(sourceAid);
-  return game
-    .setIn(['players', animal.ownerId, 'continent', animal.id, 'flags', flag], on);
+  if (animal) return game.setIn(['players', animal.ownerId, 'continent', animal.id, 'flags', flag], on);
+
+  const plant = game.getPlant(sourceAid);
+  if (plant) return game.setIn(['plants', plant.id, 'flags', flag], on);
+
+  logger.error(`Cannot traitSetAnimalFlag for ${sourceAid} (${flag} ${on})`);
+  return game;
 };
 
 export const traitSetValue = (game, {sourceAid, traitId, value}) => {
   const animal = game.locateAnimal(sourceAid);
+  if (animal) return game.setIn(['players', animal.ownerId, 'continent', animal.id, 'traits', traitId, 'value'], value);
+
   const plant = game.getPlant(sourceAid);
-  if (animal) {
-    return game.setIn(['players', animal.ownerId, 'continent', animal.id, 'traits', traitId, 'value'], value);
-  } else if (plant) {
-    return game.setIn(['plants', plant.id, 'traits', traitId, 'value'], value);
-  } else {
-    logger.error(`Cannot traitSetValue for ${sourceAid} (${traitId} ${value})`);
-    return game;
-  }
+  if (plant) return game.setIn(['plants', plant.id, 'traits', traitId, 'value'], value);
+
+  logger.error(`Cannot traitSetValue for ${sourceAid} (${traitId} ${value})`);
+  return game;
 };
 
 const traitNotify_Start_getTarget = {
@@ -568,10 +572,27 @@ export const huntUnsetFlag = (game, {key, value}) => game.updateIn(['hunts', 0, 
 export const huntEnd = (game, {}) => game.update('hunts', hunts => hunts.shift());
 
 // region Plantarium
-export const gameSpawnPlants = (game, {plants}) => game
-  .update('pdeck', pdeck => pdeck ? pdeck.skip(plants.size) : pdeck)
-  .update('plants', plantsMap => plants.reduce((result, plant) => result.set(plant.id, plant), plantsMap))
-  .update(addToGameLog(['gameSpawnPlants', plants.size]));
+export const gameSpawnPlants = (game, {plants}) => {
+  return game
+    .update(game => {
+      if (game.deckPlants === null) {
+        // client
+        return game;
+      }
+
+      let deck = game.deckPlants;
+      let resetDiscard = false;
+
+      if (plants.size > deck.size) {
+        // No shuffling because it's a feature creep
+        deck = deck.concat(game.deckPlantsDiscard);
+      }
+      return game
+        .set('deckPlants', deck.skip(plants.size))
+    })
+    .update('plants', plantsMap => plants.reduce((result, plant) => result.set(plant.id, plant), plantsMap))
+    .update(addToGameLog(['gameSpawnPlants', plants.size]));
+}
 
 export const gameDeployPlant = (game, {plant}) => game
   .setIn(['plants', plant.id], plant)
@@ -629,7 +650,8 @@ export const reducer = createReducer(Map(), {
 
   , traitAnimalAttachTrait: (state, data) => state.update(data.gameId, game => traitAnimalAttachTrait(game, data))
   , traitAnimalRemoveTrait: (state, data) => state.update(data.gameId, game => traitAnimalRemoveTrait(game, data))
-  , traitAnimalRecombinateTraits: (state, data) => state.update(data.gameId, game => traitAnimalRecombinateTraits(game, data))
+  , traitAnimalRecombinateTraits: (state, data) =>
+    state.update(data.gameId, game => traitAnimalRecombinateTraits(game, data))
 
   , traitAttachToPlant: (state, data) => state.update(data.gameId, game => traitAttachToPlant(game, data))
   , traitDetachFromPlant: (state, data) => state.update(data.gameId, game => traitDetachFromPlant(game, data))

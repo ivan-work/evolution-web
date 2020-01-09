@@ -654,6 +654,9 @@ export const server$takeFoodRequest = (gameId, playerId, animalId, plantId) => (
     throwError(getErrorOfAnimalEatingFromPlant(game, animal, plant));
 
     const errorOfPlantCounterAttack = !!getErrorOfPlantCounterAttack(game, animal, plant);
+    console.log(game.cooldowns.toJS())
+    console.log(plant.id)
+    console.log(getErrorOfPlantCounterAttack(game, animal, plant))
     if (errorOfPlantCounterAttack) {
       dispatch(server$startCooldownList(gameId, getFeedingCooldownList(gameId, playerId)));
       dispatch(server$startFeedingFromGame(game.id, animal.id, 1, 'PLANT', plantId));

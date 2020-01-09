@@ -206,6 +206,9 @@ export const InteractiveAnimal = compose(
             case PHASE.DEPLOY:
               const {traitType} = item;
               const traitData = TraitModel.new(traitType).getDataModel();
+              if (!(traitData.cardTargetType & CTT_PARAMETER.ANIMAL)) {
+                return false;
+              }
               return !traitData.checkTraitPlacementFails_User(animal, userId) && !traitData.checkTraitPlacementFails(animal);
             case PHASE.REGENERATION:
               return animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION);

@@ -7,7 +7,7 @@ import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 import gecko from '../../../assets/gfx/gecko.svg';
 import Typography from "@material-ui/core/Typography/Typography";
 
-export default class AnimalTraitDetails extends React.PureComponent {
+export default class TraitDetails extends React.PureComponent {
   static propTypes = {
     trait: PropTypes.instanceOf(TraitModel).isRequired
   };

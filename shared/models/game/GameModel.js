@@ -21,6 +21,7 @@ import {getIntRandom} from '../../utils/randomGenerator';
 import {selectUserName} from '../../selectors';
 
 import * as tt from './evolution/traitTypes';
+import * as pt from './evolution/plantarium/plantTypes';
 import PlantModel from "./evolution/plantarium/PlantModel";
 
 export const TEST_DECK_SIZE = 84;
@@ -193,12 +194,25 @@ const FOOD_TABLE = [
   , () => rollDice() + rollDice() + rollDice() + rollDice() + 4
 ];
 
+export const PLANTS_TABLE = [
+  (zero) => ({start: 3, spawn: 2, max: 4}) // 0 players
+  , (one) => ({start: 3, spawn: 2, max: 4}) // 1 player
+  , (players) => ({start: players + 1, spawn: 1, max: players * 2})
+  , (players) => ({start: players + 1, spawn: 2, max: players * 2})
+  , (players) => ({start: players + 1, spawn: 3, max: players * 2})
+  , (players) => ({start: players + 1, spawn: 3, max: players * 2})
+  , (players) => ({start: players + 1, spawn: 3, max: players * 2})
+  , (players) => ({start: players + 1, spawn: 4, max: players * 2})
+  , (players) => ({start: players + 1, spawn: 4, max: players * 2})
+];
+
 const GameModelData = {
   id: null
   , roomId: null
   , timeCreated: null
   , deck: null
-  , pdeck: null
+  , deckPlants: null
+  , deckPlantsDiscard: null
   , players: OrderedMap()
   , plants: OrderedMap()
   , areas: AreasStandard
@@ -242,15 +256,26 @@ export class GameModel extends Record({
     return FOOD_TABLE[this.getActualPlayers().size]() + aedificatorFood;
   }
 
+  getPlantsConfig() {
+    const playersSize = this.getActualPlayers().size;
+    return PLANTS_TABLE[playersSize](playersSize);
+  }
+
+  generatePlants() {
+    const {spawn, max} = this.getPlantsConfig();
+    const currentSize = this.plants.filter(plant => plant.type !== pt.PlantParasite).size;
+    return Math.min(max - currentSize, spawn);
+  }
+
   static new(room) {
     let deckConfig = Deck_Base;
-    let pdeck = [];
+    let deckPlantsConfig = [];
 
     if (room.settings.addon_timeToFly) deckConfig = deckConfig.concat(Deck_TimeToFly);
     if (room.settings.addon_continents) deckConfig = deckConfig.concat(Deck_ContinentsShort);
     if (room.settings.addon_bonus) deckConfig = deckConfig.concat(Deck_Bonus);
     if (room.settings.addon_plantarium) deckConfig = deckConfig.concat(Deck_Plantarium);
-    if (room.settings.addon_plantarium) pdeck = pdeck.concat(PlantDeck_Plantarium);
+    if (room.settings.addon_plantarium) deckPlantsConfig = deckPlantsConfig.concat(PlantDeck_Plantarium);
 
     if (room.settings.halfDeck) deckConfig = deckConfig.map(([count, type]) => [Math.ceil(count / 2), type]);
 
@@ -273,12 +298,14 @@ export class GameModel extends Record({
       })));
     }
 
+    const deckPlants = generatePlantDeck(deckPlantsConfig, true);
+
     return new GameModel({
       id: uuid.v4()
       , roomId: room.id
       , timeCreated: Date.now()
       , deck
-      , pdeck: generatePlantDeck(pdeck, true)
+      , deckPlants
       , players
       , settings: room.settings
     })
@@ -292,7 +319,8 @@ export class GameModel extends Record({
       : new GameModel({
         ...js
         , deck: List(js.deck).map(c => CardModel.fromServer(c))
-        , pdeck: js.pdeck ? List(js.pdeck) : null
+        , deckPlants: js.deckPlants ? List(js.deckPlants) : null
+        , deckPlantsDiscard: List(js.deckPlantsDiscard)
         , players: OrderedMap(js.players).map(PlayerModel.fromServer).sort((p1, p2) => p1.index > p2.index)
         , areas: Map(js.areas).map(AreaRecord.fromJS)
         , plants: OrderedMap(js.plants).map(PlantModel.fromJS)
@@ -316,7 +344,7 @@ export class GameModel extends Record({
     // TODO question
     return this
       .set('deck', this.deck.map(card => card.toClient()))
-      .set('pdeck', null)
+      .set('deckPlants', null)
       .set('players', this.players.map(player => player.toClient()).entrySeq())
       .set('plants', this.plants.map(plant => plant.toClient()).entrySeq())
       .set('areas', this.areas.map(area => area.toClient()))
@@ -390,6 +418,10 @@ export class GameModel extends Record({
 
   mapPlants(cb) {
     return this.update('plants', plants => plants.map(cb));
+  }
+
+  somePlant(cb) {
+    return this.plants.some(cb);
   }
 
   getStartingHandCount() {

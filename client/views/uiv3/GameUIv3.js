@@ -1,4 +1,5 @@
 import React from 'react';
+import T from "i18n-react";
 import cn from 'classnames';
 import {compose, lifecycle, withStateHandlers} from "recompose";
 import {connect} from "react-redux";
@@ -33,6 +34,9 @@ import Plant from "./plants/Plant";
 import FoodWrapper from "./food/FoodWrapper";
 import GameInfoToolbar2 from "./ui/GameInfoToolbar2";
 import PlantsContainer from "./plants/PlantsContainer";
+import Typography from "@material-ui/core/Typography/Typography";
+import User from "../utils/User";
+import IconPause from "@material-ui/core/SvgIcon/SvgIcon";
 
 const styles = theme => ({
   GameUIv3Container: {
@@ -115,7 +119,7 @@ const styles = theme => ({
   }
   , gridHand: {}
 
-  , PlayerWrapper: {
+  , GridWrapper: {
     display: 'flex'
     , flexFlow: 'column nowrap'
 
@@ -125,12 +129,11 @@ const styles = theme => ({
     , minWidth: GameStyles.defaultWidth * 4
 
     , textAlign: 'center'
-    , '&.isUserTurn': {
+  }
+  , PlayerWrapper: {
+    '&.isUserTurn': {
       background: '#F3FFFA'
     }
-  }
-  , isPlayerTurn: {
-    background: '#dfd'
   }
   , ContinentContainer: {
     display: 'flex'
@@ -142,7 +145,7 @@ export class SVGContextInteractionSpy extends React.PureComponent {
   static contextType = InteractionContext;
 
   render() {
-    return <SVGContextSpy name='SVGContextInteractionSpy' watch={this.context.interaction}/>
+    return <SVGContextSpy name='SVGContextInteractionSpy' watch={this.context.interaction} />
   }
 }
 
@@ -155,6 +158,30 @@ export class SVGContextInteractionSpy extends React.PureComponent {
 //   players:
 // - continent: carn run mimi wait, carn run mimi, carn run mimi, carn run mimi, carn run mimi, carn run mimi, $, $, $, $
 
+// `
+// settings:
+//   addon_plantarium: true
+// deck: 5 camo
+// phase: feeding
+// plants:
+//   PlantLiana $0lia honey officinalis ++\
+//  , PlantLiana $1lia myco$1gra\
+//  , PlantEphemeral $0eph +\
+//  , PlantParasitic $par parasiticlink$0eph ++\
+//  , PlantGrass $0gra protein root tree\
+//  , PlantGrass $1gra myco$1per\
+//  , PlantPerennial $0per\
+//  , PlantPerennial $1per myco$1leg\
+//  , PlantLegume $0leg\
+//  , PlantLegume $1leg myco$1lia\
+//  , PlantSucculent $0suc ++ **\
+//  , PlantSucculent $1suc **\
+//  , PlantFungus $fun +\
+//  , PlantCarnivorous $car ++ aqua
+// players:
+//   - continent: $0W wait +
+// `
+
 export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
   return (
     <Grid container direction='column' className={classes.GameUIv3Container}>
@@ -163,33 +190,33 @@ export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
       {/*</Grid>*/}
       <Grid item container direction='column' className={classes.GameUIv3}>
 
-        <GameSVGOverlay/>
-        <SVGContextInteractionSpy/>
-        <GameTimedOutDialog/>
-        <QuestionIntellect/>
-        <QuestionDefence/>
+        <GameSVGOverlay />
+        <SVGContextInteractionSpy />
+        <GameTimedOutDialog />
+        <QuestionIntellect />
+        <QuestionDefence />
 
         <Grid item className={cn(classes.gridMiscRow, {'Compressed': compress})}>
           {!compress && <Paper className={cn(classes.gridMiscItem, 'PlayersList', {'Compressed': compress})}>
-            <PlayersList game={game}/>
+            <PlayersList game={game} />
           </Paper>}
           <Paper className={cn(classes.gridMiscItem, 'Toolbar', {'Compressed': compress})}>
-            <GameInfoToolbar game={game} compressControls={{compress, toggleCompress}}/>
+            <GameInfoToolbar game={game} compressControls={{compress, toggleCompress}} />
           </Paper>
           <div className={classes.gridMiscSubRow}>
             {!game.isPlantarium() && <Paper className={cn(classes.gridMiscItem, 'Food', {'Compressed': compress})}>
-              <FoodWrapper game={game}/>
+              <FoodWrapper game={game} />
             </Paper>}
             <Paper className={cn(classes.gridMiscItem, 'Chat', {'Compressed': compress})}>
-              {!compress ? <ChatWrapper game={game}/> : <ChatWrapperSmall game={game}/>}
+              {!compress ? <ChatWrapper game={game} /> : <ChatWrapperSmall game={game} />}
             </Paper>
           </div>
         </Grid>
         <Grid item className={classes.gridPlayers}>
-          {game.isPlantarium() && <PlantsContainer game={game}/>}
+          {game.isPlantarium() && <PlantsWrapper game={game} classes={classes} />}
           {game.sortPlayersFromIndex(game.players, 0).map((player) => (
             (player.playing || player.continent.size > 0) &&
-            <PlayerWrapper key={player.id} playerId={player.id} classes={classes} game={game}/>
+            <PlayerWrapper key={player.id} playerId={player.id} classes={classes} game={game} />
           ))}
         </Grid>
       </Grid>
@@ -197,26 +224,36 @@ export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
   );
 };
 
-export const ChatWrapper = ({game}) => <Chat chatTargetType='ROOM' roomId={game.roomId}/>;
+export const ChatWrapper = ({game}) => <Chat chatTargetType='ROOM' roomId={game.roomId} />;
 
-export const ChatWrapperSmall = ({game}) => <ChatWindow chatTargetType='ROOM' roomId={game.roomId} length={1}/>;
+export const ChatWrapperSmall = ({game}) => <ChatWindow chatTargetType='ROOM' roomId={game.roomId} length={1} />;
+
+export const PlantsWrapper = ({classes, game}) => {
+  const className = cn(classes.GridWrapper, {});
+  return <Paper id='Plants' className={className}>
+    <Typography>{T.translate('GAME.UI.Plants')}</Typography>
+    <div className={classes.ContinentContainer}>
+      <PlantsContainer game={game} />
+    </div>
+  </Paper>
+};
 
 export const PlayerWrapper = ({classes, playerId, game}) => {
   const currentPlayerId = game.getPlayer() ? game.getPlayer().id : null;
   const isUserWrapper = currentPlayerId === playerId;
   const isPlayerTurn = game.isPlayerTurn();
-  const className = cn(classes.PlayerWrapper, 'PlayerWrapper', {
+  const className = cn(classes.GridWrapper, classes.PlayerWrapper, 'PlayerWrapper', {
     isUserWrapper
     , isPlayerTurn
     , isUserTurn: isUserWrapper && isPlayerTurn
   });
   return <Paper id={playerId} className={className}>
-    <PlayerUser game={game} playerId={playerId}/>
+    <PlayerUser game={game} playerId={playerId} />
     <div className={classes.ContinentContainer}>
-      <Continent playerId={playerId}/>
+      <Continent playerId={playerId} />
     </div>
     {isUserWrapper && <Grid item className={classes.gridHand}>
-      <PlayerHandWrapper><PlayerHand/></PlayerHandWrapper>
+      <PlayerHandWrapper><PlayerHand /></PlayerHandWrapper>
     </Grid>}
   </Paper>
 };

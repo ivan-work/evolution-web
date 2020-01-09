@@ -1,14 +1,18 @@
 import React from "react";
 import withStyles from "@material-ui/core/styles/withStyles";
 
-import Paper from "@material-ui/core/Paper";
-
 import Plant from "./Plant";
+import GameStyles from "../GameStyles";
 
-const styles = ({});
+const styles = ({
+  container: {
+    ...GameStyles.gridContainerBase
+    , minWidth: (GameStyles.defaultWidth + 20) * 3
+    , minHeight: (GameStyles.animal.height + 20)
+  }
+});
 
-export default withStyles(styles)(({classes, game}) => <Paper className={classes.PlayerWrapper}>
-  <div className={classes.ContinentContainer}>
-    {game.plants.valueSeq().map(plant => <Plant key={plant.id} plant={plant}/>)}
+export default withStyles(styles)(({classes, game}) => <div className={classes.container}>
+    {game.plants.valueSeq().map(plant => <Plant key={plant.id} plant={plant} />)}
   </div>
-</Paper>)
+)

@@ -86,13 +86,14 @@ export const PlantTraitParasiticPlant = {
 };
 export const PlantTraitParasiticLink = {
   type: ptt.PlantTraitParasiticLink
+  , playerControllable: true
   , cardTargetType: CARD_TARGET_TYPE.PLANT_LINK
   , targetType: TRAIT_TARGET_TYPE.NONE
   , cooldowns: fromJS([
     [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , _getErrorOfUse: (game, plant, trait) => {
-    if (game.cooldowns.checkFor())
+    // if (game.cooldowns.checkFor())
     if (!trait.linkSource) return ERRORS.TRAIT_ACTION_ONLY_LINK_SOURCE;
     const linkedPlant = game.getPlant(trait.linkAnimalId);
     if (!linkedPlant) return ERRORS.TRAIT_ACTION_NO_TARGETS;

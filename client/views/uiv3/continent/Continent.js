@@ -19,15 +19,9 @@ import {SVGContextSpy} from "../SVGContext";
 
 const styles = {
   continent: {
-    display: 'flex'
-    , margin: '4px auto'
-    , flexFlow: 'row wrap'
-    , justifyContent: 'center'
-    , alignContent: 'start'
+    ...GameStyles.gridContainerBase
     , minWidth: (GameStyles.defaultWidth + 20) * 3
     , minHeight: (GameStyles.animal.height + 20)
-    , alignItems: 'flex-start'
-
     , '& .ContinentZone': {
       ...GameStyles.animalBase
       , display: 'none'
