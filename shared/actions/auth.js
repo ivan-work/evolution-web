@@ -175,11 +175,13 @@ const customErrorReport = !process.env.TEST ? customErrorReport_PROD : customErr
 export const authClientToServer = {
   loginUserFormRequest: ({redirect = '/', form = {}}, {connectionId}) =>
     customErrorReport(() => Object.assign(loginUserFailure(), {meta: {socketId: connectionId}}), (dispatch, getState) => {
-      const validation = new Validator(form, RulesLoginPassword);
-
       if (!form) throw new ActionCheckError('loginUserFormRequest', 'form is undefined');
       if (!form.id) throw new ActionCheckError('loginUserFormRequest', 'form has no ID');
+      if (!form.login) throw new ActionCheckError('loginUserFormRequest', 'validation failed');
 
+      form.login = form.login.trim();
+
+      const validation = new Validator(form, RulesLoginPassword);
       if (validation.fails()) {
         dispatch(toUser$ConnectionId(connectionId, formValidationError(form.id, validation.errors.all())));
         throw new ActionCheckError('loginUserFormRequest', 'validation failed: %s', JSON.stringify(validation.errors.all()));
@@ -219,6 +221,8 @@ export const authClientToServer = {
       dispatch(server$loginUser(currentUser.set('connectionId', connectionId), redirect));
     })
   , userUpdateNameRequest: ({name}, {userId}) => (dispatch, getState) => {
+    name = name.trim();
+
     const validation = new Validator({name}, {name: RuleRegisteredUserName});
 
     if (validation.fails()) throw new ActionCheckError('userUpdateNameRequest', 'validation failed: %s', JSON.stringify(validation.errors.all()));
