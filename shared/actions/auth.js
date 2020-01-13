@@ -1,13 +1,14 @@
 import logger, {loggerOnline} from '~/shared/utils/logger';
 import {Map} from 'immutable';
-import {UserModel, RulesLoginPassword} from '../models/UserModel';
+import {UserModel, RulesLoginPassword, RuleRegisteredUserName} from '../models/UserModel';
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 import jwt from 'jsonwebtoken';
 import Validator from 'validatorjs';
 
 import {ActionCheckError} from '../models/ActionCheckError';
 
-import {to$, toUser$Client} from './generic';
+import {db$updateUserName} from "../../server/actions/db";
+import {formValidationError, server$toUsers, to$, toUser$Client, toUser$ConnectionId} from './generic';
 import {chatInit} from './chat';
 import {server$roomsInit, server$roomExit, findRoomByUser} from './rooms';
 
@@ -15,6 +16,7 @@ export const SOCKET_DISCONNECT_NOW = 'SOCKET_DISCONNECT_NOW';
 export const USER_LOGOUT_TIMEOUT = 120e3;
 
 import TimeService from '../../client/services/TimeService';
+import {redirectTo} from "../utils/history";
 
 export const socketConnect = (connectionId, sendToClient, ip) => ({
   type: 'socketConnect'
@@ -56,9 +58,9 @@ export const loginUserTokenRequest = (redirect, token) => ({
   , meta: {server: true}
 });
 
-export const loginUserFormRequest = (redirect, login, password) => ({
+export const loginUserFormRequest = (redirect, form) => ({
   type: 'loginUserFormRequest'
-  , data: {redirect, login, password}
+  , data: {redirect, form}
   , meta: {server: true}
 });
 
@@ -112,9 +114,9 @@ export const server$logoutUser = (userId) => (dispatch, getState) => {
  * Register
  */
 
-export const server$injectUser = (id, login) => (dispatch) => {
+export const server$injectUser = (id, login, authType) => (dispatch) => {
   // console.log('dbUser', id, login)
-  const user = new UserModel({id, login}).sign();
+  const user = new UserModel({id, login, authType}).sign();
   dispatch(loginUser({user}));
   dispatch(addTimeout(
     USER_LOGOUT_TIMEOUT
@@ -126,6 +128,30 @@ export const server$injectUser = (id, login) => (dispatch) => {
 /***
  * Misc
  */
+
+export const userUpdateNameRequest = (name) => ({
+  type: 'userUpdateNameRequest'
+  , data: {name}
+  , meta: {server: true}
+});
+
+export const userUpdateName = (userId, name) => ({
+  type: 'userUpdateName'
+  , data: {userId, name}
+});
+
+export const userUpdateNameSelf = (name) => ({
+  type: 'userUpdateNameSelf'
+  , data: {name}
+});
+
+export const server$userUpdateName = (userId, name) => (dispatch, getState) => {
+  logger.info(`updating ${userId} with ${name}`);
+  db$updateUserName(userId, name)
+    .then(_ => {
+      dispatch(server$toUsers(userUpdateName(userId, name)));
+    });
+};
 
 const customErrorReport_PROD = (customErrorAction, fn) => (dispatch, getState) => {
   const result = dispatch(fn);
@@ -147,15 +173,26 @@ const customErrorReport_TEST = (customErrorAction, fn) => (dispatch, getState) =
 const customErrorReport = !process.env.TEST ? customErrorReport_PROD : customErrorReport_TEST;
 
 export const authClientToServer = {
-  loginUserFormRequest: ({redirect = '/', login = void 0, password = void 0}, {connectionId}) =>
+  loginUserFormRequest: ({redirect = '/', form = {}}, {connectionId}) =>
     customErrorReport(() => Object.assign(loginUserFailure(), {meta: {socketId: connectionId}}), (dispatch, getState) => {
-      const validation = new Validator({login, password}, RulesLoginPassword);
-      if (validation.fails()) throw new ActionCheckError('loginUserFormRequest', 'validation failed: %s', JSON.stringify(validation.errors.all()));
+      const validation = new Validator(form, RulesLoginPassword);
 
-      if (getState().get('users').find(user => user.login === login))
+      if (!form) throw new ActionCheckError('loginUserFormRequest', 'form is undefined');
+      if (!form.id) throw new ActionCheckError('loginUserFormRequest', 'form has no ID');
+
+      if (validation.fails()) {
+        dispatch(toUser$ConnectionId(connectionId, formValidationError(form.id, validation.errors.all())));
+        throw new ActionCheckError('loginUserFormRequest', 'validation failed: %s', JSON.stringify(validation.errors.all()));
+      }
+
+      if (getState().get('users').some(user => user.login === form.login)) {
+        dispatch(toUser$ConnectionId(connectionId, formValidationError(form.id, {
+          login: ['User already exists']
+        })));
         throw new ActionCheckError('loginUserFormRequest', 'User already exists');
+      }
 
-      const user = UserModel.new(login, connectionId);
+      const user = UserModel.new(form.login, connectionId);
 
       dispatch(server$loginUser(user, redirect));
     })
@@ -181,6 +218,13 @@ export const authClientToServer = {
 
       dispatch(server$loginUser(currentUser.set('connectionId', connectionId), redirect));
     })
+  , userUpdateNameRequest: ({name}, {userId}) => (dispatch, getState) => {
+    const validation = new Validator({name}, {name: RuleRegisteredUserName});
+
+    if (validation.fails()) throw new ActionCheckError('userUpdateNameRequest', 'validation failed: %s', JSON.stringify(validation.errors.all()));
+
+    dispatch(server$userUpdateName(userId, name));
+  }
 };
 
 export const authServerToClient = {
@@ -194,10 +238,16 @@ export const authServerToClient = {
   , loginUserFailure: ({error}) => (dispatch, getState) => {
     dispatch(loginUserFailure(error));
   }
-  , onlineUpdate: ({user}) => onlineUpdate(UserModel.fromJS(user).toOthers())
   , logoutUser: ({userId}) => logoutUser(userId)
   , socketConnectClient: ({connectionId, timestamp}) => {
     TimeService.setOffset(timestamp);
     return socketConnectClient(connectionId);
+  }
+  , onlineUpdate: ({user}) => onlineUpdate(UserModel.fromJS(user).toOthers())
+  , userUpdateName: ({userId, name}, currentUserId) => (dispatch) => {
+    dispatch(userUpdateName(userId, name));
+    if (currentUserId === userId) {
+      dispatch(userUpdateNameSelf(name));
+    }
   }
 };

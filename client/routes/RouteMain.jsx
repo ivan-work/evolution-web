@@ -30,6 +30,8 @@ const styles = theme => ({
   , columnPaper: {
     padding: theme.spacing.unit
     , flex: '1'
+    , display: 'flex'
+    , flexFlow: 'column nowrap'
   }
   , columnTitle: {
     whiteSpace: 'nowrap'
@@ -37,6 +39,10 @@ const styles = theme => ({
   , rowOnline: {
     marginBottom: theme.spacing.unit / 2
     , padding: theme.spacing.unit
+  }
+  , roomsListWrapper: {
+    flex: '1 1 0'
+    , overflowY: 'auto'
   }
 });
 
@@ -86,7 +92,9 @@ export const RouteMain = ({classes}) => {
           <Paper className={classes.columnPaper}>
             <Typography className={classes.columnTitle} variant="h4">{T.translate('App.Rooms.Rooms')}: <CreateRoom/>
             </Typography>
-            <RoomsList/>
+            <div className={classes.roomsListWrapper}>
+              <RoomsList/>
+            </div>
           </Paper>
         </Grid>
         <Grid xs item container className={classes.column}>

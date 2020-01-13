@@ -1,4 +1,5 @@
 import T from 'i18n-react';
+import throttle from 'lodash/throttle';
 import deepForceUpdate from 'react-deep-force-update';
 
 import RootService from '../services/RootService';
@@ -42,10 +43,35 @@ const SHOULD_PLAY_AUDIO = GLOBAL_BROWSER && process.env.NODE_ENV !== 'test' && w
 
 const AUDIO_FILES = {};
 
-const loadAudioFiles = () => {
-  AUDIO_FILES.NOTIFICATION = new window.Audio(require('../assets/sound/notification-02.mp3'));
-  AUDIO_FILES.START_D2 = new window.Audio(require('../assets/sound/dota-ready.mp3'));
+class AudioFile {
+  constructor(name, filename, throttleTime) {
+    this.name = name;
+    this.file = new window.Audio(filename);
+    this._play = () => this.file.play();
+    if (!throttleTime) {
+      this.play = this._play;
+    } else {
+      this.play = throttle(this._play, throttleTime, {leading: true, trailing: false});
+    }
+  }
+}
+
+const AudioFileName = {
+  NOTIFICATION: 'NOTIFICATION'
+  , ROOM_CREATED: 'ROOM_CREATED'
+  , ROOM_JOIN: 'ROOM_JOIN'
+  , ROOM_JOIN_FULL: 'ROOM_JOIN_FULL'
+  , START_D2: 'START_D2'
 };
+
+const loadAudioFiles = () => {
+  AUDIO_FILES.NOTIFICATION = new AudioFile(AudioFileName.NOTIFICATION, require('../assets/sound/notification-02.wav'));
+  AUDIO_FILES.ROOM_CREATED = new AudioFile(AudioFileName.ROOM_CREATED, require('../assets/sound/searching-03.wav'), 30e3);
+  AUDIO_FILES.ROOM_JOIN = new AudioFile(AudioFileName.ROOM_JOIN, require('../assets/sound/connected-02.wav'));
+  AUDIO_FILES.ROOM_JOIN_FULL = new AudioFile(AudioFileName.ROOM_JOIN_FULL, require('../assets/sound/searching-02.wav'));
+  AUDIO_FILES.START_D2 = new AudioFile(AudioFileName.START_D2, require('../assets/sound/dota-ready.mp3'));
+};
+
 if (SHOULD_PLAY_AUDIO) loadAudioFiles();
 
 export const appPlaySound = (soundName) => (dispatch, getState) => {

@@ -13,7 +13,6 @@ import IconButton from '@material-ui/core/IconButton';
 import IconVisibility from '@material-ui/icons/Visibility'
 
 import {roomJoinRequestSoft, roomSpectateRequestSoft} from '../../../shared/actions/actions';
-import {PHASE} from '../../../shared/models/game/GameModel';
 
 import {failsChecks} from '../../../shared/actions/checks';
 import {

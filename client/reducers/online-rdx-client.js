@@ -8,4 +8,5 @@ export const reducer = createReducer(INITIAL_STATE, {
   loginUser: (state, {online}) => online
   , onlineUpdate: (state, {user}) => state.set(user.id, user)
   , logoutUser: (state, {userId}) => state.remove(userId)
+  , userUpdateName: (state, {userId, name}) => state.setIn([userId, 'login'], name)
 });

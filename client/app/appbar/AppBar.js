@@ -10,22 +10,25 @@ import Button from '@material-ui/core/Button';
 import Toolbar from '@material-ui/core/Toolbar';
 import {withStyles} from '@material-ui/core/styles';
 
-import AdminControlGroup from '../../components/AdminControlGroup.jsx'
-import {PortalTarget} from "../../views/utils/PortalTarget"
-import {TranslationSwitchView} from '../../components/TranslationSwitch.jsx'
+import EvoLink from "../../components/EvoLink";
 
-import SettingVolume from "./SettingVolume";
-import SettingUIv3 from "./SettingUIv3";
+import AdminControlGroup from '../../components/AdminControlGroup.jsx'
 import RoomControlGroup from "../../views/rooms/RoomControlGroup";
-import {Portal} from "../../views/utils/Portal";
-import Link from "@material-ui/core/Link/Link";
-import {redirectTo} from "../../../shared/utils/history";
 import GameScoreboardFinal from "../../views/game/ui/GameScoreboardFinal";
+import AppBarMenu from "./AppBarMenu";
+import IconMenu from '@material-ui/icons/Menu';
+import {SettingVolumeMenuItem} from "./SettingVolume";
+import {SettingUIv3MenuItem} from "./SettingUIv3";
+import LinkProfile from "../../components/profile/LinkProfile";
+import GuardUser from "../../components/GuardUser";
 
 const styles = theme => ({
   title: {
     overflow: 'hidden'
     , minWidth: '1em'
+  }
+  , appBarMenu: {
+    margin: '5px'
   }
   , portal: {
     whiteSpace: 'nowrap'
@@ -45,23 +48,25 @@ export const AppBar = ({classes}) => (
     <Toolbar>
       {/*<TranslationSwitchView/>*/}
       <div className={classes.title}>
-        <Link onClick={() => redirectTo('/')}
-              variant="h4"
-              color="inherit">
-            {T.translate('App.Name')}
-        </Link>
+        <EvoLink to='/' variant="h4" color="inherit">{T.translate('App.Name')}</EvoLink>
         &nbsp;
         <Typography inline variant="caption" color="inherit">v{GLOBAL_VERSION}</Typography>
       </div>
 
-      <SettingVolume/>
-
-      <SettingUIv3/>
+      <GuardUser>
+        <AppBarMenu className={classes.appBarMenu} text={<IconMenu />}>
+          <SettingVolumeMenuItem />
+          <SettingUIv3MenuItem />
+          <LinkProfile />
+        </AppBarMenu>
+      </GuardUser>
 
       <div className={classes.portal}>
-        <RoomControlGroup/>
-        <AdminControlGroup/>
-        <GameScoreboardFinal/>
+        <GuardUser>
+          <RoomControlGroup />
+          <AdminControlGroup />
+          <GameScoreboardFinal />
+        </GuardUser>
         {/*<Scrollbar>*/}
         {/*<PortalTarget name='header'/>*/}
         {/*</Scrollbar>*/}

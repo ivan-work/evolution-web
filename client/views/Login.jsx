@@ -5,7 +5,6 @@ import {connect} from 'react-redux';
 
 
 import {Redirect} from 'react-router';
-import LocationService from '../services/LocationService';
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import {withStyles} from "@material-ui/core/styles";

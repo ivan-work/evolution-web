@@ -1,4 +1,4 @@
-import {AUTH_TYPE} from '../../shared/constants';
+import {ObjectId} from 'mongodb';
 import database from '../database';
 
 // database is not ready yet, beware!
@@ -11,8 +11,16 @@ export const db$registerUser = (user) => {
   return database.db.collection('users').insertOne(user);
 };
 
-export const db$updateUser = (authType, authId, query) => {
-  return database.db.collection('users').updateOne({'auth.type': authType, 'auth.id': authId}, query);
+export const db$updateUserName = (id, name) => {
+  return database.db.collection('users').updateOne({'_id': ObjectId(id)}, {$set: {name}});
+};
+
+export const db$updateUserByAuth = (authType, authId, updateObject) => {
+  return database.db.collection('users').updateOne({'auth.type': authType, 'auth.id': authId}, {
+    $set: {
+      auth: updateObject.auth
+    }
+  });
 };
 
 export const db$gameEnd = (dbGame) => {

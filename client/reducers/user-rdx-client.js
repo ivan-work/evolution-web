@@ -36,4 +36,5 @@ export const reducer = createReducer(getInitialUser(), {
     return null;
   }
   , chatMessageUser: (user, {message}) => user.update('chat', chat => chat.receiveMessage(message))
+  , userUpdateNameSelf: (state, {name}) => state.set(['login'], name)
 });

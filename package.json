@@ -8,7 +8,8 @@
     "winston": false,
     "colors": false,
     "yaml-js": false,
-    "./server/database": false,
+    "mongodb": false,
+    "./server/database.js": false,
     "./shared/utils/logger/index.js": "./shared/utils/logger/logger-browser.js"
   },
   "scripts": {

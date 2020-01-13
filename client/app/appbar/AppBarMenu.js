@@ -21,10 +21,12 @@ export default compose(
     })
 )(({
      anchorEl, openMenu, closeMenu, children
+     , className
      , text, color = 'primary', variant = 'contained'
    }) => (
   <>
     <Button color={color}
+            className={className}
             variant={variant}
             disabled={!children}
             onClick={openMenu}>
@@ -41,7 +43,7 @@ export default compose(
                      vertical: 'top',
                      horizontal: 'center',
                    }}>
-      {children}
+      {React.Children.map(children, child => child && React.cloneElement(child, {closeMenu}))}
     </StyledPopover>
   </>
 ));

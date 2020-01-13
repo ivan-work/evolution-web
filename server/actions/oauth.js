@@ -3,7 +3,7 @@ import {promisify} from '../../shared/utils/index';
 import querystring from 'querystring';
 import request from 'request';
 const requestGet = promisify(request.get);
-import {db$findUser, db$registerUser, db$updateUser} from './db';
+import {db$findUser, db$registerUser, db$updateUserByAuth} from './db';
 import {AUTH_TYPE} from '../../shared/constants';
 import {server$injectUser} from '../../shared/actions/actions';
 
@@ -33,6 +33,7 @@ export const server$oauthVKRegister = (protocol = 'http', host, code) => (dispat
             , auth: {
               type: AUTH_TYPE.VK
               , id: user_id
+              , name: userInfo.first_name + ' ' + userInfo.last_name
               , access_token
               , expires_in
             }
@@ -40,9 +41,9 @@ export const server$oauthVKRegister = (protocol = 'http', host, code) => (dispat
           .then((updateObject) => {
             return (user === null
               ? db$registerUser(updateObject)
-              : db$updateUser(AUTH_TYPE.VK, user_id, {$set: updateObject}))
+              : db$updateUserByAuth(AUTH_TYPE.VK, user_id, updateObject))
               .then(() => db$findUser(AUTH_TYPE.VK, user_id))
-              .then((result) => dispatch(server$injectUser(result._id.toString(), result.name)))
+              .then((result) => dispatch(server$injectUser(result._id.toString(), result.name, AUTH_TYPE.VK)))
           })
         )
     )
