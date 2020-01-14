@@ -4,8 +4,6 @@ import T from 'i18n-react';
 import {connect} from 'react-redux';
 import {compose} from "recompose";
 
-import {RoomModel, VotingModel} from '../../../shared/models/RoomModel';
-
 import Chat from '../Chat.jsx';
 import UsersList from '../utils/UsersList.jsx';
 
@@ -32,13 +30,22 @@ import {UserVariants} from "../utils/User";
 
 const styles = theme => ({
   root: {
-    margin: theme.spacing.unit
+    padding: theme.spacing.unit
+    , flex: '1 1 0'
   }
-  , container: {}
-  , column: {}
+  , container: {
+    flex: '1 1 0'
+  }
+  , column: {
+    flexFlow: 'column nowrap'
+  }
   , columnPaper: {
     padding: theme.spacing.unit
     , flex: '1'
+  }
+  , columnSettings: {
+    flex: '1 1 0'
+    , overflowX: 'auto'
   }
 });
 
@@ -46,7 +53,8 @@ export class Room extends React.PureComponent {
   renderUser = ({user}) => {
     const {roomKickRequest, roomBanRequest, isHost, userId} = this.props;
     return (
-      <UserVariants.listItemWithActions user={user} userId={userId} isHost={isHost} roomKickRequest={roomKickRequest} roomBanRequest={roomBanRequest}/>
+      <UserVariants.listItemWithActions user={user} userId={userId} isHost={isHost} roomKickRequest={roomKickRequest}
+                                        roomBanRequest={roomBanRequest} />
     );
   };
 
@@ -56,7 +64,7 @@ export class Room extends React.PureComponent {
       <UserVariants.listItem user={user} actions={
         user.id !== userId && isHost && <ListItemSecondaryAction>
           <Tooltip title={T.translate('App.Room.$Unban')}>
-            <IconButton onClick={() => roomUnbanRequest(user.id)}><IconUnbanUser/></IconButton>
+            <IconButton onClick={() => roomUnbanRequest(user.id)}><IconUnbanUser /></IconButton>
           </Tooltip>
         </ListItemSecondaryAction>}
       />);
@@ -65,21 +73,21 @@ export class Room extends React.PureComponent {
   render() {
     const {classes, room} = this.props;
     return (
-      <div className={classes.root}>
-        <RoomStartVotingDialog/>
+      <Grid container direction='column' wrap='nowrap' item className={classes.root}>
+        <RoomStartVotingDialog />
         <Typography variant='h3'>
-          {T.translate('App.Room.Room')}&nbsp;«{room.name}»&nbsp;
-          <RoomStartVotingTimer room={room}/>
+          {/*{T.translate('App.Room.Room')}&nbsp;«{room.name}»&nbsp;*/}
+          <RoomStartVotingTimer room={room} />
         </Typography>
         <Grid container className={classes.container} spacing={8}>
           <Grid container item className={classes.column} xs={4}>
-            <Paper className={classes.columnPaper}>
-              <RoomSettings roomId={room.id}/>
+            <Paper className={classes.columnPaper + ' ' + classes.columnSettings}>
+              <RoomSettings roomId={room.id} />
             </Paper>
           </Grid>
           <Grid container item className={classes.column} xs={4}>
             <Paper className={classes.columnPaper}>
-              <Chat chatTargetType='ROOM' roomId={room.id}/>
+              <Chat chatTargetType='ROOM' roomId={room.id} />
             </Paper>
           </Grid>
           <Grid container item className={classes.column} xs={4}>
@@ -97,7 +105,7 @@ export class Room extends React.PureComponent {
             </Paper>
           </Grid>
         </Grid>
-      </div>
+      </Grid>
     );
   }
 }

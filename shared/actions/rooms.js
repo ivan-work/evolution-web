@@ -20,7 +20,7 @@ import {appPlaySound} from '../../client/actions/app';
 import {toUser$Client, server$toUsers, server$toRoom} from './generic';
 
 import {redirectTo} from '../utils/history';
-import {selectRoom, selectGame, selectUsersInRoom} from '../selectors';
+import {selectRoom, selectGame, selectUsersInRoom, selectUserName, selectUser} from '../selectors';
 
 import {
   checkSelectRoom
@@ -46,6 +46,7 @@ const selectClientRoomId = (getState) => getState().get('room');
 export const findRoomByUser = (getState, userId) => getState().get('rooms').find(room => !!~room.users.indexOf(userId) || !!~room.spectators.indexOf(userId));
 
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
+import LocationService from "../../client/services/LocationService";
 
 /**
  * Init
@@ -115,7 +116,7 @@ const roomJoinSelf = (roomId, userId, room) => ({
 export const server$roomJoin = (roomId, userId) => (dispatch, getState) => {
   const previousRoom = findRoomByUser(getState, userId);
   if (previousRoom)
-  // If user has previous room and it's not the same:
+    // If user has previous room and it's not the same:
     if (previousRoom.id !== roomId) dispatch(server$roomExit(previousRoom.id, userId));
     // If user has same previous room, but not in spectators:
     else if (!~previousRoom.users.indexOf(userId)) dispatch(server$roomExit(previousRoom.id, userId, false));
@@ -389,7 +390,7 @@ export const server$roomAfkHosts = () => (dispatch, getState) => {
 
 export const roomsClientToServer = {
   roomCreateRequest: (data, {userId}) => (dispatch, getState) => {
-    const room = RoomModel.new();
+    const room = RoomModel.new(selectUser(getState, userId));
     dispatch(server$roomCreate(room));
     dispatch(server$roomJoin(room.id, userId));
   }
@@ -406,7 +407,7 @@ export const roomsClientToServer = {
     const previousRoom = findRoomByUser(getState, userId);
 
     if (previousRoom)
-    // If user has previous room and it's not the same:
+      // If user has previous room and it's not the same:
       if (previousRoom.id !== roomId) dispatch(server$roomExit(previousRoom.id, userId));
       // If user has same previous room, but not in spectators:
       else if (!~previousRoom.spectators.indexOf(userId)) dispatch(server$roomExit(previousRoom.id, userId, false));
@@ -497,12 +498,25 @@ const isUserRouterInGame = (getState, roomId) => {
 
 export const roomsServerToClient = {
   roomsInit: ({roomId, rooms}) => roomsInit(roomId, Map(rooms).map(r => RoomModel.fromJS(r)))
-  , roomCreate: ({room}) => roomCreate(RoomModel.fromJS(room))
+  , roomCreate: ({room}, currentUserId) => (dispatch, getState) => {
+    const roomModel = RoomModel.fromJS(room);
+    dispatch(roomCreate(roomModel));
+    const userNotInRoom = !getState().room;
+    const userAtRoot = LocationService.getLocationPath() === '/';
+    const userIsNotHost = roomModel.hostId !== currentUserId;
+    if (userNotInRoom && userAtRoot && userIsNotHost) {
+      dispatch(appPlaySound('ROOM_CREATED', 30e3));
+    }
+  }
   , roomJoin: ({roomId, userId}, currentUserId) => (dispatch, getState) => {
     dispatch(roomJoin(roomId, userId));
     const room = selectRoom(getState, roomId);
-    if (room.users.size == +room.settings.maxPlayers && room.users.first() === currentUserId) {
-      dispatch(appPlaySound('NOTIFICATION'));
+    if (room.users.first() === currentUserId && userId !== currentUserId) {
+      if (room.users.size === +room.settings.maxPlayers) {
+        dispatch(appPlaySound('ROOM_JOIN_FULL'));
+      } else {
+        dispatch(appPlaySound('ROOM_JOIN'));
+      }
     }
   }
   , roomJoinSelf: ({roomId, userId, room}, currentUserId) => (dispatch, getState) => {

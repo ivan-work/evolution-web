@@ -1,5 +1,7 @@
 export const selectRoom = (getState, roomId) => getState().getIn(['rooms', roomId]);
 
+export const selectUser = (getState, userId) => getState().getIn(['users', userId]);
+
 export const selectUserName = (getState, userId) => getState().getIn(['users', userId, 'login']);
 // Game:
 

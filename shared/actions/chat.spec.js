@@ -18,13 +18,13 @@ describe('Chat:', () => {
     expectUnchanged(`Not logged in can't chat`, () =>
         clientStore0.dispatch(chatMessageRequest(null, 'GLOBAL', 'test0'))
       , serverStore, clientStore0, clientStore1);
-    clientStore0.dispatch(loginUserFormRequest('/test', 'User0', 'User0'));
+    clientStore0.dispatch(loginUserFormRequest('/test', {id: 'test', login: 'User0'}));
     clientStore0.dispatch(chatMessageRequest(null, 'GLOBAL', 'test1'));
     expect(serverStore.getState().getIn(['chat', 'messages'])).size(1);
     expect(serverStore.getState().getIn(['chat', 'messages', 0, 'text'])).equal('test1');
     expect(clientStore0.getState().getIn(['chat', 'messages', 0, 'text'])).equal('test1');
     expect(clientStore1.getState().getIn(['chat', 'messages', 0, 'text'])).undefined;
-    clientStore1.dispatch(loginUserFormRequest('/test', 'User1', 'User1'));
+    clientStore1.dispatch(loginUserFormRequest('/test', {id: 'test', login: 'User1'}));
     expect(clientStore1.getState().getIn(['chat', 'messages', 0, 'text'])).equal('test1');
 
     clientStore0.dispatch(chatMessageRequest(null, 'GLOBAL', 'test2'));
@@ -63,7 +63,7 @@ describe('Chat:', () => {
     expect(clientStore1.getState().getIn(['rooms', roomId, 'chat', 'messages', 1, 'text'])).equal('test2');
     expect(clientStore2.getState().getIn(['rooms', roomId, 'chat', 'messages', 1, 'text'])).undefined;
 
-    clientStore2.dispatch(loginUserFormRequest('/test', 'User2', 'User2'));
+    clientStore2.dispatch(loginUserFormRequest('/test', {id: 'test', login: 'User2'}));
     clientStore2.dispatch(roomJoinRequest(roomId));
     expect(clientStore2.getState().getIn(['rooms', roomId, 'chat', 'messages', 0, 'text'])).equal('test1');
     expect(clientStore2.getState().getIn(['rooms', roomId, 'chat', 'messages', 1, 'text'])).equal('test2');

@@ -6,6 +6,7 @@ import ProtectedRoute from './ProtectedRoute';
 import Login from '../views/Login';
 import RouteMain from './RouteMain';
 import RouteRoom from './RouteRoom';
+import RouteProfile from './RouteProfile';
 import {Test} from '../components/Test.jsx';
 
 const LoadingMessage = () => 'Loading...';
@@ -22,6 +23,7 @@ export default (<Suspense fallback={<LoadingMessage />}>
     <ProtectedRoute path={'/room'} component={RouteRoom}/>
     <Route path='/test' component={Test}/>
     <ProtectedRoute exact path='/' component={RouteMain}/>
+    <ProtectedRoute exact path='/profile' component={RouteProfile}/>
   </Switch>
 </Suspense>
 );

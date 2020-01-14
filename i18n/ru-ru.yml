@@ -8,11 +8,21 @@ App:
     Twitter: Войти через Twitter
   Name: Эволюция
   Online: Онлайн
+  Settings:
+    Sound: Звук
+    UIv3: Новый интерфейс (v3)
+    Profile: Профиль
+  Profile:
+    Title: Профиль
+    Name: Имя
+    NameChange: Сменить Имя
   Misc:
     VKGroup: Группа ВК
     Changelog: Список изменений
     Agree: Да # Yes: Да => true: Да WTF???
     Disagree: Нет # Yes: Да => true: Да WTF???
+    On: Вкл
+    Off: Выкл
     FAQ: Об игре
     FAQ_HREF: 'https://github.com/ivan-work/evolution-web/blob/master/faq-ru.md'
   Chat:

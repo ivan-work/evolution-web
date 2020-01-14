@@ -7,47 +7,34 @@ import {connect} from "react-redux";
 import Button from "@material-ui/core/Button/Button";
 import EvoTextField from "../../components/EvoTextField";
 
-import Validator from "validatorjs";
+import withForm from "../../components/withForm";
 import {RulesLoginPassword} from "../../../shared/models/UserModel";
 
 import {loginUserFormRequest} from "../../../shared/actions/auth";
 
 export const TextLogin = compose(
   connect(
-    (state) => ({}),
+    null,
     (dispatch) => ({
       $loginUser: (...args) => dispatch(loginUserFormRequest(...args))
     })
   )
-  , withStateHandlers(() => {
-    return {
-      form: {
-        login: ''
-      }
-      , validation: new Validator({}, RulesLoginPassword)
-    }
-  }, {
-    formOnChange: ({form}) => ({target}) => {
-      const {name, value} = target;
-      form[name] = value;
-      const validation = new Validator(form, RulesLoginPassword);
-      validation.check();
-      return {form, validation};
-    }
-    , formOnSubmit: ({form}, {$loginUser}) => e => {
-      e.preventDefault();
-      $loginUser('/', form.login, form.password);
+  , withForm({
+    form: {login: ''}
+    , rules: RulesLoginPassword
+    , onSubmit: (form, {$loginUser}) => {
+      $loginUser('/', form)
     }
   })
 )(
-  ({form, validation, formOnChange, formOnSubmit}) => (
+  ({form, errors, formOnChange, formOnSubmit}) => (
     <form noValidate autoComplete={'off'}>
       <EvoTextField
         name="login"
         label={T.translate('App.Login.Username')}
         value={form.login}
         onChange={formOnChange}
-        error={validation.errors.errors.login}
+        error={errors.login}
       />
       <div>
         <Button

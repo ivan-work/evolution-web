@@ -33,7 +33,7 @@ export default {
       entryOnly: false
     }) : null
     //, isDevelopment ? new webpack.HotModuleReplacementPlugin({quiet: false}) : null
-    , new webpack.IgnorePlugin(/\.(css|less|mp3)$/)
+    , new webpack.IgnorePlugin(/\.(css|less|mp3|wav)$/)
   ].filter(p => p !== null)
   , externals: nodeModules
   , module: {

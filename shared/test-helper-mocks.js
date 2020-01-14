@@ -18,7 +18,7 @@ global.mockStores = (count = 2, initialServerStore = void 0) => {
   let debugInfo = 'Started test with ';
   for (let i = 0; i < count; ++i) {
     const clientStore = mockClientStore().connect(serverStore);
-    clientStore.dispatch(loginUserFormRequest('/', 'User' + i, 'testPassword'));
+    clientStore.dispatch(loginUserFormRequest('/', {id: 'test', login: 'User' + i}));
     const User = UserSpy.lastCall.returnValue;
     debugInfo += `(${User.id}) `;
     result.push({

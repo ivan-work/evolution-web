@@ -59,7 +59,7 @@ describe('Auth:', function () {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
 
-      clientStore0.dispatch(loginUserFormRequest('/test', 'testLogin', 'testPassword'));
+      clientStore0.dispatch(loginUserFormRequest('/test', {id: 'test', login: 'testLogin'}));
 
       const User0 = serverStore.getState().get('users').last();
       expect(User0).instanceof(UserModel);
@@ -72,9 +72,11 @@ describe('Auth:', function () {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
 
-      expectUnchanged('Login validation', () => {
-        clientStore0.dispatch(loginUserFormRequest('/test', '', 'testPassword'));
-      }, serverStore, clientStore0);
+      expectError('loginUserFormRequest fails with error', 'validation', () => {
+        clientStore0.dispatch(loginUserFormRequest('/test', {id: 'test', login: ''}));
+      });
+
+      expect(clientStore0.getState().getIn(['app', 'forms', 'test', 'login'])).ok;
     });
 
     it('Auth dropped from server', () => {
@@ -86,11 +88,9 @@ describe('Auth:', function () {
       expectError('Connect fails with error', 'Token', () => {
         clientStore0.connect(serverStore);
       });
-      console.log(serverStore.getActionTypes())
-      console.log(clientStore0.getActionTypes())
       expect(clientStore0.getActions()[clientStore0.getActions().length - 1].type).equal('loginUserFailure');
 
-      expectError('loginUserFormRequest fails with error', 'validation', () => {
+      expectError('loginUserFormRequest fails with error', 'form', () => {
         clientStore0.dispatch(loginUserFormRequest('/test'));
       });
 
@@ -104,7 +104,7 @@ describe('Auth:', function () {
 
       // User0 logins
 
-      clientStore0.dispatch(loginUserFormRequest('/test', 'User0', 'testPassword'));
+      clientStore0.dispatch(loginUserFormRequest('/test', {id: 'test', login: 'User0'}));
       const User0 = serverStore.getState().get('users').last();
       expect(User0).instanceof(UserModel);
 
@@ -120,7 +120,7 @@ describe('Auth:', function () {
 
       // User1 logins
 
-      clientStore1.dispatch(loginUserFormRequest('/test', 'User1', 'testPassword'));
+      clientStore1.dispatch(loginUserFormRequest('/test', {id: 'test', login: 'User1'}));
       const User1 = serverStore.getState().get('users').last();
       expect(User1).instanceof(UserModel);
       expect(User1).not.equal(User0);
@@ -139,9 +139,9 @@ describe('Auth:', function () {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
       const clientStore1 = mockClientStore().connect(serverStore);
-      clientStore0.dispatch(loginUserFormRequest('/User0', 'User0', 'User0'));
+      clientStore0.dispatch(loginUserFormRequest('/User0', {id: 'test', login: 'User0'}));
       const User0 = serverStore.getState().get('users').last();
-      clientStore1.dispatch(loginUserFormRequest('/User1', 'User1', 'User1'));
+      clientStore1.dispatch(loginUserFormRequest('/User1', {id: 'test', login: 'User1'}));
       const User1 = serverStore.getState().get('users').last();
 
       clientStore0.disconnect();
@@ -165,9 +165,9 @@ describe('Auth:', function () {
       const clientStore0 = mockClientStore().connect(serverStore);
       const clientStore1 = mockClientStore().connect(serverStore);
 
-      clientStore0.dispatch(loginUserFormRequest('/test', 'User0', 'testPassword'));
+      clientStore0.dispatch(loginUserFormRequest('/test', {id: 'test', login: 'User0'}));
       const User0 = serverStore.getState().get('users').last();
-      clientStore1.dispatch(loginUserFormRequest('/test', 'User1', 'testPassword'));
+      clientStore1.dispatch(loginUserFormRequest('/test', {id: 'test', login: 'User1'}));
       const User1 = serverStore.getState().get('users').last();
 
       clientStore0.disconnect();
@@ -196,7 +196,7 @@ describe('Auth:', function () {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
 
-      clientStore0.dispatch(loginUserFormRequest('/test', 'User0', 'testPassword'));
+      clientStore0.dispatch(loginUserFormRequest('/test', {id: 'test', login: 'User0'}));
       const User0 = serverStore.getState().get('users').last();
 
       clientStore0.getClient().disconnect();
@@ -217,7 +217,7 @@ describe('Auth:', function () {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
 
-      clientStore0.dispatch(loginUserFormRequest('/test', 'User0', 'testPassword'));
+      clientStore0.dispatch(loginUserFormRequest('/test', {id: 'test', login: 'User0'}));
       const User0 = serverStore.getState().get('users').last();
 
       const clientStore1 = mockClientStore(Map({user: User0})).connect(serverStore);
@@ -231,9 +231,9 @@ describe('Auth:', function () {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
       const clientStore1 = mockClientStore().connect(serverStore);
-      clientStore0.dispatch(loginUserFormRequest('/test', 'User0', 'testPassword'));
+      clientStore0.dispatch(loginUserFormRequest('/test', {id: 'test', login: 'User0'}));
       const User0 = serverStore.getState().get('users').last();
-      clientStore1.dispatch(loginUserFormRequest('/test', 'User1', 'testPassword'));
+      clientStore1.dispatch(loginUserFormRequest('/test', {id: 'test', login: 'User1'}));
       const User1 = serverStore.getState().get('users').last();
       clientStore1.disconnect();
       clientStore1.connect(serverStore);

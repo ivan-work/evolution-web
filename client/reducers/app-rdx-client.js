@@ -37,6 +37,7 @@ const getInitialState = () => Map({
   , uiv3: loadValue('uiv3', true)
   , adminMode: process.env.NODE_ENV !== 'production'
   , ignoreList: OrderedSet(loadValue('ignoreList', []))
+  , forms: Map()
 });
 
 export const reducer = createReducer(getInitialState(), {
@@ -55,4 +56,6 @@ export const reducer = createReducer(getInitialState(), {
     saveValue('ignoreList', ignoreList.toJS());
     return state.set('ignoreList', ignoreList);
   }
+  , formValidationError: (state, {formId, errors}) => state.updateIn(['forms', formId], formErrors => (formErrors || Map()).merge(Map(errors)))
+  , formValidationClear: (state, {formId}) => state.removeIn(['forms', formId])
 });

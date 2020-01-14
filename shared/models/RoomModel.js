@@ -31,6 +31,7 @@ export class VotingModel extends Record({
 
 export class RoomModel extends Record({
   id: null
+  , hostId: null
   , name: null
   , settings: new SettingsRecord()
   , users: List()
@@ -59,11 +60,14 @@ export class RoomModel extends Record({
     });
   }
 
-  static new() {
+  static new(host) {
     const id = uuid.v4();
+    const hostId = host ? host.id : null;
+    const roomName = host ? host.login : id.slice(0, 4);
     return new RoomModel({
-      id: id
-      , name: 'Room ' + id.slice(0, 4)
+      id
+      , hostId
+      , name: `Room «${roomName}»`
       , users: List()
       , timestamp: Date.now()
     })
