@@ -21,8 +21,8 @@ App:
     Changelog: Список изменений
     Agree: Да # Yes: Да => true: Да WTF???
     Disagree: Нет # Yes: Да => true: Да WTF???
-    On: Вкл
-    Off: Выкл
+    $on: вкл # this doesn't work without $
+    $off: выкл # this doesn't work without $
     FAQ: Об игре
     FAQ_HREF: 'https://github.com/ivan-work/evolution-web/blob/master/faq-ru.md'
   Chat:
@@ -77,6 +77,16 @@ Game:
     EXTINCTION: Фаза вымирания
     FINAL: Игра закончена
   UI:
+    IM:
+      Help:
+        CARD: 'Сыграйте карту'
+        FOOD: 'Накормите животное'
+        TRAIT: 'Активируйте свойство'
+        CARD_TRAIT: 'Положите карту либо на пустую область (сделает новое животное), либо на уже существующее животное (добавит свойство)'
+        TRAIT_SHELL: 'Положите раковину на животное'
+        ANIMAL_LINK: 'Соедините со вторым животным'
+        PLANT_LINK: 'Соедините со вторым растением'
+        COVER: 'Положите на животное, чтобы защитить его от атаки'
     SwitchUI:
       New: Новый интерфейс
       Old: Старый интерфейс
@@ -169,51 +179,64 @@ Game:
     PlantFungus: Гриб
     PlantCarnivorous: Хищное
     PlantParasite: Паразит
+  AnimalFlag:
+    HIBERNATED: Спит zZzZ
+    POISONED: Отравлен
+    SHELL: В раковине
+    REGENERATION: Регенерирует
+    PARALYSED: Парализован
+    SHY: Спрятался
+    IN_COVER: В укрытии
   Trait:
-    TraitSymbiosis      : Симбиоз
-    TraitCommunication  : Сотрудничество
-    TraitCooperation    : Взаимодействие
-    TraitCarnivorous    : Хищник
-    TraitParasite       : Паразит
-    TraitFatTissue      : Жировой запас
-    TraitSwimming       : Водоплавающее
-    TraitRunning        : Быстрое
-    TraitMimicry        : Мимикрия
-    TraitScavenger      : Падальщик
-    TraitPiracy         : Пиратство
-    TraitTailLoss       : Отбрасывание хвоста
-    TraitGrazing        : Топотун
-    TraitMassive        : Большой
-    TraitHibernation    : Спячка
-    TraitPoisonous      : Ядовитое
-    TraitBurrowing      : Норное
-    TraitCamouflage     : Камуфляж
-    TraitSharpVision    : Острое зрение
+    TraitSymbiosis           : Симбиоз
+    TraitSymbiosisSource     : Симбионт
+    TraitCommunication       : Сотрудничество
+    TraitCommunicationSource : Сотрудничество
+    TraitCooperation         : Взаимодействие
+    TraitCooperationSource   : Взаимодействие
+    TraitCarnivorous         : Хищник
+    TraitParasite            : Паразит
+    TraitFatTissue           : Жировой запас
+    TraitSwimming            : Водоплавающее
+    TraitRunning             : Быстрое
+    TraitMimicry             : Мимикрия
+    TraitScavenger           : Падальщик
+    TraitPiracy              : Пиратство
+    TraitTailLoss            : Отбрасывание хвоста
+    TraitGrazing             : Топотун
+    TraitMassive             : Большой
+    TraitHibernation         : Спячка
+    TraitPoisonous           : Ядовитое
+    TraitBurrowing           : Норное
+    TraitCamouflage          : Камуфляж
+    TraitSharpVision         : Острое зрение
 
-    TraitShell          : Раковина
-    TraitIntellect      : Интеллект
-    TraitAnglerfish     : Удильщик
-    TraitTrematode      : Трематода
-    TraitMetamorphose   : Метаморфоза
-    TraitInkCloud       : Чернильное облако
-    TraitViviparous     : Живорождение
-    TraitAmbush         : Засада
-    TraitFlight         : Полет
-    TraitSpecA          : Термосинтез
-    TraitSpecB          : Фотосинтез
+    TraitShell               : Раковина
+    TraitIntellect           : Интеллект
+    TraitAnglerfish          : Удильщик
+    TraitTrematode           : Трематода
+    TraitTrematodeSource     : Трематода
+    TraitMetamorphose        : Метаморфоза
+    TraitInkCloud            : Чернильное облако
+    TraitViviparous          : Живорождение
+    TraitAmbush              : Засада
+    TraitFlight              : Полет
+    TraitSpecA               : Термосинтез
+    TraitSpecB               : Фотосинтез
 
-    TraitAedificator    : Эдификатор
-    TraitCnidocytes     : Стрекательные клетки
-    TraitHerding        : Стадность
-    TraitMigration      : Миграция
-    TraitNeoplasm       : Неоплазия
-    TraitRecombination  : Рекомбинация
-    TraitRegeneration   : Регенерация
-    TraitSuckerfish     : Прилипала
+    TraitAedificator         : Эдификатор
+    TraitCnidocytes          : Стрекательные клетки
+    TraitHerding             : Стадность
+    TraitMigration           : Миграция
+    TraitNeoplasm            : Неоплазия
+    TraitRecombination       : Рекомбинация
+    TraitRecombinationSource : Рекомбинация
+    TraitRegeneration        : Регенерация
+    TraitSuckerfish          : Прилипала
 
-    TraitRstrategy      : r-Стратегия
-    TraitHomeothermy    : Теплокровное
-    TraitShy            : Пугливое
+    TraitRstrategy           : r-Стратегия
+    TraitHomeothermy         : Теплокровное
+    TraitShy                 : Пугливое
 
     PlantTraitRootVegetable: Корнеплод
     PlantTraitHoney: Медонос

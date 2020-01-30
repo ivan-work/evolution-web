@@ -33,6 +33,8 @@ const TraitGeneralColors = {
   , fillValue: '#FC3'
   , textDisabled: '#333'
   , fillDisabled: '#999'
+  , textInteracting: '#F33'
+  , fillInteracting: '#F33'
 };
 
 const defaultColorConfig = {
@@ -46,6 +48,8 @@ const defaultColorConfig = {
   , fillValue: TraitGeneralColors.fillValue
   , textDisabled: TraitGeneralColors.textDisabled
   , fillDisabled: TraitGeneralColors.fillDisabled
+  , textInteracting: TraitGeneralColors.textInteracting
+  , fillInteracting: TraitGeneralColors.fillInteracting
 };
 
 const TraitColors = {
@@ -121,7 +125,7 @@ const animalTrait = {
 
 const animalBase = {
   minWidth: defaultWidth
-  , height: (animalTrait.height + 2) * 8
+  , height: 20 + animalTrait.height * 8
   , margin: 10
   , borderRadius: 5
   , boxShadow: '1px 1px 5px black'

@@ -21,7 +21,6 @@ import {openQuestionMetamorphose, openQuestionRecombination} from "../../../acti
 import {traitActivateRequest, traitAmbushActivateRequest} from "../../../../shared/actions/trait";
 import styled from "../../../styles/styled";
 import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
-import WhiteTooltip from "../../utils/WhiteTooltip";
 import LinkedTrait from "../lineBetweenTraits/LinkedTrait";
 import {TraitBase} from "../traits/Trait";
 import LinkedTraitWrapper from "../lineBetweenTraits/LinkedTraitWrapper";
@@ -31,7 +30,7 @@ export const AnimalTraitBase = (props) => (
     {...props}
     textComponent={
       <>
-        <span className='name'>{T.translate('Game.Trait.' + props.trait.type)}</span>
+        <span className='name'>{T.translate(`Game.Trait.${props.trait.type}${props.trait.linkSource ? `Source` : ``}`)}</span>
         <span className='food'>
           {props.trait.getDataModel().food > 0 ? ' +' + props.trait.getDataModel().food : null}
           </span>
@@ -109,7 +108,8 @@ export const InteractiveTraitClickable = compose(
 export const InteractiveTrait = compose(
   connect((state, props) => ({canStart: checkCanStart(state, props)}), {traitActivateRequest})
   , InteractionSource(DND_ITEM_TYPE.TRAIT, {
-    canStart: ({canStart}) => canStart
+    getIID: ({trait}) => trait.id
+    , canStart: ({canStart}) => canStart
     , onStart: ({trait, sourceAnimal}) => ({trait, sourceAnimal})
   })
 )(AnimalTraitBase);

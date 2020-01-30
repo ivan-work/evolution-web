@@ -17,11 +17,12 @@ import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
 import {TraitBase} from "../traits/Trait";
 import LinkedTraitWrapper from "../lineBetweenTraits/LinkedTraitWrapper";
 import {plantTraitActivateRequest} from "../../../../shared/actions/game.plantarium";
+import {getErrorOfEntityTraitActivation} from "../../../../shared/actions/trait.checks";
 
 export const PlantTraitBase = (props) => (
   <TraitBase
     {...props}
-    textComponent={<span className='name'>{T.translate('Game.PlantTrait.' + props.trait.type)}</span>}
+    textComponent={<span className='name'>{T.translate('Game.Trait.' + props.trait.type)}</span>}
   />
 );
 
@@ -41,7 +42,7 @@ const PlantTrait = (props) => {
 const checkCanStart = ({game}, {trait, host}) => (
   (game.isPlayerTurn() || trait.getDataModel().transient)
   && game.status.phase === PHASE.FEEDING
-  && !trait.getErrorOfUse(game, host)
+  && !getErrorOfEntityTraitActivation(game, game.getPlayer().id, host, trait)
 );
 
 export const InteractiveTraitClickable = compose(

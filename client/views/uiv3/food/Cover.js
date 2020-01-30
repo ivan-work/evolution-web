@@ -1,11 +1,12 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import cn from 'classnames';
 import noop from 'lodash/noop';
 
 import SvgIcon from '@material-ui/core/SvgIcon';
 // import IconCover from '@material-ui/icons/AllOut';
 
-import {compose, fromRenderProps, withHandlers, withProps} from "recompose";
+import {compose, fromRenderProps, setPropTypes, withHandlers, withProps} from "recompose";
 import {connect} from "react-redux";
 
 import withStyles from "@material-ui/core/styles/withStyles";
@@ -48,15 +49,18 @@ Cover.defaultProps = {
 };
 
 export const InteractiveCover = compose(
-  connect(state => {
+  setPropTypes({
+    sourceId: PropTypes.string
+  })
+  , connect(state => {
     const game = state.game;
     return {
       canStart: game.isPlayerTurn() && !game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, game.userId)
     }
   })
-  , InteractionSource(DND_ITEM_TYPE.TRAIT_SHELL, {
+  , InteractionSource(DND_ITEM_TYPE.COVER, {
     canStart: ({canStart}) => canStart
-    , onStart: ({trait}) => ({trait})
+    , onStart: ({sourceId}) => ({sourceId})
   })
 )(Cover);
 

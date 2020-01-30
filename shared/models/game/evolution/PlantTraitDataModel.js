@@ -29,6 +29,9 @@ const PlantTraitDataModelProps = {
  * @property {callback} getTargets: null // get list of available target for an active trait (game, sourceAnimal) => list of targets
  * @property {object} customFns: {} // Object of custom trait functions
  *
+ * @property {callback} _getErrorOfUse
+ * @property {callback} _getErrorOfTraitPlacement
+ * @property {callback} _getErrorOfFoodIntake
  * @property {callback} getErrorOfFoodIntake
  * @property {callback} getErrorOfUseAction
  * @property {callback} getErrorOfUseOnTarget
@@ -47,14 +50,8 @@ export default class PlantTraitDataModel extends Record(PlantTraitDataModelProps
     if (!trait) trait = plant.hasTrait(this.type, true);
     if (!trait) return ERRORS.TRAIT_ACTION_NO_TRAIT;
     if (trait.disabled) return ERRORS.TRAIT_ACTION_DISABLED;
-    console.log('getting error of ', plant.id,  trait.id)
     if (this.cooldowns && this.cooldowns
-      .some(([link]) => {
-        const res = game.cooldowns.checkFor(link, null, plant.id, trait.id)
-        res && console.log('error in', game.cooldowns.toJS())
-        res && console.log('error in', link, plant.id, trait.id)
-        return res;
-      }))
+      .some(([link]) => game.cooldowns.checkFor(link, null, plant.id, trait.id)))
       return ERRORS.COOLDOWN;
 
     return this._getErrorOfUse(game, plant, trait, ...targets);

@@ -80,9 +80,9 @@ class BasePlant extends React.PureComponent {
     return (
       <div className={cnPlant} onClickCapture={acceptInteraction}>
         <Typography className={classes.name}>{T.translate(`Game.Plant.${plant.type}`)}</Typography>
-        <div className={classes.food}>{repeat(plant.getFood(), i => <InteractiveFood key={i} />)}</div>
+        <div className={classes.food}>{repeat(plant.getFood(), i => <InteractiveFood key={i} index={i} sourceId={plant.id} />)}</div>
         <div className={classes.covers}>
-          {repeat(plant.covers, i => <InteractiveCover key={i} />)}
+          {repeat(plant.covers, i => <InteractiveCover key={i} sourceId={plant.id} />)}
           {repeat(plant.coverSlots - plant.covers, i => <Cover key={i} />)}
         </div>
         <div>
@@ -116,11 +116,9 @@ const InteractivePlant = compose(
             case PHASE.DEPLOY:
               const {traitType} = item;
               const traitData = TraitModel.new(traitType).getDataModel();
-              console.log(traitData, traitData.cardTargetType & CTT_PARAMETER.PLANT)
               if (!(traitData.cardTargetType & CTT_PARAMETER.PLANT)) {
                 return false;
               }
-              console.log(traitData.getErrorOfTraitPlacement(game, plant))
               return !traitData.getErrorOfTraitPlacement(game, plant);
             default:
               return false;

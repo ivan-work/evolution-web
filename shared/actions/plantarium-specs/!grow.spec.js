@@ -250,7 +250,7 @@ players:
     });
   });
 
-  describe.only('After turn grow', function() {
+  describe('After turn grow', function() {
     it('Spawns new plants after turn', () => {
       const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
       const gameId = ParseGame(`
@@ -335,7 +335,7 @@ players:
   - hand: 1 camo
     continent: $A pois, $B pois, $C pois, $D pois +
 `);
-      const {selectGame, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+      const {selectGame, findAnimal, findPlant, findPlayerByIndex} = makeGameSelectors(serverStore.getState, gameId);
       expect(selectGame().status.turn, 'turn').equal(0);
       expect(selectGame().status.round, 'round').equal(0);
       expect(selectGame().status.phase, 'phase').equal(PHASE.DEPLOY);
@@ -351,25 +351,25 @@ players:
 
       const [plantPer, plantCarn1, plantCarn2, plantCarn3] = selectGame().plants.keySeq().toJS();
 
-      logger.verbose(`Plants are: ${[plantPer, plantCarn1, plantCarn2, plantCarn3]}`)
+      logger.verbose(`Plants are: ${[plantPer, plantCarn1, plantCarn2, plantCarn3]}`);
 
       clientStore0.dispatch(gamePlantAttackRequest(plantCarn1, '$A'));
 
       expect(findAnimal('$A')).null;
+
+
       // console.log(findPlant(plantCarn1))
       clientStore0.dispatch(gamePlantAttackRequest(plantCarn2, '$B'));
       expect(findAnimal('$B')).null;
 
-      clientStore0.dispatch(gameEndTurnRequest());
+      clientStore0.dispatch(traitTakeFoodRequest('$C', plantCarn3));
       expect(findAnimal('$C')).null;
 
+      expect(selectGame().status.turn, 'turn 1').equal(1);
+      expect(selectGame().status.round, 'round').equal(0);
+      expect(selectGame().status.phase, 'phase').equal(PHASE.DEPLOY);
 
-
-      // expect(selectGame().status.turn, 'turn').equal(1);
-      // expect(selectGame().status.round, 'round').equal(0);
-      // expect(selectGame().status.phase, 'phase').equal(PHASE.DEPLOY);
-      //
-      // expect(selectGame().plants, 'plants').size(4);
+      expect(selectGame().plants, 'plants').size(4);
       // expect(selectGame().deckPlants, 'deckPlants').size(5);
     });
   })

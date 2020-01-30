@@ -3,7 +3,7 @@ import React from 'react'
 import Tooltip from '@material-ui/core/Tooltip';
 import withStyles from '@material-ui/core/styles/withStyles';
 
-const styles = theme => ({
+export default withStyles(theme => ({
   popper: {
     opacity: 1
   }
@@ -15,10 +15,4 @@ const styles = theme => ({
     , zIndex: theme.zIndex.tooltip - 1
     , boxShadow: '1px 1px 5px black'
   }
-});
-
-export default withStyles(styles)(({classes, children, ...props}) => (
-  <Tooltip classes={{tooltip: classes.tooltip, popper: classes.popper}} {...props}>
-    {children}
-  </Tooltip>
-));
+}))(Tooltip);

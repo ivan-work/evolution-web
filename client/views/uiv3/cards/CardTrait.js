@@ -72,7 +72,6 @@ export const InteractiveCardTrait = compose(
       cardId: cardId
       , traitType: trait
       , alternateTrait: invert
-      , help: 'Peretashite carty na zhivotne'
     })
   })
 )(CardTrait);

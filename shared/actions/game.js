@@ -366,6 +366,9 @@ export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
   if (!acted && game.status.phase === PHASE.FEEDING) {
     const options = getOptions(game, userId);
     options.forEach(option => {
+      if (!option.cooldownAction) {
+        logger.error(option);
+      }
       dispatch(option.cooldownAction(gameId));
     });
   }

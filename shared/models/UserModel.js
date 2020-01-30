@@ -5,8 +5,8 @@ import uuid from 'uuid';
 
 import {ChatModel} from './ChatModel';
 
-export const RuleGuestUserName = 'required|string|between:4,12|regex:/^[a-zA-Zа-яА-Я\\d]+$/';
-export const RuleRegisteredUserName = 'required|string|between:4,20|regex:/^[0-9a-zA-Zа-яА-Я\\d ]+$/';
+export const RuleGuestUserName = 'required|string|between:4,12|regex:/^[a-zA-Zа-яА-Я\\d \-_]+$/';
+export const RuleRegisteredUserName = 'required|string|between:4,20|regex:/^[0-9a-zA-Zа-яА-Я\\d \-_]+$/';
 
 export const RulesLoginPassword = {
   login: RuleGuestUserName

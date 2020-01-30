@@ -13,7 +13,7 @@ import SettingOff from '@material-ui/icons/RadioButtonUnchecked';
 import {appUseUIv3} from "../../actions/app";
 
 export const SettingUIv3Body = ({uiv3, toggleSetting, disabled}) => (
-  <Tooltip title={`${T.translate('App.Settings.UIv3')} ${T.translate(`App.Misc.${uiv3 ? 'On' : 'Off'}`)}`}>
+  <Tooltip title={`${T.translate('App.Settings.UIv3')} ${T.translate(`App.Misc.$${uiv3 ? 'on' : 'off'}`)}`}>
     <IconButton color="inherit"
                 disabled={disabled}
                 onClick={toggleSetting}>
@@ -23,7 +23,7 @@ export const SettingUIv3Body = ({uiv3, toggleSetting, disabled}) => (
 );
 
 export const SettingUIv3MenuItemBody = ({uiv3, toggleSetting, disabled}) => (
-  <Tooltip title={`${T.translate('App.Settings.UIv3')} ${T.translate(`App.Misc.${uiv3 ? 'On' : 'Off'}`)}`}>
+  <Tooltip title={`${T.translate('App.Settings.UIv3')} ${T.translate(`App.Misc.$${uiv3 ? 'on' : 'off'}`)}`}>
     <MenuItem onClick={toggleSetting} disabled={disabled}>
       {T.translate('App.Settings.UIv3')}&nbsp;
       {uiv3 ? <SettingOn /> : <SettingOff />}

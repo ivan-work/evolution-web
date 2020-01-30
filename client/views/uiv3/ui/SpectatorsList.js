@@ -7,8 +7,7 @@ import MUIList from '@material-ui/core/List'
 import WhiteTooltip from '../../utils/WhiteTooltip'
 
 import User from "../../utils/User";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import IgnoreUnignoreTooltip, {IgnoreButton, UnignoreButton} from "../../../components/IgnoreUnignoreTooltip";
+import {IgnoreButton, UnignoreButton} from "../../../components/IgnoreUnignoreTooltip";
 import T from "i18n-react";
 import Typography from "@material-ui/core/Typography";
 

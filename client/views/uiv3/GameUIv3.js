@@ -20,29 +20,24 @@ import Continent from "./continent/Continent";
 
 import {chatMessageRequest} from "../../../shared/actions/chat";
 import {debugMirrorPlayer} from "../../actions/debug";
-import {InteractiveFood} from "./food/Food";
 import {InteractionContext, InteractionManagerProvider} from './InteractionManager'
+import {CurrentInteractionDebug, CurrentInteractionHelp} from './ui/InteractionManagerHelp'
 import {SVGContextProvider, SVGContextSpy} from "./SVGContext";
 import GameSVGOverlay from "./GameSVGOverlay";
 import GameTimedOutDialog from "./ui/GameTimedOutDialog";
 import QuestionIntellect from "./ui/QuestionIntellect";
 import QuestionDefence from "./ui/QuestionDefence";
-import {InteractiveShell} from "./food/Shell";
-import AnimatedHOC from "../../services/AnimationService/AnimatedHOC";
 import GameStyles from "./GameStyles";
-import Plant from "./plants/Plant";
 import FoodWrapper from "./food/FoodWrapper";
-import GameInfoToolbar2 from "./ui/GameInfoToolbar2";
 import PlantsContainer from "./plants/PlantsContainer";
 import Typography from "@material-ui/core/Typography/Typography";
-import User from "../utils/User";
-import IconPause from "@material-ui/core/SvgIcon/SvgIcon";
 
 const styles = theme => ({
   GameUIv3Container: {
     flex: '1 1 0'
     , flexWrap: 'nowrap'
     , background: theme.palette.background.accent
+    , paddingTop: 2
   }
   , GameUIv3: {
     flex: '1 1 0'
@@ -58,8 +53,7 @@ const styles = theme => ({
     , marginBottom: 2
   }
   , gridMiscRow: {
-    marginTop: 2
-    , display: 'flex'
+    display: 'flex'
     , flexFlow: 'row wrap'
   }
   , gridMiscSubRow: {
@@ -185,9 +179,8 @@ export class SVGContextInteractionSpy extends React.PureComponent {
 export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
   return (
     <Grid container direction='column' className={classes.GameUIv3Container}>
-      {/*<Grid item className={classes.gridGameToolbar}>*/}
-      {/*<GameInfoToolbar2 game={game} compressControls={{compress, toggleCompress}}/>*/}
-      {/*</Grid>*/}
+      <CurrentInteractionHelp/>
+      {/*<CurrentInteractionDebug/>*/}
       <Grid item container direction='column' className={classes.GameUIv3}>
 
         <GameSVGOverlay />
@@ -231,7 +224,7 @@ export const ChatWrapperSmall = ({game}) => <ChatWindow chatTargetType='ROOM' ro
 export const PlantsWrapper = ({classes, game}) => {
   const className = cn(classes.GridWrapper, {});
   return <Paper id='Plants' className={className}>
-    <Typography>{T.translate('GAME.UI.Plants')}</Typography>
+    <Typography>{T.translate('Game.UI.Plants')}</Typography>
     <div className={classes.ContinentContainer}>
       <PlantsContainer game={game} />
     </div>

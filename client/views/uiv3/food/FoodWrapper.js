@@ -22,7 +22,7 @@ export default compose(
   , AnimatedHOC(() => `FoodContainer`)
 )(
   ({classes, game}) => <div className={classes.FoodContainer}>
-    {repeat(game.food, i => <InteractiveFood key={i}/>)}
+    {repeat(game.food, i => <InteractiveFood key={i} index={i}/>)}
     {/*{game.isPlantarium() && game.plants.valueSeq().map(plant => <Plant key={plant.id} plant={plant}/>)}*/}
     {game.getArea().shells.map((trait) => <InteractiveShell key={trait.id} trait={trait}/>).toList()}
   </div>

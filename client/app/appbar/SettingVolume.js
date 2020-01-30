@@ -13,14 +13,14 @@ import IconVolumeOff from '@material-ui/icons/VolumeOff';
 import {appChangeSound} from "../../actions/app";
 
 export const SettingVolumeBody = ({sound, toggleVolume}) =>
-  <Tooltip title={`${T.translate('App.Settings.Sound')} ${T.translate(`App.Misc.${sound ? 'On' : 'Off'}`)}`}>
+  <Tooltip title={`${T.translate('App.Settings.Sound')} ${T.translate(`App.Misc.$${sound ? 'on' : 'off'}`)}`}>
     <IconButton color="inherit" onClick={toggleVolume}>
       {sound ? <IconVolumeOn /> : <IconVolumeOff />}
     </IconButton>
   </Tooltip>;
 
 export const SettingVolumeMenuItemBody = ({sound, toggleVolume}) =>
-  <Tooltip title={`${T.translate('App.Settings.Sound')} ${T.translate(`App.Misc.${sound ? 'On' : 'Off'}`)}`}>
+  <Tooltip title={`${T.translate('App.Settings.Sound')} ${T.translate(`App.Misc.$${sound ? 'on' : 'off'}`)}`}>
     <MenuItem onClick={toggleVolume}>
       {T.translate('App.Settings.Sound')}&nbsp;
       {sound ? <IconVolumeOn /> : <IconVolumeOff />}

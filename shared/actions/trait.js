@@ -49,7 +49,8 @@ import {
   , getErrorOfAnimalEatingFromPlant
   , getErrorOfPlantCounterAttack
   , checkTraitActivation_Target
-  , getErrorOfEntityTraitActivation, getErrorOfAnimalTakingCover, getErrorOfAnimalEatingFromPlantNoCD
+  , getErrorOfAnimalTakingCover
+  , getErrorOfAnimalEatingFromPlantNoCD
 } from './trait.checks';
 
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';

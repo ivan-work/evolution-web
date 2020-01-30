@@ -2,11 +2,21 @@ import React from 'react';
 import PropTypes from "prop-types";
 
 import {connect} from "react-redux";
-import {compose, withHandlers, branch, renderNothing, renderComponent, setPropTypes, setDisplayName} from "recompose";
+import {
+  compose,
+  withHandlers,
+  branch,
+  renderNothing,
+  renderComponent,
+  setPropTypes,
+  setDisplayName,
+  withStateHandlers
+} from "recompose";
 
 import {appIgnoreUser, appUnignoreUser} from "../actions/app";
 
 import IconButton from "@material-ui/core/IconButton";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconIgnore from '@material-ui/icons/MicOff';
 import IconUnignore from '@material-ui/icons/Mic';
@@ -32,7 +42,7 @@ export const IgnoreButton = compose(
 )(({onClick}) => (
   <Tooltip title={'ignore'} placement='right'>
     <IconButton style={ButtonStyle} size='small' onClick={onClick}>
-      <IconIgnore/>
+      <IconIgnore />
     </IconButton>
   </Tooltip>
 ));
@@ -54,7 +64,7 @@ export const UnignoreButton = compose(
 )(({onClick}) => (
   <Tooltip title={'unignore'} placement='right'>
     <IconButton style={ButtonStyle} size='small' onClick={onClick}>
-      <IconUnignore/>
+      <IconUnignore />
     </IconButton>
   </Tooltip>
 ));
@@ -66,6 +76,10 @@ export const IgnoreUnignoreTooltip = compose(
   , setPropTypes({
     userId: PropTypes.string.isRequired
   })
+  , withStateHandlers({isOpen: false}, {
+    handleTooltipOpen: () => () => ({isOpen: true})
+    , handleTooltipClose: () => () => ({isOpen: false})
+  })
   , connect((state, {userId}) => {
     const appUserId = state.getIn(['user', 'id']);
     const appIgnoredUser = state.getIn(['app', 'ignoreList']).has(userId);
@@ -75,15 +89,42 @@ export const IgnoreUnignoreTooltip = compose(
     }
   })
   , branch(({hideIgnore, hideUnignore}) => hideIgnore && hideUnignore, RenderChildrenHOC)
-)(({children, userId, hideIgnore, hideUnignore, dispatch, ...props}) => (
-  <WhiteTooltip interactive title={(
-    <span>
-      {!hideIgnore && <IgnoreButton userId={userId}/>}
-      {!hideUnignore && <UnignoreButton userId={userId}/>}
-    </span>
-  )} placement='right' {...props}>
-    {children}
-  </WhiteTooltip>
+)(({
+     children
+     , userId
+
+     , hideIgnore
+     , hideUnignore
+
+     , isOpen
+     , handleTooltipOpen
+     , handleTooltipClose
+
+     , dispatch // to take out from passing it to WhiteTooltip
+     , ...props
+   }) => (
+  <ClickAwayListener onClickAway={handleTooltipClose}>
+    <WhiteTooltip
+      interactive
+      placement='right'
+      disableFocusListener
+      disableHoverListener
+      disableTouchListener
+      open={isOpen}
+      onClose={handleTooltipClose}
+      title={(
+        <span>
+          {!hideIgnore && <IgnoreButton userId={userId} />}
+          {!hideUnignore && <UnignoreButton userId={userId} />}
+        </span>
+      )}
+      {...props}
+    >
+      <span onClick={handleTooltipOpen}>
+        {children}
+      </span>
+    </WhiteTooltip>
+  </ClickAwayListener>
 ));
 
 export default IgnoreUnignoreTooltip;

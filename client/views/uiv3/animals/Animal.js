@@ -13,7 +13,8 @@ import repeat from 'lodash/times';
 
 
 import GameStyles from "../GameStyles";
-import Typography from "@material-ui/core/Typography/Typography";
+import Typography from "@material-ui/core/Typography";
+import Tooltip from "@material-ui/core/Tooltip";
 
 import geckoHR from '../../../assets/gfx/geckoHR.svg';
 import {PHASE} from "../../../../shared/models/game/GameModel";
@@ -22,12 +23,6 @@ import {CTT_PARAMETER, TRAIT_ANIMAL_FLAG} from "../../../../shared/models/game/e
 import IconFull from '@material-ui/icons/SentimentVerySatisfied';
 import IconEnough from '@material-ui/icons/SentimentSatisfied';
 import IconHungry from '@material-ui/icons/SentimentVeryDissatisfied';
-
-import IconFlagPoisoned from '@material-ui/icons/SmokingRooms';
-import IconFlagHibernated from '@material-ui/icons/Snooze';
-import IconFlagShell from '@material-ui/icons/Home';
-import IconFlagRegeneration from '@material-ui/icons/GetApp';
-import IconFlagShy from '@material-ui/icons/Report';
 
 import Food from "../food/Food";
 import AnimalTrait from "./AnimalTrait";
@@ -39,6 +34,7 @@ import {gameDeployRegeneratedAnimalRequest, gameDeployTraitRequest} from "../../
 import {
   traitActivateRequest,
   traitAmbushActivateRequest,
+  traitTakeCoverRequest,
   traitTakeFoodRequest,
   traitTakeShellRequest
 } from "../../../../shared/actions/trait";
@@ -48,6 +44,12 @@ import {AnimalModel} from "../../../../shared/models/game/evolution/AnimalModel"
 
 import {AT_DEATH} from "../animations";
 import {SVGContextSpy} from "../SVGContext";
+import {
+  getErrorOfAnimalEatingFromGame,
+  getErrorOfAnimalEatingFromPlant,
+  getErrorOfAnimalTakingCover
+} from "../../../../shared/actions/trait.checks";
+import AnimalFlags from "./AnimalFlags";
 
 const DEATH_ANIMATION_TIME = `${AT_DEATH}ms`;
 
@@ -71,6 +73,15 @@ const styles = theme => ({
     , '& .AnimalIcon': {
       verticalAlign: 'middle'
     }
+    , '& .AnimalFlag': {
+      fill: '#555'
+      , '&.good': {
+        fill: '#030'
+      }
+      , '&.bad': {
+        fill: '#800'
+      }
+    }
     , '& .AnimalIconText': {
       fontWeight: 700,
       fontSize: 24,
@@ -87,7 +98,7 @@ const styles = theme => ({
   }
   , animalToolbar: {
     textAlign: 'center'
-    , height: 44
+    , height: GameStyles.animal.height - (GameStyles.animalTrait.height + 2) * 6
     , maxWidth: GameStyles.animal.minWidth
     , lineHeight: 0
   }
@@ -95,25 +106,25 @@ const styles = theme => ({
 
 // region Animal Food
 export const AnimalFoodStatus = ({animal}) => (
-  animal.isFull() ? <IconFull className='AnimalIcon'/>
-    : animal.canSurvive() ? <IconEnough className='AnimalIcon'/>
-    : <IconHungry className='AnimalIcon'/>
+  animal.isFull() ? <IconFull className='AnimalIcon' />
+    : animal.canSurvive() ? <IconEnough className='AnimalIcon' />
+    : <IconHungry className='AnimalIcon' />
 );
 
-const AnimalFood = () => (<Food className='AnimalIcon AnimalIconFood'/>);
+const AnimalFood = () => (<Food className='AnimalIcon AnimalIconFood' />);
 
-export const ListAnimalFood = ({food}) => repeat(food, i => <AnimalFood key={i}/>);
+export const ListAnimalFood = ({food}) => repeat(food, i => <AnimalFood key={i} />);
 
 export const NumberedAnimalFood = ({food}) => (
   <Fragment>
     <Typography inline className='AnimalIconText'>{food}</Typography>
-    <AnimalFood/>
+    <AnimalFood />
   </Fragment>
 );
 
 const AnimalFoodContainer = ({food}) => (food < 4
-  ? <ListAnimalFood food={food}/>
-  : <NumberedAnimalFood food={food}/>);
+  ? <ListAnimalFood food={food} />
+  : <NumberedAnimalFood food={food} />);
 //endregion
 
 const calcWidthF = x => Math.floor(x / 8) + 1;
@@ -143,27 +154,18 @@ export class BaseAnimal extends React.PureComponent {
       .reverse()
       .map(trait => <AnimalTrait key={trait.id}
                                  trait={trait}
-                                 sourceAnimal={animal}/>));
+                                 sourceAnimal={animal} />));
 
     return (
       <div className={cnAnimal} ref={this.setAnimalRef} onClickCapture={acceptInteraction}>
         <div className={classes.animalToolbar}>
           <div>
             {/*{renderAnimalFood(animal)}*/}
-            {game && game.status.phase === PHASE.FEEDING && <AnimalFoodStatus animal={animal}/>}
-            {game && game.status.phase === PHASE.FEEDING && <AnimalFoodContainer food={animal.getFood()}/>}
+            {game && game.status.phase === PHASE.FEEDING && <AnimalFoodStatus animal={animal} />}
+            {game && game.status.phase === PHASE.FEEDING && <AnimalFoodContainer food={animal.getFood()} />}
           </div>
           <div>
-            {animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED) && <IconFlagPoisoned className='AnimalIcon'/>}
-            {animal.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED) && <IconFlagHibernated className='AnimalIcon'/>}
-            {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL) && <IconFlagShell className='AnimalIcon'/>}
-            {animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION) && <IconFlagRegeneration className='AnimalIcon'/>}
-            {animal.hasFlag(TRAIT_ANIMAL_FLAG.SHY) && <IconFlagShy className='AnimalIcon'/>}
-            {/*{<IconFlagPoisoned className='Flag Poisoned'/>}*/}
-            {/*{<IconFlagHibernated className='Flag Hibernated'/>}*/}
-            {/*{<IconFlagShell className='Flag Shell'/>}*/}
-            {/*{<IconFlagRegeneration className='Flag Regeneration'/>}*/}
-            {/*{<IconFlagShy className='Flag Shy'/>}*/}
+            <AnimalFlags animal={animal} />
           </div>
         </div>
         {traitList}
@@ -195,10 +197,18 @@ export const InteractiveAnimal = compose(
     , traitActivateRequest
     , traitAmbushActivateRequest
     , traitTakeShellRequest
+    , traitTakeCoverRequest
     // PHASE.REGENERATION
     , gameDeployRegeneratedAnimalRequest
   })
-  , InteractionTarget([DND_ITEM_TYPE.CARD_TRAIT, DND_ITEM_TYPE.FOOD, DND_ITEM_TYPE.TRAIT, DND_ITEM_TYPE.TRAIT_SHELL, DND_ITEM_TYPE.ANIMAL_LINK], {
+  , InteractionTarget([
+    DND_ITEM_TYPE.CARD_TRAIT
+    , DND_ITEM_TYPE.FOOD
+    , DND_ITEM_TYPE.TRAIT
+    , DND_ITEM_TYPE.TRAIT_SHELL
+    , DND_ITEM_TYPE.ANIMAL_LINK
+    , DND_ITEM_TYPE.COVER
+  ], {
     canInteract: ({game, userId, animal}, {type, item}) => {
       switch (type) {
         case DND_ITEM_TYPE.CARD_TRAIT: {
@@ -225,8 +235,14 @@ export const InteractiveAnimal = compose(
             && !TraitModel.LinkBetweenCheck(traitType, sourceAnimal, animal)
           );
         }
-        case DND_ITEM_TYPE.FOOD:
-          return userId === animal.ownerId && animal.canEat(game);
+        case DND_ITEM_TYPE.FOOD: {
+          const {sourceId} = item;
+          const hostPlant = game.getPlant(sourceId);
+          return (
+            !hostPlant && !getErrorOfAnimalEatingFromGame(game, animal)
+            || !!hostPlant && !getErrorOfAnimalEatingFromPlant(game, animal, hostPlant)
+          );
+        }
         case DND_ITEM_TYPE.TRAIT: {
           const {trait, sourceAnimal} = item;
           const targetError = trait.getDataModel().getErrorOfUseOnTarget(game, sourceAnimal, animal);
@@ -235,6 +251,11 @@ export const InteractiveAnimal = compose(
         case DND_ITEM_TYPE.TRAIT_SHELL: {
           const {trait} = item;
           return !trait.getDataModel().checkTraitPlacementFails_User(animal, userId) && !trait.getDataModel().checkTraitPlacementFails(animal);
+        }
+        case DND_ITEM_TYPE.COVER: {
+          const {sourceId} = item;
+          const hostPlant = game.getPlant(sourceId);
+          return !getErrorOfAnimalTakingCover(game, animal, hostPlant);
         }
         default:
           return true;
@@ -250,6 +271,7 @@ export const InteractiveAnimal = compose(
                      , traitActivateRequest
                      , traitAmbushActivateRequest
                      , traitTakeShellRequest
+                     , traitTakeCoverRequest
                      // PHASE.REGENERATION
                      , gameDeployRegeneratedAnimalRequest
                      , ...props
@@ -263,7 +285,7 @@ export const InteractiveAnimal = compose(
               if (traitDataModel.cardTargetType & CTT_PARAMETER.LINK) {
                 return {
                   type: DND_ITEM_TYPE.ANIMAL_LINK
-                  , data: {
+                  , item: {
                     ...item
                     , animalId: animal.id
                   }
@@ -286,7 +308,7 @@ export const InteractiveAnimal = compose(
         }
 
         case DND_ITEM_TYPE.FOOD: {
-          traitTakeFoodRequest(animal.id);
+          traitTakeFoodRequest(animal.id, item.sourceId);
           break;
         }
 
@@ -299,6 +321,12 @@ export const InteractiveAnimal = compose(
         case DND_ITEM_TYPE.TRAIT_SHELL: {
           const {trait} = item;
           traitTakeShellRequest(animal.id, trait.id);
+          break;
+        }
+
+        case DND_ITEM_TYPE.COVER: {
+          const {sourceId} = item;
+          traitTakeCoverRequest(animal.id, sourceId);
           break;
         }
       }

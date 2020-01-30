@@ -3,31 +3,32 @@ import {compose, fromRenderProps, withHandlers, withProps} from "recompose";
 
 export const InteractionContext = React.createContext();
 
-export const CurrentInteractionDebug = () => (<InteractionContext.Consumer>
-  {context => <pre onClick={e => context.cancelInteraction()}>
-    Context: {JSON.stringify(context.interaction ? context.interaction.type : null, null, ' ')}
-  </pre>}
-</InteractionContext.Consumer>);
-
 const stopEvent = e => {
   //https://stackoverflow.com/questions/24415631/reactjs-syntheticevent-stoppropagation-only-works-with-react-events
   e.stopPropagation();
   e.nativeEvent.stopImmediatePropagation();
 };
 
-export const InteractionSource = (type, {canStart, onStart}) => compose(
+export const InteractionSource = (type, {getIID = () => 0, help, canStart, onStart}) => compose(
   fromRenderProps(InteractionContext.Consumer, (im) => ({im}))
   , withProps((props) => ({
-    canStart: canStart(props)
-  }))
+      canStart: canStart(props)
+      , isInteracting: props.im.interaction && props.im.interaction.iid && props.im.interaction.iid === getIID(props)
+    })
+  )
   , withHandlers({
     startInteraction: ({im, canStart, ...props}) => (e) => {
       stopEvent(e);
       if (canStart) {
-        const interactionData = onStart(props);
-        if (interactionData !== false) {
-          // console.log(`im.startInteraction`, type, interactionData);
-          return im.startInteraction(type, interactionData);
+        const interactionItem = onStart(props);
+        if (interactionItem !== false) {
+          // console.log(`im.startInteraction`, type, interactionItem);
+          return im.startInteraction({
+            type
+            , iid: getIID(props)
+            , item: interactionItem
+            , help
+          });
         }
       }
     }
@@ -53,7 +54,7 @@ export const InteractionTarget = (types = [], {
           .then((interactionResult) => {
             // console.log('Interaction ended with:', interactionResult);
             if (interactionResult && typeof interactionResult === 'object') {
-              return im.startInteraction(interactionResult.type, interactionResult.data);
+              return im.startInteraction(interactionResult);
             } else {
               return im.cancelInteraction();
             }
@@ -66,7 +67,14 @@ export const InteractionTarget = (types = [], {
 export class InteractionManagerProvider extends React.PureComponent {
   state = {interaction: null};
 
-  startInteraction = (type, item) => this.setState({interaction: {type, item}});
+  startInteraction = ({type, iid, item, help}) => this.setState({
+    interaction: {
+      type: type
+      , iid
+      , item
+      , help: help || type
+    }
+  });
 
   cancelInteraction = () => this.setState({interaction: null});
 

@@ -35,7 +35,12 @@ const TraitDataModelProps = {
  * @property {boolean} [optional: false] - On defense traits, can choose to suicide animal instead of using it
  * @property {callback} checkTraitPlacement: null // (animal) => boolean - if trait is allowed to be placed on this animal
  * @property {callback} $checkAction: null // if trait is allowed to be clicked? (game, sourceAnimal) => boolean
- * @property {callback} getErrorOfUseOnTarget: null // if target is valid? (game, sourceAnimal, targetAnimal) => boolean
+ *
+ * @property {callback} _getErrorOfUse
+ * @property {callback} _getErrorOfTraitPlacement
+ * @property {callback} _getErrorOfFoodIntake
+ * @property {callback} getErrorOfFoodIntake
+ * @property {callback} getErrorOfUseAction: null // if target is valid? (game, sourceAnimal, targetAnimal) => boolean
  */
 
 export class TraitDataModel extends Record(TraitDataModelProps) {

@@ -13,32 +13,47 @@ import {
   getErrorOfAnimalEatingFromGame,
   checkTraitActivation_Animal,
   checkAnimalCanTakeShellFails,
-  getErrorOfAnimalEatingFromPlant, getErrorOfAnimalTakingCover
+  getErrorOfAnimalEatingFromPlant,
+  getErrorOfAnimalTakingCover
 } from './trait.checks';
-import {selectGame} from '../selectors';
 
-const logOptions = false;
+const logOptions = !!process.env.LOG_OPTIONS;
 
 const makeOption = {
   traitTakeFoodRequest: (animalId) => {
     return new Option({
       type: 'traitTakeFoodRequest'
       , text: `traitTakeFoodRequest: ${animalId}`
-      // , cooldownAction: (gameId) => null//startCooldown(gameId, )
+      , cooldownAction: (gameId) => startCooldown(gameId
+        , TRAIT_COOLDOWN_LINK.EATING
+        , TRAIT_COOLDOWN_DURATION.TURN
+        , TRAIT_COOLDOWN_PLACE.ANIMAL
+        , animalId
+      )
     })
   }
   , traitTakeFoodPlantRequest: (animalId, plantId) => {
     return new Option({
       type: 'traitTakeFoodRequest'
       , text: `traitTakeFoodRequest: ${animalId} from ${plantId}`
-      // , cooldownAction: (gameId) => null//startCooldown(gameId, )
+      , cooldownAction: (gameId) => startCooldown(gameId
+        , TRAIT_COOLDOWN_LINK.EATING
+        , TRAIT_COOLDOWN_DURATION.TURN
+        , TRAIT_COOLDOWN_PLACE.ANIMAL
+        , animalId
+      )
     })
   }
   , traitTakeCoverRequest: (animalId, plantId) => {
     return new Option({
       type: 'traitTakeCoverRequest'
       , text: `traitTakeCoverRequest: ${animalId} from ${plantId}`
-      // , cooldownAction: (gameId) => null//startCooldown(gameId, )
+      , cooldownAction: (gameId) =>startCooldown(gameId
+        , TRAIT_COOLDOWN_LINK.EATING
+        , TRAIT_COOLDOWN_DURATION.TURN
+        , TRAIT_COOLDOWN_PLACE.ANIMAL
+        , animalId
+      )
     })
   }
   , traitTakeShellRequest: (animalId) => {
@@ -48,7 +63,8 @@ const makeOption = {
       , cooldownAction: (gameId) => startCooldown(gameId
         , TRAIT_COOLDOWN_LINK.TAKE_SHELL
         , TRAIT_COOLDOWN_DURATION.TURN
-        , TRAIT_COOLDOWN_PLACE.ANIMAL, animalId)
+        , TRAIT_COOLDOWN_PLACE.ANIMAL, animalId
+      )
     })
   }
   , traitActivateRequest: (animalId, trait, target) => {
@@ -85,7 +101,7 @@ export const doesPlayerHasOptions = (game, playerId) => {
     if (process.env.LOG_LEVEL === 'debug') {
       const options = getOptions(game, playerId);
       if (options.length === 0) throw new Error('Options length = 0');
-      console.log('options', options.map(o => o.text));
+      logger.debug('options', options.map(o => o.text));
     }
   }
   return true;
@@ -138,8 +154,13 @@ export const searchPlayerOptions = (game, playerId, successFn) => {
     return animal.traits.some((trait) => {
       const traitData = trait.getDataModel();
 
-      logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/trait/${trait.type}/${trait.getErrorOfUse(game, animal)}`);
-      if (!traitData.transient && traitData.playerControllable && !trait.getErrorOfUse(game, animal)) {
+      logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/trait/${trait.type}`);
+      if (
+        !traitData.defense
+        && !traitData.transient
+        && traitData.playerControllable
+        && !trait.getErrorOfUse(game, animal)
+      ) {
         switch (traitData.targetType) {
           case TRAIT_TARGET_TYPE.ANIMAL:
             const exampleTarget = allAnimals.find((targetAid) => passesChecks(() =>
