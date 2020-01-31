@@ -62,6 +62,53 @@ export const TraitCarnivorous_End = (manager, {sourceAid}) => {
   }
 };
 
+export const PlantTraitHiddenCarnivorous_Start = (manager, {sourceAid, targets}) => {
+  const sourcePlantHtml = manager.getPlant(sourceAid);
+  const targetAnimalHtml = manager.getAnimal(targets[0]);
+
+  if (sourcePlantHtml && targetAnimalHtml) {
+    const sabbx = sourcePlantHtml.getBoundingClientRect();
+    const tabbx = targetAnimalHtml.getBoundingClientRect();
+
+    let originX = sabbx.x;
+    let originY = sabbx.y;
+
+    if (sourcePlantHtml.dataset.animated) {
+      originX = sourcePlantHtml.dataset.originX;
+      originY = sourcePlantHtml.dataset.originY;
+    } else {
+      sourcePlantHtml.dataset.originX = originX;
+      sourcePlantHtml.dataset.originY = originY;
+    }
+    sourcePlantHtml.dataset.animated = 'true';
+    sourcePlantHtml.classList.add('onTop');
+    sourcePlantHtml.classList.add('animation-stoppable');
+
+    return Velocity(sourcePlantHtml, {
+      translateX: tabbx.x - originX
+      , translateY: tabbx.y + tabbx.height - originY
+    }, AT_MEDIUM)
+      .then(() => {
+        const sourceAnimalHtml = manager.getAnimal(sourceAid);
+        if (sourceAnimalHtml) sourceAnimalHtml.classList.remove('animation-stoppable');
+      });
+  }
+};
+
+export const PlantTraitHiddenCarnivorous_End = (manager, {sourceAid}) => {
+  const sourcePlantHtml = manager.getPlant(sourceAid);
+
+  if (sourcePlantHtml) {
+    sourcePlantHtml.classList.remove('onTop');
+    delete sourcePlantHtml.dataset.animated;
+
+    return Velocity(sourcePlantHtml, {
+      translateX: 0
+      , translateY: 0
+    }, AT_MEDIUM);
+  }
+};
+
 export const TraitPiracy_Start = (manager, {sourceAid, targets}) => {
   const sourceAnimalHtml = manager.getAnimal(sourceAid);
   const targetAnimalHtml = manager.getAnimal(targets[0]);

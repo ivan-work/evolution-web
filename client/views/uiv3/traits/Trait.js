@@ -34,6 +34,12 @@ export const StyledTraitBody = styled('div')({
     , '&.canStart': {
       background: colorConfig.fillActive
       , cursor: 'pointer'
+      , '&.value': {
+        '& .text': {
+          color: colorConfig.textValue
+          , fontWeight: 500
+        }
+      }
       , '& .text': {
         color: colorConfig.textActive
         , fontWeight: 500

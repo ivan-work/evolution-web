@@ -1,5 +1,9 @@
 # Evolution-web
 
+Main server: https://evo2.herokuapp.com
+
+[FAQ (ru)](faq-ru.md)
+
 ### Install
 1. clone
 1. ```$ npm i```
@@ -8,7 +12,7 @@
 
 ### Run
 
-#### dev:1
+#### dev:
 ```
 $ npm start
 ```

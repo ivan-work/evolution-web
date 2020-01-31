@@ -14,11 +14,11 @@ import IconVisibility from '@material-ui/icons/Visibility'
 
 import {roomJoinRequestSoft, roomSpectateRequestSoft} from '../../../shared/actions/actions';
 
-import {failsChecks} from '../../../shared/actions/checks';
+import {passesChecks, failsChecks} from '../../../shared/actions/checks';
 import {
   checkCanJoinRoomToPlay,
-  checkCanJoinRoomToSpectate,
-  checkUserNotInPlayers
+  checkCanJoinRoomToSpectate, checkUserInRoom,
+  checkUserNotInPlayers, isUserInPlayers
 } from '../../../shared/actions/rooms.checks';
 
 export class RoomsList extends React.Component {
@@ -36,9 +36,12 @@ export class RoomsList extends React.Component {
           <ListItem key={room.id}
                     button
                     onClick={() => $roomJoin(room.id)}
-                    disabled={!!failsChecks(() => checkCanJoinRoomToPlay(room, userId))}>
+                    disabled={!(
+                      isUserInPlayers(room, userId)
+                      || passesChecks(() => checkCanJoinRoomToPlay(room, userId))
+                    )}>
             <ListItemText primary={room.name}
-                          secondary={`(${room.users.size}/${room.settings.maxPlayers}) ${room.spectators.size > 0 ? `+${room.spectators.size}` : ''}`}/>
+                          secondary={`(${room.users.size}/${room.settings.maxPlayers}) ${room.spectators.size > 0 ? `+${room.spectators.size}` : ''}`} />
             <ListItemSecondaryAction>
               <IconButton name='visibility'
                           color='secondary'
@@ -47,7 +50,7 @@ export class RoomsList extends React.Component {
                             checkUserNotInPlayers(room, userId);
                           })}
                           onClick={() => $roomSpectate(room.id)}>
-                <IconVisibility/>
+                <IconVisibility />
               </IconButton>
             </ListItemSecondaryAction>
           </ListItem>)}
@@ -62,7 +65,7 @@ export default connect(
       room: state.get('room')
       , userId: state.getIn(['user', 'id'])
       , rooms: state.getIn(['rooms'])
-      //.filter((room) => !room.gameFinished)
+        //.filter((room) => !room.gameFinished)
         .toList()
         .sort((r1, r2) => {
           if (r1.gameId && !r2.gameId) return 1;

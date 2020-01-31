@@ -22,6 +22,7 @@ export const PlantTraitHiddenCarnivorous = Object.assign({}, TraitCarnivorous, {
   , hidden: true
   , cooldowns: fromJS([
     [ptt.PlantTraitHiddenCarnivorous, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+    , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , _getErrorOfUse: () => false
   , action: (game, attackAnimal, attackTrait, targetAnimal, ...flags) => (dispatch, getState) => {

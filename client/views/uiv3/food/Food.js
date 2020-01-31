@@ -12,6 +12,7 @@ import {connect} from "react-redux";
 import withStyles from "@material-ui/core/styles/withStyles";
 import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";
 import {TRAIT_COOLDOWN_LINK} from "../../../../shared/models/game/evolution/constants";
+import {PHASE} from "../../../../shared/models/game/GameModel";
 
 import {InteractionSource} from '../InteractionManager';
 import GameStyles from "../GameStyles";
@@ -28,8 +29,13 @@ const IconFood = (props) => (
 const styles = {
   Food: {
     fontSize: 32
-    , fill: 'gray'
+    , stroke: GameStyles.defaultColorConfig.textDisabled
+    , fill: GameStyles.defaultColorConfig.fillDisabled
     , transition: '.5s transform linear'
+    , '&.isPlaceholder': {
+      stroke: '#AAA'
+      , fill: '#FFF'
+    }
     , '&.canStart': {
       cursor: 'pointer'
       , fill: GameStyles.defaultColorConfig.fillActive
@@ -48,8 +54,15 @@ const styles = {
   }
 };
 
-export const Food = withStyles(styles)(({classes, className, canStart, startInteraction, isInteracting}) => (
-  <IconFood className={cn(classes.Food, className, {canStart, isInteracting})}
+export const Food = withStyles(styles)(({
+                                          classes
+                                          , className
+                                          , canStart
+                                          , isPlaceholder
+                                          , startInteraction
+                                          , isInteracting
+                                        }) => (
+  <IconFood className={cn(classes.Food, className, {isPlaceholder, canStart, isInteracting})}
             onClick={startInteraction}
   />
 ));
@@ -66,11 +79,13 @@ export const InteractiveFood = compose(
   , connect(state => {
     const game = state.game;
     return {
-      canStart: game.isPlayerTurn() && !game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, game.userId)
+      canStart: game.isPlayerTurn()
+        && game.status.phase === PHASE.FEEDING
+        && !game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, game.userId)
     }
   })
   , InteractionSource(DND_ITEM_TYPE.FOOD, {
-    getIID: ({index, sourceId}) => index + sourceId
+    getIID: ({index, sourceId}) => DND_ITEM_TYPE.FOOD + index + sourceId
     , canStart: ({canStart}) => canStart
     , onStart: ({sourceId}) => ({sourceId})
   })

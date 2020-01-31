@@ -82,7 +82,11 @@ const TraitColors = {
     , textActiveHover: '#FFE'
     , fillActiveHover: '#F60'
   }
+  , [ptt.PlantTraitAquatic]: {
+    text: '#00F'
+  }
   , [ptt.PlantTraitParasiticLink]: TraitGeneralColors.Parasitic
+  , [ptt.PlantTraitHiddenCarnivorous]: TraitGeneralColors.Attack
   , [ptt.PlantTraitMycorrhiza]: {
     text: '#396'
   }

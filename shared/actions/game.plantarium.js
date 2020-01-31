@@ -36,6 +36,7 @@ import {
 import {server$playerActed} from "./game";
 import {logTarget} from "./log.util";
 import {getIntRandom} from "../utils/randomGenerator";
+import * as ptt from "../models/game/evolution/plantarium/plantTraitTypes";
 
 // region game
 export const gameSpawnPlants = (gameId, plants) => ({

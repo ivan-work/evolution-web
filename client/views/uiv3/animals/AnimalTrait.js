@@ -21,7 +21,6 @@ import {openQuestionMetamorphose, openQuestionRecombination} from "../../../acti
 import {traitActivateRequest, traitAmbushActivateRequest} from "../../../../shared/actions/trait";
 import styled from "../../../styles/styled";
 import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
-import LinkedTrait from "../lineBetweenTraits/LinkedTrait";
 import {TraitBase} from "../traits/Trait";
 import LinkedTraitWrapper from "../lineBetweenTraits/LinkedTraitWrapper";
 
@@ -106,7 +105,7 @@ export const InteractiveTraitClickable = compose(
 )(AnimalTraitBase);
 
 export const InteractiveTrait = compose(
-  connect((state, props) => ({canStart: checkCanStart(state, props)}), {traitActivateRequest})
+  connect((state, props) => ({canStart: checkCanStart(state, props)}))
   , InteractionSource(DND_ITEM_TYPE.TRAIT, {
     getIID: ({trait}) => trait.id
     , canStart: ({canStart}) => canStart

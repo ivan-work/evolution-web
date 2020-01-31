@@ -9,7 +9,7 @@ import {PHASE} from "../../../../shared/models/game/GameModel";
 import PlantModel from "../../../../shared/models/game/evolution/plantarium/PlantModel";
 import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
 import repeat from "lodash/times";
-import {InteractiveFood} from "../food/Food";
+import Food, {InteractiveFood} from "../food/Food";
 import InteractiveCover, {Cover} from "../food/Cover";
 import Typography from "@material-ui/core/Typography/Typography";
 import withStyles from "@material-ui/core/styles/withStyles";
@@ -20,6 +20,9 @@ import {CTT_PARAMETER, TRAIT_ANIMAL_FLAG} from "../../../../shared/models/game/e
 import {gameDeployPlantTraitRequest} from "../../../../shared/actions/game";
 import cn from "classnames";
 import {AT_DEATH} from "../animations";
+import IconFruit from '@material-ui/icons/Camera';
+import * as pt from "../../../../shared/models/game/evolution/plantarium/plantTypes";
+import * as ptt from "../../../../shared/models/game/evolution/plantarium/plantTraitTypes";
 
 const DEATH_ANIMATION_TIME = `${AT_DEATH}ms`;
 
@@ -28,45 +31,48 @@ const styles = ({
     ...GameStyles.plant
     , flex: `0 0 120px`
     , textAlign: 'center'
-  }
-  , transition: 'background-color 1s'
-  , 'will-change': 'transform'
-  , '&.Animate_Death-leave': {
-    backgroundColor: 'black'
-    , maxWidth: 0
-    , minWidth: 0
-    , margin: 0
-    , transform: 'scaleX(0)'
-    // , transition: 'background-color ${DEATH_ANIMATION_TIME}, max-width ${DEATH_ANIMATION_TIME}, min-width ${DEATH_ANIMATION_TIME}, margin ${DEATH_ANIMATION_TIME}'
-    , transition: `linear ${DEATH_ANIMATION_TIME}`
-    , '& > div': {
-      visibility: 'hidden'
+
+    , '& .PlantIcon': {
+      verticalAlign: 'middle',
+      fill: '#660'
     }
+
+    , transition: 'background-color 1s'
+    , 'will-change': 'transform'
+    , '&.Animate_Death-leave': {
+      backgroundColor: 'black'
+      , maxWidth: 0
+      , minWidth: 0
+      , margin: 0
+      , transform: 'scaleX(0)'
+      // , transition: 'background-color ${DEATH_ANIMATION_TIME}, max-width ${DEATH_ANIMATION_TIME}, min-width ${DEATH_ANIMATION_TIME}, margin ${DEATH_ANIMATION_TIME}'
+      , transition: `linear ${DEATH_ANIMATION_TIME}`
+      , '& > div': {
+        visibility: 'hidden'
+      }
+    }
+    // , '& .AnimalIconText': {
+    //   fontWeight: 700,
+    //   fontSize: 24,
+    //   lineHeight: 0,
+    //   verticalAlign: 'middle'
+    // }
+    // , '& .AnimalIconFood': {
+    //   fontSize: 24
+    //   , fill: 'orange'
+    // }
+    , '&.velocity-animating': {
+      zIndex: 2
+    }
+    , name: {}
+    , food: {}
+    , covers: {}
   }
-  // , '& .AnimalIcon': {
-  //   verticalAlign: 'middle'
-  // }
-  // , '& .AnimalIconText': {
-  //   fontWeight: 700,
-  //   fontSize: 24,
-  //   lineHeight: 0,
-  //   verticalAlign: 'middle'
-  // }
-  // , '& .AnimalIconFood': {
-  //   fontSize: 24
-  //   , fill: 'orange'
-  // }
-  , '&.velocity-animating': {
-    zIndex: 2
-  }
-  , name: {}
-  , food: {}
-  , covers: {}
 });
 
 class BasePlant extends React.PureComponent {
   render() {
-    const {classes, plant, children, canInteract, acceptInteraction} = this.props;
+    const {classes, game, plant, children, canInteract, acceptInteraction} = this.props;
 
     const cnPlant = cn(
       classes.Plant
@@ -75,17 +81,31 @@ class BasePlant extends React.PureComponent {
 
     const traitList = children || (plant.getTraits(true).toList()
       .reverse()
-      .map(trait => <PlantTrait key={trait.id} trait={trait} host={plant} />));
+      .map(trait => <PlantTrait key={trait.id} trait={trait} sourcePlant={plant} />));
+
+    const traitCarnivorous = plant.hasTrait(ptt.PlantTraitHiddenCarnivorous);
 
     return (
       <div className={cnPlant} onClickCapture={acceptInteraction}>
-        <Typography className={classes.name}>{T.translate(`Game.Plant.${plant.type}`)}</Typography>
-        <div className={classes.food}>{repeat(plant.getFood(), i => <InteractiveFood key={i} index={i} sourceId={plant.id} />)}</div>
+        <Typography className={classes.name}>
+          {T.translate(`Game.Plant.${plant.type}`)}
+          {plant.isFruit() && <IconFruit className='PlantIcon' />}
+          {/*{plant.getNextFood(game, plant)}*/}
+        </Typography>
+        <div className={classes.food}>
+          {repeat(plant.getFood(), i => (
+            <InteractiveFood key={i} index={i} sourceId={plant.id} />
+          ))}
+          {game && repeat(plant.getNextFood(game, plant), i => (
+            <Food key={i} isPlaceholder />
+          ))}
+        </div>
         <div className={classes.covers}>
-          {repeat(plant.covers, i => <InteractiveCover key={i} sourceId={plant.id} />)}
-          {repeat(plant.coverSlots - plant.covers, i => <Cover key={i} />)}
+          {repeat(plant.covers, i => <InteractiveCover key={i} index={i} sourceId={plant.id} />)}
+          {repeat(plant.coverSlots - plant.covers, i => <Cover key={i} isPlaceholder />)}
         </div>
         <div>
+          {traitCarnivorous && <PlantTrait trait={traitCarnivorous} sourcePlant={plant}/>}
           {traitList}
         </div>
       </div>
@@ -108,21 +128,24 @@ const InteractivePlant = compose(
   }, {
     gameDeployPlantTraitRequest
   })
-  , InteractionTarget([DND_ITEM_TYPE.CARD_TRAIT], {
+  , InteractionTarget([DND_ITEM_TYPE.CARD_TRAIT, DND_ITEM_TYPE.PLANT_LINK], {
     canInteract: ({game, plant}, {type, item}) => {
       switch (type) {
         case DND_ITEM_TYPE.CARD_TRAIT: {
-          switch (game.status.phase) {
-            case PHASE.DEPLOY:
-              const {traitType} = item;
-              const traitData = TraitModel.new(traitType).getDataModel();
-              if (!(traitData.cardTargetType & CTT_PARAMETER.PLANT)) {
-                return false;
-              }
-              return !traitData.getErrorOfTraitPlacement(game, plant);
-            default:
-              return false;
+          const {traitType} = item;
+          const traitData = TraitModel.new(traitType).getDataModel();
+          if (!(traitData.cardTargetType & CTT_PARAMETER.PLANT)) {
+            return false;
           }
+          return !traitData.getErrorOfTraitPlacement(game, plant);
+        }
+        case DND_ITEM_TYPE.PLANT_LINK: {
+          const {traitType, plantId, alternateTrait} = item;
+          const sourcePlant = game.getPlant(plantId);
+          return (
+            plant !== sourcePlant
+            && !TraitModel.LinkBetweenCheck(traitType, sourcePlant, plant)
+          );
         }
       }
       return false;
@@ -139,7 +162,7 @@ const InteractivePlant = compose(
           if (traitDataModel.cardTargetType & CTT_PARAMETER.LINK) {
             return {
               type: DND_ITEM_TYPE.PLANT_LINK
-              , data: {
+              , item: {
                 ...item
                 , plantId: plant.id
               }
@@ -147,6 +170,11 @@ const InteractivePlant = compose(
           } else {
             gameDeployPlantTraitRequest(cardId, plant.id, alternateTrait);
           }
+          break;
+        }
+        case DND_ITEM_TYPE.PLANT_LINK: {
+          const {cardId, alternateTrait, plantId} = item;
+          gameDeployPlantTraitRequest(cardId, plantId, alternateTrait, plant.id);
           break;
         }
       }

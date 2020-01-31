@@ -15,7 +15,7 @@ import {
   server$traitDefenceAnswer,
   server$traitDefenceQuestion,
   server$traitKillAnimal,
-  server$traitNotify_End, server$traitQuestion,
+  server$traitNotify_End, server$traitNotify_Start, server$traitQuestion,
   server$traitSetValue,
   server$traitStartCooldown,
   traitAmbushActivate,
@@ -106,6 +106,7 @@ export const server$huntStart_Animal = (gameId, attackAnimal, attackTrait, targe
 
 export const server$huntStart_Plant = (gameId, attackPlant, targetAnimal, ...flags) => (dispatch, getState) => {
   const attackTrait = attackPlant.hasTrait(ptt.PlantTraitHiddenCarnivorous);
+  dispatch(server$traitNotify_Start(selectGame(getState, gameId), attackPlant, attackTrait, targetAnimal.id));
   dispatch(server$huntStart(gameId, HUNT_TYPE.PLANT, attackPlant, attackTrait, targetAnimal, ...flags));
 };
 

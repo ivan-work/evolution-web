@@ -15,31 +15,50 @@ import {TRAIT_COOLDOWN_LINK} from "../../../../shared/models/game/evolution/cons
 
 import {InteractionSource} from '../InteractionManager';
 import GameStyles from "../GameStyles";
+import {PHASE} from "../../../../shared/models/game/GameModel";
 
 export const IconCover = (props) => (
   <SvgIcon {...props}>
     <path
-      d="M16.21 4.16l4 4v-4zm4 12l-4 4h4zm-12 4l-4-4v4zm-4-12l4-4h-4zm12.95-.95c-2.73-2.73-7.17-2.73-9.9 0s-2.73 7.17 0 9.9 7.17 2.73 9.9 0 2.73-7.16 0-9.9zm-1.1 8.8c-2.13 2.13-5.57 2.13-7.7 0s-2.13-5.57 0-7.7 5.57-2.13 7.7 0 2.13 5.57 0 7.7z"/>
+      d="M20 15.31L23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69zM12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z" />
   </SvgIcon>
 );
 
 const styles = {
   Cover: {
     fontSize: 32
-    , fill: 'gray'
+    , stroke: GameStyles.defaultColorConfig.textDisabled
+    , fill: GameStyles.defaultColorConfig.fillDisabled
+    , '&.isPlaceholder': {
+      stroke: '#AAA'
+      , fill: '#FFF'
+    }
     , '&.canStart': {
       cursor: 'pointer'
-      , fill: GameStyles.defaultColorConfig.fillActiveHover
+      , fill: GameStyles.defaultColorConfig.fillActive
+      , stroke: GameStyles.defaultColorConfig.fillActiveHover
     }
     , '&.canStart:hover, &.canStart:focus': {
-      stroke: GameStyles.defaultColorConfig.fillActiveHover
-      , fill: GameStyles.defaultColorConfig.fill
+      stroke: GameStyles.defaultColorConfig.textActive
+      , fill: GameStyles.defaultColorConfig.fillActiveHover
+    }
+    , '&.isInteracting': {
+      fill: GameStyles.defaultColorConfig.fillInteracting
+      , stroke: GameStyles.defaultColorConfig.textInteracting
+      , animation: `interaction-pulsate 1000ms ease-in-out infinite`
     }
   }
 };
 
-export const Cover = withStyles(styles)(({classes, className, canStart, startInteraction}) => (
-  <IconCover className={cn(classes.Cover, className, {canStart})}
+export const Cover = withStyles(styles)(({
+                                           classes
+                                           , className
+                                           , isPlaceholder
+                                           , canStart
+                                           , startInteraction
+                                           , isInteracting
+                                         }) => (
+  <IconCover className={cn(classes.Cover, className, {isPlaceholder, canStart, isInteracting})}
              onClick={startInteraction}
   />
 ));
@@ -50,16 +69,20 @@ Cover.defaultProps = {
 
 export const InteractiveCover = compose(
   setPropTypes({
-    sourceId: PropTypes.string
+    index: PropTypes.number.isRequired
+    , sourceId: PropTypes.string
   })
   , connect(state => {
     const game = state.game;
     return {
-      canStart: game.isPlayerTurn() && !game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, game.userId)
+      canStart: game.isPlayerTurn()
+        && game.status.phase === PHASE.FEEDING
+        && !game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, game.userId)
     }
   })
   , InteractionSource(DND_ITEM_TYPE.COVER, {
-    canStart: ({canStart}) => canStart
+    getIID: ({index, sourceId}) => DND_ITEM_TYPE.COVER + index + sourceId
+    , canStart: ({canStart}) => canStart
     , onStart: ({sourceId}) => ({sourceId})
   })
 )(Cover);

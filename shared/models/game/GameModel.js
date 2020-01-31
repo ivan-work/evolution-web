@@ -97,6 +97,11 @@ export class QuestionRecord extends Record({
   }
 }
 
+export const FEEDING_SOURCE_TYPE = {
+  GAME: 'GAME'
+  , PLANT: 'PLANT'
+};
+
 const FeedingData = {
   gameId: null
   , targetAid: null
@@ -120,6 +125,10 @@ export class FeedingRecord extends Record(FeedingData) {
       helperId,
       auto
     });
+  }
+
+  static fromJS(js) {
+    return new FeedingRecord({...js});
   }
 }
 

@@ -555,10 +555,6 @@ const server$gameExtinct = (gameId) => (dispatch, getState) => {
     } else if (!animal.canSurvive()) {
       dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.STARVE, animal.id)));
     }
-    // remove on sight
-    // else {
-    //   dispatch(server$tryViviparous(gameId, animal.id)); // #fix plants wtf?
-    // }
   });
 
   const plantsVisitor = new PlantVisitor(selectGame(getState, gameId));

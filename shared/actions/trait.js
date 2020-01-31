@@ -590,7 +590,7 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
       dispatch(server$takeCardFromRandomPlayer(game, animal.ownerId));
     }
     if (sourcePlant.hasTrait(ptt.PlantTraitOfficinalis)) {
-      dispatch(server$traitSetAnimalFlag(game, animal, TRAIT_ANIMAL_FLAG.PARALYSED, true));
+      dispatch(server$game(game.id, traitParalyze(game.id, animal.id)));
     }
     if (sourcePlant.hasTrait(ptt.PlantTraitProteinRich)) {
       amount = 2
@@ -670,9 +670,9 @@ export const server$takeFoodRequest = (gameId, playerId, animalId, plantId) => (
   }
 };
 
-export const gameFoodTake_Start = (gameId, animalId, sourceType, sourceId) => ({
+export const gameFoodTake_Start = (gameId, feedingRecord) => ({
   type: 'gameFoodTake_Start'
-  , data: {gameId, animalId, sourceType, sourceId}
+  , data: {gameId, feedingRecord}
 });
 
 export const gameFoodTake_End = (gameId, animalId, sourceType, sourceId) => ({
@@ -716,7 +716,7 @@ export const server$continueFeedingFromGame = (gameId, feedingRecord) => (dispat
     return false;
   }
 
-  dispatch(server$game(gameId, gameFoodTake_Start(gameId, targetAid, sourceType, sourceId)));
+  dispatch(server$game(gameId, gameFoodTake_Start(gameId, feedingRecord)));
 
   const ambushers = getAmbushersList(game, targetAnimal);
 
@@ -1132,7 +1132,7 @@ export const traitServerToClient = {
   , traitGrazeFood: ({gameId, food, sourceAid}) => traitGrazeFood(gameId, food, sourceAid)
   , traitParalyze: ({gameId, animalId}) => traitParalyze(gameId, animalId)
 
-  , gameFoodTake_Start: ({gameId, animalId}) => gameFoodTake_Start(gameId, animalId)
+  , gameFoodTake_Start: ({gameId, feedingRecord}) => gameFoodTake_Start(gameId, FeedingRecord.fromJS(feedingRecord))
   , gameFoodTake_End: ({gameId, animalId}) => gameFoodTake_End(gameId, animalId)
 
   , traitAmbushActivate: ({gameId, animalId, on}) => traitAmbushActivate(gameId, animalId, on)

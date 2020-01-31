@@ -1,5 +1,6 @@
 import logger from '../../../shared/utils/logger';
 
+import * as tt from '../../models/game/evolution/traitTypes';
 import * as ptt from '../../models/game/evolution/plantarium/plantTraitTypes';
 import {makeGameSelectors} from '../../selectors'
 import {traitTakeFoodRequest} from "../trait";
@@ -18,9 +19,11 @@ plants: PlantFungus $fun offic +++
 players:
   - continent: $A carn, $W wait
 `);
-    const {selectGame, findPlayerByIndex, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame, findPlayerByIndex, findAnimal, findPlant, findTrait} = makeGameSelectors(serverStore.getState, gameId);
     clientStore0.dispatch(traitTakeFoodRequest('$A', '$fun'));
     expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
+    expect(findTrait('$A', tt.TraitCarnivorous).disabled, '$A.TraitCarnivorous is disabled').true;
+    expect(findAnimal('$A').getWantedFood(), `$A is full and disabled`).equal(0);
   });
 });
 

@@ -50,6 +50,7 @@ import {
   getErrorOfAnimalTakingCover
 } from "../../../../shared/actions/trait.checks";
 import AnimalFlags from "./AnimalFlags";
+import {gamePlantAttackRequest} from "../../../../shared/actions/game.plantarium";
 
 const DEATH_ANIMATION_TIME = `${AT_DEATH}ms`;
 
@@ -90,7 +91,8 @@ const styles = theme => ({
     }
     , '& .AnimalIconFood': {
       fontSize: 24
-      , fill: 'orange'
+      , stroke: 'none'
+      , fill: '#F90'
     }
     , '&.velocity-animating': {
       zIndex: 2
@@ -198,6 +200,7 @@ export const InteractiveAnimal = compose(
     , traitAmbushActivateRequest
     , traitTakeShellRequest
     , traitTakeCoverRequest
+    , gamePlantAttackRequest
     // PHASE.REGENERATION
     , gameDeployRegeneratedAnimalRequest
   })
@@ -208,6 +211,7 @@ export const InteractiveAnimal = compose(
     , DND_ITEM_TYPE.TRAIT_SHELL
     , DND_ITEM_TYPE.ANIMAL_LINK
     , DND_ITEM_TYPE.COVER
+    , DND_ITEM_TYPE.PLANT_ATTACK
   ], {
     canInteract: ({game, userId, animal}, {type, item}) => {
       switch (type) {
@@ -237,10 +241,13 @@ export const InteractiveAnimal = compose(
         }
         case DND_ITEM_TYPE.FOOD: {
           const {sourceId} = item;
-          const hostPlant = game.getPlant(sourceId);
+          const sourcePlant = game.getPlant(sourceId);
           return (
-            !hostPlant && !getErrorOfAnimalEatingFromGame(game, animal)
-            || !!hostPlant && !getErrorOfAnimalEatingFromPlant(game, animal, hostPlant)
+            game.userId === animal.ownerId
+            && (
+              !sourcePlant && !getErrorOfAnimalEatingFromGame(game, animal)
+              || !!sourcePlant && !getErrorOfAnimalEatingFromPlant(game, animal, sourcePlant)
+            )
           );
         }
         case DND_ITEM_TYPE.TRAIT: {
@@ -254,8 +261,14 @@ export const InteractiveAnimal = compose(
         }
         case DND_ITEM_TYPE.COVER: {
           const {sourceId} = item;
-          const hostPlant = game.getPlant(sourceId);
-          return !getErrorOfAnimalTakingCover(game, animal, hostPlant);
+          const sourcePlant = game.getPlant(sourceId);
+          return game.userId === animal.ownerId
+            && !getErrorOfAnimalTakingCover(game, animal, sourcePlant);
+        }
+        case DND_ITEM_TYPE.PLANT_ATTACK: {
+          const {trait, sourcePlant} = item;
+          const targetError = trait.getDataModel().getErrorOfUseOnTarget(game, sourcePlant, animal);
+          return !targetError;
         }
         default:
           return true;
@@ -272,6 +285,7 @@ export const InteractiveAnimal = compose(
                      , traitAmbushActivateRequest
                      , traitTakeShellRequest
                      , traitTakeCoverRequest
+                     , gamePlantAttackRequest
                      // PHASE.REGENERATION
                      , gameDeployRegeneratedAnimalRequest
                      , ...props
@@ -315,6 +329,12 @@ export const InteractiveAnimal = compose(
         case DND_ITEM_TYPE.TRAIT: {
           const {sourceAnimal, trait} = item;
           traitActivateRequest(sourceAnimal.id, trait.id, animal.id);
+          break;
+        }
+
+        case DND_ITEM_TYPE.PLANT_ATTACK: {
+          const {sourcePlant} = item;
+          gamePlantAttackRequest(sourcePlant.id, animal.id);
           break;
         }
 

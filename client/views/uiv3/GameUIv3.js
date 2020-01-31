@@ -143,39 +143,6 @@ export class SVGContextInteractionSpy extends React.PureComponent {
   }
 }
 
-// settings:
-//   addon_plantarium: true
-// deck: 5 carn
-// phase: feeding
-// food: 50
-// plants: PlantLiana $lia myco$per ++++++, PlantGrass $gra0 +++, PlantSucc spiky **** $per + myco$leg, PlantGrass $gra1 ++, PlantLegume $leg myco$lia +++, PlantCarn $car ++++++
-//   players:
-// - continent: carn run mimi wait, carn run mimi, carn run mimi, carn run mimi, carn run mimi, carn run mimi, $, $, $, $
-
-// `
-// settings:
-//   addon_plantarium: true
-// deck: 5 camo
-// phase: feeding
-// plants:
-//   PlantLiana $0lia honey officinalis ++\
-//  , PlantLiana $1lia myco$1gra\
-//  , PlantEphemeral $0eph +\
-//  , PlantParasitic $par parasiticlink$0eph ++\
-//  , PlantGrass $0gra protein root tree\
-//  , PlantGrass $1gra myco$1per\
-//  , PlantPerennial $0per\
-//  , PlantPerennial $1per myco$1leg\
-//  , PlantLegume $0leg\
-//  , PlantLegume $1leg myco$1lia\
-//  , PlantSucculent $0suc ++ **\
-//  , PlantSucculent $1suc **\
-//  , PlantFungus $fun +\
-//  , PlantCarnivorous $car ++ aqua
-// players:
-//   - continent: $0W wait +
-// `
-
 export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
   return (
     <Grid container direction='column' className={classes.GameUIv3Container}>

@@ -351,7 +351,7 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
       const source = game.getPlant(sourceId);
       return updatedGame
         .updateIn(['plants', sourceId, 'food'], food => Math.max(food - amount, 0))
-        .update(addToGameLog(['traitMoveFood', amount, sourceType, logAnimal(animal)]));
+        .update(addToGameLog(['traitMoveFood', amount, sourceType, logAnimal(animal), logPlant(source)]));
     }
     case tt.TraitPiracy: {
       const source = game.locateAnimal(sourceId);

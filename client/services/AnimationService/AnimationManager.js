@@ -24,4 +24,12 @@ export default class AnimationManager {
   getAnimalTrait(traitId) {
     return this.getComponent(`AnimalTrait#${traitId}`);
   }
+
+  getPlant(animalId) {
+    return this.getComponent(`Plant#${animalId}`);
+  }
+
+  getPlantTrait(animalId) {
+    return this.getComponent(`PlantTrait#${animalId}`);
+  }
 }

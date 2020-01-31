@@ -118,6 +118,15 @@ export default class PlantModel extends Record({
     return this.food;
   }
 
+  getMaxFood() {
+    return this.data.maxFood;
+  }
+
+  getNextFood(game) {
+    if (!this.data.surviveNoFood && this.getFood() === 0) return 0;
+    return (this.data.produceFood(game, this) - this.getFood()) || 0
+  }
+
   canSurvive() {
     return this.getFood() >= 0
   }
