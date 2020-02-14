@@ -26,7 +26,7 @@ export const PlantTraitHiddenCarnivorous = Object.assign({}, TraitCarnivorous, {
   ])
   , _getErrorOfUse: () => false
   , action: (game, attackAnimal, attackTrait, targetAnimal, ...flags) => (dispatch, getState) => {
-    dispatch(server$huntStart_Plant(game.id, attackAnimal, targetAnimal, ...flags));
+    dispatch(server$huntStart_Plant(game.id, null, attackAnimal, targetAnimal, ...flags));
     return false;
   }
 });

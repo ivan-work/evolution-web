@@ -22,6 +22,7 @@ import AnimalTraitChooseList from "./AnimalTraitChooseList";
 import GameStyles from "../GameStyles";
 
 import * as tt from "../../../../shared/models/game/evolution/traitTypes";
+import * as ptt from "../../../../shared/models/game/evolution/plantarium/plantTraitTypes";
 
 import {TraitMimicry, TraitTailLoss} from '../../../../shared/models/game/evolution/traitsData';
 import {getTraitDataModel} from "../../../../shared/models/game/evolution/TraitModel";
@@ -29,10 +30,14 @@ import {QuestionRecord} from "../../../../shared/models/game/GameModel";
 
 import {checkIfTraitDisabledByIntellect} from "../../../../shared/actions/trait.checks";
 import {traitAnswerRequest} from "../../../../shared/actions/trait";
+import {AnimalModel} from "../../../../shared/models/game/evolution/AnimalModel";
+import PlantModel from "../../../../shared/models/game/evolution/plantarium/PlantModel";
+import {Plant} from "../plants/Plant";
+import {PlantTraitBase} from "../plants/PlantTrait";
 
 const IconAttack = (props) => (
   <SvgIcon {...props} viewBox={'8 9 8 6'}>
-    <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+    <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
   </SvgIcon>
 );
 
@@ -72,22 +77,21 @@ class QuestionDefence extends React.PureComponent {
     return game.locateAnimal(game.question.targetAid, game.question.targetPid)
   };
 
-  getAttackAnimal = () => {
+  getAttackEntity = () => {
     const game = this.props.game;
-    return game.locateAnimal(game.question.sourceAid, game.question.sourcePid)
+    return (
+      game.locateAnimal(game.question.sourceAid, game.question.sourcePid)
+      || game.getPlant(game.question.sourceAid)
+    )
   };
 
-  checkForAllowingNoDefence = () => {
-    const {game} = this.props;
-    const targetAnimal = this.getTargetAnimal();
-    const attackAnimal = this.getAttackAnimal();
-    const traitCarnivorous = attackAnimal.hasTrait(tt.TraitCarnivorous);
+  checkForAllowingNoDefence = (game, targetAnimal, attackEntity, traitCarnivorous) => {
     const traitTailLoss = targetAnimal.hasTrait(tt.TraitTailLoss);
 
     const traitMimicry = targetAnimal.hasTrait(tt.TraitMimicry);
-    const targetsMimicry = traitMimicry
-      && !checkIfTraitDisabledByIntellect(attackAnimal, traitMimicry)
-      && !traitMimicry.getErrorOfUse(game, targetAnimal, attackAnimal, traitCarnivorous);
+    const traitMimicryIsAllowed = traitMimicry
+      && !checkIfTraitDisabledByIntellect(attackEntity, traitMimicry)
+      && !traitMimicry.getErrorOfUse(game, targetAnimal, attackEntity, traitCarnivorous);
 
     const otherTraits = [
       targetAnimal.hasTrait(tt.TraitShell)
@@ -96,24 +100,24 @@ class QuestionDefence extends React.PureComponent {
       , targetAnimal.hasTrait(tt.TraitCnidocytes)
     ].filter(t => !!t // Really has trait
       && !t.getErrorOfUse(game, targetAnimal) // And can activate it
-      && !checkIfTraitDisabledByIntellect(attackAnimal, t) // And it's not blocked by attacking intellect
+      && !checkIfTraitDisabledByIntellect(attackEntity, t) // And it's not blocked by attacking intellect
     );
 
     return otherTraits.every(t => t.getDataModel().optional)
       && !traitTailLoss
-      && !(traitMimicry && targetsMimicry && targetsMimicry.size > 0);
+      && !traitMimicryIsAllowed;
   };
 
   getMode = () => {
     const {game, selectedTrait, setSelectedTrait, traitAnswerRequest} = this.props;
     const targetAnimal = this.getTargetAnimal();
-    const attackAnimal = this.getAttackAnimal();
-    const traitCarnivorous = attackAnimal.hasTrait(tt.TraitCarnivorous);
+    const attackEntity = this.getAttackEntity();
+    const traitCarnivorous = game.locateTrait(game.question.traitId, game.question.sourceAid);
     const defaultMode = {
       checkTrait: trait => {
-        if (checkIfTraitDisabledByIntellect(attackAnimal, trait)) return;
+        if (checkIfTraitDisabledByIntellect(attackEntity, trait)) return;
         if (!trait.getDataModel().defense) return;
-        return !trait.getErrorOfUse(game, targetAnimal, attackAnimal, traitCarnivorous);
+        return !trait.getErrorOfUse(game, targetAnimal, attackEntity, traitCarnivorous);
       }
       , onSelectTrait: trait => e => {
         switch (trait.type) {
@@ -147,25 +151,26 @@ class QuestionDefence extends React.PureComponent {
   render() {
     const {classes, game, traitAnswerRequest, selectedTrait, setSelectedTrait} = this.props;
     const targetAnimal = this.getTargetAnimal();
-    const attackAnimal = this.getAttackAnimal();
+    const attackEntity = this.getAttackEntity();
+    const traitCarnivorous = game.locateTrait(game.question.traitId, game.question.sourceAid);
 
-    const mode = this.getMode(game, targetAnimal, attackAnimal, selectedTrait);
+    const mode = this.getMode(game, targetAnimal, attackEntity, selectedTrait);
 
-    const disableTrait = (trait) => checkIfTraitDisabledByIntellect(attackAnimal, trait);
+    const disableTrait = (trait) => checkIfTraitDisabledByIntellect(attackEntity, trait);
 
-    const allowNothing = this.checkForAllowingNoDefence(game, targetAnimal, attackAnimal);
+    const allowNothing = this.checkForAllowingNoDefence(game, targetAnimal, attackEntity, traitCarnivorous);
     const onSelectNothing = e => traitAnswerRequest(true);
     return (
       <Dialog open={true}>
         <DialogTitle>
           {T.translate('Game.UI.TraitDefenceDialog.AttackedBy')}
           &nbsp;
-          <User id={game.question.sourcePid} variant='simple'/>:
+          <User id={game.question.sourcePid} variant='simple' />:
         </DialogTitle>
         <DialogContent>
           <Typography align='center'>
-            <T.span text='Game.UI.TraitDefenceDialog.Time'/>:&nbsp;
-            <Timer start={game.question.time} duration={game.settings.timeTraitResponse}/>
+            <T.span text='Game.UI.TraitDefenceDialog.Time' />:&nbsp;
+            <Timer start={game.question.time} duration={game.settings.timeTraitResponse} />
           </Typography>
 
           {selectedTrait && <Typography align='center'>
@@ -176,12 +181,17 @@ class QuestionDefence extends React.PureComponent {
 
           <div className={classes.content}>
             <div className={classes.defenseContainer}>
-              <Animal animal={attackAnimal}>
-                <AnimalTraitChooseList traitList={attackAnimal.traits.toList()}/>
-              </Animal>
+              {(attackEntity instanceof AnimalModel) && <Animal animal={attackEntity}>
+                <AnimalTraitChooseList traitList={attackEntity.traits.toList()} />
+              </Animal>}
+              {(attackEntity instanceof PlantModel) && <Plant plant={attackEntity}>
+                {attackEntity.getTraits().toList().reverse().map((trait) => (
+                  <PlantTraitBase key={trait.id} trait={trait} />
+                ))}
+              </Plant>}
             </div>
 
-            <IconAttack className={classes.iconAttack}/>
+            <IconAttack className={classes.iconAttack} />
 
             <div className={classes.animalWrapper}>
               <Animal animal={targetAnimal}>
@@ -210,15 +220,15 @@ class QuestionDefence extends React.PureComponent {
   renderMimicry(mode) {
     const {classes, game} = this.props;
     const targetAnimal = this.getTargetAnimal();
-    const attackAnimal = this.getAttackAnimal();
-    const traitCarnivorous = attackAnimal.hasTrait(tt.TraitCarnivorous);
+    const attackEntity = this.getAttackEntity();
+    const traitCarnivorous = game.locateTrait(game.question.traitId, game.question.sourceAid);
     const traitMimicry = targetAnimal.hasTrait(tt.TraitMimicry);
     const targetsMimicry = (
       traitMimicry
       && !!traitCarnivorous
-      && !traitMimicry.getErrorOfUse(game, targetAnimal, attackAnimal, traitCarnivorous)
-      && !checkIfTraitDisabledByIntellect(attackAnimal, traitMimicry)
-      && TraitMimicry.getTargets(game, targetAnimal, traitMimicry, attackAnimal, traitCarnivorous)
+      && !traitMimicry.getErrorOfUse(game, targetAnimal, attackEntity, traitCarnivorous)
+      && !checkIfTraitDisabledByIntellect(attackEntity, traitMimicry)
+      && TraitMimicry.getTargets(game, targetAnimal, traitMimicry, attackEntity, traitCarnivorous)
     );
     if (!targetsMimicry) return;
     return (
@@ -229,7 +239,7 @@ class QuestionDefence extends React.PureComponent {
           canInteract={true}
           acceptInteraction={mode.onSelectAnimal(animal)}
         >
-          <AnimalTraitChooseList traitList={animal.traits.toList()}/>
+          <AnimalTraitChooseList traitList={animal.traits.toList()} />
         </Animal>)}
       </div>
     );

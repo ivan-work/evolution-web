@@ -592,9 +592,6 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
     if (sourcePlant.hasTrait(ptt.PlantTraitOfficinalis)) {
       dispatch(server$game(game.id, traitParalyze(game.id, animal.id)));
     }
-    if (sourcePlant.hasTrait(ptt.PlantTraitProteinRich)) {
-      amount = 2
-    }
   }
 
   dispatch(server$game(gameId, traitMoveFood(gameId, animalId, amount, sourceType, sourceId)));
@@ -655,14 +652,11 @@ export const server$takeFoodRequest = (gameId, playerId, animalId, plantId) => (
     throwError(getErrorOfAnimalEatingFromPlant(game, animal, plant));
 
     const errorOfPlantCounterAttack = !!getErrorOfPlantCounterAttack(game, animal, plant);
-    console.log(game.cooldowns.toJS())
-    console.log(plant.id)
-    console.log(getErrorOfPlantCounterAttack(game, animal, plant))
     if (errorOfPlantCounterAttack) {
       dispatch(server$startCooldownList(gameId, getFeedingCooldownList(gameId, playerId)));
       dispatch(server$startFeedingFromGame(game.id, animal.id, 1, 'PLANT', plantId));
     } else {
-      dispatch(server$huntStart_Plant(game.id, plant, animal
+      dispatch(server$huntStart_Plant(game.id, null, plant, animal
         , HUNT_FLAG.FEED_FROM_PLANT
         , HUNT_FLAG.PLANT_COUNTERATTACK
       ));
@@ -847,10 +841,13 @@ export const server$questionResumeTimeout = (gameId, question) => (dispatch, get
  * Defence
  */
 
-export const server$traitDefenceQuestion = (gameId, attackAnimal, trait, defenseAnimal) => {
+export const server$traitDefenceQuestion = (gameId, attackEid, attackPid, trait, defenseAnimal) => {
   const question = QuestionRecord.new(QuestionRecord.DEFENSE
     , defenseAnimal.ownerId
-    , attackAnimal, trait.id, defenseAnimal
+    , attackEid
+    , attackPid
+    , trait.id
+    , defenseAnimal
   );
   return server$traitQuestion(gameId, question);
 };
@@ -868,9 +865,7 @@ export const server$traitDefenceAnswer = (gameId, questionId, traitId, targetId)
       , 'QuesionID is incorrect (%s)', questionId)
   }
 
-  const attackAnimal = question.sourcePid !== void 0
-    ? checkPlayerHasAnimal(game, question.sourcePid, question.sourceAid)
-    : checkGameHasPlant(game, question.sourceAid);
+  const attackAnimal = game.getEntity(question.sourceAid);
   const attackTrait = attackAnimal.hasTrait(question.traitId);
   if (!attackTrait) {
     throw new ActionCheckError(`checkTraitActivation@Game(${gameId})`, 'Animal(%s) doesnt have Trait(%s)', question.sourceAid, traitId)
@@ -887,7 +882,7 @@ export const server$traitDefenceAnswer = (gameId, questionId, traitId, targetId)
 
     if (checkIfTraitDisabledByIntellect(attackAnimal, defenseTrait))
       throw new ActionCheckError(`server$traitDefenceAnswer@Game(${game.id})`
-        , 'Trait disabled by intellect');
+        , ERRORS.TRAIT_ACTION_SUPRESSED);
 
     dispatch(server$traitAnswerSuccess(game.id, questionId));
     dispatch(server$traitActivate(gameId, defenseAnimal.id, defenseTrait, target, attackAnimal, attackTrait));
@@ -903,10 +898,11 @@ export const server$traitDefenceAnswer = (gameId, questionId, traitId, targetId)
  * Intellect
  */
 
-export const server$traitIntellectQuestion = (gameId, attackAnimal, attackTrait, defenseAnimal) => {
+export const server$traitIntellectQuestion = (gameId, attackEntity, attackTrait, defenseAnimal) => {
   const question = QuestionRecord.new(QuestionRecord.INTELLECT
-    , attackAnimal.ownerId
-    , attackAnimal
+    , attackEntity.ownerId
+    , attackEntity.id
+    , attackEntity.ownerId
     , attackTrait.id
     , defenseAnimal
   );
@@ -959,7 +955,9 @@ export const server$traitIntellectAnswer = (gameId, questionId, traitId, targetI
 export const server$questionPlantCarnivorousCounterattack = (gameId, attackPlant, attackTrait, defenseAnimal) => {
   const question = QuestionRecord.new(QuestionRecord.PLANT_COUNTERATTACK
     , defenseAnimal.ownerId
-    , attackPlant, attackTrait.id, defenseAnimal
+    , attackPlant
+    , attackTrait.id
+    , defenseAnimal
   );
   return server$traitQuestion(gameId, question);
 };

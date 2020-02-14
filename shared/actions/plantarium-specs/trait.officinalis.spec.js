@@ -20,10 +20,14 @@ players:
   - continent: $A carn, $W wait
 `);
     const {selectGame, findPlayerByIndex, findAnimal, findPlant, findTrait} = makeGameSelectors(serverStore.getState, gameId);
+    expect(findPlant('$fun').getFood(), 'Food before intake').equal(3);
+
     clientStore0.dispatch(traitTakeFoodRequest('$A', '$fun'));
+
     expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
     expect(findTrait('$A', tt.TraitCarnivorous).disabled, '$A.TraitCarnivorous is disabled').true;
     expect(findAnimal('$A').getWantedFood(), `$A is full and disabled`).equal(0);
+    expect(findPlant('$fun').getFood(), 'Food after intake').equal(2);
   });
 });
 

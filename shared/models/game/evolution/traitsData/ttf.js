@@ -130,13 +130,13 @@ export const TraitInkCloud = {
   }
 };
 
-export const TraitSpecA = {
-  type: tt.TraitSpecA
+export const TraitThermosynthesis = {
+  type: tt.TraitThermosynthesis
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
-  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitSpecB, true)
+  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitPhotosynthesis, true)
   , cooldowns: fromJS([
-    [tt.TraitSpecA, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+    [tt.TraitThermosynthesis, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , action: (game, animal, trait) => (dispatch, getState) => {
@@ -154,17 +154,17 @@ export const TraitSpecA = {
   }
 };
 
-export const TraitSpecB = {
-  type: tt.TraitSpecB
+export const TraitPhotosynthesis = {
+  type: tt.TraitPhotosynthesis
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
-  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitSpecA, true)
+  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitThermosynthesis, true)
   , cooldowns: fromJS([
-    [tt.TraitSpecB, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+    [tt.TraitPhotosynthesis, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
-  , action: TraitSpecA.action
-  , _getErrorOfUse: TraitSpecA._getErrorOfUse
+  , action: TraitThermosynthesis.action
+  , _getErrorOfUse: TraitThermosynthesis._getErrorOfUse
 };
 
 export const TraitFlight = {
@@ -253,4 +253,9 @@ export const TraitAnglerfish = {
     dispatch(server$traitSetValue(game, sourceAnimal, trait, !trait.value));
     return false;
   }
+};
+
+export const TraitSpecialization = {
+  type: tt.TraitSpecialization
+  , cardTargetType: CARD_TARGET_TYPE.LINK_SELF_PLANT
 };

@@ -64,6 +64,39 @@ players:
 
     expect(findPlant('$suc').getFood(), '$suc.food').equals(2);
   });
+
+  it('[PLANTARIUM] TraitPlantHomeothermy:', function () {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+  settings:
+    addon_plantarium: true
+  phase: feeding
+  plants: succ $suc +++++
+  players:
+    - continent: $A mass fat fat planthomeo, $B mass, $W wait +
+  `);
+    const {selectGame, findAnimal, findPlant, findTrait} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitTakeFoodRequest('$A', '$suc'));
+
+    expectError(`Too early to eat`, ERRORS.COOLDOWN, () => {
+      clientStore0.dispatch(traitTakeFoodRequest('$A', '$suc'));
+    });
+
+    expect(selectGame().status.round, 'round 0').equal(0);
+    expect(findPlant('$suc').getFood(), '$suc.food').equals(4);
+    expect(findAnimal('$A').getFood(), '$A.getFood()').equal(1);
+    expect(findAnimal('$B').getFood(), '$B.getFood()').equal(0);
+    expect(findAnimal('$W').getFood(), '$W.getFood()').equal(1);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitPlantHomeothermy, '$suc'));
+
+    expect(selectGame().status.round, 'round 0').equal(0);
+    expect(findPlant('$suc').getFood(), '$suc.food').equals(3);
+    expect(findAnimal('$A').getFood(), '$A.getFood()').equal(2);
+    expect(findAnimal('$B').getFood(), '$B.getFood()').equal(0);
+    expect(findAnimal('$W').getFood(), '$W.getFood()').equal(1);
+  });
 });
 
 

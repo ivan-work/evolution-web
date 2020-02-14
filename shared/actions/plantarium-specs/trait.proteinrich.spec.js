@@ -11,15 +11,17 @@ describe('[PLANTARIUM] PlantTraitProteinRich:', function () {
 settings:
   addon_plantarium: true
 phase: feeding
-plants: PlantGrass $gra protein ++
+plants: PlantGrass $gra protein +++
 players:
   - continent: $A carn mass para, $W wait
 `);
     const {selectGame, findPlayerByIndex, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+    expect(findPlant('$gra').getFood(), 'Food before intake').equal(3);
 
     clientStore0.dispatch(traitTakeFoodRequest('$A', '$gra'));
 
     expect(findAnimal('$A').getFood()).equal(2);
+    expect(findPlant('$gra').getFood(), 'Food after intake').equal(2);
   });
 });
 

@@ -102,16 +102,16 @@ export const Deck_TimeToFly = [
 //полёт / специализация В - 2,
 //интеллект / жировой запас - 2,
   [2, cardsData.CardFlightAndCarnivorous.type]
-  , [2, cardsData.CardFlightAndSpecA.type]
-  , [2, cardsData.CardFlightAndSpecB.type]
+  , [2, cardsData.CardFlightAndThermosynthesis.type]
+  , [2, cardsData.CardFlightAndPhotosynthesis.type]
   , [2, cardsData.CardIntellectAndFatTissue.type]
 //1
 //интеллект / специализация А - 2,
 //засада / специализация В - 2,
 //засада / водоплавающее - 2,
 //удильщик - 4,
-  , [2, cardsData.CardIntellectAndSpecA.type]
-  , [2, cardsData.CardAmbushAndSpecB.type]
+  , [2, cardsData.CardIntellectAndThermosynthesis.type]
+  , [2, cardsData.CardAmbushAndPhotosynthesis.type]
   , [2, cardsData.CardAmbushAndSwimming.type]
   , [4, cardsData.CardAnglerfish.type]
 //2
@@ -123,8 +123,8 @@ export const Deck_TimeToFly = [
   , [4, cardsData.CardInkCloud.type]
   , [4, cardsData.CardShell.type]
   , [2, cardsData.CardMetamorphoseAndCarnivorous.type]
-  , [2, cardsData.CardMetamorphoseAndSpecA.type]
-  , [2, cardsData.CardViviparousAndSpecB.type]
+  , [2, cardsData.CardMetamorphoseAndThermosynthesis.type]
+  , [2, cardsData.CardViviparousAndPhotosynthesis.type]
 //3
 //живорождение / водоплавающее - 2,
 //трематода / сотрудничество - 4,

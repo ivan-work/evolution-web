@@ -136,7 +136,7 @@ deck: 5 shell
 phase: feeding
 food: 6
 players:
-  - continent: $A carn, $B shell carn meta speca specb
+  - continent: $A carn, $B shell carn meta ${tt.TraitThermosynthesis} ${tt.TraitPhotosynthesis}
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
@@ -148,9 +148,9 @@ players:
 
     expectUnchanged('$B cant attack', () => {
       clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$A'));
-      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitSpecA));
-      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitSpecB));
-      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitMetamorphose, tt.TraitSpecA));
+      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitThermosynthesis));
+      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitPhotosynthesis));
+      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitMetamorphose, tt.TraitThermosynthesis));
     }, serverStore, clientStore0);
   });
 });

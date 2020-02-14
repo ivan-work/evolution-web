@@ -14,7 +14,11 @@ import {
   TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_LINK, TRAIT_ANIMAL_FLAG
 } from '../models/game/evolution/constants';
-import {countUnavoidableDefenses, getStaticDefenses} from "../models/game/evolution/traitsData/TraitCarnivorous";
+import {
+  countUnavoidableDefenses,
+  getIntellectValue,
+  getStaticDefenses
+} from "../models/game/evolution/traitsData/TraitCarnivorous";
 import {getTraitDataModel} from "../models/game/evolution/TraitModel";
 
 export const checkTraitActivation = (game, animal, traitId, ...targets) => {
@@ -44,6 +48,9 @@ export const checkTraitActivation_Target = (game, animal, trait, ...targets) => 
   switch (trait.getDataModel().targetType) {
     case TRAIT_TARGET_TYPE.ANIMAL:
       target = checkTraitActivation_Animal(game, animal, trait, ...targets);
+      break;
+    case TRAIT_TARGET_TYPE.PLANT:
+      target = checkTraitActivation_Plant(game, animal, trait, ...targets);
       break;
     case TRAIT_TARGET_TYPE.TRAIT:
       target = checkTraitActivation_Trait(game, animal, trait, ...targets);
@@ -79,6 +86,25 @@ export const checkTraitActivation_Animal = (game, sourceAnimal, trait, targetAid
       , 'Animal(%s):Trait(%s) checkTarget on Animal(%s) failed', sourceAnimal.id, trait.type, targetAnimal.id, error)
   }
   return targetAnimal;
+};
+
+export const checkTraitActivation_Plant = (game, sourceAnimal, trait, targetEid, ...targets) => {
+  const gameId = game.id;
+  let error;
+  const targetPlant = game.getPlant(targetEid);
+  if (!targetPlant) {
+    throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
+      , 'Animal(%s):Trait(%s) cant locate Plant(%s)', sourceAnimal.id, trait.type, targetEid)
+  }
+  error = trait.getDataModel().getErrorOfUseOnTarget(game, sourceAnimal, targetPlant, ...targets);
+  if (error) {
+    throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
+      , `Animal(%s):Trait(%s) checkTarget on Plant(%s) failed: %s`, sourceAnimal.id, trait.type, targetPlant.id, error)
+
+    // throw new ActionCheckError(`checkTraitActivation_Animal@Game(${gameId})`
+    //   , `Animal(${sourceAnimal.id}):Trait(${trait.type}) checkTarget on Plant(${targetPlant.id}) failed: ${error}`)
+  }
+  return targetPlant;
 };
 
 export const checkTraitActivation_Trait = (game, sourceAnimal, trait, traitId) => {
@@ -202,7 +228,7 @@ export const checkAnimalCanTakeShellFails = (game, animal) => {
   return false;
 };
 
-export const checkIfTraitDisabledByIntellect = (attackAnimal, defenseTrait) => {
-  const traitIntellect = attackAnimal.hasTrait(tt.TraitIntellect);
-  return traitIntellect && (traitIntellect.value === defenseTrait.id || traitIntellect.value === defenseTrait.type);
+export const checkIfTraitDisabledByIntellect = (attackEntity, defenseTrait) => {
+  const traitIntellectValue = getIntellectValue(attackEntity);
+  return traitIntellectValue === defenseTrait.id || traitIntellectValue === defenseTrait.type;
 };

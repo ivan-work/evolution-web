@@ -66,9 +66,10 @@ export const parsePlantDeck = string => {
 
 export const parseAnimalList = (userId, string) => {
   invariant(typeof userId === 'string', `GameModel.parseAnimalList wrong userId: (${userId})`);
-  invariant(typeof string === 'string', `GameModel.parseAnimalList wrong string: (${string})`);
   const links = [];
-  let animalsMap = string.split(',')
+  let animalsMap = string;
+  if (typeof string === 'string') animalsMap = string.split(',');
+  animalsMap = animalsMap
     .map(rawAnimal => rawAnimal.trim())
     .filter(rawAnimal => rawAnimal.length > 0)
     .map(rawAnimal => rawAnimal
@@ -113,9 +114,10 @@ export const parseAnimalList = (userId, string) => {
 };
 
 export const parsePlantsList = (string) => {
-  invariant(typeof string === 'string', `parsePlantsList wrong string: (${string})`);
   const links = [];
-  let plantsMap = string.split(',')
+  let plantsMap = string;
+  if (typeof string === 'string') plantsMap = string.split(',');
+  plantsMap = plantsMap
     .map(plantString => plantString.trim())
     .filter(plantString => plantString.length > 0)
     .map(plantString => {

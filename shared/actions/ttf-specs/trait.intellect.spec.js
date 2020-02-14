@@ -2,7 +2,7 @@ import {
   gameEndTurnRequest
   , traitTakeFoodRequest
   , traitActivateRequest
-  , traitAnswerRequest
+  , traitAnswerRequest, traitTakeCoverRequest
 } from '../actions';
 
 import * as tt from '../../models/game/evolution/traitTypes';
@@ -12,6 +12,7 @@ import {TRAIT_ANIMAL_FLAG} from '../../models/game/evolution/constants';
 import {replaceGetRandom} from '../../utils/randomGenerator';
 
 import {makeGameSelectors} from '../../selectors';
+import ERRORS from "../errors";
 
 describe('TraitIntellect:', () => {
   it('Static: 1', () => {
@@ -131,9 +132,9 @@ players:
       clientStore0.dispatch(traitAnswerRequest('TraitIntellect', null));
     }, serverStore, clientStore0, clientStore1);
     clientStore0.dispatch(traitAnswerRequest('TraitIntellect', 'TraitMimicry'));
-    expectUnchanged('Cannot cancel Intellect', () => {
+    expectError(`Mimicry should not work`, ERRORS.TRAIT_ACTION_SUPRESSED, () => {
       clientStore1.dispatch(traitAnswerRequest('TraitMimicry', '$B'));
-    }, serverStore, clientStore0, clientStore1);
+    });
   });
 
   it('Intellect ignore Poison', () => {

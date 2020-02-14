@@ -21,7 +21,7 @@ import {
 import {db$gameEnd} from '../../server/actions/db';
 
 import {server$game, to$} from './generic';
-import {doesPlayerHasOptions, getFeedingOption, doesOptionExist, getOptions} from './ai';
+import {doesPlayerHasOptions, doesOptionExist, getOptions} from './ai';
 import {
   server$takeFoodRequest
   , server$questionPauseTimeout

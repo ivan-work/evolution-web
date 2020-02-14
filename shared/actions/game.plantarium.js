@@ -155,7 +155,7 @@ export const plantsClientToServer = {
     dispatch(server$startCooldownList(gameId, [
       startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)
     ]));
-    dispatch(server$huntStart_Plant(gameId, plant, animal, HUNT_FLAG.PLANT_ATTACK));
+    dispatch(server$huntStart_Plant(gameId, userId, plant, animal, HUNT_FLAG.PLANT_ATTACK));
   }
   , plantTraitActivateRequest: ({gameId, plantId, traitId, targets}, {userId}) => (dispatch, getState) => {
     logger.verbose('plantTraitActivateRequest', gameId, plantId, traitId, ...targets);

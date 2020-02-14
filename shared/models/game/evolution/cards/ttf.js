@@ -10,8 +10,8 @@ import * as traits from '../traitTypes/index';
 //интеллект / жировой запас - 2,
 
 export const CardFlightAndCarnivorous = makeCard(traits.TraitFlight, traits.TraitCarnivorous);
-export const CardFlightAndSpecA = makeCard(traits.TraitFlight, traits.TraitSpecA);
-export const CardFlightAndSpecB = makeCard(traits.TraitFlight, traits.TraitSpecB);
+export const CardFlightAndThermosynthesis = makeCard(traits.TraitFlight, traits.TraitThermosynthesis);
+export const CardFlightAndPhotosynthesis = makeCard(traits.TraitFlight, traits.TraitPhotosynthesis);
 export const CardIntellectAndFatTissue = makeCard(traits.TraitIntellect, traits.TraitFatTissue);
 
 //1
@@ -19,8 +19,8 @@ export const CardIntellectAndFatTissue = makeCard(traits.TraitIntellect, traits.
 //засада / специализация В - 2,
 //засада / водоплавающее - 2,
 //удильщик - 4,
-export const CardIntellectAndSpecA = makeCard(traits.TraitIntellect, traits.TraitSpecA);
-export const CardAmbushAndSpecB = makeCard(traits.TraitAmbush, traits.TraitSpecB);
+export const CardIntellectAndThermosynthesis = makeCard(traits.TraitIntellect, traits.TraitThermosynthesis);
+export const CardAmbushAndPhotosynthesis = makeCard(traits.TraitAmbush, traits.TraitPhotosynthesis);
 export const CardAmbushAndSwimming = makeCard(traits.TraitAmbush, traits.TraitSwimming);
 export const CardAnglerfish = makeCard(traits.TraitAnglerfish);
 
@@ -33,8 +33,8 @@ export const CardAnglerfish = makeCard(traits.TraitAnglerfish);
 export const CardInkCloud = makeCard(traits.TraitInkCloud);
 export const CardShell = makeCard(traits.TraitShell);
 export const CardMetamorphoseAndCarnivorous = makeCard(traits.TraitMetamorphose, traits.TraitCarnivorous);
-export const CardMetamorphoseAndSpecA = makeCard(traits.TraitMetamorphose, traits.TraitSpecA);
-export const CardViviparousAndSpecB = makeCard(traits.TraitViviparous, traits.TraitSpecB);
+export const CardMetamorphoseAndThermosynthesis = makeCard(traits.TraitMetamorphose, traits.TraitThermosynthesis);
+export const CardViviparousAndPhotosynthesis = makeCard(traits.TraitViviparous, traits.TraitPhotosynthesis);
 
 //3
 //живорождение / водоплавающее - 2,

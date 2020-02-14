@@ -16,13 +16,14 @@ import withStyles from "@material-ui/core/styles/withStyles";
 import GameStyles from "../GameStyles";
 import PlantTrait from "./PlantTrait";
 import {TraitModel} from "../../../../shared/models/game/evolution/TraitModel";
-import {CTT_PARAMETER, TRAIT_ANIMAL_FLAG} from "../../../../shared/models/game/evolution/constants";
+import {CTT_PARAMETER, TRAIT_ANIMAL_FLAG, TRAIT_TARGET_TYPE} from "../../../../shared/models/game/evolution/constants";
 import {gameDeployPlantTraitRequest} from "../../../../shared/actions/game";
 import cn from "classnames";
 import {AT_DEATH} from "../animations";
 import IconFruit from '@material-ui/icons/Camera';
 import * as pt from "../../../../shared/models/game/evolution/plantarium/plantTypes";
 import * as ptt from "../../../../shared/models/game/evolution/plantarium/plantTraitTypes";
+import {traitActivateRequest} from "../../../../shared/actions/trait";
 
 const DEATH_ANIMATION_TIME = `${AT_DEATH}ms`;
 
@@ -105,7 +106,7 @@ class BasePlant extends React.PureComponent {
           {repeat(plant.coverSlots - plant.covers, i => <Cover key={i} isPlaceholder />)}
         </div>
         <div>
-          {traitCarnivorous && <PlantTrait trait={traitCarnivorous} sourcePlant={plant}/>}
+          {traitCarnivorous && <PlantTrait trait={traitCarnivorous} sourcePlant={plant} />}
           {traitList}
         </div>
       </div>
@@ -113,7 +114,7 @@ class BasePlant extends React.PureComponent {
   }
 }
 
-const Plant = compose(
+export const Plant = compose(
   setDisplayName('Plant')
   , setPropTypes({plant: PropTypes.instanceOf(PlantModel).isRequired})
   , withStyles(styles)
@@ -127,10 +128,18 @@ const InteractivePlant = compose(
     return {game}
   }, {
     gameDeployPlantTraitRequest
+    , traitActivateRequest
   })
-  , InteractionTarget([DND_ITEM_TYPE.CARD_TRAIT, DND_ITEM_TYPE.PLANT_LINK], {
+  , InteractionTarget([DND_ITEM_TYPE.CARD_TRAIT, DND_ITEM_TYPE.PLANT_LINK, DND_ITEM_TYPE.TRAIT], {
     canInteract: ({game, plant}, {type, item}) => {
       switch (type) {
+        case DND_ITEM_TYPE.TRAIT: {
+          const {trait, sourceAnimal} = item;
+          const traitDataModel = trait.getDataModel();
+          if (traitDataModel.targetType !== TRAIT_TARGET_TYPE.PLANT) return;
+          const targetError = traitDataModel.getErrorOfUseOnTarget(game, sourceAnimal, plant);
+          return !targetError;
+        }
         case DND_ITEM_TYPE.CARD_TRAIT: {
           const {traitType} = item;
           const traitData = TraitModel.new(traitType).getDataModel();
@@ -154,6 +163,7 @@ const InteractivePlant = compose(
                      game
                      , plant
                      , gameDeployPlantTraitRequest
+                     , traitActivateRequest
                    }, {type, item}) => {
       switch (type) {
         case DND_ITEM_TYPE.CARD_TRAIT: {
@@ -175,6 +185,11 @@ const InteractivePlant = compose(
         case DND_ITEM_TYPE.PLANT_LINK: {
           const {cardId, alternateTrait, plantId} = item;
           gameDeployPlantTraitRequest(cardId, plantId, alternateTrait, plant.id);
+          break;
+        }
+        case DND_ITEM_TYPE.TRAIT: {
+          const {sourceAnimal, trait} = item;
+          traitActivateRequest(sourceAnimal.id, trait.id, plant.id);
           break;
         }
       }

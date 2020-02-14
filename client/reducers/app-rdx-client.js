@@ -36,6 +36,7 @@ const getInitialState = () => Map({
   , sound: loadValue('sound', true)
   , uiv3: loadValue('uiv3', true)
   , adminMode: process.env.NODE_ENV !== 'production'
+  , plantsMode: process.env.NODE_ENV !== 'production'
   , ignoreList: OrderedSet(loadValue('ignoreList', []))
   , forms: Map()
 });
@@ -44,6 +45,7 @@ export const reducer = createReducer(getInitialState(), {
   appChangeLanguage: (state, data) => state.set('lang', saveValue('lang', data))
   , appChangeSound: (state, data) => state.set('sound', saveValue('sound', data))
   , setAdminMode: (state, data) => state.set('adminMode', !state.get('adminMode'))
+  , setPlantsMode: (state, data) => state.set('plantsMode', !state.get('plantsMode'))
   , socketConnectClient: (state, {connectionId}) => state.set('connectionId', connectionId)
   , appUseUIv3: (state, data) => state.set('uiv3', saveValue('uiv3', data))
   , appIgnoreUser: (state, {userId}) => {

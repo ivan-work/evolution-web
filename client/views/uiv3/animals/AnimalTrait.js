@@ -29,7 +29,8 @@ export const AnimalTraitBase = (props) => (
     {...props}
     textComponent={
       <>
-        <span className='name'>{T.translate(`Game.Trait.${props.trait.type}${props.trait.linkSource ? `Source` : ``}`)}</span>
+        <span
+          className='name'>{T.translate(`Game.Trait.${props.trait.type}${props.trait.linkSource ? `Source` : ``}`)}</span>
         <span className='food'>
           {props.trait.getDataModel().food > 0 ? ' +' + props.trait.getDataModel().food : null}
           </span>
@@ -46,7 +47,11 @@ const AnimalTrait = (props) => {
     return <InteractiveTraitRecombination {...props} />;
   } else if (trait.type === tt.TraitAmbush) {
     return <InteractiveTraitAmbush {...props} />;
-  } else if (traitDataModel.playerControllable && traitDataModel.targetType === TRAIT_TARGET_TYPE.ANIMAL) {
+  } else if (traitDataModel.playerControllable
+    && (
+      traitDataModel.targetType === TRAIT_TARGET_TYPE.ANIMAL
+      || traitDataModel.targetType === TRAIT_TARGET_TYPE.PLANT
+    )) {
     return <InteractiveTrait {...props} />;
   } else if (traitDataModel.playerControllable) {
     return <InteractiveTraitClickable {...props} />;

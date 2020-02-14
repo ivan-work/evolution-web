@@ -358,4 +358,80 @@ settings:
       });
     });
   });
+
+  describe('[EVERYTHING]', () => {
+    it('ParseGame is ', () => {
+      const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+      const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+deck: 50 camo
+phase: feeding
+plants:
+  - PlantEphemeral ++
+  - PlantPerennial ++
+  - PlantLegume ++
+  - PlantGrass ++
+  - PlantFruits ++
+  - PlantSucculent ++
+  - PlantLiana ++
+  - PlantFungus ++
+  - PlantCarnivorous ++
+  - PlantCarnivorous PlantTraitAquatic ++
+  - PlantPerennial $per ++
+  - PlantParasite PlantTraitParasiticLink$per ++
+  - PlantPerennial ++ PlantTraitRootVegetable PlantTraitMycorrhiza$pernormal
+  - PlantPerennial $pernormal ++ PlantTraitHoney
+  - PlantPerennial ++ PlantTraitOfficinalis
+  - PlantPerennial ++ PlantTraitProteinRich
+  - PlantPerennial ++ PlantTraitTree
+  - PlantPerennial ++ PlantTraitSpiky  
+  - PlantPerennial $aqua ++ PlantTraitAquatic
+players:
+- continent: 
+    - $A TraitParasite TraitSymbiosis$B
+    - $B TraitParasite TraitCommunication$C
+    - $C TraitParasite TraitCooperation$D
+    - $D TraitParasite 
+    - $ TraitParasite TraitHomeothermy
+    - $eater TraitParasite TraitScavenger TraitPiracy TraitMassive TraitHibernation TraitBurrowing TraitInkCloud
+    - $ TraitCarnivorous
+    - $ TraitCarnivorous
+    - $ TraitCarnivorous
+    - $ TraitCarnivorous TraitIntellect
+    - $ TraitCarnivorous TraitIntellect
+    - $ TraitCarnivorous TraitIntellect
+    - $ TraitCarnivorous TraitAmbush
+    - $ TraitCarnivorous TraitAmbush
+    - $ TraitCarnivorous TraitIntellect TraitAmbush
+    - $ TraitCarnivorous TraitIntellect TraitAmbush
+    - $ TraitFatTissue
+    - $ TraitSwimming
+    - $ TraitRunning TraitMimicry TraitTailLoss TraitShell TraitCnidocytes
+    - $ TraitRunning 
+    - $ TraitMimicry
+    - $ TraitTailLoss
+    - $ TraitGrazing TraitSwimming
+    - $ TraitPlantGrazing
+    - $ TraitShell
+    - $ TraitAnglerfish
+    - $ TraitAnglerfish
+    - $ TraitAnglerfish
+    - $ TraitMetamorphose
+    - $ TraitInkCloud
+    - $ TraitViviparous
+    - $ TraitAmbush
+    - $ TraitFlight
+    - $ TraitThermosynthesis
+    - $ TraitPhotosynthesis
+    # - $ TraitSpecialization$aqua
+    - $ TraitAedificator
+    - $ TraitCnidocytes 
+    - $ TraitRegeneration
+    - $ TraitRstrategy
+    - $ TraitHomeothermy
+`);
+      expect(gameId).ok
+    })
+  })
 });

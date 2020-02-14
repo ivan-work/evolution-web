@@ -21,6 +21,8 @@ export const chatInit = (globalChat) => ({
 export const chatMessageRequest = (to, toType, text) => (dispatch) => {
   if (text === '/admin') {
     dispatch({type: 'setAdminMode', data: null});
+  } else if (text === '/растения') {
+    dispatch({type: 'setPlantsMode', data: null});
   } else {
     dispatch({
       type: 'chatMessageRequest'

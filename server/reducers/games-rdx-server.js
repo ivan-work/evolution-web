@@ -13,6 +13,7 @@ import * as tt from '../../shared/models/game/evolution/traitTypes';
 import * as pt from '../../shared/models/game/evolution/plantarium/plantTypes';
 
 import {TraitNeoplasm} from '../../shared/models/game/evolution/traitsData/cons';
+import * as ptt from "../../shared/models/game/evolution/plantarium/plantTraitTypes";
 
 const byId = id => object => object.id === id;
 
@@ -338,7 +339,7 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
   ensureParameter(amount, 'number');
   const animal = game.locateAnimal(animalId);
 
-  const updatedGame = game
+  let updatedGame = game
     .updateIn(['players', animal.ownerId, 'continent', animal.id], animal => animal.receiveFood(amount));
 
   switch (sourceType) {
@@ -349,6 +350,10 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
     }
     case 'PLANT': {
       const source = game.getPlant(sourceId);
+      if (source.hasTrait(ptt.PlantTraitProteinRich)) {
+        updatedGame = updatedGame
+          .updateIn(['players', animal.ownerId, 'continent', animal.id], animal => animal.receiveFood(1));
+      }
       return updatedGame
         .updateIn(['plants', sourceId, 'food'], food => Math.max(food - amount, 0))
         .update(addToGameLog(['traitMoveFood', amount, sourceType, logAnimal(animal), logPlant(source)]));

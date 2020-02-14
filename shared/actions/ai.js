@@ -74,7 +74,9 @@ const makeOption = {
       , cooldownAction: (gameId) => startCooldown(gameId
         , trait.type
         , TRAIT_COOLDOWN_DURATION.TURN
-        , TRAIT_COOLDOWN_PLACE.TRAIT, trait.id)
+        , TRAIT_COOLDOWN_PLACE.TRAIT
+        , trait.id
+      )
     })
   }
 };
@@ -98,7 +100,7 @@ export const doesPlayerHasOptions = (game, playerId) => {
     logger.debug('AutoTurn for: ' + playerId);
     return false;
   } else {
-    if (process.env.LOG_LEVEL === 'debug') {
+    if (logOptions) {
       const options = getOptions(game, playerId);
       if (options.length === 0) throw new Error('Options length = 0');
       logger.debug('options', options.map(o => o.text));
@@ -127,6 +129,7 @@ export const getOptions = (game, playerId) => {
 
 export const searchPlayerOptions = (game, playerId, successFn) => {
   const allAnimals = game.players.reduce((result, player) => result.concat(player.continent.keySeq().toArray()), []);
+  const allPlants = game.plants.keySeq().toArray();
   logOptions && logger.debug(`endturn/options/search/${playerId}`);
 
   return game.getPlayer(playerId).someAnimal((animal) => {
@@ -162,7 +165,7 @@ export const searchPlayerOptions = (game, playerId, successFn) => {
         && !trait.getErrorOfUse(game, animal)
       ) {
         switch (traitData.targetType) {
-          case TRAIT_TARGET_TYPE.ANIMAL:
+          case TRAIT_TARGET_TYPE.ANIMAL: {
             const exampleTarget = allAnimals.find((targetAid) => passesChecks(() =>
               checkTraitActivation_Animal(game, animal, trait, targetAid))
             );
@@ -170,6 +173,16 @@ export const searchPlayerOptions = (game, playerId, successFn) => {
               return successFn(makeOption.traitActivateRequest(animal.id, trait, exampleTarget));
             }
             break;
+          }
+          case TRAIT_TARGET_TYPE.PLANT: {
+            const exampleTarget = allPlants.find((targetEid) => passesChecks(() =>
+              checkTraitActivation_Animal(game, animal, trait, targetEid))
+            );
+            if (exampleTarget) {
+              return successFn(makeOption.traitActivateRequest(animal.id, trait, exampleTarget));
+            }
+            break;
+          }
           case TRAIT_TARGET_TYPE.TWO_TRAITS:
             return successFn(makeOption.traitActivateRequest(animal.id, trait));
           case TRAIT_TARGET_TYPE.TRAIT:

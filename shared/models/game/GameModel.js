@@ -64,13 +64,13 @@ export class QuestionRecord extends Record({
   , targetAid: null
   , turnRemainingTime: null
 }) {
-  static new(type, userId, sourceAnimal, traitId, targetAnimal, turnRemainingTime) {
+  static new(type, userId, sourceEid, sourcePid, traitId, targetAnimal, turnRemainingTime) {
     return new QuestionRecord({
       id: uuid.v4()
       , type
       , userId
-      , sourcePid: sourceAnimal.ownerId
-      , sourceAid: sourceAnimal.id
+      , sourcePid: sourcePid
+      , sourceAid: sourceEid
       , traitId
       , targetPid: targetAnimal.ownerId
       , targetAid: targetAnimal.id
@@ -425,6 +425,10 @@ export class GameModel extends Record({
     return this.plants.get(plantId);
   }
 
+  getEntity(entityId) {
+    return this.getPlant(entityId) || this.locateAnimal(entityId);
+  }
+
   mapPlants(cb) {
     return this.update('plants', plants => plants.map(cb));
   }
@@ -542,6 +546,7 @@ GameModelClient.prototype.getPlant = GameModel.prototype.getPlant;
 GameModelClient.prototype.isPlantarium = GameModel.prototype.isPlantarium;
 GameModelClient.prototype.sortPlayersFromIndex = GameModel.prototype.sortPlayersFromIndex;
 GameModelClient.prototype.getActualPlayers = GameModel.prototype.getActualPlayers;
+GameModelClient.prototype.getEntity = GameModel.prototype.getEntity;
 GameModelClient.prototype.someAnimal = GameModel.prototype.someAnimal;
 GameModelClient.prototype.mapPlants = GameModel.prototype.mapPlants;
 GameModelClient.prototype.getPlayerCard = GameModel.prototype.getPlayerCard;

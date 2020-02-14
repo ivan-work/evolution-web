@@ -108,7 +108,7 @@ export class RoomSettings extends React.Component {
         <RoomAddonRow name='addon_timeToFly' deck={this.Deck_TimeToFly_help}/>
         <RoomAddonRow name='addon_continents' deck={this.Deck_ContinentsShort_help}/>
         <RoomAddonRow name='addon_bonus' deck={this.Deck_Bonus_help}/>
-        {this.props.isAdmin && <RoomAddonRow name='addon_plantarium' deck={this.Deck_Plantarium_help}/>}
+        {this.props.showPlants && <RoomAddonRow name='addon_plantarium' deck={this.Deck_Plantarium_help}/>}
 
         <Submit id='RoomSettings$Submit' variant='contained' color='primary' size='large'>
           {T.translate('App.Room.$Edit')}
@@ -123,7 +123,7 @@ export default compose(
     (state, {roomId}) => ({
       userId: state.getIn(['user', 'id'])
       , room: state.getIn(['rooms', roomId])
-      , isAdmin: state.getIn(['app', 'adminMode'])
+      , showPlants: state.getIn(['app', 'adminMode']) || state.getIn(['app', 'plantsMode'])
     })
     , {roomEditSettingsRequest}
   )

@@ -30,8 +30,9 @@ export const TraitInkCloud = 'TraitInkCloud';
 export const TraitViviparous = 'TraitViviparous';
 export const TraitAmbush = 'TraitAmbush';
 export const TraitFlight = 'TraitFlight';
-export const TraitSpecA = 'TraitSpecA';
-export const TraitSpecB = 'TraitSpecB';
+export const TraitThermosynthesis = 'TraitThermosynthesis';
+export const TraitPhotosynthesis = 'TraitPhotosynthesis';
+export const TraitSpecialization = 'TraitSpecialization';
 
 export const TraitAedificator = 'TraitAedificator';
 export const TraitCnidocytes = 'TraitCnidocytes';
@@ -44,4 +45,5 @@ export const TraitSuckerfish = 'TraitSuckerfish';
 
 export const TraitRstrategy = 'TraitRstrategy';
 export const TraitHomeothermy = 'TraitHomeothermy';
+export const TraitPlantHomeothermy = 'TraitPlantHomeothermy';
 export const TraitShy = 'TraitShy';

@@ -183,9 +183,13 @@ export class TraitModel extends Record({
         const animal = game.locateAnimal(targets[0]);
         throwError(!animal && ERRORS.TRAIT_ACTION_NO_TARGETS);
         return animal;
+      case TRAIT_TARGET_TYPE.PLANT:
+        const plant = game.getPlant(targets[0]);
+        throwError(!plant && ERRORS.TRAIT_ACTION_NO_TARGETS);
+        return plant;
       case TRAIT_TARGET_TYPE.TRAIT:
         const targetTrait = entity.hasTrait(targets[0], true);
-        throwError(!animal && ERRORS.TRAIT_ACTION_NO_TARGETS);
+        throwError(!targetTrait && ERRORS.TRAIT_ACTION_NO_TARGETS);
         return targetTrait;
       case TRAIT_TARGET_TYPE.TWO_TRAITS:
         const linkedAnimal = game.locateAnimal(entity.id === trait.hostAnimalId

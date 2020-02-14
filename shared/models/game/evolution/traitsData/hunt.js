@@ -27,7 +27,8 @@ import {
   findAnglerfish,
   findDefaultActiveDefence,
   getActiveDefenses,
-  getAffectiveDefenses, getIntellectValue,
+  getAffectiveDefenses,
+  getIntellectValue,
   getStaticDefenses,
   TraitCarnivorous
 } from "./TraitCarnivorous";
@@ -84,11 +85,11 @@ const debugHuntFlags = noopIfProd((game) => `(${gameGetHunt(game).flags.toJS()})
 
 const debugHunts = noopIfProd((game) => `(${game.hunts.map(hunt => `${hunt.attackEntityId} > ${hunt.targetAid} ${debugHuntFlags(game)}`).toArray()})`);
 
-const server$huntStart = (gameId, type, attackEntity, attackTrait, targetAnimal, ...flags) => (dispatch, getState) => {
+const server$huntStart = (gameId, type, attackPid, attackEntity, attackTrait, targetAnimal, ...flags) => (dispatch, getState) => {
   let game = selectGame(getState, gameId);
   logger.verbose(`server$huntStart: ${attackEntity.id} > ${targetAnimal.id}`);
   // dispatch(server$game(gameId, huntStart(gameId, attackEntity.id, attackTrait.id, targetAnimal.id)));
-  dispatch(huntStart(gameId, type, attackEntity.id, attackEntity.ownerId));
+  dispatch(huntStart(gameId, type, attackEntity.id, attackPid));
   dispatch(huntSetTarget(gameId, attackTrait, targetAnimal));
 
   flags.forEach((flag) =>
@@ -101,13 +102,13 @@ const server$huntStart = (gameId, type, attackEntity, attackTrait, targetAnimal,
 // Public
 
 export const server$huntStart_Animal = (gameId, attackAnimal, attackTrait, targetAnimal, ...flags) => (dispatch, getState) => {
-  dispatch(server$huntStart(gameId, HUNT_TYPE.ANIMAL, attackAnimal, attackTrait, targetAnimal, ...flags));
+  dispatch(server$huntStart(gameId, HUNT_TYPE.ANIMAL, attackAnimal.ownerId, attackAnimal, attackTrait, targetAnimal, ...flags));
 };
 
-export const server$huntStart_Plant = (gameId, attackPlant, targetAnimal, ...flags) => (dispatch, getState) => {
+export const server$huntStart_Plant = (gameId, attackPid, attackPlant, targetAnimal, ...flags) => (dispatch, getState) => {
   const attackTrait = attackPlant.hasTrait(ptt.PlantTraitHiddenCarnivorous);
   dispatch(server$traitNotify_Start(selectGame(getState, gameId), attackPlant, attackTrait, targetAnimal.id));
-  dispatch(server$huntStart(gameId, HUNT_TYPE.PLANT, attackPlant, attackTrait, targetAnimal, ...flags));
+  dispatch(server$huntStart(gameId, HUNT_TYPE.PLANT, attackPid, attackPlant, attackTrait, targetAnimal, ...flags));
 };
 
 export const server$huntProcess = (gameId) => (dispatch, getState) => {
@@ -198,8 +199,8 @@ export const server$huntProcess = (gameId) => (dispatch, getState) => {
 
       return true;
     });
-  logger.debug(`server$huntProcess/${attackEntity.id}/possibleDefenses/ ${[].concat(possibleDefenses)})`);
-  logger.debug(`server$huntProcess/${attackEntity.id}/possibleDefenseTargets/ ${possibleDefenseTargets})`);
+  logger.debug(`server$huntProcess/${attackEntity.id}/Intellect/possibleDefenses/ ${[].concat(possibleDefenses)})`);
+  logger.debug(`server$huntProcess/${attackEntity.id}/Intellect/possibleDefenseTargets/ ${possibleDefenseTargets})`);
 
   if (canUseIntellect) {
     const affectiveDefenses = getAffectiveDefenses(game, attackEntity, targetAnimal);
@@ -208,7 +209,8 @@ export const server$huntProcess = (gameId) => (dispatch, getState) => {
       if (hunt.type === HUNT_TYPE.ANIMAL) {
         const question = QuestionRecord.new(QuestionRecord.INTELLECT
           , attackEntity.ownerId
-          , attackEntity
+          , attackEntity.id
+          , attackEntity.ownerId
           , attackTrait.id
           , targetAnimal
         );
@@ -236,13 +238,21 @@ export const server$huntProcess = (gameId) => (dispatch, getState) => {
   if (possibleDefenses.length > 1
     || possibleDefenseTargets > 1
     || possibleDefenses.some(t => t.getDataModel().optional)) {
-    dispatch(server$traitDefenceQuestion(gameId, attackEntity, attackTrait, targetAnimal));
+    dispatch(server$traitDefenceQuestion(gameId, attackEntity.id, hunt.attackPlayerId, attackTrait, targetAnimal));
     return false;
   }
 
   const defaultDefence = findDefaultActiveDefence(game, attackEntity, attackTrait, targetAnimal);
   if (defaultDefence) {
-    const question = QuestionRecord.new(QuestionRecord.DEFENSE, targetAnimal.ownerId, attackEntity, attackTrait.id, targetAnimal, 0);
+    const question = QuestionRecord.new(
+      QuestionRecord.DEFENSE
+      , targetAnimal.ownerId
+      , attackEntity.id
+      , attackEntity.ownerId
+      , attackTrait.id
+      , targetAnimal
+      , 0
+    );
     logger.debug(`server$traitDefenceQuestionInstant: ${attackEntity.id} > ${targetAnimal.id} + ${defaultDefence}`);
     dispatch(traitQuestion(gameId, question));
     dispatch(server$traitDefenceAnswer(gameId
@@ -309,6 +319,9 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
   if (huntGetFlag(game, HUNT_FLAG.FEED_FROM_PLANT)) {
     dispatch(server$startCooldownList(gameId, getFeedingCooldownList(gameId, hunt.targetPid)));
   }
+  // if (huntGetFlag(game, HUNT_FLAG.TRAIT_HOMEOTHERMY)) {
+  //   dispatch(server$startCooldown(gameId, ...));
+  // }
 
   if (attackEntity) {
     const traitIntellect = attackEntity.hasTrait(tt.TraitIntellect) || attackEntity.hasTrait(ptt.PlantTraitHiddenIntellect);
@@ -325,7 +338,7 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
     if (huntGetFlag(game, HUNT_FLAG.FEED_FROM_KILL)) {
       dispatch(server$startFeeding(gameId, attackEntity.id, 2, tt.TraitCarnivorous));
     }
-    if (huntGetFlag(game, HUNT_FLAG.PARALYZE)) {
+    if (huntGetFlag(game, HUNT_FLAG.PARALYZE) && hunt.type === HUNT_TYPE.ANIMAL) {
       dispatch(server$game(gameId, traitParalyze(gameId, hunt.attackEntityId)));
     }
     if (huntGetFlag(game, HUNT_FLAG.FEED_SCAVENGERS)) {
@@ -359,10 +372,17 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
         dispatch(traitShy.getDataModel().action(game, targetAnimal, traitShy));
       }
     }
-    if (huntGetFlag(game, HUNT_FLAG.FEED_FROM_PLANT)) {
-      if (!getErrorOfAnimalEatingFromPlant(game, targetAnimal, attackEntity)) {
-        dispatch(server$startFeedingFromGame(gameId, targetAnimal.id, 1, 'PLANT', attackEntity.id));
-      }
+    if (
+      huntGetFlag(game, HUNT_FLAG.FEED_FROM_PLANT)
+      && !getErrorOfAnimalEatingFromPlant(game, targetAnimal, attackEntity)
+    ) {
+      dispatch(server$startFeedingFromGame(gameId, targetAnimal.id, 1, 'PLANT', attackEntity.id));
+    }
+    if (
+      huntGetFlag(game, HUNT_FLAG.TRAIT_HOMEOTHERMY)
+      && !getErrorOfAnimalEatingFromPlantNoCD(game, targetAnimal, attackEntity)
+    ) {
+      dispatch(server$startFeedingFromGame(gameId, targetAnimal.id, 1, 'PLANT', attackEntity.id));
     }
   }
 
@@ -387,7 +407,9 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
   if (!huntGetFlag(game, HUNT_FLAG.AMBUSH) && hunt.attackPlayerId) {
     dispatch(server$playerActed(gameId, hunt.attackPlayerId));
   }
-  if (huntGetFlag(game, HUNT_FLAG.FEED_FROM_PLANT)) {
+  if (
+    huntGetFlag(game, HUNT_FLAG.FEED_FROM_PLANT)
+  ) {
     dispatch(server$playerActed(gameId, hunt.targetPid));
   }
   if (huntGetFlag(game, HUNT_FLAG.PLANT_ATTACK)) {

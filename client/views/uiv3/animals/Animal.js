@@ -18,7 +18,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 
 import geckoHR from '../../../assets/gfx/geckoHR.svg';
 import {PHASE} from "../../../../shared/models/game/GameModel";
-import {CTT_PARAMETER, TRAIT_ANIMAL_FLAG} from "../../../../shared/models/game/evolution/constants";
+import {CTT_PARAMETER, TRAIT_ANIMAL_FLAG, TRAIT_TARGET_TYPE} from "../../../../shared/models/game/evolution/constants";
 
 import IconFull from '@material-ui/icons/SentimentVerySatisfied';
 import IconEnough from '@material-ui/icons/SentimentSatisfied';
@@ -252,7 +252,9 @@ export const InteractiveAnimal = compose(
         }
         case DND_ITEM_TYPE.TRAIT: {
           const {trait, sourceAnimal} = item;
-          const targetError = trait.getDataModel().getErrorOfUseOnTarget(game, sourceAnimal, animal);
+          const traitDataModel = trait.getDataModel();
+          if (traitDataModel.targetType !== TRAIT_TARGET_TYPE.ANIMAL) return;
+          const targetError = traitDataModel.getErrorOfUseOnTarget(game, sourceAnimal, animal);
           return sourceAnimal.id !== animal.id && !targetError;
         }
         case DND_ITEM_TYPE.TRAIT_SHELL: {
