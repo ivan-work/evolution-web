@@ -22,6 +22,10 @@ const theme = {
     , background: {
       accent: accentBackground[700]
     }
+    , game: {
+      allowed: primary[50]
+      , allowedHover: primary[100]
+    }
   }
   , typography: {
     useNextVariants: true

@@ -270,7 +270,7 @@ export class GameModel extends Record({
     return PLANTS_TABLE[playersSize](playersSize);
   }
 
-  generatePlants() {
+  getPlantsCountForSpawn() {
     const {spawn, max} = this.getPlantsConfig();
     const currentSize = this.plants.filter(plant => plant.type !== pt.PlantParasite).size;
     return Math.min(max - currentSize, spawn);

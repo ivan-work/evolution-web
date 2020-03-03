@@ -615,11 +615,11 @@ export const server$gamePhaseEndRegeneration = (gameId) => (dispatch, getState) 
   if (selectGame(getState, gameId).deck.size > 0) {
     dispatch(server$gameDistributeCards(gameId));
     dispatch(server$gameDistributeAnimals(gameId));
-    if (game.isPlantarium()) {
-      dispatch(server$gameSpawnPlants(gameId, game.generatePlants()));
-    }
     dispatch(server$game(gameId, gameStartTurn(gameId)));
     dispatch(server$gameStartPhase(gameId, PHASE.DEPLOY));
+    if (game.isPlantarium()) {
+      dispatch(server$gameSpawnPlants(gameId, game.getPlantsCountForSpawn()));
+    }
     dispatch(server$gamePlayerStart(gameId));
   } else {
     dispatch(server$gameEnd(gameId, true));

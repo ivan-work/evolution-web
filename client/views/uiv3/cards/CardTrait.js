@@ -25,10 +25,11 @@ const traitStyles = theme => ({
     , fontSize: 16
     , overflowWrap: 'break-word'
     , '&.canStart': {
-      cursor: 'pointer'
+      backgroundColor: theme.palette.game.allowed
+      , cursor: 'pointer'
     }
     , '&.canStart:hover, &.canStart:focus': {
-      backgroundColor: theme.palette.grey.A100,
+      backgroundColor: theme.palette.game.allowedHover
     }
   }
   , CardTraitText: {}

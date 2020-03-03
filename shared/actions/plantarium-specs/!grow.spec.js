@@ -257,8 +257,8 @@ players:
 settings:
   addon_plantarium: true
 phase: prepare
-deckPlants: PlantEphemeral, PlantPerennial, PlantLegume, PlantGrass,\
-PlantFruits, PlantSucculent, PlantLiana, PlantFungus, PlantCarnivorous
+deckPlants: PlantLegume, PlantLegume, PlantLegume, PlantLegume,\
+PlantLegume, PlantLegume, PlantLegume, PlantLegume, PlantLegume
 deck: camo, pois
 players:
   - hand: 1 camo
@@ -285,6 +285,7 @@ players:
 
       expect(selectGame().plants, 'plants').size(4);
       expect(selectGame().deckPlants, 'deckPlants').size(5);
+      expect(selectGame().plants.last().getFood()).equal(2);
     });
 
     it(`Doesn't throw error if the deck is too small`, () => {

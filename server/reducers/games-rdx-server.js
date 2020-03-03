@@ -228,16 +228,31 @@ export const gameSetPaused = (game, {paused}) => game.setIn(['status', 'paused']
  * GAME PHASES
  * */
 
+const plantProduceFood = (game, plant, aedificators) => {
+  let food = 0;
+  if (plant.getFood() === 0) {
+    food = 1;
+  } else {
+    food = plant.data.produceFood(game, plant)
+  }
+  food = Math.min(plant.data.maxFood, food + aedificators);
+  return food;
+};
+
 export const gameStartTurn = (game) => {
   const roundPlayerIndex = game.getPlayer(game.status.roundPlayer).index;
   const nextRoundPlayerIndex = (roundPlayerIndex + 1) % game.players.size;
   const nextRoundPlayerId = game.players.find(p => p.index === nextRoundPlayerIndex).id;
+  let aedificators = 0;
+  game.someAnimal((animal) => {
+    if (animal.hasTrait(tt.TraitAedificator)) aedificators++;
+  });
   return game
     .updateIn(['status', 'turn'], turn => ++turn)
     .setIn(['status', 'roundPlayer'], nextRoundPlayerId)
     .setIn(['food'], 0)
     .mapPlants(plant => plant
-      .set('food', plant.getFood() === 0 ? 1 : plant.data.produceFood(game, plant))
+      .set('food', plantProduceFood(game, plant, aedificators))
       .set('covers', plant.coverSlots)
     )
     .update('cooldowns', cooldowns => cooldowns.eventNextTurn());

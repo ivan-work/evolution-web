@@ -180,7 +180,7 @@ Game:
     PlantLiana: Лиана
     PlantFungus: Гриб
     PlantCarnivorous: Хищное
-    PlantParasite: Паразит
+    PlantParasite: Растение-паразит
   AnimalFlag:
     HIBERNATED: Спит zZzZ
     POISONED: Отравлен
@@ -249,7 +249,7 @@ Game:
     PlantTraitOfficinalis: Лекарственное
     PlantTraitProteinRich: Питательное
     PlantTraitTree: Дерево
-    PlantTraitParasiticPlant:
+    PlantTraitParasiticPlant: Растение-паразит
     PlantTraitSpiky: Колючее
     PlantTraitParasiticLink: Паразит
     PlantTraitHiddenCarnivorous: Хищное
@@ -321,7 +321,14 @@ Game:
       Действует только фишка убежища.
     PlantTraitProteinRich: $A, получившее $F с такого растения, дополнительно получает $F. $TraitCarnivorous может брать еду с этого растения.
     PlantTraitTree: Только $A со свойствами $TraitMassive и/или $TraitFlight может брать с такого растения. Дает фишку убежища.
-    PlantTraitParasiticPlant: $PlantTraitParasiticPlant считается самостоятельным растением.
+    PlantTraitParasiticPlant: >-
+      Карта РАСТЕНИЯ-ПАРАЗИТА кладется на другое растение.
+      Для РАСТЕНИЙ-ПАРАЗИТОВ действуют следующие правила:
+      1. ПАРАЗИТ не идет в зачет максимального количества растений, находящихся на игровом столе.
+      2. В свою фазу питания игрок может вместо взятия $F или атаки ХИЩНИКОМ, переместить с растения-хозяина $F на ПАРАЗИТА.
+      При этом нельзя переместить последнюю $F с растения-хозяина.
+      ПАРАЗИТ выживает, если на нем нет в фазу вымирания.
+      ПАРАЗИТ погибает, если погибает растение-хозяин.
     PlantTraitSpiky: Дает три фишки убежища.
     PlantTraitParasiticLink: Активируйте чтобы положить ЕДУ на паразита
     PlantTraitHiddenCarnivorous: Активируйте чтобы атаковать $A

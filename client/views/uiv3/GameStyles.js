@@ -86,6 +86,7 @@ const TraitColors = {
     text: '#00F'
   }
   , [ptt.PlantTraitParasiticLink]: TraitGeneralColors.Parasitic
+  , [ptt.PlantTraitParasiticPlant]: TraitGeneralColors.Parasitic
   , [ptt.PlantTraitHiddenCarnivorous]: TraitGeneralColors.Attack
   , [ptt.PlantTraitMycorrhiza]: {
     text: '#396'

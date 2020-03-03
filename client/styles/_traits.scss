@@ -75,6 +75,10 @@ $Activated: #f66;
   }
 }
 
+.PlantTraitParasiticPlant {
+  color: $TraitParasite;
+}
+
 .TraitAnglerfish {
   &.value.pointer.active {
     font-weight: bold;
