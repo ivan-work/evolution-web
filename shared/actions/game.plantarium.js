@@ -1,8 +1,8 @@
 import logger from '~/shared/utils/logger';
 import {List} from 'immutable';
 
-import {selectGame} from "../selectors";
-import {server$game} from "./generic";
+import {selectGame, selectUsersInGame} from "../selectors";
+import {server$game, to$, toUser$Client} from "./generic";
 import PlantModel from "../models/game/evolution/plantarium/PlantModel";
 import {
   server$autoFoodSharing,
@@ -33,10 +33,11 @@ import {
   TRAIT_COOLDOWN_LINK,
   TRAIT_COOLDOWN_PLACE
 } from "../models/game/evolution/constants";
-import {server$playerActed} from "./game";
+import {gameGiveCards, server$playerActed} from "./game";
 import {logTarget} from "./log.util";
 import {getIntRandom} from "../utils/randomGenerator";
 import * as ptt from "../models/game/evolution/plantarium/plantTraitTypes";
+import {CardModel} from "../models/game/CardModel";
 
 // region game
 export const gameSpawnPlants = (gameId, plants) => ({
@@ -112,12 +113,18 @@ export const server$plantTraitActivate = (gameId, playerId, sourceAid, trait, ..
 // endregion
 
 // region traits
-const traitMoveCard = (gameId, fromPid, toPid, cardId) => ({
+const traitMoveCard = (gameId, fromPid, toPid, card) => ({
   type: 'traitMoveCard'
-  , data: {gameId, fromPid, toPid, cardId}
+  , data: {gameId, fromPid, toPid, card}
 });
 
-export const server$traitMoveCard = (gameId, fromPid, toPid, cardId) => server$game(gameId, traitMoveCard(gameId, fromPid, toPid, cardId));
+export const server$traitMoveCard = (gameId, fromPid, toPid, cardId) => (dispatch, getState) => {
+  const card = selectGame(getState, gameId).getPlayer(fromPid).hand.find(c => c.id === cardId);
+  dispatch(traitMoveCard(gameId, fromPid, toPid, card));
+  dispatch(toUser$Client(toPid, traitMoveCard(gameId, fromPid, toPid, card.toClient())));
+  dispatch(to$({clientOnly: true, users: selectUsersInGame(getState, gameId).filter(uid => uid !== toPid)}
+    , traitMoveCard(gameId, fromPid, toPid, card.toOthers().toClient())));
+};
 
 export const server$takeCardFromRandomPlayer = (game, toPid) => (dispatch, getState) => {
   let maxHand = 0;
@@ -186,47 +193,7 @@ export const plantsServerToClient = {
   gameSpawnPlants: ({gameId, plants}) => gameSpawnPlants(gameId, List(plants).map(PlantModel.fromJS))
   , gameDeployPlant: ({gameId, plant}) => gameDeployPlant(gameId, PlantModel.fromJS(plant))
   , gamePlantUpdateFood: ({gameId, plantId, amount}) => gamePlantUpdateFood(gameId, plantId, amount)
-  , traitMoveCard: ({gameId, fromPid, toPid, cardId}) => traitMoveCard(gameId, fromPid, toPid, cardId)
-//   gameInit: ({game, userId}, currentUserId) => (dispatch) => {
-//     dispatch(gameInit(GameModelClient.fromServer(game, userId)));
-//     redirectTo('/room');
-//   }
-//   , gameCreateSuccess: (({game}, currentUserId) => (dispatch) => {
-//     dispatch(gameCreateSuccess(GameModelClient.fromServer(game, currentUserId)));
-//     redirectTo('/room');
-//   })
-//   , gameCreateNotify: ({roomId, gameId}) => gameCreateNotify(roomId, gameId)
-//   , gameStart: ({gameId}) => gameStart(gameId)
-//   , gameStartTurn: ({gameId}) => gameStartTurn(gameId)
-//   , gameStartPhase: ({gameId, phase, timestamp, data}) => gameStartPhase(gameId, phase, timestamp, data)
-//   , gameGiveCards: ({gameId, userId, cards}) =>
-//     gameGiveCards(gameId, userId, List(cards).map(card => CardModel.fromServer(card)))
-//   , gameDeployAnimalFromHand: ({gameId, userId, animal, animalPosition, cardId}) =>
-//     gameDeployAnimalFromHand(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardId)
-//   , gameDeployAnimalFromDeck: ({gameId, animal, sourceAid}) =>
-//     gameDeployAnimalFromDeck(gameId, AnimalModel.fromServer(animal), sourceAid)
-//   , gameDeployTrait: ({gameId, cardId, traits}) =>
-//     gameDeployTrait(gameId, cardId, traits.map(trait => TraitModel.fromServer(trait)))
-//   , gameDeployRegeneratedAnimal: ({gameId, userId, cardId, animalId, source}) =>
-//     gameDeployRegeneratedAnimal(gameId, userId, cardId, animalId, source)
-//   , gameAddTurnTimeout: ({gameId, turnStartTime, turnDuration}) =>
-//     gameAddTurnTimeout(gameId, turnStartTime, turnDuration)
-//   , gameNextRound: ({gameId}) => gameNextRound(gameId)
-//   , gameNextPlayer: ({gameId, playerId}, userId) => (dispatch, getState) => {
-//     const game = getState().get('game');
-//     const previousPlayerId = game.status.currentPlayer;
-//     if (previousPlayerId !== userId && playerId === userId) dispatch(appPlaySound('NOTIFICATION'));
-//     dispatch(gameNextPlayer(gameId, playerId))
-//   }
-//   , playerActed: ({gameId, userId}) => playerActed(gameId, userId)
-//   , gameEndTurn: ({gameId, userId}) => gameEndTurn(gameId, userId)
-//   , gameEnd: ({gameId, game}, currentUserId) => gameEnd(gameId, GameModelClient.fromServer(game, currentUserId))
-//   , gamePlayerLeft: ({gameId, userId}) => gamePlayerLeft(gameId, userId)
-//   , gameSetUserTimedOut: ({gameId, playerId, timedOut}) => gameSetUserTimedOut(gameId, playerId, timedOut)
-//   , gameSetUserWantsPause: ({gameId, userId, wantsPause}) => gameSetUserWantsPause(gameId, userId, wantsPause)
-//   , gameSetPaused: ({gameId, paused}) => gameSetPaused(gameId, paused)
-//   , animalDeath: ({gameId, type, animalId, data}) =>
-//     animalDeath(gameId, type, animalId, data)
+  , traitMoveCard: ({gameId, fromPid, toPid, card}) => traitMoveCard(gameId, fromPid, toPid, CardModel.fromServer(card))
 };
 
 

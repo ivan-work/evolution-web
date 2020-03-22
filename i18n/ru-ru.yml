@@ -37,13 +37,19 @@ App:
     StartVoting_Title: Готовы?
     StartVoting_InProgress: Идет голосование
     Room: Комната
+    Desc:
+      Seeded: Тестовая игра
     Settings:
       name: Название
       maxPlayers: Количество игроков
       timeTurn: Время хода (В минутах)
       timeTraitResponse: Время реагирования на атаку
       randomPlayers: Случайный порядок игроков
+      cardCountResult: Карт в колоде
       halfDeck: Половина колоды
+      halfDeckHelp: Искуственно уберет половину карт, гарантируя наличие всех свойств. Например, если в колоде 4 карты пиратства - опция гарантирует, что пиратства останется 2.
+      maxCardsEnabled: Ограничить количество карт
+      maxCardsEnabledHelp: Срежет лишние карты после перемешивания колоды. Какие-то свойства могут полностью вылететь.
       addon_base: База
       addon_timeToFly: Время Летать
       addon_continents: Континенты (Без локаций)
@@ -161,6 +167,7 @@ Game:
       TraitCommunication: '{2} делится едой с {3}'
       TraitCarnivorous: '{2} съедает {3}'
       TraitScavenger: '{2} кушает останки.'
+    traitMoveCard: $Player@{0} отобрал карту у $Player@{1}
     animalDeath:
       STARVE: '{1} умерло от голода.'
       KILL: '{1} убито.'

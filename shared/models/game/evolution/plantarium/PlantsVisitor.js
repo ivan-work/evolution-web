@@ -16,7 +16,7 @@ export default class PlantVisitor {
   }
 
   visit = (plant) => {
-    this.log && logger.debug(`PlantVisitor/${plant.id}/visit? ${!!this.visited[plant.id]}`);
+    this.log && logger.debug(`PlantVisitor/${plant.id}/visit: ${!!this.visited[plant.id]}`);
     if (this.visited[plant.id]) return;
 
     this.visited[plant.id] = true;
@@ -52,5 +52,5 @@ export default class PlantVisitor {
       this.log && logger.debug(`PlantVisitor/${plant.id}/mycoStack FALSE`);
       this.mycoStackSurvive = false;
     }
-  }
+  };
 }

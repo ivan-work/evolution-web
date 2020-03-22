@@ -2,13 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types'
 import T from 'i18n-react';
 import Validator from 'validatorjs';
-import shallowEqual from 'fbjs/lib/shallowEqual'
 
 import EvoTextField from "../../components/EvoTextField";
 import EvoCheckbox from "../../components/EvoCheckbox";
 import Button from "@material-ui/core/Button/Button";
+import Typography from "@material-ui/core/Typography";
 
-const FormContext = React.createContext();
+export const FormContext = React.createContext();
 
 export default class Form extends React.Component {
   static propTypes = {
@@ -43,10 +43,16 @@ export default class Form extends React.Component {
     const {disabled, rules} = this.props;
     const {model} = this.state;
     if (!disabled && model[name] != value) {
-      model[name] = value;
-      const validation = new Validator(model, rules);
-      validation.passes();
-      this.setState({model, validation, dirty: true});
+      return this.setState(({model}) => {
+        const newModel = {...model, [name]: value};
+        const validation = new Validator(newModel, rules);
+        validation.passes();
+        return {
+          model: newModel
+          , validation
+          , dirty: true
+        }
+      });
     }
   }
 

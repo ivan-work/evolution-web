@@ -48,8 +48,18 @@ export const TraitCarnivorous_Start = (manager, {sourceAid, targets}) => {
   }
 };
 
-export const TraitCarnivorous_End = (manager, {sourceAid}) => {
+export const TraitCarnivorous_End = (manager, {sourceAid, targetId}) => {
   const sourceAnimalHtml = manager.getAnimal(sourceAid);
+  const targetAnimalHtml = manager.getAnimal(targetId);
+
+  if (targetAnimalHtml) {
+    targetAnimalHtml.classList.remove('onTop');
+    delete targetAnimalHtml.dataset.animated;
+    Velocity(targetAnimalHtml, {
+      translateX: 0
+      , translateY: 0
+    }, AT_MEDIUM);
+  }
 
   if (sourceAnimalHtml) {
     sourceAnimalHtml.classList.remove('onTop');

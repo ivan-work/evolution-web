@@ -386,10 +386,9 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
   }
 };
 
-export const traitMoveCard = (game, {fromPid, toPid, cardId}) => {
-  const card = game.getPlayer(fromPid).hand.find(byId(cardId));
+export const traitMoveCard = (game, {fromPid, toPid, card}) => {
   return game
-    .updateIn(['players', fromPid, 'hand'], hand => hand.filterNot(byId(cardId)))
+    .updateIn(['players', fromPid, 'hand'], hand => hand.filterNot(byId(card.id)))
     .updateIn(['players', toPid, 'hand'], hand => hand.push(card))
     .update(addToGameLog(['traitMoveCard', fromPid, toPid]));
 };

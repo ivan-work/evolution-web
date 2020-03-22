@@ -206,13 +206,13 @@ const FOOD_TABLE = [
 export const PLANTS_TABLE = [
   (zero) => ({start: 3, spawn: 2, max: 4}) // 0 players
   , (one) => ({start: 3, spawn: 2, max: 4}) // 1 player
-  , (players) => ({start: players + 1, spawn: 1, max: players * 2})
-  , (players) => ({start: players + 1, spawn: 2, max: players * 2})
-  , (players) => ({start: players + 1, spawn: 3, max: players * 2})
-  , (players) => ({start: players + 1, spawn: 3, max: players * 2})
-  , (players) => ({start: players + 1, spawn: 3, max: players * 2})
-  , (players) => ({start: players + 1, spawn: 4, max: players * 2})
-  , (players) => ({start: players + 1, spawn: 4, max: players * 2})
+  , (players) => ({start: players + 1, spawn: 1, max: 2 + players * 2})
+  , (players) => ({start: players + 1, spawn: 2, max: 2 + players * 2})
+  , (players) => ({start: players + 1, spawn: 3, max: 2 + players * 2})
+  , (players) => ({start: players + 1, spawn: 3, max: 2 + players * 2})
+  , (players) => ({start: players + 1, spawn: 3, max: 2 + players * 2})
+  , (players) => ({start: players + 1, spawn: 4, max: 2 + players * 2})
+  , (players) => ({start: players + 1, spawn: 4, max: 2 + players * 2})
 ];
 
 const GameModelData = {
@@ -288,13 +288,12 @@ export class GameModel extends Record({
 
     if (room.settings.halfDeck) deckConfig = deckConfig.map(([count, type]) => [Math.ceil(count / 2), type]);
 
-
-    const players = (room.settings.randomPlayers
-        ? doShuffle(room.users.toArray())
-        : room.users
-    ).reduce((result, userId, index) => result.set(userId, PlayerModel.new(userId, index)), OrderedMap());
-
     let deck = generateDeck(deckConfig, true);
+
+    if (room.settings.maxCards) {
+      deck = deck.take(room.settings.maxCards)
+    }
+
     if (room.settings.addon_plantarium) {
       deck = deck.update(deck => deck.map(immcard => immcard.withMutations(card => {
         if (card.trait1 && getTraitDataModel(card.trait1).replaceOnPlantarium) {
@@ -306,6 +305,11 @@ export class GameModel extends Record({
         return card;
       })));
     }
+
+    const players = (room.settings.randomPlayers
+        ? doShuffle(room.users.toArray())
+        : room.users
+    ).reduce((result, userId, index) => result.set(userId, PlayerModel.new(userId, index)), OrderedMap());
 
     const deckPlants = generatePlantDeck(deckPlantsConfig, true);
 

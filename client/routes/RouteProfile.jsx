@@ -22,7 +22,7 @@ import {ActionCheckError} from "../../shared/models/ActionCheckError";
 
 const styles = theme => ({
   root: {
-    margin: theme.spacing.unit
+    margin: theme.spacing()
   }
 });
 
@@ -32,7 +32,7 @@ const changeNameStyles = theme => ({
     , alignItems: 'center'
   }
   , margin: {
-    margin: theme.spacing.unit
+    margin: theme.spacing()
   }
 });
 

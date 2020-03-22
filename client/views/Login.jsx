@@ -7,15 +7,15 @@ import {connect} from 'react-redux';
 import {Redirect} from 'react-router';
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
-import {withStyles} from "@material-ui/core/styles";
+import withStyles from "@material-ui/core/styles/withStyles";
 
 import TextLogin from "./auth/TextLogin";
 import VKAPILogin from './auth/VKAPILogin';
 
 const styles = theme => ({
   loginOption: {
-    padding: theme.spacing.unit * 3
-    , margin: theme.spacing.unit
+    padding: theme.spacing(3)
+    , margin: theme.spacing()
   }
 });
 

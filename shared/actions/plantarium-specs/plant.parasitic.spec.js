@@ -18,7 +18,7 @@ import * as pt from "../../models/game/evolution/plantarium/plantTypes";
 import {getErrorOfEatingCooldown} from "../trait.checks";
 import ERRORS from "../errors";
 
-describe('[PLANTARIUM] PlantCarnivorous:', function () {
+describe('[PLANTARIUM] PlantParasitic:', function () {
   describe('Deploy:', function () {
     it('Player can deploy parasitic plant', () => {
       const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
@@ -79,6 +79,23 @@ players:
       expect(parasiticPlant.traits).size(1);
       expect(parasiticPlant.traits.first().type).equal(ptt.PlantTraitParasiticLink);
       expect(parasiticPlant.traits.first().linkSource).equal(false);
+    });
+
+    it('BUG Parasite should die when host is dead', () => {
+      const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+      const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+phase: feeding
+plants: per $HOST, para $PARASITE parasiticlink$HOST myco$MYCOFRIEND, eph $MYCOFRIEND ++
+players:
+  - continent: $A wait +
+`);
+      const {selectGame, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+      clientStore0.dispatch(gameEndTurnRequest());
+      expect(findPlant('$MYCOFRIEND'), '$MYCOFRIEND should live').ok;
+      expect(findPlant('$HOST'), '$HOST should die').not.ok;
+      expect(findPlant('$PARASITE'), 'parasite should die').not.ok;
     });
   });
 

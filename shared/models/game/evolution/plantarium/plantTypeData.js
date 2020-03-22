@@ -117,6 +117,7 @@ export const PlantCarnivorous = {
 };
 export const PlantParasite = {
   type: pt.PlantParasite
+  , surviveNoFood: true
   , fruit: false
   , coverSlots: 0
   , startingFood: 0

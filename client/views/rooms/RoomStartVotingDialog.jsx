@@ -14,6 +14,7 @@ import IconVotePending from '@material-ui/icons/Snooze';
 import IconVoteYes from '@material-ui/icons/Check';
 import IconVoteNo from '@material-ui/icons/Close';
 
+import RoomDescription from './RoomDescription';
 import TimeService from '../../services/TimeService';
 import {Timer} from '../utils/Timer.jsx';
 import UsersList from '../utils/UsersList.jsx';
@@ -37,7 +38,7 @@ export class RoomStartVotingDialog extends React.Component {
         <DialogTitle>
           {T.translate('App.Room.StartVoting_Title')}&nbsp;
           {room.votingForStart &&
-          <Timer start={room.votingForStart.timestamp} duration={VotingModel.START_VOTING_TIMEOUT}/>}
+          <Timer start={room.votingForStart.timestamp} duration={VotingModel.START_VOTING_TIMEOUT} />}
         </DialogTitle>
         {open && room.votingForStart && this.renderDialogContent()}
       </Dialog>
@@ -46,15 +47,18 @@ export class RoomStartVotingDialog extends React.Component {
 
   renderDialogContent() {
     const {room, userId, $voteYes, $voteNo} = this.props;
-    return (<DialogContent>
-      <UsersList list={room.users}>{this.renderUserVote}</UsersList>
-      <DialogActions>
-        <Button variant={"contained"} color={"primary"} disabled={!isUserInPlayers(room, userId)}
-                onClick={$voteYes}>{T.translate('App.Misc.Agree')}</Button>
-        <Button variant={"contained"} color={"primary"} disabled={!isUserInPlayers(room, userId)}
-                onClick={$voteNo}>{T.translate('App.Misc.Disagree')}</Button>
-      </DialogActions>
-    </DialogContent>);
+    return (
+      <DialogContent>
+        <RoomDescription room={room}/>
+        <UsersList list={room.users}>{this.renderUserVote}</UsersList>
+        <DialogActions>
+          <Button variant={"contained"} color={"primary"} disabled={!isUserInPlayers(room, userId)}
+                  onClick={$voteYes}>{T.translate('App.Misc.Agree')}</Button>
+          <Button variant={"contained"} color={"primary"} disabled={!isUserInPlayers(room, userId)}
+                  onClick={$voteNo}>{T.translate('App.Misc.Disagree')}</Button>
+        </DialogActions>
+      </DialogContent>
+    );
   }
 
   renderUserVote = ({user}) => {
@@ -75,8 +79,8 @@ export class RoomStartVotingDialog extends React.Component {
 
     return (
       <ListItem>
-        <ListItemText primary={user.login}/>
-        <ListItemSecondaryAction><Icon/></ListItemSecondaryAction>
+        <ListItemText primary={user.login} />
+        <ListItemSecondaryAction><Icon /></ListItemSecondaryAction>
       </ListItem>
     );
   }
@@ -100,7 +104,7 @@ export class RoomStartVotingTimer extends React.Component {
     if (!show) return null;
     return (<span>
       {T.translate('App.Room.StartVoting_InProgress')}&nbsp;
-      <Timer start={room.votingForStart.timestamp} duration={VotingModel.START_VOTING_TIMEOUT}/>
+      <Timer start={room.votingForStart.timestamp} duration={VotingModel.START_VOTING_TIMEOUT} />
     </span>);
   }
 }

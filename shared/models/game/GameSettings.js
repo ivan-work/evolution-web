@@ -20,6 +20,7 @@ export const SettingsRules = {
   , timeTraitResponse: `numeric|between:${SETTINGS_TIME_VALUES[0]},${SETTINGS_TIME_VALUES[1]}`
   , randomPlayers: `boolean`
   , halfDeck: `boolean`
+  , maxCards: 'numeric'
   , addon_timeToFly: `boolean`
   , addon_continents: `boolean`
   , addon_bonus: `boolean`
@@ -33,6 +34,7 @@ export class SettingsRecord extends Record({
   , timeAmbush: SETTINGS_AMBUSH_TIME
   , randomPlayers: !process.env.TEST
   , halfDeck: false
+  , maxCards: null
   , addon_timeToFly: false
   , addon_continents: false
   , addon_bonus: false

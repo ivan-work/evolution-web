@@ -187,6 +187,7 @@ export const getErrorOfAnimalEatingFromPlant = (game, animal, plant) => (
 
 export const getErrorOfAnimalTakingCover = (game, animal, plant) => {
   if (plant.covers === 0) return ERRORS.PLANT_COVERS_ZERO;
+  if (animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) return ERRORS.TRAIT_REGENERATION_DEAD;
   if (animal.hasFlag(TRAIT_ANIMAL_FLAG.IN_COVER)) return ERRORS.ANIMAL_IN_COVER;
   return (
     getErrorOfEatingCooldown(game, animal.ownerId, animal.id)

@@ -7,7 +7,7 @@ import {compose} from "recompose";
 import Chat from '../Chat.jsx';
 import UsersList from '../utils/UsersList.jsx';
 
-import RoomSettings from './RoomSettings.jsx';
+import RoomSettings from './settings/RoomSettings.jsx';
 import RoomStartVotingDialog, {RoomStartVotingTimer} from './RoomStartVotingDialog.jsx';
 
 import {
@@ -30,7 +30,7 @@ import {UserVariants} from "../utils/User";
 
 const styles = theme => ({
   root: {
-    padding: theme.spacing.unit
+    padding: theme.spacing()
     , flex: '1 1 0'
   }
   , container: {
@@ -40,7 +40,7 @@ const styles = theme => ({
     flexFlow: 'column nowrap'
   }
   , columnPaper: {
-    padding: theme.spacing.unit
+    padding: theme.spacing()
     , flex: '1'
   }
   , columnSettings: {
@@ -79,7 +79,7 @@ export class Room extends React.PureComponent {
           {/*{T.translate('App.Room.Room')}&nbsp;«{room.name}»&nbsp;*/}
           <RoomStartVotingTimer room={room} />
         </Typography>
-        <Grid container className={classes.container} spacing={8}>
+        <Grid container className={classes.container} spacing={1}>
           <Grid container item className={classes.column} xs={4}>
             <Paper className={classes.columnPaper + ' ' + classes.columnSettings}>
               <RoomSettings roomId={room.id} />

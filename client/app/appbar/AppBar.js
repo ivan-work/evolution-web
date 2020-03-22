@@ -38,7 +38,7 @@ const styles = theme => ({
   , spacer: {flexGrow: 1}
   , button: {
     whiteSpace: 'nowrap'
-    , margin: theme.spacing.unit
+    , margin: theme.spacing()
     , flex: theme.style.flex.off
   }
 });
@@ -50,7 +50,7 @@ export const AppBar = ({classes}) => (
       <div className={classes.title}>
         <EvoLink to='/' variant="h4" color="inherit">{T.translate('App.Name')}</EvoLink>
         &nbsp;
-        <Typography inline variant="caption" color="inherit">v{GLOBAL_VERSION}</Typography>
+        <Typography display='inline' variant="caption" color="inherit">v{GLOBAL_VERSION}</Typography>
       </div>
 
       <GuardUser>

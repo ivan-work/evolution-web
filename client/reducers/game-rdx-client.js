@@ -34,6 +34,7 @@ import {
   , animalDeath
   , plantDeath
   , traitMoveFood
+  , traitMoveCard
   , startCooldown
   , traitQuestion
   , traitAnswerSuccess
@@ -89,6 +90,7 @@ export const reducer = createReducer(null, {
   , animalDeath
   , plantDeath
   , traitMoveFood
+  , traitMoveCard
   , startCooldown
   , traitQuestion
   , traitAnswerSuccess

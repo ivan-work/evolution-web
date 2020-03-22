@@ -44,7 +44,17 @@ a[disabled] {
 }
 
 .layout-padding {
-  padding: 2em;
+  padding: 8px;
+  &-h {
+    padding: 0 8px;
+    &-2 {
+      padding: 0 16px;
+    }
+  }
+}
+
+.layout-margin {
+  margin: 8px;
 }
 
 .flex {

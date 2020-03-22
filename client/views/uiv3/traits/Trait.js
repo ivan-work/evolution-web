@@ -1,4 +1,4 @@
-import styled from "../../../styles/styled";
+// import styled from "../../../styles/styled";
 import GameStyles from "../GameStyles";
 
 import React from 'react';
@@ -9,6 +9,7 @@ import Typography from "@material-ui/core/Typography";
 
 import TraitDetails from "../traits/TraitDetails";
 import WhiteTooltip from "../../utils/WhiteTooltip";
+import styled from "@material-ui/core/styles/styled";
 
 export const StyledTraitBody = styled('div')({
   ...GameStyles.animalTrait

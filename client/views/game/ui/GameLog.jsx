@@ -41,6 +41,9 @@ const customLog = {
   , traitMoveFood: (message, [amount, sourceType, animal, another]) => {
     return T.translate('Game.Log.' + message + '.' + sourceType, {context: amount, ...[amount, sourceType, animal, another]})
   }
+  , traitMoveCard: (message, [fromPid, toPid]) => {
+    return T.translate('Game.Log.' + message, {...[fromPid, toPid]})
+  }
   , animalDeath: (message, [type, animal, data]) => {
     return T.translate('Game.Log.' + message, {context: type, ...[type, animal, data]})
   }

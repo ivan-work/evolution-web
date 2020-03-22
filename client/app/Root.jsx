@@ -16,7 +16,7 @@ class Root extends React.PureComponent {
         <MuiThemeProvider theme={theme}>
           <Provider store={store}>
             <Router history={history}>
-              <App history={history}/>
+              <App/>
             </Router>
           </Provider>
         </MuiThemeProvider>

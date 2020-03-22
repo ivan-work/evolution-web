@@ -119,7 +119,7 @@ export const ListAnimalFood = ({food}) => repeat(food, i => <AnimalFood key={i} 
 
 export const NumberedAnimalFood = ({food}) => (
   <Fragment>
-    <Typography inline className='AnimalIconText'>{food}</Typography>
+    <Typography display='inline' className='AnimalIconText'>{food}</Typography>
     <AnimalFood />
   </Fragment>
 );

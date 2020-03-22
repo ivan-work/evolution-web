@@ -20,7 +20,10 @@ const defaultUser = (id) => ({
 export const UserVariants = {
   simple: ({user}) => <span className='User'>{user.login}</span>
   , typography: ({user, className}) => (
-    <Typography className={'User' + (className ? ' ' + className : '')} inline color='inherit' component='span'>
+    <Typography display='inline'
+                className={'User' + (className ? ' ' + className : '')}
+                color='inherit'
+                component='span'>
       {user.login}
     </Typography>
   )

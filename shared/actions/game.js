@@ -20,7 +20,7 @@ import {
 
 import {db$gameEnd} from '../../server/actions/db';
 
-import {server$game, to$} from './generic';
+import {server$game, to$, toUser$Client} from './generic';
 import {doesPlayerHasOptions, doesOptionExist, getOptions} from './ai';
 import {
   server$takeFoodRequest
@@ -55,6 +55,7 @@ import {server$gameDeployPlant, server$gameSpawnPlants} from "./game.plantarium"
 import {getErrorOfAnimalEating, getErrorOfAnimalEatingFromGame, getErrorOfAnimalEatingFromPlant} from "./trait.checks";
 import PlantModel from "../models/game/evolution/plantarium/PlantModel";
 import PlantVisitor from "../models/game/evolution/plantarium/PlantsVisitor";
+import ParasiteVisitor from "../models/game/evolution/plantarium/ParasiteVisitor";
 
 // region Game
 // region Init
@@ -153,17 +154,10 @@ export const gameGiveCards = (gameId, userId, cards) => ({
 
 export const server$gameGiveCards = (gameId, userId, count) => (dispatch, getState) => {
   const cards = selectGame(getState, gameId).deck.take(count);
-  dispatch(Object.assign(
-    gameGiveCards(gameId, userId, cards)
-  ));
-  dispatch(Object.assign(
-    gameGiveCards(gameId, userId, cards.map(card => card.toClient()))
-    , {meta: {clientOnly: true, userId}}
-  ));
-  dispatch(Object.assign(
-    gameGiveCards(gameId, userId, cards.map(card => card.toOthers().toClient()))
-    , {meta: {clientOnly: true, users: selectUsersInGame(getState, gameId).filter(uid => uid !== userId)}}
-  ));
+  dispatch(gameGiveCards(gameId, userId, cards));
+  dispatch(toUser$Client(userId, gameGiveCards(gameId, userId, cards.map(card => card.toClient()))));
+  dispatch(to$({clientOnly: true, users: selectUsersInGame(getState, gameId).filter(uid => uid !== userId)}
+    , gameGiveCards(gameId, userId, cards.map(card => card.toOthers().toClient()))));
 };
 // endregion
 
@@ -557,9 +551,13 @@ const server$gameExtinct = (gameId) => (dispatch, getState) => {
     }
   });
 
-  const plantsVisitor = new PlantVisitor(selectGame(getState, gameId));
-  selectGame(getState, gameId).plants.forEach(plantsVisitor.visit);
-  plantsVisitor.deathRow.forEach(plantId => dispatch(server$game(gameId, plantDeath(gameId, plantId))));
+  const game = selectGame(getState, gameId);
+  const plantsVisitor = new PlantVisitor(game);
+  const parasiteVisitor = new ParasiteVisitor(game);
+
+  game.plants.forEach(plantsVisitor.visit);
+  plantsVisitor.deathRow.map(plantId => game.getPlant(plantId)).forEach(parasiteVisitor.visit);
+  parasiteVisitor.deathRow.forEach(plantId => dispatch(server$game(gameId, plantDeath(gameId, plantId))));
 };
 // endregion
 

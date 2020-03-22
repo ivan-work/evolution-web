@@ -61,7 +61,7 @@ const styles = theme => ({
     , font: '16px Roboto, Arial'
   }
   , padding: {
-    padding: theme.spacing.unit
+    padding: theme.spacing()
   }
   , stickerRow: {
     flex: '1 1 0'
