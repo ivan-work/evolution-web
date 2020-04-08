@@ -15,7 +15,7 @@ import {getMemoizedCardsTotal} from "./utils-deck";
 const memoCardsTotal = getMemoizedCardsTotal();
 
 export default ({minCards}) => (
-  <FormContext.Consumer>{({model, onChange}) => {
+  <FormContext.Consumer>{({model, onChange, disabled}) => {
     const cardsTotal = memoCardsTotal(model);
     return (
       <>
@@ -23,6 +23,7 @@ export default ({minCards}) => (
           <EvoCheckbox
             label={T.translate('App.Room.Settings.maxCardsEnabled')}
             color='primary'
+            disabled={disabled}
             onChange={({target}) => {
               const checked = target.checked;
               onChange('maxCardsEnabled', checked);
@@ -41,6 +42,7 @@ export default ({minCards}) => (
               max={cardsTotal}
               value={model.maxCards}
               onChange={(e, value) => onChange('maxCards', value)}
+              disabled={disabled}
             />
           </div>
         )}

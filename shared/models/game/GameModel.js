@@ -88,7 +88,10 @@ export class QuestionRecord extends Record({
     return js == null ? null : new QuestionRecord(js);
   }
 
-  toOthers() {
+  toOthers(userId) {
+    if (this.userId === userId) {
+      return this;
+    }
     return this.set('id', null);
   }
 
@@ -225,7 +228,6 @@ const GameModelData = {
   , players: OrderedMap()
   , plants: OrderedMap()
   , areas: AreasStandard
-  , observers: List()
   , log: List()
   , food: -1
   , status: new StatusRecord()
@@ -351,6 +353,7 @@ export class GameModel extends Record({
     return this
       .set('deck', this.deck.map(card => card.toOthers()))
       .set('players', this.players.map(player => player.id === userId ? player : player.toOthers()))
+      .update('question', question => question ? question.toOthers(userId) : null)
   }
 
   toClient() {
@@ -361,6 +364,7 @@ export class GameModel extends Record({
       .set('players', this.players.map(player => player.toClient()).entrySeq())
       .set('plants', this.plants.map(plant => plant.toClient()).entrySeq())
       .set('areas', this.areas.map(area => area.toClient()))
+      .set('question', this.question ? this.question.toClient() : null)
       .remove('hunts')
   }
 

@@ -22,13 +22,12 @@ import IconIgnore from '@material-ui/icons/MicOff';
 import IconUnignore from '@material-ui/icons/Mic';
 import WhiteTooltip from "../views/utils/WhiteTooltip";
 
-const WhiteButtonStyle = {fontSize: 12, padding: 0, color: 'white'};
 const ButtonStyle = {fontSize: 12, padding: 0};
 
 export const IgnoreButton = compose(
   setDisplayName('IgnoreButton$')
   , setPropTypes({
-    userId: PropTypes.string.isRequired
+    userId: PropTypes.any.isRequired
   })
   , connect((state, {userId}) => {
       const appUserId = state.getIn(['user', 'id']);
@@ -50,7 +49,7 @@ export const IgnoreButton = compose(
 export const UnignoreButton = compose(
   setDisplayName('UnignoreButton$')
   , setPropTypes({
-    userId: PropTypes.string.isRequired
+    userId: PropTypes.any.isRequired
   })
   , connect((state, {userId}) => {
       const appUserId = state.getIn(['user', 'id']);
@@ -74,7 +73,10 @@ const RenderChildrenHOC = renderComponent(({children}) => children);
 export const IgnoreUnignoreTooltip = compose(
   setDisplayName('IgnoreUnignoreTooltip$')
   , setPropTypes({
-    userId: PropTypes.string.isRequired
+    userId: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number
+    ]).isRequired
   })
   , withStateHandlers({isOpen: false}, {
     handleTooltipOpen: () => () => ({isOpen: true})

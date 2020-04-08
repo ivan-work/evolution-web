@@ -2,6 +2,7 @@ import logger from '~/shared/utils/logger';
 import {Map} from 'immutable';
 
 export const ROOM_AFK_HOST_PERIOD = 10 * 60e3;
+export const ROOM_SELF_DESTRUCTION_TIME = 2 * 60e3;
 
 import {RoomModel, VotingModel} from '../models/RoomModel';
 import {GameModel, GameModelClient} from '../models/game/GameModel';
@@ -14,7 +15,7 @@ import {
   , server$gameLeave
   , gameDestroy
   , server$gameCreateSuccess
-  , server$chatMessage
+  , server$chatMessage, makeTurnTimeoutId
 } from './actions';
 import {appPlaySound} from '../../client/actions/app';
 import {toUser$Client, server$toUsers, server$toRoom} from './generic';
@@ -116,7 +117,7 @@ const roomJoinSelf = (roomId, userId, room) => ({
 export const server$roomJoin = (roomId, userId) => (dispatch, getState) => {
   const previousRoom = findRoomByUser(getState, userId);
   if (previousRoom)
-    // If user has previous room and it's not the same:
+  // If user has previous room and it's not the same:
     if (previousRoom.id !== roomId) dispatch(server$roomExit(previousRoom.id, userId));
     // If user has same previous room, but not in spectators:
     else if (!~previousRoom.users.indexOf(userId)) dispatch(server$roomExit(previousRoom.id, userId, false));
@@ -238,6 +239,7 @@ export const server$roomExit = (roomId, userId, checkForDestroy = true) => (disp
   //logger.debug('server$roomExit:', roomId, userId);
   dispatch(Object.assign(roomExit(roomId, userId), {meta: {users: true}}));
   const room = selectRoom(getState, roomId);
+
   if (room.gameId && selectGame(getState, room.gameId).getPlayer(userId))
     dispatch(server$gameLeave(room.gameId, userId));
 
@@ -257,7 +259,19 @@ export const roomDestroy = (roomId) => ({
 export const server$roomDestroy = (roomId) => (dispatch, getState) => {
   const room = selectRoom(getState, roomId);
   const game = selectGame(getState, room.gameId);
+
+  dispatch(server$roomSelfDestructCancel(roomId));
+
+  room.users.forEach((userId) => {
+    dispatch(server$roomExit(roomId, userId, false));
+  });
+
+  room.spectators.forEach((userId) => {
+    dispatch(server$roomExit(roomId, userId, false));
+  });
+
   if (game) dispatch(gameDestroy(game.id));
+
   dispatch(Object.assign(roomDestroy(roomId)
     , {meta: {users: true}}));
 };
@@ -406,12 +420,13 @@ export const roomsClientToServer = {
     checkUserNotSpectatingRoom(room, userId);
     const previousRoom = findRoomByUser(getState, userId);
 
-    if (previousRoom)
+    if (previousRoom) {
       // If user has previous room and it's not the same:
       if (previousRoom.id !== roomId) dispatch(server$roomExit(previousRoom.id, userId));
       // If user has same previous room, but not in spectators:
       else if (!~previousRoom.spectators.indexOf(userId)) dispatch(server$roomExit(previousRoom.id, userId, false));
       else throw new ActionCheckError('User already in spectators');
+    }
 
     dispatch(roomSpectate(roomId, userId));
     dispatch(Object.assign(roomSpectate(roomId, userId), {meta: {clientOnly: true, users: true}}));
@@ -491,10 +506,30 @@ export const roomsClientToServer = {
 };
 
 // TODO make it normal. relocate, add selectPath, url contruction to function.
-const isUserRouterInGame = (getState, roomId) => {
-  const pathname = getState().getIn(['routing', 'locationBeforeTransitions', 'pathname']);
-  return pathname === '/room/' + roomId || pathname === '/game';
+const isUserRouterInGame = () => {
+  const pathname = window.location.pathname;
+  return pathname === '/room';
 };
+
+// region roomSelfDestruct
+
+const makeRoomSelfDestructTimeoutId = (roomId) => `roomSelfDestruct#${roomId}`;
+
+export const server$roomSelfDestructStart = (roomId, winnerId) => (dispatch, getState) => {
+  dispatch(server$chatMessage(roomId, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.GameEnd', 0, {
+    time: Math.floor(ROOM_SELF_DESTRUCTION_TIME / 60e3)
+    , winnerName: selectUserName(getState, winnerId)
+  }));
+
+  dispatch(addTimeout(ROOM_SELF_DESTRUCTION_TIME, makeRoomSelfDestructTimeoutId(roomId), (dispatch) => {
+    dispatch(server$roomDestroy(roomId));
+  }));
+};
+
+export const server$roomSelfDestructCancel = (roomId) =>
+  cancelTimeout(makeRoomSelfDestructTimeoutId(roomId));
+
+// endregion
 
 export const roomsServerToClient = {
   roomsInit: ({roomId, rooms}) => roomsInit(roomId, Map(rooms).map(r => RoomModel.fromJS(r)))
@@ -535,7 +570,7 @@ export const roomsServerToClient = {
     dispatch(roomExit(roomId, userId));
     if (currentUserId === userId) {
       dispatch(roomExitSelf());
-      if (isUserRouterInGame(getState, roomId))
+      if (isUserRouterInGame())
         redirectTo(`/`);
     }
   }
@@ -547,7 +582,7 @@ export const roomsServerToClient = {
   , roomStartVoting: ({roomId, timestamp}, currentUserId) => (dispatch, getState) => {
     dispatch(roomStartVoting(roomId, timestamp));
     if (isUserInPlayers(selectRoom(getState, roomId), currentUserId)) {
-      if (!isUserRouterInGame(getState, roomId)) {
+      if (!isUserRouterInGame()) {
         redirectTo(`/room`);
       }
       dispatch(appPlaySound('START_D2'));

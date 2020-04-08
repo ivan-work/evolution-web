@@ -18,10 +18,11 @@ import {
   , roomStartVotingRequest
   , roomStartVoteActionRequest
 
-  , SOCKET_DISCONNECT_NOW
+  , SOCKET_DISCONNECT_NOW, makeTurnTimeoutId, ROOM_SELF_DESTRUCTION_TIME
 } from '../actions';
 
 import {makeGameSelectors} from '../../selectors';
+import {testShiftTime} from "../../utils/reduxTimeout";
 
 describe('Game (ENDING PHASE):', function () {
   it('Next deploy: (FULL DECK)', () => {
@@ -186,7 +187,6 @@ phase: prepare
     expect(clientStore2.getState().get('room')).null;
   });
 
-
   it('Increased eating', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
     const gameId = ParseGame(`
@@ -205,4 +205,40 @@ players:
       clientStore0.dispatch(gameEndTurnRequest());
     }, serverStore, clientStore0);
   });
+
+  it('self-destruct room at the end', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockGame(3);
+    const gameId = ParseGame(`
+food: 10
+phase: feeding
+players:
+  - continent: $A TraitCarnivorous ++
+  - continent: $B TraitCarnivorous ++
+`);
+    const {selectGame, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    const roomId = selectGame().roomId;
+
+    clientStore2.dispatch(roomSpectateRequest(roomId));
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expect(serverStore.getState().rooms).size(1);
+    expect(serverStore.getState().games).size(1);
+    expect(clientStore0.getState().game).not.null;
+    expect(clientStore0.getState().rooms).size(1);
+    expect(clientStore1.getState().game).not.null;
+    expect(clientStore1.getState().rooms).size(1);
+    expect(clientStore2.getState().game).not.null;
+    expect(clientStore2.getState().rooms).size(1);
+
+    serverStore.dispatch(testShiftTime(ROOM_SELF_DESTRUCTION_TIME * 2));
+
+    expect(serverStore.getState().rooms).size(0);
+    expect(serverStore.getState().games).size(0);
+    expect(clientStore0.getState().game).null;
+    expect(clientStore0.getState().rooms).size(0);
+    expect(clientStore1.getState().game).null;
+    expect(clientStore1.getState().rooms).size(0);
+    expect(clientStore2.getState().game).null;
+    expect(clientStore2.getState().rooms).size(0);
+  })
 });

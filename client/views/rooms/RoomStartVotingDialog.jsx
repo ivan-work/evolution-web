@@ -50,7 +50,15 @@ export class RoomStartVotingDialog extends React.Component {
     return (
       <DialogContent>
         <RoomDescription room={room}/>
-        <UsersList list={room.users}>{this.renderUserVote}</UsersList>
+
+        <UsersList list={room.users}>{({user}) => this.renderUserVote({user})}</UsersList>
+        {/* TODO:
+        I have no idea why
+          <UsersList list={room.users}>{this.renderUserVote}</UsersList>
+        doesn't gets re-rendered when users vote
+
+        please send help
+        */}
         <DialogActions>
           <Button variant={"contained"} color={"primary"} disabled={!isUserInPlayers(room, userId)}
                   onClick={$voteYes}>{T.translate('App.Misc.Agree')}</Button>

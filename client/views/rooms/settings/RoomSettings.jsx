@@ -65,7 +65,6 @@ export class RoomSettings extends React.Component {
           </Tooltip>
         </Grid>
 
-
         <SetMaxCardCountSlider minCards={minCards} />
 
         <hr />

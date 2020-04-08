@@ -47,7 +47,7 @@ const chatMessageUser = (message) => ({
   , data: {message}
 });
 
-export const server$chatMessage = (to, toType, text, from) => (dispatch, getState) => {
+export const server$chatMessage = (to, toType, text, from, context) => (dispatch, getState) => {
   const validText = text
     .trim()
     // .replace(CHAT_WHITELIST_REGEX, '')
@@ -65,6 +65,7 @@ export const server$chatMessage = (to, toType, text, from) => (dispatch, getStat
   const message = MessageModel.fromJS({
     timestamp: Date.now(), to, toType, from, text: validText
     , fromLogin
+    , context
   });
 
   switch (toType) {
@@ -85,7 +86,7 @@ export const server$chatMessage = (to, toType, text, from) => (dispatch, getStat
       dispatch(to$({userId: user.id}, chatMessageUser(message)));
       break;
   }
-}
+};
 
 /**
  * Client > Server

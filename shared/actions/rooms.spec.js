@@ -1,5 +1,4 @@
-import {Map, List, fromJS} from 'immutable';
-import {UserModel} from '../models/UserModel';
+import {Map, List} from 'immutable';
 import {RoomModel} from '../models/RoomModel';
 import {
   loginUserFormRequest

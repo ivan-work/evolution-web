@@ -1,15 +1,15 @@
-import {List} from 'immutable';
 import React from 'react';
+import T from "i18n-react";
 import {connect} from 'react-redux';
+import {List} from 'immutable';
 
-import Badge from '@material-ui/core/Badge'
+import Typography from "@material-ui/core/Typography";
 import MUIList from '@material-ui/core/List'
+
 import WhiteTooltip from '../../utils/WhiteTooltip'
+import {IgnoreButton, UnignoreButton} from "../../../components/IgnoreUnignoreTooltip";
 
 import User from "../../utils/User";
-import {IgnoreButton, UnignoreButton} from "../../../components/IgnoreUnignoreTooltip";
-import T from "i18n-react";
-import Typography from "@material-ui/core/Typography";
 
 const withSpectators = connect((state) => {
   const roomId = state.get('room');

@@ -13,9 +13,12 @@ import {
   roomStartVoteActionRequest,
   gameDeployAnimalRequest,
   gameDeployTraitRequest,
-  gameEndTurnRequest
+  gameEndTurnRequest, traitActivateRequest, traitAnswerRequest
 } from '../actions';
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
+import * as tt from "../../models/game/evolution/traitTypes";
+import {loginUserFormRequest} from "../auth";
+import {roomSpectateRequest} from "../rooms";
 
 describe('Game:', function () {
   it('Game start', () => {
@@ -205,8 +208,8 @@ players:
 
     clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A'));
 
-    expect(selectPlayer (User0).hand, 'ServerGame.hand').size(1);
-    expect(selectPlayer (User0).getIn(['hand', 0, 'type'])).equal('CardSharpVision');
+    expect(selectPlayer(User0).hand, 'ServerGame.hand').size(1);
+    expect(selectPlayer(User0).getIn(['hand', 0, 'type'])).equal('CardSharpVision');
     expect(selectPlayer0(User0).hand, 'selectGame0.hand').size(1);
     expect(selectPlayer0(User0).getIn(['hand', 0, 'type'])).equal('CardSharpVision');
     expect(selectPlayer1(User0).hand, 'ClientGame1.hand').size(1);
@@ -285,6 +288,29 @@ players:
     clientStore1.disconnect(SOCKET_DISCONNECT_NOW);
 
     expect(serverStore.getState().get('games')).equal(Map());
+  });
+
+  it(`Spectator shouldn't see question`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+
+    const clientStore2 = mockClientStore().connect(serverStore);
+    clientStore2.dispatch(loginUserFormRequest('/', {id: 'test', login: 'User2'}));
+
+    const gameId = ParseGame(`
+phase: feeding
+deck: 10 camo
+players:
+  - continent: $A0 carn wait
+  - continent: $A1 shell tail fat
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A0', tt.TraitCarnivorous, '$A1'));
+
+    clientStore2.dispatch(roomSpectateRequest(selectGame().roomId));
+    expect(clientStore0.getState().game.question.id, `User0 can't see question`).not.ok;
+    expect(clientStore1.getState().game.question.id, `User1 can see question`).ok;
+    expect(clientStore2.getState().game.question.id, `Spectator can't see question`).not.ok;
   });
 });
 

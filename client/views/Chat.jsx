@@ -105,7 +105,7 @@ export const ChatWindow = compose(
 
 export const ChatMessage = withStyles(messageStyles)(({classes, message, short}) => {
   const {timestamp, from, fromLogin, to, toType} = message;
-  const text = from !== 0 ? message.text : T.translate(message.text);
+  const text = from !== 0 ? message.text : T.translate(message.text, message.context);
   return (
     <Typography className={cn({
       [classes.messageRoot]: true

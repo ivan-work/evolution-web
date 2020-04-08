@@ -26,11 +26,11 @@ import {
   server$takeFoodRequest
   , server$questionPauseTimeout
   , server$questionResumeTimeout
-  , server$autoFoodSharing
+  , server$autoFoodSharing, server$chatMessage, server$roomSelfDestructStart
 } from './actions';
 import {appPlaySound} from '../../client/actions/app';
 import {redirectTo} from '../utils/history';
-import {selectGame, selectUsersInGame} from '../selectors';
+import {selectGame, selectRoom, selectUsersInGame} from '../selectors';
 
 import {
   checkGameDefined
@@ -56,6 +56,7 @@ import {getErrorOfAnimalEating, getErrorOfAnimalEatingFromGame, getErrorOfAnimal
 import PlantModel from "../models/game/evolution/plantarium/PlantModel";
 import PlantVisitor from "../models/game/evolution/plantarium/PlantsVisitor";
 import ParasiteVisitor from "../models/game/evolution/plantarium/ParasiteVisitor";
+import {CHAT_TARGET_TYPE} from "../models/ChatModel";
 
 // region Game
 // region Init
@@ -295,6 +296,8 @@ export const server$gameDeployPlantTraits = (gameId, cardId, traits) => (dispatc
 };
 // endregion
 
+// endregion
+
 // region gameEndTurn
 export const gameEndTurnRequest = () => (dispatch, getState) => dispatch({
   type: 'gameEndTurnRequest'
@@ -470,6 +473,7 @@ export const server$gameCancelTurnTimeout = (gameId) => (dispatch, getState) => 
   // logger.info(`Cancel Timeout:`, `${gameId}`);
   return dispatch(cancelTimeout(makeTurnTimeoutId(gameId)));
 };
+
 // endregion
 
 // region Player Start/Continue
@@ -527,7 +531,6 @@ const server$gameNextPlayer = (gameId, startSearchFromId) => (dispatch, getState
   }
   return !!nextPlayer;
 };
-// endregion
 // endregion
 
 // region EXTINCT
@@ -717,9 +720,13 @@ const client$gameEnd = (gameId) => (dispatch, getState) =>
 export const server$gameEnd = (gameId, finished) => (dispatch, getState) => {
   logger.debug('server$gameEnd', gameId, finished);
   dispatch(server$gameCancelTurnTimeout(gameId));
+
   const game = selectGame(getState, gameId);
+
   dispatch(gameEnd(gameId, game));
   dispatch(client$gameEnd(gameId));
+
+  dispatch(server$roomSelfDestructStart(game.roomId, selectGame(getState, gameId).winnerId));
 
   const gameStats = selectGame(getState, gameId).toDatabase(getState, finished);
   db$gameEnd(gameStats);

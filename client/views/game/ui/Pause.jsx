@@ -21,18 +21,23 @@ export class Pause extends React.Component {
   render() {
     const {isPlayer, wantsPause, gamePaused, $wantsPauseRequest} = this.props;
 
+    const tooltip = (
+      <span>
+        {T.translate(wantsPause ? 'Game.UI.Pause' : 'Game.UI.Unpause')}
+        <br/>
+        {T.translate(!gamePaused ? 'Game.UI.Pause_Desc' : 'Game.UI.Unpause_Desc')}
+      </span>
+    );
+
     return (
-      <Tooltip title={(
+      <Tooltip title={tooltip}>
         <span>
-            {T.translate(wantsPause ? 'Game.UI.Pause' : 'Game.UI.Unpause')}
-          <br/>
-          {T.translate(!gamePaused ? 'Game.UI.Pause_Desc' : 'Game.UI.Unpause_Desc')}
-          </span>)}>
-        <Button size='small'
-                disabled={!isPlayer}
-                onClick={$wantsPauseRequest(!wantsPause)}>
-          {wantsPause ? <IconPlay/> : <IconPause/>}
-        </Button>
+          <Button size='small'
+                  disabled={!isPlayer}
+                  onClick={$wantsPauseRequest(!wantsPause)}>
+            {wantsPause ? <IconPlay/> : <IconPause/>}
+          </Button>
+        </span>
       </Tooltip>
     );
   }

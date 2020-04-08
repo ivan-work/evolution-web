@@ -16,6 +16,7 @@ export class MessageModel extends Record({
   , from: null
   , fromLogin: null
   , text: null
+  , context: void 0
 }) {
   static fromJS(js) {
     return js == null
