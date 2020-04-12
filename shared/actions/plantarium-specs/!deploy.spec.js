@@ -7,7 +7,7 @@ import {
   gameDeployAnimalRequest
 } from '../actions';
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors'
-import {gameDeployPlantTraitRequest, gameDeployTraitRequest} from "../game";
+import {gameDeployTraitRequest} from "../game";
 
 describe('[PLANTARIUM] Deploy:', function () {
   it('Players can deploy plant traits', () => {
@@ -36,7 +36,7 @@ players:
     }, serverStore, clientStore0);
 
     // Deploy PlantTraitAquatic to a plant
-    clientStore0.dispatch(gameDeployPlantTraitRequest(cardIds[1], '$eph'));
+    clientStore0.dispatch(gameDeployTraitRequest(cardIds[1], '$eph'));
 
     expect(findPlant('$eph').traits).size(1);
     expect(findPlant('$eph').traits.first().type).equal(ptt.PlantTraitAquatic);
@@ -67,10 +67,10 @@ players:
       clientStore0.dispatch(gameDeployTraitRequest(cardIds[0], '$A'))
     }, serverStore, clientStore0);
     expectUnchanged(`Can't deploy PlantTraitMycorrhiza to single plant`, () => {
-      clientStore0.dispatch(gameDeployPlantTraitRequest(cardIds[0], '$eph'))
+      clientStore0.dispatch(gameDeployTraitRequest(cardIds[0], '$eph'))
     }, serverStore, clientStore0);
 
-    clientStore0.dispatch(gameDeployPlantTraitRequest(cardIds[0], '$eph', false, '$per'));
+    clientStore0.dispatch(gameDeployTraitRequest(cardIds[0], '$eph', false, '$per'));
 
     expect(findPlant('$eph').traits).size(1);
     expect(findPlant('$eph').traits.first().type).equal(ptt.PlantTraitMycorrhiza);

@@ -21,7 +21,7 @@ const styles = {
     , opacity: .5
     , fill: 'none'
     , ...GameStyles.addTraitColors((colorConfig) => ({
-      stroke: colorConfig.text
+      stroke: colorConfig.stroke
     }))
   }
 };

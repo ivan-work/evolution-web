@@ -184,7 +184,7 @@ const DropAnimalBaseDT = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND
           case PHASE.DEPLOY:
             const {card, alternateTrait} = monitor.getItem();
             const traitData = card.getTraitDataModel(alternateTrait);
-            return !traitData.checkTraitPlacementFails(animal);
+            return !traitData.getErrorOfTraitPlacement(animal);
           case PHASE.REGENERATION:
             return animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION);
           default:
@@ -202,7 +202,7 @@ const DropAnimalBaseDT = DropTarget([DND_ITEM_TYPE.CARD, DND_ITEM_TYPE.FOOD, DND
       case DND_ITEM_TYPE.TRAIT_SHELL: {
         const {model: animal} = props;
         const {trait} = monitor.getItem();
-        return !trait.getDataModel().checkTraitPlacementFails(animal);
+        return !trait.getDataModel().getErrorOfTraitPlacement(animal);
       }
       case DND_ITEM_TYPE.ANIMAL_LINK: {
         const {model: targetAnimal} = props;

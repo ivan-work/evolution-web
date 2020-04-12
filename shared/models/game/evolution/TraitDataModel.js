@@ -10,7 +10,6 @@ const TraitDataModelProps = {
   , defense: false
   , food: 0 // Amount of food required
   , score: 1 // Base score for trait. TODO rewrite every trait to use score only
-  , checkTraitPlacement: null // (animal) => boolean // if trait is allowed to be placed on this animal
   , optional: false // On defense traits, can choose to suicide animal
   // (game, sourceAnimal, trait:TraitModel, targetAnimal/targetTrait/none, attackTrait/none, attackAnimal/none) => should return (dispatch, getState)
 };
@@ -33,7 +32,6 @@ const TraitDataModelProps = {
  * @property {number} [food: 0] - Amount of food required
  * @property {number} [score: 1] - Base score for trait. TODO rewrite every trait to use score only
  * @property {boolean} [optional: false] - On defense traits, can choose to suicide animal instead of using it
- * @property {callback} checkTraitPlacement: null // (animal) => boolean - if trait is allowed to be placed on this animal
  * @property {callback} $checkAction: null // if trait is allowed to be clicked? (game, sourceAnimal) => boolean
  *
  * @property {callback} _getErrorOfUse
@@ -64,24 +62,33 @@ export class TraitDataModel extends Record(TraitDataModelProps) {
     return this._getErrorOfUse(game, animal, trait, ...targets);
   };
 
-  checkTraitPlacementFails_User(animal, userId) {
+  getErrorOfTraitPlacement_User(userId, entityOwnerId) {
     if (this.cardTargetType & CTT_PARAMETER.SELF)
-      if (animal.ownerId !== userId)
+      if (userId !== entityOwnerId)
         return ERRORS.TRAIT_PLACEMENT_CTT_SELF;
     if (this.cardTargetType & CTT_PARAMETER.ENEMY)
-      if (animal.ownerId === userId)
+      if (userId === entityOwnerId)
         return ERRORS.TRAIT_PLACEMENT_CTT_ENEMY;
     return false;
   }
 
-  checkTraitPlacementFails(animal, userId) {
-    if (!(this.cardTargetType & CTT_PARAMETER.LINK) && !this.multiple && animal.hasTrait(this.type, true)) return ERRORS.TRAIT_PLACEMENT_MULTIPLE;
+  getErrorOfTraitPlacement_LinkUser(userId, linkedEntityOwnerId) {
+    if (this.linkTargetType & CTT_PARAMETER.SELF)
+      if (userId !== linkedEntityOwnerId)
+        return ERRORS.TRAIT_PLACEMENT_CTT_SELF;
+    if (this.linkTargetType & CTT_PARAMETER.ENEMY)
+      if (userId === linkedEntityOwnerId)
+        return ERRORS.TRAIT_PLACEMENT_CTT_ENEMY;
+    return false;
+  }
+
+  getErrorOfTraitPlacement(animal) {
+    if (!this.linkTargetType && !this.multiple && animal.hasTrait(this.type, true)) return ERRORS.TRAIT_PLACEMENT_MULTIPLE;
     if (this.hidden) return ERRORS.TRAIT_PLACEMENT_HIDDEN;
-    if (this.checkTraitPlacement && !this.checkTraitPlacement(animal)) return this.type;
     if (animal.hasTrait(tt.TraitRegeneration) && (
       this.food > 0 || animal.traits.filter(t => !t.getDataModel().hidden).size >= 2
     )) return tt.TraitRegeneration;
-    return false;
+    return this._getErrorOfTraitPlacement(animal);
   }
 }
 

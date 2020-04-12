@@ -17,7 +17,7 @@ import GameStyles from "../GameStyles";
 import PlantTrait from "./PlantTrait";
 import {TraitModel} from "../../../../shared/models/game/evolution/TraitModel";
 import {CTT_PARAMETER, TRAIT_ANIMAL_FLAG, TRAIT_TARGET_TYPE} from "../../../../shared/models/game/evolution/constants";
-import {gameDeployPlantTraitRequest} from "../../../../shared/actions/game";
+import {gameDeployTraitRequest} from "../../../../shared/actions/game";
 import cn from "classnames";
 import {AT_DEATH} from "../animations";
 import IconFruit from '@material-ui/icons/Camera';
@@ -127,7 +127,7 @@ const InteractivePlant = compose(
   , connect(({game}, {plant}) => {
     return {game}
   }, {
-    gameDeployPlantTraitRequest
+    gameDeployTraitRequest
     , traitActivateRequest
   })
   , InteractionTarget([DND_ITEM_TYPE.CARD_TRAIT, DND_ITEM_TYPE.PLANT_LINK, DND_ITEM_TYPE.TRAIT], {
@@ -146,14 +146,14 @@ const InteractivePlant = compose(
           if (!(traitData.cardTargetType & CTT_PARAMETER.PLANT)) {
             return false;
           }
-          return !traitData.getErrorOfTraitPlacement(game, plant);
+          return !traitData.getErrorOfTraitPlacement(plant);
         }
         case DND_ITEM_TYPE.PLANT_LINK: {
           const {traitType, plantId, alternateTrait} = item;
-          const sourcePlant = game.getPlant(plantId);
+          const sourceEntity = game.getEntity(plantId);
           return (
-            plant !== sourcePlant
-            && !TraitModel.LinkBetweenCheck(traitType, sourcePlant, plant)
+            plant !== sourceEntity
+            && !TraitModel.LinkBetweenCheck(traitType, sourceEntity, plant)
           );
         }
       }
@@ -162,14 +162,14 @@ const InteractivePlant = compose(
     , onInteract: ({
                      game
                      , plant
-                     , gameDeployPlantTraitRequest
+                     , gameDeployTraitRequest
                      , traitActivateRequest
                    }, {type, item}) => {
       switch (type) {
         case DND_ITEM_TYPE.CARD_TRAIT: {
           const {cardId, traitType, alternateTrait} = item;
           const traitDataModel = TraitModel.new(traitType).getDataModel();
-          if (traitDataModel.cardTargetType & CTT_PARAMETER.LINK) {
+          if (traitDataModel.linkTargetType) {
             return {
               type: DND_ITEM_TYPE.PLANT_LINK
               , item: {
@@ -178,13 +178,13 @@ const InteractivePlant = compose(
               }
             };
           } else {
-            gameDeployPlantTraitRequest(cardId, plant.id, alternateTrait);
+            gameDeployTraitRequest(cardId, plant.id, alternateTrait);
           }
           break;
         }
         case DND_ITEM_TYPE.PLANT_LINK: {
           const {cardId, alternateTrait, plantId} = item;
-          gameDeployPlantTraitRequest(cardId, plantId, alternateTrait, plant.id);
+          gameDeployTraitRequest(cardId, plantId, alternateTrait, plant.id);
           break;
         }
         case DND_ITEM_TYPE.TRAIT: {

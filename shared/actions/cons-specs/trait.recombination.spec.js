@@ -1,13 +1,8 @@
 import {
   gameEndTurnRequest
-  , traitTakeFoodRequest
   , traitActivateRequest
-  , traitAnswerRequest
-  , gameDeployTraitRequest
-  , gameDeployRegeneratedAnimalRequest
 } from '../actions';
 
-import {PHASE} from '../../models/game/GameModel';
 import * as tt from '../../models/game/evolution/traitTypes';
 
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';

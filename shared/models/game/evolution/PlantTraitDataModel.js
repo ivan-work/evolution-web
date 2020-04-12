@@ -9,7 +9,6 @@ const PlantTraitDataModelProps = {
   ...TraitDataModelBaseProps
   , fruit: false
   , coverSlots: 0
-  , _getErrorOfTraitPlacement: () => false
   , _getErrorOfFoodIntake: () => false
   , _getErrorOfUse: () => false
 };
@@ -57,10 +56,10 @@ export default class PlantTraitDataModel extends Record(PlantTraitDataModelProps
     return this._getErrorOfUse(game, plant, trait, ...targets);
   };
 
-  getErrorOfTraitPlacement(game, plant) {
-    if (!(this.cardTargetType & CTT_PARAMETER.LINK) && !this.multiple && plant.hasTrait(this.type, true)) return ERRORS.TRAIT_PLACEMENT_MULTIPLE;
+  getErrorOfTraitPlacement(plant) {
+    if (!this.linkTargetType && !this.multiple && plant.hasTrait(this.type, true)) return ERRORS.TRAIT_PLACEMENT_MULTIPLE;
     if (this.hidden) return ERRORS.TRAIT_PLACEMENT_HIDDEN;
-    return this._getErrorOfTraitPlacement(game, plant);
+    return this._getErrorOfTraitPlacement(plant);
   }
 
   getErrorOfFoodIntake(game, plant, animal) {

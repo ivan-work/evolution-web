@@ -87,7 +87,7 @@ export class PlayerWrapper extends Component {
     };
 
     this.$deployTrait = (card, animal, alternateTrait, component) => {
-      if (card.getTraitDataModel(alternateTrait).cardTargetType & CTT_PARAMETER.LINK) {
+      if (card.getTraitDataModel(alternateTrait).linkTargetType) {
         component.setState({selectLink: {card, animal, alternateTrait}});
       } else {
         $deployTrait(card.id, animal.id, alternateTrait);

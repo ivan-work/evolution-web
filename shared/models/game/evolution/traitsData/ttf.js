@@ -105,7 +105,8 @@ export const TraitShell = {
 
 export const TraitTrematode = {
   type: tt.TraitTrematode
-  , cardTargetType: CARD_TARGET_TYPE.LINK_ENEMY
+  , cardTargetType: CARD_TARGET_TYPE.ANIMAL_ENEMY
+  , linkTargetType: CARD_TARGET_TYPE.ANIMAL_ENEMY
   , food: 1
 };
 
@@ -134,7 +135,11 @@ export const TraitThermosynthesis = {
   type: tt.TraitThermosynthesis
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
-  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitPhotosynthesis, true)
+  , _getErrorOfTraitPlacement: (animal) => {
+    if (animal.hasTrait(tt.TraitPhotosynthesis, true)) return tt.TraitThermosynthesis;
+    return false;
+  }
+  , replaceOnPlantarium: tt.TraitSpecialization
   , cooldowns: fromJS([
     [tt.TraitThermosynthesis, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
@@ -158,7 +163,11 @@ export const TraitPhotosynthesis = {
   type: tt.TraitPhotosynthesis
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
-  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitThermosynthesis, true)
+  , _getErrorOfTraitPlacement: (animal) => {
+    if (animal.hasTrait(tt.TraitThermosynthesis, true)) return tt.TraitPhotosynthesis;
+    return false;
+  }
+  , replaceOnPlantarium: tt.TraitSpecialization
   , cooldowns: fromJS([
     [tt.TraitPhotosynthesis, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
@@ -259,5 +268,6 @@ export const TraitAnglerfish = {
 
 export const TraitSpecialization = {
   type: tt.TraitSpecialization
-  , cardTargetType: CARD_TARGET_TYPE.LINK_SELF_PLANT
+  , cardTargetType: CARD_TARGET_TYPE.ANIMAL_SELF
+  , linkTargetType: CARD_TARGET_TYPE.PLANT
 };

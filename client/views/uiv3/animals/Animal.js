@@ -223,7 +223,10 @@ export const InteractiveAnimal = compose(
               if (!(traitData.cardTargetType & CTT_PARAMETER.ANIMAL)) {
                 return false;
               }
-              return !traitData.checkTraitPlacementFails_User(animal, userId) && !traitData.checkTraitPlacementFails(animal);
+              return (
+                !traitData.getErrorOfTraitPlacement_User(userId, animal.ownerId)
+                && !traitData.getErrorOfTraitPlacement(animal)
+              );
             case PHASE.REGENERATION:
               return animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION);
             default:
@@ -259,7 +262,10 @@ export const InteractiveAnimal = compose(
         }
         case DND_ITEM_TYPE.TRAIT_SHELL: {
           const {trait} = item;
-          return !trait.getDataModel().checkTraitPlacementFails_User(animal, userId) && !trait.getDataModel().checkTraitPlacementFails(animal);
+          return (
+            !trait.getDataModel().getErrorOfTraitPlacement_User(userId, animal.ownerId)
+            && !trait.getDataModel().getErrorOfTraitPlacement(userId, animal)
+          );
         }
         case DND_ITEM_TYPE.COVER: {
           const {sourceId} = item;
@@ -298,12 +304,20 @@ export const InteractiveAnimal = compose(
           switch (game.status.phase) {
             case PHASE.DEPLOY:
               const traitDataModel = TraitModel.new(traitType).getDataModel();
-              if (traitDataModel.cardTargetType & CTT_PARAMETER.LINK) {
+              if (traitDataModel.linkTargetType && traitDataModel.linkTargetType & CTT_PARAMETER.ANIMAL) {
                 return {
                   type: DND_ITEM_TYPE.ANIMAL_LINK
                   , item: {
                     ...item
                     , animalId: animal.id
+                  }
+                };
+              } else if (traitDataModel.linkTargetType && traitDataModel.linkTargetType & CTT_PARAMETER.PLANT) {
+                return {
+                  type: DND_ITEM_TYPE.PLANT_LINK
+                  , item: {
+                    ...item
+                    , plantId: animal.id
                   }
                 };
               } else {

@@ -14,7 +14,6 @@ export const appChangeLanguage = (langCode) => (dispatch) => {
         type: 'appChangeLanguage'
         , data: langCode
       });
-      console.log('texts SET', !!RootService.root);
       RootService.rootPromise.then((root) => deepForceUpdate(root));
     });
 };

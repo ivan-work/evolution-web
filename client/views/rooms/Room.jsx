@@ -53,8 +53,14 @@ export class Room extends React.PureComponent {
   renderUser = ({user}) => {
     const {roomKickRequest, roomBanRequest, isHost, userId} = this.props;
     return (
-      <UserVariants.listItemWithActions user={user} userId={userId} isHost={isHost} roomKickRequest={roomKickRequest}
-                                        roomBanRequest={roomBanRequest} />
+      <UserVariants.listItemWithActions
+        showAuth
+        user={user}
+        userId={userId}
+        isHost={isHost}
+        roomKickRequest={roomKickRequest}
+        roomBanRequest={roomBanRequest}
+      />
     );
   };
 
@@ -64,7 +70,7 @@ export class Room extends React.PureComponent {
       <UserVariants.listItem user={user} actions={
         user.id !== userId && isHost && <ListItemSecondaryAction>
           <Tooltip title={T.translate('App.Room.$Unban')}>
-            <IconButton onClick={() => roomUnbanRequest(user.id)}><IconUnbanUser /></IconButton>
+            <IconButton onClick={() => roomUnbanRequest(user.id)}><IconUnbanUser/></IconButton>
           </Tooltip>
         </ListItemSecondaryAction>}
       />);
@@ -74,20 +80,20 @@ export class Room extends React.PureComponent {
     const {classes, room} = this.props;
     return (
       <Grid container direction='column' wrap='nowrap' item className={classes.root}>
-        <RoomStartVotingDialog />
+        <RoomStartVotingDialog/>
         <Typography variant='h3'>
           {/*{T.translate('App.Room.Room')}&nbsp;«{room.name}»&nbsp;*/}
-          <RoomStartVotingTimer room={room} />
+          <RoomStartVotingTimer room={room}/>
         </Typography>
         <Grid container className={classes.container} spacing={1}>
           <Grid container item className={classes.column} xs={4}>
             <Paper className={classes.columnPaper + ' ' + classes.columnSettings}>
-              <RoomSettings roomId={room.id} />
+              <RoomSettings roomId={room.id}/>
             </Paper>
           </Grid>
           <Grid container item className={classes.column} xs={4}>
             <Paper className={classes.columnPaper}>
-              <Chat chatTargetType='ROOM' roomId={room.id} />
+              <Chat chatTargetType='ROOM' roomId={room.id}/>
             </Paper>
           </Grid>
           <Grid container item className={classes.column} xs={4}>

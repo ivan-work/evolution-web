@@ -8,7 +8,7 @@ import {
   traitAnswerRequest,
   traitTakeFoodRequest
 } from "../trait";
-import {gameDeployPlantTraitRequest, gameDeployTraitRequest, gameEndTurnRequest} from "../game";
+import {gameDeployTraitRequest, gameEndTurnRequest} from "../game";
 import * as tt from "../../models/game/evolution/traitTypes";
 import {TRAIT_ANIMAL_FLAG} from "../../models/game/evolution/constants";
 import {PHASE} from "../../models/game/GameModel";
@@ -38,10 +38,10 @@ players:
 
       // expectUnchanged(`Can't deploy ParasiticPlant to animal`, () => {
       // }, serverStore, clientStore0);
-      expectError(`Can't deploy ParasiticPlant to animal`, `wrong target type`, () => {
+      expectError(`Can't deploy ParasiticPlant to animal`, `No entity found`, () => {
         clientStore0.dispatch(gameDeployTraitRequest(cardIds[0], '$A'))
       });
-      clientStore0.dispatch(gameDeployPlantTraitRequest(cardIds[0], '$eph'));
+      clientStore0.dispatch(gameDeployTraitRequest(cardIds[0], '$eph'));
       expect(selectGame().plants, 'game.plants.size').size(3);
       expect(findPlant('$eph').traits).size(1);
       expect(findPlant('$eph').traits.first().type).equal(ptt.PlantTraitParasiticLink);

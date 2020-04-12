@@ -12,7 +12,6 @@ import {
   , gameDeployAnimalFromHand
   , gameDeployAnimalFromDeck
   , gameDeployTrait
-  , gameDeployPlantTraits
   , gameDeployRegeneratedAnimal
   , gameEndTurn
   , gamePlayerLeft
@@ -68,7 +67,6 @@ export const reducer = createReducer(null, {
   , gameDeployAnimalFromHand
   , gameDeployAnimalFromDeck
   , gameDeployTrait
-  , gameDeployPlantTraits
   , gameDeployRegeneratedAnimal
   , gameEndTurn
   , gamePlayerLeft

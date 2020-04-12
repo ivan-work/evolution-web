@@ -23,3 +23,6 @@ export const CardProteinRichAndSwimming = makeCard(ptt.PlantTraitProteinRich, tt
 export const CardTreeAndCarnivorous = makeCard(ptt.PlantTraitTree, tt.TraitCarnivorous);
 export const CardParasiticPlant = makeCard(ptt.PlantTraitParasiticPlant);
 export const CardSpikyAndCommunication = makeCard(ptt.PlantTraitSpiky, tt.TraitCommunication);
+
+// For testing
+export const CardSpecialization = makeCard(tt.TraitSpecialization);

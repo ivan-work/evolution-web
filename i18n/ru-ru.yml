@@ -235,6 +235,7 @@ Game:
     TraitThermosynthesis     : Термосинтез
     TraitPhotosynthesis      : Фотосинтез
     TraitSpecialization      : Специализация
+    TraitSpecializationSource: Специализация
 
     TraitAedificator         : Эдификатор
     TraitCnidocytes          : Стрекательные клетки

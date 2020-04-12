@@ -174,6 +174,18 @@ export const getErrorOfAnimalEatingFromPlantNoCD = (game, animal, plant) => {
   if (plant.getFood() < 1) return ERRORS.PLANT_FOOD;
   if (animal.hasTrait(tt.TraitCarnivorous) && !plant.isFruit()) return ERRORS.PLANT_FOOD_FRUIT;
 
+  const traitSpecialization = animal.hasTrait(tt.TraitSpecialization);
+  if (traitSpecialization) {
+    if (animal.traits.filter(trait => !trait.disabled && trait.type === tt.TraitSpecialization).size > 1) {
+      return tt.TraitSpecialization;
+    }
+    if (plant.id !== traitSpecialization.linkAnimalId) {
+      return tt.TraitSpecialization;
+    } else {
+      return getErrorOfAnimalEating(game, animal)
+    }
+  }
+
   return (
     getErrorOfAnimalEating(game, animal)
     || getErrorInList(plant.getTraits(), trait => trait.getDataModel().getErrorOfFoodIntake(game, plant, animal))
@@ -216,6 +228,11 @@ export const getErrorOfPlantCounterAttack = (game, animal, plant) => {
   const defenses = getStaticDefenses(game, plant, animal);
   if (defenses.length > 1) return ERRORS.TRAIT_ATTACK_TOO_MUCH_DEFENSES;
 
+  const traitSpecialization = animal.hasTrait(tt.TraitSpecialization);
+  if (traitSpecialization && traitSpecialization.linkAnimalId === plant.id) {
+    return tt.TraitSpecialization;
+  }
+
   return getErrorOfPlantAttackBase(game, animal, plant);
 };
 
@@ -225,7 +242,7 @@ export const checkAnimalCanTakeShellFails = (game, animal) => {
   if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.TAKE_SHELL, animal.ownerId, animal.id)) return ERRORS.COOLDOWN;
   if (animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) return ERRORS.TRAIT_REGENERATION_DEAD;
   const traitRegeneration = animal.hasTrait(tt.TraitRegeneration, true);
-  if (traitRegeneration && !traitRegeneration.getDataModel().checkTraitPlacement(animal)) return ERRORS.TRAIT_REGENERATION_TRAIT_MAX;
+  if (traitRegeneration && traitRegeneration.getDataModel()._getErrorOfTraitPlacement(animal)) return ERRORS.TRAIT_REGENERATION_TRAIT_MAX;
   return false;
 };
 

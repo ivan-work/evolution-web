@@ -10,6 +10,7 @@ import {CardModel} from './CardModel';
 import {AnimalModel} from './evolution/AnimalModel';
 import {parsePlantTrait, parseTrait, TraitModel} from './evolution/TraitModel';
 import * as cardsData from './evolution/cards/index';
+import * as tt from './evolution/traitTypes';
 import * as pt from './evolution/plantarium/plantTypes';
 import * as ptt from './evolution/plantarium/plantTraitTypes';
 import {TraitNeoplasm} from './evolution/traitsData';

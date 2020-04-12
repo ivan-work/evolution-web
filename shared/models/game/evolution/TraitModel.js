@@ -9,11 +9,6 @@ import {TRAIT_ANIMAL_FLAG, TRAIT_TARGET_TYPE} from './constants';
 
 import {TraitDataModel} from './TraitDataModel';
 import PlantTraitDataModel from "./PlantTraitDataModel";
-import {
-  checkTraitActivation_Animal,
-  checkTraitActivation_Trait,
-  checkTraitActivation_TwoTraits
-} from "../../../actions/trait.checks";
 import {throwError} from "../../../actions/checks";
 import ERRORS from "../../../actions/errors";
 import invariant from "invariant";

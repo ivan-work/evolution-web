@@ -78,9 +78,11 @@ export const TraitNeoplasm = {
 
 export const TraitRegeneration = {
   type: tt.TraitRegeneration
-  , checkTraitPlacement: (animal) => (animal.traits.filter(t => !t.hidden).size < 2
-    && animal.traits.every(t => t.getDataModel().food === 0)
-  )
+  , _getErrorOfTraitPlacement: (animal) => {
+    if (animal.traits.filter(t => !t.hidden).size >= 2) return ERRORS.TRAIT_REGENERATION_TRAIT_MAX;
+    if (!animal.traits.every(t => t.getDataModel().food === 0)) return tt.TraitRegeneration;
+    return false;
+  }
 };
 
 export const TraitCnidocytes = {
@@ -111,7 +113,8 @@ export const TraitCnidocytes = {
 export const TraitRecombination = {
   type: tt.TraitRecombination
   , targetType: TRAIT_TARGET_TYPE.TWO_TRAITS
-  , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
+  , cardTargetType: CARD_TARGET_TYPE.ANIMAL_SELF
+  , linkTargetType: CARD_TARGET_TYPE.ANIMAL_SELF
   , playerControllable: true
   , cooldowns: fromJS([
     [tt.TraitRecombination, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]

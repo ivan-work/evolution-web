@@ -251,9 +251,9 @@ export const server$gameDeployAnimalFromDeck = (gameId, sourceAnimal, onCreateCa
 // endregion
 
 // region gameDeployTrait
-export const gameDeployTraitRequest = (cardId, animalId, alternateTrait, linkId) => (dispatch, getState) => dispatch({
+export const gameDeployTraitRequest = (cardId, entityId, alternateTrait, linkId) => (dispatch, getState) => dispatch({
   type: 'gameDeployTraitRequest'
-  , data: {gameId: getState().get('game').id, cardId, animalId, alternateTrait, linkId}
+  , data: {gameId: getState().get('game').id, cardId, entityId, alternateTrait, linkId}
   , meta: {server: true}
 });
 
@@ -268,29 +268,6 @@ export const server$gameDeployTrait = (gameId, cardId, traits) => (dispatch, get
   dispatch(gameDeployTrait(gameId, cardId, traits));
   dispatch(Object.assign(
     gameDeployTrait(gameId, cardId, traits.map(trait => trait.toOthers().toClient()))
-    , {meta: {clientOnly: true, users: selectUsersInGame(getState, gameId)}}
-  ));
-};
-// endregion
-
-// region gameDeployPlantTrait
-export const gameDeployPlantTraitRequest = (cardId, plantId, alternateTrait, linkId) => (dispatch, getState) => dispatch({
-  type: 'gameDeployPlantTraitRequest'
-  , data: {gameId: getState().get('game').id, cardId, plantId, alternateTrait, linkId}
-  , meta: {server: true}
-});
-
-export const gameDeployPlantTraits = (gameId, cardId, traits) => ({
-  type: 'gameDeployPlantTraits'
-  , data: {gameId, cardId, traits}
-});
-
-export const server$gameDeployPlantTraits = (gameId, cardId, traits) => (dispatch, getState) => {
-  logger.verbose('server$gameDeployPlantTraits:', gameId, cardId
-    , ...traits.map(t => `${t.type}(${t.hostAnimalId}${t.linkAnimalId ? (`-` + t.linkAnimalId) : ''})`));
-  dispatch(gameDeployPlantTraits(gameId, cardId, traits));
-  dispatch(Object.assign(
-    gameDeployPlantTraits(gameId, cardId, traits.map(trait => trait.toOthers().toClient()))
     , {meta: {clientOnly: true, users: selectUsersInGame(getState, gameId)}}
   ));
 };
@@ -754,12 +731,13 @@ export const gameClientToServer = {
     dispatch(server$gameDeployAnimalFromHand(gameId, userId, animal, parseInt(animalPosition), cardId));
     dispatch(server$playerActed(gameId, userId));
   }
-  , gameDeployTraitRequest: ({gameId, cardId, animalId, alternateTrait, linkId}, {userId}) => (dispatch, getState) => {
+  , gameDeployTraitRequest: ({gameId, cardId, entityId, alternateTrait, linkId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
     checkGamePhase(game, PHASE.DEPLOY);
     checkPlayerCanAct(game, userId);
+
 
     const card = checkPlayerHasCard(game, userId, cardId);
     const traitData = card.getTraitDataModel(alternateTrait);
@@ -769,98 +747,68 @@ export const gameClientToServer = {
         , card.trait2
         , traitData);
     }
-    if (!(traitData.cardTargetType & CTT_PARAMETER.ANIMAL)) {
-      throw new ActionCheckError(`CheckCardTargetType(${game.id})`, 'Player#%s selected wrong target type', playerId);
+
+    let entity;
+    let entityOwnerId;
+
+    if (traitData.cardTargetType & CTT_PARAMETER.ANIMAL) {
+      entity = game.locateAnimal(entityId);
+      if (entity) {
+        entityOwnerId = entity.ownerId;
+      }
+    } else if (traitData.cardTargetType & CTT_PARAMETER.PLANT) {
+      entity = game.getPlant(entityId);
     }
 
-    const animal = game.locateAnimal(animalId);
-    if (!animal) {
-      throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Player#%s doesn\'t have Animal#%s', playerId, animalId);
-    }
-    const playerId = animal.ownerId;
-
-    const linkedAnimal = game.locateAnimal(linkId, playerId);
-
-    if (!!(traitData.cardTargetType & CTT_PARAMETER.LINK)) {
-      if (animal === linkedAnimal)
-        throw new ActionCheckError(`CheckCardTargetType(${game.id})`, 'Player#%s want to link Animal#%s to itself', playerId, linkedAnimal);
-      if (!linkedAnimal)
-        throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Player#%s doesn\'t have linked Animal#%s', playerId, linkedAnimal);
+    if (!entity) {
+      throw new ActionCheckError(`No entity found(${game.id})`, `No entity found(${game.id}): ${entityId}`);
     }
 
-    if (traitData.checkTraitPlacementFails_User(animal, userId))
-      throw new ActionCheckError(`gameDeployTraitRequest(${game.id})`, `Trait(%s) failed checkTraitPlacement on Animal(%s)`, traitData.type, animal.id);
+    throwError(traitData.getErrorOfTraitPlacement(entity));
+    throwError(traitData.getErrorOfTraitPlacement_User(userId, entityOwnerId));
 
-    if (traitData.checkTraitPlacementFails(animal))
-      throw new ActionCheckError(`gameDeployTraitRequest(${game.id})`, `Trait(%s) failed checkTraitPlacement on Animal(%s)`, traitData.type, animal.id);
+    let linkedEntity;
+    let linkedEntityOwnerId;
+    if (traitData.linkTargetType) {
+      if (traitData.linkTargetType & CTT_PARAMETER.PLANT) {
+        linkedEntity = game.getPlant(linkId);
+      } else if (traitData.linkTargetType & CTT_PARAMETER.ANIMAL) {
+        linkedEntity = game.locateAnimal(linkId);
+        if (linkedEntity) {
+          linkedEntityOwnerId = linkedEntity.ownerId;
+        }
+      }
 
-    // TODO: refactor.
-    // This one is bad because it attaches and links traits only for reducer to find their hosts.
+      if (!linkedEntity)
+        throw new ActionCheckError(`No entity found(${game.id})`, `No entity found(${game.id}): ${linkId}`);
+      if (entity === linkedEntity)
+        throw new ActionCheckError(`CheckCardTargetType(${game.id})`, 'Player want to link Animal#%s to itself', linkedEntity);
+      throwError(traitData.getErrorOfTraitPlacement(linkedEntity));
+      throwError(traitData.getErrorOfTraitPlacement_LinkUser(userId, linkedEntityOwnerId));
+    }
+
     let traits = [];
-    if (!(traitData.cardTargetType & CTT_PARAMETER.LINK)) {
-      traits = [TraitModel.new(traitData.type).attachTo(animal)];
-    } else {
-      if (traitData.checkTraitPlacementFails(linkedAnimal))
-        throw new ActionCheckError(`gameDeployTraitRequest(${game.id})`, `Trait(%s) failed checkTraitPlacement on Animal(%s)`, traitData.type, animal.id);
+    if (traitData.linkTargetType) {
       traits = TraitModel.LinkBetween(
         traitData.type
-        , animal
-        , linkedAnimal
+        , entity
+        , linkedEntity
       );
+    } else if (traitData.cardTargetType & CTT_PARAMETER.PARASITE) {
+      const linkedPlant = PlantModel.new(pt.PlantParasite);
+      dispatch(server$gameDeployPlant(gameId, linkedPlant));
+      traits = TraitModel.LinkBetween(
+        ptt.PlantTraitParasiticLink
+        , linkedPlant
+        , entity
+      );
+    } else{
+      traits = [TraitModel.new(traitData.type).attachTo(entity)];
     }
 
     dispatch(server$gameDeployTrait(gameId, cardId, traits));
     dispatch(server$playerActed(gameId, userId));
   }
-  , gameDeployPlantTraitRequest: ({gameId, cardId, plantId, alternateTrait, linkId}, {userId}) =>
-    (dispatch, getState) => {
-      const game = selectGame(getState, gameId);
-      checkGameDefined(game);
-      checkGameHasUser(game, userId);
-      checkGamePhase(game, PHASE.DEPLOY);
-      checkPlayerCanAct(game, userId);
-
-      const card = checkPlayerHasCard(game, userId, cardId);
-      const traitData = card.getTraitDataModel(alternateTrait);
-      if (!traitData) {
-        throw new ActionCheckError(`checkCardHasTrait@Game(${game.id})`, 'Card(%s;%s) doesn\'t have trait (%s)'
-          , card.trait1
-          , card.trait2
-          , traitData);
-      }
-      if (!(traitData.cardTargetType & CTT_PARAMETER.PLANT)) {
-        throw new ActionCheckError(`CheckCardTargetType(${game.id})`, 'Player#%s selected wrong target type', userId, traitData.type, traitData.cardTargetType);
-      }
-
-      const plant = checkGameHasPlant(game, plantId);
-
-      throwError(traitData.getErrorOfTraitPlacement(game, plant));
-
-      let traits = [];
-      if (!!(traitData.cardTargetType & CTT_PARAMETER.LINK)) {
-        const linkedPlant = checkGameHasPlant(game, linkId);
-        if (plant === linkedPlant)
-          throw new ActionCheckError(`CheckCardTargetType(${game.id})`, 'User#%s want to link Plant#%s to itself', userId, plant);
-        throwError(traitData.getErrorOfTraitPlacement(game, linkedPlant));
-        traits = TraitModel.LinkBetween(
-          traitData.type
-          , plant
-          , linkedPlant
-        );
-      } else if (!!(traitData.cardTargetType & CTT_PARAMETER.PARASITE)) {
-        const linkedPlant = PlantModel.new(pt.PlantParasite);
-        dispatch(server$gameDeployPlant(gameId, linkedPlant));
-        traits = TraitModel.LinkBetween(
-          ptt.PlantTraitParasiticLink
-          , linkedPlant
-          , plant
-        );
-      } else {
-        traits = [TraitModel.new(traitData.type).set('hostAnimalId', plant.id)]; // Yes, yes, I know it's not animal (-__- )
-      }
-      dispatch(server$gameDeployPlantTraits(gameId, cardId, traits));
-      dispatch(server$playerActed(gameId, userId));
-    }
   , gameSetUserTimedOutRequest: ({gameId}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
@@ -920,8 +868,6 @@ export const gameServerToClient = {
     gameDeployAnimalFromDeck(gameId, AnimalModel.fromServer(animal), sourceAid)
   , gameDeployTrait: ({gameId, cardId, traits}) =>
     gameDeployTrait(gameId, cardId, traits.map(trait => TraitModel.fromServer(trait)))
-  , gameDeployPlantTraits: ({gameId, cardId, traits}) =>
-    gameDeployPlantTraits(gameId, cardId, traits.map(trait => TraitModel.fromServer(trait)))
   , gameDeployRegeneratedAnimal: ({gameId, userId, cardId, animalId, source}) =>
     gameDeployRegeneratedAnimal(gameId, userId, cardId, animalId, source)
   , gameAddTurnTimeout: ({gameId, turnStartTime, turnDuration}) =>

@@ -4,7 +4,7 @@ import * as tt from '../../models/game/evolution/traitTypes';
 import * as ptt from '../../models/game/evolution/plantarium/plantTraitTypes';
 import {makeGameSelectors} from '../../selectors'
 import {server$autoFoodSharing, traitActivateRequest, traitTakeFoodRequest} from "../trait";
-import {gameEndTurnRequest} from "../game";
+import {gameDeployTraitRequest, gameEndTurnRequest} from "../game";
 import ERRORS from "../errors";
 
 describe('[PLANTARIUM] Trait changes:', function () {
@@ -130,6 +130,31 @@ players:
     expect(findAnimal('$A').getFood(), '$A.getFood()').equal(2);
     expect(findAnimal('$B').getFood(), '$B.getFood()').equal(0);
     expect(findAnimal('$W').getFood(), '$W.getFood()').equal(1);
+  });
+
+  it('[PLANTARIUM] TraitSpecialization', function () {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+phase: deploy
+plants: carn $carn + aqua tree, eph $eph +++ 
+players:
+  - continent: $A fat fat, $W wait +
+    hand: special
+    `);
+    const {selectGame, selectCard, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A', false, '$carn'));
+
+    expectError(`Cannot eat from $eph`, tt.TraitSpecialization, () => {
+      clientStore0.dispatch(traitTakeFoodRequest('$A', '$eph'));
+    });
+
+    clientStore0.dispatch(traitTakeFoodRequest('$A', '$carn'));
+
+    expect(findAnimal('$A'), '$A is OK').ok;
+    expect(findAnimal('$A').getFood(), '$A got food').equal(1);
   });
 });
 

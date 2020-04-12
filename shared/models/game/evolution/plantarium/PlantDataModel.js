@@ -27,11 +27,4 @@ export default class PlantDataModel extends Record({
     const plantData = plantTypeData[plantType];
     return new PlantDataModel(plantData);
   }
-
-  // getErrorOfPlacement(plant) {
-  //   if (!plant) return TRAIT_DATA_PLACEMENT_ERRORS.NO_HOST;
-  //   if (!(this.cardTargetType & CTT_PARAMETER.LINK) && plant.hasTrait(this.type, true)) return TRAIT_DATA_PLACEMENT_ERRORS.MULTIPLE;
-  //   // if (this.checkTraitPlacement && !this.checkTraitPlacement(animal)) return this.type;
-  //   return false;
-  // }
 }

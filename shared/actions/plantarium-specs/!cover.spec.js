@@ -5,7 +5,7 @@ import * as ptt from '../../models/game/evolution/plantarium/plantTraitTypes';
 
 import {gameEndTurnRequest, traitActivateRequest} from '../actions';
 import {makeGameSelectors} from '../../selectors'
-import {gameDeployPlantTraitRequest} from "../game";
+import {gameDeployTraitRequest} from "../game";
 import ERRORS from "../errors";
 import {traitTakeCoverRequest, traitTakeFoodRequest} from "../trait";
 import {TRAIT_ANIMAL_FLAG} from "../../models/game/evolution/constants";
@@ -74,7 +74,7 @@ players:
     expect(findPlant('$suc').covers, 'succ covers').equal(1);
 
     const User0 = findPlayerByIndex(0);
-    clientStore0.dispatch(gameDeployPlantTraitRequest(findCard(User0, ptt.PlantTraitSpiky), '$suc'));
+    clientStore0.dispatch(gameDeployTraitRequest(findCard(User0, ptt.PlantTraitSpiky), '$suc'));
 
     expect(findPlant('$suc').covers, 'deploy covers').equal(1);
     expect(findPlant('$suc').coverSlots, 'deploy cover slots').equal(4);

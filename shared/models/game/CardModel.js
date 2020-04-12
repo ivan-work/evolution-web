@@ -1,8 +1,6 @@
 import {Record, Range} from 'immutable';
 import uuid from 'uuid';
 
-import {CARD_TARGET_TYPE} from './evolution/constants';
-
 import {getTraitDataModel} from './evolution/TraitModel'
 import * as cardsData from './evolution/cards/index'
 

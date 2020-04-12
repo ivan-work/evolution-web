@@ -9,6 +9,7 @@ import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import Tooltip from "@material-ui/core/Tooltip/Tooltip";
 import T from "i18n-react";
 
+import PersonIcon from '@material-ui/icons/Person';
 import IconButton from "@material-ui/core/IconButton";
 import IconKickUser from '@material-ui/icons/Clear';
 import IconBanUser from '@material-ui/icons/Block';
@@ -25,23 +26,30 @@ const cnUser = (user, className = '') => cn(
 );
 
 export const UserVariants = {
-  simple: ({user, login, className}) => <span className={cnUser(user, className)}>{login || user.login}</span>
-  , typography: ({user, login, className}) => (
+  simple: ({user, login, showAuth, className}) => (
+    <span className={cnUser(user, className)}>
+      {showAuth && user.authType && (<PersonIcon className='icon'/>)}{login || user.login}
+    </span>
+  )
+  , typography: ({user, login, showAuth, className}) => (
     <Typography display='inline'
                 className={cnUser(user, className)}
                 color='inherit'
                 component='span'>
-      {login || user.login}
+      {showAuth && user.authType && (<PersonIcon className='icon'/>)}{login || user.login}
     </Typography>
   )
-  , listItem: ({user, login, actions}) => (
-    <ListItem key={user.id} className={cnUser(user)} style={{width: 'auto'}}>
-      <ListItemText primary={login || user.login}/>
-      {!!actions ? actions : null}
-    </ListItem>
-  )
-  , listItemWithActions: ({user, userId, isHost, roomKickRequest, roomBanRequest}) => (
-    <UserVariants.listItem user={user} actions={
+  , listItem: (props) => {
+    const {user, login, actions} = props;
+    return (
+      <ListItem key={user.id} className={cnUser(user)} style={{width: 'auto'}}>
+        <ListItemText primary={UserVariants.simple(props)}/>
+        {!!actions ? actions : null}
+      </ListItem>
+    )
+  }
+  , listItemWithActions: ({user, userId, isHost, roomKickRequest, roomBanRequest, ...props}) => (
+    <UserVariants.listItem user={user} {...props} actions={
       user.id !== userId && isHost && <ListItemSecondaryAction>
         <Tooltip title={T.translate('App.Room.$Kick')}>
           <IconButton onClick={() => roomKickRequest(user.id)}><IconKickUser/></IconButton>

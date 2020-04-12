@@ -9,6 +9,7 @@ const defaultWidth = 120;
 const TraitGeneralColors = {
   Parasitic: {
     text: '#909'
+    , stroke: '#909'
     , textActive: '#603'
     , fillActive: '#FCF'
     , textActiveHover: '#FEE'
@@ -40,6 +41,7 @@ const TraitGeneralColors = {
 const defaultColorConfig = {
   text: TraitGeneralColors.text
   , fill: TraitGeneralColors.fill
+  , stroke: TraitGeneralColors.text
   , textActive: TraitGeneralColors.textActive
   , fillActive: TraitGeneralColors.fillActive
   , textActiveHover: TraitGeneralColors.textActiveHover
@@ -63,17 +65,21 @@ const TraitColors = {
   , [tt.TraitNeoplasm]: TraitGeneralColors.Parasitic
   , [tt.TraitCommunication]: {
     text: '#99F'
+    , stroke: '#99F'
   }
   , [tt.TraitCooperation]: {
     text: '#090'
+    , stroke: '#090'
   }
   , [tt.TraitSymbiosis]: {
     text: '#F06'
+    , stroke: '#F06'
     , textSource: '#FFF'
     , fillSource: '#FAA'
   }
   , [tt.TraitRecombination]: {
     text: '#3AA'
+    , stroke: '#3AA'
   }
   , [tt.TraitFatTissue]: {
     text: TraitGeneralColors.Fat
@@ -90,6 +96,11 @@ const TraitColors = {
   , [ptt.PlantTraitHiddenCarnivorous]: TraitGeneralColors.Attack
   , [ptt.PlantTraitMycorrhiza]: {
     text: '#396'
+    , stroke: '#396'
+  }
+  , [tt.TraitSpecialization]: {
+    text: '#396'
+    , stroke: 'rgba(111, 211, 111, .25)'
   }
 };
 TraitColors.Trait = {}; // default mapping

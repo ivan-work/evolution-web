@@ -130,14 +130,18 @@ export const TraitMimicry = {
 
 export const TraitScavenger = {
   type: tt.TraitScavenger
-  , checkTraitPlacement: (animal) => !animal.hasTrait(tt.TraitCarnivorous, true)
+  , _getErrorOfTraitPlacement: (animal) => {
+    if (animal.hasTrait(tt.TraitCarnivorous, true)) return tt.TraitScavenger;
+    return false;
+  }
 };
 
 //
 
 export const TraitSymbiosis = {
   type: tt.TraitSymbiosis
-  , cardTargetType: CARD_TARGET_TYPE.LINK_SELF_ONEWAY
+  , cardTargetType: CARD_TARGET_TYPE.ANIMAL_SELF
+  , linkTargetType: CARD_TARGET_TYPE.ANIMAL_SELF
 };
 
 export const TraitPiracy = {
@@ -283,7 +287,8 @@ export const TraitPoisonous = {
 export const TraitCooperation = {
   type: tt.TraitCooperation
   , targetType: TRAIT_TARGET_TYPE.NONE
-  , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
+  , cardTargetType: CARD_TARGET_TYPE.ANIMAL_SELF
+  , linkTargetType: CARD_TARGET_TYPE.ANIMAL_SELF
   , playerControllable: true
   , cooldowns: fromJS([
     [tt.TraitCooperation, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
@@ -326,7 +331,8 @@ export const TraitCooperation = {
 export const TraitCommunication = {
   type: tt.TraitCommunication
   , targetType: TRAIT_TARGET_TYPE.NONE
-  , cardTargetType: CARD_TARGET_TYPE.LINK_SELF
+  , cardTargetType: CARD_TARGET_TYPE.ANIMAL_SELF
+  , linkTargetType: CARD_TARGET_TYPE.ANIMAL_SELF
   , playerControllable: true
   , cooldowns: fromJS([
     [tt.TraitCommunication, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
