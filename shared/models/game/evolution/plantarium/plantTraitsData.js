@@ -20,6 +20,7 @@ import {getFeedingCooldownList, server$startCooldownList, server$traitStartCoold
 export const PlantTraitHiddenCarnivorous = Object.assign({}, TraitCarnivorous, {
   type: ptt.PlantTraitHiddenCarnivorous
   , hidden: true
+  , playerControllable: true
   , cooldowns: fromJS([
     [ptt.PlantTraitHiddenCarnivorous, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]

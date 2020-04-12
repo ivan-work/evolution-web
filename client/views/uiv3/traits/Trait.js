@@ -92,7 +92,7 @@ export class TraitBase extends React.PureComponent {
       , trait.type
       , {
         canStart
-        , value: value || trait.value
+        , value: value || (trait.getDataModel().displayValue && trait.value)
         , source: trait.linkSource
         , disabled: disabled || trait.disabled
         , isInteracting

@@ -12,7 +12,16 @@
 
 Правила растений: https://hobbyworld.ru/download/rules/evo-plant_rus.pdf
 
+### Континенты
+
+Несмотря на то что в игре есть пак "континенты" - игра идет без локаций. 
+В паке нет карт связанных с локациями - "Миграция", "Прилипала" и "Стадность".
+
 ## Баги и ошибки
+
+### Иногда всех выкидывает и сервер перезагружается
+
+Хероку перезагружает его каждые 24 часа + от 0 до 216 минут: https://devcenter.heroku.com/articles/dynos#automatic-dyno-restarts
 
 ### Я нашел ошибку!
 
@@ -23,10 +32,6 @@
 1. Сохранить весь игровой лог в текстовый файл
 1. Открыть консоль (F12) и скопировать все оттуда в другой текстовый файл
 1. Максимально подробно описать ситуацию и запостить все сюда: https://vk.com/topic-144914092_35603928
-
-### Иногда всех выкидывает и сервер перезагружается
-
-Хероку перезагружает его каждые 24 часа + от 0 до 216 минут: https://devcenter.heroku.com/articles/dynos#automatic-dyno-restarts
 
 > Dynos are also restarted (cycled) at least once per day to help maintain the health of applications running on Heroku.
 

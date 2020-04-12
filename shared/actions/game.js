@@ -21,7 +21,7 @@ import {
 import {db$gameEnd} from '../../server/actions/db';
 
 import {server$game, to$, toUser$Client} from './generic';
-import {doesPlayerHasOptions, doesOptionExist, getOptions} from './ai';
+import {doesPlayerHasOptions, doesOptionExist, getOptions, searchPlayerOptions} from './ai';
 import {
   server$takeFoodRequest
   , server$questionPauseTimeout
@@ -321,33 +321,24 @@ export const server$defaultTurn = (gameId, userId) => (dispatch, getState) => {
     //   dispatch(server$playerActed(gameId, userId));
     //   return true;
     // }
-  } else if (game.status.phase === PHASE.FEEDING && !game.isPlantarium()) {
-    const animal = game.getPlayer(userId).continent.find((animal) => {
-      return !getErrorOfAnimalEatingFromGame(game, animal);
+  } else if (game.status.phase === PHASE.FEEDING) {
+    let mandatoryOption;
+    searchPlayerOptions(game, userId, (option) => {
+      if (option.mandatoryAction) {
+        mandatoryOption = option;
+        logger.debug('server$defaultTurn/option found:', option.text);
+        return true;
+      }
     });
-    if (!!animal) {
-      logger.debug('server$defaultTurn:', userId, animal.id);
-      dispatch(server$takeFoodRequest(gameId, userId, animal.id));
-      dispatch(server$autoFoodSharing(gameId, userId));
-      return true;
-    }
-  } else if (game.status.phase === PHASE.FEEDING && game.isPlantarium()) {
-    let allowedPlant;
-    const animal = game.getPlayer(userId).continent.find((animal) => {
-      allowedPlant = game.plants.find(plant => !getErrorOfAnimalEatingFromPlant(game, animal, plant));
-      return !!allowedPlant;
-    });
-    if (!!animal && !!allowedPlant) {
-      logger.debug('server$defaultTurn:', userId, animal.id, allowedPlant.id);
-      dispatch(server$takeFoodRequest(gameId, userId, animal.id, allowedPlant.id));
-      dispatch(server$autoFoodSharing(gameId, userId));
+    if (mandatoryOption) {
+      mandatoryOption.mandatoryAction(dispatch, gameId, userId);
       return true;
     }
   }
 };
 
-export const server$gameEndTurn = (gameId, userId) => (dispatch, getState) => {
-  logger.debug(`game/server$gameEndTurn attempt`);
+export const server$gameEndTurn = (gameId, userId, debugSource) => (dispatch, getState) => {
+  logger.debug(`game/server$gameEndTurn attempt, source: ${debugSource}`);
   if (!dispatch(server$autoFoodSharing(gameId, userId))) return;
   const isDefaultTurn = !!dispatch(server$defaultTurn(gameId, userId));
   // if isDefaultTurn is true, then player performed default turn\
@@ -405,13 +396,13 @@ const playerActed = (gameId, userId) => ({
   , data: {gameId, userId}
 });
 
-export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
-  logger.debug(`server$playerActed`, userId);
+export const server$playerActed = (gameId, userId, debugSource) => (dispatch, getState) => {
+  logger.debug(`server$playerActed: ${userId} (${debugSource})`);
   let game = selectGame(getState, gameId);
   dispatch(server$game(gameId, playerActed(gameId, userId)));
   switch (game.status.phase) {
     case PHASE.DEPLOY:
-      return dispatch(server$gameEndTurn(gameId, userId));
+      return dispatch(server$gameEndTurn(gameId, userId, 'server$playerActed'));
     case PHASE.FEEDING:
       game = selectGame(getState, gameId);
       const gameHasNoQuestions = !game.question;
@@ -422,7 +413,7 @@ export const server$playerActed = (gameId, userId) => (dispatch, getState) => {
       const gameIsNotOnHunt = !game.hunt;
 
       if (gameHasNoQuestions && gameIsNotOnHunt && (playerHasNoOptions || (gameIsNotPaused && playerHasNoTimeouts))) {
-        return dispatch(server$gameEndTurn(gameId, userId));
+        return dispatch(server$gameEndTurn(gameId, userId, 'server$playerActed'));
       }
   }
 };
@@ -465,7 +456,7 @@ export const server$addTurnTimeout = (gameId, userId, turnTime) => (dispatch, ge
   dispatch(addTimeout(turnTime, makeTurnTimeoutId(gameId, userId), (dispatch, getState) => {
     logger.info(`Turn Timeout:`, `${gameId}: ${userId}`);
     dispatch(server$gameSetUserTimedOut(gameId, userId, true));
-    dispatch(server$gameEndTurn(gameId, userId))
+    dispatch(server$gameEndTurn(gameId, userId, 'server$addTurnTimeout'))
   }));
 };
 
@@ -745,7 +736,7 @@ export const gameClientToServer = {
       throw new ActionCheckError(`checkGamePhase@Game(${game.id})`, 'Wrong phase (%s)', game.status.phase);
     }
     logger.verbose(`gameEndTurnRequest: ${userId} (${game.getPlayer(userId).acted})`);
-    dispatch(server$gameEndTurn(gameId, userId));
+    dispatch(server$gameEndTurn(gameId, userId, 'gameEndTurnRequest'));
   }
   , gameDeployAnimalRequest: ({gameId, cardId, animalPosition = 0}, {userId}) => (dispatch, getState) => {
     // console.time('gameDeployAnimalRequest body');

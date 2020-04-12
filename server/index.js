@@ -2,6 +2,7 @@ import globals from '../globals';
 import logger, {loggerOnline} from '../shared/utils/logger'
 import http from 'http';
 import express from 'express';
+import bodyParser from 'body-parser';
 import configureStore from './configureStore';
 import database from './database';
 
@@ -14,6 +15,8 @@ database.ready.then(() => {
   logger.info('NODE_ENV =', process.env.NODE_ENV);
 
   const app = express();
+
+  app.use(bodyParser.json());
 
   const server = http.createServer(app);
   app.set('port', process.env.PORT || 2000);

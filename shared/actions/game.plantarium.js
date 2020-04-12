@@ -33,7 +33,7 @@ import {
   TRAIT_COOLDOWN_LINK,
   TRAIT_COOLDOWN_PLACE
 } from "../models/game/evolution/constants";
-import {gameGiveCards, server$playerActed} from "./game";
+import {server$playerActed} from "./game";
 import {logTarget} from "./log.util";
 import {getIntRandom} from "../utils/randomGenerator";
 import * as ptt from "../models/game/evolution/plantarium/plantTraitTypes";

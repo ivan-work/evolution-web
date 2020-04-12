@@ -1,3 +1,6 @@
+import logger, {loggerOnline} from '~/shared/utils/logger';
+import {selectUser} from "../../shared/selectors";
+
 var router = require('express').Router();
 var path = require('path');
 import oauth from './oauth';
@@ -24,6 +27,7 @@ module.exports = (app, passport) => {
       const value = yamlParser.load(fs.readFileSync(fileName).toString());
       return {...result, [key]: value};
     }, {});
+
   router.get('/i18n/*', function (req, res, next) {
     const translation = req.path.substr(req.path.lastIndexOf('/') + 1);
     if (translations.hasOwnProperty(translation)) {
@@ -33,9 +37,21 @@ module.exports = (app, passport) => {
     }
   });
 
+  router.use('/oauth', oauth);
+  // set authentication routes
+  //require('./authentication.js')(app, passport);
+
+  router.post('/stats/uiold', (req, res, next) => {
+    const getState = app.get('store').getState;
+    const user = selectUser(getState, req.body.userId);
+    loggerOnline.info(`User ${user.login} is using OLD UI`);
+    res.status(200).send(`It's sad`);
+  });
+
+  // region debug state
   if (!!process.env.DEBUG_STATE) {
     router.get('/state', function (req, res, next) {
-      const state = app.get('store').getState()
+      const state = app.get('store').getState();
       // .update('connections', c => c.keySeq().toArray());
 
       const replacer = (key, value) => (
@@ -63,24 +79,24 @@ module.exports = (app, passport) => {
     });
   }
 
-  router.use('/oauth', oauth);
-  // set authentication routes
-  //require('./authentication.js')(app, passport);
+  if (!!process.env.DEBUG_STATE) {
+    router.get('/stats', (req, res, next) => {
+      const from = moment(req.query.from, "YYYY-MM-DD");
+      const to = moment(req.query.to, "YYYY-MM-DD");
+      if (!from.isValid() || !to.isValid()) {
+        res.status(400).send('Wrong parameters (from=YYYY-MM-DD&to=YYYY-MM-DD)');
+        return;
+      }
+      return db$findStats(from.valueOf(), to.valueOf())
+        .then(data => res.status(200).json(data))
+        .catch(err => {
+          console.error(err);
+          res.status(500);
+        })
+    });
+  }
 
-  router.get('/stats', (req, res, next) => {
-    const from = moment(req.query.from, "YYYY-MM-DD");
-    const to = moment(req.query.to, "YYYY-MM-DD");
-    if (!from.isValid() || !to.isValid()) {
-      res.status(400).send('Wrong parameters (from=YYYY-MM-DD&to=YYYY-MM-DD)');
-      return;
-    }
-    return db$findStats(from.valueOf(), to.valueOf())
-      .then(data => res.status(200).json(data))
-      .catch(err => {
-        console.error(err);
-        res.status(500);
-      })
-  });
+  // endregion
 
   // set other routes
   app.use('/api', router);

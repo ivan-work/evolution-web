@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types'
+import cn from 'classnames'
 import {connect} from 'react-redux';
 
 import ListItem from "@material-ui/core/ListItem";
@@ -17,19 +18,25 @@ const defaultUser = (id) => ({
   id, login: '---'
 });
 
+const cnUser = (user, className = '') => cn(
+  'User'
+  , className
+  , {auth: user.authType}
+);
+
 export const UserVariants = {
-  simple: ({user}) => <span className='User'>{user.login}</span>
-  , typography: ({user, className}) => (
+  simple: ({user, login, className}) => <span className={cnUser(user, className)}>{login || user.login}</span>
+  , typography: ({user, login, className}) => (
     <Typography display='inline'
-                className={'User' + (className ? ' ' + className : '')}
+                className={cnUser(user, className)}
                 color='inherit'
                 component='span'>
-      {user.login}
+      {login || user.login}
     </Typography>
   )
-  , listItem: ({user, actions}) => (
-    <ListItem key={user.id} className='User' style={{width: 'auto'}}>
-      <ListItemText primary={user.login}/>
+  , listItem: ({user, login, actions}) => (
+    <ListItem key={user.id} className={cnUser(user)} style={{width: 'auto'}}>
+      <ListItemText primary={login || user.login}/>
       {!!actions ? actions : null}
     </ListItem>
   )

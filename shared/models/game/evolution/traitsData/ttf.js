@@ -197,6 +197,7 @@ export const TraitViviparous = {
 
 export const TraitAmbush = {
   type: tt.TraitAmbush
+  , displayValue: true
 };
 
 export const TraitIntellect = {
@@ -245,6 +246,7 @@ export const TraitAnglerfish = {
   , transient: true
   , hidden: true
   , score: 0
+  , displayValue: true
   , _getErrorOfUse: (game, animal) => {
     if (animal.getTraits(true).size > 0) return ERRORS.TRAIT_ACTION_SPECIFIC;
     return false;

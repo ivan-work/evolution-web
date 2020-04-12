@@ -271,6 +271,7 @@ export const server$huntProcess = (gameId) => (dispatch, getState) => {
 };
 
 export const server$huntKill_Animal = (gameId) => (dispatch, getState) => {
+  logger.debug('hunt/server$huntKill_Animal');
   const game = selectGame(getState, gameId);
   const hunt = gameGetHunt(game);
   const attackAnimal = getHuntingEntity(game);
@@ -288,6 +289,7 @@ export const server$huntKill_Animal = (gameId) => (dispatch, getState) => {
 };
 
 export const server$huntKill = (gameId) => (dispatch, getState) => {
+  logger.debug('hunt/server$huntKill');
   const game = selectGame(getState, gameId);
   const hunt = gameGetHunt(game);
 
@@ -410,9 +412,6 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
   if (
     huntGetFlag(game, HUNT_FLAG.FEED_FROM_PLANT)
   ) {
-    dispatch(server$playerActed(gameId, hunt.targetPid));
-  }
-  if (huntGetFlag(game, HUNT_FLAG.PLANT_ATTACK)) {
-    dispatch(server$playerActed(gameId, game.status.currentPlayer));
+    dispatch(server$playerActed(gameId, hunt.targetPid, 'FEED_FROM_PLANT'));
   }
 };

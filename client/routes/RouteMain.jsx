@@ -20,6 +20,7 @@ import IgnoreUnignoreTooltip from "../components/IgnoreUnignoreTooltip";
 
 import {roomCreateRequest} from '../../shared/actions/actions';
 import EvoPaper from "../views/utils/EvoPaper";
+import User from "../views/utils/User";
 
 
 const styles = theme => ({
@@ -60,7 +61,7 @@ const OnlineWidget = connect((state) => ({
     <Typography>
       {online.map((user, index) => <Fragment key={user.id}>
         {!!index && ', '}
-        <IgnoreUnignoreTooltip userId={user.id}><span>{user.login}</span></IgnoreUnignoreTooltip>
+        <IgnoreUnignoreTooltip userId={user.id}><User id={user.id}/></IgnoreUnignoreTooltip>
       </Fragment>)}
     </Typography>
   </Fragment>

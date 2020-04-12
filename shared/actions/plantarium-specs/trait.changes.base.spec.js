@@ -65,6 +65,40 @@ players:
     expect(findPlant('$suc').getFood(), '$suc.food').equals(2);
   });
 
+  it('[PLANTARIUM] #bug TraitGrazing with communication', function () {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+  settings:
+    addon_plantarium: true
+  phase: feeding
+  plants: succ $suc ++++
+  players:
+    - continent: $A graz comm$B plantgraz, $B plantgraz wait
+  `);
+    const {selectGame, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitTakeFoodRequest('$A', '$suc'));
+
+
+    expect(selectGame().status.round, 'round 0').equal(0);
+    expect(findPlant('$suc').getFood(), '$suc.food').equals(3);
+    expect(findAnimal('$A').getFood(), '$A.getFood()').equal(1);
+    expect(findAnimal('$B').getFood(), '$B.getFood()').equal(0);
+
+    expectError(`Too early to graze`, ERRORS.COOLDOWN, () => {
+      clientStore0.dispatch(traitTakeFoodRequest('$A', '$suc'));
+    });
+
+    expect(selectGame().status.round, 'round 0').equal(0);
+    expect(findPlant('$suc').getFood(), '$suc.food').equals(3);
+    expect(findAnimal('$A').getFood(), '$A.getFood()').equal(1);
+    expect(findAnimal('$B').getFood(), '$B.getFood()').equal(1);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitPlantGrazing));
+
+    expect(findPlant('$suc').getFood(), '$suc.food').equals(2);
+  });
+
   it('[PLANTARIUM] TraitPlantHomeothermy:', function () {
     const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
     const gameId = ParseGame(`

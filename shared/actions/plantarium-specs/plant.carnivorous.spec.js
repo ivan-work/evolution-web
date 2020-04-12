@@ -409,5 +409,30 @@ players:
       expect(findAnimal('$A'), '$A dead').null;
       expect(findPlant('$carA').getFood(), '$carA.getFood()').equal(4);
     });
+
+    it(`Dies from poisonous`, () => {
+      const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+      const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+deck: 1 camo
+deckPlants: 4 eph
+phase: feeding
+plants: PlantCarn $carA ++, PlantCarn $carB
+players:
+  - continent: $A pois +, $0w wait +
+`);
+      const {selectGame, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+
+      clientStore0.dispatch(gamePlantAttackRequest('$carA', '$A'));
+
+      expect(findPlant('$carA').hasFlag(TRAIT_ANIMAL_FLAG.POISONED)).true;
+
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      clientStore0.dispatch(gameEndTurnRequest());
+
+      expect(findPlant('$carA'), '$carA should be dead').undefined;
+    });
   });
 });

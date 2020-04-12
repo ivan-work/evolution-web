@@ -57,6 +57,7 @@ export const TraitFatTissue = {
   , multiple: true
   , playerControllable: true
   , targetType: TRAIT_TARGET_TYPE.NONE
+  , displayValue: true
   , cooldowns: fromJS([
     [tt.TraitFatTissue, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]

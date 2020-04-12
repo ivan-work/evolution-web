@@ -43,6 +43,7 @@ export class UserModel extends Record({
     return new UserModel({
       id: this.id
       , login: this.login
+      , authType: this.authType
     });
   }
 

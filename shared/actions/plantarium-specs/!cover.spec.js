@@ -8,6 +8,7 @@ import {makeGameSelectors} from '../../selectors'
 import {gameDeployPlantTraitRequest} from "../game";
 import ERRORS from "../errors";
 import {traitTakeCoverRequest, traitTakeFoodRequest} from "../trait";
+import {TRAIT_ANIMAL_FLAG} from "../../models/game/evolution/constants";
 
 describe('[PLANTARIUM] Covers:', function () {
   it('Players can take covers', () => {
@@ -54,21 +55,22 @@ players:
     expectError(`Can't take more next turn`, 'checkTarget', () => {
       clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
     });
+  });
 
-    clientStore0.dispatch(traitTakeFoodRequest('$A', '$suc'));
-    clientStore0.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(traitTakeFoodRequest('$A', '$suc2'));
-    clientStore0.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(traitTakeFoodRequest('$B', '$suc2'));
-    clientStore0.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(traitTakeFoodRequest('$C', '$suc2'));
-    clientStore0.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(gameEndTurnRequest());
+  it('Players can add covers', () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+deck: 5 spiky
+phase: deploy
+plants: Succ $suc * +++
+players:
+  - continent: $A wait +
+    hand: spiky, camo
+`);
+    const {selectGame, findPlant, findCard, findPlayerByIndex} = makeGameSelectors(serverStore.getState, gameId);
 
-    expect(selectGame().status.turn, 'turn 1').equal(1);
-
-    expect(findPlant('$suc2'), '$suc2 dead').not.ok;
-    expect(findPlant('$suc'), '$suc alive').ok;
     expect(findPlant('$suc').covers, 'succ covers').equal(1);
 
     const User0 = findPlayerByIndex(0);
@@ -84,6 +86,29 @@ players:
     expect(findPlant('$suc').coverSlots, 'Spiky cover slots').equal(4);
     expect(findPlant('$suc').covers, 'Spiky covers').equal(4);
   });
+
+  it(`Autoturn can take covers`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+plants: pere $p0 ** +
+phase: feeding
+players:
+  - continent: $A, $B, $C
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(gameEndTurnRequest());
+    expect(selectGame().status.round, 'round 1').equal(1);
+    expect(findAnimal('$A').getFood()).equal(1);
+    expect(selectGame().status.phase).equal('FEEDING');
+
+    clientStore0.dispatch(gameEndTurnRequest());
+    expect(selectGame().status.phase).equal('FEEDING');
+    expect(selectGame().status.round, 'round 2').equal(2);
+    expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.IN_COVER)).ok;
+  })
 });
 
 

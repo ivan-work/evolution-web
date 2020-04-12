@@ -81,7 +81,7 @@ export const onlineUpdate = (user) => ({
 
 export const server$loginUser = (user, redirect) => (dispatch, getState) => {
   if (!user.id) throw new Error('User has no ID');
-  loggerOnline.info(`User ${user.login} joined`);
+  // loggerOnline.info(`User ${user.login} joined`);
   const online = getState().get('users').map(u => u.toOthers());
   const rooms = getState().get('rooms');
   dispatch(loginUser({user}));
@@ -232,12 +232,21 @@ export const authClientToServer = {
 };
 
 export const authServerToClient = {
-  loginUser: ({user, redirect = '/', online}) => (dispatch) => {
+  loginUser: ({user, redirect = '/', online}) => (dispatch, getState) => {
     user = UserModel.fromJS(user);
     dispatch(loginUser({
       user: user
       , online: Map(online).map(u => new UserModel(u).toOthers())
     }));
+
+    // TODO remove this once this is done #UIOLD
+    if (window && window.fetch && !getState().getIn(['app', 'uiv3'])) {
+      window.fetch('/api/stats/uiold', {
+        method: 'POST'
+        , headers: {'Content-Type': 'application/json'}
+        , body: JSON.stringify({userId: user.id})
+      });
+    }
   }
   , loginUserFailure: ({error}) => (dispatch, getState) => {
     dispatch(loginUserFailure(error));

@@ -331,7 +331,7 @@ settings:
 phase: prepare
 deckPlants: 3 PlantCarn
 plants: PlantPer $per
-deck: camo, pois, camo, pois, camo, pois, camo, pois, camo, pois, camo, pois, camo, pois, camo, pois, camo, pois
+deck: 10 pois
 players:
   - hand: 1 camo
     continent: $A pois, $B pois, $C pois, $D pois +
@@ -355,9 +355,7 @@ players:
       logger.verbose(`Plants are: ${[plantPer, plantCarn1, plantCarn2, plantCarn3]}`);
 
       clientStore0.dispatch(gamePlantAttackRequest(plantCarn1, '$A'));
-
       expect(findAnimal('$A')).null;
-
 
       // console.log(findPlant(plantCarn1))
       clientStore0.dispatch(gamePlantAttackRequest(plantCarn2, '$B'));
@@ -370,7 +368,7 @@ players:
       expect(selectGame().status.round, 'round').equal(0);
       expect(selectGame().status.phase, 'phase').equal(PHASE.DEPLOY);
 
-      expect(selectGame().plants, 'plants').size(4);
+      expect(selectGame().plants, 'plants').size(3);
       // expect(selectGame().deckPlants, 'deckPlants').size(5);
     });
   })

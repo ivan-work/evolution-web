@@ -15,7 +15,6 @@ import {
 } from '../models/game/evolution/constants';
 
 import {server$game, to$} from './generic';
-import {doesPlayerHasOptions} from './ai';
 import {
   server$gameEndTurn
   , server$addTurnTimeout
@@ -616,7 +615,7 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
       }
     }
 
-    if (trait.type === tt.TraitPlantGrazing) {
+    if (sourceType === 'PLANT' && trait.type === tt.TraitPlantGrazing) {
       dispatch(server$traitSetValue(game, animal, trait, sourceId));
     }
   });
@@ -723,6 +722,12 @@ export const server$continueFeedingFromGame = (gameId, feedingRecord) => (dispat
   }
 
   return ambushers.length === 0;
+};
+
+export const server$traitTakeCover = (gameId, userId, animalId, plantId) => dispatch => {
+  dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
+  dispatch(server$game(gameId, traitTakeCover(gameId, animalId, plantId)));
+  dispatch(server$playerActed(gameId, userId));
 };
 
 /**
@@ -1006,9 +1011,7 @@ export const traitClientToServer = {
     const plant = checkGameHasPlant(game, plantId);
     throwError(getErrorOfAnimalTakingCover(game, animal, plant));
 
-    dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
-    dispatch(server$game(gameId, traitTakeCover(gameId, animalId, plantId)));
-    dispatch(server$playerActed(gameId, userId));
+    dispatch(server$traitTakeCover(gameId, userId, animalId, plantId));
   }
   , traitAmbushActivateRequest: ({gameId, animalId, on}, {userId}) => (dispatch, getState) => {
     const game = selectGame(getState, gameId);

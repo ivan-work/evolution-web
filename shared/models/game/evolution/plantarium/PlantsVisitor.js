@@ -1,5 +1,6 @@
 import logger from '../../../../utils/logger';
 import * as ptt from "./plantTraitTypes";
+import {TRAIT_ANIMAL_FLAG} from "../constants";
 
 export default class PlantVisitor {
   visited = {};
@@ -20,6 +21,11 @@ export default class PlantVisitor {
     if (this.visited[plant.id]) return;
 
     this.visited[plant.id] = true;
+
+    if (plant.hasFlag(TRAIT_ANIMAL_FLAG.POISONED)) {
+      this.deathRow.push(plant.id);
+      return;
+    }
 
     if (plant.getFood() > 0) {
       this.log && logger.debug(`PlantVisitor/${plant.id}/mycoStack TRUE`);
