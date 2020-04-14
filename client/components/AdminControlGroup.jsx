@@ -1,18 +1,9 @@
-import React, {Component} from 'react';
+import React from 'react';
 import {connect} from 'react-redux';
-
-import {RoomSectionView} from './AdminPanelSections/RoomSection.jsx';
-import {GameSectionView} from './AdminPanelSections/GameSection.jsx';
-import {branch, compose, renderNothing, withStateHandlers} from "recompose";
+import {branch, compose, renderNothing} from "recompose";
 import get from "lodash/fp/get";
-import Game from "../views/game/Game";
-import {redirectTo} from "../../shared/utils/history";
+
 import AppBarMenu from "../app/appbar/AppBarMenu";
-import MenuItem from "@material-ui/core/MenuItem";
-import ListSubheader from "@material-ui/core/ListSubheader";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
 import RoomSection from "./AdminControlGroupSections/RoomSection";
 import GameSection from "./AdminControlGroupSections/GameSection";
 

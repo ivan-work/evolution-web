@@ -100,7 +100,7 @@ const TraitColors = {
   }
   , [tt.TraitSpecialization]: {
     text: '#396'
-    , stroke: 'rgba(111, 211, 111, .25)'
+    , stroke: 'rgba(111, 211, 111, .77)'
   }
 };
 TraitColors.Trait = {}; // default mapping

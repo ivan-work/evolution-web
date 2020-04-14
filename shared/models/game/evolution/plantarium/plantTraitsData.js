@@ -95,6 +95,7 @@ export const PlantTraitParasiticLink = {
   , targetType: TRAIT_TARGET_TYPE.NONE
   , cooldowns: fromJS([
     [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
+    , [ptt.PlantTraitParasiticLink, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , _getErrorOfUse: (game, plant, trait) => {
     // if (game.cooldowns.checkFor())

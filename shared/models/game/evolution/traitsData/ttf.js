@@ -15,18 +15,13 @@ import ERRORS from '../../../../actions/errors';
 
 import {
   server$startFeeding
-  , server$traitActivate
   , server$traitStartCooldown
   , server$traitAnimalRemoveTrait
   , server$traitSetAnimalFlag
   , server$traitSetValue
-  , server$traitNotify_End
-  , server$game
   , startCooldown
   , server$gameDeployAnimalFromDeck
   , server$startCooldownList
-  , getFeedingCooldownList
-  , server$traitIntellectAnswer
 } from '../../../../actions/actions';
 
 import {selectGame} from '../../../../selectors';

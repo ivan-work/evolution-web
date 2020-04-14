@@ -11,7 +11,7 @@ import TraitDetails from "../traits/TraitDetails";
 
 import {TraitModel} from "../../../../shared/models/game/evolution/TraitModel";
 import {compose} from "recompose";
-import connect from "react-redux/es/connect/connect";
+import {connect} from "react-redux";
 import {PHASE} from "../../../../shared/models/game/GameModel";
 import {InteractionSource} from "../InteractionManager";
 import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";

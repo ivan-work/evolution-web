@@ -1,5 +1,4 @@
-import React, {Component} from 'react';
-// import {connect} from 'react-redux';
+import React from 'react';
 import T from 'i18n-react';
 import Button from '@material-ui/core/Button';
 import {withStyles} from "@material-ui/core/styles";

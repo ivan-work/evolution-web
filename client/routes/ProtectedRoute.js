@@ -1,6 +1,6 @@
 import React from "react";
 import {branch, compose, renderComponent} from "recompose";
-import connect from "react-redux/es/connect/connect";
+import {connect} from "react-redux";
 import {Redirect, Route} from "react-router";
 
 const ProtectedRoute = compose(

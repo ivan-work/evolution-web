@@ -44,7 +44,7 @@ const styles = theme => ({
 });
 
 export const AppBar = ({classes}) => (
-  <MUIAppBar>
+  <MUIAppBar color='primary'>
     <Toolbar>
       {/*<TranslationSwitchView/>*/}
       <div className={classes.title}>
@@ -56,7 +56,7 @@ export const AppBar = ({classes}) => (
       <GuardUser>
         <AppBarMenu className={classes.appBarMenu} text={<IconMenu />}>
           <SettingVolumeMenuItem />
-          <SettingUIv3MenuItem />
+          {/*<SettingUIv3MenuItem />*/}
           <LinkProfile />
         </AppBarMenu>
       </GuardUser>

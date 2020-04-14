@@ -3,14 +3,14 @@ import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes'
 import {connect} from 'react-redux';
 import {branch, compose, renderComponent} from 'recompose';
+import get from 'lodash/fp/get';
 
-import Game from '../views/game/Game.jsx'
+import Typography from "@material-ui/core/Typography/Typography";
+
+import EvoLink from "../components/EvoLink";
+
 import GameUIv3 from '../views/uiv3/GameUIv3'
 import Room from '../views/rooms/Room.jsx'
-
-import get from 'lodash/fp/get';
-import Typography from "@material-ui/core/Typography/Typography";
-import EvoLink from "../components/EvoLink";
 
 export default compose(
   connect(
@@ -22,8 +22,7 @@ export default compose(
       return {room, game, uiv3}
     }
   )
-  , branch(({game, uiv3}) => uiv3 && game, renderComponent(GameUIv3))
-  , branch(get('game'), renderComponent(Game))
+  , branch(get('game'), renderComponent(GameUIv3))
   , branch(get('room'), renderComponent(Room))
 )(() => (<Typography color={"error"} align={"center"}>
   Error!&nbsp;

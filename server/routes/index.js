@@ -41,12 +41,12 @@ module.exports = (app, passport) => {
   // set authentication routes
   //require('./authentication.js')(app, passport);
 
-  router.post('/stats/uiold', (req, res, next) => {
-    const getState = app.get('store').getState;
-    const user = selectUser(getState, req.body.userId);
-    loggerOnline.info(`User ${user.login} is using OLD UI`);
-    res.status(200).send(`It's sad`);
-  });
+  // router.post('/stats/uiold', (req, res, next) => {
+  //   const getState = app.get('store').getState;
+  //   const user = selectUser(getState, req.body.userId);
+  //   loggerOnline.info(`User ${user.login} is using OLD UI`);
+  //   res.status(200).send(`It's sad`);
+  // });
 
   // region debug state
   if (!!process.env.DEBUG_STATE) {

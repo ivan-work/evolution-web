@@ -3,6 +3,7 @@ import withStyles from "@material-ui/core/styles/withStyles";
 
 import Plant from "./Plant";
 import GameStyles from "../GameStyles";
+import {InteractiveShell} from "../food/Shell";
 
 const styles = ({
   container: {
@@ -12,7 +13,9 @@ const styles = ({
   }
 });
 
-export default withStyles(styles)(({classes, game}) => <div className={classes.container}>
-    {game.plants.valueSeq().map(plant => <Plant key={plant.id} plant={plant} />)}
+export default withStyles(styles)(({classes, game}) => (
+  <div className={classes.container}>
+    {game.getArea().shells.map((trait) => <InteractiveShell key={trait.id} trait={trait}/>).toList()}
+    {game.plants.valueSeq().map(plant => <Plant key={plant.id} plant={plant}/>)}
   </div>
-)
+))

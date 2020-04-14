@@ -3,22 +3,16 @@ import T from 'i18n-react';
 import PropTypes from 'prop-types'
 import RIP from 'react-immutable-proptypes'
 import {connect} from 'react-redux';
-import {branch, compose, renderComponent, withState, withStateHandlers} from 'recompose';
+import {compose, withStateHandlers} from 'recompose';
+import Validator from "validatorjs";
 
-import Game from '../views/game/Game.jsx'
-import GameUIv3 from '../views/uiv3/GameUIv3'
-import Room from '../views/rooms/Room.jsx'
-import {userUpdateNameRequest} from '../../shared/actions/auth'
-
-import get from 'lodash/fp/get';
-import Typography from "@material-ui/core/Typography/Typography";
-import EvoLink from "../components/EvoLink";
-import EvoTextField from "../components/EvoTextField";
 import Button from "@material-ui/core/Button";
 import withStyles from "@material-ui/core/styles/withStyles";
-import Validator from "validatorjs";
+
+import EvoTextField from "../components/EvoTextField";
+
 import {RuleRegisteredUserName} from "../../shared/models/UserModel";
-import {ActionCheckError} from "../../shared/models/ActionCheckError";
+import {userUpdateNameRequest} from '../../shared/actions/auth'
 
 const styles = theme => ({
   root: {

@@ -264,7 +264,7 @@ export const InteractiveAnimal = compose(
           const {trait} = item;
           return (
             !trait.getDataModel().getErrorOfTraitPlacement_User(userId, animal.ownerId)
-            && !trait.getDataModel().getErrorOfTraitPlacement(userId, animal)
+            && !trait.getDataModel().getErrorOfTraitPlacement(animal)
           );
         }
         case DND_ITEM_TYPE.COVER: {

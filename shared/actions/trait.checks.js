@@ -20,6 +20,7 @@ import {
   getStaticDefenses
 } from "../models/game/evolution/traitsData/TraitCarnivorous";
 import {getTraitDataModel} from "../models/game/evolution/TraitModel";
+import {server$traitActivate} from "./trait";
 
 export const checkTraitActivation = (game, animal, traitId, ...targets) => {
   const gameId = game.id;
@@ -170,9 +171,15 @@ export const getErrorOfAnimalEatingFromGame = (game, animal) => {
   );
 };
 
+export const getErrorsOfPlantFoodDefence = (game, animal, plant) => plant.getTraits()
+  .map(trait => [trait.id, trait.getDataModel().getErrorOfFoodIntake(game, plant, animal)])
+  .filter(([traitId, error]) => error);
+
 export const getErrorOfAnimalEatingFromPlantNoCD = (game, animal, plant) => {
   if (plant.getFood() < 1) return ERRORS.PLANT_FOOD;
   if (animal.hasTrait(tt.TraitCarnivorous) && !plant.isFruit()) return ERRORS.PLANT_FOOD_FRUIT;
+  const errorOfAnimalEating = getErrorOfAnimalEating(game, animal);
+  if (errorOfAnimalEating) return errorOfAnimalEating;
 
   const traitSpecialization = animal.hasTrait(tt.TraitSpecialization);
   if (traitSpecialization) {
@@ -182,14 +189,25 @@ export const getErrorOfAnimalEatingFromPlantNoCD = (game, animal, plant) => {
     if (plant.id !== traitSpecialization.linkAnimalId) {
       return tt.TraitSpecialization;
     } else {
-      return getErrorOfAnimalEating(game, animal)
+      return false
     }
   }
 
-  return (
-    getErrorOfAnimalEating(game, animal)
-    || getErrorInList(plant.getTraits(), trait => trait.getDataModel().getErrorOfFoodIntake(game, plant, animal))
-  );
+  const errorsOfFoodIntake = getErrorsOfPlantFoodDefence(game, animal, plant);
+
+  if (errorsOfFoodIntake.size > 1) {
+    const [errorTraitId, errorMessage] = errorsOfFoodIntake.first();
+    return errorMessage;
+  } else if (errorsOfFoodIntake.size === 1) {
+    const [errorTraitId, errorMessage] = errorsOfFoodIntake.first();
+
+    const traitIntellect = animal.hasTrait(tt.TraitIntellect);
+    if (!traitIntellect) return errorMessage;
+
+    if (traitIntellect.value !== errorTraitId && traitIntellect.getErrorOfUse(game, animal)) return errorMessage;
+  }
+
+  return false;
 };
 
 export const getErrorOfAnimalEatingFromPlant = (game, animal, plant) => (

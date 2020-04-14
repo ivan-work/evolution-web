@@ -238,15 +238,6 @@ export const authServerToClient = {
       user: user
       , online: Map(online).map(u => new UserModel(u).toOthers())
     }));
-
-    // TODO remove this once this is done #UIOLD
-    if (window && window.fetch && !getState().getIn(['app', 'uiv3'])) {
-      window.fetch('/api/stats/uiold', {
-        method: 'POST'
-        , headers: {'Content-Type': 'application/json'}
-        , body: JSON.stringify({userId: user.id})
-      });
-    }
   }
   , loginUserFailure: ({error}) => (dispatch, getState) => {
     dispatch(loginUserFailure(error));

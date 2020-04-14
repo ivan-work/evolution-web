@@ -1,4 +1,5 @@
 import React from 'react';
+import T from "i18n-react";
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import noop from 'lodash/noop';
@@ -16,13 +17,15 @@ import {TRAIT_COOLDOWN_LINK} from "../../../../shared/models/game/evolution/cons
 import {InteractionSource} from '../InteractionManager';
 import GameStyles from "../GameStyles";
 import {PHASE} from "../../../../shared/models/game/GameModel";
+import Tooltip from "@material-ui/core/Tooltip";
 
-export const IconCover = (props) => (
+export const IconCover = React.forwardRef((props, ref) => (
   <SvgIcon {...props}>
     <path
-      d="M20 15.31L23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69zM12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z" />
+      ref={ref}
+      d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0" />
   </SvgIcon>
-);
+));
 
 const styles = {
   Cover: {
@@ -58,9 +61,11 @@ export const Cover = withStyles(styles)(({
                                            , startInteraction
                                            , isInteracting
                                          }) => (
-  <IconCover className={cn(classes.Cover, className, {isPlaceholder, canStart, isInteracting})}
-             onClick={startInteraction}
-  />
+  <Tooltip title={T.translate('Game.Icon.Cover')}>
+    <IconCover className={cn(classes.Cover, className, {isPlaceholder, canStart, isInteracting})}
+               onClick={startInteraction}
+    />
+  </Tooltip>
 ));
 
 Cover.defaultProps = {

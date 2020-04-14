@@ -1,29 +1,34 @@
 import React from "react";
+import PropTypes from "prop-types";
 import T from "i18n-react";
 import {compose, setDisplayName, setPropTypes} from "recompose";
-import PropTypes from "prop-types";
-import connect from "react-redux/es/connect/connect";
-import {InteractionTarget} from "../InteractionManager";
-import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";
-import {PHASE} from "../../../../shared/models/game/GameModel";
-import PlantModel from "../../../../shared/models/game/evolution/plantarium/PlantModel";
-import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
+import cn from "classnames";
 import repeat from "lodash/times";
-import Food, {InteractiveFood} from "../food/Food";
-import InteractiveCover, {Cover} from "../food/Cover";
+import {connect} from "react-redux";
+
 import Typography from "@material-ui/core/Typography/Typography";
 import withStyles from "@material-ui/core/styles/withStyles";
-import GameStyles from "../GameStyles";
-import PlantTrait from "./PlantTrait";
-import {TraitModel} from "../../../../shared/models/game/evolution/TraitModel";
-import {CTT_PARAMETER, TRAIT_ANIMAL_FLAG, TRAIT_TARGET_TYPE} from "../../../../shared/models/game/evolution/constants";
-import {gameDeployTraitRequest} from "../../../../shared/actions/game";
-import cn from "classnames";
+
+import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";
 import {AT_DEATH} from "../animations";
-import IconFruit from '@material-ui/icons/Camera';
-import * as pt from "../../../../shared/models/game/evolution/plantarium/plantTypes";
+import {CTT_PARAMETER, TRAIT_TARGET_TYPE} from "../../../../shared/models/game/evolution/constants";
+import {InteractionTarget} from "../InteractionManager";
+import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
+
+import Food, {InteractiveFood} from "../food/Food";
+import InteractiveCover, {Cover} from "../food/Cover";
+import PlantTrait from "./PlantTrait";
+
+import PlantModel from "../../../../shared/models/game/evolution/plantarium/PlantModel";
+import {TraitModel} from "../../../../shared/models/game/evolution/TraitModel";
 import * as ptt from "../../../../shared/models/game/evolution/plantarium/plantTraitTypes";
+import * as pt from "../../../../shared/models/game/evolution/plantarium/plantTypes";
 import {traitActivateRequest} from "../../../../shared/actions/trait";
+import {gameDeployTraitRequest} from "../../../../shared/actions/game";
+
+import GameStyles from "../GameStyles";
+import IconFruit from '@material-ui/icons/Apple';
+import Tooltip from "@material-ui/core/Tooltip";
 
 const DEATH_ANIMATION_TIME = `${AT_DEATH}ms`;
 
@@ -34,8 +39,9 @@ const styles = ({
     , textAlign: 'center'
 
     , '& .PlantIcon': {
-      verticalAlign: 'middle',
-      fill: '#660'
+      verticalAlign: 'text-bottom',
+      fill: '#6A0',
+      width: '22px'
     }
 
     , transition: 'background-color 1s'
@@ -90,7 +96,11 @@ class BasePlant extends React.PureComponent {
       <div className={cnPlant} onClickCapture={acceptInteraction}>
         <Typography className={classes.name}>
           {T.translate(`Game.Plant.${plant.type}`)}
-          {plant.isFruit() && <IconFruit className='PlantIcon' />}
+          {plant.isFruit() && (
+            <Tooltip title={T.translate('Game.Icon.Fruit')}>
+              <IconFruit className='PlantIcon'/>
+            </Tooltip>
+          )}
           {/*{plant.getNextFood(game, plant)}*/}
         </Typography>
         <div className={classes.food}>

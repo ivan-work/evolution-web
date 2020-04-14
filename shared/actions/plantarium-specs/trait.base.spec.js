@@ -6,6 +6,7 @@ import {makeGameSelectors} from '../../selectors'
 import {server$autoFoodSharing, traitActivateRequest, traitTakeFoodRequest} from "../trait";
 import {gameDeployTraitRequest, gameEndTurnRequest} from "../game";
 import ERRORS from "../errors";
+import {TRAIT_ANIMAL_FLAG} from "../../models/game/evolution/constants";
 
 describe('[PLANTARIUM] Trait changes:', function () {
   it(`TraitCooperation`, () => {
@@ -154,6 +155,57 @@ players:
     clientStore0.dispatch(traitTakeFoodRequest('$A', '$carn'));
 
     expect(findAnimal('$A'), '$A is OK').ok;
+    expect(findAnimal('$A').getFood(), '$A got food').equal(1);
+  });
+
+  it('[PLANTARIUM] TraitSpecialization', function () {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+phase: deploy
+plants: carn $carn + aqua tree, eph $eph +++ 
+players:
+  - continent: $A fat fat, $W wait +
+    hand: special
+    `);
+    const {selectGame, selectCard, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A', false, '$carn'));
+
+    expectError(`Cannot eat from $eph`, tt.TraitSpecialization, () => {
+      clientStore0.dispatch(traitTakeFoodRequest('$A', '$eph'));
+    });
+
+    clientStore0.dispatch(traitTakeFoodRequest('$A', '$carn'));
+
+    expect(findAnimal('$A'), '$A is OK').ok;
+    expect(findAnimal('$A').getFood(), '$A got food').equal(1);
+  });
+
+  it('[PLANTARIUM] TraitSpecialization + Officinalis', function () {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+phase: deploy
+plants: carn $carn + aqua tree offic, eph $eph +++ 
+players:
+  - continent: $A fat fat, $W wait +
+    hand: special
+    `);
+    const {selectGame, selectCard, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A', false, '$carn'));
+
+    expectError(`Cannot eat from $eph`, tt.TraitSpecialization, () => {
+      clientStore0.dispatch(traitTakeFoodRequest('$A', '$eph'));
+    });
+
+    clientStore0.dispatch(traitTakeFoodRequest('$A', '$carn'));
+
+    expect(findAnimal('$A'), '$A is OK').ok;
+    expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED), '$A is not paralyzed').equals(false);
     expect(findAnimal('$A').getFood(), '$A got food').equal(1);
   });
 });

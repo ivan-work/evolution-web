@@ -1,6 +1,5 @@
 import AnimationManager from './AnimationManager';
 import Velocity from 'velocity-animate';
-import kostilAnimations from '../../views/game/animations' // TODO remove this abomination. I'm sorry
 
 export const animationComponentSubscribe = (name, html) => ({type: 'animationComponentSubscribe', data: {name, html}});
 export const animationComponentUnsubscribe = (name) => ({type: 'animationComponentUnsubscribe', data: {name}});
@@ -46,10 +45,6 @@ export default (subscriptions = {}) => {
             queue.push(action);
           } else {
             let animationArray = subscriptions[action.type];
-            if (!getState().getIn(['app', 'uiv3'])) {
-              // I'm sorry, little one
-              animationArray = kostilAnimations[action.type];
-            }
 
             if (animationArray) {
               const id = ID++;

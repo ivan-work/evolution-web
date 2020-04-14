@@ -76,6 +76,10 @@ App:
       AfkHostNormal: Хост не АФК.
 Game:
   Game: Игра
+  Icon:
+    Fruit: Съедобно для хищников
+    Food: Еда
+    Cover: Укрытие от хищников
   Phase:
     DEPLOY: Фаза развития
     FEEDING: Фаза питания

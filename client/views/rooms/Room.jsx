@@ -18,13 +18,13 @@ import {
 
 import Typography from "@material-ui/core/Typography/Typography";
 import Grid from "@material-ui/core/Grid/Grid";
-import Paper from "@material-ui/core/Paper/Paper";
+import Tooltip from "@material-ui/core/Tooltip/Tooltip";
+import IconButton from "@material-ui/core/IconButton/IconButton";
 import withStyles from "@material-ui/core/styles/withStyles";
+import Paper from "@material-ui/core/Paper";
 
 import IconUnbanUser from '@material-ui/icons/RemoveCircleOutline';
 
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
-import IconButton from "@material-ui/core/IconButton/IconButton";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import {UserVariants} from "../utils/User";
 
