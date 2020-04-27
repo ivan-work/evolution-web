@@ -30,11 +30,11 @@ export const SpectatorsList = (({spectators}) => (
   </MUIList>
 ));
 
-export const SpectatorsStatement = withSpectators(({classes, spectators}) => (
+export const SpectatorsStatement = withSpectators(({spectators}) => (
   spectators && spectators.size > 0 && <WhiteTooltip title={<SpectatorsList spectators={spectators}/>} interactive>
-    <Typography className={classes.statement}>
-      <span className={classes.key}>{T.translate('App.Room.Spectators')}:&nbsp;</span>
-      <span className={classes.value}>{spectators.size}</span>
+    <Typography className='statement'>
+      <span className='key'>{T.translate('App.Room.Spectators')}:&nbsp;</span>
+      <span className='value'>{spectators.size}</span>
     </Typography>
   </WhiteTooltip>
 ));

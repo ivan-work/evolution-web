@@ -26,7 +26,7 @@ import {
   server$takeFoodRequest
   , server$questionPauseTimeout
   , server$questionResumeTimeout
-  , server$autoFoodSharing, server$chatMessage, server$roomSelfDestructStart
+  , server$autoFoodSharing, server$chatMessage, server$roomSelfDestructStart, server$activateViviparous
 } from './actions';
 import {appPlaySound} from '../../client/actions/app';
 import {redirectTo} from '../utils/history';
@@ -57,6 +57,7 @@ import PlantModel from "../models/game/evolution/plantarium/PlantModel";
 import PlantVisitor from "../models/game/evolution/plantarium/PlantsVisitor";
 import ParasiteVisitor from "../models/game/evolution/plantarium/ParasiteVisitor";
 import {CHAT_TARGET_TYPE} from "../models/ChatModel";
+import ERRORS from "./errors";
 
 // region Game
 // region Init
@@ -468,7 +469,6 @@ const server$gameNextPlayer = (gameId, startSearchFromId) => (dispatch, getState
   let nextRound = false;
   const roundPlayerId = game.getIn(['status', 'roundPlayer']);
   const currentPlayerId = game.getIn(['status', 'currentPlayer']);
-  // console.log('server$gameNextPlayer', roundPlayerId, currentPlayerId, !!startSearchFromId)
   const startIndex = !!startSearchFromId
     ? (game.getPlayer(startSearchFromId).index + 1) % game.players.size
     : game.getPlayer(roundPlayerId).index;
@@ -512,13 +512,37 @@ export const plantDeath = (gameId, plantId) => ({
   , data: {gameId, plantId}
 });
 
+export const server$animalDeath = (gameId, type, animalId, data) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  const animal = game.locateAnimal(animalId);
+  const viviAnimalIds = animal.getTraits()
+    .filter(trait => trait.type === tt.TraitTrematode)
+    .map(trait => game.locateAnimal(trait.linkAnimalId))
+    .filter(possibleVivi => {
+      const traitViviparous = possibleVivi.hasTrait(tt.TraitViviparous);
+      return (
+        traitViviparous
+        && traitViviparous.getErrorOfUse(game, animal) === ERRORS.TRAIT_TARGETING_ANIMAL_SATURATED
+      );
+    })
+    .map(viviAnimal => viviAnimal.id);
+
+  dispatch(server$game(gameId, animalDeath(gameId, type, animalId, data)));
+
+  const updatedGame = selectGame(getState, gameId);
+  viviAnimalIds
+    .forEach(viviAnimalId => {
+      dispatch(server$activateViviparous(updatedGame.id, viviAnimalId));
+    });
+};
+
 const server$gameExtinct = (gameId) => (dispatch, getState) => {
   dispatch(server$gameStartPhase(gameId, PHASE.EXTINCTION));
   selectGame(getState, gameId).someAnimal((animal, continent, player) => {
     if (animal.hasFlag(TRAIT_ANIMAL_FLAG.POISONED)) {
-      dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.POISON, animal.id)));
+      dispatch(server$animalDeath(gameId, ANIMAL_DEATH_REASON.POISON, animal.id));
     } else if (!animal.canSurvive()) {
-      dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.STARVE, animal.id)));
+      dispatch(server$animalDeath(gameId, ANIMAL_DEATH_REASON.STARVE, animal.id));
     }
   });
 
@@ -802,7 +826,7 @@ export const gameClientToServer = {
         , linkedPlant
         , entity
       );
-    } else{
+    } else {
       traits = [TraitModel.new(traitData.type).attachTo(entity)];
     }
 

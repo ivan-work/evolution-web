@@ -1,25 +1,25 @@
 import React, {Fragment} from 'react';
 import PropTypes from 'prop-types'
-import T from 'i18n-react';
+import T from 'i18n-react/dist/i18n-react';
 import cn from 'classnames';
 import {connect} from "react-redux";
 import {branch, compose, renderNothing} from "recompose";
 
-import Button from '@material-ui/core/Button';
+import Button from '@material-ui/core/Button/index';
 
-import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogActions from '@material-ui/core/DialogActions';
+import Dialog from '@material-ui/core/Dialog/index';
+import DialogTitle from '@material-ui/core/DialogTitle/index';
+import DialogContent from '@material-ui/core/DialogContent/index';
+import DialogActions from '@material-ui/core/DialogActions/index';
 
 import {PHASE} from '../../../../shared/models/game/GameModel';
 
 import User from "../../utils/User";
-import Table from "@material-ui/core/Table";
-import TableRow from "@material-ui/core/TableRow";
-import TableCell from "@material-ui/core/TableCell";
-import TableHead from "@material-ui/core/TableHead";
-import TableBody from "@material-ui/core/TableBody";
+import Table from "@material-ui/core/Table/index";
+import TableRow from "@material-ui/core/TableRow/index";
+import TableCell from "@material-ui/core/TableCell/index";
+import TableHead from "@material-ui/core/TableHead/index";
+import TableBody from "@material-ui/core/TableBody/index";
 import withStyles from "@material-ui/core/styles/withStyles";
 
 const styles = {

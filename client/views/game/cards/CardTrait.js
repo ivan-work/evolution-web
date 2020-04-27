@@ -14,7 +14,7 @@ import {compose} from "recompose";
 import {connect} from "react-redux";
 import {PHASE} from "../../../../shared/models/game/GameModel";
 import {InteractionSource} from "../InteractionManager";
-import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";
+import {InteractionItemType} from "../InteractionItemType";
 
 const traitStyles = theme => ({
   CardTrait: {
@@ -67,7 +67,7 @@ export const InteractiveCardTrait = compose(
   connect(({game}) => ({
     canStart: (game.status.phase === PHASE.DEPLOY && game.isPlayerTurn()) || (game.status.phase === PHASE.REGENERATION)
   }))
-  , InteractionSource(DND_ITEM_TYPE.CARD_TRAIT, {
+  , InteractionSource(InteractionItemType.CARD_TRAIT, {
     canStart: ({canStart}) => canStart
     , onStart: ({cardId, trait, invert}) => ({
       cardId: cardId

@@ -250,7 +250,12 @@ const plantProduceFood = (game, plant, aedificators) => {
 export const gameStartTurn = (game) => {
   const roundPlayerIndex = game.getPlayer(game.status.roundPlayer).index;
   const nextRoundPlayerIndex = (roundPlayerIndex + 1) % game.players.size;
-  const nextRoundPlayerId = game.players.find(p => p.index === nextRoundPlayerIndex).id;
+  const nextRoundPlayer = game.sortPlayersFromIndex(game.players, nextRoundPlayerIndex)
+    .filter(player => player.playing)
+    .first();
+
+  const nextRoundPlayerId = nextRoundPlayer.id;
+
   let aedificators = 0;
   game.someAnimal((animal) => {
     if (animal.hasTrait(tt.TraitAedificator)) aedificators++;

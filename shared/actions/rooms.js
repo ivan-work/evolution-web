@@ -377,26 +377,24 @@ const roomAfkHost = (roomId, afkHost) => ({
 
 export const server$roomAfkHosts = () => (dispatch, getState) => {
   getState().get('rooms').forEach((room) => {
-    // console.log('Check', room.gameId, Date.now() - room.timestamp, ROOM_AFK_HOST_PERIOD, Date.now() - room.timestamp < ROOM_AFK_HOST_PERIOD)
     if (room.gameId) return;
     if (Date.now() - room.timestamp < ROOM_AFK_HOST_PERIOD) return;
     const hostId = room.users.first();
 
-    // console.log('Check2', Date.now() - room.hostActivity, ROOM_AFK_HOST_PERIOD, Date.now() - room.hostActivity > ROOM_AFK_HOST_PERIOD)
     if (Date.now() - room.hostActivity > ROOM_AFK_HOST_PERIOD) {
       if (room.afkHost) {
-        dispatch(server$chatMessage(room.id, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.AfkHostKick', 0));
+        dispatch(server$chatMessage(room.id, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.AfkHostKick', '0'));
         dispatch(roomAfkHost(room.id, false));
         // Watch out, this should be the last action as it could destroy room
         dispatch(server$roomKick(room.id, hostId));
       } else {
         dispatch(roomAfkHost(room.id, true));
-        dispatch(server$chatMessage(room.id, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.AfkHostRequest', 0));
+        dispatch(server$chatMessage(room.id, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.AfkHostRequest', '0'));
       }
     } else {
       if (room.afkHost) {
         dispatch(roomAfkHost(room.id, false));
-        dispatch(server$chatMessage(room.id, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.AfkHostNormal', 0));
+        dispatch(server$chatMessage(room.id, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.AfkHostNormal', '0'));
       }
     }
   })
@@ -516,7 +514,7 @@ const isUserRouterInGame = () => {
 const makeRoomSelfDestructTimeoutId = (roomId) => `roomSelfDestruct#${roomId}`;
 
 export const server$roomSelfDestructStart = (roomId, winnerId) => (dispatch, getState) => {
-  dispatch(server$chatMessage(roomId, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.GameEnd', 0, {
+  dispatch(server$chatMessage(roomId, CHAT_TARGET_TYPE.ROOM, 'App.Room.Messages.GameEnd', '0', {
     time: Math.floor(ROOM_SELF_DESTRUCTION_TIME / 60e3)
     , winnerName: selectUserName(getState, winnerId)
   }));

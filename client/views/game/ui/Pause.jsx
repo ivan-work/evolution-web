@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types'
-import T from 'i18n-react';
+import T from 'i18n-react/dist/i18n-react';
 import {connect} from 'react-redux';
 
 import IconPause from '@material-ui/icons/Pause';
 import IconPlay from '@material-ui/icons/PlayArrow';
 
-import Button from '@material-ui/core/Button';
-import Tooltip from '@material-ui/core/Tooltip';
+import Button from '@material-ui/core/Button/index';
+import Tooltip from '@material-ui/core/Tooltip/index';
 
 import {gameSetUserWantsPauseRequest} from '../../../../shared/actions/actions';
 

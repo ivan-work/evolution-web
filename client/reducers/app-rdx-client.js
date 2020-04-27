@@ -1,4 +1,4 @@
-import {Map, OrderedSet} from 'immutable';
+import {Map, Set} from 'immutable';
 import {createReducer} from '~/shared/utils';
 import langCodes from '../../i18n';
 
@@ -37,7 +37,7 @@ const getInitialState = () => Map({
   , uiv3: loadValue('uiv3', true)
   , adminMode: process.env.NODE_ENV !== 'production'
   , plantsMode: process.env.NODE_ENV !== 'production'
-  , ignoreList: OrderedSet(loadValue('ignoreList', []))
+  , ignoreList: Set(loadValue('ignoreList', []))
   , forms: Map()
 });
 
@@ -55,6 +55,11 @@ export const reducer = createReducer(getInitialState(), {
   }
   , appUnignoreUser: (state, {userId}) => {
     const ignoreList = state.get('ignoreList').remove(userId);
+    saveValue('ignoreList', ignoreList.toJS());
+    return state.set('ignoreList', ignoreList);
+  }
+  , appUnignoreAll: (state) => {
+    const ignoreList = Set();
     saveValue('ignoreList', ignoreList.toJS());
     return state.set('ignoreList', ignoreList);
   }

@@ -78,20 +78,27 @@ deck: 50 camo
     expect(selectGame().getIn(['status', 'currentPlayer']), 'currentPlayer').equal(User1.id);
   });
 
-  it(`Handle game with leaver`, () => {
-    const [{serverStore, ParseGame}
-      , {clientStore0, User0, ClientGame0}
-      , {clientStore1, User1, ClientGame1}
-      , {clientStore2, User2, ClientGame2}] = mockGame(3);
+  it(`Handle game with leavers`, () => {
+    const [
+      {serverStore, ParseGame}
+      , {clientStore0, User0}
+      , {clientStore1, User1}
+      , {clientStore2, User2}
+      , {clientStore3, User3}
+    ] = mockGame(4);
     const gameId = ParseGame(`
 phase: feeding
 food: 5
 deck: 50 camo
 players:
-  - hand: 5 camo
+  - hand: 2 camo
     continent: $Q +, $W
-  - continent: $A +, $S
-  - continent: $Z +, $X
+  - hand: 2 camo
+    continent: $L1 +, $K1
+  - hand: 2 camo
+    continent: $L2 +, $K2
+  - hand: 2 camo
+    continent: $A +, $S
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
@@ -99,19 +106,41 @@ players:
     expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.FEEDING);
     expect(selectGame().getIn(['status', 'currentPlayer'])).equal(User0.id);
 
-    //replaceGetRandom(() => )
-    clientStore0.disconnect(SOCKET_DISCONNECT_NOW);
-    expect(selectPlayer(User0).hand, 'empties hand after leave').size(0);
-    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(User1.id);
+    clientStore0.dispatch(traitTakeFoodRequest('$W'));
 
-    clientStore1.dispatch(traitTakeFoodRequest('$S'));
-    clientStore2.dispatch(traitTakeFoodRequest('$X'));
+    clientStore1.disconnect(SOCKET_DISCONNECT_NOW);
+    clientStore2.disconnect(SOCKET_DISCONNECT_NOW);
+
+    expect(selectPlayer(User1).hand, 'empties hand after leave').size(0);
+    expect(selectPlayer(User2).hand, 'empties hand after leave').size(0);
+
+    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(User3.id);
+
+    clientStore3.dispatch(traitTakeFoodRequest('$S'));
 
     expect(selectGame().getIn(['status', 'turn'])).equal(1);
     expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.DEPLOY);
-    expect(selectGame().getIn(['status', 'currentPlayer'])).equal(User1.id);
-    expect(selectPlayer(User0).hand).size(0);
-    expect(selectPlayer(User1).hand).size(3);
-    expect(selectPlayer(User2).hand).size(3);
+    expect(selectGame().getIn(['status', 'currentPlayer']), 'Turn 1: User3 first').equal(User3.id);
+
+    expect(selectPlayer(User0).hand).size(5);
+    expect(selectPlayer(User1).hand).size(0);
+    expect(selectPlayer(User2).hand).size(0);
+    expect(selectPlayer(User3).hand).size(5);
+
+    clientStore3.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expect(selectGame().getIn(['status', 'turn'])).equal(1);
+    expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.FEEDING);
+    expect(selectGame().getIn(['status', 'currentPlayer']), 'Turn 1: User3 first').equal(User3.id);
+
+    clientStore3.dispatch(traitTakeFoodRequest('$A'));
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+    clientStore3.dispatch(traitTakeFoodRequest('$S'));
+    clientStore0.dispatch(traitTakeFoodRequest('$W'));
+
+    expect(selectGame().getIn(['status', 'turn'])).equal(2);
+    expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.DEPLOY);
+    expect(selectGame().getIn(['status', 'currentPlayer']), 'Turn 2: User0 first').equal(User0.id);
   });
 });

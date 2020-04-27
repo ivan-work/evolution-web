@@ -15,8 +15,8 @@ import {List} from 'immutable';
 import TimeService from '../services/TimeService';
 
 import {CHAT_MESSAGE_LENGTH, CHAT_TARGET_TYPE} from '../../shared/models/ChatModel';
-import {chatMessageRequest} from '../../shared/actions/actions';
-import GameStyles from "./uiv3/GameStyles";
+import {client$chatMessageRequest} from '../../shared/actions/actions';
+import GameStyles from "./game/GameStyles";
 import IgnoreUnignoreTooltip from "../components/IgnoreUnignoreTooltip";
 import User from "./utils/User";
 
@@ -106,7 +106,7 @@ export const ChatWindow = compose(
 
 export const ChatMessage = withStyles(messageStyles)(({classes, message, short}) => {
   const {timestamp, from, fromLogin, to, toType} = message;
-  const text = from !== 0 ? message.text : T.translate(message.text, message.context);
+  const text = from !== '0' ? message.text : T.translate(message.text, message.context);
   return (
     <Typography className={cn({
       [classes.messageRoot]: true
@@ -124,7 +124,7 @@ export const ChatMessage = withStyles(messageStyles)(({classes, message, short})
 
 const ChatInput = compose(
   connect(null, (dispatch, {roomId, chatTargetType}) => ({
-    sendMessage: (message) => dispatch(chatMessageRequest(roomId, chatTargetType, message))
+    sendMessage: (message) => dispatch(client$chatMessageRequest(roomId, chatTargetType, message))
   }))
   , withStateHandlers({message: ''}, {
     onMessageChange: () => (e) => ({message: e.target.value})

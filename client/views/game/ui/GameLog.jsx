@@ -1,11 +1,11 @@
 import React from 'react'
-import T from 'i18n-react'
+import T from 'i18n-react/dist/i18n-react'
 
-import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import Button from "@material-ui/core/Button";
-import Tooltip from '@material-ui/core/Tooltip';
+import Dialog from '@material-ui/core/Dialog/index';
+import DialogTitle from '@material-ui/core/DialogTitle/index';
+import DialogContent from '@material-ui/core/DialogContent/index';
+import Button from "@material-ui/core/Button/index";
+import Tooltip from '@material-ui/core/Tooltip/index';
 
 import IconLog from '@material-ui/icons/List';
 
@@ -22,7 +22,7 @@ const format = (str, arr) => str.replace(DATA_REGEX, (match, number) => typeof a
 import replace from 'react-string-replace';
 
 import './GameLog.scss';
-import Food from "../../uiv3/food/Food";
+import Food from "../food/Food";
 
 const customLog = {
   gameGiveCards: (message, values) => {

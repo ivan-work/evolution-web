@@ -11,7 +11,7 @@ import {compose, fromRenderProps, setPropTypes, withHandlers, withProps} from "r
 import {connect} from "react-redux";
 
 import withStyles from "@material-ui/core/styles/withStyles";
-import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";
+import {InteractionItemType} from "../InteractionItemType";
 import {TRAIT_COOLDOWN_LINK} from "../../../../shared/models/game/evolution/constants";
 
 import {InteractionSource} from '../InteractionManager';
@@ -23,7 +23,7 @@ export const IconCover = React.forwardRef((props, ref) => (
   <SvgIcon {...props}>
     <path
       ref={ref}
-      d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0" />
+      d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
   </SvgIcon>
 ));
 
@@ -85,8 +85,8 @@ export const InteractiveCover = compose(
         && !game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, game.userId)
     }
   })
-  , InteractionSource(DND_ITEM_TYPE.COVER, {
-    getIID: ({index, sourceId}) => DND_ITEM_TYPE.COVER + index + sourceId
+  , InteractionSource(InteractionItemType.COVER, {
+    getIID: ({index, sourceId}) => InteractionItemType.COVER + index + sourceId
     , canStart: ({canStart}) => canStart
     , onStart: ({sourceId}) => ({sourceId})
   })

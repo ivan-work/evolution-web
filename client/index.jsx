@@ -29,7 +29,7 @@ import './styles/style.scss';
 import 'rc-tooltip/assets/bootstrap_white.css'
 
 // Services
-import animations from './views/uiv3/animations';
+import animations from './views/game/animations';
 import animationMiddleware from './services/AnimationService/animationMiddleware';
 
 const reducer = combineReducers({

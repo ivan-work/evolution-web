@@ -1,8 +1,10 @@
 import logger from '../../../shared/utils/logger';
 
+import * as tt from '../../models/game/evolution/traitTypes';
 import * as ptt from '../../models/game/evolution/plantarium/plantTraitTypes';
+
 import {makeGameSelectors} from '../../selectors'
-import {traitTakeFoodRequest} from "../trait";
+import {traitActivateRequest, traitTakeFoodRequest} from "../trait";
 import {gameEndTurnRequest} from "../game";
 import ERRORS from "../errors";
 import {TRAIT_ANIMAL_FLAG} from "../../models/game/evolution/constants";
@@ -29,9 +31,12 @@ players:
     expectError(`Can't reuse intellect`, ERRORS.PLANT_FOOD_NO_ACCESS, () => {
       clientStore0.dispatch(traitTakeFoodRequest('$A', '$aqua'));
     });
+
+    expectError(`Can't reuse intellect`, ERRORS.PLANT_FOOD_NO_ACCESS, () => {
+      clientStore0.dispatch(traitTakeFoodRequest('$A', '$suc'));
+    });
+
     expect(findAnimal('$A').getFood(), '$A.food after error').equals(1);
-    clientStore0.dispatch(traitTakeFoodRequest('$A', '$suc'));
-    expect(findAnimal('$A').getFood(), '$A.food').equals(2);
   });
 
   it(`TraitIntellect + Officinalis`, () => {
@@ -66,6 +71,34 @@ players:
     clientStore0.dispatch(traitTakeFoodRequest('$A', '$suc'));
     expect(findAnimal('$A').getFood(), '$A.food').equals(1);
     expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED), '$A is paralyzed').equals(true);
+  });
+
+  it(`TraitIntellect vs Carnivorous`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+phase: feeding
+plants: carn $carn +++
+players:
+  - continent: $A int carn para, $B swim, $W wait
+`);
+    const {selectGame, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitTakeFoodRequest('$A', '$carn'));
+
+    expect(findAnimal('$A'), '$A is alive').ok;
+    expect(findAnimal('$A').getFood(), '$A.food').equals(1);
+
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expectError(`Can't reuse intellect on animal`, 'checkTarget', () => {
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+    });
+
+    clientStore0.dispatch(traitTakeFoodRequest('$A', '$carn'));
+
+    expect(findAnimal('$A'), '$A is dead').null;
   });
 });
 

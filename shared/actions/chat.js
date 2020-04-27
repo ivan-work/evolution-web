@@ -1,5 +1,8 @@
 import {loggerChat} from '../utils/logger';
 import {to$, server$toRoom, server$toUsers} from './generic';
+import {selectGame} from '../selectors';
+import TimeService from '../../client/services/TimeService';
+import moment from 'moment';
 
 import {ChatModel, MessageModel, CHAT_TARGET_TYPE, CHAT_MESSAGE_LENGTH} from '../models/ChatModel';
 import {ActionCheckError} from '../models/ActionCheckError';
@@ -18,17 +21,34 @@ export const chatInit = (globalChat) => ({
  * Message
  * */
 
-export const chatMessageRequest = (to, toType, text) => (dispatch) => {
+const chatMessageRequest = (to, toType, text) => ({
+  type: 'chatMessageRequest'
+  , data: {to, toType, text}
+  , meta: {server: true}
+});
+
+export const client$chatMessageRequest = (to, toType, text) => (dispatch, getState) => {
   if (text === '/admin') {
     dispatch({type: 'setAdminMode', data: null});
   } else if (text === '/растения') {
     dispatch({type: 'setPlantsMode', data: null});
+  } else if (text === '/time') {
+    const game = getState().game;
+    if (game) {
+      const time = moment.utc(Date.now() - game.timeCreated).format('HH:mm');
+
+      dispatch(chatMessageRoom(MessageModel.fromJS({
+        timestamp: Date.now()
+        , to: game.roomId
+        , toType: CHAT_TARGET_TYPE.ROOM
+        , from: '0'
+        , fromLogin: 'System'
+        , text: 'App.Room.Messages.OutputTime'
+        , context: {time}
+      })));
+    }
   } else {
-    dispatch({
-      type: 'chatMessageRequest'
-      , data: {to, toType, text}
-      , meta: {server: true}
-    });
+    dispatch(chatMessageRequest(to, toType, text));
   }
 };
 
@@ -52,18 +72,24 @@ export const server$chatMessage = (to, toType, text, from, context) => (dispatch
     .trim()
     // .replace(CHAT_WHITELIST_REGEX, '')
     .slice(0, CHAT_MESSAGE_LENGTH);
+
   if (validText.length === 0) {
     throw new ActionCheckError('chatMessageRequest not valid');
   }
+
   if (validText === '/error') {
     throw new Error('chat error');
   }
 
-  const fromLogin = from === 0 ? 'System'
+  const fromLogin = from === '0' ? 'System'
     : getState().getIn(['users', from, 'login'], 'unknown');
 
   const message = MessageModel.fromJS({
-    timestamp: Date.now(), to, toType, from, text: validText
+    timestamp: Date.now()
+    , to
+    , toType
+    , from
+    , text: validText
     , fromLogin
     , context
   });

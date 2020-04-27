@@ -25,6 +25,7 @@ App:
     $off: выкл # this doesn't work without $
     FAQ: Об игре
     FAQ_HREF: 'https://github.com/ivan-work/evolution-web/blob/master/faq-ru.md'
+    UnignoreAll: Сбросить игнорирование
   Chat:
     Label: Чат
     EnterMessage: ...
@@ -70,6 +71,7 @@ App:
     ErrorKick: Вас кикнули
     ErrorBan: Вас забанили
     Messages:
+      OutputTime: "Время игры: {time}"
       GameEnd: Игра закончена. Поздравляем {winnerName}! Комната самоуничтожится через {time} минуты.
       AfkHostRequest: Привет, хост! Пожалуйста, напиши что-нибудь в чат.
       AfkHostKick: Хост кикнут за АФК.
@@ -99,9 +101,6 @@ Game:
         PLANT_LINK: 'Соедините со вторым растением'
         PLANT_ATTACK: 'Атакуйте животное'
         COVER: 'Положите на животное, чтобы защитить его от атаки'
-    SwitchUI:
-      New: Новый интерфейс
-      Old: Старый интерфейс
     FoodBase: Кормовая база
     SelectLink: Перетащите на другое существо
     EndTurn: Передать ход
@@ -151,6 +150,7 @@ Game:
       AttackedBy: Защищайтесь! Вас атаковал
   Log:
     Label: Лог действий
+    gameNextRound: Новый раунд.
     gameGiveCards:
       0: $Player@{0} получил {1} карту
       1: $Player@{0} получил {1} карты
@@ -194,6 +194,7 @@ Game:
     PlantFungus: Гриб
     PlantCarnivorous: Хищное
     PlantParasite: Растение-паразит
+  Animal: Животное
   AnimalFlag:
     HIBERNATED: Спит zZzZ
     POISONED: Отравлен

@@ -7,6 +7,7 @@ import {
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
 
 import * as tt from '../../models/game/evolution/traitTypes';
+import {traitAnswerRequest} from "../trait";
 
 describe('TraitViviparous:', () => {
   it('from taking food', () => {
@@ -126,6 +127,43 @@ players:
     expect(findPlayerByIndex(1).continent).size(0);
 
     expect(selectGame().deck, 'Deck size').size(2);
+  });
+
+  it(`From tailloss`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 2 camo
+phase: feeding
+food: 1
+players:
+  - continent: $A vivi tail para ++, $B carn, $W wait
+`);
+    const {selectGame, findPlayerByIndex, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$A'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitTailLoss, tt.TraitParasite));
+
+    expect(findPlayerByIndex(0).continent).size(4);
+
+    expect(selectGame().deck, 'Deck size').size(1);
+  });
+
+  it(`From tremathode`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 2 camo
+phase: feeding
+food: 1
+players:
+  - continent: $A vivi trem$B ++, $B, $C carn, $W wait
+`);
+    const {selectGame, findPlayerByIndex, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$C', tt.TraitCarnivorous, '$B'));
+
+    expect(findPlayerByIndex(0).continent).size(4);
+
+    expect(selectGame().deck, 'Deck size').size(1);
   });
 });
 

@@ -1,27 +1,37 @@
 import React from "react";
+import T from 'i18n-react';
 import cn from "classnames";
+import {compose} from "recompose";
+import repeat from "lodash/times";
 
 import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
 
-import repeat from "lodash/times";
-
 import {InteractiveFood} from "./Food";
 import {InteractiveShell} from "./Shell";
-import Plant from "../plants/Plant";
-import {compose} from "recompose";
+
 import withStyles from "@material-ui/core/styles/withStyles";
+import GameStyles from "../GameStyles";
 
 
 export default compose(
   withStyles({
-    FoodContainer: {
+    root: {
       height: '100%'
       , overflow: 'hidden'
+      , textAlign: 'center'
+    }
+    , title: {
+      lineHeight: GameStyles.iconSize + 'px'
+      , verticalAlign: 'top'
     }
   })
   , AnimatedHOC(() => `FoodContainer`)
 )(
-  ({classes, game}) => <div className={classes.FoodContainer}>
+  ({classes, game}) => <div className={classes.root}>
+    <span className={cn('h5', classes.title)}>
+      {T.translate('Game.Icon.Food')}&nbsp;({game.food})
+      {game.food > 0 ? ': ' : ''}
+    </span>
     {repeat(game.food, i => <InteractiveFood key={i} index={i}/>)}
     {game.getArea().shells.map((trait) => <InteractiveShell key={trait.id} trait={trait}/>).toList()}
   </div>

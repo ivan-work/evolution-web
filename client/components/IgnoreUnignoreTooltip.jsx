@@ -73,10 +73,7 @@ const RenderChildrenHOC = renderComponent(({children}) => children);
 export const IgnoreUnignoreTooltip = compose(
   setDisplayName('IgnoreUnignoreTooltip$')
   , setPropTypes({
-    userId: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.number
-    ]).isRequired
+    userId: PropTypes.string.isRequired
   })
   , withStateHandlers({isOpen: false}, {
     handleTooltipOpen: () => () => ({isOpen: true})

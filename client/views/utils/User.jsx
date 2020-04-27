@@ -69,6 +69,8 @@ export const UserConnected = connect(
   })
 )(({children, variant, ...props}) => children ? children(props) : UserVariants[variant](props));
 
+UserConnected.displayName = 'UserConnected';
+
 UserConnected.propTypes = {
   id: PropTypes.string.isRequired,
   variant: PropTypes.oneOf(['simple', 'typography', 'listItem', 'listItemWithActions'])

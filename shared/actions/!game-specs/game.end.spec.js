@@ -51,8 +51,8 @@ players:
     expect(ClientGame0().status.turn, 'ClientGame0().status.turn').equal(1);
     expect(ClientGame0().status.phase, 'ClientGame0().status.phase').equal(PHASE.DEPLOY);
 
-    expect(selectPlayer(User0).continent).size(1);
-    expect(ClientGame0().getPlayer(User0).continent).size(1);
+    expect(selectPlayer(User0).continent, 'selectPlayer(User0).continent').size(1);
+    expect(ClientGame0().getPlayer(User0).continent, 'ClientGame0().getPlayer(User0).continent').size(1);
     expect(ClientGame1().getPlayer(User0).continent).size(1);
     expect(ClientGame2().getPlayer(User0).continent).size(1);
     expect(selectAnimal(User0, 0).getFood()).equal(0);

@@ -36,6 +36,8 @@ const TraitGeneralColors = {
   , fillDisabled: '#999'
   , textInteracting: '#F33'
   , fillInteracting: '#F33'
+  , textCooldown: '#AAA'
+  , fillCooldown: '#F33'
 };
 
 const defaultColorConfig = {
@@ -52,6 +54,8 @@ const defaultColorConfig = {
   , fillDisabled: TraitGeneralColors.fillDisabled
   , textInteracting: TraitGeneralColors.textInteracting
   , fillInteracting: TraitGeneralColors.fillInteracting
+  , textCooldown: TraitGeneralColors.textCooldown
+  , fillCooldown: TraitGeneralColors.fillCooldown
 };
 
 const TraitColors = {
@@ -181,6 +185,7 @@ export default {
   , defaultColorConfig
   , TraitColors
   , gridContainerBase
+  , iconSize: 32
   , card: {
     width: 90
     , height: 90 / 3 * 4

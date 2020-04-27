@@ -12,7 +12,7 @@ import {connect} from "react-redux";
 import Tooltip from '@material-ui/core/Tooltip';
 import withStyles from "@material-ui/core/styles/withStyles";
 
-import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";
+import {InteractionItemType} from "../InteractionItemType";
 import {TRAIT_COOLDOWN_LINK} from "../../../../shared/models/game/evolution/constants";
 
 import {InteractionSource} from '../InteractionManager';
@@ -28,7 +28,7 @@ export const IconShell = React.forwardRef((props, ref) => (
 
 const styles = {
   Food: {
-    fontSize: 32
+    fontSize: GameStyles.iconSize
     , fill: 'gray'
     , '&.canStart': {
       cursor: 'pointer'
@@ -60,7 +60,7 @@ export const InteractiveShell = compose(
       canStart: game.isPlayerTurn() && !game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, game.userId)
     }
   })
-  , InteractionSource(DND_ITEM_TYPE.TRAIT_SHELL, {
+  , InteractionSource(InteractionItemType.TRAIT_SHELL, {
     canStart: ({canStart}) => canStart
     , onStart: ({trait}) => ({trait})
   })

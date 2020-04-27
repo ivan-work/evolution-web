@@ -16,6 +16,7 @@ import {TraitCarnivorous, TraitIntellect} from "../traitsData";
 import {server$huntStart_Plant} from "../traitsData/hunt";
 import {server$gamePlantUpdateFood} from "../../../../actions/game.plantarium";
 import {getFeedingCooldownList, server$startCooldownList, server$traitStartCooldown} from "../../../../actions/trait";
+import {countUnavoidableDefenses} from "../traitsData/TraitCarnivorous";
 
 export const PlantTraitHiddenCarnivorous = Object.assign({}, TraitCarnivorous, {
   type: ptt.PlantTraitHiddenCarnivorous

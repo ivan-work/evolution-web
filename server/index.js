@@ -31,12 +31,20 @@ database.ready.then(() => {
   server.on('listening', onListening);
   server.listen(app.get('port'), () => {
     loggerOnline.info('Server started');
-    console.log('App is running at http://localhost:%d in %s mode', app.get('port'), app.get('env'));
+    console.log(`App is running at port ${app.get('port')} in ${app.get('env')} env`);
     console.log('Press CTRL-C to stop\n');
   });
 
-// development error handler
-// will print stacktrace
+  /* Redirect http to https */
+  app.get('*', function (req, res, next) {
+    if (req.headers['x-forwarded-proto'] !== 'https' && process.env.NODE_ENV === 'production')
+      res.redirect('https://' + req.hostname + req.url);
+    else
+      next() /* Continue to other routes if we're not redirecting */
+  });
+
+  // development error handler
+  // will print stacktrace
   if (app.get('env') === 'development') {
     app.use(function (err, req, res, next) {
       console.log(err.stack);

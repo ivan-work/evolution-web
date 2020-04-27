@@ -9,13 +9,13 @@ import {InteractionSource} from "../InteractionManager";
 
 import GameStyles from "../GameStyles";
 
-import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";
+import {InteractionItemType} from "../InteractionItemType";
 import {PHASE} from "../../../../shared/models/game/GameModel";
 import {TRAIT_TARGET_TYPE} from "../../../../shared/models/game/evolution/constants";
 
 import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
 import {TraitBase} from "../traits/Trait";
-import LinkedTraitWrapper from "../lineBetweenTraits/LinkedTraitWrapper";
+import LinkedTraitWrapper from "../traits/LinkedTraitWrapper";
 import {getErrorOfEntityTraitActivation} from "../../../../shared/actions/trait.checks";
 import * as ptt from "../../../../shared/models/game/evolution/plantarium/plantTraitTypes";
 import {AnimalTraitBase} from "../animals/AnimalTrait";
@@ -50,11 +50,16 @@ const checkCanStart = ({game}, {trait, sourcePlant}) => (
   && !getErrorOfEntityTraitActivation(game, game.userId, sourcePlant, trait)
 );
 
+const checkCooldown = ({game}, {trait, sourcePlant}) => (
+  game.cooldowns.checkFor(trait.type, game.userId, sourcePlant.id, trait.id)
+);
+
 export const InteractivePlantTraitCarnivorous = compose(
   connect((state, props) => ({
     canStart: checkCanStart(state, props)
+    , isOnCooldown: checkCooldown(state, props)
   }))
-  , InteractionSource(DND_ITEM_TYPE.PLANT_ATTACK, {
+  , InteractionSource(InteractionItemType.PLANT_ATTACK, {
     getIID: ({trait}) => trait.id
     , canStart: ({canStart}) => canStart
     , onStart: ({trait, sourcePlant}) => ({trait, sourcePlant})
@@ -64,6 +69,7 @@ export const InteractivePlantTraitCarnivorous = compose(
 export const InteractiveTraitClickable = compose(
   connect((state, props) => ({
     canStart: checkCanStart(state, props)
+    , isOnCooldown: checkCooldown(state, props)
   }), (dispatch, {trait, sourcePlant}) => ({
     startInteraction: () => dispatch(plantTraitActivateRequest(sourcePlant.id, trait.id))
   }))
@@ -72,8 +78,9 @@ export const InteractiveTraitClickable = compose(
 export const InteractiveTrait = compose(
   connect((state, props) => ({
     canStart: checkCanStart(state, props)
+    , isOnCooldown: checkCooldown(state, props)
   }))
-  , InteractionSource(DND_ITEM_TYPE.TRAIT, {
+  , InteractionSource(InteractionItemType.TRAIT, {
     getIID: ({trait}) => trait.id
     , canStart: ({canStart}) => canStart
     , onStart: ({trait, sourcePlant}) => ({trait, sourcePlant})

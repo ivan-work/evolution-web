@@ -9,7 +9,7 @@ import Typography from "@material-ui/core/Typography/Typography";
 
 import EvoLink from "../components/EvoLink";
 
-import GameUIv3 from '../views/uiv3/GameUIv3'
+import GameUIv3 from '../views/game/GameUIv3'
 import Room from '../views/rooms/Room.jsx'
 
 export default compose(

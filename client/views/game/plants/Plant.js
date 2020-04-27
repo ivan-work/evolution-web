@@ -9,7 +9,7 @@ import {connect} from "react-redux";
 import Typography from "@material-ui/core/Typography/Typography";
 import withStyles from "@material-ui/core/styles/withStyles";
 
-import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";
+import {InteractionItemType} from "../InteractionItemType";
 import {AT_DEATH} from "../animations";
 import {CTT_PARAMETER, TRAIT_TARGET_TYPE} from "../../../../shared/models/game/evolution/constants";
 import {InteractionTarget} from "../InteractionManager";
@@ -140,17 +140,17 @@ const InteractivePlant = compose(
     gameDeployTraitRequest
     , traitActivateRequest
   })
-  , InteractionTarget([DND_ITEM_TYPE.CARD_TRAIT, DND_ITEM_TYPE.PLANT_LINK, DND_ITEM_TYPE.TRAIT], {
+  , InteractionTarget([InteractionItemType.CARD_TRAIT, InteractionItemType.PLANT_LINK, InteractionItemType.TRAIT], {
     canInteract: ({game, plant}, {type, item}) => {
       switch (type) {
-        case DND_ITEM_TYPE.TRAIT: {
+        case InteractionItemType.TRAIT: {
           const {trait, sourceAnimal} = item;
           const traitDataModel = trait.getDataModel();
           if (traitDataModel.targetType !== TRAIT_TARGET_TYPE.PLANT) return;
           const targetError = traitDataModel.getErrorOfUseOnTarget(game, sourceAnimal, plant);
           return !targetError;
         }
-        case DND_ITEM_TYPE.CARD_TRAIT: {
+        case InteractionItemType.CARD_TRAIT: {
           const {traitType} = item;
           const traitData = TraitModel.new(traitType).getDataModel();
           if (!(traitData.cardTargetType & CTT_PARAMETER.PLANT)) {
@@ -158,7 +158,7 @@ const InteractivePlant = compose(
           }
           return !traitData.getErrorOfTraitPlacement(plant);
         }
-        case DND_ITEM_TYPE.PLANT_LINK: {
+        case InteractionItemType.PLANT_LINK: {
           const {traitType, plantId, alternateTrait} = item;
           const sourceEntity = game.getEntity(plantId);
           return (
@@ -176,12 +176,12 @@ const InteractivePlant = compose(
                      , traitActivateRequest
                    }, {type, item}) => {
       switch (type) {
-        case DND_ITEM_TYPE.CARD_TRAIT: {
+        case InteractionItemType.CARD_TRAIT: {
           const {cardId, traitType, alternateTrait} = item;
           const traitDataModel = TraitModel.new(traitType).getDataModel();
           if (traitDataModel.linkTargetType) {
             return {
-              type: DND_ITEM_TYPE.PLANT_LINK
+              type: InteractionItemType.PLANT_LINK
               , item: {
                 ...item
                 , plantId: plant.id
@@ -192,12 +192,12 @@ const InteractivePlant = compose(
           }
           break;
         }
-        case DND_ITEM_TYPE.PLANT_LINK: {
+        case InteractionItemType.PLANT_LINK: {
           const {cardId, alternateTrait, plantId} = item;
           gameDeployTraitRequest(cardId, plantId, alternateTrait, plant.id);
           break;
         }
-        case DND_ITEM_TYPE.TRAIT: {
+        case InteractionItemType.TRAIT: {
           const {sourceAnimal, trait} = item;
           traitActivateRequest(sourceAnimal.id, trait.id, plant.id);
           break;

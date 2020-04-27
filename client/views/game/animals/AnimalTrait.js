@@ -12,7 +12,7 @@ import Typography from "@material-ui/core/Typography";
 
 import GameStyles from "../GameStyles";
 
-import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";
+import {InteractionItemType} from "../InteractionItemType";
 import {PHASE} from "../../../../shared/models/game/GameModel";
 import {TRAIT_TARGET_TYPE} from "../../../../shared/models/game/evolution/constants";
 import * as tt from "../../../../shared/models/game/evolution/traitTypes";
@@ -22,20 +22,21 @@ import {traitActivateRequest, traitAmbushActivateRequest} from "../../../../shar
 import styled from "../../../styles/styled";
 import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
 import {TraitBase} from "../traits/Trait";
-import LinkedTraitWrapper from "../lineBetweenTraits/LinkedTraitWrapper";
+import LinkedTraitWrapper from "../traits/LinkedTraitWrapper";
 
 export const AnimalTraitBase = (props) => (
   <TraitBase
     {...props}
     textComponent={
       <>
-        <span
-          className='name'>{T.translate(`Game.Trait.${props.trait.type}${props.trait.linkSource ? `Source` : ``}`)}</span>
+        <span className='name'>
+          {T.translate(`Game.Trait.${props.trait.type}${props.trait.linkSource ? `Source` : ``}`)}
+        </span>
         <span className='food'>
           {props.trait.getDataModel().food > 0 ? ' +' + props.trait.getDataModel().food : null}
-          </span>
+        </span>
       </>
-    } />
+    }/>
 );
 
 const AnimalTrait = (props) => {
@@ -47,6 +48,8 @@ const AnimalTrait = (props) => {
     return <InteractiveTraitRecombination {...props} />;
   } else if (trait.type === tt.TraitAmbush) {
     return <InteractiveTraitAmbush {...props} />;
+  } else if (trait.type === tt.TraitIntellect) {
+    return <InteractiveTraitIntellect {...props} />;
   } else if (traitDataModel.playerControllable
     && (
       traitDataModel.targetType === TRAIT_TARGET_TYPE.ANIMAL
@@ -79,14 +82,24 @@ const checkCanStartAmbush = ({game}, {trait, sourceAnimal}) => {
   )
 };
 
+const checkCooldown = ({game}, {trait, sourceAnimal}) => (
+  game.cooldowns.checkFor(trait.type, sourceAnimal.ownerId, sourceAnimal.id, trait.id)
+);
+
 export const InteractiveTraitMetamorphose = compose(
-  connect((state, props) => ({canStart: checkCanStart(state, props)}), (dispatch, {trait, sourceAnimal}) => ({
+  connect((state, props) => ({
+    canStart: checkCanStart(state, props)
+    , isOnCooldown: checkCooldown(state, props)
+  }), (dispatch, {trait, sourceAnimal}) => ({
     startInteraction: () => dispatch(openQuestionMetamorphose({trait, sourceAnimal}))
   }))
 )(AnimalTraitBase);
 
 export const InteractiveTraitRecombination = compose(
-  connect((state, props) => ({canStart: checkCanStart(state, props)}), (dispatch, {trait, sourceAnimal}) => ({
+  connect((state, props) => ({
+    canStart: checkCanStart(state, props)
+    , isOnCooldown: checkCooldown(state, props)
+  }), (dispatch, {trait, sourceAnimal}) => ({
     startInteraction: () => dispatch(openQuestionRecombination({trait, sourceAnimal}))
   }))
 )(AnimalTraitBase);
@@ -101,17 +114,27 @@ export const InteractiveTraitAmbush = compose(
   })
 )(AnimalTraitBase);
 
+export const InteractiveTraitIntellect = compose(
+  connect((state, props) => ({
+    isOnCooldown: checkCooldown(state, props)
+  }))
+)(AnimalTraitBase);
+
 export const InteractiveTraitClickable = compose(
   connect((state, props) => ({
     canStart: checkCanStart(state, props)
+    , isOnCooldown: checkCooldown(state, props)
   }), (dispatch, {trait, sourceAnimal}) => ({
     startInteraction: () => dispatch(traitActivateRequest(sourceAnimal.id, trait.id))
   }))
 )(AnimalTraitBase);
 
 export const InteractiveTrait = compose(
-  connect((state, props) => ({canStart: checkCanStart(state, props)}))
-  , InteractionSource(DND_ITEM_TYPE.TRAIT, {
+  connect((state, props) => ({
+    canStart: checkCanStart(state, props)
+    , isOnCooldown: checkCooldown(state, props)
+  }))
+  , InteractionSource(InteractionItemType.TRAIT, {
     getIID: ({trait}) => trait.id
     , canStart: ({canStart}) => canStart
     , onStart: ({trait, sourceAnimal}) => ({trait, sourceAnimal})

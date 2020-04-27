@@ -38,6 +38,11 @@ export const appUnignoreUser = (userId) => ({
   , data: {userId}
 });
 
+export const appUnignoreAll = () => ({
+  type: 'appUnignoreAll'
+  , data: null
+});
+
 const SHOULD_PLAY_AUDIO = GLOBAL_BROWSER && process.env.NODE_ENV !== 'test' && window && window.Audio;
 
 const AUDIO_FILES = {};

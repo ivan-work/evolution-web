@@ -63,6 +63,7 @@ import * as ptt from "../models/game/evolution/plantarium/plantTraitTypes";
 import {logTarget} from "./log.util";
 import {server$takeCardFromRandomPlayer} from "./game.plantarium";
 import {CooldownList} from "../models/game/CooldownList";
+import {server$animalDeath} from "./game";
 
 /**
  * Activation
@@ -153,7 +154,7 @@ const shared$startCooldownList = (list) => (dispatch) => list.forEach(cooldownAc
 
 export const getFeedingCooldownList = (gameId, playerId) => [
   startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, playerId)
-  , startCooldown(gameId, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, playerId)
+  // , startCooldown(gameId, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, playerId)
 ];
 // endregion
 
@@ -212,7 +213,7 @@ export const server$traitKillAnimal = (gameId, sourceAnimal, targetAnimal) => (d
     dispatch(server$game(gameId, traitSetAnimalFlag(gameId, targetAnimal.id, TRAIT_ANIMAL_FLAG.REGENERATION, true)));
     dispatch(server$game(gameId, traitParalyze(gameId, targetAnimal.id)));
   } else {
-    dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.KILL, targetAnimal.id)));
+    dispatch(server$animalDeath(gameId, ANIMAL_DEATH_REASON.KILL, targetAnimal.id));
   }
 };
 
@@ -286,15 +287,21 @@ const traitTakeShell = (gameId, continentId, animalId, trait) => ({
   , data: {gameId, continentId, animalId, trait}
 });
 
-// remove after 1.0.23
-// export const server$tryViviparous = (gameId, animalId) => (dispatch, getState) => {
-//   return passesChecks(() => {
-//     const game = selectGame(getState, gameId);
-//     const animal = game.locateAnimal(animalId);
-//     const trait = checkTraitActivation(game, animal, tt.TraitViviparous);
-//     return dispatch(server$traitActivate(gameId, animalId, trait));
-//   })
-// };
+export const server$checkForViviparous = (gameId, animalId, callback) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  const animal = game.locateAnimal(animalId);
+  const traitViviparous = animal.hasTrait(tt.TraitViviparous);
+  const checkForViviparous = (
+    traitViviparous
+    && traitViviparous.getErrorOfUse(game, animal) === ERRORS.TRAIT_TARGETING_ANIMAL_SATURATED
+  );
+
+  callback();
+
+  if (checkForViviparous) {
+    dispatch(server$activateViviparous(gameId, animalId));
+  }
+};
 
 export const server$activateViviparous = (gameId, animalId) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
@@ -313,7 +320,7 @@ export const server$tryNeoplasmDeath = (gameId, sourceAnimal) => (dispatch, getS
   const animal = game.locateAnimal(sourceAnimal.id, sourceAnimal.ownerId);
   if (animal) {
     if (TraitNeoplasm.customFns.shouldKillAnimal(animal)) {
-      dispatch(server$game(gameId, animalDeath(gameId, ANIMAL_DEATH_REASON.NEOPLASM, animal.id)));
+      dispatch(server$animalDeath(gameId, ANIMAL_DEATH_REASON.NEOPLASM, animal.id));
     }
   }
 };
@@ -576,6 +583,31 @@ export const server$traitNotify_End = (gameId, sourceAid, trait, targetId) => {
  * Complex Actions
  */
 
+const plantFeedingSubroutine = (game, animal, sourcePlant) => {
+  if (sourcePlant.hasTrait(ptt.PlantTraitHoney)) {
+    dispatch(server$takeCardFromRandomPlayer(game, animal.ownerId));
+  }
+
+  const traitSpecialization = animal.getTraits()
+    .find(trait => (trait.type === tt.TraitSpecialization && trait.linkAnimalId === sourcePlant.id));
+
+  if (traitSpecialization) {
+    return;
+  }
+
+  const traitIntellect = animal.hasTrait(tt.TraitIntellect);
+  const disabledTraitId = traitIntellect && traitIntellect.value;
+  const canActivateIntellect = traitIntellect && disabledTraitId === void 0 && !traitIntellect.getErrorOfUse(game, animal);
+
+  const intellectTargets = [
+    sourcePlant.hasTrait(ptt.PlantTraitOfficinalis)
+    , (
+      !getErrorOfPlantCounterAttack(game, animal, sourcePlant)
+      && animal.hasTrait(ptt.PlantTraitHiddenCarnivorous)
+    )
+  ]
+};
+
 export const server$startFeeding = (gameId, animalId, amount, sourceType, sourceId, autoShare) => (dispatch, getState) => {
   // logger.debug(`server$startFeeding: ${sourceId} feeds ${animalId} through ${sourceType} with (${amount})`);
   logger.debug(`server$startFeeding: ${animalId} gets ${amount} from ${sourceType}(${sourceId})`);
@@ -585,6 +617,7 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
 
   if (sourceType === 'PLANT') {
     const sourcePlant = game.getPlant(sourceId);
+
     if (sourcePlant.hasTrait(ptt.PlantTraitHoney)) {
       dispatch(server$takeCardFromRandomPlayer(game, animal.ownerId));
     }
@@ -596,37 +629,38 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
 
     const traitIntellect = animal.hasTrait(tt.TraitIntellect);
     const disabledTraitId = traitIntellect && traitIntellect.value;
-    const canActivateIntellect = traitIntellect && disabledTraitId === void 0 && !traitIntellect.getErrorOfUse(game, animal);
+    let canActivateIntellect = traitIntellect && disabledTraitId === void 0 && !traitIntellect.getErrorOfUse(game, animal);
 
-    const plantTraitOfficinalis = sourcePlant.hasTrait(ptt.PlantTraitOfficinalis);
+    const intellectTargets = [
+      errorsOfFoodIntake.first() && errorsOfFoodIntake.first()[0]
+      , (
+        getErrorOfPlantCounterAttack(game, animal, sourcePlant) === tt.TraitIntellect
+        && sourcePlant.hasTrait(ptt.PlantTraitHiddenCarnivorous)
+      )
+      , sourcePlant.hasTrait(ptt.PlantTraitOfficinalis)
+    ].filter(trait => trait);
 
     if (traitSpecialization) {
       // everything is OK, do nothing
-    } else if (errorsOfFoodIntake.size === 0) {
-      if (plantTraitOfficinalis) {
-        if (canActivateIntellect) {
-          dispatch(traitIntellect.getDataModel().action(game, animal, traitIntellect, plantTraitOfficinalis.id));
-        } else if (plantTraitOfficinalis.id !== disabledTraitId) {
-          dispatch(server$game(game.id, traitParalyze(game.id, animal.id)));
-        }
-      }
-    } else if (errorsOfFoodIntake.size === 1) {
-      const [errorTraitId, errorMessage] = errorsOfFoodIntake.first();
-
-      if (canActivateIntellect) {
-        dispatch(traitIntellect.getDataModel().action(game, animal, traitIntellect, errorTraitId));
-        if (sourcePlant.hasTrait(ptt.PlantTraitOfficinalis)) {
-          dispatch(server$game(game.id, traitParalyze(game.id, animal.id)));
-        }
-      } else if (disabledTraitId === errorTraitId) {
-        if (sourcePlant.hasTrait(ptt.PlantTraitOfficinalis)) {
-          dispatch(server$game(game.id, traitParalyze(game.id, animal.id)));
-        }
-      } else {
-        logger.error(`Game${game.id}: Invalid plant feeding 1`, sourcePlant.toString(), animal.toString());
-      }
     } else {
-      logger.error(`Game${game.id}: Invalid plant feeding 2`, sourcePlant.toString(), animal.toString());
+      intellectTargets
+        .filter(trait => {
+          logger.debug(`server$startFeeding: intellectTarget ${trait.type}`);
+          if (canActivateIntellect) {
+            dispatch(traitIntellect.getDataModel().action(game, animal, traitIntellect, 'PLANT'));
+            canActivateIntellect = false;
+            return false;
+          }
+          return true;
+        })
+        .forEach(trait => {
+          if (trait.type === ptt.PlantTraitOfficinalis) {
+            dispatch(server$game(game.id, traitParalyze(game.id, animal.id)));
+          }
+          if (trait.type === ptt.PlantTraitHiddenCarnivorous) {
+            logger.error('illegal state')
+          }
+        });
     }
   }
 

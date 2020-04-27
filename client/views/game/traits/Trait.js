@@ -72,6 +72,13 @@ export const StyledTraitBody = styled('div')({
         color: colorConfig.textInteracting
       }
     }
+    , '&.isOnCooldown': {
+      // background: colorConfig.fillCooldown
+      // ,
+      '& .text': {
+        color: colorConfig.textCooldown
+      }
+    }
   }))
   , '&.animation': {
     background: '#0F0 !important'
@@ -85,7 +92,7 @@ export class TraitBase extends React.PureComponent {
   };
 
   render() {
-    const {trait, canStart, value, disabled, textComponent, isInteracting} = this.props;
+    const {trait, canStart, isOnCooldown, value, disabled, textComponent, isInteracting} = this.props;
     const cnTrait = cn(
       'Trait'
       , 'AnimalTrait2'
@@ -95,6 +102,7 @@ export class TraitBase extends React.PureComponent {
         , value: value || (trait.getDataModel().displayValue && trait.value)
         , source: trait.linkSource
         , disabled: disabled || trait.disabled
+        , isOnCooldown
         , isInteracting
       }
     );

@@ -10,7 +10,7 @@ import GameStyles from "../GameStyles";
 
 import {AnimatedAnimal} from '../animals/Animal';
 import {InteractionTarget} from "../InteractionManager";
-import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";
+import {InteractionItemType} from "../InteractionItemType";
 import {gameDeployAnimalRequest} from "../../../../shared/actions/game";
 import {PHASE} from "../../../../shared/models/game/GameModel";
 import CSSTransitionGroup from "react-transition-group/CSSTransitionGroup";
@@ -42,7 +42,7 @@ const ContinentZone = ({index, acceptInteraction, canInteract}) => (
 );
 const InteractiveContinentZone = compose(
   connect(null, {gameDeployAnimalRequest})
-  , InteractionTarget([DND_ITEM_TYPE.CARD_TRAIT], {
+  , InteractionTarget([InteractionItemType.CARD_TRAIT], {
     onInteract: ({index, gameDeployAnimalRequest}, {item}) => {
       const {cardId} = item;
       gameDeployAnimalRequest(cardId, index);

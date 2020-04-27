@@ -27,7 +27,7 @@ import IconHungry from '@material-ui/icons/SentimentVeryDissatisfied';
 import Food from "../food/Food";
 import AnimalTrait from "./AnimalTrait";
 
-import {DND_ITEM_TYPE} from "../../game/dnd/DND_ITEM_TYPE";
+import {InteractionItemType} from "../InteractionItemType";
 import {InteractionTarget} from "../InteractionManager";
 
 import {gameDeployRegeneratedAnimalRequest, gameDeployTraitRequest} from "../../../../shared/actions/game";
@@ -205,17 +205,17 @@ export const InteractiveAnimal = compose(
     , gameDeployRegeneratedAnimalRequest
   })
   , InteractionTarget([
-    DND_ITEM_TYPE.CARD_TRAIT
-    , DND_ITEM_TYPE.FOOD
-    , DND_ITEM_TYPE.TRAIT
-    , DND_ITEM_TYPE.TRAIT_SHELL
-    , DND_ITEM_TYPE.ANIMAL_LINK
-    , DND_ITEM_TYPE.COVER
-    , DND_ITEM_TYPE.PLANT_ATTACK
+    InteractionItemType.CARD_TRAIT
+    , InteractionItemType.FOOD
+    , InteractionItemType.TRAIT
+    , InteractionItemType.TRAIT_SHELL
+    , InteractionItemType.ANIMAL_LINK
+    , InteractionItemType.COVER
+    , InteractionItemType.PLANT_ATTACK
   ], {
     canInteract: ({game, userId, animal}, {type, item}) => {
       switch (type) {
-        case DND_ITEM_TYPE.CARD_TRAIT: {
+        case InteractionItemType.CARD_TRAIT: {
           switch (game.status.phase) {
             case PHASE.DEPLOY:
               const {traitType} = item;
@@ -233,7 +233,7 @@ export const InteractiveAnimal = compose(
               return false;
           }
         }
-        case DND_ITEM_TYPE.ANIMAL_LINK: {
+        case InteractionItemType.ANIMAL_LINK: {
           const {traitType, animalId, alternateTrait} = item;
           const sourceAnimal = game.locateAnimal(animalId);
           return (
@@ -242,7 +242,7 @@ export const InteractiveAnimal = compose(
             && !TraitModel.LinkBetweenCheck(traitType, sourceAnimal, animal)
           );
         }
-        case DND_ITEM_TYPE.FOOD: {
+        case InteractionItemType.FOOD: {
           const {sourceId} = item;
           const sourcePlant = game.getPlant(sourceId);
           return (
@@ -253,27 +253,27 @@ export const InteractiveAnimal = compose(
             )
           );
         }
-        case DND_ITEM_TYPE.TRAIT: {
+        case InteractionItemType.TRAIT: {
           const {trait, sourceAnimal} = item;
           const traitDataModel = trait.getDataModel();
           if (traitDataModel.targetType !== TRAIT_TARGET_TYPE.ANIMAL) return;
           const targetError = traitDataModel.getErrorOfUseOnTarget(game, sourceAnimal, animal);
           return sourceAnimal.id !== animal.id && !targetError;
         }
-        case DND_ITEM_TYPE.TRAIT_SHELL: {
+        case InteractionItemType.TRAIT_SHELL: {
           const {trait} = item;
           return (
             !trait.getDataModel().getErrorOfTraitPlacement_User(userId, animal.ownerId)
             && !trait.getDataModel().getErrorOfTraitPlacement(animal)
           );
         }
-        case DND_ITEM_TYPE.COVER: {
+        case InteractionItemType.COVER: {
           const {sourceId} = item;
           const sourcePlant = game.getPlant(sourceId);
           return game.userId === animal.ownerId
             && !getErrorOfAnimalTakingCover(game, animal, sourcePlant);
         }
-        case DND_ITEM_TYPE.PLANT_ATTACK: {
+        case InteractionItemType.PLANT_ATTACK: {
           const {trait, sourcePlant} = item;
           const targetError = trait.getDataModel().getErrorOfUseOnTarget(game, sourcePlant, animal);
           return !targetError;
@@ -299,14 +299,14 @@ export const InteractiveAnimal = compose(
                      , ...props
                    }, {type, item}) => {
       switch (type) {
-        case DND_ITEM_TYPE.CARD_TRAIT: {
+        case InteractionItemType.CARD_TRAIT: {
           const {cardId, traitType, alternateTrait} = item;
           switch (game.status.phase) {
             case PHASE.DEPLOY:
               const traitDataModel = TraitModel.new(traitType).getDataModel();
               if (traitDataModel.linkTargetType && traitDataModel.linkTargetType & CTT_PARAMETER.ANIMAL) {
                 return {
-                  type: DND_ITEM_TYPE.ANIMAL_LINK
+                  type: InteractionItemType.ANIMAL_LINK
                   , item: {
                     ...item
                     , animalId: animal.id
@@ -314,7 +314,7 @@ export const InteractiveAnimal = compose(
                 };
               } else if (traitDataModel.linkTargetType && traitDataModel.linkTargetType & CTT_PARAMETER.PLANT) {
                 return {
-                  type: DND_ITEM_TYPE.PLANT_LINK
+                  type: InteractionItemType.PLANT_LINK
                   , item: {
                     ...item
                     , plantId: animal.id
@@ -331,36 +331,36 @@ export const InteractiveAnimal = compose(
           break;
         }
 
-        case DND_ITEM_TYPE.ANIMAL_LINK: {
+        case InteractionItemType.ANIMAL_LINK: {
           const {cardId, alternateTrait, animalId} = item;
           gameDeployTraitRequest(cardId, animalId, alternateTrait, animal.id);
           break;
         }
 
-        case DND_ITEM_TYPE.FOOD: {
+        case InteractionItemType.FOOD: {
           traitTakeFoodRequest(animal.id, item.sourceId);
           break;
         }
 
-        case DND_ITEM_TYPE.TRAIT: {
+        case InteractionItemType.TRAIT: {
           const {sourceAnimal, trait} = item;
           traitActivateRequest(sourceAnimal.id, trait.id, animal.id);
           break;
         }
 
-        case DND_ITEM_TYPE.PLANT_ATTACK: {
+        case InteractionItemType.PLANT_ATTACK: {
           const {sourcePlant} = item;
           gamePlantAttackRequest(sourcePlant.id, animal.id);
           break;
         }
 
-        case DND_ITEM_TYPE.TRAIT_SHELL: {
+        case InteractionItemType.TRAIT_SHELL: {
           const {trait} = item;
           traitTakeShellRequest(animal.id, trait.id);
           break;
         }
 
-        case DND_ITEM_TYPE.COVER: {
+        case InteractionItemType.COVER: {
           const {sourceId} = item;
           traitTakeCoverRequest(animal.id, sourceId);
           break;

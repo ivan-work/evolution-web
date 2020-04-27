@@ -1,4 +1,4 @@
-export const DND_ITEM_TYPE = {
+export const InteractionItemType = {
   CARD: 'CARD'
   , FOOD: 'FOOD'
   , TRAIT: 'TRAIT'

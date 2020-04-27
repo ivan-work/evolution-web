@@ -1,6 +1,6 @@
-import {List} from 'immutable';
+import {List} from 'immutable/dist/immutable-nonambient';
 import React from 'react'
-import T from 'i18n-react'
+import T from 'i18n-react/dist/i18n-react'
 
 import GameLog from './GameLog.jsx';
 

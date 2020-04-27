@@ -72,7 +72,7 @@ export const TraitPlantHomeothermy = {
   , targetType: TRAIT_TARGET_TYPE.PLANT
   , replaceOnPlantarium: tt.TraitPlantHomeothermy
   , cooldowns: fromJS([
-    [tt.TraitHomeothermy, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
+    [tt.TraitPlantHomeothermy, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , _getErrorOfUse: (game, animal, traitSpec) => {
     if (!animal.canEat(game)) return ERRORS.ANIMAL_DONT_WANT_FOOD;
