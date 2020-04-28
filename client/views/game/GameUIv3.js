@@ -29,7 +29,7 @@ import QuestionDefence from "./ui/QuestionDefence";
 import GameStyles from "./GameStyles";
 import FoodWrapper from "./food/FoodWrapper";
 import PlantsContainer from "./plants/PlantsContainer";
-import Typography from "@material-ui/core/Typography/Typography";
+import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
   GameUIv3Container: {

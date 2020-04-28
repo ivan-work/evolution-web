@@ -48,9 +48,11 @@ const SHOULD_PLAY_AUDIO = GLOBAL_BROWSER && process.env.NODE_ENV !== 'test' && w
 const AUDIO_FILES = {};
 
 class AudioFile {
-  constructor(name, filename, throttleTime) {
+  constructor(name, filename, options = {}) {
+    const {throttleTime, volume = 1} = options;
     this.name = name;
     this.file = new window.Audio(filename);
+    this.file.volume = volume;
     this._play = () => this.file.play();
     if (!throttleTime) {
       this.play = this._play;
@@ -60,20 +62,22 @@ class AudioFile {
   }
 }
 
-const AudioFileName = {
+export const AudioFileName = {
   NOTIFICATION: 'NOTIFICATION'
   , ROOM_CREATED: 'ROOM_CREATED'
   , ROOM_JOIN: 'ROOM_JOIN'
   , ROOM_JOIN_FULL: 'ROOM_JOIN_FULL'
   , START_D2: 'START_D2'
+  , CLOCK_TICK: 'CLOCK_TICK'
 };
 
 const loadAudioFiles = () => {
   AUDIO_FILES.NOTIFICATION = new AudioFile(AudioFileName.NOTIFICATION, require('../assets/sound/notification-02.wav'));
-  AUDIO_FILES.ROOM_CREATED = new AudioFile(AudioFileName.ROOM_CREATED, require('../assets/sound/searching-03.wav'), 30e3);
+  AUDIO_FILES.ROOM_CREATED = new AudioFile(AudioFileName.ROOM_CREATED, require('../assets/sound/searching-03.wav'), {throttleTime: 30e3});
   AUDIO_FILES.ROOM_JOIN = new AudioFile(AudioFileName.ROOM_JOIN, require('../assets/sound/connected-02.wav'));
   AUDIO_FILES.ROOM_JOIN_FULL = new AudioFile(AudioFileName.ROOM_JOIN_FULL, require('../assets/sound/searching-02.wav'));
   AUDIO_FILES.START_D2 = new AudioFile(AudioFileName.START_D2, require('../assets/sound/dota-ready.mp3'));
+  AUDIO_FILES.CLOCK_TICK = new AudioFile(AudioFileName.CLOCK_TICK, require('../assets/sound/metal-tick.wav'), {volume: .6});
 };
 
 if (SHOULD_PLAY_AUDIO) loadAudioFiles();

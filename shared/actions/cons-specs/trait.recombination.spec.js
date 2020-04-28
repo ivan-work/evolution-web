@@ -6,6 +6,7 @@ import {
 import * as tt from '../../models/game/evolution/traitTypes';
 
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
+import {TRAIT_ANIMAL_FLAG} from "../../models/game/evolution/constants";
 
 describe('TraitRecombination:', () => {
   it('Works', () => {
@@ -192,6 +193,24 @@ players:
     console.log(findAnimal('$B1'));
     console.log(findAnimal('$A2'));
     console.log(findAnimal('$B2'));
+  });
+
+  it('BUG Recombination with hiber and meta', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: feeding
+food: 2
+players:
+  - continent: $A recomb$B mass para hiber meta, $B mass para, $W wait
+`);
+    const {selectGame, selectPlayer, findCard, findAnimal, findTrait} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitHibernation));
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitRecombination, tt.TraitHibernation, tt.TraitMassive));
+
+    expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)).false;
+
   });
 });
 

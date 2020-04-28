@@ -131,7 +131,9 @@ export const server$huntProcess = (gameId) => (dispatch, getState) => {
     dispatch(server$traitAnimalRemoveTrait(game, animalAnglerfish, traitAnglerfish));
 
     dispatch(server$traitAnimalAttachTrait(game, animalAnglerfish, newTraitCarnivorous));
-    dispatch(server$traitAnimalAttachTrait(game, animalAnglerfish, newTraitIntellect));
+    if (hunt.type === HUNT_TYPE.ANIMAL) {
+      dispatch(server$traitAnimalAttachTrait(game, animalAnglerfish, newTraitIntellect));
+    }
 
     game = selectGame(getState, gameId);
 
@@ -147,11 +149,16 @@ export const server$huntProcess = (gameId) => (dispatch, getState) => {
         }
         break;
       case HUNT_TYPE.PLANT:
+        dispatch(huntSetFlag(gameId, HUNT_FLAG.TRAIT_ANGLERFISH));
         dispatch(server$huntEnd(gameId));
         const newGame = selectGame(getState, gameId);
         const newPlant = newGame.getPlant(attackEntity.id);
         const anglerfishShouldEat = (
           animalAnglerfish.id !== targetAnimal.id
+          && !getErrorOfAnimalEatingFromPlantNoCD(newGame, animalAnglerfish, newPlant)
+        ) || (
+          animalAnglerfish.id === targetAnimal.id
+          && huntGetFlag(game, HUNT_FLAG.PLANT_ATTACK)
           && !getErrorOfAnimalEatingFromPlantNoCD(newGame, animalAnglerfish, newPlant)
         );
         logger.debug(`server$huntProcess/Anglerfish/anglerfishShouldEat/${animalAnglerfish.id}: ${anglerfishShouldEat}`);

@@ -1,6 +1,6 @@
 import React from "react";
 
-import Grid from "@material-ui/core/Grid/Grid";
+import Grid from "@material-ui/core/Grid";
 import Tooltip from "@material-ui/core/Tooltip";
 
 import {Checkbox} from "../../utils/Form";

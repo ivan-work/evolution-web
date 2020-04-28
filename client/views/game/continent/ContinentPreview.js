@@ -3,7 +3,7 @@ import T from "i18n-react";
 import {compose} from "recompose";
 import {connect} from "react-redux";
 
-import Typography from "@material-ui/core/Typography/Typography";
+import Typography from "@material-ui/core/Typography";
 import withStyles from '@material-ui/core/styles/withStyles';
 
 import GameStyles from "../GameStyles";

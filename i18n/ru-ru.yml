@@ -25,6 +25,8 @@ App:
     $off: выкл # this doesn't work without $
     FAQ: Об игре
     FAQ_HREF: 'https://github.com/ivan-work/evolution-web/blob/master/faq-ru.md'
+    Ignore: Игнорировать
+    Unignore: Сбросить игнорирование
     UnignoreAll: Сбросить игнорирование
   Chat:
     Label: Чат
@@ -204,12 +206,11 @@ Game:
     SHY: Спрятался
     IN_COVER: В укрытии
   Trait:
-    TraitSymbiosis           : Симбиоз
-    TraitSymbiosisSource     : Симбионт
+    TraitSymbiosis:
+      _: Симбиоз
+      source: Симбионт
     TraitCommunication       : Сотрудничество
-    TraitCommunicationSource : Сотрудничество
     TraitCooperation         : Взаимодействие
-    TraitCooperationSource   : Взаимодействие
     TraitCarnivorous         : Хищник
     TraitParasite            : Паразит
     TraitFatTissue           : Жировой запас
@@ -229,9 +230,10 @@ Game:
 
     TraitShell               : Раковина
     TraitIntellect           : Интеллект
-    TraitAnglerfish          : Удильщик
+    TraitAnglerfish:
+      _: Удильщик
+      value: Защитильщик
     TraitTrematode           : Трематода
-    TraitTrematodeSource     : Трематода
     TraitMetamorphose        : Метаморфоза
     TraitInkCloud            : Чернильное облако
     TraitViviparous          : Живорождение
@@ -240,7 +242,6 @@ Game:
     TraitThermosynthesis     : Термосинтез
     TraitPhotosynthesis      : Фотосинтез
     TraitSpecialization      : Специализация
-    TraitSpecializationSource: Специализация
 
     TraitAedificator         : Эдификатор
     TraitCnidocytes          : Стрекательные клетки
@@ -248,7 +249,6 @@ Game:
     TraitMigration           : Миграция
     TraitNeoplasm            : Неоплазия
     TraitRecombination       : Рекомбинация
-    TraitRecombinationSource : Рекомбинация
     TraitRegeneration        : Регенерация
     TraitSuckerfish          : Прилипала
 

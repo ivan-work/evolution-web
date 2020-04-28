@@ -3,10 +3,10 @@ import T from 'i18n-react';
 import {connect} from "react-redux";
 import {compose, withHandlers} from "recompose";
 
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
+import Tooltip from "@material-ui/core/Tooltip";
 import MenuItem from "@material-ui/core/MenuItem";
 
-import IconButton from "@material-ui/core/IconButton/IconButton";
+import IconButton from "@material-ui/core/IconButton";
 import SettingOn from '@material-ui/icons/RadioButtonChecked';
 import SettingOff from '@material-ui/icons/RadioButtonUnchecked';
 

@@ -6,7 +6,7 @@ import cn from "classnames";
 import repeat from "lodash/times";
 import {connect} from "react-redux";
 
-import Typography from "@material-ui/core/Typography/Typography";
+import Typography from "@material-ui/core/Typography";
 import withStyles from "@material-ui/core/styles/withStyles";
 
 import {InteractionItemType} from "../InteractionItemType";

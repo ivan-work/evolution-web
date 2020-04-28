@@ -4,7 +4,7 @@ import T from 'i18n-react';
 import {compose} from "recompose";
 import {connect} from "react-redux";
 
-import Grid from "@material-ui/core/Grid/Grid";
+import Grid from "@material-ui/core/Grid";
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from "@material-ui/core/Typography";
 
@@ -73,7 +73,7 @@ export class RoomSettings extends React.Component {
         <RoomAddonRow name='addon_timeToFly' />
         <RoomAddonRow name='addon_continents' />
         <RoomAddonRow name='addon_bonus' />
-        {this.props.showPlants && <RoomAddonRow name='addon_plantarium' />}
+        <RoomAddonRow name='addon_plantarium' />
 
         {/*<FormContext.Consumer>{({model}) => (<pre>{JSON.stringify(model, null, ' ')}</pre>)}</FormContext.Consumer>*/}
 
@@ -93,7 +93,6 @@ export default compose(
       return {
         isHost: room.users.get(0) === userId
         , room
-        , showPlants: state.getIn(['app', 'adminMode']) || state.getIn(['app', 'plantsMode'])
       };
     }
     , {roomEditSettingsRequest}

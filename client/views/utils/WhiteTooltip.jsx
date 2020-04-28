@@ -1,9 +1,9 @@
 import React from 'react'
 
-import Tooltip from '@material-ui/core/Tooltip';
 import withStyles from '@material-ui/core/styles/withStyles';
+import Tooltip from '@material-ui/core/Tooltip';
 
-export default withStyles(theme => ({
+const withWhiteStyles = withStyles(theme => ({
   popper: {
     opacity: 1
   }
@@ -15,4 +15,11 @@ export default withStyles(theme => ({
     , zIndex: theme.zIndex.tooltip - 1
     , boxShadow: '1px 1px 5px black'
   }
-}))(Tooltip);
+}));
+
+export default withWhiteStyles(({classes, ...props}) => {
+  return <Tooltip classes={{popper: classes.popper, tooltip: classes.tooltip}} {...props} />
+});
+
+// I have no idea why line below doesn't work. If someone find out, please message me
+// export default withWhiteStyles(Tooltip);

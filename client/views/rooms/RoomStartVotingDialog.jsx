@@ -16,7 +16,7 @@ import IconVoteNo from '@material-ui/icons/Close';
 
 import RoomDescription from './RoomDescription';
 import TimeService from '../../services/TimeService';
-import {Timer} from '../utils/Timer.jsx';
+import Timer from '../utils/Timer.jsx';
 import UsersList from '../utils/UsersList.jsx';
 
 import {VotingModel} from '../../../shared/models/RoomModel.js';

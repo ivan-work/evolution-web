@@ -5,8 +5,7 @@ import Validator from 'validatorjs';
 
 import EvoTextField from "../../components/EvoTextField";
 import EvoCheckbox from "../../components/EvoCheckbox";
-import Button from "@material-ui/core/Button/Button";
-import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
 
 export const FormContext = React.createContext();
 

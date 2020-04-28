@@ -6,7 +6,7 @@ import {compose, withHandlers} from "recompose";
 import Tooltip from "@material-ui/core/Tooltip";
 import MenuItem from "@material-ui/core/MenuItem";
 
-import IconButton from "@material-ui/core/IconButton/IconButton";
+import IconButton from "@material-ui/core/IconButton";
 import IconVolumeOn from '@material-ui/icons/VolumeUp';
 import IconVolumeOff from '@material-ui/icons/VolumeOff';
 

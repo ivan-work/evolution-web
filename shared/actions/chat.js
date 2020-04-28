@@ -30,8 +30,6 @@ const chatMessageRequest = (to, toType, text) => ({
 export const client$chatMessageRequest = (to, toType, text) => (dispatch, getState) => {
   if (text === '/admin') {
     dispatch({type: 'setAdminMode', data: null});
-  } else if (text === '/растения') {
-    dispatch({type: 'setPlantsMode', data: null});
   } else if (text === '/time') {
     const game = getState().game;
     if (game) {

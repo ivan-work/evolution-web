@@ -231,12 +231,16 @@ export const traitAnimalRemoveTrait = (gameId, sourcePid, sourceAid, traitId) =>
   , data: {gameId, sourcePid, sourceAid, traitId}
 });
 
-export const server$traitAnimalRemoveTrait = (game, animal, trait) => (dispatch) => {
-  logger.debug('server$traitAnimalRemoveTrait');
+export const server$traitAnimalRemoveTrait_onRemove = (game, animal, trait) => (dispatch) => {
   const dataModel = trait.getDataModel();
   if (!!dataModel && !!dataModel.customFns && dataModel.customFns.onRemove) {
     dispatch(dataModel.customFns.onRemove(game, animal, trait));
   }
+};
+
+export const server$traitAnimalRemoveTrait = (game, animal, trait) => (dispatch) => {
+  logger.debug('server$traitAnimalRemoveTrait');
+  dispatch(server$traitAnimalRemoveTrait_onRemove(game, animal, trait));
   dispatch(server$game(game.id, traitAnimalRemoveTrait(game.id, animal.ownerId, animal.id, trait.id)));
 };
 // endregion

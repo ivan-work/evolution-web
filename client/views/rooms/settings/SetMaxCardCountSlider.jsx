@@ -1,7 +1,7 @@
 import React from 'react';
 import T from 'i18n-react';
 
-import Grid from "@material-ui/core/Grid/Grid";
+import Grid from "@material-ui/core/Grid";
 import Tooltip from '@material-ui/core/Tooltip';
 
 import EvoCheckbox from "../../../components/EvoCheckbox";

@@ -70,7 +70,7 @@ export class GameScoreboardFinal extends React.PureComponent {
         {this.state.show && <DialogTitle>
           {T.translate('Game.UI.Scores.Winner')}: <User id={game.winnerId} variant='simple'/>
         </DialogTitle>}
-        <DialogContent>{this.renderDialogContent()}</DialogContent>
+        <DialogContent>{game.scoreboardFinal && this.renderDialogContent()}</DialogContent>
         <DialogActions>
           <Button type='button' variant='contained' color='primary'
                   onClick={() => this.setState({show: false})}>OK</Button>
@@ -83,7 +83,7 @@ export class GameScoreboardFinal extends React.PureComponent {
     const {classes, game} = this.props;
 
     return (
-      game.scoreboardFinal && <Table>
+      <Table>
         <TableHead>
           <TableRow>
             <TableCell>{T.translate('Game.UI.Scores.TablePlayer')}</TableCell>

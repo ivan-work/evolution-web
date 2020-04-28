@@ -1,4 +1,5 @@
 import React from 'react';
+import T from 'i18n-react';
 import PropTypes from "prop-types";
 
 import {connect} from "react-redux";
@@ -20,14 +21,13 @@ import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconIgnore from '@material-ui/icons/MicOff';
 import IconUnignore from '@material-ui/icons/Mic';
-import WhiteTooltip from "../views/utils/WhiteTooltip";
 
-const ButtonStyle = {fontSize: 12, padding: 0};
+const ButtonStyle = {color: 'currentColor', fontSize: 12, padding: 0};
 
 export const IgnoreButton = compose(
   setDisplayName('IgnoreButton$')
   , setPropTypes({
-    userId: PropTypes.any.isRequired
+    userId: PropTypes.string.isRequired
   })
   , connect((state, {userId}) => {
       const appUserId = state.getIn(['user', 'id']);
@@ -39,7 +39,7 @@ export const IgnoreButton = compose(
   , branch(({hide}) => hide, renderNothing)
   , withHandlers({onClick: ({appIgnoreUser, userId}) => e => appIgnoreUser(userId)})
 )(({onClick}) => (
-  <Tooltip title={'ignore'} placement='right'>
+  <Tooltip title={T.translate('App.Misc.Ignore')} placement='right'>
     <IconButton style={ButtonStyle} size='small' onClick={onClick}>
       <IconIgnore />
     </IconButton>
@@ -61,7 +61,7 @@ export const UnignoreButton = compose(
   , branch(({hide}) => hide, renderNothing)
   , withHandlers({onClick: ({appUnignoreUser, userId}) => e => appUnignoreUser(userId)})
 )(({onClick}) => (
-  <Tooltip title={'unignore'} placement='right'>
+  <Tooltip title={T.translate('App.Misc.Unignore')} placement='right'>
     <IconButton style={ButtonStyle} size='small' onClick={onClick}>
       <IconUnignore />
     </IconButton>
@@ -103,7 +103,7 @@ export const IgnoreUnignoreTooltip = compose(
      , ...props
    }) => (
   <ClickAwayListener onClickAway={handleTooltipClose}>
-    <WhiteTooltip
+    <Tooltip
       interactive
       placement='right'
       disableFocusListener
@@ -122,7 +122,7 @@ export const IgnoreUnignoreTooltip = compose(
       <span onClick={handleTooltipOpen}>
         {children}
       </span>
-    </WhiteTooltip>
+    </Tooltip>
   </ClickAwayListener>
 ));
 

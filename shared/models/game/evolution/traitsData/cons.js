@@ -22,7 +22,11 @@ import {
 import {selectGame} from '../../../../selectors';
 import {huntSetFlag, server$huntProcess} from "./hunt";
 import {AnimalModel} from "../AnimalModel";
-import {server$traitAnimalRecombinateTraits, traitAnimalRemoveTrait} from "../../../../actions/trait";
+import {
+  server$traitAnimalRecombinateTraits,
+  server$traitAnimalRemoveTrait_onRemove,
+  traitAnimalRemoveTrait
+} from "../../../../actions/trait";
 
 export const TraitAedificator = {type: tt.TraitAedificator};
 
@@ -124,6 +128,8 @@ export const TraitRecombination = {
     let animal2 = traitRecombination1.findLinkedAnimal(game, sourceAnimal);
     const traitRecombination2 = traitRecombination1.findLinkedTrait(game);
 
+    dispatch(server$traitAnimalRemoveTrait_onRemove(game, animal1, trait1));
+    dispatch(server$traitAnimalRemoveTrait_onRemove(game, animal2, trait2));
     dispatch(server$traitAnimalRecombinateTraits(game.id, animal1, animal2, trait1, trait2));
 
     dispatch(server$traitStartCooldown(game.id, traitRecombination1, animal1));

@@ -434,5 +434,25 @@ players:
 
       expect(findPlant('$carA'), '$carA should be dead').undefined;
     });
+
+    it(`Attack on anglerfish`, () => {
+      const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+      const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+phase: feeding
+plants: PlantCarn $car ++
+players:
+  - continent: $A angler, $W wait
+`);
+      const {selectGame, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+
+      clientStore0.dispatch(gamePlantAttackRequest('$car', '$A'));
+
+
+      expect(findAnimal('$A'), '$A is alive').ok;
+      expect(findAnimal('$A').getFood(), '$A.food').equals(1);
+      expect(selectGame().hunts, 'Game.hunts').size(0)
+    });
   });
 });

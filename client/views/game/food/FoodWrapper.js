@@ -29,7 +29,7 @@ export default compose(
 )(
   ({classes, game}) => <div className={classes.root}>
     <span className={cn('h5', classes.title)}>
-      {T.translate('Game.Icon.Food')}&nbsp;({game.food})
+      {T.translate('Game.Icon.Food')}&nbsp;({Math.max(game.food, 0)})
       {game.food > 0 ? ': ' : ''}
     </span>
     {repeat(game.food, i => <InteractiveFood key={i} index={i}/>)}

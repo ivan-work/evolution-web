@@ -6,7 +6,7 @@ import replace from "react-string-replace";
 
 import {TraitModel} from '../../../../shared/models/game/evolution/TraitModel';
 
-import Typography from "@material-ui/core/Typography/Typography";
+import Typography from "@material-ui/core/Typography";
 
 import IconAnimal from "../../icons/IconAnimal";
 import IconFood from "../../icons/IconFood";
@@ -32,9 +32,9 @@ export default class TraitDetails extends React.PureComponent {
         } else if (/\$EAT/.test(match)) {
           return T.translate('Game.TraitDesc.$EAT')
         } else if (/\$CDRound/.test(match)) {
-          return T.translate('Game.TraitDesc.CDRound')
+          return T.translate('Game.TraitDesc.$CDRound')
         } else if (/\$CDTurn/.test(match)) {
-          return T.translate('Game.TraitDesc.CDTurn')
+          return T.translate('Game.TraitDesc.$CDTurn')
         } else if (/\$A/.test(match)) {
           return <IconAnimal key={index} className='icon'/>
         } else if (/\$F/.test(match)) {

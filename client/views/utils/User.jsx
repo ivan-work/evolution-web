@@ -6,7 +6,7 @@ import {connect} from 'react-redux';
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import Tooltip from "@material-ui/core/Tooltip/Tooltip";
+import Tooltip from "@material-ui/core/Tooltip";
 import T from "i18n-react";
 
 import PersonIcon from '@material-ui/icons/Person';

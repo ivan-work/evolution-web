@@ -16,7 +16,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 
 import Dialog from "../../../app/modals/Dialog";
-import {Timer} from "../../utils/Timer";
+import Timer from "../../utils/Timer";
 import {Animal} from "../animals/Animal";
 import AnimalTraitChooseList from "./AnimalTraitChooseList";
 

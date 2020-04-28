@@ -15,7 +15,7 @@ import SvgIcon from '@material-ui/core/SvgIcon';
 
 import User from "../../utils/User";
 import Dialog from "../../../app/modals/Dialog";
-import {Timer} from "../../utils/Timer";
+import Timer from "../../utils/Timer";
 import {Animal} from "../animals/Animal";
 import AnimalTraitChooseList from "./AnimalTraitChooseList";
 

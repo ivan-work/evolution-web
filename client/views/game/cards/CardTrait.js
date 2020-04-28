@@ -2,7 +2,7 @@ import React from "react";
 import T from "i18n-react";
 import cn from "classnames";
 
-import Typography from "@material-ui/core/Typography/Typography";
+import Typography from "@material-ui/core/Typography";
 import withStyles from "@material-ui/core/styles/withStyles";
 
 import WhiteTooltip from "../../utils/WhiteTooltip";

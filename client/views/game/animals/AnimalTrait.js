@@ -30,7 +30,9 @@ export const AnimalTraitBase = (props) => (
     textComponent={
       <>
         <span className='name'>
-          {T.translate(`Game.Trait.${props.trait.type}${props.trait.linkSource ? `Source` : ``}`)}
+          {T.translate(`Game.Trait.${props.trait.type}`, {
+            context: props.trait.linkSource ? 'source' : props.trait.value ? 'value' : void 0
+          })}
         </span>
         <span className='food'>
           {props.trait.getDataModel().food > 0 ? ' +' + props.trait.getDataModel().food : null}

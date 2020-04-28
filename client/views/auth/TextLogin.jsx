@@ -4,7 +4,7 @@ import T from "i18n-react";
 import {compose, withStateHandlers} from "recompose";
 import {connect} from "react-redux";
 
-import Button from "@material-ui/core/Button/Button";
+import Button from "@material-ui/core/Button";
 import EvoTextField from "../../components/EvoTextField";
 
 import withForm from "../../components/withForm";

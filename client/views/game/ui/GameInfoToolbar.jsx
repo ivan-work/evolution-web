@@ -10,7 +10,7 @@ import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import withStyles from "@material-ui/core/styles/withStyles";
 
-import {Timer} from '../../utils/Timer.jsx';
+import Timer from '../../utils/Timer.jsx';
 import Pause from "./Pause";
 import GameLog from "./GameLog";
 import GameEndTurnButton from './GameEndTurnButton.jsx';
@@ -18,21 +18,29 @@ import GameEndTurnButton from './GameEndTurnButton.jsx';
 import {PHASE} from '../../../../shared/models/game/GameModel';
 import IconArrowUp from "@material-ui/icons/KeyboardArrowUp";
 import IconArrowDown from "@material-ui/icons/KeyboardArrowDown";
-import Button from "@material-ui/core/Button/Button";
+import Button from "@material-ui/core/Button";
 import {SpectatorsStatement} from "./SpectatorsList";
 
 import './GameInfoToolbar.scss';
 
-/*@formatter:off*/
-const renderTime = (game) => (
-    (game.status.paused ? <span>{T.translate('Game.UI.Status.Pause')}</span>
-   : game.question ? <Timer start={game.question.time} duration={game.settings.timeTraitResponse}/>
-   : game.status.phase === PHASE.REGENERATION ? <Timer start={game.status.turnStartTime} duration={game.settings.timeTraitResponse}/>
-   : game.status.phase === PHASE.AMBUSH ? <Timer start={game.status.turnStartTime} duration={game.settings.timeAmbush}/>
-   : game.status.turnStartTime != null ? <Timer start={game.status.turnStartTime} duration={game.status.turnDuration}/>
-   : '-')
-);
-/*@formatter:on*/
+const renderTime = (game) => {
+  if (game.status.paused) {
+    return (<span>{T.translate('Game.UI.Status.Pause')}</span>);
+  } else if (game.question) {
+    return (<Timer start={game.question.time} duration={game.settings.timeTraitResponse}/>);
+  } else if (game.status.phase === PHASE.FINAL) {
+    return '-';
+  } else if (game.status.phase === PHASE.REGENERATION) {
+    return (<Timer start={game.status.turnStartTime} duration={game.settings.timeTraitResponse}/>);
+  } else if (game.status.phase === PHASE.AMBUSH) {
+    return (<Timer start={game.status.turnStartTime} duration={game.settings.timeAmbush}/>);
+  } else if (game.status.turnStartTime != null) {
+    const sound = game.status.currentPlayer === game.userId;
+    return (<Timer start={game.status.turnStartTime} duration={game.status.turnDuration} sound={sound}/>);
+  } else {
+    return '-';
+  }
+};
 
 const ToggleCompress = ({compress, toggleCompress}) => (
   <Button size='small'

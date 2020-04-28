@@ -5,7 +5,7 @@ import {connect} from 'react-redux';
 import {branch, compose, renderComponent} from 'recompose';
 import get from 'lodash/fp/get';
 
-import Typography from "@material-ui/core/Typography/Typography";
+import Typography from "@material-ui/core/Typography";
 
 import EvoLink from "../components/EvoLink";
 
