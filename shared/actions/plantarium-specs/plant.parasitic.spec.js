@@ -54,13 +54,13 @@ players:
       expect(parasiticPlant.traits.first().linkSource).equal(true);
     });
 
-    it('Player can deploy parasitic plant', () => {
+    it('parasitic plant from seed', () => {
       const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
       const gameId = ParseGame(`
 settings:
   addon_plantarium: true
 phase: feeding
-plants: PlantEphemeral $eph ++ parasiticlink$par, para $par
+plants: PlantEphemeral $eph ++, para $par parasiticlink$eph
 players:
   -continent: wait
 `);
@@ -70,7 +70,7 @@ players:
 
       expect(findPlant('$eph').traits).size(1);
       expect(findPlant('$eph').traits.first().type).equal(ptt.PlantTraitParasiticLink);
-      expect(findPlant('$eph').traits.first().linkSource).equal(true);
+      expect(findPlant('$eph').traits.first().linkSource).equal(false);
 
       const parasiticPlant = findPlant('$par');
 
@@ -78,7 +78,7 @@ players:
       expect(parasiticPlant.type).equal(pt.PlantParasite);
       expect(parasiticPlant.traits).size(1);
       expect(parasiticPlant.traits.first().type).equal(ptt.PlantTraitParasiticLink);
-      expect(parasiticPlant.traits.first().linkSource).equal(false);
+      expect(parasiticPlant.traits.first().linkSource).equal(true);
     });
 
     it('BUG Parasite should die when host is dead', () => {

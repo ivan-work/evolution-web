@@ -1,4 +1,5 @@
 import {PHASE} from '../../models/game/GameModel';
+import * as tt from "../../models/game/evolution/traitTypes";
 
 import {
   traitTakeFoodRequest,
@@ -6,6 +7,7 @@ import {
 } from '../actions';
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
 import ERRORS from "../errors";
+import {traitActivateRequest} from "../trait";
 
 describe('[PLANTARIUM] !food.spec.js:', function () {
   it('PHASE.PREPARE', () => {
@@ -113,6 +115,21 @@ players:
       });
       expect(selectGame().status.round, 'round 0').equal(0);
       expect(findAnimal('$A').getFood()).equal(0);
+    });
+
+    it('Fungi eat dead regeneration', () => {
+      const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+      const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+phase: feeding
+plants: fung $fun +
+players:
+  - continent: $A carn, $B regen, $W wait
+`);
+      const {selectGame, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'))
+      expect(findPlant('$fun').getFood(), '$fun ate dead regen').equal(2);
     });
   });
 });

@@ -1,5 +1,9 @@
 import logger from '~/shared/utils/logger';
-import uuid from 'uuid';
+
+import * as tt from '../models/game/evolution/traitTypes';
+import * as pt from '../models/game/evolution/plantarium/plantTypes';
+import * as ptt from "../models/game/evolution/plantarium/plantTraitTypes";
+
 import {ActionCheckError} from '../models/ActionCheckError';
 import {getTraitDataModel, TraitModel} from '../models/game/evolution/TraitModel';
 import {TraitNeoplasm} from '../models/game/evolution/traitsData';
@@ -21,14 +25,13 @@ import {
   , server$gameCancelTurnTimeout
   , animalDeath
   , server$gameStartPhase
-  , server$playerActed
+  , server$playerActed, server$gamePlantUpdateFood
 } from './actions';
 import ERRORS from './errors'
 
 import {selectRoom, selectGame, selectUsersInGame} from '../selectors';
 
 import {GameModel, PHASE, QuestionRecord, AmbushRecord, FeedingRecord, AREA} from '../models/game/GameModel';
-import * as tt from '../models/game/evolution/traitTypes';
 
 import {
   checkGameDefined
@@ -59,7 +62,6 @@ import {
   , server$huntProcess
   , server$huntStart_Plant
 } from "../models/game/evolution/traitsData/hunt";
-import * as ptt from "../models/game/evolution/plantarium/plantTraitTypes";
 import {logTarget} from "./log.util";
 import {server$takeCardFromRandomPlayer} from "./game.plantarium";
 import {CooldownList} from "../models/game/CooldownList";
@@ -212,6 +214,12 @@ export const server$traitKillAnimal = (gameId, sourceAnimal, targetAnimal) => (d
   if (targetAnimal.hasTrait(tt.TraitRegeneration)) {
     dispatch(server$game(gameId, traitSetAnimalFlag(gameId, targetAnimal.id, TRAIT_ANIMAL_FLAG.REGENERATION, true)));
     dispatch(server$game(gameId, traitParalyze(gameId, targetAnimal.id)));
+    const game = selectGame(getState, gameId);
+    game.plants
+      .filter(plant => plant.type === pt.PlantFungus)
+      .forEach(plant => {
+        dispatch(server$gamePlantUpdateFood(gameId, plant.id, 1));
+      })
   } else {
     dispatch(server$animalDeath(gameId, ANIMAL_DEATH_REASON.KILL, targetAnimal.id));
   }

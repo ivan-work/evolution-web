@@ -1,4 +1,5 @@
 import logger from '../../../shared/utils/logger';
+import * as tt from "../../models/game/evolution/traitTypes";
 
 import {makeGameSelectors} from '../../selectors'
 import {
@@ -8,7 +9,6 @@ import {
   traitTakeFoodRequest
 } from "../trait";
 import {gameEndTurnRequest} from "../game";
-import * as tt from "../../models/game/evolution/traitTypes";
 import {TRAIT_ANIMAL_FLAG} from "../../models/game/evolution/constants";
 import {PHASE} from "../../models/game/GameModel";
 import {gamePlantAttackRequest} from "../game.plantarium";
