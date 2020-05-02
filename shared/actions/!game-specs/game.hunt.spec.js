@@ -170,34 +170,33 @@ players:
   deck: 10 camo
   food: 1
   players:
-    - continent: $A0 mimi, $B0, $C0, $W0 wait
-    - continent: $B1 carn amb, $C1 carn amb
+    - continent: $A mimi, $B, $C, $W wait
+    - continent: $car1 carn amb, $car2 carn amb
   `);
       const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
       const {selectGame0, selectPlayer0, findAnimal0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
       const {selectGame1, selectPlayer1, findAnimal1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
 
-      clientStore0.dispatch(traitTakeFoodRequest('$A0'));
+      clientStore0.dispatch(traitTakeFoodRequest('$A'));
 
-      clientStore1.dispatch(traitAmbushActivateRequest('$B1'));
-      clientStore1.dispatch(traitAmbushActivateRequest('$C1'));
+      clientStore1.dispatch(traitAmbushActivateRequest('$car1'));
+      clientStore1.dispatch(traitAmbushActivateRequest('$car2'));
 
-
-      clientStore0.dispatch(traitAnswerRequest(tt.TraitMimicry, '$B0'));
-      clientStore0.dispatch(traitAnswerRequest(tt.TraitMimicry, '$C0'));
+      clientStore0.dispatch(traitAnswerRequest(tt.TraitMimicry, '$B'));
+      clientStore0.dispatch(traitAnswerRequest(tt.TraitMimicry, '$C'));
 
       expect(selectGame().hunts.size, 'Game hunts').equal(0);
       expect(selectPlayer0().acted, 'User0 acted').true;
 
-      expect(findAnimal('$A0')).ok;
-      expect(findAnimal('$B0')).null;
-      expect(findAnimal('$C0')).null;
-      expect(findAnimal('$B1')).ok;
-      expect(findAnimal('$C1')).ok;
+      expect(findAnimal('$A')).ok;
+      expect(findAnimal('$B')).null;
+      expect(findAnimal('$C')).null;
+      expect(findAnimal('$car1')).ok;
+      expect(findAnimal('$car2')).ok;
 
-      expect(findAnimal('$A0').getFood()).equal(1);
-      expect(findAnimal('$B1').getFood()).equal(2);
-      expect(findAnimal('$C1').getFood()).equal(2);
+      expect(findAnimal('$A').getFood()).equal(1);
+      expect(findAnimal('$car1').getFood()).equal(2);
+      expect(findAnimal('$car2').getFood()).equal(2);
     });
   });
 

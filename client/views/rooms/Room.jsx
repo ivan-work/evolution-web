@@ -54,7 +54,7 @@ export class Room extends React.PureComponent {
     const {roomKickRequest, roomBanRequest, isHost, userId} = this.props;
     return (
       <UserVariants.listItemWithActions
-        showAuth
+        showIcon
         user={user}
         userId={userId}
         isHost={isHost}

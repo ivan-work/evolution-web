@@ -123,6 +123,8 @@ export const TraitMimicry = {
   }
   , action: (game, mimicryAnimal, traitMimicry, newTargetAnimal, attackAnimal, attackTrait) => (dispatch, getState) => {
     dispatch(server$traitStartCooldown(game.id, traitMimicry, mimicryAnimal));
+    // dispatch(huntSetTarget(game.id, newTargetAnimal));
+    // dispatch(server$huntProcess(game.id));
     dispatch(server$traitActivate(game.id, attackAnimal.id, attackTrait, newTargetAnimal));
     return false;
   }

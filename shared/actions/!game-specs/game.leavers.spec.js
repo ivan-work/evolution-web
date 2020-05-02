@@ -127,12 +127,15 @@ players:
     expect(selectPlayer(User2).hand).size(0);
     expect(selectPlayer(User3).hand).size(5);
 
-    clientStore3.dispatch(gameEndTurnRequest());
-    clientStore0.dispatch(gameEndTurnRequest());
+    replaceGetRandom(() => 6, () => {
+      clientStore3.dispatch(gameEndTurnRequest());
+      clientStore0.dispatch(gameEndTurnRequest());
+    });
 
     expect(selectGame().getIn(['status', 'turn'])).equal(1);
     expect(selectGame().getIn(['status', 'phase'])).equal(PHASE.FEEDING);
     expect(selectGame().getIn(['status', 'currentPlayer']), 'Turn 1: User3 first').equal(User3.id);
+    expect(selectGame().getFood(), `Game has 8 food`).equal(8);
 
     clientStore3.dispatch(traitTakeFoodRequest('$A'));
     clientStore0.dispatch(traitTakeFoodRequest('$Q'));

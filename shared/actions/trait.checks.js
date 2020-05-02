@@ -134,12 +134,12 @@ export const checkTraitActivation_TwoTraits = (game, sourceAnimal, trait, trait1
   const trait1 = sourceAnimal.hasTrait(trait1id, true);
   if (!trait1) {
     throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
-      , 'Animal(%s):Trait#%s cant find Trait#%s', sourceAnimal.id, trait.type, trait1Id)
+      , 'Animal(%s):Trait#%s cant find Trait#%s', sourceAnimal.id, trait.type, trait1id)
   }
   const trait2 = linkedAnimal.hasTrait(trait2id, true);
   if (!trait2) {
     throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
-      , 'Animal(%s):Trait#%s cant find Trait#%s', sourceAnimal.id, trait.type, trait2Id)
+      , 'Animal(%s):Trait#%s cant find Trait#%s', sourceAnimal.id, trait.type, trait2id)
   }
   if (trait.getDataModel().getErrorOfUseOnTarget(game, sourceAnimal, trait1)) {
     throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`

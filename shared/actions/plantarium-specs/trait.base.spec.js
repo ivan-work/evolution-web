@@ -208,6 +208,29 @@ players:
     expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED), '$A is not paralyzed').equals(false);
     expect(findAnimal('$A').getFood(), '$A got food').equal(1);
   });
+
+  it('[PLANTARIUM] #BUG TraitSpecialization + Meta', function () {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+settings:
+  addon_plantarium: true
+phase: deploy
+plants: pere $per ++ aqua tree, eph $eph +++ 
+players:
+  - continent: $A fat fat meta, $W wait +
+    hand: special
+    `);
+    const {selectGame, selectCard, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A', false, '$per'));
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitMetamorphose, tt.TraitSpecialization));
+
+    expect(findAnimal('$A'), '$A is OK').ok;
+    expect(findAnimal('$A').getFood(), '$A got food').equal(1);
+    expect(findAnimal('$A').hasTrait(tt.TraitSpecialization), `$A doesn't have spec`).equal(void 0);
+    expect(findPlant('$per').hasTrait(tt.TraitSpecialization), `$per doesn't have spec`).equal(void 0);
+  });
 });
 
 

@@ -14,6 +14,7 @@ import {testShiftTime} from '../../utils/reduxTimeout'
 import {replaceGetRandom} from '../../utils/randomGenerator';
 
 import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
+import ERRORS from "../errors";
 
 describe('TraitAnglerfish:', () => {
   it('Deploy', () => {
@@ -218,4 +219,27 @@ players:
     expect(findAnimal('$A'), '$A is alive').ok;
     expect(findAnimal('$A').getFood(), '$A.getFood').equal(0);
   });
+
+  it(`#bug Anglerfish shouldn't attack twice if got taillossed`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 5
+players:
+  - continent: $B carn tail camo, $W wait
+  - continent: $A angler, $C carn
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$A'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitTailLoss, tt.TraitCamouflage));
+    clientStore0.dispatch(gameEndTurnRequest());
+    expectError(`Expecting cooldown error on attack`, ERRORS.COOLDOWN, () => {
+      clientStore1.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$C'))
+    });
+    clientStore1.dispatch(traitActivateRequest('$C', tt.TraitCarnivorous, '$A'))
+    expect(findAnimal('$A'), '$A is dead').null;
+    expect(findAnimal('$B'), '$B is alive').ok;
+    expect(findAnimal('$C'), '$C is alive').ok;
+  })
 });

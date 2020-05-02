@@ -515,6 +515,7 @@ export const plantDeath = (gameId, plantId) => ({
 export const server$animalDeath = (gameId, type, animalId, data) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   const animal = game.locateAnimal(animalId);
+
   const viviAnimalIds = animal.getTraits()
     .filter(trait => trait.type === tt.TraitTrematode)
     .map(trait => game.locateAnimal(trait.linkAnimalId))
@@ -522,7 +523,7 @@ export const server$animalDeath = (gameId, type, animalId, data) => (dispatch, g
       const traitViviparous = possibleVivi.hasTrait(tt.TraitViviparous);
       return (
         traitViviparous
-        && traitViviparous.getErrorOfUse(game, animal) === ERRORS.TRAIT_TARGETING_ANIMAL_SATURATED
+        && traitViviparous.getErrorOfUse(game, possibleVivi) === ERRORS.TRAIT_TARGETING_ANIMAL_SATURATED
       );
     })
     .map(viviAnimal => viviAnimal.id);

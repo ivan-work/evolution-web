@@ -701,6 +701,27 @@ players:
     expect(findAnimal('$X').getFood(), '$X.getFood()').equal(2);
   });
 
+  it('[BUG] ambush on mimi ink', () => {
+    const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 5
+players:
+  - continent: $Q mimi, $W ink
+  - continent: $A amb carn
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+
+    clientStore1.dispatch(traitAmbushActivateRequest('$A'));
+
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitInkCloud));
+
+    clientStore1.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$W'));
+
+    expect(findAnimal('$A').getFood()).equal(2);
+  });
+
   describe(`Self-Ambush`, () => {
     it(`Can't ambush self`, () => {
       const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);

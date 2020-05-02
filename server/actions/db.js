@@ -4,7 +4,7 @@ import database from '../database';
 // database is not ready yet, beware!
 
 export const db$findUser = (authType, authId) => {
-  return database.db.collection('users').findOne({'auth.type': authType, 'auth.id': authId}, ['name', 'auth']);
+  return database.db.collection('users').findOne({'auth.type': authType, 'auth.id': authId}, ['name', 'auth', 'awards']);
 };
 
 export const db$registerUser = (user) => {

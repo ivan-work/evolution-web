@@ -1,7 +1,7 @@
 import logger from '~/shared/utils/logger';
 import {createReducer, ensureParameter, validateParameter} from '../../shared/utils';
 import {getRandom} from '../../shared/utils/randomGenerator';
-import {Map, List, OrderedMap, fromJS} from 'immutable';
+import {Map, List, OrderedMap, Set, fromJS} from 'immutable';
 import {PHASE, AREA, HuntRecord, AmbushRecord} from '../../shared/models/game/GameModel';
 import {getTraitDataModel} from '../../shared/models/game/evolution/TraitModel';
 import {
@@ -132,6 +132,8 @@ export const traitAnimalAttachTrait = (game, {sourcePid, sourceAid, trait}) => g
 
 export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) => {
   const deadAnimals = [];
+  const animal = game.locateAnimal(sourceAid);
+  const specializationIds = getSpecializationIds(animal);
   return game
     .updateIn(['players', sourcePid, 'continent'], continent => continent
       .map(animal => animal
@@ -150,6 +152,7 @@ export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) =>
           return animal;
         })
       ))
+    .mapPlants(mapDetachSpecialization(specializationIds))
     .update(game => deadAnimals.reduce(
       (game, animalId) => animalDeath(game, {type: ANIMAL_DEATH_REASON.NEOPLASM, animalId})
       , game));
@@ -161,14 +164,16 @@ export const traitAnimalRecombinateTraits = (game, {player1id, player2id, animal
   const trait1 = recombinateTrait(game.locateTrait(trait1id, animal1id, player1id));
   const trait2 = recombinateTrait(game.locateTrait(trait2id, animal2id, player2id));
 
-  let animal1 = game.locateAnimal(animal1id, player1id)
-    .traitDetach(trait => trait.id === trait1id);
+  let animal1 = game.locateAnimal(animal1id, player1id);
+  const traits1 = animal1.traits.filterNot(trait => trait.id === trait1id);
+  animal1 = animal1.set('traits', traits1);
   if (trait1.type === tt.TraitNeoplasm && !animal1.hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)) {
     animal1 = animal1.update('traits', traits => traits.map(trait => trait.set('disabled', false)));
   }
 
-  let animal2 = game.locateAnimal(animal2id, player2id)
-    .traitDetach(trait => trait.id === trait2id);
+  let animal2 = game.locateAnimal(animal2id, player2id);
+  const traits2 = animal2.traits.filterNot(trait => trait.id === trait2id);
+  animal2 = animal2.set('traits', traits2);
   if (trait2.type === tt.TraitNeoplasm && !animal2.hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)) {
     animal2 = animal2.update('traits', traits => traits.map(trait => trait.set('disabled', false)));
   }
@@ -177,6 +182,9 @@ export const traitAnimalRecombinateTraits = (game, {player1id, player2id, animal
     animal1 = animal1.traitAttach(trait2);
   if (!trait1.getDataModel().getErrorOfTraitPlacement(animal2))
     animal2 = animal2.traitAttach(trait1);
+
+  animal1 = animal1.recalculateFood();
+  animal2 = animal2.recalculateFood();
 
   if (TraitNeoplasm.customFns.shouldKillAnimal(animal1)) {
     game = animalDeath(game, {type: ANIMAL_DEATH_REASON.NEOPLASM, animalId: animal1id});
@@ -408,14 +416,15 @@ export const traitMoveCard = (game, {fromPid, toPid, card}) => {
 
 const getSpecializationIds = entity => entity.traits
   .filter(trait => trait.type === tt.TraitSpecialization)
-  .map(trait => trait.linkAnimalId)
+  .map(trait => trait.linkId)
   .valueSeq().toSet();
 
-const mapDetachSpecialization = (sourceId, specializationIds) => entity => {
-  if (specializationIds.has(entity.id)) {
-    return entity.traitDetach(trait => trait.linkAnimalId === sourceId)
-  }
-  return entity;
+const mapDetachSpecialization = (specializationIds) => entity => {
+  return specializationIds
+    .filter(specializationTraitId => entity.traits.has(specializationTraitId))
+    .reduce((entity, specializationTraitId) => {
+      return entity.traitDetach(trait => trait.id === specializationTraitId)
+    }, entity);
 };
 
 export const animalDeath = (game, {type, animalId, data}) => {
@@ -430,7 +439,7 @@ export const animalDeath = (game, {type, animalId, data}) => {
     .updateIn(['areas', AREA.STANDARD, 'shells'], shells => shell ? shells.set(shell.id, shell) : shells)
     .mapPlants(plant => plant.type !== pt.PlantFungus ? plant
       : plant.set('food', Math.min(plant.data.maxFood, plant.getFood() + 1)))
-    .mapPlants(mapDetachSpecialization(animalId, specializationIds))
+    .mapPlants(mapDetachSpecialization(specializationIds))
     .update(addToGameLog(['animalDeath', type, logAnimal(animal)]));
 };
 
@@ -443,7 +452,7 @@ export const plantDeath = (game, {plantId}) => {
       p.traitDetach(trait => trait.linkAnimalId === plantId)
     ))
     .update('players', players => players.map(player => player.update('continent', animals => animals
-      .map(mapDetachSpecialization(plantId, specializationIds)))))
+      .map(mapDetachSpecialization(specializationIds)))))
     .update('deckPlantsDiscard', deck => !deck ? deck : deck.push(plant.type))
     .update(addToGameLog(['plantDeath', logPlant(plant)]));
 };
@@ -602,17 +611,27 @@ export const gameAmbushAttackEnd = (game) => game
   .setIn(['status', 'phase'], PHASE.FEEDING)
   .removeIn(['ambush']);
 
-export const huntStart = (game, {type, attackEntityId, attackPlayerId}) => game
+export const huntStart = (game, {
+  type
+  , attackEntityId
+  , attackPlayerId
+  , attackTraitId
+  , attackTraitType
+}) => game
   .update('hunts', hunts => hunts.unshift(HuntRecord({
     type
     , attackEntityId
     , attackPlayerId
+    , attackTraitId
+    , attackTraitType
   })));
-export const huntSetTarget = (game, {attackTraitId, attackTraitType, targetAid, targetPid}) => game
-  .setIn(['hunts', 0, 'attackTraitId'], attackTraitId)
-  .setIn(['hunts', 0, 'attackTraitType'], attackTraitType)
+
+export const huntSetTarget = (game, {targetAid, targetPid}) => game
   .setIn(['hunts', 0, 'targetAid'], targetAid)
   .setIn(['hunts', 0, 'targetPid'], targetPid);
+
+export const allHuntsSetFlag = (game, {key, value}) => game
+  .update('hunts', hunts => hunts.map(hunt => hunt.update('flags', flags => flags.add(key))));
 
 export const huntSetFlag = (game, {key, value}) => game.updateIn(['hunts', 0, 'flags'], flags => flags.add(key));
 
@@ -716,6 +735,7 @@ export const reducer = createReducer(Map(), {
 
   , huntStart: (state, data) => state.update(data.gameId, game => huntStart(game, data))
   , huntSetTarget: (state, data) => state.update(data.gameId, game => huntSetTarget(game, data))
+  , allHuntsSetFlag: (state, data) => state.update(data.gameId, game => allHuntsSetFlag(game, data))
   , huntSetFlag: (state, data) => state.update(data.gameId, game => huntSetFlag(game, data))
   , huntUnsetFlag: (state, data) => state.update(data.gameId, game => huntUnsetFlag(game, data))
   , huntEnd: (state, data) => state.update(data.gameId, game => huntEnd(game, data))

@@ -212,6 +212,23 @@ players:
     expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)).false;
 
   });
+
+  it('BUG Recombination with steals food', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: feeding
+food: 2
+players:
+  - continent: $A recomb$B mass ++, $B vivi ++, $W wait
+`);
+    const {selectGame, selectPlayer, findCard, findAnimal, findTrait} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitRecombination, tt.TraitMassive, tt.TraitViviparous));
+
+    expect(findAnimal('$A').getFood(), '$A food').equal(2);
+    expect(findAnimal('$B').getFood(), '$B food').equal(2);
+  });
 });
 
 

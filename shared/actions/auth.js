@@ -114,9 +114,9 @@ export const server$logoutUser = (userId) => (dispatch, getState) => {
  * Register
  */
 
-export const server$injectUser = (id, login, authType) => (dispatch) => {
+export const server$injectUser = (id, login, authType, awards) => (dispatch) => {
   // console.log('dbUser', id, login)
-  const user = new UserModel({id, login, authType}).sign();
+  const user = new UserModel({id, login, authType, awards}).sign();
   dispatch(loginUser({user}));
   dispatch(addTimeout(
     USER_LOGOUT_TIMEOUT
@@ -247,7 +247,7 @@ export const authServerToClient = {
     TimeService.setOffset(timestamp);
     return socketConnectClient(connectionId);
   }
-  , onlineUpdate: ({user}) => onlineUpdate(UserModel.fromJS(user).toOthers())
+  , onlineUpdate: ({user}) => onlineUpdate(UserModel.fromJS(user))
   , userUpdateName: ({userId, name}, currentUserId) => (dispatch) => {
     dispatch(userUpdateName(userId, name));
     if (currentUserId === userId) {

@@ -96,7 +96,7 @@ players:
         expect(selectGame().hunts, 'Game.hunts').size(0)
       });
 
-      it(`Anglerfish denies animal of getting the food`, () => {
+      it(`Anglerfish denies plant of getting the food`, () => {
         const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
         const gameId = ParseGame(`
 settings:
@@ -125,16 +125,16 @@ players:
 settings:
   addon_plantarium: true
 phase: feeding
-plants: PlantCarn $car ++
+plants: PlantPere $per ++
 players:
   - continent: $A, $W wait
   - continent: $B amb carn
 `);
         const {selectGame, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
 
-        clientStore0.dispatch(traitTakeFoodRequest('$A', '$car'));
+        clientStore0.dispatch(traitTakeFoodRequest('$A', '$per'));
 
-        // clientStore1.dispatch(traitAmbushActivateRequest('$B'));
+        clientStore1.dispatch(traitAmbushActivateRequest('$B'));
 
         expect(findAnimal('$A'), '$A dead').null;
         expect(findAnimal('$B'), '$B alive').ok;
