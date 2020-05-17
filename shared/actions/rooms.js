@@ -8,7 +8,9 @@ import {RoomModel, VotingModel} from '../models/RoomModel';
 import {GameModel, GameModelClient} from '../models/game/GameModel';
 import {CHAT_TARGET_TYPE} from '../models/ChatModel';
 import {SettingsRules} from '../models/game/GameSettings';
-import {ActionCheckError} from '../models/ActionCheckError';
+
+import ActionCheckError from '../models/ActionCheckError';
+import * as ERR from '../errors/ERR';
 
 import {
   gameInit

@@ -21,13 +21,15 @@ describe('[PLANTARIUM] Deck changes:', function () {
     clientStore1.dispatch(roomJoinRequest(roomId));
     clientStore0.dispatch(roomEditSettingsRequest({
       name: 'Room Test'
+      , timeTurn: 1
+      , timeTraitResponse: 1
+      , maxPlayers: 2
       , addon_plantarium: true
       , addon_timeToFly: true
     }));
 
     expect(serverStore.getState().getIn(['rooms', roomId, 'settings', 'addon_plantarium']), true);
     expect(serverStore.getState().getIn(['rooms', roomId, 'settings', 'addon_timeToFly']), true);
-
 
     clientStore0.dispatch(roomStartVotingRequest());
     clientStore1.dispatch(roomStartVoteActionRequest(true));

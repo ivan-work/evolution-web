@@ -17,6 +17,7 @@ import * as ptt from "../../models/game/evolution/plantarium/plantTraitTypes";
 import * as pt from "../../models/game/evolution/plantarium/plantTypes";
 import {getErrorOfEatingCooldown} from "../trait.checks";
 import ERRORS from "../errors";
+import * as ERR from "../../errors/ERR";
 
 describe('[PLANTARIUM] PlantParasitic:', function () {
   describe('Deploy:', function () {
@@ -38,7 +39,7 @@ players:
 
       // expectUnchanged(`Can't deploy ParasiticPlant to animal`, () => {
       // }, serverStore, clientStore0);
-      expectError(`Can't deploy ParasiticPlant to animal`, `No entity found`, () => {
+      expectError(`Can't deploy ParasiticPlant to animal`, ERR.GAME_ENTITY_NOTFOUND, () => {
         clientStore0.dispatch(gameDeployTraitRequest(cardIds[0], '$A'))
       });
       clientStore0.dispatch(gameDeployTraitRequest(cardIds[0], '$eph'));

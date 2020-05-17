@@ -1,11 +1,10 @@
 import {loggerChat} from '../utils/logger';
 import {to$, server$toRoom, server$toUsers} from './generic';
-import {selectGame} from '../selectors';
-import TimeService from '../../client/services/TimeService';
 import moment from 'moment';
 
 import {ChatModel, MessageModel, CHAT_TARGET_TYPE, CHAT_MESSAGE_LENGTH} from '../models/ChatModel';
-import {ActionCheckError} from '../models/ActionCheckError';
+import ActionCheckError from '../models/ActionCheckError';
+import * as ERR from "../errors/ERR";
 
 const CHAT_WHITELIST_REGEX = /[^\wа-яА-ЯёЁ\d\s\?!\.,\(\):]/gmi;
 /**
@@ -72,7 +71,7 @@ export const server$chatMessage = (to, toType, text, from, context) => (dispatch
     .slice(0, CHAT_MESSAGE_LENGTH);
 
   if (validText.length === 0) {
-    throw new ActionCheckError('chatMessageRequest not valid');
+    throw new ActionCheckError(ERR.APP_USER_CHAT);
   }
 
   if (validText === '/error') {
@@ -99,14 +98,14 @@ export const server$chatMessage = (to, toType, text, from, context) => (dispatch
       break;
     case CHAT_TARGET_TYPE.ROOM:
       const room = getState().getIn(['rooms', to]);
-      if (!room) throw new ActionCheckError('chatMessageRequest', 'Invalid parameters');
+      if (!room) throw new ActionCheckError(ERR.APP_USER_CHAT);
       loggerChat.info(`${message.fromLogin}: ${message.text}`, {room: room.name});
       dispatch(server$toRoom(room.id, chatMessageRoom(message)));
       break;
     case CHAT_TARGET_TYPE.USER:
       loggerChat.info(`${message.fromLogin}: ${message.text}`, {type: toType});
       const user = getState().getIn(['users', to]);
-      if (!user) throw new ActionCheckError('chatMessageRequest', 'User offline');
+      if (!user) throw new ActionCheckError(ERR.APP_USER_CHAT);
       dispatch(to$({userId: user.id}, chatMessageUser(message)));
       break;
   }

@@ -9,6 +9,7 @@ import {PHASE} from '../../models/game/GameModel';
 import * as tt from '../../models/game/evolution/traitTypes';
 
 import {makeGameSelectors} from '../../selectors';
+import ERRORS from "../errors";
 
 describe('TraitMetamorphose:', () => {
   it('Works', () => {
@@ -98,5 +99,22 @@ players:
     clientStore0.dispatch(traitActivateRequest('$A', tt.TraitMetamorphose, tt.TraitMetamorphose));
 
     expect(findAnimal('$A')).null;
+  });
+
+  it(`#CR +${tt.TraitHibernation}: Can't be used when animal is hibernating`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 1 camo
+phase: feeding
+players:
+  - continent: $A hiber meta, $W wait 
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitHibernation));
+
+    expectError(`Metamorphose doesn't work`, ERRORS.ANIMAL_DONT_WANT_FOOD, () => {
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitMetamorphose, tt.TraitHibernation));
+    });
   });
 });

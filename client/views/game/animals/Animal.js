@@ -59,6 +59,9 @@ const styles = theme => ({
     ...GameStyles.animal
     , transition: 'background-color 1s'
     , 'will-change': 'transform'
+    , '&:hover': {
+      zIndex: 6
+    }
     , '&.Animate_Death-leave': {
       backgroundColor: 'black'
       , maxWidth: 0

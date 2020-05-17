@@ -52,7 +52,7 @@ export const TraitMetamorphose = {
     return true;
   }
   , _getErrorOfUse: (game, sourceAnimal) => {
-    if (sourceAnimal.getWantedFood() === 0) return ERRORS.ANIMAL_DONT_WANT_FOOD;
+    if (sourceAnimal.isFull()) return ERRORS.ANIMAL_DONT_WANT_FOOD;
     if (sourceAnimal.getEatingBlockers(game).length > 1) return ERRORS.ANIMAL_BLOCKED_FROM_FOOD;
     return false;
   }

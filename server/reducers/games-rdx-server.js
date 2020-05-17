@@ -65,7 +65,6 @@ export const gameGiveCards = (game, {userId, cards}) => {
 };
 
 const gameDeployAnimal = (animal, card, position) => (game) => {
-  //console.log('gameDeployAnimal', animal)
   return game
     .updateIn(['players', animal.ownerId, 'continent'], continent => OrderedMap(continent.entrySeq().splice(position, 0, [animal.id, animal])));
 };
@@ -160,42 +159,43 @@ export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) =>
 
 const recombinateTrait = (trait) => trait.set('value', false).set('disabled', false);
 
+const recombinateRemoveAnimalTrait = (recombinatedTrait) => animal => {
+  const traits = animal.traits.filterNot(trait => trait.id === recombinatedTrait.id);
+  animal = animal.set('traits', traits);
+  if (recombinatedTrait.type === tt.TraitNeoplasm && !animal.hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)) {
+    animal = animal.update('traits', traits => traits.map(trait => trait.set('disabled', false)));
+  }
+  return animal;
+}
+
 export const traitAnimalRecombinateTraits = (game, {player1id, player2id, animal1id, animal2id, trait1id, trait2id}) => {
+  const getAnimal1 = () => game.locateAnimal(animal1id, player1id);
+  const getAnimal2 = () => game.locateAnimal(animal2id, player2id);
+
   const trait1 = recombinateTrait(game.locateTrait(trait1id, animal1id, player1id));
   const trait2 = recombinateTrait(game.locateTrait(trait2id, animal2id, player2id));
 
-  let animal1 = game.locateAnimal(animal1id, player1id);
-  const traits1 = animal1.traits.filterNot(trait => trait.id === trait1id);
-  animal1 = animal1.set('traits', traits1);
-  if (trait1.type === tt.TraitNeoplasm && !animal1.hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)) {
-    animal1 = animal1.update('traits', traits => traits.map(trait => trait.set('disabled', false)));
-  }
+  game = game.updateIn(['players', player1id, 'continent', animal1id], recombinateRemoveAnimalTrait(trait1));
+  game = game.updateIn(['players', player2id, 'continent', animal2id], recombinateRemoveAnimalTrait(trait2));
 
-  let animal2 = game.locateAnimal(animal2id, player2id);
-  const traits2 = animal2.traits.filterNot(trait => trait.id === trait2id);
-  animal2 = animal2.set('traits', traits2);
-  if (trait2.type === tt.TraitNeoplasm && !animal2.hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)) {
-    animal2 = animal2.update('traits', traits => traits.map(trait => trait.set('disabled', false)));
-  }
+  if (!trait2.getDataModel().getErrorOfTraitPlacement(getAnimal1()))
+    game = game.updateIn(['players', player1id, 'continent', animal1id], animal => animal
+      .traitAttach(trait2)
+      .recalculateFood()
+    );
+  if (!trait1.getDataModel().getErrorOfTraitPlacement(getAnimal2()))
+    game = game.updateIn(['players', player2id, 'continent', animal2id], animal => animal
+      .traitAttach(trait1)
+      .recalculateFood()
+    );
 
-  if (!trait2.getDataModel().getErrorOfTraitPlacement(animal1))
-    animal1 = animal1.traitAttach(trait2);
-  if (!trait1.getDataModel().getErrorOfTraitPlacement(animal2))
-    animal2 = animal2.traitAttach(trait1);
-
-  animal1 = animal1.recalculateFood();
-  animal2 = animal2.recalculateFood();
-
-  if (TraitNeoplasm.customFns.shouldKillAnimal(animal1)) {
+  if (TraitNeoplasm.customFns.shouldKillAnimal(getAnimal1())) {
     game = animalDeath(game, {type: ANIMAL_DEATH_REASON.NEOPLASM, animalId: animal1id});
-  } else {
-    game = game.setIn(['players', player1id, 'continent', animal1id], animal1)
   }
-  if (TraitNeoplasm.customFns.shouldKillAnimal(animal2)) {
+  if (TraitNeoplasm.customFns.shouldKillAnimal(getAnimal2())) {
     game = animalDeath(game, {type: ANIMAL_DEATH_REASON.NEOPLASM, animalId: animal2id});
-  } else {
-    game = game.setIn(['players', player2id, 'continent', animal2id], animal2)
   }
+
   return game;
 };
 
@@ -256,6 +256,37 @@ const plantProduceFood = (game, plant, aedificators) => {
 };
 
 export const gameStartTurn = (game) => {
+  let aedificators = 0;
+  return game
+    .updateIn(['status', 'turn'], turn => ++turn)
+    .setIn(['status', 'round'], 0)
+    .setIn(['food'], 0)
+    .update('players', players => players.map(player => player
+      .set('ended', !player.playing)
+      .update('continent', continent => continent.map(animal => animal
+        .set('food', 0)
+        .update('traits', traits => traits
+          .map(trait => trait.type === tt.TraitIntellect ? trait.set('value', false) : trait)
+          .map(trait => trait.set('disabled', false))
+        )
+        .update(animal => TraitNeoplasm.customFns.actionProcess(animal))
+      ))
+    ))
+    .update(game => { // tap
+      if (game.isPlantarium()) {
+        game.someAnimal((animal) => {
+          if (animal.hasTrait(tt.TraitAedificator)) aedificators++;
+        })
+      }
+      return game;
+    })
+    .mapPlants(plant => plant
+      .set('food', plantProduceFood(game, plant, aedificators))
+      .set('covers', plant.coverSlots)
+    );
+};
+
+export const gameStartDeploy = (game) => {
   const roundPlayerIndex = game.getPlayer(game.status.roundPlayer).index;
   const nextRoundPlayerIndex = (roundPlayerIndex + 1) % game.players.size;
   const nextRoundPlayer = game.sortPlayersFromIndex(game.players, nextRoundPlayerIndex)
@@ -264,36 +295,14 @@ export const gameStartTurn = (game) => {
 
   const nextRoundPlayerId = nextRoundPlayer.id;
 
-  let aedificators = 0;
-  game.someAnimal((animal) => {
-    if (animal.hasTrait(tt.TraitAedificator)) aedificators++;
-  });
   return game
-    .updateIn(['status', 'turn'], turn => ++turn)
     .setIn(['status', 'roundPlayer'], nextRoundPlayerId)
-    .setIn(['food'], 0)
-    .mapPlants(plant => plant
-      .set('food', plantProduceFood(game, plant, aedificators))
-      .set('covers', plant.coverSlots)
-    )
-    .update('cooldowns', cooldowns => cooldowns.eventNextTurn());
-};
-
-export const gameStartDeploy = (game) => {
-  return game
+    .update('cooldowns', cooldowns => cooldowns.eventNextTurn())
     .update('players', players => players.map(player => player
-      .set('ended', !player.playing)
       .update('continent', continent => continent.map(animal => animal
-        .set('food', 0)
         .set('flags', Map())
-        .update('traits', traits => traits
-          .map(trait => trait.type === tt.TraitIntellect ? trait.set('value', false) : trait)
-          .map(trait => trait.set('disabled', false))
-        )
-        .update(animal => TraitNeoplasm.customFns.actionProcess(animal))
       ))
     ))
-    .setIn(['status', 'round'], 0)
 };
 
 export const gameStartFeeding = (game, {food = 0}) => {
@@ -329,10 +338,6 @@ const processNeoplasm = (game) => {
 };
 
 export const gameStartExtinct = (game) => game
-// AUTO FAT PROCESSING - disabled by rules. TODO delete on sight
-// .update('players', players => players.map(player => player
-//   .update('continent', continent => continent.map(animal => animal.digestFood()))
-// ));
 
 export const gameStartRegeneration = (game) => game
   .setIn(['status', 'round'], 0);
@@ -358,17 +363,19 @@ export const gameStartPhase = (game, {phase, timestamp, data}) => (game
  * Traits
  * */
 
-export const gameDeployRegeneratedAnimal = (game, {userId, cardId, animalId, source}) => game
-  .update(game => {
-    if (source === 'DECK') {
-      return game.update('deck', deck => deck.skip(1))
-    } else {
-      const {cardIndex} = game.locateCard(cardId, userId);
-      return game.removeIn(['players', userId, 'hand', cardIndex]);
-    }
-  })
-  .update(game => traitSetAnimalFlag(game, {sourceAid: animalId, flag: TRAIT_ANIMAL_FLAG.REGENERATION, on: false}))
-;
+export const gameDeployRegeneratedAnimal = (game, {userId, cardId, animalId, source}) => {
+  return game
+    .update(game => {
+      if (source === 'DECK') {
+        return game.update('deck', deck => deck.skip(1))
+      } else {
+        const {cardIndex} = game.locateCard(cardId, userId);
+        return game.removeIn(['players', userId, 'hand', cardIndex]);
+      }
+    })
+    .update(game => traitSetAnimalFlag(game, {sourceAid: animalId, flag: TRAIT_ANIMAL_FLAG.REGENERATION, on: false}))
+    ;
+}
 
 export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) => {
   ensureParameter(animalId, 'string');

@@ -218,7 +218,7 @@ export const TraitGrazing = {
     return true;
   }
   , _getErrorOfUse: (game, sourceAnimal) => {
-    if (game.getFood() === 0) return ERRORS.GAME_FOOD;
+    if (game.getFood() < 1) return ERRORS.GAME_FOOD;
     return false;
   }
 };
@@ -307,7 +307,7 @@ export const TraitCooperation = {
 
     const {sourceType, sourceId} = trait.value;
     if (sourceType === 'GAME') {
-      if (game.getFood() === 0) return ERRORS.GAME_FOOD;
+      if (game.getFood() < 1) return ERRORS.GAME_FOOD;
     } else if (sourceType === 'PLANT') {
       const plant = game.getPlant(sourceId);
       return getErrorOfAnimalEatingFromPlantNoCD(game, linkedAnimal, plant)

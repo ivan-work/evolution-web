@@ -8,6 +8,7 @@ import {
 const {ObjectId} = require('mongodb');
 
 import {testShiftTime} from '../utils/reduxTimeout'
+import * as ERR from "../errors/ERR";
 
 describe('Auth:', function () {
   it('socketConnect / disconnect', () => {
@@ -72,7 +73,7 @@ describe('Auth:', function () {
       const serverStore = mockServerStore();
       const clientStore0 = mockClientStore().connect(serverStore);
 
-      expectError('loginUserFormRequest fails with error', 'validation', () => {
+      expectError('loginUserFormRequest fails with error', ERR.APP_USER_LOGIN_FORM_INVALID, () => {
         clientStore0.dispatch(loginUserFormRequest('/test', {id: 'test', login: ''}));
       });
 
@@ -90,7 +91,7 @@ describe('Auth:', function () {
       });
       expect(clientStore0.getActions()[clientStore0.getActions().length - 1].type).equal('loginUserFailure');
 
-      expectError('loginUserFormRequest fails with error', 'form', () => {
+      expectError('loginUserFormRequest fails with error', ERR.APP_USER_LOGIN_FORM_INVALID, () => {
         clientStore0.dispatch(loginUserFormRequest('/test'));
       });
 

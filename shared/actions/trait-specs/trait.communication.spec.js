@@ -5,7 +5,7 @@ import {
   , traitActivateRequest
 } from '../actions';
 
-import {PHASE} from '../../models/game/GameModel';
+import * as ERR from '../../errors/ERR';
 import * as tt from '../../models/game/evolution/traitTypes';
 import {testShiftTime} from '../../utils/reduxTimeout'
 
@@ -232,7 +232,7 @@ players:
       const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
-      expectError(`Error since communication prevents from eating`, 'checkTarget', () => {
+      expectError(`Error since communication prevents from eating`, ERR.GAME_TRAIT_TARGET_ERROR, () => {
         clientStore0.dispatch(traitActivateRequest('$B', tt.TraitPiracy, '$A'));
       });
       expect(findAnimal('$A').getFoodAndFat(), 'Animal $A.getFoodAndFat()').equal(2);

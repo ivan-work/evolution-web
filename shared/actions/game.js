@@ -1,6 +1,9 @@
 import logger, {loggerOnline} from '~/shared/utils/logger';
-import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import {List} from 'immutable';
+
+import ActionCheckError from '~/shared/models/ActionCheckError';
+import ERRORS from "./errors";
+import * as ERR from "../errors/ERR";
 
 import {SETTINGS_TIMED_OUT_TURN_TIME} from '../models/game/GameSettings';
 import {GameModel, GameModelClient, PHASE} from '../models/game/GameModel';
@@ -11,9 +14,7 @@ import * as tt from '../models/game/evolution/traitTypes';
 import * as ptt from '../models/game/evolution/plantarium/plantTraitTypes';
 import * as pt from '../models/game/evolution/plantarium/plantTypes';
 import {
-  CARD_TARGET_TYPE
-  , CARD_SOURCE
-  , CTT_PARAMETER
+  CTT_PARAMETER
   , TRAIT_ANIMAL_FLAG
   , ANIMAL_DEATH_REASON
 } from '../models/game/evolution/constants';
@@ -23,24 +24,25 @@ import {db$gameEnd} from '../../server/actions/db';
 import {server$game, to$, toUser$Client} from './generic';
 import {doesPlayerHasOptions, doesOptionExist, getOptions, searchPlayerOptions} from './ai';
 import {
-  server$takeFoodRequest
-  , server$questionPauseTimeout
+  server$questionPauseTimeout
   , server$questionResumeTimeout
-  , server$autoFoodSharing, server$chatMessage, server$roomSelfDestructStart, server$activateViviparous
+  , server$autoFoodSharing
+  , server$roomSelfDestructStart
+  , server$activateViviparous
 } from './actions';
 import {appPlaySound} from '../../client/actions/app';
 import {redirectTo} from '../utils/history';
-import {selectGame, selectRoom, selectUsersInGame} from '../selectors';
+import {selectGame, selectUsersInGame} from '../selectors';
 
 import {
   checkGameDefined
   , checkGameHasUser
-  , checkPlayerTurn
   , checkPlayerHasCard
-  , checkPlayerHasAnimal
+  , getOrThrowPlayerAnimal
   , checkPlayerCanAct
   , checkGamePhase
-  , checkValidAnimalPosition, checkGameHasPlant, throwError
+  , checkValidAnimalPosition
+  , throwError
 } from './checks';
 
 import {
@@ -52,12 +54,9 @@ import {
 import {addTimeout, cancelTimeout, checkTimeout} from '../utils/reduxTimeout';
 import {parseFromRoom} from "../models/game/GameModel.parse";
 import {server$gameDeployPlant, server$gameSpawnPlants} from "./game.plantarium";
-import {getErrorOfAnimalEating, getErrorOfAnimalEatingFromGame, getErrorOfAnimalEatingFromPlant} from "./trait.checks";
 import PlantModel from "../models/game/evolution/plantarium/PlantModel";
 import PlantVisitor from "../models/game/evolution/plantarium/PlantsVisitor";
 import ParasiteVisitor from "../models/game/evolution/plantarium/ParasiteVisitor";
-import {CHAT_TARGET_TYPE} from "../models/ChatModel";
-import ERRORS from "./errors";
 
 // region Game
 // region Init
@@ -155,6 +154,7 @@ export const gameGiveCards = (gameId, userId, cards) => ({
 });
 
 export const server$gameGiveCards = (gameId, userId, count) => (dispatch, getState) => {
+  logger.debug(`server$gameGiveCards/${userId}: ${count}`);
   const cards = selectGame(getState, gameId).deck.take(count);
   dispatch(gameGiveCards(gameId, userId, cards));
   dispatch(toUser$Client(userId, gameGiveCards(gameId, userId, cards.map(card => card.toClient()))));
@@ -607,9 +607,9 @@ export const server$gamePhaseEndRegeneration = (gameId) => (dispatch, getState) 
   });
 
   if (selectGame(getState, gameId).deck.size > 0) {
+    dispatch(server$game(gameId, gameStartTurn(gameId)));
     dispatch(server$gameDistributeCards(gameId));
     dispatch(server$gameDistributeAnimals(gameId));
-    dispatch(server$game(gameId, gameStartTurn(gameId)));
     dispatch(server$gameStartPhase(gameId, PHASE.DEPLOY));
     if (game.isPlantarium()) {
       dispatch(server$gameSpawnPlants(gameId, game.getPlantsCountForSpawn()));
@@ -674,7 +674,7 @@ const server$gameDistributeAnimals = (gameId) => (dispatch, getState) => {
   game.players.forEach((player) => {
     playerStacks[player.id] = [];
     player.someAnimal((animal) => {
-      if (animal.hasTrait(tt.TraitRstrategy, true) && !animal.flags.has(TRAIT_ANIMAL_FLAG.REGENERATION)) {
+      if (animal.hasTrait(tt.TraitRstrategy) && !animal.flags.has(TRAIT_ANIMAL_FLAG.REGENERATION)) {
         playerStacks[player.id].push(server$gameDeployAnimalFromDeck(gameId, animal));
         playerStacks[player.id].push(server$gameDeployAnimalFromDeck(gameId, animal));
       }
@@ -734,8 +734,12 @@ export const gameClientToServer = {
     checkGameDefined(game);
     checkGameHasUser(game, userId);
     checkPlayerCanAct(game, userId);
-    if (!(game.status.phase === PHASE.FEEDING || game.status.phase === PHASE.DEPLOY)) {
-      throw new ActionCheckError(`checkGamePhase@Game(${game.id})`, 'Wrong phase (%s)', game.status.phase);
+    if (game.status.phase !== PHASE.FEEDING && game.status.phase !== PHASE.DEPLOY) {
+      throw new ActionCheckError(ERR.GAME_PHASE, {
+        gameId
+        , phase: game.status.phase
+        , targetPhase: `${PHASE.FEEDING}/${PHASE.DEPLOY}`
+      });
     }
     logger.verbose(`gameEndTurnRequest: ${userId} (${game.getPlayer(userId).acted})`);
     dispatch(server$gameEndTurn(gameId, userId, 'gameEndTurnRequest'));
@@ -767,10 +771,15 @@ export const gameClientToServer = {
     const card = checkPlayerHasCard(game, userId, cardId);
     const traitData = card.getTraitDataModel(alternateTrait);
     if (!traitData) {
-      throw new ActionCheckError(`checkCardHasTrait@Game(${game.id})`, 'Card(%s;%s) doesn\'t have trait (%s)'
-        , card.trait1
-        , card.trait2
-        , traitData);
+      throw new ActionCheckError(ERR.GAME_CARD_TRAIT_NOTFOUND, {
+        gameId
+        , userId
+        , cardId
+        , trait1: card.trait1
+        , trait2: card.trait2
+        , alternateTrait
+        , linkId
+      });
     }
 
     let entity;
@@ -786,7 +795,7 @@ export const gameClientToServer = {
     }
 
     if (!entity) {
-      throw new ActionCheckError(`No entity found(${game.id})`, `No entity found(${game.id}): ${entityId}`);
+      throw new ActionCheckError(ERR.GAME_ENTITY_NOTFOUND, {gameId, entityId});
     }
 
     throwError(traitData.getErrorOfTraitPlacement(entity));
@@ -805,9 +814,9 @@ export const gameClientToServer = {
       }
 
       if (!linkedEntity)
-        throw new ActionCheckError(`No entity found(${game.id})`, `No entity found(${game.id}): ${linkId}`);
+        throw new ActionCheckError(ERR.GAME_LINK_NOTFOUND, {gameId, linkId});
       if (entity === linkedEntity)
-        throw new ActionCheckError(`CheckCardTargetType(${game.id})`, 'Player want to link Animal#%s to itself', linkedEntity);
+        throw new ActionCheckError(ERR.GAME_LINK_SELF, {gameId, linkId});
       throwError(traitData.getErrorOfTraitPlacement(linkedEntity));
       throwError(traitData.getErrorOfTraitPlacement_LinkUser(userId, linkedEntityOwnerId));
     }
@@ -838,7 +847,9 @@ export const gameClientToServer = {
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
     checkGameHasUser(game, userId);
-    if (!game.getPlayer(userId).timedOut) throw new ActionCheckError(`User(%s) is not timedOut`, userId);
+    if (!game.getPlayer(userId).timedOut) {
+      throw new ActionCheckError(ERR.GAME_PLAYER_TIMEOUT_NOTFOUND, {gameId, userId});
+    }
     dispatch(server$gameSetUserTimedOut(gameId, userId, false));
     if (game.status.currentPlayer === userId && checkTimeout(makeTurnTimeoutId(gameId))) {
       dispatch(server$gameCancelTurnTimeout(gameId));
@@ -858,12 +869,14 @@ export const gameClientToServer = {
     checkGameHasUser(game, userId);
     checkGamePhase(game, PHASE.REGENERATION);
     checkPlayerHasCard(game, userId, cardId);
-    const animal = checkPlayerHasAnimal(game, userId, animalId);
-    if (!animal) {
-      throw new ActionCheckError(`checkPlayerHasAnimal(${game.id})`, 'Player#%s doesn\'t have Animal#%s', userId, animalId);
-    }
+    const animal = getOrThrowPlayerAnimal(game, userId, animalId);
     if (!animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) {
-      throw new ActionCheckError(`checkPlayerHasAnimalFlag(${game.id})`, 'Player#%s doesn\'t have Flag on Animal#%s ', userId, animalId);
+      throw new ActionCheckError(ERR.GAME_ANIMAL_FLAG, {
+        gameId,
+        userId,
+        animalId,
+        flag: TRAIT_ANIMAL_FLAG.REGENERATION
+      });
     }
     dispatch(server$game(gameId, gameDeployRegeneratedAnimal(gameId, userId, cardId, animalId, 'HAND')));
     if (dispatch(server$gamePhaseCheckEndRegeneration(gameId))) {

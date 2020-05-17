@@ -13,7 +13,7 @@ import {makeGameSelectors} from '../../selectors';
 
 describe('TraitNeoplasm:', () => {
   it('Works', () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 15 camo
 phase: deploy
@@ -63,7 +63,7 @@ players:
   });
 
   it('Places at bottom', () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1}] = mockGame(2);
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
     const gameId = ParseGame(`
 deck: 10 camo
 phase: deploy
@@ -82,7 +82,7 @@ players:
   });
 
   it('Kills angler', () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 10 camo
 phase: deploy
@@ -96,7 +96,7 @@ players:
   });
 
   it('Disable defenses', () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
     const gameId = ParseGame(`
 phase: feeding
 players:
@@ -110,7 +110,7 @@ players:
   });
 
   it('Drops disabling after loss', () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
     const gameId = ParseGame(`
 phase: feeding
 players:
@@ -128,7 +128,7 @@ players:
   });
 
   it('Kills animal with linked traits', () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
     const gameId = ParseGame(`
 phase: feeding
 players:
@@ -143,7 +143,7 @@ players:
   });
 
   it('Kills instantly', () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
     const gameId = ParseGame(`
 phase: feeding
 players:
@@ -156,21 +156,65 @@ players:
     expect(findAnimal('$A').getFood()).equal(1);
     expect(findAnimal('$B')).null;
   });
+
+  it(`#BUG +${tt.TraitMetamorphose} +${tt.TraitRecombination}: after dropping out, recalculate food`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A carn neoplasm para meta, $B carn neoplasm para recomb$C, $C fat neoplasm fat, $W wait
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    expect(findAnimal('$A').foodSize).equal(3);
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitMetamorphose, tt.TraitNeoplasm));
+    expect(findAnimal('$A').foodSize).equal(4);
+
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expect(findAnimal('$B').foodSize).equal(3);
+    clientStore0.dispatch(traitActivateRequest('$B', tt.TraitRecombination, tt.TraitNeoplasm, tt.TraitFatTissue));
+    expect(findAnimal('$B').hasTrait(tt.TraitNeoplasm)).undefined;
+    expect(findAnimal('$B').foodSize).equal(4);
+  });
+
+  it(`#BUG +${tt.TraitRecombination} +${tt.TraitCooperation}: 
+if animal dies after using recombination, coop left alone`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+food: 5
+players:
+  - continent: 
+    - $A recomb$B carn neo coop$B swim
+    - $B swim amb int carn sharp neo shy
+    - $W wait
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitRecombination, tt.TraitSwimming, tt.TraitNeoplasm));
+    expect(findAnimal('$A'), '$A dead').not.ok;
+    expect(findAnimal('$B').hasTrait(tt.TraitRecombination)).undefined;
+    expect(findAnimal('$B').hasTrait(tt.TraitCooperation)).undefined;
+  })
+
+  it(`#BUG +${tt.TraitRstrategy}: r-strategy gets disabled by neoplasm`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: feeding
+food: 10
+players:
+  - continent: $A rstrat neo swim sharp +, $W wait +
+`);
+    const {selectGame, findPlayerByIndex, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    expect(findAnimal('$A').hasTrait(tt.TraitRstrategy)).not.ok;
+
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expect(findAnimal('$A'), '$A is alive').ok;
+    expect(findAnimal('$W'), '$W is alive').ok;
+    expect(findPlayerByIndex(0).continent).size(2);
+  })
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

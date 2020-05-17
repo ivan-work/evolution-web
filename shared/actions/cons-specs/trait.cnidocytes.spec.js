@@ -172,7 +172,7 @@ players:
     expect(selectPlayer(User0).continent).size(2);
   });
 
-  it('rstrat', () => {
+  it(`#BUG +${tt.TraitRstrategy}: Should not disable r-strategy`, () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 10 camo

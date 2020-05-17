@@ -1,5 +1,6 @@
 import logger from '../../../shared/utils/logger';
 import {PHASE} from '../../models/game/GameModel';
+import * as ERR from '../../errors/ERR';
 import * as tt from '../../models/game/evolution/traitTypes';
 import * as ptt from '../../models/game/evolution/plantarium/plantTraitTypes';
 
@@ -52,7 +53,7 @@ players:
       clientStore0.dispatch(traitTakeCoverRequest('$C', '$suc'));
     });
 
-    expectError(`Can't take more next turn`, 'checkTarget', () => {
+    expectError(`Can't take more next turn`, ERR.GAME_TRAIT_TARGET_ERROR, () => {
       clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
     });
   });

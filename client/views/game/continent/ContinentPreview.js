@@ -7,9 +7,7 @@ import Typography from "@material-ui/core/Typography";
 import withStyles from '@material-ui/core/styles/withStyles';
 
 import GameStyles from "../GameStyles";
-import {Scrollbars} from "react-custom-scrollbars";
 import * as tt from '../../../../shared/models/game/evolution/traitTypes';
-import stylesJson from '../../../stylesv3.json';
 
 const styles = {
   continentPreview: {
@@ -61,15 +59,6 @@ export const ContinentPreview = ({classes, game, player}) => (
       .map(animal => <AnimalPreview key={animal.id} animal={animal}/>)}
   </div>
 );
-
-export const getAnimalPreviewColor = (animal) => {
-  if (animal.hasTrait(tt.TraitCarnivorous, true)) {
-    return stylesJson[tt.TraitCarnivorous];
-  } else if (animal.hasTrait(tt.TraitSwimming, true)) {
-    return stylesJson[tt.TraitSwimming];
-  }
-  return '#fff';
-};
 
 export const AnimalPreview = withStyles(styles)(({classes, animal}) => {
   const traitsList = animal.traits.toList();

@@ -8,6 +8,7 @@ import {traitActivateRequest, traitTakeFoodRequest} from "../trait";
 import {gameEndTurnRequest} from "../game";
 import ERRORS from "../errors";
 import {TRAIT_ANIMAL_FLAG} from "../../models/game/evolution/constants";
+import * as ERR from "../../errors/ERR";
 
 describe('[PLANTARIUM] TraitIntellect:', function () {
   it(`TraitIntellect`, () => {
@@ -92,7 +93,7 @@ players:
 
     clientStore0.dispatch(gameEndTurnRequest());
 
-    expectError(`Can't reuse intellect on animal`, 'checkTarget', () => {
+    expectError(`Can't reuse intellect on animal`, ERR.GAME_TRAIT_TARGET_ERROR, () => {
       clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
     });
 

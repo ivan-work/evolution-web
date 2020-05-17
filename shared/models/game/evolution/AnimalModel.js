@@ -15,6 +15,10 @@ import {TRAIT_ANIMAL_FLAG, CTT_PARAMETER} from './constants';
 /**
  * @class AnimalModel
  * @property {string} id - an ID.
+ * @property {TraitModel[]} traits
+ * @property {Map} flags
+ * @property {number} foodSize
+ * @property {number} fatSize
  * @property {string} ownerId - a PlayerModel ID.
  */
 export class AnimalModel extends Record({
@@ -56,7 +60,10 @@ export class AnimalModel extends Record({
   }
 
   toString() {
-    return `Animal#${this.id}(${this.getFood()}/${this.foodSize}+${this.getFat()}/${this.fatSize})[${this.traits.toArray().map(t => `${t.type}${t.value ? `#${t.value}` : ''}`)}]`;
+    return `\
+Animal#${this.id}\
+(${this.getFood()}/${this.foodSize}+${this.getFat()}/${this.fatSize})\
+[${this.traits.toArray().map(t => `${t.disabled ? '!' : ''}${t.type}${t.value ? `#${t.value}` : ''}`)}]`;
   }
 
   getTraits(withDisabled) {
