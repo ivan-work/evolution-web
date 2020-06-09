@@ -25,7 +25,6 @@ import {
   server$gameEndTurn
   , server$addTurnTimeout
   , server$gameCancelTurnTimeout
-  , animalDeath
   , server$gameStartPhase
   , server$playerActed, server$gamePlantUpdateFood
 } from './actions';

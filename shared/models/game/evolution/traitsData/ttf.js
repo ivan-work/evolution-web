@@ -52,12 +52,13 @@ export const TraitMetamorphose = {
     return true;
   }
   , _getErrorOfUse: (game, sourceAnimal) => {
-    if (sourceAnimal.isFull()) return ERRORS.ANIMAL_DONT_WANT_FOOD;
+    if (sourceAnimal.getWantedFood() === 0) return ERRORS.ANIMAL_DONT_WANT_FOOD;
     if (sourceAnimal.getEatingBlockers(game).length > 1) return ERRORS.ANIMAL_BLOCKED_FROM_FOOD;
     return false;
   }
   , getErrorOfUseOnTarget: (game, sourceAnimal, targetTrait) => {
     if (targetTrait.getDataModel().food > 0) return ERRORS.TRAIT_TARGETING_NO_FOOD_ON_TRAIT;
+    if (targetTrait.getDataModel().hidden) return ERRORS.TRAIT_ACTION_NO_TRAIT;
     const eatingBlockers = sourceAnimal.getEatingBlockers(game);
     if (eatingBlockers.length > 1) return ERRORS.ANIMAL_BLOCKED_FROM_FOOD;
     if (eatingBlockers.length === 1 && targetTrait.id !== eatingBlockers[0].id) return ERRORS.ANIMAL_BLOCKED_FROM_FOOD;
@@ -113,11 +114,6 @@ export const TraitInkCloud = {
     [tt.TraitInkCloud, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
   ])
   , action: (game, defenseAnimal, defenseTrait, target, attackAnimal, attackTrait) => (dispatch) => {
-    dispatch(server$startCooldownList(game.id, [
-      startCooldown(game.id, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, attackAnimal.ownerId)
-      , startCooldown(game.id, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.TRAIT, attackTrait.id)
-    ]));
-
     dispatch(server$traitStartCooldown(game.id, defenseTrait, defenseAnimal));
     dispatch(allHuntsSetFlag(game.id, HUNT_FLAG.TRAIT_INK_CLOUD));
     dispatch(server$huntEnd(game.id));
@@ -189,8 +185,9 @@ export const TraitViviparous = {
     dispatch(server$gameDeployAnimalFromDeck(game.id, sourceAnimal, animal => animal.set('food', 1)));
   }
   , _getErrorOfUse: (game, animal) => {
-    if (!animal.isSaturated(game)) return ERRORS.TRAIT_TARGETING_ANIMAL_SATURATED;
+    if (game.status.phase === PHASE.EXTINCTION) return ERRORS.GAME_WRONG_PHASE;
     if (game.deck.size === 0) return ERRORS.GAME_LAST_TURN;
+    if (!animal.isSaturated(game)) return ERRORS.TRAIT_TARGETING_ANIMAL_SATURATED;
     return false;
   }
 };

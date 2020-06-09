@@ -17,11 +17,11 @@ import {
   server$traitKillAnimal,
   server$traitNotify_End, server$traitNotify_Start, server$traitQuestion,
   server$traitSetValue,
-  server$traitStartCooldown,
+  server$traitStartCooldown, startCooldown,
   traitAmbushActivate,
   traitParalyze, traitQuestion
 } from "../../../../actions/trait";
-import {HUNT_FLAG, TRAIT_COOLDOWN_LINK, TRAIT_COOLDOWN_PLACE} from "../constants";
+import {HUNT_FLAG, TRAIT_COOLDOWN_DURATION, TRAIT_COOLDOWN_LINK, TRAIT_COOLDOWN_PLACE} from "../constants";
 import {getErrorOfAnimalEatingFromPlant, getErrorOfAnimalEatingFromPlantNoCD} from "../../../../actions/trait.checks";
 import {
   findAnglerfish,
@@ -110,7 +110,6 @@ const server$huntStart = (gameId, type, attackPid, attackEntity, attackTrait, ta
 };
 
 // Public
-
 export const server$huntStart_Animal = (gameId, attackAnimal, attackTrait, targetAnimal, ...flags) => (dispatch, getState) => {
   dispatch(server$huntStart(gameId, HUNT_TYPE.ANIMAL, attackAnimal.ownerId, attackAnimal, attackTrait, targetAnimal, ...flags));
 };
@@ -338,9 +337,13 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
   if (huntGetFlag(game, HUNT_FLAG.FEED_FROM_PLANT)) {
     dispatch(server$startCooldownList(gameId, getFeedingCooldownList(gameId, hunt.targetPid)));
   }
-  // if (huntGetFlag(game, HUNT_FLAG.TRAIT_HOMEOTHERMY)) {
-  //   dispatch(server$startCooldown(gameId, ...));
-  // }
+  if (huntGetFlag(game, HUNT_FLAG.TRAIT_INK_CLOUD)) {
+    dispatch(server$startCooldownList(game.id, [
+      startCooldown(game.id, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, hunt.attackPlayerId)
+      , startCooldown(game.id, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.TRAIT, hunt.attackTraitId)
+    ]));
+  }
+
 
   if (attackEntity) {
     const traitIntellect = attackEntity.hasTrait(tt.TraitIntellect) || attackEntity.hasTrait(ptt.PlantTraitHiddenIntellect);

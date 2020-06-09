@@ -217,4 +217,38 @@ players:
     expect(findAnimal('$W'), '$W is alive').ok;
     expect(findPlayerByIndex(0).continent).size(2);
   })
+
+  it(`Neoplasm scoring`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+food: 10
+players:
+  - continent: $A carn rstrat neo swim sharp +, $W wait +
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    expect(findAnimal('$A').hasTrait(tt.TraitRstrategy)).not.ok;
+
+    expect(findAnimal('$A').countScore(), '$A score').equal(8);
+  })
+
+  it(`Neoplasm disable aedificator`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: deploy
+food: 10
+players:
+  - continent: $A neo aedif para, $W wait +
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    expect(findAnimal('$A').hasTrait(tt.TraitAedificator)).ok;
+
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expect(findAnimal('$A').hasTrait(tt.TraitAedificator)).not.ok;
+
+    expect(selectGame().getFood(), 'selectGame().getFood()').equal(10);
+  })
 });

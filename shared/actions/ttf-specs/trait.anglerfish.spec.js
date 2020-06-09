@@ -242,4 +242,24 @@ players:
     expect(findAnimal('$B'), '$B is alive').ok;
     expect(findAnimal('$C'), '$C is alive').ok;
   })
+
+  it(`#bug ${tt.TraitInkCloud} should disallow attack for the turn`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 5
+players:
+  - continent: $A carn ink camo, $W1 wait
+  - continent: $B angler, $W2 wait
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitInkCloud));
+
+    expectError(`Expecting cooldown error on attack`, ERRORS.COOLDOWN, () => {
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'))
+    });
+    clientStore0.dispatch(gameEndTurnRequest());
+  });
 });

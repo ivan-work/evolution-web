@@ -307,13 +307,22 @@ export const gameStartDeploy = (game) => {
 
 export const gameStartFeeding = (game, {food = 0}) => {
   ensureParameter(food, 'number');
+  let aedificators = 0;
   return game
     .update('players', players => players.map(player => player
       .set('ended', !player.playing)))
     .update('plants', plants => plants.map(plant => plant.set('covers', plant.coverSlots)))
-    .setIn(['food'], food)
-    .setIn(['status', 'round'], 0)
     .update(processNeoplasm)
+    .update(game => { // tap
+      if (!game.isPlantarium()) {
+        game.someAnimal((animal) => {
+          if (animal.hasTrait(tt.TraitAedificator)) aedificators++;
+        })
+      }
+      return game;
+    })
+    .set('food', food + aedificators * 2)
+    .setIn(['status', 'round'], 0)
 };
 
 const processNeoplasm = (game) => {

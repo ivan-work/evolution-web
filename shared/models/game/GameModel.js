@@ -260,11 +260,7 @@ export class GameModel extends Record({
   , hunts: List()
 }) {
   generateFood() {
-    let aedificatorFood = 0;
-    this.someAnimal((animal, continent, player) => {
-      if (animal.hasTrait(tt.TraitAedificator)) aedificatorFood += 2;
-    });
-    return FOOD_TABLE[this.getActualPlayers().size]() + aedificatorFood;
+    return FOOD_TABLE[this.getActualPlayers().size]();
   }
 
   getPlantsConfig() {

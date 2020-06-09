@@ -183,6 +183,24 @@ players:
 
     expect(findPlayerByIndex(0).continent).size(2);
   });
+
+  it(`[BUG] trematode death triggers vivi v2`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 5 camo
+phase: feeding
+food: 0
+players:
+  - continent: $A vivi trem$B ++, $B vivi ++, $W wait +
+`);
+    const {selectGame, findPlayerByIndex, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expect(selectGame().status.turn, 'Turn 1').equal(1);
+
+    expect(findPlayerByIndex(0).continent).size(1);
+  });
 });
 
 
