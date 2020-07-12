@@ -35,6 +35,8 @@ export default class TraitDetails extends React.PureComponent {
           return T.translate('Game.TraitDesc.$CDRound')
         } else if (/\$CDTurn/.test(match)) {
           return T.translate('Game.TraitDesc.$CDTurn')
+        } else if (/\$Count/.test(match)) {
+          return T.translate('Game.TraitDesc.$Count')
         } else if (/\$A/.test(match)) {
           return <IconAnimal key={index} className='icon'/>
         } else if (/\$F/.test(match)) {
