@@ -336,19 +336,16 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
 
   if (huntGetFlag(game, HUNT_FLAG.FEED_FROM_PLANT)) {
     dispatch(server$startCooldownList(gameId, getFeedingCooldownList(gameId, hunt.targetPid)));
+  } else {
+    // #cooldown - Global hunt cooldown being set here
+    dispatch(server$startCooldownList(gameId, getFeedingCooldownList(gameId, hunt.attackPlayerId)));
   }
-  if (huntGetFlag(game, HUNT_FLAG.TRAIT_INK_CLOUD)) {
-    dispatch(server$startCooldownList(game.id, [
-      startCooldown(game.id, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, hunt.attackPlayerId)
-      , startCooldown(game.id, tt.TraitCarnivorous, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.TRAIT, hunt.attackTraitId)
-    ]));
-  }
-
 
   if (attackEntity) {
     const traitIntellect = attackEntity.hasTrait(tt.TraitIntellect) || attackEntity.hasTrait(ptt.PlantTraitHiddenIntellect);
     if (!!traitIntellect && traitIntellect.value === true) dispatch(server$traitSetValue(game, attackEntity, traitIntellect, false));
 
+    // #cooldown - TraitCarnivorous cooldown being set here
     if (!huntGetFlag(game, HUNT_FLAG.TRAIT_INK_CLOUD)) {
       const ensuredAttackTrait = TraitModel.new(hunt.attackTraitType).set('id', hunt.attackTraitId); // Attack trait could be undefined
       dispatch(server$traitStartCooldown(game.id, ensuredAttackTrait, attackEntity));
@@ -406,6 +403,15 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
     ) {
       dispatch(server$startFeedingFromGame(gameId, targetAnimal.id, 1, 'PLANT', attackEntity.id));
     }
+
+    // When attacker (now target) uses INK_CLOUD we make sure his trait still gets cooldown
+    if (huntGetFlag(game, HUNT_FLAG.TRAIT_ANGLERFISH)) {
+      const traitCarnivorousOfTarget = targetAnimal.hasTrait(tt.TraitCarnivorous, true);
+      if (traitCarnivorousOfTarget) {
+        logger.info('SET COOLDOWN', targetAnimal.toString(), traitCarnivorousOfTarget.toString())
+        dispatch(server$traitStartCooldown(gameId, traitCarnivorousOfTarget, targetAnimal));
+      }
+    }
   }
 
   dispatch(huntEnd(gameId));
@@ -418,8 +424,12 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
     logger.info(`ENDING ANOTHER HUNT: ${debugHunts(game)}`);
     dispatch(server$huntEnd(gameId));
   }
-  if (!huntGetFlag(game, HUNT_FLAG.AMBUSH) && hunt.attackPlayerId) {
-    dispatch(server$playerActed(gameId, hunt.attackPlayerId));
+  if (
+    !huntGetFlag(game, HUNT_FLAG.AMBUSH)
+    && !huntGetFlag(game, HUNT_FLAG.TRAIT_ANGLERFISH)
+    && hunt.attackPlayerId
+  ) {
+    dispatch(server$playerActed(gameId, hunt.attackPlayerId, `normal hunt`));
   }
   if (
     huntGetFlag(game, HUNT_FLAG.FEED_FROM_PLANT)

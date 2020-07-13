@@ -103,7 +103,7 @@ export const TraitMimicry = {
   , defense: true
   , targetType: TRAIT_TARGET_TYPE.ANIMAL
   , cooldowns: fromJS([
-    [tt.TraitMimicry, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ACTIVATION]
+    [tt.TraitMimicry, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
   ])
   , getErrorOfUseOnTarget: (game, mimicryAnimal, targetAnimal, attackAnimal, attackTrait) => {
     if (targetAnimal.id === mimicryAnimal.id) return ERRORS.TRAIT_TARGETING_SAME_ANIMAL;

@@ -153,4 +153,27 @@ players:
       clientStore0.dispatch(traitActivateRequest('$B', tt.TraitMetamorphose, tt.TraitThermosynthesis));
     }, serverStore, clientStore0);
   });
+
+  it(`#BUG Disabled shell should be undisabled when re-picked up`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A shell neo fat, $B carn, $C, $W wait
+`);
+    const {selectGame, findAnimal, findTrait, findPlayerByIndex} = makeGameSelectors(serverStore.getState, gameId);
+
+    expect(findTrait('$A', tt.TraitShell).disabled, '$A shell is disabled').true;
+
+    clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$A'));
+
+    expect(findAnimal('$A'), '$A is dead').not.ok;
+    expect(selectGame().getArea().shells, 'shells amount').size(1);
+
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(traitTakeShellRequest('$C', selectGame().getArea().shells.first().id));
+
+    expect(findTrait('$C', tt.TraitShell), '$C has shell').ok;
+    expect(findTrait('$C', tt.TraitShell).disabled, '$C shell is not disabled').false;
+  });
 });

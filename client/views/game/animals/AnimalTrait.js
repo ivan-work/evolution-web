@@ -135,6 +135,7 @@ export const InteractiveTrait = compose(
   connect((state, props) => ({
     canStart: checkCanStart(state, props)
     , isOnCooldown: checkCooldown(state, props)
+    , className: 'InteractiveTrait'
   }))
   , InteractionSource(InteractionItemType.TRAIT, {
     getIID: ({trait}) => trait.id

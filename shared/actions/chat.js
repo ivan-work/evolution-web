@@ -6,6 +6,8 @@ import {ChatModel, MessageModel, CHAT_TARGET_TYPE, CHAT_MESSAGE_LENGTH} from '..
 import ActionCheckError from '../models/ActionCheckError';
 import * as ERR from "../errors/ERR";
 
+export const SYSTEM_LOGIN = '0';
+
 const CHAT_WHITELIST_REGEX = /[^\wа-яА-ЯёЁ\d\s\?!\.,\(\):]/gmi;
 /**
  * Init
@@ -39,7 +41,7 @@ export const client$chatMessageRequest = (to, toType, text) => (dispatch, getSta
         , to: game.roomId
         , toType: CHAT_TARGET_TYPE.ROOM
         , from: '0'
-        , fromLogin: 'System'
+        , fromLogin: SYSTEM_LOGIN
         , text: 'App.Room.Messages.OutputTime'
         , context: {time}
       })));
@@ -78,7 +80,7 @@ export const server$chatMessage = (to, toType, text, from, context) => (dispatch
     throw new Error('chat error');
   }
 
-  const fromLogin = from === '0' ? 'System'
+  const fromLogin = from === '0' ? SYSTEM_LOGIN
     : getState().getIn(['users', from, 'login'], 'unknown');
 
   const message = MessageModel.fromJS({

@@ -57,7 +57,9 @@ export const TraitMetamorphose = {
     return false;
   }
   , getErrorOfUseOnTarget: (game, sourceAnimal, targetTrait) => {
-    if (targetTrait.getDataModel().food > 0) return ERRORS.TRAIT_TARGETING_NO_FOOD_ON_TRAIT;
+    if (
+      !targetTrait.disabled && targetTrait.getDataModel().food > 0
+    ) return ERRORS.TRAIT_TARGETING_NO_FOOD_ON_TRAIT;
     if (targetTrait.getDataModel().hidden) return ERRORS.TRAIT_ACTION_NO_TRAIT;
     const eatingBlockers = sourceAnimal.getEatingBlockers(game);
     if (eatingBlockers.length > 1) return ERRORS.ANIMAL_BLOCKED_FROM_FOOD;

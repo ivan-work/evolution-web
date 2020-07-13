@@ -136,4 +136,19 @@ players:
 
     expect(findAnimal('$A').getFood()).equal(0);
   });
+
+  it(`#BUG Metamorphose can eat disabled traits`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 1 camo
+phase: feeding
+players:
+  - continent: $A mass neo meta, $W wait 
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitMetamorphose, tt.TraitMassive));
+
+    expect(findAnimal('$A').getFood()).equal(1);
+  });
 });

@@ -452,7 +452,10 @@ export const animalDeath = (game, {type, animalId, data}) => {
     .removeIn(['players', animal.ownerId, 'continent', animalId])
     .updateIn(['players', animal.ownerId, 'continent'], continent => continent
       .map(a => a.traitDetach(trait => trait.linkAnimalId === animal.id)))
-    .updateIn(['areas', AREA.STANDARD, 'shells'], shells => shell ? shells.set(shell.id, shell) : shells)
+    .updateIn(['areas', AREA.STANDARD, 'shells'], shells => shell
+      ? shells.set(shell.id, shell.set('disabled', false))
+      : shells
+    )
     .mapPlants(plant => plant.type !== pt.PlantFungus ? plant
       : plant.set('food', Math.min(plant.data.maxFood, plant.getFood() + 1)))
     .mapPlants(mapDetachSpecialization(specializationIds))

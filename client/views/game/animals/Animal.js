@@ -148,7 +148,7 @@ export class BaseAnimal extends React.PureComponent {
   }
 
   render() {
-    const {classes, animal, game, children, canInteract, acceptInteraction} = this.props;
+    const {classes, animal, game, children, canInteract, acceptInteraction, place} = this.props;
 
     const cnAnimal = cn(
       classes.animal
@@ -161,13 +161,16 @@ export class BaseAnimal extends React.PureComponent {
                                  trait={trait}
                                  sourceAnimal={animal} />));
 
+    // If game is defined and phase is not feeding - hide food
+    const showFood = !(game && game.status.phase !== PHASE.FEEDING);
+
     return (
       <div className={cnAnimal} ref={this.setAnimalRef} onClickCapture={acceptInteraction}>
         <div className={classes.animalToolbar}>
           <div>
             {/*{renderAnimalFood(animal)}*/}
-            {game && game.status.phase === PHASE.FEEDING && <AnimalFoodStatus animal={animal} />}
-            {game && game.status.phase === PHASE.FEEDING && <AnimalFoodContainer food={animal.getFood()} />}
+            {showFood && <AnimalFoodStatus animal={animal} />}
+            {showFood && <AnimalFoodContainer food={animal.getFood()} />}
           </div>
           <div>
             <AnimalFlags animal={animal} />

@@ -61,13 +61,13 @@ const getZoneList = (continent) => {
 
 const renderZoneListDeploy = (continent) => {
   return getZoneList(continent).map((animal, index) => (
-    animal ? <AnimatedAnimal key={animal.id} animal={animal}/>
+    animal ? <AnimatedAnimal key={animal.id} animal={animal} />
       : <InteractiveContinentZone key={index} index={index / 2}/>
   ))
 };
 
 const renderZoneListOther = (continent) => {
-  return continent.map(animal => <AnimatedAnimal key={animal.id} animal={animal}/>)
+  return continent.map(animal => <AnimatedAnimal key={animal.id} animal={animal} />)
 };
 
 export const Continent = ({classes, renderZoneList, continent}) => (

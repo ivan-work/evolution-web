@@ -741,7 +741,7 @@ export const gameClientToServer = {
         , targetPhase: `${PHASE.FEEDING}/${PHASE.DEPLOY}`
       });
     }
-    logger.verbose(`gameEndTurnRequest: ${userId} (${game.getPlayer(userId).acted})`);
+    logger.verbose(`gameEndTurnRequest: ${userId} (${game.getPlayer(userId).acted ? 'acted' : 'not acted'})`);
     dispatch(server$gameEndTurn(gameId, userId, 'gameEndTurnRequest'));
   }
   , gameDeployAnimalRequest: ({gameId, cardId, animalPosition = 0}, {userId}) => (dispatch, getState) => {
