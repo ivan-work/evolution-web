@@ -164,7 +164,9 @@ Animal#${this.id}\
         if (trait.type === TraitSymbiosis && trait.linkSource && trait.hostAnimalId === this.id) {
           const hostAnimal = game.locateAnimal(trait.linkAnimalId, trait.ownerId);
           const linkedTrait = game.locateTrait(trait.linkId, trait.linkAnimalId, trait.ownerId);
-          return !linkedTrait.disabled && !hostAnimal.isSaturated();
+          if (linkedTrait) {
+            return !linkedTrait.disabled && !hostAnimal.isSaturated();
+          }
         }
       }).toArray());
     const traitShell = this.hasTrait(TraitShell);
