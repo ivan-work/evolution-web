@@ -168,6 +168,8 @@ const recombinateRemoveAnimalTrait = (recombinatedTrait) => animal => {
   return animal;
 }
 
+const updateAnimal = (game, playerId, animalId, cb) => game.updateIn(['players', playerId, 'continent', animalId], cb);
+
 export const traitAnimalRecombinateTraits = (game, {player1id, player2id, animal1id, animal2id, trait1id, trait2id}) => {
   const getAnimal1 = () => game.locateAnimal(animal1id, player1id);
   const getAnimal2 = () => game.locateAnimal(animal2id, player2id);
@@ -181,12 +183,10 @@ export const traitAnimalRecombinateTraits = (game, {player1id, player2id, animal
   if (!trait2.getDataModel().getErrorOfTraitPlacement(getAnimal1()))
     game = game.updateIn(['players', player1id, 'continent', animal1id], animal => animal
       .traitAttach(trait2)
-      .recalculateFood()
     );
   if (!trait1.getDataModel().getErrorOfTraitPlacement(getAnimal2()))
     game = game.updateIn(['players', player2id, 'continent', animal2id], animal => animal
       .traitAttach(trait1)
-      .recalculateFood()
     );
 
   if (TraitNeoplasm.customFns.shouldKillAnimal(getAnimal1())) {
@@ -194,6 +194,13 @@ export const traitAnimalRecombinateTraits = (game, {player1id, player2id, animal
   }
   if (TraitNeoplasm.customFns.shouldKillAnimal(getAnimal2())) {
     game = animalDeath(game, {type: ANIMAL_DEATH_REASON.NEOPLASM, animalId: animal2id});
+  }
+
+  if (getAnimal1()) {
+    game = updateAnimal(game, player1id, animal1id, animal => animal.recalculateFood());
+  }
+  if (getAnimal2()) {
+    game = updateAnimal(game, player2id, animal2id, animal => animal.recalculateFood());
   }
 
   return game;

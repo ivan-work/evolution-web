@@ -35,7 +35,10 @@ const renderTime = (game) => {
   } else if (game.status.phase === PHASE.AMBUSH) {
     return (<Timer start={game.status.turnStartTime} duration={game.settings.timeAmbush}/>);
   } else if (game.status.turnStartTime != null) {
-    const sound = game.status.currentPlayer === game.userId;
+    const sound = (
+      game.status.currentPlayer === game.userId
+      && game.settings.timeTurn >= 30e3
+    );
     return (<Timer start={game.status.turnStartTime} duration={game.status.turnDuration} sound={sound}/>);
   } else {
     return '-';
