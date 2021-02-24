@@ -143,8 +143,8 @@ Game:
     Cover: Cover from carnivores
   Trait:
     TraitSymbiosis      : 
-    _: Symbiosis
-    source: Symbiont
+      _: Symbiosis
+      source: Symbiont
     TraitCommunication  : Communication
     TraitCooperation    : Cooperation
     TraitCarnivorous    : Carnivorous
