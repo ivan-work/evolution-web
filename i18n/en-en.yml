@@ -218,87 +218,86 @@ Game:
     TraitCarnivorous    : $A can attack other unprotected $A. For the eaten animal receives $F$F. For biting off the tail gets $F. In case of failure don`t get any $F. Can not attack if fully fed. $EAT, $CDTurn.
     TraitParasite       : Can be deployed only on enemy $A. Increases the need for $F by +2. Can be dropped by $TraitTailLoss or $TraitRecombination. $Count 8
     TraitFatTissue      : Additional stock $F for $A, can be activated when animal is lacking $F. Can be placed multiple times on one animal. When activated transforms that tissue and more if needed. $A, that have food only in fat tissue is not counting as fed. 
-    TraitSwimming       : $A can be attacked only if attacker have $TraitSwimming. Carnivourous with $TraitSwimming can`t attack $A without $TraitSwimming (even with $TraitIntellect).
+    TraitSwimming       : $A can be attacked only if attacker have $TraitSwimming. Carnivorous with $TraitSwimming can`t attack $A without $TraitSwimming (even with $TraitIntellect).
     TraitRunning        : When $A is attacked, it has a 50% chance of escaping. Attacker can`t attack in this turn anymore. $Count 4
-    TraitMimicry        : When $A is attacked, owner $A must redirect the attack. You can only redirect to $A, that can be attacked by this Carnivourous. If there is no such $A, then $TraitMimicry is not triggering. Loop Mimicry is possible only one time for attack. $Count 4
-    TraitScavenger      : $A automatically receives $F when other $A is killed by Carnivourous. Only one $TraitScavenger receives $F in game, starting from $A of Carnivourous` owner clockwise direction. If there are many Scavengers, $F receives only one from non-fed from left to right. Can`t be used on $A with trait "Carnivourous" and vice versa. $Count 4
-    TraitPiracy         : Один раз в ход в свою фазу питания игрок может забрать одну $F у другого НЕНАКОРМЛЕННОГО $A в игре. Защитные свойства игнорируются. Нельзя использовать чтобы положить еду в жировой запас. $Count 4 
-    TraitTailLoss       : Когда $A атаковано хищником, игрок может отбросить любое свойство защищающегося $A (кроме тремотоды) и остаться в живых. Атаковавший хищник получает только одну $F. $Count 4
-    TraitGrazing        : При использовании уничтожает одну $F из общей "кормовой базы". Можно использовать в каждом раунде в свою фазу питания независимо от действия других свойств. $Count 4
-    TraitMassive        : Большое $A может быть атаковано только хищником со свойством $TraitMassive. $Count 8
-    TraitHibernation    : Можно использовать в свою фазу питания - $A считается НАКОРМЛЕННЫМ. Нельзя использовать два хода подряд и в последний ход игры. Активированная Спячка запрещает наполнять жировой запас и использовать свойства, связанные с получением еды. $Count 4
-    TraitPoisonous      : Хищник, съевший это $A, в фазу вымирания текущего хода погибает. Животное, съевшее другое отравленное животное без свойства ЯДОВИТОЕ, не погибает. $Count 4
-    TraitBurrowing      : Когда $A НАКОРМЛЕНО, оно не может быть атаковано хищником. $Count 4
-    TraitCamouflage     : $A может быть атаковано только хищником со свойством $TraitSharpVision. $Count 4
-    TraitSharpVision    : Хищник с этим свойством может атаковать $A со свойством $TraitCamouflage. $Count 4
+    TraitMimicry        : When $A is attacked, owner $A must redirect the attack. You can only redirect to $A, that can be attacked by this Carnivorous. If there is no such $A, then $TraitMimicry is not triggering. Loop Mimicry is possible only one time for attack. $Count 4
+    TraitScavenger      : $A automatically receives $F when other $A is killed by Carnivorous. Only one $TraitScavenger receives $F in game, starting from $A of Carnivorous` owner clockwise direction. If there are many Scavengers, $F receives only one from non-fed from left to right. Can`t be used on $A with trait Carnivorous and vice versa. $Count 4
+    TraitPiracy         : Once in a feeding phase player can grab one $F from other non-fed animal im game. Ignores any defensive traits. Can`t be used to fill fat tissue. $Count 4 
+    TraitTailLoss       : When $A is attacked, player can drop one of the defender`s $A traits (excluding trematode) and survive. Attacker receives only one $F. $Count 4
+    TraitGrazing        : When used destroys one $F from "food base". Can be used in every round. $Count 4
+    TraitMassive        : Massive $A can be only attacked by Carnivorous with $TraitMassive. $Count 8
+    TraitHibernation    : Can be used in your feeding phase - $A is counting as fed. Can`t be used two times in a row and in the last turn of the game. Active Hybernation prohibits from filling fat tissue and activating traits that manipulate food. $Count 4
+    TraitPoisonous      : Carnivorous, ate this $A will die in the next extinction phase. $A, ate other poisoned animal without $TraintPoisonous will not die. $Count 4
+    TraitBurrowing      : When $A is fed, it can`t be attacked. $Count 4
+    TraitCamouflage     : $A can be attacked only by Carnivorous with $TraitSharpVision. $Count 4
+    TraitSharpVision    : Carnivorous with this trait can attack $A with trait $TraitCamouflage. $Count 4
     TraitShell          : >-
-      Если $A атаковано хищником, может спрятаться в раковину.
-      В раковине $A не может быть атаковано, но и до конца хода не может получать $F, кроме как преобразуя жир.
-      Атаковавший хищник не получает $F$F и не может более атаковать в этот ход.
-      $A не может спрятаться в Раковину, если Хищник напал с помощью Засады, даже если атака была перенаправлена с помощью Мимикрии.
-      Если $A было съедено или умерло от голода, то Раковину может подобрать любой игрок вместо взятия еды из кормовой базы. $Count 4
-    TraitIntellect      : Хищник с этим свойством один раз в ход может игнорировать одно из свойств $A, которое он собирается атаковать. Хищник с этим свойством не может игнорировать Регенерацию и Удильщика. Водоплавающий хищник не может атаковать никакое "сухопутное" животное. $Count 4
-    TraitAnglerfish     : Можно сыграть только как $A. Когда хищник атакует вашего УДИЛЬЩИКА, он останавливает атаку и тут же атакует нападающего, игнорируя одно из его свойств по выбору игрока. При этом УДИЛЬЩИК также не должен иметь каких-либо свойств, в том числе парных. Противники не видят вашего УДИЛЬЩИКА, для них он $A без свойств. УДИЛЬЩИК может защищать всех других $A без свойств - для этого необходимо активировать УДИЛЬЩИКА нажатием. $Count 4
-    TraitTrematode      : Парное отрицательное свойство. Можно сыграть одновременно на пару $A$A другого игрока. Не может быть сброшена с помощью других карт. $Count 8
-    TraitMetamorphose   : "В свою фазу питания вместо взятия $F из кормовой базы $A может сбросить одну карту из своих свойств (не приводящих к увеличению потребности в еде) и получить $F. МЕТАМОРФОЗА может быть использована для выхода из состояний, блокирующих получение еды, таких как: СПЯЧКА, РАКОВИНА, СИМБИОЗ. $Count 4"
-    TraitInkCloud       : Один раз за фазу питания, когда атаковано хищником, $A может выбросить чернила, и не будет съедено. Хищник может снова атаковать в следующую свою фазу питания текущего хода это или другое $A. $Count 4
-    TraitViviparous     : $A, став накормленным, немедленно рождает новое $A - верхняя карта с колоды помещается на поле как новое $A. В этот ход оно также считается накормленным. Если карт в колоде уже нет, то новое $A не появляется. $Count 6
-    TraitAmbush         : Хищник с этим свойством может атаковать $A, когда оно получает $F из кормовой базы. Если атакованное $A съедено, $F остается в кормовой базе. Хищник с этим свойством игнорирует у жертвы свойства РАКОВИНА и НОРНОЕ. Если игрок хочет использовать несколько животных с ЗАСАДОЙ, то они атакуют жертву в порядке слева-направо. Все игроки на столе могут использовать ЗАСАДУ поочередно, пока жертва, находясь у кормовой базы, жива. $Count 4
-    TraitFlight         : $A с этим свойством не может быть атаковано хищником, у которого столько же или больше свойств. $Count 6
-    TraitThermosynthesis: $EAT, $CDTurn. Получить $F от энергии тепла. Это свойство нельзя использовать, если на континенте есть ещё $A с этим свойством. $Count 6
-    TraitPhotosynthesis : $EAT, $CDTurn. Получить $F от энергии солнца. Это свойство нельзя использовать, если на континенте есть ещё $A с этим свойством. $Count 6
-    TraitSpecialization : Парное свойство. Соедините растение и $A чтобы оно могло получать еду только с этого растения игнорируя его свойства.
+      If $A is attacked, it can hide in a shell.
+      In shell $A can`t be attacked, but it cant receive $F until the end of feeding phase other than converting Fat Tissue.
+      Attacker do not receive $F$F and can`t attack this turn.
+      $A can`t hide in a shell, if attacked using Ambush, even if attack was redirected by Mimicry. 
+      If $A died, any player can pick shell instead of receiving food from "food base". $Count 4
+    TraitIntellect      : Carnivorous with this trait once in a turn can ignore one of the $A traits, that`s it going to attack. Can`t ignore Regeneration or Anglerfish. Swimming Carnivorous can`t attack any non-Swimming animals. $Count 4
+    TraitAnglerfish     : Can be used only as $A. When Carnivorous is attacking your Anglerfish, it stops the game and attacking the attacker, ignoring one of the attacker`s traits. To work, Anglerfish also must to have none of the other traits, including pair traits. Enemies don`t see your Anglerfish, it is just an empty $A for them. Anglerfish can defend other empty $A  - for this you need to click it. $Count 4
+    TraitTrematode      : Pair negative trait. Can be deployed on pair of $A$A of other player. Can`t be dropped by other cards. $Count 8
+    TraitMetamorphose   : In your feeding phase insted of taking $F from  "food base" $A can drop off one of its traits (not leading to an increase in the need for food) and receive $F. Metamorphose can be used to quit Hybernation, Shell, Symbiosys. $Count 4
+    TraitInkCloud       : Once in a feeding phase, when attacked, $A can release ink and will not be eaten. Carnivorous can attack that or others $A in next turn of feeding phase. $Count 4
+    TraitViviparous     : $A, when fed, immediatly creates new $A - top card from deck is deployed as new $A. In this phase it is counting as fed. If there is no cards in the deck, new $A will not be created. $Count 6
+    TraitAmbush         : Carnivourous with this trait can attack $A, when it receives $F from "food base". If attacked $A is killed, $F remains in the "food base". Carnivorous with this trait ignores Shell and Burrow traits. If there are many $A with Ambush, they will attack from left to right as long as the victim, being at the "food base", is alive. $Count 4
+    TraitFlight         : $A with this trait can`t be attacked with Carnivorous that have same or bigger amount of traits. $Count 6
+    TraitThermosynthesis: $EAT, $CDTurn. Receive $F from the heat energy. Can`t use if there is another $A with this traint on this continent. $Count 6
+    TraitPhotosynthesis : $EAT, $CDTurn. Receive $F from the sun energy. Can`t use if there is another $A with this traint on this continent. $Count 6
+    TraitSpecialization : Pair trait. Link plant and $A so that it can get food only from this plant ignoring its traits.
     
-    TraitAedificator    : В начале фазы питания кормовая база пополняется на 2 $F за каждое $A с таким свойством в локации. $Count 4
-    TraitCnidocytes     : Не предотвращает смерть хозяина, но по желанию игрока парализует атаковавшего его хищника, у которого до начала следующего хода перестают действовать все свойства, в том числе парные. Эффект от СТРЕКАТЕЛЬНЫХ КЛЕТОК подействует после окончания атаки. $Count 4
-    TraitNeoplasm       : Каждую фазу определения ресурсов у $A, на которое сыграно, перестает действовать одно из свойств; когда все свойства перестают действовать, $A погибает. Не действует на парные свойства. $Count 4
+    TraitAedificator    : In the beginning of the feeding phase "food base" receives extra 2 $F for every $A with this trait in this location. $Count 4
+    TraitCnidocytes     : It does not prevent the death of the $A, but by the will of the player, it paralyzes the Carnivorous that attacked it, which until the beginning of the next turn ceases to have all traits, including paired ones. The effect of the Cnidocytes will take effect after the attack ends. $Count 4
+    TraitNeoplasm       : Every feeding phase $A, with this trait, one of the traits ceases to act; when all traits are ceased, $A dies. Do not affect pair traits. $Count 4
     TraitRecombination  : >-
-      $CDTurn. Парное свойство. $A$A могут обменяться друг с другом одним из своих непарных свойств.
-      Если в результате рекомбинации на животном появляются невозможные комбинации, то рекомбинируемое свойство отбрасывается.
-      Невозможные комбинации на одном животном
-      1. два одинаковых свойства
-      2. хищник и падальщик
-      3. регенерации и два любых свойства
-      3. регенерация и свойство, повышающее потребность в еде.
-      Рекомбинированный заполненный жировой запас становится незаполненным.
-      Если в результате рекомбинации на животном образовался избыток еды, то он уничтожается, но не заполняет жировой запас.
+      $CDTurn. Pair trait. $A$A can exchange with themselves one of their non-pair traits.
+      If impossible combinations appear on the animal as a result of recombination, the recombinated trait is dropped.
+      Impossible combination on one animal:
+      1. Two same traits (excluding Fat Tissue)
+      2. Carnivorous and Scavenger
+      3. Regeneration and any traits
+      4. Regeneration and trait, leading to increased need of food.
+      Recombinated filled Fat Tissue becomes unfilled.
+      If after Recombination there are extra food on the animal, it destroys, but don`t fills Fat Tissue.
   
-    TraitRegeneration   : $A может иметь еще только одно свойство, и оно не должно увеличивать потребность. Если $A съедено, свойства остаются в игре, но не действуют. Перед фазой развития карта съеденого $A должна быть восстановлена с руки; если у игрока на руках нет карт, то из колоды. Регенерирующее животное невозможно уничтожить ничем, кроме голода. $Count 6
+    TraitRegeneration   : $A can have only two traits, not leading to an increased need of food. If $A is killed, traits remain in game, but do not work. Before deploy phase caed od killed $A must be recovered from hand; If player don`t have any, recoveres from deck. Animal with this trait can be killed only by starvation. $Count 6
 
-    TraitSuckerfish     : Мне лень писать описание, присылайте свои варианты в нашу группу ВК.
-    TraitHerding        : Мне лень писать описание, присылайте свои варианты в нашу группу ВК.
-    TraitMigration      : Мне лень писать описание, присылайте свои варианты в нашу группу ВК.
+    TraitSuckerfish     : To be added...
+    TraitHerding        : To be added....
+    TraitMigration      : To be added.....
 
-    TraitRstrategy      : Можно играть на любого игрока. Игрок не получает новых карт за $A с этим свойством. Вместо этого в начале хода две карты выкладываются как два новых $A игрока. $Count 6
-    TraitHomeothermy    : $CDRound. $A с этим свойством может получить дополнительно $F из кормовой базы. Нельзя использовать чтобы положить еду в жировой запас. $Count 6
-    TraitPlantHomeothermy: $CDRound. $A с этим свойством может получить дополнительно $F с растения. Нельзя использовать чтобы положить еду в жировой запас.
-    TraitShy            : Если $A было атаковано хищником и выжило, то в этот ход хищники больше не могут его атаковать. $Count 6
+    TraitRstrategy      : Can be deployed on any animal in game. Player do not receive cards for $A with this trait. Instead in the beginning of the deploy phase, two cards are deployed as new $A of that player. $Count 6
+    TraitHomeothermy    : $CDRound. $A with this trait can receive additional $F from "food base". Can`t be used to fill Fat Tissue. $Count 6
+    TraitPlantHomeothermy: $CDRound. $A with this trait can receive additional $F from plant. Can`t be used to fill Fat Tissue.
+    TraitShy            : If $A was attacked and survived, Carnivores cant attack this $A this phase. $Count 6
     
-    PlantTraitRootVegetable: Только $A со свойством $TraitBurrowing может брать $F с такого растения.
-    PlantTraitHoney: Если ваше $A получило $F с такого растения, заберите карту у игрока с наибольшем количеством карт в руке.
+    PlantTraitRootVegetable: Only $A with trait $TraitBurrowing can receive $F from that plant.
+    PlantTraitHoney: If your $A received $F from this plant, pick up a card from players with the most cards in hand.
     PlantTraitMycorrhiza: >-
-      Парное свойство.
-      Несколько растений связаны между собой с помощью микоризой: все они выживут, если хотя бы на одном из них есть $F.
-      Затем в конце фазы роста каждое из тех растений, на которых нет $F, получит $F.
-    PlantTraitAquatic: Только животное со свойством $TraitSwimming может брать $F с такого растения.
+      Pair trait.
+      Two plants are linked with Mycorrhiza: all of them will survive, if any of them have $F left.
+      After that at the end of the deploy phase every plant with no $F, will get $F.
+    PlantTraitAquatic: Only $A with $TraitSwimming can receive $F from that plant.
     PlantTraitOfficinalis: >-
-      $A, получившее $F с такого растения, считается накормленным, но абсолютно все его свойства перестают действовать до конца фазы питания.
-      Действует только фишка убежища.
-    PlantTraitProteinRich: $A, получившее $F с такого растения, дополнительно получает $F. $TraitCarnivorous может брать еду с этого растения.
-    PlantTraitTree: Только $A со свойствами $TraitMassive и/или $TraitFlight может брать с такого растения. Дает фишку убежища.
+      $A, that received $F from plant with this trait, is counting as fed, but every of animal`s traits are ceased until the end of phase.
+      Only Cover mark is working.
+    PlantTraitProteinRich: $A, received $F from plant with this trait, additionally receives $F. $TraitCarnivorous can recieve food from that plant.
+    PlantTraitTree: Only $A with traits $TraitMassive and/or $TraitFlight can receives food from plant with this trait. Gives Cover mark.
     PlantTraitParasiticPlant: >-
-      Карта РАСТЕНИЯ-ПАРАЗИТА кладется на другое растение.
-      Для РАСТЕНИЙ-ПАРАЗИТОВ действуют следующие правила:
-      1. ПАРАЗИТ не идет в зачет максимального количества растений, находящихся на игровом столе.
-      2. В свою фазу питания игрок может вместо взятия $F или атаки ХИЩНИКОМ, переместить с растения-хозяина $F на ПАРАЗИТА.
-      При этом нельзя переместить последнюю $F с растения-хозяина.
-      ПАРАЗИТ выживает, если на нем нет в фазу вымирания.
-      ПАРАЗИТ погибает, если погибает растение-хозяин.
-    PlantTraitSpiky: Дает три фишки убежища.
-    PlantTraitParasiticLink: Активируйте чтобы положить ЕДУ на паразита
-    PlantTraitHiddenCarnivorous: Активируйте чтобы атаковать $A
+      Card Parasitic Plant is deployed on other plant.
+      Rules for Parasitic Plant:
+      1. Parasite is not counting in max plant amount on the game board.
+      2. In feeding phase player can move $F from host-plant to parasitic plant instead of receiving food or using Carnivorous.
+      Parasite survives, if it has got no food on it.
+      Parasite dies if host-plant dies
+    PlantTraitSpiky: Grants three Cover marks
+    PlantTraitParasiticLink: Activate to move food on Parasite
+    PlantTraitHiddenCarnivorous: Activate to attack $A
 
-    TraitPlantGrazing: Сначала $A получает $F с растения. Затем оно может уничтожить другую $F на этом же растении.
+    TraitPlantGrazing: First, $A receives $F from plant. Then it can destroy other $F on this plant.
   Phase:
     DEPLOY: Deploy phase
     FEEDING: Feeding phase
