@@ -73,13 +73,13 @@ App:
     $Unban: Unban
     ErrorKick: You were kicked
     ErrorBan: You were banned
- Messages:
+  Messages:
     OutputTime: "Game time: {time}"
     GameEnd: Game over. Congratulations {winnerName}! The room will self-destruct after {time} minutes.
     AfkHostRequest: Hello! There's been no activity in this room for 10 minutes. Please write something in the chat so that the system knows that you are somewhere nearby.
     AfkHostKick: The system determined that the host had gone somewhere and kicked him from the room.
     AfkHostNormal: Thank you!
- Log:
+  Log:
     Label: Action Log
     gameNextRound: New Round.
     gameGiveCards:

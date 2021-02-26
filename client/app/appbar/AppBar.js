@@ -22,6 +22,8 @@ import GameScoreboardFinal from "../../views/game/ui/GameScoreboardFinal";
 
 import {SettingVolumeMenuItem} from "./SettingVolume";
 import SettingUnignoreAll from "./SettingUnignoreAll";
+import TranslationSwitch from "../../components/TranslationSwitch";
+import MenuItem from "@material-ui/core/MenuItem";
 
 const styles = theme => ({
   title: {
@@ -57,6 +59,7 @@ export const AppBar = ({classes}) => (
       <GuardUser>
         <AppBarMenu className={classes.appBarMenu} text={<IconMenu />}>
           <SettingVolumeMenuItem />
+          <MenuItem><TranslationSwitch/></MenuItem>
           {/*<SettingUIv3MenuItem />*/}
           <LinkProfile />
           <SettingUnignoreAll />

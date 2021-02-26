@@ -4,37 +4,31 @@ import langCodes from '../../i18n';
 
 import {appChangeLanguage} from '../actions/app';
 
-const createChangeLanguage = (changeLanguage) => ({currentTarget}) => changeLanguage(langCodes[currentTarget.selectedIndex]);
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
 
-export const TranslationSwitch = ({changeLanguage, currentLanguage}) => (
-  <div style={styles.container}>
-    <select
-      label='country'
+
+const TranslationSwitch = ({changeLanguage, currentLanguage}) => (
+  <FormControl>
+    {/* Not translated because why? :D */}
+    <InputLabel id="select-language">Language</InputLabel>
+    <Select
+      id='select-language'
       value={currentLanguage}
-      onChange={createChangeLanguage(changeLanguage)}
-    >{langCodes.map((code, index) =>
-    <option key={index}>
-      {code}
-    </option>)}
-    </select>
-  </div>
+      onChange={({target}) => changeLanguage(target.value)}
+    >
+      {langCodes.map((code, index) =>
+        <MenuItem key={index} value={code}>
+          {code}
+        </MenuItem>
+      )}
+    </Select>
+  </FormControl>
 );
 
-const styles = {
-  container: {
-    position: 'absolute'
-    , left: '0px'
-    , top: '3em'
-    , width: '2em'
-    //background: '#333'
-    //, color: '#fff'
-    //, padding: 16
-    //, textAlign: 'right'
-    //, verticalAlign: 'middle'
-  }
-};
-
-export const TranslationSwitchView = connect((state) => ({
+export default connect((state) => ({
   currentLanguage: state.getIn(['app', 'lang'])
 }), (dispatch) => ({
   changeLanguage: (code) => dispatch(appChangeLanguage(code))

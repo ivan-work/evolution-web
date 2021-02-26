@@ -1,10 +1,9 @@
 import T from 'i18n-react';
 import throttle from 'lodash/throttle';
-import deepForceUpdate from 'react-deep-force-update';
 
 import RootService from '../services/RootService';
 
-export const appChangeLanguage = (langCode) => (dispatch) => {
+export const appChangeLanguage = (langCode) => (dispatch, getState) => {
   //console.log('fetching', langCode);
   window.fetch(`/api/i18n/${langCode}`)
     .then(r => r.json())
