@@ -1,5 +1,6 @@
 App:
   TBD: In development
+  Start: Server started and will be rebooted after about 24 hours
   Login:
     Login: Login
     Username: Username
@@ -11,10 +12,23 @@ App:
   Misc:
     VKGroup: VK Group
     Changelog: Changelog
-    Agree: Yes # Yes: Да => true: Да WTF???
-    Disagree: No # Yes: Да => true: Да WTF???
+    Agree: Yes 
+    Disagree: No 
+    $on: on # this doesn't work without $
+    $off: off # this doesn't work without $
     FAQ: FAQ
     FAQ_HREF: 'https://github.com/ivan-work/evolution-web/blob/master/faq-ru.md'
+    Ignore: Ignore
+    Unignore: Unignore
+    UnignoreAll: Unignore
+  Settings:
+    Sound: Sound
+    UIv3: New interface (v3)
+    Profile: Profile
+  Profile:
+    Title: Profile
+    Name: Name
+    NameChange: Change name
   Chat:
     Label: Chat
     EnterMessage: ...
@@ -25,16 +39,26 @@ App:
     $Watch: watch
   Room:
     Room: Room
+    StartVoting_Title: Ready?
+    StartVoting_InProgress: Voting in process
+    Desc:
+      Seeded: Test game
     Settings:
       name: Name
       maxPlayers: Max players
       timeTurn: Turn time (minutes)
       timeTraitResponse: Attack response time
+      randomPlayers: Randomed first player
       halfDeck: Use only half of the cards
+      halfDeckHelp: Artificially removes half of the cards, ensuring that all the properties are present. For example, if there are 4 piracy cards in the deck, the option guarantees that there will be 2 piracy cards left.
+      maxCardsEnabled: Set maximum amount of cards
+      maxCardsEnabledHelp: Will remove extra cards after sorting the deck. Some traits may be completely lost. 
+      cardCountResult: Amount of cards in deck
       addon_timeToFly: Time To Fly
-      addon_continents: Continents
+      addon_continents: Continents (without locations)
       addon_bonus: Bonus cards
       addon_plantarium: Plantarium
+      addon_base: Base
     Players: Players
     Spectators: Spectators
     Banned: Banned
@@ -49,10 +73,78 @@ App:
     $Unban: Unban
     ErrorKick: You were kicked
     ErrorBan: You were banned
+ Messages:
+    OutputTime: "Game time: {time}"
+    GameEnd: Game over. Congratulations {winnerName}! The room will self-destruct after {time} minutes.
+    AfkHostRequest: Hello! There's been no activity in this room for 10 minutes. Please write something in the chat so that the system knows that you are somewhere nearby.
+    AfkHostKick: The system determined that the host had gone somewhere and kicked him from the room.
+    AfkHostNormal: Thank you!
+ Log:
+    Label: Action Log
+    gameNextRound: New Round.
+    gameGiveCards:
+      0: $Player@{0} has got {1} card
+      1: $Player@{0} has got {1} cards
+      2: $Player@{0} has got {1} cards
+      3: $Player@{0} hasn`t got any cards =(
+    gameDeployAnimal: $Player@{0} deployed $A
+    gameDeployTrait:
+      1: $Player@{0} deployed ${1} on {2}
+      2: $Player@{0} deployed ${1} on {2} and {3}
+    gameDeployTrait_LINKED : $Player@{0} deployed traint "${1}" on {2} and {3}
+    gameEndTurn: $Player@{0} has ended a turn
+    gameNextPlayer: $Player@{0} has started a turn
+    traitTakeShell: '${0} is hiding in a shell'
+    traitGiveBirth: '${0} is giving a birth to a child'
+    traitMoveFood:
+      GAME: '{2} has taken {0} from food base.'
+      PLANT: '{2} has taken {0} from {3}'
+      TraitPiracy: '{2} pirates $F from {3}'
+      TraitTailLoss: '{2} receiving $F for "tail"'
+      TraitCommunication: '{2} is sharing food with {3}'
+      TraitCarnivorous: '{2} ate {3}'
+      TraitScavenger: '{2} eats the remains.'
+    traitMoveCard: $Player@{0} stole a card from $Player@{1}
+    animalDeath:
+      STARVE: '{1} died of starvation.'
+      KILL: '{1} killed.'
+      POISON: '{1} died of poisoning.'
+      NEOPLASM: '{1} died of $TraitNeoplasm.'
+    traitNotify_Start:
+      0: '{0} is using trait ${1}'
+      1: '{0} is using trait  ${1} on {2}'
+      2: '{0} is using trait  ${1} on {2} and {3}'
+  Plant:
+    PlantEphemeral: Ephemeral
+    PlantPerennial: Perennial
+    PlantLegume: Legume
+    PlantGrass: Grass
+    PlantFruits: Fruits
+    PlantSucculent: Succulent
+    PlantLiana: Liana
+    PlantFungus: Mushroom
+    PlantCarnivorous: Carnivorous
+    PlantParasite: Parasite Plant
+  Animal: Animal
+  AnimalFlag:
+    HIBERNATED: is sleeping zZzZ
+    POISONED: is poisoned
+    SHELL: in shell
+    REGENERATION: is regenerating
+    PARALYSED: is paralyzed
+    SHY: is shy
+    IN_COVER: is in cover
+ 
 Game:
   Game: Game
+  Icon:
+    Fruit: Edible for carnivores
+    Food: Food
+    Cover: Cover from carnivores
   Trait:
-    TraitSymbiosis      : Symbiosis
+    TraitSymbiosis      : 
+      _: Symbiosis
+      source: Symbiont
     TraitCommunication  : Communication
     TraitCooperation    : Cooperation
     TraitCarnivorous    : Carnivorous
@@ -71,26 +163,204 @@ Game:
     TraitBurrowing      : Burrowing
     TraitCamouflage     : Camouflage
     TraitSharpVision    : SharpVision
+    
+    TraitShell          : Shell
+    TraitIntellect      : Intellect
+    TraitAnglerfish:
+      _: Anglerfish
+      value: Defenderfish
+    TraitTrematode      : Trematode
+    TraitMetamorphose   : Metamorphose
+    TraitInkCloud       : Ink Cloud 
+    TraitViviparous     : Viviparous
+    TraitAmbush         : Ambush
+    TraitFlight         : Flight
+    TraitThermosynthesis: Thermosynthesis
+    TraitPhotosynthesis : Photosynthesis
+    TraitSpecialization : Specialization
+
+    TraitAedificator    : Aedificator
+    TraitCnidocytes     : Cnidocytes
+    TraitHerding        : Herding
+    TraitMigration      : Migration
+    TraitNeoplasm       : Neoplasm
+    TraitRecombination  : Recombination
+    TraitRegeneration   : Regeneration
+    TraitSuckerfish     : Suckerfish
+
+    TraitRstrategy      : r-Strategy
+    TraitHomeothermy    : Homeothermy
+    TraitPlantHomeothermy: Homeothermy
+    TraitShy            : Shy
+
+    PlantTraitRootVegetable : Root Vegetable
+    PlantTraitHoney         : Honey
+    PlantTraitMycorrhiza    : Micorrhiza
+    PlantTraitAquatic       : Aquatic
+    PlantTraitOfficinalis   : Officinalis
+    PlantTraitProteinRich   : Protein Rich
+    PlantTraitTree          : Tree
+    PlantTraitParasiticPlant: Parasitic Plant
+    PlantTraitSpiky         : Spiky
+    PlantTraitParasiticLink : Parasitic Link
+    PlantTraitHiddenCarnivorous: Carnivorous
+
+  TraitPlantGrazing: Grazing
+  
+  TraitDesc:
+    $EAT: By the will of the player can be activated instead of taking food
+    $CDRound: Can be used every round
+    $CDTurn: Can be used one time at a turn
+    $Count: "\nCount in a full deck: "
+    TraitSymbiosis      : Pair trait. The first $A is the "symbiont", and the second $A is its host. The symbiote is dependent on the host and cannot be attacked as long as there is a symbiosis between them. Also, the symbiote cannot receive $F in any way (other than fat tissue conversion) until the host is fed or the symbiotic bond is broken. $Count 4
+    TraitCommunication  : Pair trait. When one $A receives $F - other $A immediatly receives $F too. Fat tissue conversation is not activating this trait. $CDRound.
+    TraitCooperation    : Pair trait. When one $A receives $F from "food base", other $A takes $F out of turn. $CDRound.
+    TraitCarnivorous    : $A can attack other unprotected $A. For the eaten animal receives $F$F. For biting off the tail gets $F. In case of failure don`t get any $F. Can not attack if fully fed. $EAT, $CDTurn.
+    TraitParasite       : Can be deployed only on enemy $A. Increases the need for $F by +2. Can be dropped by $TraitTailLoss or $TraitRecombination. $Count 8
+    TraitFatTissue      : Additional stock $F for $A, can be activated when animal is lacking $F. Can be placed multiple times on one animal. When activated transforms that tissue and more if needed. $A, that have food only in fat tissue is not counting as fed. 
+    TraitSwimming       : $A can be attacked only if attacker have $TraitSwimming. Carnivorous with $TraitSwimming can`t attack $A without $TraitSwimming (even with $TraitIntellect).
+    TraitRunning        : When $A is attacked, it has a 50% chance of escaping. Attacker can`t attack in this turn anymore. $Count 4
+    TraitMimicry        : When $A is attacked, owner $A must redirect the attack. You can only redirect to $A, that can be attacked by this Carnivorous. If there is no such $A, then $TraitMimicry is not triggering. Loop Mimicry is possible only one time for attack. $Count 4
+    TraitScavenger      : $A automatically receives $F when other $A is killed by Carnivorous. Only one $TraitScavenger receives $F in game, starting from $A of Carnivorous` owner clockwise direction. If there are many Scavengers, $F receives only one from non-fed from left to right. Can`t be used on $A with trait Carnivorous and vice versa. $Count 4
+    TraitPiracy         : Once in a feeding phase player can grab one $F from other non-fed animal im game. Ignores any defensive traits. Can`t be used to fill fat tissue. $Count 4 
+    TraitTailLoss       : When $A is attacked, player can drop one of the defender`s $A traits (excluding trematode) and survive. Attacker receives only one $F. $Count 4
+    TraitGrazing        : When used destroys one $F from "food base". Can be used in every round. $Count 4
+    TraitMassive        : Massive $A can be only attacked by Carnivorous with $TraitMassive. $Count 8
+    TraitHibernation    : Can be used in your feeding phase - $A is counting as fed. Can`t be used two times in a row and in the last turn of the game. Active Hybernation prohibits from filling fat tissue and activating traits that manipulate food. $Count 4
+    TraitPoisonous      : Carnivorous, ate this $A will die in the next extinction phase. $A, ate other poisoned animal without $TraintPoisonous will not die. $Count 4
+    TraitBurrowing      : When $A is fed, it can`t be attacked. $Count 4
+    TraitCamouflage     : $A can be attacked only by Carnivorous with $TraitSharpVision. $Count 4
+    TraitSharpVision    : Carnivorous with this trait can attack $A with trait $TraitCamouflage. $Count 4
+    TraitShell          : >-
+      If $A is attacked, it can hide in a shell.
+      In shell $A can`t be attacked, but it cant receive $F until the end of feeding phase other than converting Fat Tissue.
+      Attacker do not receive $F$F and can`t attack this turn.
+      $A can`t hide in a shell, if attacked using Ambush, even if attack was redirected by Mimicry. 
+      If $A died, any player can pick shell instead of receiving food from "food base". $Count 4
+    TraitIntellect      : Carnivorous with this trait once in a turn can ignore one of the $A traits, that`s it going to attack. Can`t ignore Regeneration or Anglerfish. Swimming Carnivorous can`t attack any non-Swimming animals. $Count 4
+    TraitAnglerfish     : Can be used only as $A. When Carnivorous is attacking your Anglerfish, it stops the game and attacking the attacker, ignoring one of the attacker`s traits. To work, Anglerfish also must to have none of the other traits, including pair traits. Enemies don`t see your Anglerfish, it is just an empty $A for them. Anglerfish can defend other empty $A  - for this you need to click it. $Count 4
+    TraitTrematode      : Pair negative trait. Can be deployed on pair of $A$A of other player. Can`t be dropped by other cards. $Count 8
+    TraitMetamorphose   : In your feeding phase insted of taking $F from  "food base" $A can drop off one of its traits (not leading to an increase in the need for food) and receive $F. Metamorphose can be used to quit Hybernation, Shell, Symbiosys. $Count 4
+    TraitInkCloud       : Once in a feeding phase, when attacked, $A can release ink and will not be eaten. Carnivorous can attack that or others $A in next turn of feeding phase. $Count 4
+    TraitViviparous     : $A, when fed, immediatly creates new $A - top card from deck is deployed as new $A. In this phase it is counting as fed. If there is no cards in the deck, new $A will not be created. $Count 6
+    TraitAmbush         : Carnivourous with this trait can attack $A, when it receives $F from "food base". If attacked $A is killed, $F remains in the "food base". Carnivorous with this trait ignores Shell and Burrow traits. If there are many $A with Ambush, they will attack from left to right as long as the victim, being at the "food base", is alive. $Count 4
+    TraitFlight         : $A with this trait can`t be attacked with Carnivorous that have same or bigger amount of traits. $Count 6
+    TraitThermosynthesis: $EAT, $CDTurn. Receive $F from the heat energy. Can`t use if there is another $A with this traint on this continent. $Count 6
+    TraitPhotosynthesis : $EAT, $CDTurn. Receive $F from the sun energy. Can`t use if there is another $A with this traint on this continent. $Count 6
+    TraitSpecialization : Pair trait. Link plant and $A so that it can get food only from this plant ignoring its traits.
+    
+    TraitAedificator    : In the beginning of the feeding phase "food base" receives extra 2 $F for every $A with this trait in this location. $Count 4
+    TraitCnidocytes     : It does not prevent the death of the $A, but by the will of the player, it paralyzes the Carnivorous that attacked it, which until the beginning of the next turn ceases to have all traits, including paired ones. The effect of the Cnidocytes will take effect after the attack ends. $Count 4
+    TraitNeoplasm       : Every feeding phase $A, with this trait, one of the traits ceases to act; when all traits are ceased, $A dies. Do not affect pair traits. $Count 4
+    TraitRecombination  : >-
+      $CDTurn. Pair trait. $A$A can exchange with themselves one of their non-pair traits.
+      If impossible combinations appear on the animal as a result of recombination, the recombinated trait is dropped.
+      Impossible combination on one animal:
+      1. Two same traits (excluding Fat Tissue)
+      2. Carnivorous and Scavenger
+      3. Regeneration and any traits
+      4. Regeneration and trait, leading to increased need of food.
+      Recombinated filled Fat Tissue becomes unfilled.
+      If after Recombination there are extra food on the animal, it destroys, but don`t fills Fat Tissue.
+  
+    TraitRegeneration   : $A can have only two traits, not leading to an increased need of food. If $A is killed, traits remain in game, but do not work. Before deploy phase caed od killed $A must be recovered from hand; If player don`t have any, recoveres from deck. Animal with this trait can be killed only by starvation. $Count 6
+
+    TraitSuckerfish     : To be added...
+    TraitHerding        : To be added....
+    TraitMigration      : To be added.....
+
+    TraitRstrategy      : Can be deployed on any animal in game. Player do not receive cards for $A with this trait. Instead in the beginning of the deploy phase, two cards are deployed as new $A of that player. $Count 6
+    TraitHomeothermy    : $CDRound. $A with this trait can receive additional $F from "food base". Can`t be used to fill Fat Tissue. $Count 6
+    TraitPlantHomeothermy: $CDRound. $A with this trait can receive additional $F from plant. Can`t be used to fill Fat Tissue.
+    TraitShy            : If $A was attacked and survived, Carnivores cant attack this $A this phase. $Count 6
+    
+    PlantTraitRootVegetable: Only $A with trait $TraitBurrowing can receive $F from that plant.
+    PlantTraitHoney: If your $A received $F from this plant, pick up a card from players with the most cards in hand.
+    PlantTraitMycorrhiza: >-
+      Pair trait.
+      Two plants are linked with Mycorrhiza: all of them will survive, if any of them have $F left.
+      After that at the end of the deploy phase every plant with no $F, will get $F.
+    PlantTraitAquatic: Only $A with $TraitSwimming can receive $F from that plant.
+    PlantTraitOfficinalis: >-
+      $A, that received $F from plant with this trait, is counting as fed, but every of animal`s traits are ceased until the end of phase.
+      Only Cover mark is working.
+    PlantTraitProteinRich: $A, received $F from plant with this trait, additionally receives $F. $TraitCarnivorous can recieve food from that plant.
+    PlantTraitTree: Only $A with traits $TraitMassive and/or $TraitFlight can receives food from plant with this trait. Gives Cover mark.
+    PlantTraitParasiticPlant: >-
+      Card Parasitic Plant is deployed on other plant.
+      Rules for Parasitic Plant:
+      1. Parasite is not counting in max plant amount on the game board.
+      2. In feeding phase player can move $F from host-plant to parasitic plant instead of receiving food or using Carnivorous.
+      Parasite survives, if it has got no food on it.
+      Parasite dies if host-plant dies
+    PlantTraitSpiky: Grants three Cover marks
+    PlantTraitParasiticLink: Activate to move food on Parasite
+    PlantTraitHiddenCarnivorous: Activate to attack $A
+
+    TraitPlantGrazing: First, $A receives $F from plant. Then it can destroy other $F on this plant.
   Phase:
-    1: Deploy
-    2: Feeding
+    DEPLOY: Deploy phase
+    FEEDING: Feeding phase
+    AMBUSH: Ambush phase
+    REGENERATION: Regeneration phase
+    EXTINCTION: Extinction phase
+    FINAL: Game over
   UI:
+    IM:
+      Help:
+        CARD: 'Play a card'
+        FOOD: 'Feed the animal'
+        TRAIT: 'Use a trait'
+        CARD_TRAIT: 'Put a card on empty space (will create new animal), or use it on already existing animal (will add the trait)'
+        TRAIT_SHELL: 'Put the shell on the animal'
+        ANIMAL_LINK: 'Link with the other animal'
+        PLANT_LINK: 'Link with the other plant'
+        PLANT_ATTACK: 'Attack the animal'
+        COVER: 'Put on animal to protect it from attack'
+    FoodBase: Food base
+    SelectLink: Drag and drop on the other creature
+    EndTurn: End turn
+    EndPhase: End phase
+    EndAmbush: Skip
+    Deck: Deck
+    TimedOut_Title: Time of your turn has ended.
+    TimedOut_Desc: Until you close this window, the duration of your turn will be 5 seconds.
+    TimedOut_Action: Ok.
+    Pause: You vote for a pause.
+    Pause_Desc: Game will pause when everyone press this button.
+    Unpause: You vote for unpausing the game.
+    Unpause_Desc: Game will unpause when most of the players press this button.
+    Plants: Plants
     Scores:
-      Label: Scoreboard
+      Label: Label
       Winner: Winner
       TablePlayer: Player
       TableScoreNormal: Score
-      TableScoreDead: Score (for dead)
-    EndTurn: End turn
-    EndPhase: End phase
+      TableScoreDead: Score for dead creatures
+      TableScoreRandom: Score for luck
     Status:
+      Title: Title
       Turn: Turn
       Phase: Phase
       Round: Round
       Player: Player
       Time: Time
+      Pause: Pause
+    TraitActivateDialog:
+      Title: Select the trait
+      Nothing: Don`t use anything
+    TraitRecombinationDialog:
+      Title: Recombination
+      Action: Recombinate
     TraitDefenceDialog:
       Title: Defend!
       Time: Time left
-      Mimicry_Title: Mimicry
-      TailLoss_Title: Lose tail
+      Mimicry_Title: Use Mimicry
+      TailLoss_Title: Use Tail loss
+      Other_Title: Use traits
+      DefendOption:
+        TraitMimicry: Redirect the attack to the other animal
+        TraitTailLoss: Drop one of your traits
+      Cancel: Cancel
+      Nothing: Do not defend
+      AttackedBy: Defend! You were attacked by
