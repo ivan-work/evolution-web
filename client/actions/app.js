@@ -2,6 +2,7 @@ import T from 'i18n-react';
 import throttle from 'lodash/throttle';
 
 import RootService from '../services/RootService';
+import deepForceUpdate from 'react-deep-force-update';
 
 export const appChangeLanguage = (langCode) => (dispatch, getState) => {
   //console.log('fetching', langCode);
