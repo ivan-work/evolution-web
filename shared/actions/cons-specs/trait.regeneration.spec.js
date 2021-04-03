@@ -227,4 +227,28 @@ players:
     }, serverStore, clientStore0);
     expect(findAnimal('$CarnShell').traits, '$CarnShell.traits.size').size(3);
   });
+
+  it(`Gets card on start`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 5 camo
+phase: feeding
+players:
+  - continent: $A regen +, $B carn, $W wait +
+`);
+    const {selectGame, findAnimal, findPlayerByIndex} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$A'));
+    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    expect(selectGame().status.phase).equal(PHASE.DEPLOY);
+    expect(selectGame().status.turn, 'TURN 1').equal(1);
+
+    expect(findAnimal('$A'), 'find $A').ok;
+    expect(findAnimal('$B'), 'find $B').ok;
+    expect(findAnimal('$W'), 'find $W').ok;
+    expect(selectGame().deck.size, 'deck size').equal(1); // -3 for hand and -1 for regen
+    expect(findPlayerByIndex(0).hand, 'hand size').size(3);
+  });
 });

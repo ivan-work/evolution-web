@@ -4,7 +4,7 @@ import * as pt from "./evolution/plantarium/plantTypes";
 
 export const SETTINGS_PLAYERS = [2, 8];
 
-export const SETTINGS_TIME_VALUES = [.1, 5];
+export const SETTINGS_TIME_VALUES = [.2, 10];
 
 export const SETTINGS_MINUTES = 60e3; // by 1 minute
 
@@ -15,9 +15,9 @@ export const SETTINGS_DEFAULT_TIME_TRAIT = 1 * SETTINGS_MINUTES;
 
 export const SettingsRules = {
   name: 'string|between:4,20|required|regex:/^[a-zA-Zа-яА-ЯёЁ\\d\\s«»\\-_]*$/'
-  , maxPlayers: `integer|between:${SETTINGS_PLAYERS[0]},${SETTINGS_PLAYERS[1]}`
-  , timeTurn: `numeric|between:${SETTINGS_TIME_VALUES[0]},${SETTINGS_TIME_VALUES[1]}`
-  , timeTraitResponse: `numeric|between:${SETTINGS_TIME_VALUES[0]},${SETTINGS_TIME_VALUES[1]}`
+  , maxPlayers: `integer|required|between:${SETTINGS_PLAYERS[0]},${SETTINGS_PLAYERS[1]}`
+  , timeTurn: `numeric|required|between:${SETTINGS_TIME_VALUES[0]},${SETTINGS_TIME_VALUES[1]}`
+  , timeTraitResponse: `numeric|required|between:${SETTINGS_TIME_VALUES[0]},${SETTINGS_TIME_VALUES[1]}`
   , randomPlayers: `boolean`
   , halfDeck: `boolean`
   , maxCards: 'numeric'

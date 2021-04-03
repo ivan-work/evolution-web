@@ -103,7 +103,7 @@ export const TraitMimicry = {
   , defense: true
   , targetType: TRAIT_TARGET_TYPE.ANIMAL
   , cooldowns: fromJS([
-    [tt.TraitMimicry, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ACTIVATION]
+    [tt.TraitMimicry, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
   ])
   , getErrorOfUseOnTarget: (game, mimicryAnimal, targetAnimal, attackAnimal, attackTrait) => {
     if (targetAnimal.id === mimicryAnimal.id) return ERRORS.TRAIT_TARGETING_SAME_ANIMAL;
@@ -218,7 +218,7 @@ export const TraitGrazing = {
     return true;
   }
   , _getErrorOfUse: (game, sourceAnimal) => {
-    if (game.getFood() === 0) return ERRORS.GAME_FOOD;
+    if (game.getFood() < 1) return ERRORS.GAME_FOOD;
     return false;
   }
 };
@@ -307,7 +307,7 @@ export const TraitCooperation = {
 
     const {sourceType, sourceId} = trait.value;
     if (sourceType === 'GAME') {
-      if (game.getFood() === 0) return ERRORS.GAME_FOOD;
+      if (game.getFood() < 1) return ERRORS.GAME_FOOD;
     } else if (sourceType === 'PLANT') {
       const plant = game.getPlant(sourceId);
       return getErrorOfAnimalEatingFromPlantNoCD(game, linkedAnimal, plant)

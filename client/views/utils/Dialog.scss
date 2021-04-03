@@ -1,9 +1,11 @@
+@import "../../styles/variables";
+
 $backdrop-background: rgba(0, 0, 0, .5);
 $transition: 200ms;
 
 .DialogContainer {
   $_: &;
-  z-index: 999;
+  z-index: $ziDialog;
   position: fixed;
   top: 0;
   bottom: 0;

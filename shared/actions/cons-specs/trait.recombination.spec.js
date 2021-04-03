@@ -213,7 +213,7 @@ players:
 
   });
 
-  it('BUG Recombination with steals food', () => {
+  it('BUG Recombination steals food', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
 deck: 10 camo
@@ -228,6 +228,21 @@ players:
 
     expect(findAnimal('$A').getFood(), '$A food').equal(2);
     expect(findAnimal('$B').getFood(), '$B food').equal(2);
+  });
+
+  it(`BUG Recombination doesn't recalculate food`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A recom$B swim, $B swim carn, $W wait
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitRecombination, tt.TraitSwimming, tt.TraitCarnivorous));
+
+    expect(findAnimal('$A').foodSize, '$A food').equal(2);
+    expect(findAnimal('$B').foodSize, '$B food').equal(1);
   });
 });
 

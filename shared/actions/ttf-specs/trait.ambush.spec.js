@@ -701,7 +701,7 @@ players:
     expect(findAnimal('$X').getFood(), '$X.getFood()').equal(2);
   });
 
-  it('[BUG] ambush on mimi ink', () => {
+  it('#BUG ambush on mimi ink', () => {
     const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
     const gameId = ParseGame(`
 phase: feeding
@@ -719,6 +719,24 @@ players:
 
     clientStore1.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$W'));
 
+    expect(findAnimal('$A').getFood()).equal(2);
+  });
+
+  it(`#BUG +${tt.TraitBurrowing} burrowing shouldn't protect`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 5
+players:
+  - continent: $Q burr + fat, $W wait
+  - continent: $A amb carn
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitTakeFoodRequest('$Q'));
+
+    clientStore1.dispatch(traitAmbushActivateRequest('$A'));
+
+    expect(findAnimal('$Q')).not.ok;
     expect(findAnimal('$A').getFood()).equal(2);
   });
 

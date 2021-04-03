@@ -170,12 +170,10 @@ players:
   deck: 10 camo
   food: 1
   players:
-    - continent: $A mimi, $B, $C, $W wait
+    - continent: $A mimi tail, $B, $W wait
     - continent: $car1 carn amb, $car2 carn amb
   `);
-      const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
-      const {selectGame0, selectPlayer0, findAnimal0} = makeClientGameSelectors(clientStore0.getState, gameId, 0);
-      const {selectGame1, selectPlayer1, findAnimal1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
+      const {selectGame, findAnimal, findPlayerByIndex} = makeGameSelectors(serverStore.getState, gameId);
 
       clientStore0.dispatch(traitTakeFoodRequest('$A'));
 
@@ -183,10 +181,10 @@ players:
       clientStore1.dispatch(traitAmbushActivateRequest('$car2'));
 
       clientStore0.dispatch(traitAnswerRequest(tt.TraitMimicry, '$B'));
-      clientStore0.dispatch(traitAnswerRequest(tt.TraitMimicry, '$C'));
+      clientStore0.dispatch(traitAnswerRequest(tt.TraitTailLoss, tt.TraitMimicry));
 
       expect(selectGame().hunts.size, 'Game hunts').equal(0);
-      expect(selectPlayer0().acted, 'User0 acted').true;
+      expect(findPlayerByIndex(0).acted, 'User0 acted').true;
 
       expect(findAnimal('$A')).ok;
       expect(findAnimal('$B')).null;
@@ -196,7 +194,7 @@ players:
 
       expect(findAnimal('$A').getFood()).equal(1);
       expect(findAnimal('$car1').getFood()).equal(2);
-      expect(findAnimal('$car2').getFood()).equal(2);
+      expect(findAnimal('$car2').getFood()).equal(1);
     });
   });
 

@@ -5,7 +5,8 @@ import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 import jwt from 'jsonwebtoken';
 import Validator from 'validatorjs';
 
-import {ActionCheckError} from '../models/ActionCheckError';
+import ActionCheckError from '../models/ActionCheckError';
+import * as ERR from "../errors/ERR";
 
 import {db$updateUserName} from "../../server/actions/db";
 import {formValidationError, server$toUsers, to$, toUser$Client, toUser$ConnectionId} from './generic';
@@ -105,7 +106,7 @@ export const server$logoutUser = (userId) => (dispatch, getState) => {
   const userLogin = getState().getIn(['users', userId, 'login']);
   const room = findRoomByUser(getState, userId);
   if (room) dispatch(server$roomExit(room.id, userId));
-  loggerOnline.info(`User ${userLogin} left`);
+  // loggerOnline.info(`User ${userLogin} left`);
   dispatch(Object.assign(logoutUser(userId)
     , {meta: {users: true}}));
 };
@@ -146,7 +147,6 @@ export const userUpdateNameSelf = (name) => ({
 });
 
 export const server$userUpdateName = (userId, name) => (dispatch, getState) => {
-  logger.info(`updating ${userId} with ${name}`);
   db$updateUserName(userId, name)
     .then(_ => {
       dispatch(server$toUsers(userUpdateName(userId, name)));
@@ -175,23 +175,23 @@ const customErrorReport = !process.env.TEST ? customErrorReport_PROD : customErr
 export const authClientToServer = {
   loginUserFormRequest: ({redirect = '/', form = {}}, {connectionId}) =>
     customErrorReport(() => Object.assign(loginUserFailure(), {meta: {socketId: connectionId}}), (dispatch, getState) => {
-      if (!form) throw new ActionCheckError('loginUserFormRequest', 'form is undefined');
-      if (!form.id) throw new ActionCheckError('loginUserFormRequest', 'form has no ID');
-      if (!form.login) throw new ActionCheckError('loginUserFormRequest', 'validation failed');
+      if (!form) throw new ActionCheckError(ERR.APP_USER_LOGIN_FORM_INVALID);
+      if (!form.id) throw new ActionCheckError(ERR.APP_USER_LOGIN_FORM_INVALID);
+      if (!form.login) throw new ActionCheckError(ERR.APP_USER_LOGIN_FORM_INVALID);
 
       form.login = form.login.trim();
 
       const validation = new Validator(form, RulesLoginPassword);
       if (validation.fails()) {
         dispatch(toUser$ConnectionId(connectionId, formValidationError(form.id, validation.errors.all())));
-        throw new ActionCheckError('loginUserFormRequest', 'validation failed: %s', JSON.stringify(validation.errors.all()));
+        throw new ActionCheckError(ERR.APP_USER_LOGIN_FORM_VALIDATION, JSON.stringify(validation.errors.all()));
       }
 
       if (getState().get('users').some(user => user.login === form.login)) {
         dispatch(toUser$ConnectionId(connectionId, formValidationError(form.id, {
           login: ['User already exists']
         })));
-        throw new ActionCheckError('loginUserFormRequest', 'User already exists');
+        throw new ActionCheckError(ERR.APP_USER_LOGIN_USER_ALREADY_EXISTS);
       }
 
       const user = UserModel.new(form.login, connectionId);
@@ -204,11 +204,11 @@ export const authClientToServer = {
       try {
         jwt.verify(token, process.env.JWT_SECRET);
       } catch (err) {
-        throw new ActionCheckError('server$loginExistingUser', `Token not valid (%s)`, token);
+        throw new ActionCheckError(ERR.APP_USER_LOGIN_TOKEN);
       }
       const currentUser = getState().get('users').find(u => u.token === token);
       if (!currentUser) {
-        throw new ActionCheckError('server$loginExistingUser', `User not exists (%s)`, token);
+        throw new ActionCheckError(ERR.APP_USER_LOGIN_USER_NOT_EXISTS);
       }
 
       if (getState().get('connections').has(currentUser.connectionId)) {
@@ -225,7 +225,7 @@ export const authClientToServer = {
 
     const validation = new Validator({name}, {name: RuleRegisteredUserName});
 
-    if (validation.fails()) throw new ActionCheckError('userUpdateNameRequest', 'validation failed: %s', JSON.stringify(validation.errors.all()));
+    if (validation.fails()) throw new ActionCheckError(ERR.APP_USER_NAMECHANGE_VALIDATION, JSON.stringify(validation.errors.all()));
 
     dispatch(server$userUpdateName(userId, name));
   }

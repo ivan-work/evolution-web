@@ -11,6 +11,7 @@ import * as tt from '../../models/game/evolution/traitTypes';
 import {TRAIT_ANIMAL_FLAG} from '../../models/game/evolution/constants';
 
 import {makeGameSelectors} from '../../selectors';
+import ERRORS from "../errors";
 
 describe('TraitHibernation:', () => {
   it('A > X, B > Y, C > B', () => {
@@ -134,21 +135,21 @@ players:
     expect(selectAnimal(User0, 0).getFat(), '2: Animal stored fat').equal(2);
   });
 
-  it(`Drops flag when dropped`, () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+  it(`Drops flag when switched`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
     const gameId = ParseGame(`
-deck: 10 camo
-food: 0
+deck: 1 camo
 phase: feeding
 players:
-  - continent: $A hiber meta carn trem$B + wait, $B
+  - continent: $A hiber recomb$B carn trem$B +, $B swim, $W wait
 `);
-    const {selectGame, selectPlayer, findAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {findAnimal} = makeGameSelectors(serverStore.getState, gameId);
     clientStore0.dispatch(traitActivateRequest('$A', tt.TraitHibernation));
-    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitMetamorphose, tt.TraitHibernation));
-    clientStore0.dispatch(gameEndTurnRequest());
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitRecombination, tt.TraitHibernation, tt.TraitSwimming));
     expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)).false;
-    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+    expectError(`TraitHibernation doesn't work`, ERRORS.COOLDOWN, () => {
+      clientStore0.dispatch(traitActivateRequest('$B', tt.TraitHibernation));
+    });
   });
 });
 

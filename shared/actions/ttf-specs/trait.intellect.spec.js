@@ -13,6 +13,7 @@ import {replaceGetRandom} from '../../utils/randomGenerator';
 
 import {makeGameSelectors} from '../../selectors';
 import ERRORS from "../errors";
+import ERR from "../errors";
 
 describe('TraitIntellect:', () => {
   it('Static: 1', () => {
@@ -132,7 +133,7 @@ players:
       clientStore0.dispatch(traitAnswerRequest('TraitIntellect', null));
     }, serverStore, clientStore0, clientStore1);
     clientStore0.dispatch(traitAnswerRequest('TraitIntellect', 'TraitMimicry'));
-    expectError(`Mimicry should not work`, ERRORS.TRAIT_ACTION_SUPRESSED, () => {
+    expectError(`Mimicry should not work`, ERR.TRAIT_ACTION_SUPRESSED, () => {
       clientStore1.dispatch(traitAnswerRequest('TraitMimicry', '$B'));
     });
   });

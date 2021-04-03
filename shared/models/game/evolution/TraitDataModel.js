@@ -24,21 +24,21 @@ const TraitDataModelProps = {
  * @property {boolean} multiple: false - is allowed multiple traits with same type? (only for FatTissue)
  * @property {boolean} transient: false - for ambush / anglerfish
  * @property {boolean} hidden: false - for anglerfish
- * @property {callback} action: null // action function
+ * @property {function} action: null // action function
  * (game, sourceAnimal, trait:TraitModel, targetAnimal/targetTrait/none, attackTrait/none, attackAnimal/none) => should return (dispatch, getState)
- * @property {callback} getTargets: null // get list of available target for an active trait (game, sourceAnimal) => list of targets
+ * @property {function} getTargets: null // get list of available target for an active trait (game, sourceAnimal) => list of targets
  * @property {object} customFns: {} // Object of custom trait functions
  *
  * @property {number} [food: 0] - Amount of food required
  * @property {number} [score: 1] - Base score for trait. TODO rewrite every trait to use score only
  * @property {boolean} [optional: false] - On defense traits, can choose to suicide animal instead of using it
- * @property {callback} $checkAction: null // if trait is allowed to be clicked? (game, sourceAnimal) => boolean
+ * @property {function} $checkAction: null // if trait is allowed to be clicked? (game, sourceAnimal) => boolean
  *
- * @property {callback} _getErrorOfUse
- * @property {callback} _getErrorOfTraitPlacement
- * @property {callback} _getErrorOfFoodIntake
- * @property {callback} getErrorOfFoodIntake
- * @property {callback} getErrorOfUseAction: null // if target is valid? (game, sourceAnimal, targetAnimal) => boolean
+ * @property {function} _getErrorOfUse
+ * @property {function} _getErrorOfTraitPlacement
+ * @property {function} _getErrorOfFoodIntake
+ * @property {function} getErrorOfFoodIntake
+ * @property {function} getErrorOfUseAction: null // if target is valid? (game, sourceAnimal, targetAnimal) => boolean
  */
 
 export class TraitDataModel extends Record(TraitDataModelProps) {

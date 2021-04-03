@@ -1,7 +1,4 @@
-import {createReducer, ensureParameter} from '../../shared/utils';
-import {Map, List} from 'immutable';
-import {GameModel, GameModelClient} from '~/shared/models/game/GameModel';
-import {AnimalModel} from '~/shared/models/game/evolution/AnimalModel';
+import {createReducer} from '../../shared/utils';
 
 import {
   gameStart

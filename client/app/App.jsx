@@ -11,7 +11,6 @@ import {withStyles} from '@material-ui/core/styles';
 
 import AppBar from './appbar/AppBar';
 import {PortalsContext, PortalTarget} from '../views/utils/PortalTarget.jsx'
-import {TranslationSwitchView} from '../components/TranslationSwitch.jsx'
 import ErrorReporter from '../components/ErrorReporter.jsx';
 import AppModal from "./modals/AppModal";
 

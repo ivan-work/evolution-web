@@ -1,3 +1,4 @@
+@import 'variables';
 @import 'evolution';
 @import 'traits';
 
@@ -79,7 +80,7 @@ a[disabled] {
 }
 
 .onTop {
-  z-index: 5;
+  z-index: $ziAnimation;
 }
 .animationGhostSource {
   opacity: .25;

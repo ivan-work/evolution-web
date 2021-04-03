@@ -1,3 +1,4 @@
+import logger from '../../../../../shared/utils/logger';
 import {fromJS} from 'immutable';
 import {PHASE} from '../../GameModel';
 import {
@@ -15,7 +16,6 @@ import {
   server$startFeedingFromGame
   , server$traitStartCooldown
   , server$traitSetAnimalFlag
-  , server$traitNotify_End, server$startCooldownList, getFeedingCooldownList
 } from '../../../../actions/actions';
 
 import * as tt from '../traitTypes';
@@ -41,7 +41,7 @@ export const TraitHomeothermy = {
     [tt.TraitHomeothermy, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , _getErrorOfUse: (game, animal, traitSpec) => {
-    if (game.getFood() === 0) return ERRORS.GAME_FOOD;
+    if (game.getFood() < 1) return ERRORS.GAME_FOOD;
     if (!animal.canEat(game)) return ERRORS.ANIMAL_DONT_WANT_FOOD;
     if (animal.getNeededFood() === 0) return ERRORS.ANIMAL_DONT_NEED_FOOD;
   }

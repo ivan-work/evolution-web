@@ -4,7 +4,7 @@ import uuid from 'uuid';
 import * as tt from './traitTypes'
 import * as ptt from './plantarium/plantTraitTypes'
 
-import {ActionCheckError} from '~/shared/models/ActionCheckError';
+import ActionCheckError from '~/shared/models/ActionCheckError';
 import {TRAIT_ANIMAL_FLAG, TRAIT_TARGET_TYPE} from './constants';
 
 import {TraitDataModel} from './TraitDataModel';

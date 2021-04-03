@@ -97,7 +97,7 @@ module.exports = {
       // So, no need for ExtractTextPlugin here.
       test: /\.css$/,
       include: /node_modules/,
-      loaders: ['style-loader', 'css-loader']
+      loader: ['style-loader', 'css-loader']
     }, {
       test: /\.(eot|svg|ttf|woff|woff2)$/,
       loader: 'file-loader'

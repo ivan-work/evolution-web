@@ -1,1 +1,1 @@
-export default ['en-en', 'ru-ru'];
+export default ['ru-ru', 'en-en'];

@@ -1,10 +1,10 @@
 import T from 'i18n-react';
 import throttle from 'lodash/throttle';
-import deepForceUpdate from 'react-deep-force-update';
 
 import RootService from '../services/RootService';
+import deepForceUpdate from 'react-deep-force-update';
 
-export const appChangeLanguage = (langCode) => (dispatch) => {
+export const appChangeLanguage = (langCode) => (dispatch, getState) => {
   //console.log('fetching', langCode);
   window.fetch(`/api/i18n/${langCode}`)
     .then(r => r.json())
@@ -77,7 +77,7 @@ const loadAudioFiles = () => {
   AUDIO_FILES.ROOM_JOIN = new AudioFile(AudioFileName.ROOM_JOIN, require('../assets/sound/connected-02.wav'));
   AUDIO_FILES.ROOM_JOIN_FULL = new AudioFile(AudioFileName.ROOM_JOIN_FULL, require('../assets/sound/searching-02.wav'));
   AUDIO_FILES.START_D2 = new AudioFile(AudioFileName.START_D2, require('../assets/sound/dota-ready.mp3'));
-  AUDIO_FILES.CLOCK_TICK = new AudioFile(AudioFileName.CLOCK_TICK, require('../assets/sound/metal-tick.wav'), {volume: .6});
+  AUDIO_FILES.CLOCK_TICK = new AudioFile(AudioFileName.CLOCK_TICK, require('../assets/sound/metal-tick.wav'), {volume: .4});
 };
 
 if (SHOULD_PLAY_AUDIO) loadAudioFiles();

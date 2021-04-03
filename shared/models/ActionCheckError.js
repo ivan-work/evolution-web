@@ -1,9 +1,12 @@
-export function ActionCheckError(name, message, ...data) {
+function ActionCheckError(name, context = {}) {
   this.type = 'ActionCheckError';
+  this.userLevelError = true;
   this.name = name;
-  this.message = (data || []).reduce((str, item) => str.replace(/%s/, item), message);
-  this.data = data;
+  this.message = name + JSON.stringify(context);
+  this.context = context;
   this.stack = (new Error()).stack;
 }
 
 ActionCheckError.prototype = new Error;
+
+export default ActionCheckError;

@@ -92,11 +92,12 @@ export class TraitBase extends React.PureComponent {
   };
 
   render() {
-    const {trait, canStart, isOnCooldown, value, disabled, textComponent, isInteracting} = this.props;
+    const {trait, className, canStart, isOnCooldown, value, disabled, textComponent, isInteracting} = this.props;
     const cnTrait = cn(
       'Trait'
       , 'AnimalTrait2'
       , trait.type
+      , className
       , {
         canStart
         , value: value || (trait.getDataModel().displayValue && trait.value)

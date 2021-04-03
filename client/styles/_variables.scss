@@ -23,6 +23,10 @@ $PLAYER_STICKER_ARROW_SIZE: $PLAYER_STICKER_ARROW_SIZE * 1px;
 $MDL_PRIMARY_COLOR: #009688; // Teal
 $MDL_ACCENT_COLOR: #3F51B5; // Indigo
 
+$ziAnimation: 5;
+$ziAnimalHover: 6;
+$ziDialog: 999; // todo remove and check what'll break
+
 @mixin selection() {
   box-shadow: 0px 0px .5em .5em yellow;
 }

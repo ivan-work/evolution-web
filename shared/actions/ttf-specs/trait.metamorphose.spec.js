@@ -9,6 +9,7 @@ import {PHASE} from '../../models/game/GameModel';
 import * as tt from '../../models/game/evolution/traitTypes';
 
 import {makeGameSelectors} from '../../selectors';
+import ERRORS from "../errors";
 
 describe('TraitMetamorphose:', () => {
   it('Works', () => {
@@ -98,5 +99,56 @@ players:
     clientStore0.dispatch(traitActivateRequest('$A', tt.TraitMetamorphose, tt.TraitMetamorphose));
 
     expect(findAnimal('$A')).null;
+  });
+
+  it(`#CR +${tt.TraitHibernation}: Can be used when animal is hibernating`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 1 camo
+phase: feeding
+players:
+  - continent: $A hiber meta para, $W wait 
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitHibernation));
+
+    // Metamorphose should work
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitMetamorphose, tt.TraitHibernation));
+
+    expect(findAnimal('$A').getFood()).equal(1);
+  });
+
+  it(`#BUG +${tt.TraitAnglerfish}: Can't metamorphose hidden traits`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 1 camo
+phase: feeding
+players:
+  - continent: $A meta angler, $W wait 
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    // Metamorphose should work
+    expectError(`Metamorphose shouldn't work`, ERRORS.TRAIT_ACTION_NO_TRAIT, () => {
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitMetamorphose, tt.TraitAnglerfish));
+    });
+
+    expect(findAnimal('$A').getFood()).equal(0);
+  });
+
+  it(`#BUG Metamorphose can eat disabled traits`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+deck: 1 camo
+phase: feeding
+players:
+  - continent: $A mass neo meta, $W wait 
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitMetamorphose, tt.TraitMassive));
+
+    expect(findAnimal('$A').getFood()).equal(1);
   });
 });

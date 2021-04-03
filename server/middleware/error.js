@@ -1,5 +1,4 @@
 import logger from '~/shared/utils/logger';
-import {ActionCheckError} from '~/shared/models/ActionCheckError';
 import util from 'util';
 
 export const errorMiddleware = (interceptor = () => null) => store => next => action => {
@@ -8,8 +7,8 @@ export const errorMiddleware = (interceptor = () => null) => store => next => ac
   } catch (error) {
     let actionType = action.type ? `(${action.type})` : '';
     if (process.env.TEST) throw error;
-    if (error instanceof ActionCheckError) {
-      logger.warn(`${error.name}${actionType}: ` + util.format(error.message, ...error.data));
+    if (error.userLevelError) {
+      logger.warn(`${error.name}${actionType}: ${error.message}`);
     } else {
       try {
         logger.error(`GenericError${actionType}:`, process.env.NODE_ENV === 'production' ? {

@@ -13,8 +13,9 @@ import * as tt from '../../models/game/evolution/traitTypes';
 import {testShiftTime} from '../../utils/reduxTimeout'
 import {replaceGetRandom} from '../../utils/randomGenerator';
 
-import {makeGameSelectors, makeClientGameSelectors} from '../../selectors';
+import {makeGameSelectors, makeClientGameSelectors, selectGame} from '../../selectors';
 import ERRORS from "../errors";
+import {TRAIT_COOLDOWN_LINK} from "../../models/game/evolution/constants";
 
 describe('TraitAnglerfish:', () => {
   it('Deploy', () => {
@@ -242,4 +243,94 @@ players:
     expect(findAnimal('$B'), '$B is alive').ok;
     expect(findAnimal('$C'), '$C is alive').ok;
   })
+
+  it(`#bug ${tt.TraitInkCloud} should disallow attack for the turn`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 5
+players:
+  - continent: $A carn ink camo, $W1 wait
+  - continent: $B angler, $W2 wait
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitInkCloud));
+
+    expectError(`Expecting cooldown error on attack`, ERRORS.COOLDOWN, () => {
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'))
+    });
+    clientStore0.dispatch(gameEndTurnRequest());
+  });
+
+  it(`#bug Attacker can't get food after being eaten by angler`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 5
+players:
+  - continent: $A carn, $B, $W wait
+  - continent: $C angler, $D
+`);
+    const {selectGame, findAnimal, findPlayerByIndex} = makeGameSelectors(serverStore.getState, gameId);
+    const User1 = findPlayerByIndex(1);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$C'));
+
+    expectError(`Expecting cooldown error on attack`, ERRORS.COOLDOWN, () => {
+      clientStore0.dispatch(traitTakeFoodRequest('$B'))
+    });
+  });
+
+  it(`#bug angler defender not acted after being attacked`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 5
+players:
+  - continent: $A carn, $B
+  - continent: $C angler, $D
+`);
+    const {selectGame, findAnimal, findPlayerByIndex} = makeGameSelectors(serverStore.getState, gameId);
+    const {selectGame0, selectPlayer1} = makeClientGameSelectors(clientStore1.getState, gameId, 1);
+    const User1 = findPlayerByIndex(1);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$C'));
+
+    expect(selectGame().status.currentPlayer, `Current Player is 1`).equal(User1.id);
+    expect(User1.acted, `User1 not acted`).false;
+    expect(selectPlayer1().acted, `selectPlayer1 not acted`).false;
+  });
+
+  it(`#bug attacker can't attack after defending with ink`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 5
+players:
+  - continent: $A carn camo ink, $W1 wait
+  - continent: $C angler, $W2 wait
+`);
+    const {selectGame, findAnimal, findTrait} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$C'));
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitInkCloud));
+    expectError(`Carn is on cooldown`, ERRORS.COOLDOWN, () => {
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$C'));
+    });
+    const traitCarnivorous$A = findTrait('$A', tt.TraitCarnivorous);
+    expect(
+      selectGame().cooldowns.checkFor(tt.TraitCarnivorous, null, '$A', traitCarnivorous$A.id)
+      , `Trait ${traitCarnivorous$A.id} has cooldown`
+    ).true;
+    clientStore0.dispatch(gameEndTurnRequest());
+
+    clientStore1.dispatch(gameEndTurnRequest());
+    clientStore1.dispatch(gameEndTurnRequest());
+
+    expectError(`Carn is on cooldown`, ERRORS.COOLDOWN, () => {
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$C'));
+    });
+  });
 });

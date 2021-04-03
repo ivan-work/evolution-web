@@ -130,6 +130,7 @@ export const TraitRecombination = {
 
     dispatch(server$traitAnimalRemoveTrait_onRemove(game, animal1, trait1));
     dispatch(server$traitAnimalRemoveTrait_onRemove(game, animal2, trait2));
+
     dispatch(server$traitAnimalRecombinateTraits(game.id, animal1, animal2, trait1, trait2));
 
     dispatch(server$traitStartCooldown(game.id, traitRecombination1, animal1));

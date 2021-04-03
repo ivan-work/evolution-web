@@ -2,13 +2,15 @@ import logger from '~/shared/utils/logger';
 import {Map} from 'immutable';
 
 export const ROOM_AFK_HOST_PERIOD = 10 * 60e3;
-export const ROOM_SELF_DESTRUCTION_TIME = 2 * 60e3;
+export const ROOM_SELF_DESTRUCTION_TIME = 10 * 60e3;
 
 import {RoomModel, VotingModel} from '../models/RoomModel';
 import {GameModel, GameModelClient} from '../models/game/GameModel';
 import {CHAT_TARGET_TYPE} from '../models/ChatModel';
 import {SettingsRules} from '../models/game/GameSettings';
-import {ActionCheckError} from '../models/ActionCheckError';
+
+import ActionCheckError from '../models/ActionCheckError';
+import * as ERR from '../errors/ERR';
 
 import {
   gameInit

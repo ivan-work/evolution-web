@@ -1,8 +1,9 @@
 import logger from '~/shared/utils/logger';
-import {RoomModel, VotingModel} from '../models/RoomModel';
+import {VotingModel} from '../models/RoomModel';
 import Validator from 'validatorjs';
 
-import {ActionCheckError} from '../models/ActionCheckError';
+import ActionCheckError from '../models/ActionCheckError';
+import * as ERR from '../errors/ERR';
 
 /**
  * Check/Select
@@ -103,7 +104,7 @@ export const checkUserIsHost = (room, userId) => {
 
 export const checkValidate = (data, rules) => {
   const validation = new Validator(data, rules);
-  if (validation.fails()) throw new ActionCheckError('roomEditSettingsRequest', 'validation failed: %s', JSON.stringify(validation.errors.all()));
+  if (validation.fails()) throw new ActionCheckError(ERR.APP_ROOM_SETTINGS_VALIDATION, validation.errors.all());
 };
 
 export const checkUserNotBanned = (room, userId) => {

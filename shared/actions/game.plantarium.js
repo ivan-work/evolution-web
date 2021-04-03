@@ -12,19 +12,18 @@ import {
   startCooldown
 } from "./trait";
 import {
-  checkGameDefined, checkGameHasAnimal,
-  checkGameHasPlant,
+  checkGameDefined,
+  getOrThrowGameAnimal,
+  getOrThrowGamePlant,
   checkGameHasUser,
   checkGamePhase,
   checkPlayerCanAct,
-  checkPlayerHasAnimal, throwError
+  getOrThrowPlayerAnimal, throwError
 } from "./checks";
 import {PHASE} from "../models/game/GameModel";
 import {
-  checkTraitActivation,
   getErrorOfEntityTraitActivation,
   getErrorOfPlantAttack,
-  getErrorOfPlantCounterAttack
 } from "./trait.checks";
 import {server$huntStart_Plant} from "../models/game/evolution/traitsData/hunt";
 import {
@@ -156,8 +155,8 @@ export const plantsClientToServer = {
     checkGameHasUser(game, userId);
     checkGamePhase(game, PHASE.FEEDING);
     checkPlayerCanAct(game, userId);
-    const animal = checkGameHasAnimal(game, targetId);
-    const plant = checkGameHasPlant(game, plantId);
+    const animal = getOrThrowGameAnimal(game, targetId);
+    const plant = getOrThrowGamePlant(game, plantId);
     throwError(getErrorOfPlantAttack(game, animal, plant, userId));
     dispatch(server$startCooldownList(gameId, [
       startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)
@@ -170,7 +169,7 @@ export const plantsClientToServer = {
     checkGameDefined(game);
     checkGameHasUser(game, userId);
     checkGamePhase(game, PHASE.FEEDING);
-    const plant = checkGameHasPlant(game, plantId);
+    const plant = getOrThrowGamePlant(game, plantId);
     const trait = plant.hasTrait(traitId);
     throwError(getErrorOfEntityTraitActivation(game, userId, plant, trait, ...targets));
 
