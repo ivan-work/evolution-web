@@ -9,18 +9,6 @@ App:
     Twitter: Sign in with Twitter
   Name: Evolution
   Online: Online
-  Misc:
-    VKGroup: VK Group
-    Changelog: Changelog
-    Agree: Yes 
-    Disagree: No 
-    $on: on # this doesn't work without $
-    $off: off # this doesn't work without $
-    FAQ: FAQ
-    FAQ_HREF: 'https://github.com/ivan-work/evolution-web/blob/master/faq-ru.md'
-    Ignore: Ignore
-    Unignore: Unignore
-    UnignoreAll: Unignore
   Settings:
     Sound: Sound
     UIv3: New interface (v3)
@@ -29,6 +17,18 @@ App:
     Title: Profile
     Name: Name
     NameChange: Change name
+  Misc:
+    VKGroup: VK Group
+    Changelog: Changelog
+    Agree: "Yes" # Quotes are important
+    Disagree: "No" # Quotes are important
+    $on: on # this doesn't work without $
+    $off: off # this doesn't work without $
+    FAQ: FAQ
+    FAQ_HREF: 'https://github.com/ivan-work/evolution-web/blob/master/faq-ru.md'
+    Ignore: Ignore
+    Unignore: Unignore
+    UnignoreAll: Unignore
   Chat:
     Label: Chat
     EnterMessage: ...
@@ -73,12 +73,86 @@ App:
     $Unban: Unban
     ErrorKick: You were kicked
     ErrorBan: You were banned
-  Messages:
-    OutputTime: "Game time: {time}"
-    GameEnd: Game over. Congratulations {winnerName}! The room will self-destruct after {time} minutes.
-    AfkHostRequest: Hello! There's been no activity in this room for 10 minutes. Please write something in the chat so that the system knows that you are somewhere nearby.
-    AfkHostKick: The system determined that the host had gone somewhere and kicked him from the room.
-    AfkHostNormal: Thank you!
+    Messages:
+      OutputTime: "Game time: {time}"
+      GameEnd: Game over. Congratulations {winnerName}! The room will self-destruct after {time} minutes.
+      AfkHostRequest: Hello! There's been no activity in this room for 10 minutes. Please write something in the chat so that the system knows that you are somewhere nearby.
+      AfkHostKick: The system determined that the host had gone somewhere and kicked him from the room.
+      AfkHostNormal: Thank you!
+ 
+Game:
+  Game: Game
+  Icon:
+    Fruit: Edible for carnivores
+    Food: Food
+    Cover: Cover from carnivores
+  Phase:
+    DEPLOY: Deploy phase
+    FEEDING: Feeding phase
+    AMBUSH: Ambush phase
+    REGENERATION: Regeneration phase
+    EXTINCTION: Extinction phase
+    FINAL: Game over
+  UI:
+    IM:
+      Help:
+        CARD: 'Play a card'
+        FOOD: 'Feed the animal'
+        TRAIT: 'Use a trait'
+        CARD_TRAIT: 'Put a card on empty space (will create new animal), or use it on already existing animal (will add the trait)'
+        TRAIT_SHELL: 'Put the shell on the animal'
+        ANIMAL_LINK: 'Link with the other animal'
+        PLANT_LINK: 'Link with the other plant'
+        PLANT_ATTACK: 'Attack the animal'
+        COVER: 'Put on animal to protect it from attack'
+    FoodBase: Food base
+    SelectLink: Drag and drop on the other creature
+    EndTurn: End turn
+    EndPhase: End phase
+    EndAmbush: Skip
+    Deck: Deck
+    TimedOut_Title: Time of your turn has ended.
+    TimedOut_Desc: Until you close this window, the duration of your turn will be 5 seconds.
+    TimedOut_Action: Ok.
+    Pause: You vote for a pause.
+    Pause_Desc: Game will pause when everyone press this button.
+    Unpause: You vote for unpausing the game.
+    Unpause_Desc: Game will unpause when most of the players press this button.
+    Plants: Plants
+    Scores:
+      Label: Label
+      Winner: Winner
+      TablePlayer: Player
+      TableScoreNormal: Score
+      TableScoreDead: Score for dead creatures
+      TableScoreRandom: Score for luck
+    Status:
+      Title: Title
+      Turn: Turn
+      Phase: Phase
+      Round: Round
+      Player: Player
+      Time: Time
+      Pause: Pause
+    TraitActivateDialog:
+      Title: Select the trait
+      Nothing: Don`t use anything
+    TraitRecombinationDialog:
+      Title: Recombination
+      Action: Recombinate
+    TraitDefenceDialog:
+      Title: Defend!
+      Time: Time left
+      Mimicry_Title: Use Mimicry
+      TailLoss_Title: Use Tail loss
+      Other_Title: Use traits
+      DefendOption:
+        TraitMimicry: Redirect the attack to the other animal
+        TraitTailLoss: Drop one of your traits
+      Cancel: Cancel
+      Nothing: Do not defend
+      AttackedBy: Defend! You were attacked by
+
   Log:
     Label: Action Log
     gameNextRound: New Round.
@@ -134,15 +208,8 @@ App:
     PARALYSED: is paralyzed
     SHY: is shy
     IN_COVER: is in cover
- 
-Game:
-  Game: Game
-  Icon:
-    Fruit: Edible for carnivores
-    Food: Food
-    Cover: Cover from carnivores
   Trait:
-    TraitSymbiosis      : 
+    TraitSymbiosis      :
       _: Symbiosis
       source: Symbiont
     TraitCommunication  : Communication
@@ -163,7 +230,7 @@ Game:
     TraitBurrowing      : Burrowing
     TraitCamouflage     : Camouflage
     TraitSharpVision    : SharpVision
-    
+
     TraitShell          : Shell
     TraitIntellect      : Intellect
     TraitAnglerfish:
@@ -171,7 +238,7 @@ Game:
       value: Defenderfish
     TraitTrematode      : Trematode
     TraitMetamorphose   : Metamorphose
-    TraitInkCloud       : Ink Cloud 
+    TraitInkCloud       : Ink Cloud
     TraitViviparous     : Viviparous
     TraitAmbush         : Ambush
     TraitFlight         : Flight
@@ -205,8 +272,7 @@ Game:
     PlantTraitParasiticLink : Parasitic Link
     PlantTraitHiddenCarnivorous: Carnivorous
 
-  TraitPlantGrazing: Grazing
-  
+    TraitPlantGrazing: Grazing
   TraitDesc:
     $EAT: By the will of the player can be activated instead of taking food
     $CDRound: Can be used every round
@@ -298,69 +364,4 @@ Game:
     PlantTraitHiddenCarnivorous: Activate to attack $A
 
     TraitPlantGrazing: First, $A receives $F from plant. Then it can destroy other $F on this plant.
-  Phase:
-    DEPLOY: Deploy phase
-    FEEDING: Feeding phase
-    AMBUSH: Ambush phase
-    REGENERATION: Regeneration phase
-    EXTINCTION: Extinction phase
-    FINAL: Game over
-  UI:
-    IM:
-      Help:
-        CARD: 'Play a card'
-        FOOD: 'Feed the animal'
-        TRAIT: 'Use a trait'
-        CARD_TRAIT: 'Put a card on empty space (will create new animal), or use it on already existing animal (will add the trait)'
-        TRAIT_SHELL: 'Put the shell on the animal'
-        ANIMAL_LINK: 'Link with the other animal'
-        PLANT_LINK: 'Link with the other plant'
-        PLANT_ATTACK: 'Attack the animal'
-        COVER: 'Put on animal to protect it from attack'
-    FoodBase: Food base
-    SelectLink: Drag and drop on the other creature
-    EndTurn: End turn
-    EndPhase: End phase
-    EndAmbush: Skip
-    Deck: Deck
-    TimedOut_Title: Time of your turn has ended.
-    TimedOut_Desc: Until you close this window, the duration of your turn will be 5 seconds.
-    TimedOut_Action: Ok.
-    Pause: You vote for a pause.
-    Pause_Desc: Game will pause when everyone press this button.
-    Unpause: You vote for unpausing the game.
-    Unpause_Desc: Game will unpause when most of the players press this button.
-    Plants: Plants
-    Scores:
-      Label: Label
-      Winner: Winner
-      TablePlayer: Player
-      TableScoreNormal: Score
-      TableScoreDead: Score for dead creatures
-      TableScoreRandom: Score for luck
-    Status:
-      Title: Title
-      Turn: Turn
-      Phase: Phase
-      Round: Round
-      Player: Player
-      Time: Time
-      Pause: Pause
-    TraitActivateDialog:
-      Title: Select the trait
-      Nothing: Don`t use anything
-    TraitRecombinationDialog:
-      Title: Recombination
-      Action: Recombinate
-    TraitDefenceDialog:
-      Title: Defend!
-      Time: Time left
-      Mimicry_Title: Use Mimicry
-      TailLoss_Title: Use Tail loss
-      Other_Title: Use traits
-      DefendOption:
-        TraitMimicry: Redirect the attack to the other animal
-        TraitTailLoss: Drop one of your traits
-      Cancel: Cancel
-      Nothing: Do not defend
-      AttackedBy: Defend! You were attacked by
+
