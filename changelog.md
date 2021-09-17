@@ -1,3 +1,9 @@
+v1.1.7 26.02.21
++ Fixed English translation (https://github.com/ivan-work/evolution-web/issues/125)
++ Поправлен Русский текст
++ Авторизация ВК снова работает
++ Тиканье на последних 4 секундах если временя хода меньше 30 секунд 
+
 v1.1.6 26.02.21
 + Added English translation and language selectors
 

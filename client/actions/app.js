@@ -4,6 +4,10 @@ import throttle from 'lodash/throttle';
 import RootService from '../services/RootService';
 import deepForceUpdate from 'react-deep-force-update';
 
+export const CLOCK_TICK_WARNING = 11e3; // Time to start turn ticking
+export const CLOCK_TICK_WARNING_FAST = 5e3; // Time to start turn when turns are less than threshold
+export const CLOCK_TICK_WARNING_FAST_THRESHOLD = 30e3;
+
 export const appChangeLanguage = (langCode) => (dispatch, getState) => {
   //console.log('fetching', langCode);
   window.fetch(`/api/i18n/${langCode}`)
@@ -77,7 +81,7 @@ const loadAudioFiles = () => {
   AUDIO_FILES.ROOM_JOIN = new AudioFile(AudioFileName.ROOM_JOIN, require('../assets/sound/connected-02.wav'));
   AUDIO_FILES.ROOM_JOIN_FULL = new AudioFile(AudioFileName.ROOM_JOIN_FULL, require('../assets/sound/searching-02.wav'));
   AUDIO_FILES.START_D2 = new AudioFile(AudioFileName.START_D2, require('../assets/sound/dota-ready.mp3'));
-  AUDIO_FILES.CLOCK_TICK = new AudioFile(AudioFileName.CLOCK_TICK, require('../assets/sound/metal-tick.wav'), {volume: .4});
+  AUDIO_FILES.CLOCK_TICK = new AudioFile(AudioFileName.CLOCK_TICK, require('../assets/sound/metal-tick.wav'), {volume: .3});
 };
 
 if (SHOULD_PLAY_AUDIO) loadAudioFiles();

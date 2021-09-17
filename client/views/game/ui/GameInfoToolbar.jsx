@@ -22,6 +22,7 @@ import Button from "@material-ui/core/Button";
 import {SpectatorsStatement} from "./SpectatorsList";
 
 import './GameInfoToolbar.scss';
+import {CLOCK_TICK_WARNING, CLOCK_TICK_WARNING_FAST, CLOCK_TICK_WARNING_FAST_THRESHOLD} from "../../../actions/app";
 
 const renderTime = (game) => {
   if (game.status.paused) {
@@ -35,11 +36,16 @@ const renderTime = (game) => {
   } else if (game.status.phase === PHASE.AMBUSH) {
     return (<Timer start={game.status.turnStartTime} duration={game.settings.timeAmbush}/>);
   } else if (game.status.turnStartTime != null) {
-    const sound = (
-      game.status.currentPlayer === game.userId
-      && game.settings.timeTurn >= 30e3
-    );
-    return (<Timer start={game.status.turnStartTime} duration={game.status.turnDuration} sound={sound}/>);
+    let warning = CLOCK_TICK_WARNING;
+    if (game.settings.timeTurn < CLOCK_TICK_WARNING_FAST_THRESHOLD) warning = CLOCK_TICK_WARNING_FAST;
+    const sound = game.status.currentPlayer === game.userId
+    return (
+      <Timer
+        start={game.status.turnStartTime}
+        duration={game.status.turnDuration}
+        sound={sound}
+        warning={warning}
+      />);
   } else {
     return '-';
   }
