@@ -121,7 +121,7 @@
     "ignore-styles": "^5.0.1",
     "jsdom": "^13.1.0",
     "mocha": "^5.2.0",
-    "node-sass": "^4.12.0",
+    "node-sass": "^7.0.0",
     "node-sass-json-importer": "^4.1.0",
     "nodemon": "^1.18.9",
     "react-dnd-test-backend": "^7.0.2",
