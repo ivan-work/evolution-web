@@ -11,8 +11,6 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
-const jsonImporter = require('node-sass-json-importer');
-
 const isDevelopment = process.env.NODE_ENV === 'development';
 const isProfiling = process.env.PROFILE === 'true';
 
@@ -86,7 +84,6 @@ module.exports = {
           loader: 'sass-loader'
           , options: {
             sourceMap: isDevelopment
-            , importer: jsonImporter()
           }
         }]
     }, {

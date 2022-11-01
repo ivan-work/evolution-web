@@ -1,4 +1,3 @@
-import {lighten, darken} from '@material-ui/core/styles/colorManipulator'
 import geckoHR from '../../assets/gfx/geckoHR.svg';
 import * as tt from '../../../shared/models/game/evolution/traitTypes'
 import * as ptt from '../../../shared/models/game/evolution/plantarium/plantTraitTypes'
