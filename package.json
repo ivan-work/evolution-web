@@ -122,7 +122,7 @@
     "ignore-styles": "^5.0.1",
     "jsdom": "^13.1.0",
     "mocha": "^5.2.0",
-    "nodemon": "^1.18.9",
+    "nodemon": "^2.0.20",
     "react-dnd-test-backend": "^7.0.2",
     "rimraf": "^2.6.3",
     "sass": "^1.55.0",
