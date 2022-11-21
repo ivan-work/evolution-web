@@ -15,7 +15,7 @@
   "scripts": {
     "heroku-postbuild": "npm run build",
     "start": "nodemon --exec ./node_modules/.bin/babel-node server/index.js",
-    "clean": "rimraf dist",
+    "clean": "npx rimraf dist",
     "build": "npm run clean && npm run server:build && npm run client:build",
     "server:start": "node dist/server/index.js",
     "server:build": "node_modules/.bin/webpack --config webpack.server.babel.js",
