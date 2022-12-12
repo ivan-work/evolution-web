@@ -21,8 +21,8 @@ describe('[PLANTARIUM] Deck changes:', function () {
     clientStore1.dispatch(roomJoinRequest(roomId));
     clientStore0.dispatch(roomEditSettingsRequest({
       name: 'Room Test'
-      , timeTurn: 1
-      , timeTraitResponse: 1
+      , timeTurn: 60
+      , timeTraitResponse: 60
       , maxPlayers: 2
       , addon_plantarium: true
       , addon_timeToFly: true

@@ -24,7 +24,7 @@ const styles = theme => ({
 export const Login = ({classes, isAuthenticated}) => {
   return (
     <Grid container
-          justify="space-evenly"
+          justifyContent="space-evenly"
           alignItems="center"
     >
       {isAuthenticated && <Redirect to={'/'}/>}

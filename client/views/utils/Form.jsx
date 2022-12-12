@@ -31,10 +31,10 @@ export default class Form extends React.Component {
     };
   }
 
-  componentWillReceiveProps({model, disabled}) {
-    // update disabled form for other users
-    if (disabled) {
-      this.setState({model})
+  componentDidUpdate(prevProps) {
+    if (prevProps?.model !== this.props.model) {
+      console.log(this.props.model)
+      this.setState({model: this.props.model})
     }
   }
 
@@ -63,12 +63,12 @@ export default class Form extends React.Component {
   }
 
   render() {
-    const {i18nPath, disabled} = this.props;
+    const {model: modelFromServer, i18nPath, disabled} = this.props;
     const {model, validation, dirty} = this.state;
 
     const childContext = {
       i18nPath
-      , model
+      , model: disabled ? modelFromServer : model
       , validation
       , dirty
       , disabled

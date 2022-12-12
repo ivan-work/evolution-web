@@ -65,9 +65,9 @@ players:
       }]
       , settings: {
         maxPlayers: 4
-        , timeTurn: 120000
-        , timeTraitResponse: 60000
-        , timeAmbush: 10000
+        , timeTurn: 90e3
+        , timeTraitResponse: 60e3
+        , timeAmbush: 10e3
         , randomPlayers: false
         , halfDeck: false
         , addon_timeToFly: false

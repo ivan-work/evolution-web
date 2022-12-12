@@ -153,18 +153,18 @@ describe('Rooms:', function () {
       clientStore0.dispatch(roomEditSettingsRequest({
         name: 'Room Test'
         , maxPlayers: 3
-        , timeTurn: 3
-        , timeTraitResponse: 1
+        , timeTurn: 180
+        , timeTraitResponse: 60
       }));
 
       expect(serverStore.getState().getIn(['rooms', RoomId, 'name']), 'Room Test');
       expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'maxPlayers']), 3);
-      expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'timeTurn']), 3 * 60000);
-      expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'timeTraitResponse']), 1 * 60000);
+      expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'timeTurn']), 180e3);
+      expect(serverStore.getState().getIn(['rooms', RoomId, 'settings', 'timeTraitResponse']), 60e3);
       expect(clientStore0.getState().getIn(['rooms', RoomId, 'name']), 'Room Test');
       expect(clientStore0.getState().getIn(['rooms', RoomId, 'settings', 'maxPlayers']), 3);
-      expect(clientStore0.getState().getIn(['rooms', RoomId, 'settings', 'timeTurn']), 3 * 60000);
-      expect(clientStore0.getState().getIn(['rooms', RoomId, 'settings', 'timeTraitResponse']), 1 * 60000);
+      expect(clientStore0.getState().getIn(['rooms', RoomId, 'settings', 'timeTurn']), 180e3);
+      expect(clientStore0.getState().getIn(['rooms', RoomId, 'settings', 'timeTraitResponse']), 60e3);
     });
 
     it('Can kick', () => {
@@ -197,8 +197,8 @@ describe('Rooms:', function () {
       clientStore0.dispatch(roomEditSettingsRequest({
         name: 'Room Test'
         , maxPlayers: 3
-        , timeTurn: 3
-        , timeTraitResponse: 1
+        , timeTurn: 180
+        , timeTraitResponse: 60
       }));
       expect(serverStore.getState().getIn(['rooms', roomId, 'users']), 'Resize should kick').size(3);
       expect(clientStore0.getState().getIn(['rooms', roomId, 'users'])).size(3);

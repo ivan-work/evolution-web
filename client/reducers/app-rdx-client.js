@@ -1,35 +1,7 @@
 import {Map, Set} from 'immutable';
 import {createReducer} from '~/shared/utils';
 import langCodes from '../../i18n';
-
-const loadValue = (key, defValue) => {
-  let value = null;
-  if (!process.env.TEST) {
-    try {
-      value = JSON.parse(window.localStorage.getItem(key));
-    } catch (e) {
-      window.localStorage.removeItem(key);
-    }
-    return value !== null ? value : defValue;
-  }
-};
-
-const loadJSONValue = (key, defValue) => {
-  let value = null;
-  if (!process.env.TEST) {
-    try {
-      value = JSON.parse(window.localStorage.getItem(key));
-    } catch (e) {
-      window.localStorage.removeItem(key);
-    }
-    return value !== null ? value : defValue;
-  }
-};
-
-const saveValue = (key, value) => {
-  if (!process.env.TEST) window.localStorage.setItem(key, JSON.stringify(value));
-  return value;
-};
+import {loadValue, saveValue} from "../utils/localStorage";
 
 const getInitialState = () => Map({
   lang: loadValue('lang', langCodes.hasOwnProperty(window.navigator.language) ? window.navigator.language : 'ru-ru')

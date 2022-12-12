@@ -46,7 +46,7 @@ App:
     Settings:
       name: Название
       maxPlayers: Количество игроков
-      timeTurn: Время хода (В минутах)
+      timeTurn: Время хода (В секундах)
       timeTraitResponse: Время реагирования на атаку
       randomPlayers: Случайный порядок игроков
       cardCountResult: Карт в колоде

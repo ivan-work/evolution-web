@@ -465,8 +465,8 @@ export const roomsClientToServer = {
     checkUserIsHost(room, userId);
     if (settings.name) settings.name = settings.name.trim();
     checkValidate(settings, SettingsRules);
-    settings.timeTurn *= 60000;
-    settings.timeTraitResponse *= 60000;
+    settings.timeTurn *= 1e3;
+    settings.timeTraitResponse *= 1e3;
     dispatch(server$roomEditSettings(roomId, settings));
   }
   , roomSetSeedRequest: ({roomId, seed}, {userId}) => (dispatch, getState) => {

@@ -4,14 +4,15 @@ import * as pt from "./evolution/plantarium/plantTypes";
 
 export const SETTINGS_PLAYERS = [2, 8];
 
-export const SETTINGS_TIME_VALUES = [.2, 10];
+export const SETTINGS_TIME_VALUES = [10, 600];
 
-export const SETTINGS_MINUTES = 60e3; // by 1 minute
+export const SETTINGS_MINUTES = 60e3; // 1 minute
+export const SETTINGS_SECONDS = 1e3; // 1 second
 
-export const SETTINGS_TIMED_OUT_TURN_TIME = 5e3;
-export const SETTINGS_AMBUSH_TIME = 10e3;
-export const SETTINGS_DEFAULT_TIME_TURN = 2 * SETTINGS_MINUTES;
-export const SETTINGS_DEFAULT_TIME_TRAIT = 1 * SETTINGS_MINUTES;
+export const SETTINGS_TIMED_OUT_TURN_TIME = 5 * SETTINGS_MINUTES;
+export const SETTINGS_AMBUSH_TIME = 10 * SETTINGS_SECONDS;
+export const SETTINGS_DEFAULT_TIME_TURN = 90 * SETTINGS_SECONDS;
+export const SETTINGS_DEFAULT_TIME_TRAIT = 60 * SETTINGS_SECONDS;
 
 export const SettingsRules = {
   name: 'string|between:4,20|required|regex:/^[a-zA-Zа-яА-ЯёЁ\\d\\s«»\\-_]*$/'

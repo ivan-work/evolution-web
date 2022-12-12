@@ -1,4 +1,4 @@
-import {createMuiTheme} from "@material-ui/core";
+import {createTheme} from "@material-ui/core";
 
 import primary from '@material-ui/core/colors/green';
 import secondary from '@material-ui/core/colors/amber';
@@ -65,4 +65,4 @@ const theme = {
 //   }
 // };
 
-export default createMuiTheme(theme);
+export default createTheme(theme);

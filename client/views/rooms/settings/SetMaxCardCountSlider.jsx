@@ -19,7 +19,7 @@ export default ({minCards}) => (
     const cardsTotal = memoCardsTotal(model);
     return (
       <>
-        <Grid container alignItems='center' justify='space-between'>
+        <Grid container alignItems='center' justifyContent='space-between'>
           <EvoCheckbox
             label={T.translate('App.Room.Settings.maxCardsEnabled')}
             color='primary'
