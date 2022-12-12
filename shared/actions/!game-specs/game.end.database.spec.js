@@ -65,7 +65,7 @@ players:
       }]
       , settings: {
         maxPlayers: 4
-        , timeTurn: 90e3
+        , timeTurn: 120e3
         , timeTraitResponse: 60e3
         , timeAmbush: 10e3
         , randomPlayers: false
