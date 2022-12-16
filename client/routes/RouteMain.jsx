@@ -91,7 +91,7 @@ export const RouteMain = ({classes}) => (
           <OnlineWidget/>
         </EvoPaper>
         <EvoPaper className={classes.columnPaper}>
-          <Chat chatTargetType='GLOBAL'/>
+          <Chat chatTargetType='GLOBAL' maxTime={3600e3 /* 1 HOUR */}/>
         </EvoPaper>
       </Grid>
     </Grid>

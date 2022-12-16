@@ -15,7 +15,7 @@ import {List} from 'immutable';
 import TimeService from '../services/TimeService';
 
 import {CHAT_MESSAGE_LENGTH, CHAT_TARGET_TYPE} from '../../shared/models/ChatModel';
-import {client$chatMessageRequest} from '../../shared/actions/actions';
+import {client$chatMessageRequest, SYSTEM_LOGIN} from '../../shared/actions/actions';
 import GameStyles from "./game/GameStyles";
 import IgnoreUnignoreTooltip from "../components/IgnoreUnignoreTooltip";
 import User from "./utils/User";
@@ -76,7 +76,7 @@ export const enhanceWithChat = compose(
     , roomId: PropTypes.string
     , length: PropTypes.number
   })
-  , connect((state, {chatTargetType, roomId, length = 100}) => {
+  , connect((state, {chatTargetType, roomId, length = 1000, maxTime}) => {
     const ignoreList = state.app.get('ignoreList');
     let path = null;
     switch (chatTargetType) {
@@ -87,10 +87,20 @@ export const enhanceWithChat = compose(
         path = ['rooms', roomId, 'chat', 'messages'];
         break;
     }
+    const now = Date.now();
+    const filterIgnoredMessages = ({from}) => !ignoreList.has(from)
+    const filterByMaxTime = ({from, timestamp, text}) => {
+      if (from === SYSTEM_LOGIN) return true;
+      if (!maxTime) return true;
+      return (now - timestamp) < maxTime
+    }
     return {
       messages: state
         .getIn(path, List())
-        .filter(({from}) => !ignoreList.has(from))
+        .filter((message) => (
+          filterIgnoredMessages(message)
+          && filterByMaxTime(message)
+        ))
         .takeLast(length)
     };
   })
@@ -106,7 +116,7 @@ export const ChatWindow = compose(
 
 export const ChatMessage = withStyles(messageStyles)(({classes, message, short}) => {
   const {timestamp, from, fromLogin, to, toType} = message;
-  const text = from !== '0' ? message.text : T.translate(message.text, message.context);
+  const text = from !== SYSTEM_LOGIN ? message.text : T.translate(message.text, message.context);
   return (
     <Typography className={cn({
       [classes.messageRoot]: true
@@ -185,10 +195,10 @@ export const Chat = compose(
     }
     , componentRendered: ({scrollToBottom, atBottom}) => atBottom && scrollToBottom()
   })
-)(({classes, roomId, chatTargetType, atBottom, scrollToBottom, chatWindowRef, handleScroll}) => (
+)(({classes, roomId, chatTargetType, atBottom, scrollToBottom, chatWindowRef, handleScroll, maxTime}) => (
   <div className={classes.root}>
     <div className={classes.window} ref={chatWindowRef} onScroll={handleScroll}>
-      <ChatWindow {...{roomId, chatTargetType}}/>
+      <ChatWindow {...{roomId, chatTargetType, maxTime}}/>
     </div>
     <div className={classes.inputArea}>
       <ChatInput className={classes.input} roomId={roomId} chatTargetType={chatTargetType}/>
