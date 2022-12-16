@@ -11,7 +11,7 @@ let globalChat = ChatModel.new()
     timestamp: Date.now()
     , to: null
     , toType: CHAT_TARGET_TYPE.GLOBAL
-    , from: '0'
+    , from: SYSTEM_LOGIN
     , fromLogin: SYSTEM_LOGIN
     , text: 'App.Start'
   }));
