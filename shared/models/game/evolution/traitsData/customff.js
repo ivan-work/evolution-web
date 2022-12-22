@@ -183,4 +183,4 @@ export const TraitPest = {
 };
 
 // Блохи : Увеличивает потребность в $F на +1. Может быть несколько на одном $A.
-export const TraitFlea = {type: tt.TraitFlea, food: 1, multiple: true};
+export const TraitFlea = {type: tt.TraitFlea, food: 1, multiple: true, cardTargetType: CARD_TARGET_TYPE.ANIMAL_ENEMY};
