@@ -23,6 +23,17 @@ import styled from "../../../styles/styled";
 import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
 import {TraitBase} from "../traits/Trait";
 import LinkedTraitWrapper from "../traits/LinkedTraitWrapper";
+import displayFood from "../food/displayFood";
+
+export const AnimalTraitFoodDisplay = ({food}) => {
+  if (food > 0) {
+    return ` +${food}`
+  } else if (food === 0) {
+    return null
+  } else {
+    return ` ${food}`
+  }
+}
 
 export const AnimalTraitBase = (props) => (
   <TraitBase
@@ -35,7 +46,7 @@ export const AnimalTraitBase = (props) => (
           })}
         </span>
         <span className='food'>
-          {props.trait.getDataModel().food > 0 ? ' +' + props.trait.getDataModel().food : null}
+          {displayFood(props.trait.getDataModel().food)}
         </span>
       </>
     }/>
@@ -112,7 +123,11 @@ export const InteractiveTraitAmbush = compose(
     , value: state.game.getIn(['ambush', 'ambushers', props.sourceAnimal.id])
   }))
   , withHandlers({
-    startInteraction: ({dispatch, sourceAnimal, value}) => () => dispatch(traitAmbushActivateRequest(sourceAnimal.id, !value))
+    startInteraction: ({
+                         dispatch,
+                         sourceAnimal,
+                         value
+                       }) => () => dispatch(traitAmbushActivateRequest(sourceAnimal.id, !value))
   })
 )(AnimalTraitBase);
 
