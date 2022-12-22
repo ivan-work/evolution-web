@@ -19,9 +19,8 @@ describe('GameModel.parse.spec', () => {
     expect(list.get(0).trait1).equal(tt.TraitCarnivorous);
     expect(list.get(1).type).equal(cardsData.CardSharpVision.type);
     expect(list.get(1).trait1).equal(tt.TraitSharpVision);
-    expect(list.get(2).type).equal(cardsData.CardParasiteAndCarnivorous.type);
+    expect(list.get(2).type).equal(cardsData.CardParasite.type);
     expect(list.get(2).trait1).equal(tt.TraitParasite);
-    expect(list.get(2).trait2).equal(tt.TraitCarnivorous);
 
     expect(parseCardList(''), 'parseCardList(empty)').equal(List());
   });

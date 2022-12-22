@@ -74,7 +74,7 @@ players:
   phase: feeding
   plants: succ $suc ++++
   players:
-    - continent: $A graz comm$B plantgraz, $B plantgraz wait
+    - continent: $A graz commu$B plantgraz, $B plantgraz wait
   `);
     const {selectGame, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
 

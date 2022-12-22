@@ -3,7 +3,7 @@ import * as plantTraitsData from './plantarium/plantTraitsData'
 import {CARD_TARGET_TYPE, CTT_PARAMETER} from './constants';
 import TraitDataModelBaseProps from "./TraitDataModelBaseProps";
 import ERRORS from '../../../actions/errors';
-import identity from "lodash/identity";
+import PlantModel from "./plantarium/PlantModel";
 
 const PlantTraitDataModelProps = {
   ...TraitDataModelBaseProps
@@ -57,6 +57,8 @@ export default class PlantTraitDataModel extends Record(PlantTraitDataModelProps
   };
 
   getErrorOfTraitPlacement(plant) {
+    if (!(plant instanceof PlantModel)) return ERRORS.TRAIT_PLACEMENT_CTT_PLANT;
+    if (!(this.cardTargetType & CTT_PARAMETER.PLANT)) return ERRORS.TRAIT_PLACEMENT_CTT_PLANT;
     if (!this.linkTargetType && !this.multiple && plant.hasTrait(this.type, true)) return ERRORS.TRAIT_PLACEMENT_MULTIPLE;
     if (this.hidden) return ERRORS.TRAIT_PLACEMENT_HIDDEN;
     return this._getErrorOfTraitPlacement(plant);

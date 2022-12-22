@@ -333,4 +333,19 @@ players:
       clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$C'));
     });
   });
+
+  it(`#bug angler keeps intellect (https://github.com/ivan-work/evolution-web/issues/53)`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}, {clientStore1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A carn mimi mass wait, $B cni, $C Anglerfish
+`);
+    const {selectGame, findAnimal, findTrait} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$C'));
+    expect(findAnimal('$C').hasTrait(tt.TraitCarnivorous, true), `$C should have ${tt.TraitCarnivorous}`).ok;
+    expect(findAnimal('$C').hasTrait(tt.TraitIntellect, true), `$C should have no intellect`).not.ok;
+    expect(findAnimal('$C').traits).size(1);
+  });
 });

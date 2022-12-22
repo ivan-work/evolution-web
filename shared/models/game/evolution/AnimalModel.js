@@ -1,4 +1,4 @@
-import {Record, List, Map, OrderedMap} from 'immutable';
+import {Record, List, Map, OrderedMap, Seq} from 'immutable';
 import uuid from 'uuid';
 import {TraitModel} from './TraitModel';
 
@@ -8,7 +8,7 @@ import {
   TraitShell,
   TraitHibernation,
   TraitAnglerfish,
-  TraitNeoplasm
+  TraitNeoplasm, TraitVoracious
 } from './traitTypes';
 import {TRAIT_ANIMAL_FLAG, CTT_PARAMETER} from './constants';
 
@@ -74,13 +74,21 @@ Animal#${this.id}\
     return this.traits.find(trait => (ignoreDisable || !trait.disabled) && (trait.type === typeOrId || trait.id === typeOrId))
   }
 
-  traitAttach(trait, forced) {
-    const attachedTrait = trait
-      .set('ownerId', this.ownerId)
-      .set('hostAnimalId', this.id);
-    const updatedTraits = (trait.type !== TraitNeoplasm || forced
-      ? this.traits.set(attachedTrait.id, attachedTrait) // .push()
-      : OrderedMap().set(attachedTrait.id, attachedTrait).concat(this.traits)); // .unshift()
+  traitAttach(trait, unshift) {
+    const attachedTrait = trait.attachTo(this);
+    const updatedTraits = (
+      trait.type !== TraitNeoplasm || unshift
+        ? updateTraitsPush(this.traits, attachedTrait) // .push()
+        : updateTraitsUnshift(this.traits, attachedTrait) // .unshift()
+    );
+    return this
+      .set('traits', updatedTraits)
+      .recalculateFood();
+  }
+
+  traitReplace(traitToReplaceId, trait) {
+    const attachedTrait = trait.attachTo(this);
+    const updatedTraits = updateTraitsReplace(this.traits, attachedTrait, traitToReplaceId)
     return this
       .set('traits', updatedTraits)
       .recalculateFood();
@@ -102,6 +110,7 @@ Animal#${this.id}\
       if (trait.type === TraitFatTissue && !trait.disabled) fatSize++;
       foodSize += trait.getDataModel().food;
     });
+    foodSize = Math.max(1, foodSize)
     return this
       .set('foodSize', foodSize)
       .set('fatSize', fatSize)
@@ -137,6 +146,9 @@ Animal#${this.id}\
   }
 
   getWantedFood() {
+    if (this.hasTrait(TraitVoracious)) {
+      return 100;
+    }
     return (this.foodSize + this.fatSize) - (this.getFood() + this.getFat());
   }
 
@@ -198,25 +210,34 @@ Animal#${this.id}\
       );
   }
 
-  // AUTO FAT PROCESSING - disabled by rules. TODO delete on sight
-  // digestFood() {
-  //   let fatToSpend = Math.max(0, this.foodSize - this.getFood());
-  //   if (this.hasFlag(TRAIT_ANIMAL_FLAG.HIBERNATED)) {
-  //     return this
-  //   } else if (this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) {
-  //     return this
-  //   } else {
-  //     return this
-  //       .update('food', food => food + Math.min(this.getFat(), fatToSpend))
-  //       .update('traits', traits => traits.map(trait =>
-  //         (trait.type === TraitFatTissue && trait.value && fatToSpend-- > 0) ? trait.set('value', false)
-  //           : trait));
-  //   }
-  // }
-
   countScore() {
     let baseScore = 2;
     if (this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) baseScore = 0;
     return (baseScore + this.traits.reduce((result, trait) => result + trait.countScore(), 0));
   }
+}
+
+function updateTraitsPush(traitMap, trait) {
+  return traitMap.set(trait.id, trait) // .push()
+}
+
+function updateTraitsUnshift(traitMap, trait) {
+  return OrderedMap().set(trait.id, trait).concat(traitMap); // .unshift()
+}
+
+function updateTraitsReplace(traitMap, trait, oldTraitId) {
+  return replaceValue(traitMap, oldTraitId, trait.id, trait) // .replace()
+}
+
+function replaceValue(orderedMap, oldKey, newKey, value) {
+  const seq = orderedMap.entrySeq();
+  const currentIndex = seq.findIndex(([fk, fv]) => fk === oldKey)
+  if (currentIndex > -1) {
+    return new OrderedMap((new Seq.Indexed()).concat(
+      seq.slice(0, currentIndex),
+      [[newKey, value]],
+      seq.slice(currentIndex + 1, seq.size)
+    ))
+  }
+  return orderedMap
 }

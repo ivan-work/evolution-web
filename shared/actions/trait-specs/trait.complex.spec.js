@@ -194,7 +194,7 @@ deck: 10 camo
 phase: feeding
 food: 4
 players:
-  - continent: $Q comm$A int carn wait, $A tail mimi ink shell, $B tail mimi ink shell, $C tail mimi ink shell
+  - continent: $Q commu$A int carn wait, $A tail mimi ink shell, $B tail mimi ink shell, $C tail mimi ink shell
 `);
     const {selectGame} = makeGameSelectors(serverStore.getState, gameId);
     clientStore0.dispatch(traitActivateRequest('$Q', tt.TraitCarnivorous, '$A'));

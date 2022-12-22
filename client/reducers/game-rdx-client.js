@@ -18,6 +18,7 @@ import {
   , gameSetUserWantsPause
   , gameSetPaused
   , gameSpawnPlants
+  , gamePestPlants
   , gameDeployPlant
   , traitAmbushActivate
   , gameAmbushPrepareStart
@@ -25,6 +26,8 @@ import {
   , gameAmbushAttackStart
   , gameAmbushAttackEnd
   , gameAmbushSetAmbushers
+  , animalUpdateFood
+  , gameUpdateFood
   , gamePlantUpdateFood
   , playerActed
   , animalDeath
@@ -37,8 +40,10 @@ import {
 
   , traitAnimalRemoveTrait
   , traitAnimalAttachTrait
+  , traitAnimalReplaceTrait
   , traitAnimalRecombinateTraits
 
+  , gameRemoveFirstCardFromDeck
   , traitAttachToPlant
   , traitDetachFromPlant
   , traitGrazeFood
@@ -73,6 +78,7 @@ export const reducer = createReducer(null, {
   , gameSetUserWantsPause
   , gameSetPaused
   , gameSpawnPlants
+  , gamePestPlants
   , gameDeployPlant
   , traitAmbushActivate
   , gameAmbushPrepareStart
@@ -80,6 +86,8 @@ export const reducer = createReducer(null, {
   , gameAmbushAttackStart
   , gameAmbushAttackEnd
   , gameAmbushSetAmbushers
+  , animalUpdateFood
+  , gameUpdateFood
   , gamePlantUpdateFood
   , playerActed
   , animalDeath
@@ -92,8 +100,10 @@ export const reducer = createReducer(null, {
 
   , traitAnimalRemoveTrait
   , traitAnimalAttachTrait
+  , traitAnimalReplaceTrait
   , traitAnimalRecombinateTraits
 
+  , gameRemoveFirstCardFromDeck
   , traitAttachToPlant
   , traitDetachFromPlant
   , traitGrazeFood

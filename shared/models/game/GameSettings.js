@@ -1,6 +1,8 @@
 import {List, Map, Record} from 'immutable';
 import * as cardsData from './evolution/cards/index';
 import * as pt from "./evolution/plantarium/plantTypes";
+import makeCard from "./evolution/cards/makeCard";
+import * as traits from "./evolution/traitTypes";
 
 export const SETTINGS_PLAYERS = [2, 8];
 
@@ -22,10 +24,12 @@ export const SettingsRules = {
   , randomPlayers: `boolean`
   , halfDeck: `boolean`
   , maxCards: 'numeric'
+  , addon_base2: `boolean`
   , addon_timeToFly: `boolean`
   , addon_continents: `boolean`
   , addon_bonus: `boolean`
   , addon_plantarium: `boolean`
+  , addon_customff: `boolean`
 };
 
 export class SettingsRecord extends Record({
@@ -36,10 +40,12 @@ export class SettingsRecord extends Record({
   , randomPlayers: !process.env.TEST
   , halfDeck: false
   , maxCards: null
+  , addon_base2: false
   , addon_timeToFly: false
   , addon_continents: false
   , addon_bonus: false
   , addon_plantarium: false
+  , addon_customff: false
   , seed: null
 }) {
   static fromJS(js) {
@@ -220,3 +226,25 @@ export const PlantDeck_Plantarium = [
   , [4, pt.PlantCarnivorous]
   , [4, pt.PlantEphemeral]
 ];
+
+export const Deck_customff = [
+  [2, cardsData.CardInfectedAndMutation.type]
+  , [2, cardsData.CardInfectedAndCarnivorous.type]
+  , [2, cardsData.CardPerspicuusAndParalysis.type]
+  , [2, cardsData.CardPerspicuusAndAggression.type]
+  , [2, cardsData.CardVomitusAndCamouflage.type]
+  , [2, cardsData.CardVomitusAndSwimming.type]
+  , [2, cardsData.CardSkinnyAndCommunication.type]
+  , [2, cardsData.CardSkinnyAndCarnivorous.type]
+  , [2, cardsData.CardAmphibiousAndSwimming.type]
+  , [2, cardsData.CardAmphibiousAndFatTissue.type]
+  , [2, cardsData.CardAggressionAndMutation.type]
+  , [2, cardsData.CardAdaptationAndPiracy.type]
+  , [2, cardsData.CardOviparousAndCooperation.type]
+  , [2, cardsData.CardOviparousAndVoracious.type]
+  , [2, cardsData.CardCannibalismAndSharpVision.type]
+  , [2, cardsData.CardCannibalismAndMassive.type]
+  , [2, cardsData.CardPestAndParalysis.type]
+  , [2, cardsData.CardPestAndCarnivorous.type]
+  , [2, cardsData.CardFleaAndCommunication.type]
+]

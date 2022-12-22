@@ -137,6 +137,10 @@ export default class PlantModel extends Record({
 
   receiveFood(amount) {
     return this
-      .set('food', Math.max(0, Math.min(this.getFood() + amount, this.data.maxFood)));
+      .set('food', Math.max(0, Math.min(this.getFood() + amount, this.getMaxFood())));
+  }
+
+  getDataModel() {
+    return this.data;
   }
 }

@@ -224,7 +224,7 @@ players:
 phase: feeding
 food: 10
 players:
-  - continent: $A coop$B comm$B para wait, $B comm$C para, $C comm$D coop$D para, $D comm$A para wait
+  - continent: $A coop$B commu$B para wait, $B commu$C para, $C commu$D coop$D para, $D commu$A para wait
 `);
       const {selectGame, selectPlayer, findAnimal, findTrait} = makeGameSelectors(serverStore.getState, gameId);
       clientStore0.dispatch(traitTakeFoodRequest('$A'));
@@ -243,7 +243,7 @@ players:
 phase: feeding
 food: 10
 players:
-  - continent: $A coop$B comm$B para wait, $B comm$C para, $C comm$D coop$D para, $D comm$A para wait
+  - continent: $A coop$B commu$B para wait, $B commu$C para, $C commu$D coop$D para, $D commu$A para wait
 `);
       const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
       clientStore0.dispatch(traitTakeFoodRequest('$D'));

@@ -54,11 +54,13 @@ App:
       maxCardsEnabled: Set maximum amount of cards
       maxCardsEnabledHelp: Will remove extra cards after sorting the deck. Some traits may be completely lost. 
       cardCountResult: Amount of cards in deck
+      addon_base: Base
+      addon_base2: Base (x2)
       addon_timeToFly: Time To Fly
-      addon_continents: Continents (without locations)
+      addon_continents: Continents (no locations)
       addon_bonus: Bonus cards
       addon_plantarium: Plantarium
-      addon_base: Base
+      addon_customff: Fan expansion
     Players: Players
     Spectators: Spectators
     Banned: Banned
@@ -273,6 +275,23 @@ Game:
     PlantTraitHiddenCarnivorous: Carnivorous
 
     TraitPlantGrazing: Grazing
+
+    TraitSkinny: Skinny
+    TraitAmphibious: Amphibious
+    TraitInfected: Infected
+    TraitAdaptation: Adaptation
+    TraitCannibalism: Cannibalism
+    TraitVoracious: Voracious
+    TraitParalysis: Paralysis
+    TraitAggression: Aggression
+    TraitPest: Pest
+    TraitOviparous: Oviparous
+    TraitPlantOviparous: Oviparous
+    TraitFlea: Flea
+    TraitVomitus: Vomitus
+    TraitMutation: Mutation
+    TraitPerspicuus: Perspicuus
+    TraitHumus: Humus
   TraitDesc:
     $EAT: By the will of the player can be activated instead of taking food
     $CDRound: Can be used every round
@@ -365,3 +384,19 @@ Game:
 
     TraitPlantGrazing: First, $A receives $F from plant. Then it can destroy other $F on this plant.
 
+    TraitSkinny: (I NEED HELP TRANSLATING THIS) Хищник, съевший это $A получает на $F меньше.
+    TraitAmphibious: (I NEED HELP TRANSLATING THIS) $EAT. $CDTurn. Можно активировать чтобы вылезти из воды/залезть в воду при наличии у $A свойства $TraitSwimming.
+    TraitInfected: (I NEED HELP TRANSLATING THIS) Хищник съевший это $A получает свойство $TraitFlea
+    TraitAdaptation: (I NEED HELP TRANSLATING THIS) На $A больше нельзя выкладывать свойства, не меняющие потребность в еде. $A потребляет на $F меньше, минимум - одна $F.
+    TraitCannibalism: (I NEED HELP TRANSLATING THIS) При поедании своего $A хищник получает на $F больше.
+    TraitVoracious: (I NEED HELP TRANSLATING THIS) Можно брать еду сверх нормы.
+    TraitParalysis: (I NEED HELP TRANSLATING THIS) $EAT. $CDTurn. Запрещает использование активных свойств до деактивации.
+    TraitAggression: (I NEED HELP TRANSLATING THIS) Хищник с этим свойством может атаковать дважды в ход. Несовместимо со свойством $TraitIntellect
+    TraitPest: (I NEED HELP TRANSLATING THIS) Можно класть на всех. Убирает $F в начале фазы питания.
+    TraitOviparous: (I NEED HELP TRANSLATING THIS) $EAT. $CDTurn. Добавляет $F в базу.
+    TraitPlantOviparous: (I NEED HELP TRANSLATING THIS) $EAT. $CDTurn. Добавляет $F на растение.
+    TraitFlea: (I NEED HELP TRANSLATING THIS) Увеличивает потребность в $F на +1. Может быть несколько на одном $A.
+    TraitVomitus: (I NEED HELP TRANSLATING THIS) $CDTurn. Когда $A атаковали, можно сбросить $F для защиты.
+    TraitMutation: (I NEED HELP TRANSLATING THIS) В конце фазы вымирания $A получает из колоды первую карту. Если на ней есть подходящее свойство, то $A получает его.
+    TraitPerspicuus: (I NEED HELP TRANSLATING THIS) Если на $A нет $F, оно не может быть атаковано хищником
+    TraitHumus: (I NEED HELP TRANSLATING THIS) Можно заменить это свойство "Водоплавающим" при активации свойства $TraitAmphibious

@@ -19,7 +19,7 @@ describe('TraitShell:', () => {
 phase: feeding
 food: 2
 players:
-  - continent: $A carn comm$D wait, $B carn, $C shell tail piracy, $D shell + fat
+  - continent: $A carn commu$D wait, $B carn, $C shell tail piracy, $D shell + fat
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 

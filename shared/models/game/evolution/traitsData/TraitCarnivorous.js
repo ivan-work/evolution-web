@@ -46,6 +46,7 @@ export const getStaticDefenses = (game, sourceAnimal, targetAnimal) =>
       || (trait.type === tt.TraitShell && targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHELL))
       || (trait.type === tt.TraitFlight && !trait.getErrorOfUse(game, sourceAnimal, targetAnimal))
       || (trait.type === tt.TraitShy && targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHY))
+      || (trait.type === tt.TraitPerspicuus && targetAnimal.getFood() === 0)
     )).toArray();
 
 // [tt.TraitRunning, tt.TraitShell, tt.TraitInkCloud, tt.TraitCnidocytes, tt.TraitMimicry, tt.TraitTailLoss, tt.TraitPoisonous];
@@ -68,6 +69,7 @@ export const getActiveDefenses = (game, attackEntity, attackTrait, targetAnimal,
       )
       || (trait.type === tt.TraitMimicry && !trait.getErrorOfUse(game, targetAnimal, attackEntity, attackTrait))
       || (trait.type === tt.TraitTailLoss && !trait.getErrorOfUse(game, targetAnimal, attackEntity, attackTrait))
+      || (trait.type === tt.TraitVomitus && !trait.getErrorOfUse(game, targetAnimal, attackEntity, attackTrait))
     );
   }).toArray();
 };
@@ -112,7 +114,7 @@ export const TraitCarnivorous = {
   , targetType: TRAIT_TARGET_TYPE.ANIMAL
   , playerControllable: true
   , _getErrorOfTraitPlacement: (animal) => {
-    if (animal.hasTrait(tt.TraitScavenger, true)) return tt.TraitCarnivorous;
+    if (animal.hasTrait(tt.TraitScavenger, true)) return tt.TraitScavenger;
     return false;
   }
   , cooldowns: fromJS([

@@ -70,7 +70,6 @@ export const TraitPlantHomeothermy = {
   , food: 1
   , playerControllable: true
   , targetType: TRAIT_TARGET_TYPE.PLANT
-  , replaceOnPlantarium: tt.TraitPlantHomeothermy
   , cooldowns: fromJS([
     [tt.TraitPlantHomeothermy, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
   ])

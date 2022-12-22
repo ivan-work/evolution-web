@@ -4,6 +4,7 @@ import * as tt from './traitTypes'
 import {CARD_TARGET_TYPE, CTT_PARAMETER, TRAIT_ANIMAL_FLAG} from './constants';
 import TraitDataModelBaseProps from "./TraitDataModelBaseProps";
 import ERRORS from '../../../actions/errors';
+import {AnimalModel} from "./AnimalModel";
 
 const TraitDataModelProps = {
   ...TraitDataModelBaseProps
@@ -55,6 +56,21 @@ export class TraitDataModel extends Record(TraitDataModelProps) {
     if (animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) return ERRORS.TRAIT_REGENERATION_DEAD;
     // if (!this.action) return ERRORS.TRAIT_ACTION_NOT_EXISTS;
 
+    const traitParalysis = animal.hasTrait(tt.TraitParalysis);
+    if (trait.type !== tt.TraitParalysis && traitParalysis && !traitParalysis.value) return tt.TraitParalysis;
+
+    if (targets[0] !== 'CHECK' && trait.linkId) {
+      const linkedAnimal = trait.findLinkedAnimal(game, animal);
+      if (!linkedAnimal) return ERRORS.TRAIT_ACTION_NO_TARGETS
+      const linkedTrait = linkedAnimal.hasTrait(trait.linkId);
+      if (!linkedTrait) return ERRORS.TRAIT_ACTION_NO_TARGETS;
+      const linkedTraitParalysis = linkedAnimal.hasTrait(tt.TraitParalysis);
+      if (linkedTraitParalysis && !linkedTraitParalysis.value) return tt.TraitParalysis;
+
+      // const errors = linkedTrait.getErrorOfUse(game, linkedAnimal, 'CHECK')
+      // if (errors) return errors;
+    }
+
     if (this.cooldowns && this.cooldowns
       .some(([link]) => game.cooldowns.checkFor(link, animal.ownerId, animal.id, trait.id)))
       return ERRORS.COOLDOWN;
@@ -83,11 +99,14 @@ export class TraitDataModel extends Record(TraitDataModelProps) {
   }
 
   getErrorOfTraitPlacement(animal) {
+    // if (!(animal instanceof AnimalModel)) return ERRORS.TRAIT_PLACEMENT_CTT_ANIMAL;
+    // if (!(this.cardTargetType & CTT_PARAMETER.ANIMAL)) return ERRORS.TRAIT_PLACEMENT_CTT_ANIMAL;
     if (!this.linkTargetType && !this.multiple && animal.hasTrait(this.type, true)) return ERRORS.TRAIT_PLACEMENT_MULTIPLE;
     if (this.hidden) return ERRORS.TRAIT_PLACEMENT_HIDDEN;
     if (animal.hasTrait(tt.TraitRegeneration) && (
       this.food > 0 || animal.traits.filter(t => !t.getDataModel().hidden).size >= 2
     )) return tt.TraitRegeneration;
+    if (animal.hasTrait(tt.TraitAdaptation) && this.food < 1) return tt.TraitAdaptation
     return this._getErrorOfTraitPlacement(animal);
   }
 }

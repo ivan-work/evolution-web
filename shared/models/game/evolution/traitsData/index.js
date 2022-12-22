@@ -37,6 +37,7 @@ export {TraitCarnivorous};
 export * from './ttf';
 export * from './cons';
 export * from './bonus';
+export * from './customff';
 
 export const TraitWaiter = {
   type: tt.TraitWaiter
@@ -78,6 +79,10 @@ export const TraitFatTissue = {
 
 export const TraitSwimming = {
   type: tt.TraitSwimming
+  , _getErrorOfTraitPlacement: (animal) => {
+    if (animal.hasTrait(tt.TraitHumus, true)) return tt.TraitHumus;
+    return false;
+  }
 };
 
 export const TraitRunning = {
@@ -133,7 +138,7 @@ export const TraitMimicry = {
 export const TraitScavenger = {
   type: tt.TraitScavenger
   , _getErrorOfTraitPlacement: (animal) => {
-    if (animal.hasTrait(tt.TraitCarnivorous, true)) return tt.TraitScavenger;
+    if (animal.hasTrait(tt.TraitCarnivorous, true)) return tt.TraitCarnivorous;
     return false;
   }
 };

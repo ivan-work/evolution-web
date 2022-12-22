@@ -194,4 +194,19 @@ players:
     clientStore0.dispatch(gameEndTurnRequest());
     expect(selectPlayer(User0).continent).size(4);
   });
+
+  it(`#ANOMALY: Should corretly work after death`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A carn, $B cnid, $W wait +
+`);
+    const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'));
+
+    expect(findAnimal('$A').hasFlag(TRAIT_ANIMAL_FLAG.PARALYSED)).true;
+    expect(selectPlayer(User0).continent).size(2);
+  });
 });

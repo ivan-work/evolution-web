@@ -1,7 +1,6 @@
 import logger from '~/shared/utils/logger';
 import {List, fromJS} from 'immutable';
 import {PHASE} from '../../GameModel';
-import {AnimalModel} from '../AnimalModel';
 import {
   TRAIT_TARGET_TYPE
   , TRAIT_COOLDOWN_DURATION
@@ -23,8 +22,6 @@ import {
   , server$gameDeployAnimalFromDeck
   , server$startCooldownList
 } from '../../../../actions/actions';
-
-import {selectGame} from '../../../../selectors';
 
 import {
   getStaticDefenses,
@@ -128,7 +125,7 @@ export const TraitThermosynthesis = {
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
   , _getErrorOfTraitPlacement: (animal) => {
-    if (animal.hasTrait(tt.TraitPhotosynthesis, true)) return tt.TraitThermosynthesis;
+    if (animal.hasTrait(tt.TraitPhotosynthesis, true)) return tt.TraitPhotosynthesis;
     return false;
   }
   , replaceOnPlantarium: tt.TraitSpecialization
@@ -156,7 +153,7 @@ export const TraitPhotosynthesis = {
   , targetType: TRAIT_TARGET_TYPE.NONE
   , playerControllable: true
   , _getErrorOfTraitPlacement: (animal) => {
-    if (animal.hasTrait(tt.TraitThermosynthesis, true)) return tt.TraitPhotosynthesis;
+    if (animal.hasTrait(tt.TraitThermosynthesis, true)) return tt.TraitThermosynthesis;
     return false;
   }
   , replaceOnPlantarium: tt.TraitSpecialization
@@ -206,6 +203,10 @@ export const TraitIntellect = {
   , cooldowns: fromJS([
     [tt.TraitIntellect, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
   ])
+  , _getErrorOfTraitPlacement: (animal) => {
+    if (animal.hasTrait(tt.TraitAggression, true)) return tt.TraitAggression;
+    return false;
+  }
   , getTargets: (game) => {
     const sourceAnimal = game.locateAnimal(game.question.sourceAid, game.question.sourcePid);
     const attackTrait = game.locateTrait(game.question.traitId, game.question.sourceAid, game.question.sourcePid);
