@@ -15,6 +15,7 @@ import {connect} from "react-redux";
 import {PHASE} from "../../../../shared/models/game/GameModel";
 import {InteractionSource} from "../InteractionManager";
 import {InteractionItemType} from "../InteractionItemType";
+import displayFood from "../food/displayFood";
 
 const traitStyles = theme => ({
   CardTrait: {
@@ -54,7 +55,7 @@ const CardTraitBody = ({classes, trait, single, double, invert, canStart, startI
       })} onClick={startInteraction}>
         <span className={classes.CardTraitText + ' ' + trait}>
           <span className='name'>{T.translate('Game.Trait.' + trait)}</span>
-          <span className='food'>{traitFood > 0 ? ' +' + traitFood : null}</span>
+          <span className='food'>{displayFood(traitFood)}</span>
         </span>
       </Typography>
     </WhiteTooltip>
