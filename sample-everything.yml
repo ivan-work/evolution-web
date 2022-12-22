@@ -64,3 +64,19 @@ players:
     - $ TraitRegeneration
     - $ TraitRstrategy
     - $ TraitHomeothermy
+    - $ TraitSkinny
+    - $ TraitAmphibious TraitSwimming TraitCarnivorous
+    - $ TraitInfected
+    - $ TraitAdaptation
+    - $ TraitCannibalism TraitCarnivorous
+    - $ TraitVoracious TraitCarnivorous
+    - $ TraitParalysis
+    - $ TraitAggression TraitCarnivorous
+    - $ TraitPest
+    - $ TraitOviparous
+    - $ TraitPlantOviparous
+    - $ TraitFlea
+    - $ TraitVomitus
+    - $ TraitMutation
+    - $ TraitPerspicuus
+    - $ TraitHumus

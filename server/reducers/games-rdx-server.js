@@ -1,9 +1,9 @@
 import logger from '~/shared/utils/logger';
 import {createReducer, ensureParameter, validateParameter} from '../../shared/utils';
-import {getRandom} from '../../shared/utils/randomGenerator';
+import {getIntRandom, getRandom} from '../../shared/utils/randomGenerator';
 import {Map, List, OrderedMap, Set, fromJS} from 'immutable';
 import {PHASE, AREA, HuntRecord, AmbushRecord} from '../../shared/models/game/GameModel';
-import {getTraitDataModel} from '../../shared/models/game/evolution/TraitModel';
+import {getTraitDataModel, TraitModel} from '../../shared/models/game/evolution/TraitModel';
 import {
   TRAIT_TARGET_TYPE,
   TRAIT_ANIMAL_FLAG,
@@ -78,16 +78,11 @@ export const gameDeployAnimalFromHand = (game, {userId, animal, animalPosition, 
 };
 
 export const gameDeployAnimalFromDeck = (game, {animal, sourceAid}) => {
-  const ending = game.deck.size === 1;
   const parent = game.locateAnimal(sourceAid);
   const animalIndex = game.getPlayer(parent.ownerId).continent.keySeq().keyOf(sourceAid);
   const card = game.getIn(['deck', 0]);
   return game
-    .update(game => !ending ? game
-      : game
-        .update('players', players => players.map(player => player
-          .update('continent', continent => continent.map(animal => animal.setIn(['flags', TRAIT_ANIMAL_FLAG.HIBERNATED], false))))))
-    .update('deck', deck => deck.skip(1))
+    .update(gameRemoveFirstCardFromDeck)
     .update(gameDeployAnimal(animal, card, animalIndex + 1))
     .update(addToGameLog(['traitGiveBirth', logAnimal(parent)]));
 };
@@ -128,6 +123,9 @@ export const gameDeployPlantTraits = (game, {cardId, traits}) => {
 
 export const traitAnimalAttachTrait = (game, {sourcePid, sourceAid, trait}) => game
   .updateIn(['players', sourcePid, 'continent', sourceAid], animal => animal.traitAttach(trait));
+
+export const traitAnimalReplaceTrait = (game, {sourcePid, sourceAid, traitToReplaceId, trait}) => game
+  .updateIn(['players', sourcePid, 'continent', sourceAid], animal => animal.traitReplace(traitToReplaceId, trait));
 
 export const traitAnimalRemoveTrait = (game, {sourcePid, sourceAid, traitId}) => {
   const deadAnimals = [];
@@ -170,7 +168,14 @@ const recombinateRemoveAnimalTrait = (recombinatedTrait) => animal => {
 
 const updateAnimal = (game, playerId, animalId, cb) => game.updateIn(['players', playerId, 'continent', animalId], cb);
 
-export const traitAnimalRecombinateTraits = (game, {player1id, player2id, animal1id, animal2id, trait1id, trait2id}) => {
+export const traitAnimalRecombinateTraits = (game, {
+  player1id,
+  player2id,
+  animal1id,
+  animal2id,
+  trait1id,
+  trait2id
+}) => {
   const getAnimal1 = () => game.locateAnimal(animal1id, player1id);
   const getAnimal2 = () => game.locateAnimal(animal2id, player2id);
 
@@ -180,14 +185,16 @@ export const traitAnimalRecombinateTraits = (game, {player1id, player2id, animal
   game = game.updateIn(['players', player1id, 'continent', animal1id], recombinateRemoveAnimalTrait(trait1));
   game = game.updateIn(['players', player2id, 'continent', animal2id], recombinateRemoveAnimalTrait(trait2));
 
-  if (!trait2.getDataModel().getErrorOfTraitPlacement(getAnimal1()))
+  if (!trait2.getDataModel().getErrorOfTraitPlacement(getAnimal1())) {
     game = game.updateIn(['players', player1id, 'continent', animal1id], animal => animal
       .traitAttach(trait2)
     );
-  if (!trait1.getDataModel().getErrorOfTraitPlacement(getAnimal2()))
+  }
+  if (!trait1.getDataModel().getErrorOfTraitPlacement(getAnimal2())) {
     game = game.updateIn(['players', player2id, 'continent', animal2id], animal => animal
       .traitAttach(trait1)
     );
+  }
 
   if (TraitNeoplasm.customFns.shouldKillAnimal(getAnimal1())) {
     game = animalDeath(game, {type: ANIMAL_DEATH_REASON.NEOPLASM, animalId: animal1id});
@@ -241,9 +248,15 @@ export const gameAddTurnTimeout = (game, {turnStartTime, turnDuration}) => game
   .setIn(['status', 'turnStartTime'], turnStartTime)
   .setIn(['status', 'turnDuration'], turnDuration);
 
-export const gameSetUserTimedOut = (game, {playerId, timedOut}) => game.setIn(['players', playerId, 'timedOut'], timedOut);
+export const gameSetUserTimedOut = (game, {
+  playerId,
+  timedOut
+}) => game.setIn(['players', playerId, 'timedOut'], timedOut);
 
-export const gameSetUserWantsPause = (game, {userId, wantsPause}) => game.setIn(['players', userId, 'wantsPause'], wantsPause);
+export const gameSetUserWantsPause = (game, {
+  userId,
+  wantsPause
+}) => game.setIn(['players', userId, 'wantsPause'], wantsPause);
 
 export const gameSetPaused = (game, {paused}) => game.setIn(['status', 'paused'], paused);
 
@@ -315,6 +328,7 @@ export const gameStartDeploy = (game) => {
 export const gameStartFeeding = (game, {food = 0}) => {
   ensureParameter(food, 'number');
   let aedificators = 0;
+  let pests = 0;
   return game
     .update('players', players => players.map(player => player
       .set('ended', !player.playing)))
@@ -324,11 +338,12 @@ export const gameStartFeeding = (game, {food = 0}) => {
       if (!game.isPlantarium()) {
         game.someAnimal((animal) => {
           if (animal.hasTrait(tt.TraitAedificator)) aedificators++;
+          if (animal.hasTrait(tt.TraitPest)) pests++;
         })
       }
       return game;
     })
-    .set('food', food + aedificators * 2)
+    .set('food', Math.max(0, food + aedificators * 2 - pests))
     .setIn(['status', 'round'], 0)
 };
 
@@ -502,9 +517,9 @@ export const gameEnd = (oldGame, {game}) => {
   const scoreboardFinal = scoreboard.sort((p1, p2) =>
     !p1.playing ? 1
       : !p2.playing ? -1
-      : p2.scoreNormal !== p1.scoreNormal ? p2.scoreNormal - p1.scoreNormal
-        : p2.scoreDead !== p1.scoreDead ? p2.scoreDead - p1.scoreDead
-          : p2.scoreRandom - p1.scoreRandom);
+        : p2.scoreNormal !== p1.scoreNormal ? p2.scoreNormal - p1.scoreNormal
+          : p2.scoreDead !== p1.scoreDead ? p2.scoreDead - p1.scoreDead
+            : p2.scoreRandom - p1.scoreRandom);
 
   return game
     .set('scoreboardFinal', scoreboardFinal)
@@ -688,6 +703,15 @@ export const gameSpawnPlants = (game, {plants}) => {
     .update(addToGameLog(['gameSpawnPlants', plants.size]));
 }
 
+const plantUpdateFood = (game, plant, amount) => Math.max(0, plant.getFood() + amount);
+
+export const gamePestPlants = (game, {pestMap}) => game
+  .mapPlants(plant => plant
+    .set('food', pestMap[plant.id]
+      ? plantUpdateFood(game, plant, pestMap[plant.id])
+      : plant.getFood())
+  )
+
 export const gameDeployPlant = (game, {plant}) => game
   .setIn(['plants', plant.id], plant)
   .update(addToGameLog(['gameDeployPlant', logPlant(plant)]));
@@ -695,6 +719,30 @@ export const gameDeployPlant = (game, {plant}) => game
 export const gamePlantUpdateFood = (game, {plantId, amount}) => game
   .updateIn(['plants', plantId], plant => plant.receiveFood(amount))
   .update(addToGameLog(['gamePlantUpdateFood', logPlant(game.getPlant(plantId)), amount]));
+// endregion
+
+// region CustomFF
+export const animalUpdateFood = (game, {animalId, amount}) => {
+  const animal = game.locateAnimal(animalId);
+  return game
+    .updateIn(['players', animal.ownerId, 'continent', animal.id], animal => {
+      return animal.set('food', Math.max(0, Math.min(animal.getFood() + amount, animal.foodSize)))
+    })
+}
+
+export const gameUpdateFood = (game, {amount}) => game.set('food', amount);
+
+export const gameRemoveFirstCardFromDeck = (game) => {
+  const ending = game.deck.size === 1;
+  return game
+    .update(game => !ending
+      ? game
+      : game
+        .update('players', players => players.map(player => player
+          .update('continent', continent => continent.map(animal => animal
+            .setIn(['flags', TRAIT_ANIMAL_FLAG.HIBERNATED], false))))))
+    .update('deck', deck => deck.skip(1))
+}
 // endregion
 
 export const reducer = createReducer(Map(), {
@@ -742,10 +790,13 @@ export const reducer = createReducer(Map(), {
   , traitAnswerSuccess: (state, data) => state.update(data.gameId, game => traitAnswerSuccess(game, data))
 
   , traitAnimalAttachTrait: (state, data) => state.update(data.gameId, game => traitAnimalAttachTrait(game, data))
+  , traitAnimalReplaceTrait: (state, data) => state.update(data.gameId, game => traitAnimalReplaceTrait(game, data))
   , traitAnimalRemoveTrait: (state, data) => state.update(data.gameId, game => traitAnimalRemoveTrait(game, data))
   , traitAnimalRecombinateTraits: (state, data) =>
     state.update(data.gameId, game => traitAnimalRecombinateTraits(game, data))
 
+  , gameRemoveFirstCardFromDeck: (state, data) =>
+    state.update(data.gameId, game => gameRemoveFirstCardFromDeck(game, data))
   , traitAttachToPlant: (state, data) => state.update(data.gameId, game => traitAttachToPlant(game, data))
   , traitDetachFromPlant: (state, data) => state.update(data.gameId, game => traitDetachFromPlant(game, data))
   , traitConvertFat: (state, data) => state.update(data.gameId, game => traitConvertFat(game, data))
@@ -767,6 +818,9 @@ export const reducer = createReducer(Map(), {
   , huntEnd: (state, data) => state.update(data.gameId, game => huntEnd(game, data))
 
   , gameSpawnPlants: (state, data) => state.update(data.gameId, game => gameSpawnPlants(game, data))
+  , gamePestPlants: (state, data) => state.update(data.gameId, game => gamePestPlants(game, data))
   , gameDeployPlant: (state, data) => state.update(data.gameId, game => gameDeployPlant(game, data))
+  , animalUpdateFood: (state, data) => state.update(data.gameId, game => animalUpdateFood(game, data))
+  , gameUpdateFood: (state, data) => state.update(data.gameId, game => gameUpdateFood(game, data))
   , gamePlantUpdateFood: (state, data) => state.update(data.gameId, game => gamePlantUpdateFood(game, data))
 });

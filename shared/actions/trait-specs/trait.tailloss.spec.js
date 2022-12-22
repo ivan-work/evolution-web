@@ -61,7 +61,7 @@ players:
 phase: feeding
 food: 4
 players:
-  - continent: $A carn, $B carn, $C carn, $X tail, $Z symb$X comm$X
+  - continent: $A carn, $B carn, $C carn, $X tail, $Z symb$X commu$X
 settings:
   timeTraitResponse: 5
 `);

@@ -114,7 +114,7 @@ phase: feeding
 players:
   - continent: $ + , $
   - continent: $ + camo sharp
-  - continent: $ + comm$X, $X +,$,$
+  - continent: $ + commu$X, $X +,$,$
 `);
     expect(ServerGame().getPlayer(User0).countScore(), 'score for User0 before').equal(4);
     expect(ServerGame().getPlayer(User1).countScore(), 'score for User1 before').equal(4);

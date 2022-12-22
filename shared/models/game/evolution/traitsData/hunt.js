@@ -296,7 +296,13 @@ export const server$huntKill_Animal = (gameId) => (dispatch, getState) => {
 
   const traitCnidocytes = targetAnimal.hasTrait(tt.TraitCnidocytes);
   if (traitCnidocytes && !traitCnidocytes.isEqual(disabledTraitId) && !traitCnidocytes.getErrorOfUse(game, attackAnimal)) {
-    dispatch(traitCnidocytes.getDataModel().customFns.paralyze(game.id, targetAnimal, traitCnidocytes, attackAnimal));
+    // This code never executes because it's traitCnidocytes is always a defense option
+    dispatch(traitCnidocytes.getDataModel().customFns.paralyze(game, targetAnimal, traitCnidocytes, attackAnimal));
+  }
+
+  const traitInfected = targetAnimal.hasTrait(tt.TraitInfected);
+  if (traitInfected && !traitInfected.isEqual(disabledTraitId) && !traitInfected.getErrorOfUse(game, attackAnimal)) {
+    dispatch(traitInfected.getDataModel().customFns.infect(game, targetAnimal, traitInfected, attackAnimal));
   }
 
   dispatch(huntSetFlag(gameId, HUNT_FLAG.FEED_FROM_KILL));
@@ -320,6 +326,7 @@ export const server$huntKill = (gameId) => (dispatch, getState) => {
   }
 
   dispatch(huntSetFlag(game.id, HUNT_FLAG.FEED_SCAVENGERS));
+  if (targetAnimal.hasTrait(tt.TraitSkinny)) dispatch(huntSetFlag(game.id, HUNT_FLAG.TRAIT_SKINNY));
   dispatch(server$traitKillAnimal(game.id, attackEntity, targetAnimal));
   return dispatch(server$huntEnd(gameId));
 };
@@ -347,15 +354,28 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
 
     // #cooldown - TraitCarnivorous cooldown being set here
     if (!huntGetFlag(game, HUNT_FLAG.TRAIT_INK_CLOUD)) {
-      const ensuredAttackTrait = TraitModel.new(hunt.attackTraitType).set('id', hunt.attackTraitId); // Attack trait could be undefined
-      dispatch(server$traitStartCooldown(game.id, ensuredAttackTrait, attackEntity));
+      const traitAggression = attackEntity.hasTrait(tt.TraitAggression)
+      if (traitAggression && !game.cooldowns.checkFor(tt.TraitAggression, null, attackEntity.id, traitAggression.id)) {
+        dispatch(server$traitStartCooldown(game.id, traitAggression, attackEntity));
+      } else {
+        const ensuredAttackTrait = TraitModel.new(hunt.attackTraitType).set('id', hunt.attackTraitId); // Attack trait could be undefined
+        dispatch(server$traitStartCooldown(game.id, ensuredAttackTrait, attackEntity));
+      }
     }
     if (huntGetFlag(game, HUNT_FLAG.TRAIT_ANGLERFISH)) {
-      const traitIntellect = attackEntity.hasTrait(tt.TraitIntellect);
+      const traitIntellect = attackEntity.hasTrait(tt.TraitIntellect, true);
       if (traitIntellect) dispatch(server$traitAnimalRemoveTrait(game, attackEntity, traitIntellect));
     }
     if (huntGetFlag(game, HUNT_FLAG.FEED_FROM_KILL)) {
-      dispatch(server$startFeeding(gameId, attackEntity.id, 2, tt.TraitCarnivorous));
+      let food = 2;
+      const traitCannibalism = attackEntity.hasTrait(tt.TraitCannibalism);
+      if (traitCannibalism && attackEntity.ownerId === hunt.targetPid) {
+        food += 1;
+      }
+      if (huntGetFlag(game, HUNT_FLAG.TRAIT_SKINNY)) {
+        food -= 1;
+      }
+      dispatch(server$startFeeding(gameId, attackEntity.id, food, tt.TraitCarnivorous));
     }
     if (huntGetFlag(game, HUNT_FLAG.PARALYZE) && hunt.type === HUNT_TYPE.ANIMAL) {
       dispatch(server$game(gameId, traitParalyze(gameId, hunt.attackEntityId)));

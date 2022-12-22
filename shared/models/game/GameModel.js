@@ -12,7 +12,7 @@ import {
   , Deck_ContinentsShort
   , Deck_Bonus
   , Deck_Plantarium
-  , PlantDeck_Plantarium
+  , PlantDeck_Plantarium, Deck_customff
 } from './GameSettings';
 
 import uuid from 'uuid';
@@ -278,11 +278,13 @@ export class GameModel extends Record({
     let deckConfig = Deck_Base;
     let deckPlantsConfig = [];
 
+    if (room.settings.addon_base2) deckConfig = deckConfig.concat(Deck_Base);
     if (room.settings.addon_timeToFly) deckConfig = deckConfig.concat(Deck_TimeToFly);
     if (room.settings.addon_continents) deckConfig = deckConfig.concat(Deck_ContinentsShort);
     if (room.settings.addon_bonus) deckConfig = deckConfig.concat(Deck_Bonus);
     if (room.settings.addon_plantarium) deckConfig = deckConfig.concat(Deck_Plantarium);
     if (room.settings.addon_plantarium) deckPlantsConfig = deckPlantsConfig.concat(PlantDeck_Plantarium);
+    if (room.settings.addon_customff) deckConfig = deckConfig.concat(Deck_customff);
 
     if (room.settings.halfDeck) deckConfig = deckConfig.map(([count, type]) => [Math.ceil(count / 2), type]);
 
@@ -384,10 +386,12 @@ export class GameModel extends Record({
         , timeAmbush: game.settings.timeAmbush
         , randomPlayers: game.settings.randomPlayers
         , halfDeck: game.settings.halfDeck
+        , addon_base2: game.settings.addon_base2
         , addon_timeToFly: game.settings.addon_timeToFly
         , addon_continents: game.settings.addon_continents
         , addon_bonus: game.settings.addon_bonus
         , addon_plantarium: game.settings.addon_plantarium
+        , addon_customff: game.settings.addon_customff
       }
       , status: {
         turn: game.status.turn

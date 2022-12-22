@@ -28,7 +28,7 @@ import {
   , server$questionResumeTimeout
   , server$autoFoodSharing
   , server$roomSelfDestructStart
-  , server$activateViviparous
+  , server$activateViviparous, server$activateMutation, server$traitAnimalAttachTrait, server$gamePestPlants
 } from './actions';
 import {appPlaySound} from '../../client/actions/app';
 import {redirectTo} from '../utils/history';
@@ -57,6 +57,8 @@ import {server$gameDeployPlant, server$gameSpawnPlants} from "./game.plantarium"
 import PlantModel from "../models/game/evolution/plantarium/PlantModel";
 import PlantVisitor from "../models/game/evolution/plantarium/PlantsVisitor";
 import ParasiteVisitor from "../models/game/evolution/plantarium/ParasiteVisitor";
+import {getIntRandom} from "../utils/randomGenerator";
+import traitDataModel from "../models/game/evolution/TraitDataModel";
 
 // region Game
 // region Init
@@ -271,6 +273,35 @@ export const server$gameDeployTrait = (gameId, cardId, traits) => (dispatch, get
     gameDeployTrait(gameId, cardId, traits.map(trait => trait.toOthers().toClient()))
     , {meta: {clientOnly: true, users: selectUsersInGame(getState, gameId)}}
   ));
+};
+
+const gameRemoveFirstCardFromDeck = (gameId) => ({
+  type: 'gameRemoveFirstCardFromDeck'
+  , data: {gameId}
+});
+
+export const server$gameDeployTraitFromDeck = (gameId, animal) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  const userId = animal.ownerId;
+  const card = game.deck.first();
+  if (!card) return false;
+  const traits = [card.getTraitDataModel(false), card.getTraitDataModel(true)]
+    .filter(traitData => {
+      return (
+        !!traitData
+        && !traitData.linkTargetType
+        && !traitData.getErrorOfTraitPlacement(animal)
+        && !traitData.getErrorOfTraitPlacement_User(userId, animal.ownerId)
+      )
+    })
+    .map(traitData => TraitModel.new(traitData.type));
+  let trait = traits[0];
+  if (traits.length > 1) trait = traits[getIntRandom(0, 1)];
+  if (trait) {
+    dispatch(server$traitAnimalAttachTrait(game, animal, trait))
+  }
+  dispatch(server$game(gameId, gameRemoveFirstCardFromDeck(gameId)))
+  return true;
 };
 // endregion
 
@@ -613,6 +644,7 @@ export const server$gamePhaseEndRegeneration = (gameId) => (dispatch, getState) 
     dispatch(server$gameStartPhase(gameId, PHASE.DEPLOY));
     if (game.isPlantarium()) {
       dispatch(server$gameSpawnPlants(gameId, game.getPlantsCountForSpawn()));
+      dispatch(server$gamePestPlants(gameId));
     }
     dispatch(server$gamePlayerStart(gameId));
   } else {
@@ -677,6 +709,9 @@ const server$gameDistributeAnimals = (gameId) => (dispatch, getState) => {
       if (animal.hasTrait(tt.TraitRstrategy) && !animal.flags.has(TRAIT_ANIMAL_FLAG.REGENERATION)) {
         playerStacks[player.id].push(server$gameDeployAnimalFromDeck(gameId, animal));
         playerStacks[player.id].push(server$gameDeployAnimalFromDeck(gameId, animal));
+      }
+      if (animal.hasTrait(tt.TraitMutation)) {
+        playerStacks[player.id].push(server$gameDeployTraitFromDeck(gameId, animal))
       }
     });
   });
@@ -904,6 +939,7 @@ export const gameServerToClient = {
     gameDeployAnimalFromHand(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardId)
   , gameDeployAnimalFromDeck: ({gameId, animal, sourceAid}) =>
     gameDeployAnimalFromDeck(gameId, AnimalModel.fromServer(animal), sourceAid)
+  , gameRemoveFirstCardFromDeck: ({gameId}) => gameRemoveFirstCardFromDeck(gameId)
   , gameDeployTrait: ({gameId, cardId, traits}) =>
     gameDeployTrait(gameId, cardId, traits.map(trait => TraitModel.fromServer(trait)))
   , gameDeployRegeneratedAnimal: ({gameId, userId, cardId, animalId, source}) =>

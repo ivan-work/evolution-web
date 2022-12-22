@@ -60,12 +60,17 @@ const defaultColorConfig = {
 const TraitColors = {
   [tt.TraitCarnivorous]: TraitGeneralColors.Attack
   , [tt.TraitAnglerfish]: TraitGeneralColors.Attack
-  , [tt.TraitSwimming]: {
-    text: '#00F'
-  }
+  , [tt.TraitAggression]: TraitGeneralColors.Attack
+  , [tt.TraitCannibalism]: TraitGeneralColors.Attack
+  , [tt.TraitIntellect]: TraitGeneralColors.Attack
+  , [tt.TraitVoracious]: TraitGeneralColors.Attack
+  , [tt.TraitSwimming]: {text: '#00F'}
   , [tt.TraitParasite]: TraitGeneralColors.Parasitic
   , [tt.TraitTrematode]: TraitGeneralColors.Parasitic
   , [tt.TraitNeoplasm]: TraitGeneralColors.Parasitic
+  , [tt.TraitFlea]: TraitGeneralColors.Parasitic
+  , [tt.TraitParalysis]: TraitGeneralColors.Parasitic
+  , [tt.TraitPest]: TraitGeneralColors.Parasitic
   , [tt.TraitCommunication]: {
     text: '#99F'
     , stroke: '#99F'

@@ -11,7 +11,7 @@ import {decksHelper} from "./utils-deck";
 export default ({name, disabled}) => (
   <Grid container alignItems='center' justifyContent='space-between'>
     <Checkbox name={name} color='primary' disabled={disabled} />
-    <Tooltip title={decksHelper[name].help} placement="left">
+    <Tooltip title={decksHelper[name].help} placement="left-end">
       <IconCardsTooltip />
     </Tooltip>
   </Grid>

@@ -18,7 +18,7 @@ describe('TraitMetamorphose:', () => {
 phase: feeding
 food: 2
 players:
-  - continent: $A meta comm$B, $B, $C meta carn, $D meta symb$E, $E, $Waiter graz
+  - continent: $A meta commu$B, $B, $C meta carn, $D meta symb$E, $E, $Waiter graz
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 

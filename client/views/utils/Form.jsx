@@ -120,7 +120,7 @@ export class Checkbox extends React.Component {
     const {name, disabled: thisDisabled, ...props} = this.props;
     const {i18nPath, model, disabled: formDisabled, onChange} = this.context;
     return (
-      <EvoCheckbox checked={model[name]}
+      <EvoCheckbox checked={model[name] || false}
                    value={name}
                    label={T.translate(i18nPath + '.' + name)}
                    disabled={thisDisabled || formDisabled}

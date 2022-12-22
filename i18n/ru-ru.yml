@@ -55,10 +55,12 @@ App:
       maxCardsEnabled: Ограничить количество карт
       maxCardsEnabledHelp: Срежет лишние карты после перемешивания колоды. Какие-то свойства могут полностью вылететь.
       addon_base: База
+      addon_base2: База (х2)
       addon_timeToFly: Время Летать
       addon_continents: Континенты (без локаций)
       addon_bonus: Подарочный набор
       addon_plantarium: Растения
+      addon_customff: Фанатское дополнение
     Players: Игроки
     Spectators: Зрители
     Banned: Забаненные
@@ -271,6 +273,23 @@ Game:
     PlantTraitHiddenCarnivorous: Хищное
 
     TraitPlantGrazing: Топотун
+
+    TraitSkinny: Тощее
+    TraitAmphibious: Амфибия
+    TraitInfected: Зараженное
+    TraitAdaptation: Приспособлен
+    TraitCannibalism: Каннибализм
+    TraitVoracious: Прожорливое
+    TraitParalysis: Паралич
+    TraitAggression: Агрессия
+    TraitPest: Вредитель
+    TraitOviparous: Яйцекладущее
+    TraitPlantOviparous: Яйцекладущее
+    TraitFlea: Блохи
+    TraitVomitus: Плюющееся
+    TraitMutation: Мутирующее
+    TraitPerspicuus: Прозрачное
+    TraitHumus: Наземное
   TraitDesc:
     $EAT: По желанию игрока можно активировать вместо взятия еды
     $CDRound: Можно использовать в каждом раунде
@@ -346,7 +365,7 @@ Game:
       Парное свойство.
       Несколько растений связаны между собой с помощью микоризой: все они выживут, если хотя бы на одном из них есть $F.
       Затем в конце фазы роста каждое из тех растений, на которых нет $F, получит $F.
-    PlantTraitAquatic: Только животное со свойством $TraitSwimming может брать $F с такого растения.
+    PlantTraitAquatic: Только $A со свойством $TraitSwimming может брать $F с такого растения.
     PlantTraitOfficinalis: >-
       $A, получившее $F с такого растения, считается накормленным, но абсолютно все его свойства перестают действовать до конца фазы питания.
       Действует только фишка убежища.
@@ -362,6 +381,23 @@ Game:
       ПАРАЗИТ погибает, если погибает растение-хозяин.
     PlantTraitSpiky: Дает три фишки убежища.
     PlantTraitParasiticLink: Активируйте чтобы положить ЕДУ на паразита.
-    PlantTraitHiddenCarnivorous: Активируйте чтобы атаковать $A
+    PlantTraitHiddenCarnivorous: Активируйте чтобы атаковать $A.
 
     TraitPlantGrazing: Сначала $A получает $F с растения. Затем оно может уничтожить другую $F на этом же растении.
+
+    TraitSkinny: Хищник, съевший это $A получает на $F меньше.
+    TraitAmphibious: $EAT. $CDTurn. Можно активировать чтобы вылезти из воды/залезть в воду при наличии у $A свойства $TraitSwimming.
+    TraitInfected: Хищник съевший это $A получает свойство $TraitFlea
+    TraitAdaptation: На $A больше нельзя выкладывать свойства, не меняющие потребность в еде. $A потребляет на $F меньше, минимум - одна $F.
+    TraitCannibalism: При поедании своего $A хищник получает на $F больше.
+    TraitVoracious: Можно брать еду сверх нормы.
+    TraitParalysis: $EAT. $CDTurn. Запрещает использование активных свойств до деактивации.
+    TraitAggression: Хищник с этим свойством может атаковать дважды в ход. Несовместимо со свойством $TraitIntellect
+    TraitPest: Можно класть на всех. Убирает $F в начале фазы питания.
+    TraitOviparous: $EAT. $CDTurn. Добавляет $F в базу.
+    TraitPlantOviparous: $EAT. $CDTurn. Добавляет $F на растение.
+    TraitFlea: Увеличивает потребность в $F на +1. Может быть несколько на одном $A.
+    TraitVomitus: $CDTurn. Когда $A атаковали, можно сбросить $F для защиты.
+    TraitMutation: В конце фазы вымирания $A получает из колоды первую карту. Если на ней есть подходящее свойство, то $A получает его.
+    TraitPerspicuus: Если на $A нет $F, оно не может быть атаковано хищником
+    TraitHumus: Можно заменить это свойство "Водоплавающим" при активации свойства $TraitAmphibious

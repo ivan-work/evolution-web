@@ -32,10 +32,12 @@ const propsToForm = (room) => ({
   , maxCards: room.settings.maxCards
   , maxCardsEnabled: room.settings.maxCards !== null
   , addon_base: true
+  , addon_base2: room.settings.addon_base2
   , addon_timeToFly: room.settings.addon_timeToFly
   , addon_continents: room.settings.addon_continents
   , addon_bonus: room.settings.addon_bonus
   , addon_plantarium: room.settings.addon_plantarium
+  , addon_customff: room.settings.addon_customff
   , _savedSettingsVersion: STORED_SETTINGS_VERSION
 });
 
@@ -109,10 +111,12 @@ export class RoomSettings extends React.Component {
         <hr/>
 
         <RoomAddonRow name='addon_base' disabled/>
+        <RoomAddonRow name='addon_base2'/>
         <RoomAddonRow name='addon_timeToFly'/>
         <RoomAddonRow name='addon_continents'/>
         <RoomAddonRow name='addon_bonus'/>
         <RoomAddonRow name='addon_plantarium'/>
+        <RoomAddonRow name='addon_customff'/>
 
         {/*<FormContext.Consumer>{({model}) => (<pre>{JSON.stringify(model, null, ' ')}</pre>)}</FormContext.Consumer>*/}
 

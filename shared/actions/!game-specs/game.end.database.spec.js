@@ -70,10 +70,12 @@ players:
         , timeAmbush: 10e3
         , randomPlayers: false
         , halfDeck: false
+        , addon_base2: false
         , addon_timeToFly: false
         , addon_continents: false
         , addon_bonus: false
         , addon_plantarium: false
+        , addon_customff: false
       }
       , status: {
         turn: 0

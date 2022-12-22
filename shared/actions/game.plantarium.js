@@ -37,11 +37,17 @@ import {logTarget} from "./log.util";
 import {getIntRandom} from "../utils/randomGenerator";
 import * as ptt from "../models/game/evolution/plantarium/plantTraitTypes";
 import {CardModel} from "../models/game/CardModel";
+import * as tt from "../models/game/evolution/traitTypes";
 
 // region game
 export const gameSpawnPlants = (gameId, plants) => ({
   type: 'gameSpawnPlants'
   , data: {gameId, plants}
+});
+
+export const gamePestPlants = (gameId, pestMap) => ({
+  type: 'gamePestPlants'
+  , data: {gameId, pestMap}
 });
 
 export const server$gameSpawnPlants = (gameId, count) => (dispatch, getState) => {
@@ -53,6 +59,20 @@ export const server$gameSpawnPlants = (gameId, count) => (dispatch, getState) =>
   }
   const plants = deck.take(count).map(PlantModel.new);
   dispatch(server$game(gameId, gameSpawnPlants(gameId, plants)));
+};
+
+export const server$gamePestPlants = (gameId) => (dispatch, getState) => {
+  const game = selectGame(getState, gameId);
+  const plantsList = game.plants.toList();
+  let pestMap = {}; // Plants affected by pests
+  game.someAnimal((animal) => {
+    if (animal.hasTrait(tt.TraitPest)) {
+      const plant = plantsList.get(getIntRandom(0, plantsList.size))
+      if (!pestMap[plant.id]) pestMap[plant.id] = 0
+      pestMap[plant.id] -= 1;
+    }
+  })
+  dispatch(server$game(gameId, gamePestPlants(gameId, pestMap)));
 };
 
 export const gameDeployPlant = (gameId, plant) => ({
@@ -190,6 +210,7 @@ export const plantsClientToServer = {
 
 export const plantsServerToClient = {
   gameSpawnPlants: ({gameId, plants}) => gameSpawnPlants(gameId, List(plants).map(PlantModel.fromJS))
+  , gamePestPlants: ({gameId, pestMap}) => gamePestPlants(gameId, pestMap)
   , gameDeployPlant: ({gameId, plant}) => gameDeployPlant(gameId, PlantModel.fromJS(plant))
   , gamePlantUpdateFood: ({gameId, plantId, amount}) => gamePlantUpdateFood(gameId, plantId, amount)
   , traitMoveCard: ({gameId, fromPid, toPid, card}) => traitMoveCard(gameId, fromPid, toPid, CardModel.fromServer(card))

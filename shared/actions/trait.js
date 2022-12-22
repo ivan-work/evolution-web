@@ -115,6 +115,16 @@ export const traitTakeCover = (gameId, animalId, plantId) => ({
   , data: {gameId, animalId, plantId}
 });
 
+export const gameUpdateFood = (gameId, amount) => ({
+  type: 'gameUpdateFood'
+  , data: {gameId, amount}
+});
+
+export const animalUpdateFood = (gameId, animalId, amount) => ({
+  type: 'animalUpdateFood'
+  , data: {gameId, animalId, amount}
+});
+
 // region Cooldowns
 // Transport action
 export const startCooldown = (gameId, link, duration, place, placeId) => ({
@@ -234,6 +244,14 @@ const traitAnimalAttachTrait = (gameId, sourcePid, sourceAid, trait) => ({
 
 export const server$traitAnimalAttachTrait = (game, animal, trait) =>
   server$game(game.id, traitAnimalAttachTrait(game.id, animal.ownerId, animal.id, trait));
+
+const traitAnimalReplaceTrait = (gameId, sourcePid, sourceAid, traitToReplaceId, trait) => ({
+  type: 'traitAnimalReplaceTrait'
+  , data: {gameId, sourcePid, sourceAid, traitToReplaceId, trait}
+});
+
+export const server$traitAnimalReplaceTrait = (game, animal, traitToReplaceId, trait) =>
+  server$game(game.id, traitAnimalReplaceTrait(game.id, animal.ownerId, animal.id, traitToReplaceId, trait));
 
 export const traitAnimalRemoveTrait = (gameId, sourcePid, sourceAid, traitId) => ({
   type: 'traitAnimalRemoveTrait'
@@ -687,6 +705,7 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
   dispatch(server$game(gameId, traitMoveFood(gameId, animalId, amount, sourceType, sourceId)));
 
   autoShare = !!autoShare || game.status.currentPlayer !== animal.ownerId;
+  logger.silly(`server$startFeeding/autoShare: ${autoShare} || ${game.status.currentPlayer !== animal.ownerId}`)
 
   animal.getTraits().forEach(trait => {
     game = selectGame(getState, gameId);
@@ -1196,6 +1215,8 @@ export const traitServerToClient = {
     traitAnimalRemoveTrait(gameId, sourcePid, sourceAid, traitId)
   , traitAnimalAttachTrait: ({gameId, sourcePid, sourceAid, trait}) =>
     traitAnimalAttachTrait(gameId, sourcePid, sourceAid, TraitModel.fromServer(trait))
+  , traitAnimalReplaceTrait: ({gameId, sourcePid, sourceAid, traitToReplaceId, trait}) =>
+    traitAnimalReplaceTrait(gameId, sourcePid, sourceAid, traitToReplaceId, TraitModel.fromServer(trait))
   , traitAnimalRecombinateTraits: ({gameId, player1id, player2id, animal1id, animal2id, trait1id, trait2id}) =>
     traitAnimalRecombinateTraits(gameId, player1id, player2id, animal1id, animal2id, trait1id, trait2id)
 
@@ -1222,6 +1243,8 @@ export const traitServerToClient = {
   , traitTakeShell: ({gameId, continentId, animalId, trait}) =>
     traitTakeShell(gameId, continentId, animalId, TraitModel.fromServer(trait))
   , traitTakeCover: ({gameId, animalId, plantId}) => traitTakeCover(gameId, animalId, plantId)
+  , animalUpdateFood: ({gameId, animalId, amount}) => animalUpdateFood(gameId, animalId, amount)
+  , gameUpdateFood: ({gameId, amount}) => gameUpdateFood(gameId, amount)
   , traitSetValue: ({gameId, sourceAid, traitId, value}) =>
     traitSetValue(gameId, sourceAid, traitId, value)
 };

@@ -122,7 +122,7 @@ players:
 phase: feeding
 food: 2
 players:
-  - continent: $A carn comm$B wait, $B carn comm$C comm$D, $C carn, $D carn wait
+  - continent: $A carn commu$B wait, $B carn commu$C commu$D, $C carn, $D carn wait
 `);
       const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
@@ -157,7 +157,7 @@ deck: 10 camo
 phase: feeding
 food: 1
 players:
-  - continent: $A piracy comm$A1 wait , $A1, $B hiber comm$B1, $B1, $C carn comm$C1, $C1 wait
+  - continent: $A piracy commu$A1 wait , $A1, $B hiber commu$B1, $B1, $C carn commu$C1, $C1 wait
   - continent: $X + carn
 `);
       const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
@@ -182,7 +182,7 @@ deck: 10 camo
 phase: feeding
 food: 0
 players:
-  - continent: $A carn mass piracy comm$B wait para, $B wait para
+  - continent: $A carn mass piracy commu$B wait para, $B wait para
   - continent: $X, $Y + mass
 `);
       const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
@@ -202,7 +202,7 @@ deck: 10 camo
 phase: feeding
 food: 0
 players:
-  - continent: $A carn mass piracy comm$B wait, $B wait
+  - continent: $A carn mass piracy commu$B wait, $B wait
   - continent: $X, $Y + mass
 `);
       const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
@@ -226,7 +226,7 @@ deck: 10 camo
 phase: feeding
 food: 5
 players:
-  - continent: $A mass comm$B wait +, $B wait mass piracy 
+  - continent: $A mass commu$B wait +, $B wait mass piracy 
   - continent: $X, $Y + mass
 `);
       const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
@@ -245,7 +245,7 @@ players:
 phase: feeding
 food: 10
 players:
-  - continent: $A comm$B symb$B wait, $B, $Waiter graz
+  - continent: $A commu$B symb$B wait, $B, $Waiter graz
 `);
       const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
@@ -261,7 +261,7 @@ players:
 phase: feeding
 food: 10
 players:
-  - continent: $A mass comm$B coop$B wait, $B mass wait
+  - continent: $A mass commu$B coop$B wait, $B mass wait
 `);
       const {selectGame, selectPlayer, findAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
       clientStore0.dispatch(traitTakeFoodRequest('$B'));
@@ -294,7 +294,7 @@ players:
 phase: feeding
 food: 10
 players:
-  - continent: $A comm$B, $B
+  - continent: $A commu$B, $B
   - continent: $C
 `);
       const {selectGame, selectPlayer, findAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
@@ -309,7 +309,7 @@ players:
 phase: feeding
 food: 10
 players:
-  - continent: $A comm$B wait, $B wait
+  - continent: $A commu$B wait, $B wait
   - continent: $C
 `);
       const {selectGame, selectPlayer, findAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
@@ -328,7 +328,7 @@ phase: feeding
 food: 1
 players:
   - continent: $A carn, $WaitTurn
-  - continent: $X carn comm$Y comm$Z, $Y, $Z
+  - continent: $X carn commu$Y commu$Z, $Y, $Z
 `);
       const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 
@@ -344,7 +344,7 @@ players:
       const gameId = ParseGame(`
 phase: feeding
 players:
-  - continent: $A +, $B carn comm$A comm$C, $C +
+  - continent: $A +, $B carn commu$A commu$C, $C +
 `);
       const {selectGame, selectPlayer, selectCard, selectAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
 

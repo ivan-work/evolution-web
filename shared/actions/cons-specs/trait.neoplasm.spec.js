@@ -132,7 +132,7 @@ players:
     const gameId = ParseGame(`
 phase: feeding
 players:
-  - continent: $A carn wait, $B comm$C neoplasm comm$D tail, $C, $D
+  - continent: $A carn wait, $B commu$C neoplasm commu$D tail, $C, $D
 `);
     const {findAnimal} = makeGameSelectors(serverStore.getState, gameId);
 

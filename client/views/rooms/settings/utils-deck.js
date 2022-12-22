@@ -9,12 +9,10 @@ import * as cards from "../../../../shared/models/game/evolution/cards";
 import {
   Deck_Base,
   Deck_Bonus,
-  Deck_ContinentsShort,
+  Deck_ContinentsShort, Deck_customff,
   Deck_Plantarium,
   Deck_TimeToFly
 } from "../../../../shared/models/game/GameSettings";
-
-const addonList = ['addon_timeToFly', 'addon_continents', 'addon_bonus', 'addon_plantarium'];
 
 const makeDeckHelp = (deck) => (
   <div>
@@ -34,6 +32,10 @@ export const decksHelper = {
   'addon_base': {
     cardCount: countDeckCards(Deck_Base)
     , help: makeDeckHelp(Deck_Base)
+  },
+  'addon_base2': {
+    cardCount: countDeckCards(Deck_Base)
+    , help: makeDeckHelp(Deck_Base)
   }
   , 'addon_timeToFly': {
     cardCount: countDeckCards(Deck_TimeToFly)
@@ -51,13 +53,22 @@ export const decksHelper = {
     cardCount: countDeckCards(Deck_Plantarium)
     , help: makeDeckHelp(Deck_Plantarium)
   }
+  , 'addon_customff': {
+    cardCount: countDeckCards(Deck_customff)
+    , help: makeDeckHelp(Deck_customff)
+  }
 };
 
 export const getCardsTotal = (model) => {
-  let total = addonList
+  console.log('getCardsTotal', model)
+  let total = Object.keys(decksHelper)
     .filter(addonName => model[addonName])
     .map(addonName => decksHelper[addonName].cardCount)
-    .reduce((result, addonCardCount) => result + addonCardCount, decksHelper.addon_base.cardCount);
+    .reduce((result, addonCardCount) => result + addonCardCount, 0);
+  // let total = addonList
+  //   .filter(addonName => model[addonName])
+  //   .map(addonName => decksHelper[addonName].cardCount)
+  //   .reduce((result, addonCardCount) => result + addonCardCount, decksHelper.addon_base.cardCount);
 
   if (model.halfDeck) {
     total *= .5;
@@ -66,7 +77,7 @@ export const getCardsTotal = (model) => {
   return total;
 };
 
-const fieldsToCheck = [...addonList, 'halfDeck'];
+const fieldsToCheck = [...Object.keys(decksHelper), 'halfDeck'];
 
 const modelEquality = ([m1], [m2]) => isEqual(pick(m1, fieldsToCheck), pick(m2, fieldsToCheck));
 
