@@ -355,7 +355,7 @@ export const server$gameEndTurn = (gameId, userId, debugSource) => (dispatch, ge
   if (isDefaultTurn) return;
   let game = selectGame(getState, gameId);
   const acted = selectGame(getState, gameId).getPlayer(userId).acted;
-  logger.debug(`game/server$gameEndTurn: ${userId} (${game.getPlayer(userId).acted})`);
+  logger.debug(`game/server$gameEndTurn: ${userId} acted(${game.getPlayer(userId).acted})`);
 
   dispatch(server$gameCancelTurnTimeout(gameId));
 

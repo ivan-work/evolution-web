@@ -145,30 +145,31 @@ export const getOptions = (game, playerId) => {
 export const searchPlayerOptions = (game, playerId, successFn) => {
   const allAnimals = game.players.reduce((result, player) => result.concat(player.continent.keySeq().toArray()), []);
   const allPlants = game.plants.keySeq().toArray();
-  logOptions && logger.debug(`endturn/options/search/${playerId}`);
+  logOptions && logger.debug(`endturn/options/search/${playerId}/`);
 
   const animalOption = game.getPlayer(playerId).someAnimal((animal) => {
-    logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/food/${getErrorOfAnimalEatingFromGame(game, animal)}`);
+    logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/`);
+    logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/food = ${getErrorOfAnimalEatingFromGame(game, animal)}`);
     if (!getErrorOfAnimalEatingFromGame(game, animal))
       return successFn(makeOption.traitTakeFoodRequest(animal.id));
 
     const plantResult = game.somePlant((plant) => {
-      logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/plant/${plant.id}`);
-      logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/plant/${plant.id}/food/${getErrorOfAnimalEatingFromPlant(game, animal, plant)}`);
+      logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/plant/${plant.id}/`);
+      logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/plant/${plant.id}/food = ${getErrorOfAnimalEatingFromPlant(game, animal, plant)}`);
       if (!getErrorOfAnimalEatingFromPlant(game, animal, plant)) {
         return successFn(makeOption.traitTakeFoodPlantRequest(animal.id, plant.id));
       }
 
-      logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/plant/${plant.id}/cover/${getErrorOfAnimalTakingCover(game, animal, plant)}`);
+      logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/plant/${plant.id}/cover = ${getErrorOfAnimalTakingCover(game, animal, plant)}`);
       if (!getErrorOfAnimalTakingCover(game, animal, plant)) {
         return successFn(makeOption.traitTakeCoverRequest(animal.id, plant.id));
       }
     });
 
-    logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/plantResult/${plantResult}`);
+    logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/plant = ${plantResult}`);
     if (plantResult) return plantResult;
 
-    logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/shell/${game.getArea().shells.size},${checkAnimalCanTakeShellFails(game, animal)}`);
+    logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/shell/${game.getArea().shells.size} = ${checkAnimalCanTakeShellFails(game, animal)}`);
     if (game.getArea().shells.size > 0 && !checkAnimalCanTakeShellFails(game, animal))
       return successFn(makeOption.traitTakeShellRequest(animal.id));
 

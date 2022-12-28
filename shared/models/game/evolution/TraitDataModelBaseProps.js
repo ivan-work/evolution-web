@@ -10,6 +10,7 @@ const TraitDataModelBaseProps = {
   , multiple: false // is allowed multiple traits with same type? (only for FatTissue)
   , transient: false // true - don't notify others about the trait activation and allow to activate it any time
   , hidden: false
+  , dropValue: false // drop value every turn
   , displayValue: false // allows display of trait's value to users
   , action: null // action function
   , getTargets: null // get list of available target for an active trait (game, sourceAnimal) => list of targets

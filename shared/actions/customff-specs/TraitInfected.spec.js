@@ -1,6 +1,6 @@
 import * as tt from "../../models/game/evolution/traitTypes";
 import {makeGameSelectors} from "../../selectors";
-import {traitActivateRequest} from "../trait";
+import {traitActivateRequest, traitAnswerRequest} from "../trait";
 import {gameEndTurnRequest} from "../game";
 
 describe(tt.TraitInfected, () => {
@@ -21,5 +21,20 @@ players:
     expect(findAnimal('$C').traits.filter((trait) => trait.type === tt.TraitFlea)).size(2);
     clientStore0.dispatch(traitActivateRequest('$C', tt.TraitCarnivorous, '$D'))
     expect(findAnimal('$C').traits.filter((trait) => trait.type === tt.TraitFlea)).size(3);
+  });
+
+  it('Works with intellect', () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+deck: 10 camo
+players:
+  - continent: $A TraitIntellect carn, $B TraitInfected, $W waiter
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$B'))
+    clientStore0.dispatch(traitAnswerRequest(tt.TraitIntellect, tt.TraitInfected))
+    expect(findAnimal('$A').traits.filter((trait) => trait.type === tt.TraitFlea)).size(0);
+    expect(findAnimal('$B')).null;
   });
 });

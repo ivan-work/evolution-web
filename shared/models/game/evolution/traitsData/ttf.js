@@ -200,6 +200,7 @@ export const TraitIntellect = {
   type: tt.TraitIntellect
   , targetType: TRAIT_TARGET_TYPE.TRAIT
   , food: 1
+  , dropValue: true
   , cooldowns: fromJS([
     [tt.TraitIntellect, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
   ])
