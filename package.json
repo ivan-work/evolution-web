@@ -63,7 +63,7 @@
     "i18n-react": "^0.6.4",
     "immutable": "^3.8.2",
     "invariant": "^2.2.4",
-    "jsonwebtoken": "^8.4.0",
+    "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.11",
     "memoize-one": "^5.1.1",
     "moment": "^2.23.0",
