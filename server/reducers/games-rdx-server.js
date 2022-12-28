@@ -286,7 +286,7 @@ export const gameStartTurn = (game) => {
       .update('continent', continent => continent.map(animal => animal
         .set('food', 0)
         .update('traits', traits => traits
-          .map(trait => trait.type === tt.TraitIntellect ? trait.set('value', false) : trait)
+          .map(trait => trait.getDataModel().dropValue ? trait.set('value', false) : trait)
           .map(trait => trait.set('disabled', false))
         )
         .update(animal => TraitNeoplasm.customFns.actionProcess(animal))
@@ -671,8 +671,16 @@ export const huntSetTarget = (game, {targetAid, targetPid}) => game
   .setIn(['hunts', 0, 'targetAid'], targetAid)
   .setIn(['hunts', 0, 'targetPid'], targetPid);
 
-export const allHuntsSetFlag = (game, {key, value}) => game
-  .update('hunts', hunts => hunts.map(hunt => hunt.update('flags', flags => flags.add(key))));
+export const allHuntsSetFlag = (game, {key, value}) => {
+  const currentHuntEntityId = game.hunts.first().attackEntityId;
+  return game
+    .update('hunts', hunts => hunts.map(hunt => hunt.update('flags', flags => {
+      if (hunt.attackEntityId === currentHuntEntityId) {
+        return flags.add(key)
+      }
+      return flags;
+    })));
+}
 
 export const huntSetFlag = (game, {key, value}) => game.updateIn(['hunts', 0, 'flags'], flags => flags.add(key));
 

@@ -51,11 +51,12 @@ export const getStaticDefenses = (game, sourceAnimal, targetAnimal) =>
 
 // [tt.TraitRunning, tt.TraitShell, tt.TraitInkCloud, tt.TraitCnidocytes, tt.TraitMimicry, tt.TraitTailLoss, tt.TraitPoisonous];
 
-export const getAffectiveDefenses = (game, sourceAnimal, targetAnimal) =>
-  targetAnimal.traits.filter((trait) =>
-    !trait.disabled && (
-      (trait.type === tt.TraitPoisonous)
-    )).toArray();
+export const getAffectiveDefenses = (game, sourceAnimal, targetAnimal) => {
+  return [
+    targetAnimal.hasTrait(tt.TraitPoisonous)
+    , targetAnimal.hasTrait(tt.TraitInfected)
+  ].filter(x => x);
+}
 
 export const getActiveDefenses = (game, attackEntity, attackTrait, targetAnimal, skipOptionalDefence) => {
   return targetAnimal.traits.filter((trait) => {

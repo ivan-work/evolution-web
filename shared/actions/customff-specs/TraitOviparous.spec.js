@@ -1,6 +1,7 @@
 import * as tt from "../../models/game/evolution/traitTypes";
 import {makeGameSelectors} from "../../selectors";
 import {traitActivateRequest} from "../trait";
+import {gameEndTurnRequest} from "../game";
 
 describe(tt.TraitOviparous, () => {
   it(`Works`, () => {
@@ -49,5 +50,21 @@ players:
     clientStore0.dispatch(traitActivateRequest('$A', tt.TraitPlantOviparous, '$per'))
     expect(selectGame().getFood()).equal(0)
     expect(findPlant('$per').getFood()).equal(4)
+  });
+
+  it(`Allows to skip turn`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+deck: 10 camo
+settings:
+  addon_plantarium: true
+plants: eph +
+players:
+  - continent: plantovi +
+`);
+    const {selectGame, findAnimal, findPlant} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(gameEndTurnRequest())
+    expect(selectGame().status.turn).equal(1)
   });
 });

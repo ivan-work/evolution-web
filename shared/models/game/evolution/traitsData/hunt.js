@@ -331,9 +331,60 @@ export const server$huntKill = (gameId) => (dispatch, getState) => {
   return dispatch(server$huntEnd(gameId));
 };
 
+export const server$setAttackTraitCooldown = (game, attackEntity, attackTrait) => (dispatch) => {
+  logger.verbose(`server$huntEnd/server$setAttackTraitCooldown(${attackEntity.id}): ${debugHunts(game)}`);
+  const traitAggression = attackEntity.hasTrait(tt.TraitAggression);
+  if (traitAggression && !game.cooldowns.checkFor(tt.TraitAggression, null, attackEntity.id, traitAggression.id)) {
+    dispatch(server$traitStartCooldown(game.id, traitAggression, attackEntity));
+  } else if (attackTrait) {
+    dispatch(server$traitStartCooldown(game.id, attackTrait, attackEntity));
+  }
+}
+
+const checkIsLastHunt = (game) => {
+  if (game.hunts.size < 2) {
+    return true;
+  }
+  const thisHunt = game.hunts.get(0);
+  const nextHunt = game.hunts.get(1);
+  return thisHunt.attackEntityId !== nextHunt.attackEntityId;
+}
+
+/*
+* Я сдаюсь. Я не знаю что происходит в этом методе. Если вам надо его исправить, то просто переставляйте строчки местами
+* и надейтесь на тесты
+* Сейчас действия и проверки перемешаны с Концом охоты посередине и логика примерно такая:
+*
+* Основная атака первая:
+* 1) Действия охоты 1
+* 2) Конец охоты 1
+* 2.1) Действия охоты 2
+* 2.2) Конец охоты 2
+* 2.3) Действия охоты 2
+* 3) Действия охоты 1
+*
+* Следует определиться, что делать в случае 2+ охот:
+*
+* Основная атака последняя, тогда
+* 1) Проверки охоты 1 (shouldFeedFromPlant, shouldDoX, ...)
+* 2) Конец охоты 1
+* 2.1) Проверки охоты 2
+* 2.2) Конец охоты 2
+* 2.3) Все действия охоты 2
+* 3) Все действия охоты 1
+*
+* ИЛИ
+*
+* Основная атака первая, тогда придется смотреть в будущее:
+* 1) Действия охоты 1 + проверки, если это последняя охота тем же существом.
+* 2) Конец охоты 1
+* 2.1) Действия охоты 2 + проверки, если это последняя охота тем же существом.
+* 2.2) Конец охоты 2
+* */
 export const server$huntEnd = (gameId) => (dispatch, getState) => {
   let game = selectGame(getState, gameId);
   const hunt = gameGetHunt(game);
+  const isLastHunt = checkIsLastHunt(game);
 
   const attackEntity = getHuntingEntity(game);
   const attackTrait = game.locateTrait(hunt.attackTraitId, hunt.attackEntityId);
@@ -352,15 +403,10 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
     const traitIntellect = attackEntity.hasTrait(tt.TraitIntellect) || attackEntity.hasTrait(ptt.PlantTraitHiddenIntellect);
     if (!!traitIntellect && traitIntellect.value === true) dispatch(server$traitSetValue(game, attackEntity, traitIntellect, false));
 
-    // #cooldown - TraitCarnivorous cooldown being set here
-    if (!huntGetFlag(game, HUNT_FLAG.TRAIT_INK_CLOUD)) {
-      const traitAggression = attackEntity.hasTrait(tt.TraitAggression)
-      if (traitAggression && !game.cooldowns.checkFor(tt.TraitAggression, null, attackEntity.id, traitAggression.id)) {
-        dispatch(server$traitStartCooldown(game.id, traitAggression, attackEntity));
-      } else {
-        const ensuredAttackTrait = TraitModel.new(hunt.attackTraitType).set('id', hunt.attackTraitId); // Attack trait could be undefined
-        dispatch(server$traitStartCooldown(game.id, ensuredAttackTrait, attackEntity));
-      }
+    // #cooldown - TraitCarnivorous cooldown being set here and at #INK CLOUD
+    if (!huntGetFlag(game, HUNT_FLAG.TRAIT_INK_CLOUD) && isLastHunt) {
+      const ensuredAttackTrait = TraitModel.new(hunt.attackTraitType).set('id', hunt.attackTraitId); // Attack trait could be undefined
+      dispatch(server$setAttackTraitCooldown(game, attackEntity, ensuredAttackTrait))
     }
     if (huntGetFlag(game, HUNT_FLAG.TRAIT_ANGLERFISH)) {
       const traitIntellect = attackEntity.hasTrait(tt.TraitIntellect, true);
@@ -424,14 +470,11 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
       dispatch(server$startFeedingFromGame(gameId, targetAnimal.id, 1, 'PLANT', attackEntity.id));
     }
 
+    // #cooldown #INK CLOUD
     // When attacker (now target) uses INK_CLOUD we make sure his trait still gets cooldown
-    if (huntGetFlag(game, HUNT_FLAG.TRAIT_ANGLERFISH)) {
-      const traitCarnivorousOfTarget = targetAnimal.hasTrait(tt.TraitCarnivorous, true);
-      if (traitCarnivorousOfTarget) {
-        logger.info('SET COOLDOWN', targetAnimal.toString(), traitCarnivorousOfTarget.toString())
-        dispatch(server$traitStartCooldown(gameId, traitCarnivorousOfTarget, targetAnimal));
-      }
-    }
+    // if (huntGetFlag(game, HUNT_FLAG.TRAIT_ANGLERFISH)) {
+    //   dispatch(server$setAttackTraitCooldown(game, targetAnimal, targetAnimal.hasTrait(tt.TraitCarnivorous, true)))
+    // }
   }
 
   dispatch(huntEnd(gameId));

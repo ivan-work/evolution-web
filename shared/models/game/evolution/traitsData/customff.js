@@ -142,7 +142,7 @@ export const TraitPlantOviparous = {
   , playerControllable: true
   , targetType: TRAIT_TARGET_TYPE.PLANT
   , cooldowns: fromJS([
-    [tt.TraitOviparous, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
+    [tt.TraitPlantOviparous, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , getErrorOfUseOnTarget: (game, animal, plant) => {
@@ -165,6 +165,7 @@ export const TraitParalysis = {
   , playerControllable: true
   , cardTargetType: CARD_TARGET_TYPE.ANIMAL_ENEMY
   , targetType: TRAIT_TARGET_TYPE.NONE
+  , dropValue: true
   , cooldowns: fromJS([
     [tt.TraitParalysis, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.TURN]
     , [TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_PLACE.PLAYER, TRAIT_COOLDOWN_DURATION.ROUND]
