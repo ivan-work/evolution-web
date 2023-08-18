@@ -4,7 +4,7 @@
 
 Игра скопирована с настольной игры "Эволюция: Происхождение Видов" http://rightgames.ru/games/evolyuciya
 
-Адрес оф. сервера: https://evo2.herokuapp.com
+Адрес оф. сервера: https://evolution-web.onrender.com
 
 Список изменений: https://github.com/ivan-work/evolution-web/blob/master/changelog.md
 
