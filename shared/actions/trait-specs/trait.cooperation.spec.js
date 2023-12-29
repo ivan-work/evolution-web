@@ -10,6 +10,7 @@ import * as tt from '../../models/game/evolution/traitTypes';
 
 import {makeGameSelectors} from '../../selectors';
 import {replaceGetRandom} from '../../utils/randomGenerator';
+import ERRORS from "../errors";
 
 describe('TraitCooperation:', () => {
   describe('Deploy:', () => {
@@ -70,7 +71,11 @@ players:
     });
 
     it('fail friend0 > enemy0, fail friend0 > friend0, fail enemy0 > enemy0', () => {
-      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {
+        clientStore1,
+        User1,
+        ClientGame1
+      }] = mockGame(2);
       const gameId = ParseGame(`
 phase: deploy
 players:
@@ -272,6 +277,23 @@ players:
       expect(findAnimal('$A').getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(1);
       expect(findAnimal('$B').getFoodAndFat(), 'Animal#1.getFoodAndFat()').equal(1);
     });
+
+    it(`Can't destroy food`, () => {
+      const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
+      const gameId = ParseGame(`
+phase: feeding
+food: 3
+players:
+  - continent: $A mass photo +, $B pir coop$C, $C, $W wait
+`);
+      const {selectGame, selectPlayer, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+      clientStore0.dispatch(traitTakeFoodRequest('$C'));
+      expectError(`Can't take more food due to autosharing`, ERRORS.ANIMAL_DONT_WANT_FOOD, () =>
+        clientStore0.dispatch(traitActivateRequest('$B', tt.TraitPiracy, '$A'))
+      );
+      expect(selectGame().food).equal(1);
+      expect(findAnimal('$A').getFoodAndFat(), 'Animal#0.getFoodAndFat()').equal(1);
+    })
   });
 
   describe('Death:', () => {

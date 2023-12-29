@@ -30,6 +30,7 @@ export const SettingsRules = {
   , addon_bonus: `boolean`
   , addon_plantarium: `boolean`
   , addon_customff: `boolean`
+  , addon_lifecycle: `boolean`
 };
 
 export class SettingsRecord extends Record({
@@ -46,6 +47,7 @@ export class SettingsRecord extends Record({
   , addon_bonus: false
   , addon_plantarium: false
   , addon_customff: false
+  , addon_lifecycle: false
   , seed: null
 }) {
   static fromJS(js) {
@@ -247,4 +249,11 @@ export const Deck_customff = [
   , [2, cardsData.CardPestAndParalysis.type]
   , [2, cardsData.CardPestAndCarnivorous.type]
   , [2, cardsData.CardFleaAndCommunication.type]
+]
+
+export const Deck_lifecycle = [
+  [4, cardsData.CardSpores.type]
+  , [4, cardsData.CardCystInitialAndCarnivorous.type]
+  , [4, cardsData.CardStressfulAndSwimming.type]
+  , [4, cardsData.CardMammalAndFatTissue.type]
 ]

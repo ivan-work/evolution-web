@@ -71,6 +71,7 @@ export const getActiveDefenses = (game, attackEntity, attackTrait, targetAnimal,
       || (trait.type === tt.TraitMimicry && !trait.getErrorOfUse(game, targetAnimal, attackEntity, attackTrait))
       || (trait.type === tt.TraitTailLoss && !trait.getErrorOfUse(game, targetAnimal, attackEntity, attackTrait))
       || (trait.type === tt.TraitVomitus && !trait.getErrorOfUse(game, targetAnimal, attackEntity, attackTrait))
+      || (trait.type === tt.TraitStressful && !trait.getErrorOfUse(game, targetAnimal, attackEntity, attackTrait))
     );
   }).toArray();
 };

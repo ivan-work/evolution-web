@@ -64,16 +64,22 @@ export const gameGiveCards = (game, {userId, cards}) => {
     .update(addToGameLog(['gameGiveCards', userId, cards.size]));
 };
 
-const gameDeployAnimal = (animal, card, position) => (game) => {
+const gameDeployAnimalAt = (animal, position) => (game) => {
   return game
     .updateIn(['players', animal.ownerId, 'continent'], continent => OrderedMap(continent.entrySeq().splice(position, 0, [animal.id, animal])));
 };
 
+export const gameDeployAnimal = (game, {animal}) => {
+  const animalIndex = game.getPlayer(animal.ownerId).continent.size;
+  return game
+    .update(gameDeployAnimalAt(animal, animalIndex))
+};
+
 export const gameDeployAnimalFromHand = (game, {userId, animal, animalPosition, cardId}) => {
-  const {card, cardIndex} = game.locateCard(cardId, userId);
+  const {cardIndex} = game.locateCard(cardId, userId);
   return game
     .removeIn(['players', userId, 'hand', cardIndex])
-    .update(gameDeployAnimal(animal, card, animalPosition))
+    .update(gameDeployAnimalAt(animal, animalPosition))
     .update(addToGameLog(['gameDeployAnimal', userId]));
 };
 
@@ -83,7 +89,7 @@ export const gameDeployAnimalFromDeck = (game, {animal, sourceAid}) => {
   const card = game.getIn(['deck', 0]);
   return game
     .update(gameRemoveFirstCardFromDeck)
-    .update(gameDeployAnimal(animal, card, animalIndex + 1))
+    .update(gameDeployAnimalAt(animal, animalIndex + 1))
     .update(addToGameLog(['traitGiveBirth', logAnimal(parent)]));
 };
 
@@ -764,6 +770,7 @@ export const reducer = createReducer(Map(), {
   , gameAddTurnTimeout: (state, data) => state.update(data.gameId, game => gameAddTurnTimeout(game, data))
   , gameDeployAnimalFromHand: (state, data) => state.update(data.gameId, game => gameDeployAnimalFromHand(game, data))
   , gameDeployAnimalFromDeck: (state, data) => state.update(data.gameId, game => gameDeployAnimalFromDeck(game, data))
+  , gameDeployAnimal: (state, data) => state.update(data.gameId, game => gameDeployAnimal(game, data))
   , gameDeployTrait: (state, data) => state.update(data.gameId, game => gameDeployTrait(game, data))
   , gameDeployRegeneratedAnimal: (state, data) => state.update(data.gameId, game =>
     gameDeployRegeneratedAnimal(game, data))

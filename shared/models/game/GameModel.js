@@ -12,7 +12,9 @@ import {
   , Deck_ContinentsShort
   , Deck_Bonus
   , Deck_Plantarium
-  , PlantDeck_Plantarium, Deck_customff
+  , PlantDeck_Plantarium
+  , Deck_customff
+  , Deck_lifecycle
 } from './GameSettings';
 
 import uuid from 'uuid';
@@ -285,6 +287,7 @@ export class GameModel extends Record({
     if (room.settings.addon_plantarium) deckConfig = deckConfig.concat(Deck_Plantarium);
     if (room.settings.addon_plantarium) deckPlantsConfig = deckPlantsConfig.concat(PlantDeck_Plantarium);
     if (room.settings.addon_customff) deckConfig = deckConfig.concat(Deck_customff);
+    if (room.settings.addon_lifecycle) deckConfig = deckConfig.concat(Deck_lifecycle);
 
     if (room.settings.halfDeck) deckConfig = deckConfig.map(([count, type]) => [Math.ceil(count / 2), type]);
 
@@ -392,6 +395,7 @@ export class GameModel extends Record({
         , addon_bonus: game.settings.addon_bonus
         , addon_plantarium: game.settings.addon_plantarium
         , addon_customff: game.settings.addon_customff
+        , addon_lifecycle: game.settings.addon_lifecycle
       }
       , status: {
         turn: game.status.turn

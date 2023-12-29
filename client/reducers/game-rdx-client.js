@@ -8,6 +8,7 @@ import {
   , gameAddTurnTimeout
   , gameDeployAnimalFromHand
   , gameDeployAnimalFromDeck
+  , gameDeployAnimal
   , gameDeployTrait
   , gameDeployRegeneratedAnimal
   , gameEndTurn
@@ -68,6 +69,7 @@ export const reducer = createReducer(null, {
   , gameAddTurnTimeout
   , gameDeployAnimalFromHand
   , gameDeployAnimalFromDeck
+  , gameDeployAnimal
   , gameDeployTrait
   , gameDeployRegeneratedAnimal
   , gameEndTurn

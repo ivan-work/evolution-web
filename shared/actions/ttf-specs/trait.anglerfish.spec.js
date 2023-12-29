@@ -1,21 +1,19 @@
 import {
-  gameEndTurnRequest
-  , traitTakeFoodRequest
-  , traitActivateRequest
-  , traitAnswerRequest
-  , gameDeployAnimalRequest
-  , gameDeployTraitRequest
-  , makeTurnTimeoutId
+  gameDeployAnimalRequest,
+  gameDeployTraitRequest,
+  gameEndTurnRequest,
+  makeTurnTimeoutId,
+  traitActivateRequest,
+  traitAnswerRequest,
+  traitTakeFoodRequest
 } from '../actions';
 
-import {QuestionRecord, PHASE} from '../../models/game/GameModel';
+import {QuestionRecord} from '../../models/game/GameModel';
 import * as tt from '../../models/game/evolution/traitTypes';
 import {testShiftTime} from '../../utils/reduxTimeout'
-import {replaceGetRandom} from '../../utils/randomGenerator';
 
-import {makeGameSelectors, makeClientGameSelectors, selectGame} from '../../selectors';
+import {makeClientGameSelectors, makeGameSelectors} from '../../selectors';
 import ERRORS from "../errors";
-import {TRAIT_COOLDOWN_LINK} from "../../models/game/evolution/constants";
 
 describe('TraitAnglerfish:', () => {
   it('Deploy', () => {
@@ -50,7 +48,7 @@ players:
 `);
     const {selectGame, selectPlayer, selectCard, selectAnimal} = makeGameSelectors(serverStore.getState, gameId);
 
-    expectUnchanged('Cannot deploy as a trait', () => {
+    expectError(`Cannot deploy as a trait`, ERRORS.TRAIT_PLACEMENT_HIDDEN, () => {
       clientStore0.dispatch(gameDeployTraitRequest(selectCard(User0, 0).id, '$A'));
     }, serverStore, clientStore0)
   });

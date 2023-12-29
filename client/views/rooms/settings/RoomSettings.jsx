@@ -38,6 +38,7 @@ const propsToForm = (room) => ({
   , addon_bonus: room.settings.addon_bonus
   , addon_plantarium: room.settings.addon_plantarium
   , addon_customff: room.settings.addon_customff
+  , addon_lifecycle: room.settings.addon_lifecycle
   , _savedSettingsVersion: STORED_SETTINGS_VERSION
 });
 
@@ -117,6 +118,7 @@ export class RoomSettings extends React.Component {
         <RoomAddonRow name='addon_bonus'/>
         <RoomAddonRow name='addon_plantarium'/>
         <RoomAddonRow name='addon_customff'/>
+        <RoomAddonRow name='addon_lifecycle'/>
 
         {/*<FormContext.Consumer>{({model}) => (<pre>{JSON.stringify(model, null, ' ')}</pre>)}</FormContext.Consumer>*/}
 

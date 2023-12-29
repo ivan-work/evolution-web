@@ -8,6 +8,7 @@ import {AnimalModel} from "./AnimalModel";
 
 const TraitDataModelProps = {
   ...TraitDataModelBaseProps
+  , autoAttach: false
   , defense: false
   , food: 0 // Amount of food required
   , score: 1 // Base score for trait. TODO rewrite every trait to use score only
@@ -25,6 +26,7 @@ const TraitDataModelProps = {
  * @property {boolean} multiple: false - is allowed multiple traits with same type? (only for FatTissue)
  * @property {boolean} transient: false - for ambush / anglerfish
  * @property {boolean} hidden: false - for anglerfish
+ * @property {boolean} autoAttach: false - auto attach when deploying as animal
  * @property {function} action: null // action function
  * (game, sourceAnimal, trait:TraitModel, targetAnimal/targetTrait/none, attackTrait/none, attackAnimal/none) => should return (dispatch, getState)
  * @property {function} getTargets: null // get list of available target for an active trait (game, sourceAnimal) => list of targets

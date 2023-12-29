@@ -9,7 +9,9 @@ import * as cards from "../../../../shared/models/game/evolution/cards";
 import {
   Deck_Base,
   Deck_Bonus,
-  Deck_ContinentsShort, Deck_customff,
+  Deck_ContinentsShort
+  , Deck_customff
+  , Deck_lifecycle,
   Deck_Plantarium,
   Deck_TimeToFly
 } from "../../../../shared/models/game/GameSettings";
@@ -57,18 +59,17 @@ export const decksHelper = {
     cardCount: countDeckCards(Deck_customff)
     , help: makeDeckHelp(Deck_customff)
   }
+  , 'addon_lifecycle': {
+    cardCount: countDeckCards(Deck_lifecycle)
+    , help: makeDeckHelp(Deck_lifecycle)
+  }
 };
 
 export const getCardsTotal = (model) => {
-  console.log('getCardsTotal', model)
   let total = Object.keys(decksHelper)
     .filter(addonName => model[addonName])
     .map(addonName => decksHelper[addonName].cardCount)
     .reduce((result, addonCardCount) => result + addonCardCount, 0);
-  // let total = addonList
-  //   .filter(addonName => model[addonName])
-  //   .map(addonName => decksHelper[addonName].cardCount)
-  //   .reduce((result, addonCardCount) => result + addonCardCount, decksHelper.addon_base.cardCount);
 
   if (model.halfDeck) {
     total *= .5;

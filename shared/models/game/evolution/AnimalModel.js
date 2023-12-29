@@ -1,6 +1,6 @@
 import {Record, List, Map, OrderedMap, Seq} from 'immutable';
 import uuid from 'uuid';
-import {TraitModel} from './TraitModel';
+import {getTraitDataModel, TraitModel} from './TraitModel';
 
 import {
   TraitFatTissue,
@@ -30,13 +30,15 @@ export class AnimalModel extends Record({
   , traits: OrderedMap()
   , flags: Map()
 }) {
-  static new(ownerId, trait) {
+  static new(ownerId, traitType) {
     let animal = new AnimalModel({
       id: uuid.v4()
       , ownerId
     });
-    return trait !== TraitAnglerfish ? animal
-      : animal.traitAttach(TraitModel.new(TraitAnglerfish));
+    if (getTraitDataModel(traitType)?.autoAttach) {
+      animal = animal.traitAttach(TraitModel.new(traitType))
+    }
+    return animal
   }
 
   static fromServer(js) {
