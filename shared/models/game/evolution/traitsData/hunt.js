@@ -186,20 +186,27 @@ export const server$huntProcess = (gameId) => (dispatch, getState) => {
     dispatch(huntSetFlag(gameId, HUNT_FLAG.TRAIT_SHY));
   }
 
-  const staticDefenses = getStaticDefenses(game, attackEntity, targetAnimal);
-
   const traitIntellect = (
     attackEntity.hasTrait(tt.TraitIntellect)
     || (huntGetFlag(game, HUNT_FLAG.PLANT_COUNTERATTACK) && attackEntity.hasTrait(ptt.PlantTraitHiddenIntellect))
   );
   let disabledTraitId = !!traitIntellect && traitIntellect.value;
   let canUseIntellect = !!traitIntellect && disabledTraitId !== true && !traitIntellect.getErrorOfUse(game, attackEntity);
+
+  const staticDefenses = getStaticDefenses(game, attackEntity, targetAnimal)
+    .filter((defenseTrait) => !defenseTrait.isEqual(disabledTraitId));
+  logger.debug(`server$huntProcess/${attackEntity.id}/getStaticDefenses/${staticDefenses.length}`);
+
   if (canUseIntellect && staticDefenses.length === 1) {
     dispatch(server$traitActivate(game.id, attackEntity.id, traitIntellect, staticDefenses[0].id));
     dispatch(server$huntProcess(gameId));
     return;
   }
-  logger.debug(`server$huntProcess/${attackEntity.id}/Intellect/Status/ ${canUseIntellect}, ${disabledTraitId}`);
+  logger.debug(`server$huntProcess/${attackEntity.id}/Intellect/Status/: canUseIntellect:${canUseIntellect}, disabledTraitId:${disabledTraitId}`);
+
+  if (staticDefenses.length) {
+    return dispatch(server$huntEnd(game.id));
+  }
 
   let possibleDefenseTargets = 0;
   const skipOptionalDefence = huntGetFlag(game, HUNT_FLAG.OPTIONAL_DEFENCE_OFF);
@@ -236,16 +243,6 @@ export const server$huntProcess = (gameId) => (dispatch, getState) => {
         logger.debug(`server$huntProcess/${attackEntity.id}/Intellect/PlantCounterattackDefense/ ${targetId}`);
         dispatch(server$traitActivate(game.id, attackEntity.id, traitIntellect, targetId));
         dispatch(server$huntProcess(gameId));
-        // const players = game.getActualPlayers().toIndexedSeq();
-        // const targetPlayerIndex = players.findIndex(p => p.id === targetAnimal.ownerId);
-        // const previousPlayer = players.get(targetPlayerIndex - 1).id;
-        // const question = QuestionRecord.new(QuestionRecord.INTELLECT
-        //   , previousPlayer.id
-        //   , attackEntity
-        //   , attackTrait.id
-        //   , targetAnimal
-        // );
-        // server$traitQuestion(gameId, question);
       }
       return false;
     }
@@ -302,7 +299,12 @@ export const server$huntKill_Animal = (gameId) => (dispatch, getState) => {
 
   const traitInfected = targetAnimal.hasTrait(tt.TraitInfected);
   if (traitInfected && !traitInfected.isEqual(disabledTraitId) && !traitInfected.getErrorOfUse(game, attackAnimal)) {
-    dispatch(traitInfected.getDataModel().customFns.infect(game, targetAnimal, traitInfected, attackAnimal));
+    dispatch(traitInfected.getDataModel().customFns.onKill(game, targetAnimal, traitInfected, attackAnimal));
+  }
+
+  const traitCyst = targetAnimal.hasTrait(tt.TraitCyst) || targetAnimal.hasTrait(tt.TraitCystInitial)
+  if (traitCyst && !traitCyst.isEqual(disabledTraitId) && !traitCyst.getErrorOfUse(game, attackAnimal)) {
+    dispatch(traitCyst.getDataModel().customFns.onKill(game, targetAnimal, traitCyst, attackAnimal));
   }
 
   dispatch(huntSetFlag(gameId, HUNT_FLAG.FEED_FROM_KILL));

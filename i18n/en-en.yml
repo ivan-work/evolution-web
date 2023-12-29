@@ -61,6 +61,7 @@ App:
       addon_bonus: Bonus cards
       addon_plantarium: Plantarium
       addon_customff: Fan expansion
+      addon_lifecycle: Lifecycle
     Players: Players
     Spectators: Spectators
     Banned: Banned

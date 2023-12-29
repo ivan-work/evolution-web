@@ -10,10 +10,15 @@ import {testShiftTime} from '../../utils/reduxTimeout'
 import {PHASE} from '../../models/game/GameModel';
 
 import {makeGameSelectors} from '../../selectors';
+import * as tt from "../../models/game/evolution/traitTypes";
 
 describe('TraitTailLoss:', () => {
   it('Simple tail loss', () => {
-    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {clientStore1, User1, ClientGame1}] = mockGame(2);
+    const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}, {
+      clientStore1,
+      User1,
+      ClientGame1
+    }] = mockGame(2);
     const gameId = ParseGame(`
 phase: feeding
 food: 10
@@ -65,7 +70,13 @@ players:
 settings:
   timeTraitResponse: 5
 `);
-    const {selectGame, selectPlayer, selectCard, findAnimal, selectTrait} = makeGameSelectors(serverStore.getState, gameId);
+    const {
+      selectGame,
+      selectPlayer,
+      selectCard,
+      findAnimal,
+      selectTrait
+    } = makeGameSelectors(serverStore.getState, gameId);
     expect(selectTrait(User0, 3, 0).type).equal('TraitTailLoss');
     expect(selectTrait(User0, 3, 1).type).equal('TraitSymbiosis');
     expect(selectTrait(User0, 3, 2).type).equal('TraitCommunication');
@@ -103,4 +114,26 @@ settings:
     expect(findAnimal('$Z').traits, '$X traits').size(0);
     expect(selectTrait(User0, 3, 0).type).equal('TraitTailLoss');
   });
+
+  it(`Can't use on anglerfish`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A tail angler mimi, $B carn, $W wait
+`);
+
+    const {
+      selectGame,
+      selectPlayer,
+      selectCard,
+      findAnimal,
+      selectTrait
+    } = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitActivateRequest('$B', tt.TraitCarnivorous, '$A'));
+
+    expectError(`Can't drop anglerfish`, `error`, () =>
+        clientStore0.dispatch(traitAnswerRequest(tt.TraitTailLoss, tt.TraitAnglerfish))
+      , serverStore, clientStore0);
+  })
 });

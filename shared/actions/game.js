@@ -251,6 +251,26 @@ export const server$gameDeployAnimalFromDeck = (gameId, sourceAnimal, onCreateCa
     , {meta: {clientOnly: true, users: selectUsersInGame(getState, gameId).filter(uid => uid !== userId)}}
   ));
 };
+
+// For cyst
+const gameDeployAnimal = (gameId, userId, animal) => ({
+  type: 'gameDeployAnimal'
+  , data: {gameId, userId, animal}
+});
+
+export const server$gameDeployAnimal = (gameId, userId, onCreateCallback) => (dispatch, getState) => {
+  let animal = AnimalModel.new(userId);
+  if (onCreateCallback) animal = onCreateCallback(animal);
+  dispatch(gameDeployAnimal(gameId, userId, animal));
+  dispatch(Object.assign(
+    gameDeployAnimal(gameId, userId, animal.toClient())
+    , {meta: {clientOnly: true, userId}}
+  ));
+  dispatch(Object.assign(
+    gameDeployAnimal(gameId, userId, animal.toOthers().toClient())
+    , {meta: {clientOnly: true, users: selectUsersInGame(getState, gameId).filter(uid => uid !== userId)}}
+  ));
+};
 // endregion
 
 // region gameDeployTrait
@@ -559,6 +579,17 @@ export const server$animalDeath = (gameId, type, animalId, data) => (dispatch, g
     })
     .map(viviAnimal => viviAnimal.id);
 
+  const cystUserIds = animal.getTraits()
+    .filter(trait => trait.type === tt.TraitCyst)
+    .map(trait => trait.ownerId)
+
+  const sporeUserIds = (animal.hasTrait(tt.TraitSpores) ? animal.getTraits() : [])
+    .filter(trait => !trait.linkId)
+    .map(trait => {
+      logger.debug(`server$animalDeath: ${tt.TraitSpores} converting ${trait.hostAnimalId}.${trait.type} to a new animal`)
+      return trait.ownerId
+    })
+
   dispatch(server$game(gameId, animalDeath(gameId, type, animalId, data)));
 
   const updatedGame = selectGame(getState, gameId);
@@ -566,6 +597,17 @@ export const server$animalDeath = (gameId, type, animalId, data) => (dispatch, g
     .forEach(viviAnimalId => {
       dispatch(server$activateViviparous(updatedGame.id, viviAnimalId));
     });
+
+  if (type === ANIMAL_DEATH_REASON.STARVE) {
+    cystUserIds.forEach(userId => {
+      dispatch(server$gameDeployAnimal(gameId, userId, (animal) => animal.traitAttach(TraitModel.new(tt.TraitCystInitial))))
+    })
+    if (updatedGame.deck.size > 0) {
+      sporeUserIds.forEach(userId => {
+        dispatch(server$gameDeployAnimal(gameId, userId, (animal) => animal.setIn(['flags', TRAIT_ANIMAL_FLAG.NO_CARD], true)))
+      })
+    }
+  }
 };
 
 const server$gameExtinct = (gameId) => (dispatch, getState) => {
@@ -667,7 +709,11 @@ const server$gameDistributeCards = (gameId) => (dispatch, getState) => {
       playersWantedCards[player.id] = game.getStartingHandCount();
     } else {
       player.someAnimal((animal) => {
-        if (!animal.hasTrait(tt.TraitRstrategy) && !animal.flags.has(TRAIT_ANIMAL_FLAG.REGENERATION)) {
+        if (
+          !animal.hasTrait(tt.TraitRstrategy)
+          && !animal.flags.has(TRAIT_ANIMAL_FLAG.REGENERATION)
+          && !animal.flags.has(TRAIT_ANIMAL_FLAG.NO_CARD)
+        ) {
           playersWantedCards[player.id] += 1;
         }
       });
@@ -939,6 +985,8 @@ export const gameServerToClient = {
     gameDeployAnimalFromHand(gameId, userId, AnimalModel.fromServer(animal), animalPosition, cardId)
   , gameDeployAnimalFromDeck: ({gameId, animal, sourceAid}) =>
     gameDeployAnimalFromDeck(gameId, AnimalModel.fromServer(animal), sourceAid)
+  , gameDeployAnimal: ({gameId, userId, animal}) =>
+    gameDeployAnimal(gameId, userId, AnimalModel.fromServer(animal))
   , gameRemoveFirstCardFromDeck: ({gameId}) => gameRemoveFirstCardFromDeck(gameId)
   , gameDeployTrait: ({gameId, cardId, traits}) =>
     gameDeployTrait(gameId, cardId, traits.map(trait => TraitModel.fromServer(trait)))

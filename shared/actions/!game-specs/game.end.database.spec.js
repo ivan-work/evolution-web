@@ -76,6 +76,7 @@ players:
         , addon_bonus: false
         , addon_plantarium: false
         , addon_customff: false
+        , addon_lifecycle: false
       }
       , status: {
         turn: 0

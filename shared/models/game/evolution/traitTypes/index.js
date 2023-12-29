@@ -64,3 +64,9 @@ export const TraitParalysis = 'TraitParalysis';
 export const TraitPest = 'TraitPest';
 export const TraitFlea = 'TraitFlea';
 export const TraitHumus = 'TraitHumus';
+
+export const TraitSpores = 'TraitSpores';
+export const TraitCystInitial = 'TraitCystInitial';
+export const TraitCyst = 'TraitCyst';
+export const TraitStressful = 'TraitStressful';
+export const TraitMammal = 'TraitMammal';

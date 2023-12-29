@@ -38,6 +38,7 @@ export * from './ttf';
 export * from './cons';
 export * from './bonus';
 export * from './customff';
+export * from './lifecycle';
 
 export const TraitWaiter = {
   type: tt.TraitWaiter
@@ -184,6 +185,7 @@ export const TraitTailLoss = {
   ])
   , getErrorOfUseOnTarget: (game, sourceAnimal, targetTrait) => {
     if (targetTrait.type === tt.TraitTrematode) return ERRORS.TRAIT_TYPE_DENIED;
+    if (targetTrait.type === tt.TraitAnglerfish) return ERRORS.TRAIT_TYPE_DENIED;
   }
   , getTargets: (game, defenseAnimal, defenseTrait, attackAnimal, attackTrait) => defenseAnimal.getTraits()
     .toList()

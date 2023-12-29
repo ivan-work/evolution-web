@@ -709,7 +709,10 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
 
   animal.getTraits().forEach(trait => {
     game = selectGame(getState, gameId);
-    let useTrait = (trait.type === tt.TraitCommunication || (sourceType === 'GAME' && trait.type === tt.TraitCooperation));
+    let useTrait = (
+      trait.type === tt.TraitCommunication
+      || (sourceType === 'GAME' && trait.type === tt.TraitCooperation)
+    );
     if (trait.type === tt.TraitCooperation && sourceType === 'PLANT') {
       const plant = game.getPlant(sourceId);
       useTrait = !getErrorOfAnimalEatingFromPlantNoCD(game, animal, plant);
@@ -735,6 +738,14 @@ export const server$startFeeding = (gameId, animalId, amount, sourceType, source
   const animalIsSaturated = !!animal && animal.isSaturated();
   if (!animalWasSaturated && animalIsSaturated) {
     dispatch(server$activateViviparous(gameId, animalId));
+  }
+
+  const traitMammal = animal.hasTrait(tt.TraitMammal)
+  if (traitMammal) {
+    const targetAnimal = traitMammal.getDataModel().getTargets(game, animal, traitMammal)
+    if (targetAnimal) {
+      dispatch(server$startFeeding(gameId, targetAnimal.id, 1, tt.TraitMammal, animal.id))
+    }
   }
 
   return true;
@@ -1143,14 +1154,21 @@ export const traitClientToServer = {
     checkGameDefined(game);
     checkGameHasUser(game, userId);
     checkGamePhase(game, PHASE.FEEDING);
-    const sourceAnimal = getOrThrowPlayerAnimal(game, userId, sourceAid);
+    let sourceAnimal = getOrThrowPlayerAnimal(game, userId, sourceAid);
 
     const trait = getOrThrowAnimalTrait(gameId, sourceAnimal, traitId);
     //@TODO Communication // trait type checking here smells =\
     if (trait.type !== tt.TraitCommunication && trait.type !== tt.TraitCooperation) {
-      if (!dispatch(server$autoFoodSharing(gameId, userId))) return;
+      const autoFoodSharingResult = dispatch(server$autoFoodSharing(gameId, userId));
+      if (autoFoodSharingResult) {
+        logger.debug(`server$autoFoodSharing/continue`);
+      } else {
+        logger.debug(`server$autoFoodSharing/abort`);
+        return;
+      }
     }
     game = selectGame(getState, gameId);
+    sourceAnimal = getOrThrowPlayerAnimal(game, userId, sourceAid);
     throwError(trait.getErrorOfUse(game, sourceAnimal, ...targets));
 
     const target = checkTraitActivation_Target(game, sourceAnimal, trait, ...targets);

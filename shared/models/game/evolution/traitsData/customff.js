@@ -30,7 +30,7 @@ export const TraitInfected = {
     return false
   }
   , customFns: {
-    infect: (game, sourceAnimal, traitCnidocytes, targetAnimal) => dispatch => {
+    onKill: (game, sourceAnimal, traitCnidocytes, targetAnimal) => dispatch => {
       dispatch(server$traitAnimalAttachTrait(game, targetAnimal, TraitModel.new(tt.TraitFlea)));
     }
   }

@@ -246,6 +246,7 @@ export const TraitAnglerfish = {
   , playerControllable: true
   , transient: true
   , hidden: true
+  , autoAttach: true
   , score: 0
   , displayValue: true
   , _getErrorOfUse: (game, animal) => {

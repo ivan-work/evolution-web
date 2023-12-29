@@ -58,6 +58,7 @@ export const TRAIT_ANIMAL_FLAG = {
   , PARALYSED: 'PARALYSED'
   , SHY: 'SHY'
   , IN_COVER: 'IN_COVER'
+  , NO_CARD: 'NO_CARD'
 };
 
 export const ANIMAL_DEATH_REASON = {

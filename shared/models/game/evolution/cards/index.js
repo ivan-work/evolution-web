@@ -8,6 +8,7 @@ export * from './cons';
 export * from './bonus';
 export * from './plantarium';
 export * from './customff';
+export * from './lifecycle';
 
 export const CardUnknown = {
   type: 'CardUnknown'
