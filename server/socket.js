@@ -26,7 +26,7 @@ export const socketStore = (serverSocket, store) => {
         const meta = {connectionId: socket.id}
         if (!~UNPROTECTED.indexOf(action.type)) {
           try {
-            const decodedUser = jwt.decode(action.meta.token, process.env.JWT_SECRET);
+            const decodedUser = jwt.verify(action.meta.token, process.env.JWT_SECRET);
             if (!decodedUser.id) throw new Error(action.meta.token);
             meta.userId = decodedUser.id;
           } catch (err) {
