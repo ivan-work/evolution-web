@@ -465,6 +465,7 @@ export const roomsClientToServer = {
     checkUserIsHost(room, userId);
     if (settings.name) settings.name = settings.name.trim();
     checkValidate(settings, SettingsRules);
+    if (!process.env.SEEDS_ENABLED && settings.seed) throw new ActionCheckError('CheckIfSeedsEnabled', 'SEEDS_ENABLED is false', room.id, userId);
     settings.timeTurn *= 1e3;
     settings.timeTraitResponse *= 1e3;
     dispatch(server$roomEditSettings(roomId, settings));
@@ -473,6 +474,7 @@ export const roomsClientToServer = {
     const room = checkSelectRoom(getState, roomId);
     checkRoomIsNotInGame(room);
     checkUserIsHost(room, userId);
+    if (!process.env.SEEDS_ENABLED) throw new ActionCheckError('CheckIfSeedsEnabled', 'SEEDS_ENABLED is false', room.id, userId);
     dispatch(server$roomEditSettings(roomId, {seed}));
   }
   , roomKickRequest: ({roomId, userId}, {userId: hostId}) => (dispatch, getState) => {
