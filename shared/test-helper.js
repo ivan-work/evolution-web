@@ -49,6 +49,7 @@ global.clock = (start) => {
   return Math.round((end[0] * 1000) + (end[1] / 1000000));
 };
 
+process.env.SEEDS_ENABLED = true;
 // https://stackoverflow.com/questions/26867535/calling-setstate-in-jsdom-based-tests-causing-cannot-render-markup-in-a-worker
 require('fbjs/lib/ExecutionEnvironment').canUseDOM = true;
 
