@@ -4,9 +4,9 @@ import * as pt from "./evolution/plantarium/plantTypes";
 import makeCard from "./evolution/cards/makeCard";
 import * as traits from "./evolution/traitTypes";
 
-export const SETTINGS_PLAYERS = [2, 8];
+export const SETTINGS_PLAYERS = [2, 16];
 
-export const SETTINGS_TIME_VALUES = [10, 600];
+export const SETTINGS_TIME_VALUES = [5, 600];
 
 export const SETTINGS_MINUTES = 60e3; // 1 minute
 export const SETTINGS_SECONDS = 1e3; // 1 second
@@ -31,10 +31,11 @@ export const SettingsRules = {
   , addon_plantarium: `boolean`
   , addon_customff: `boolean`
   , addon_lifecycle: `boolean`
+  , fixedFood: 'integer|min:0' //11124
 };
 
 export class SettingsRecord extends Record({
-  maxPlayers: 4
+  maxPlayers: 16
   , timeTurn: SETTINGS_DEFAULT_TIME_TURN
   , timeTraitResponse: SETTINGS_DEFAULT_TIME_TRAIT
   , timeAmbush: SETTINGS_AMBUSH_TIME
@@ -49,6 +50,7 @@ export class SettingsRecord extends Record({
   , addon_customff: false
   , addon_lifecycle: false
   , seed: null
+  , fixedFood: null 
 }) {
   static fromJS(js) {
     return js == null

@@ -38,7 +38,8 @@ const propsToForm = (room) => ({
   , addon_bonus: room.settings.addon_bonus
   , addon_plantarium: room.settings.addon_plantarium
   , addon_customff: room.settings.addon_customff
-  , addon_lifecycle: room.settings.addon_lifecycle
+  , addon_lifecycle: room.settings.addon_lifecycle 
+  , fixedFood: room.settings.fixedFood || ''
   , _savedSettingsVersion: STORED_SETTINGS_VERSION
 });
 
@@ -93,7 +94,8 @@ export class RoomSettings extends React.Component {
         <Textfield name='maxPlayers' fullWidth={true}/>
         <Textfield name='timeTurn' fullWidth={true}/>
         <Textfield name='timeTraitResponse' fullWidth={true}/>
-
+        <Textfield name='fixedFood' fullWidth={true}/>
+        
         <Checkbox name='randomPlayers' color='primary'/>
 
         <FormContext.Consumer>{({model}) => (

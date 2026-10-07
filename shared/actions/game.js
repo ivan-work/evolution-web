@@ -397,7 +397,7 @@ export const server$gameEndTurn = (gameId, userId, debugSource) => (dispatch, ge
     // logger.debug(`game/server$gameEndTurn: ${userId} => ${nextPlayer}`);
     // do nothing if next player is available
   } else if (game.status.phase === PHASE.DEPLOY) {
-    const food = game.generateFood();
+    const food = game.settings.fixedFood > 0 ? game.settings.fixedFood : game.generateFood();
     dispatch(server$gameStartPhase(gameId, PHASE.FEEDING, {food}));
     dispatch(server$gamePlayerStart(gameId));
   } else if (game.status.phase === PHASE.FEEDING) {
