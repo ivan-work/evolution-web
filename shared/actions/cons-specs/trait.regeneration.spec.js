@@ -49,6 +49,24 @@ players:
     }, serverStore, clientStore0);
   });
 
+  it(`Hidden Anglerfish doesn't count as a trait`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: deploy
+players:
+  - continent: $A angler camo, $B camo swim
+    hand: 2 regen
+`);
+    const {findCard, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    expectUnchanged(`Cannot be placed to animal with two traits`, () => {
+      clientStore0.dispatch(gameDeployTraitRequest(findCard(User0, tt.TraitRegeneration), '$B'));
+    }, serverStore, clientStore0);
+
+    clientStore0.dispatch(gameDeployTraitRequest(findCard(User0, tt.TraitRegeneration), '$A'));
+    expect(findAnimal('$A').hasTrait(tt.TraitRegeneration), '$A has Regeneration').ok;
+  });
+
   it('Survives being eaten', () => {
     const [{serverStore, ParseGame}, {clientStore0, User0, ClientGame0}] = mockGame(1);
     const gameId = ParseGame(`
