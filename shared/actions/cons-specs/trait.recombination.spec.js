@@ -244,6 +244,49 @@ players:
     expect(findAnimal('$A').foodSize, '$A food').equal(2);
     expect(findAnimal('$B').foodSize, '$B food').equal(1);
   });
+
+  it(`Can't exchange paired traits`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A recomb$B comm$C camo, $B sharp trem$C, $C, $W wait
+`);
+    const {findTrait} = makeGameSelectors(serverStore.getState, gameId);
+
+    expectUnchanged('Recombination', () => {
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitRecombination, tt.TraitRecombination, tt.TraitSharpVision));
+    }, serverStore, clientStore0);
+    expectUnchanged('Communication', () => {
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitRecombination, tt.TraitCommunication, tt.TraitSharpVision));
+    }, serverStore, clientStore0);
+    expectUnchanged('Trematode', () => {
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitRecombination, tt.TraitCamouflage, tt.TraitTrematode));
+    }, serverStore, clientStore0);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitRecombination, tt.TraitCamouflage, tt.TraitSharpVision));
+    expect(findTrait('$A', tt.TraitSharpVision)).ok;
+    expect(findTrait('$B', tt.TraitCamouflage)).ok;
+  });
+
+  it(`Can't exchange hidden traits`, () => {
+    const [{serverStore, ParseGame}, {clientStore0}] = mockGame(1);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A recomb$B camo, $B angler sharp, $W wait
+`);
+    const {findTrait} = makeGameSelectors(serverStore.getState, gameId);
+
+    expectUnchanged('Anglerfish', () => {
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitRecombination, tt.TraitCamouflage, tt.TraitAnglerfish));
+    }, serverStore, clientStore0);
+
+    clientStore0.dispatch(traitActivateRequest('$A', tt.TraitRecombination, tt.TraitCamouflage, tt.TraitSharpVision));
+    expect(findTrait('$A', tt.TraitSharpVision)).ok;
+    expect(findTrait('$B', tt.TraitCamouflage)).ok;
+    expect(findTrait('$B', tt.TraitAnglerfish)).ok;
+  });
 });
 
 
