@@ -12,10 +12,12 @@ import {
   , roomEditSettingsRequest
   , roomStartVotingRequest
   , roomStartVoteActionRequest
+  , testHackGame
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
 import * as tt from '../../models/game/evolution/traitTypes';
+import {TraitModel} from '../../models/game/evolution/TraitModel';
 import {LOCATION} from '../../models/game/evolution/locations';
 import ERRORS from '../errors';
 import {replaceGetRandom} from '../../utils/randomGenerator';
@@ -137,25 +139,25 @@ ${LOCATIONS_SETTINGS}
       expect(ClientGame0().locateAnimal('$A').traits, 'Client').size(1);
     });
 
-    it('Trematode on animals of two players is discarded too', () => {
-      const [{serverStore, ParseGame}
-        , {clientStore0, User0}
-        , {clientStore1, User1}
-        , {clientStore2, User2}] = mockGame(3);
+    // Such a link can't be deployed by the rules, but the engine of master still allows it, so the server state is
+    // prepared directly: the link must be discarded as any other one
+    it('Paired trait between animals of two players is discarded too', () => {
+      const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
       const gameId = ParseGame(`
 phase: deploy
 players:
-  - hand: camo, swim
+  - hand: swim
     continent: $A
-  - hand: camo
-    continent: $B
-  - hand: trem
+  - continent: $B
 ${LOCATIONS_SETTINGS}
 `);
       const {findCard, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
-      clientStore0.dispatch(gameDeployAnimalRequest(findCard(User0, tt.TraitCamouflage), 1, LOCATION.GONDWANA));
-      clientStore1.dispatch(gameEndTurnRequest());
-      clientStore2.dispatch(gameDeployTraitRequest(findCard(User2, tt.TraitTrematode), '$A', false, '$B'));
+      serverStore.dispatch(testHackGame(gameId, game => {
+        const [traitA, traitB] = TraitModel.LinkBetween(tt.TraitTrematode, game.locateAnimal('$A'), game.locateAnimal('$B'));
+        return game
+          .updateIn(['players', User0.id, 'continent', '$A'], animal => animal.traitAttach(traitA))
+          .updateIn(['players', User1.id, 'continent', '$B'], animal => animal.traitAttach(traitB));
+      }));
       expect(findAnimal('$A').foodSize).equal(2);
       expect(findAnimal('$B').foodSize).equal(2);
 
