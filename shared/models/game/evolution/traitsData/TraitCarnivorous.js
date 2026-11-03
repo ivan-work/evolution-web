@@ -50,7 +50,7 @@ export const getStaticDefenses = (game, sourceAnimal, targetAnimal) =>
       || (trait.type === tt.TraitFlight && !trait.getErrorOfUse(game, sourceAnimal, targetAnimal))
       || (trait.type === tt.TraitShy && targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHY))
       || (trait.type === tt.TraitPerspicuus && targetAnimal.getFood() === 0)
-      || (trait.type === tt.TraitHerding && isProtectedByHerd(game, targetAnimal))
+      || (trait.type === tt.TraitHerding && isLocationsGame(game) && isProtectedByHerd(game, targetAnimal))
     )).toArray();
 
 // [tt.TraitRunning, tt.TraitShell, tt.TraitInkCloud, tt.TraitCnidocytes, tt.TraitMimicry, tt.TraitTailLoss, tt.TraitPoisonous];

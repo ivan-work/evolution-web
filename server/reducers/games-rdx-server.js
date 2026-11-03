@@ -738,6 +738,9 @@ export const gameMigrationNextDecider = (game, {time}) => game
   .updateIn(['locations', 'migration', 'deciders'], deciders => deciders.shift())
   .setIn(['locations', 'migration', 'time'], time);
 
+export const gameMigrationResume = (game, {time}) => game
+  .setIn(['locations', 'migration', 'time'], time);
+
 export const gameMigrationEnd = (game) => game
   .setIn(['locations', 'migration'], null);
 // endregion
@@ -884,6 +887,7 @@ export const reducer = createReducer(Map(), {
   , gameLocationsSetForcedAnimals: (state, data) => state.update(data.gameId, game => gameLocationsSetForcedAnimals(game, data))
   , gameMigrationStart: (state, data) => state.update(data.gameId, game => gameMigrationStart(game, data))
   , gameMigrationNextDecider: (state, data) => state.update(data.gameId, game => gameMigrationNextDecider(game, data))
+  , gameMigrationResume: (state, data) => state.update(data.gameId, game => gameMigrationResume(game, data))
   , gameMigrationEnd: (state, data) => state.update(data.gameId, game => gameMigrationEnd(game, data))
 
   , gameSpawnPlants: (state, data) => state.update(data.gameId, game => gameSpawnPlants(game, data))

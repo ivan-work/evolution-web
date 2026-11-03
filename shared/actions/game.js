@@ -150,7 +150,8 @@ export const server$gameLeave = (gameId, userId) => (dispatch, getState) => {
       if (game.status.phase !== PHASE.FINAL) dispatch(server$gameEnd(gameId, false));
       break;
     default:
-      if (game.status.currentPlayer === userId) {
+      // Continents: when the migrating player leaves, the turn passes after the remoras have decided
+      if (game.status.currentPlayer === userId && !getMigration(game)) {
         dispatch(server$gameCancelTurnTimeout(gameId));
         dispatch(server$gamePlayerContinue(gameId));
       }
@@ -214,7 +215,7 @@ const server$gameCheckForPause = (gameId) => (dispatch, getState) => {
       if (game.question) {
         dispatch(server$questionResumeTimeout(gameId, game.question));
       } else if (getMigration(game)) {
-        dispatch(server$locationsMigrationAddTimeout(gameId));
+        dispatch(server$locationsMigrationAddTimeout(gameId, true));
       } else {
         dispatch(server$addTurnTimeout(gameId));
       }

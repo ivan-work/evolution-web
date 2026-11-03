@@ -59,6 +59,7 @@ import {
   , gameLocationsSetForcedAnimals
   , gameMigrationStart
   , gameMigrationNextDecider
+  , gameMigrationResume
   , gameMigrationEnd
 } from '../../server/reducers/games-rdx-server';
 
@@ -125,6 +126,7 @@ export const reducer = createReducer(null, {
   , gameLocationsSetForcedAnimals
   , gameMigrationStart
   , gameMigrationNextDecider
+  , gameMigrationResume
   , gameMigrationEnd
   , debugMirrorPlayer: (game, {limit = 100}) => {
     const player = game.players.first();

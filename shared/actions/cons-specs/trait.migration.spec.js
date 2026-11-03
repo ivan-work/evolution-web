@@ -5,6 +5,7 @@ import {
   , traitMigrationRequest
   , traitSuckerfishRequest
   , makeTurnTimeoutId
+  , SOCKET_DISCONNECT_NOW
 } from '../actions';
 
 import {PHASE} from '../../models/game/GameModel';
@@ -268,6 +269,42 @@ settings:
 
     clientStore0.dispatch(traitMigrationRequest('$B', LOCATION.GONDWANA));
     expect(selectGame().locations.migration.deciders.toArray(), '$R1 is in Gondwana already').eql([User1.id, User2.id]);
+  });
+
+  it('Turn passes after the remoras when the migrating player leaves', () => {
+    const [{serverStore, ParseGame}
+      , {clientStore0, User0}
+      , {clientStore1, User1}
+      , {clientStore2, User2}] = mockGame(3);
+    const gameId = ParseGame(`
+deck: 10 camo
+phase: feeding
+food:
+  laurasia: 3
+players:
+  - continent: $A migr, $W0 wait
+  - continent: $R1 suck, $C1
+  - continent: $C2
+settings:
+  addon_continents: true
+  continentsLocations: true
+  timeTurn: 100
+  timeTraitResponse: 50
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitMigrationRequest('$A', LOCATION.GONDWANA));
+    expect(selectGame().locations.migration.deciders.toArray()).eql([User1.id]);
+
+    clientStore0.disconnect(SOCKET_DISCONNECT_NOW);
+    expect(selectGame().getPlayer(User0.id).playing).false;
+    expect(selectGame().status.currentPlayer, 'Waits for the remoras').equal(User0.id);
+    expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)], 'No turn timer meanwhile').undefined;
+
+    clientStore1.dispatch(traitSuckerfishRequest(['$R1']));
+    expect(findAnimal('$R1').location).equal(LOCATION.GONDWANA);
+    expect(selectGame().locations.migration).equal(null);
+    expect(selectGame().status.currentPlayer).equal(User1.id);
+    expect(serverStore.getTimeouts()[makeTurnTimeoutId(gameId)], 'Turn timer of the next player').ok;
   });
 
   it('Remora follows only from the location of the migrant and by the rules of the locations', () => {

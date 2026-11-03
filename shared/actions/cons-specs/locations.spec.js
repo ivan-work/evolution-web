@@ -606,6 +606,22 @@ ${LOCATIONS_SETTINGS}
       expect(findAnimal('$H')).null;
     });
 
+    it('Herding does nothing without locations', () => {
+      const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+      const gameId = ParseGame(`
+deck: 10 camo
+phase: feeding
+players:
+  - continent: $A carn, $W wait
+  - continent: $H herd
+settings:
+  addon_continents: true
+`);
+      const {findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+      clientStore0.dispatch(traitActivateRequest('$A', tt.TraitCarnivorous, '$H'));
+      expect(findAnimal('$H')).null;
+    });
+
     it('Intellect ignores Herding', () => {
       const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
       const gameId = ParseGame(`

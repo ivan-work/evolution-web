@@ -19,6 +19,7 @@ import {SettingsRules, SETTINGS_MINUTES, SETTINGS_SECONDS} from '../../../../sha
 import {roomEditSettingsRequest} from "../../../../shared/actions/rooms";
 import {loadJSONValue, saveValue} from "../../../utils/localStorage";
 import {RoomModel} from "../../../../shared/models/RoomModel";
+import {isLocationsModeSettings, LOCATIONS_STARTING_HAND} from "../../../../shared/models/game/evolution/locations";
 
 const STORED_SETTINGS_KEY = 'storedRoomSettings';
 const STORED_SETTINGS_VERSION = 1;
@@ -82,8 +83,8 @@ export class RoomSettings extends React.Component {
 
   render() {
     const {isHost, room} = this.props;
-    const minCards = room.users.size * 6;
     const formModel = isHost ? this.state.settings : propsToForm(room)
+    const minCards = room.users.size * (isLocationsModeSettings(formModel) ? LOCATIONS_STARTING_HAND : 6);
     return (
       <EVOForm
         i18nPath='App.Room.Settings'

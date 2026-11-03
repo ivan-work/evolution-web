@@ -49,6 +49,7 @@ import {
   , server$addTurnTimeout
   , server$gameCancelTurnTimeout
   , server$gameDeployAnimalFromHand
+  , server$gamePlayerContinue
 } from './game';
 import {addTimeout, cancelTimeout} from '../utils/reduxTimeout';
 
@@ -94,6 +95,11 @@ const gameMigrationStart = (gameId, migration) => ({
 
 const gameMigrationNextDecider = (gameId, time) => ({
   type: 'gameMigrationNextDecider'
+  , data: {gameId, time}
+});
+
+const gameMigrationResume = (gameId, time) => ({
+  type: 'gameMigrationResume'
   , data: {gameId, time}
 });
 
@@ -219,10 +225,11 @@ export const server$locationsMigrate = (gameId, userId, animalId, location) => (
   }
 };
 
-export const server$locationsMigrationAddTimeout = (gameId) => (dispatch, getState) => {
+export const server$locationsMigrationAddTimeout = (gameId, resumed) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   const migration = getMigration(game);
   if (!migration || game.status.paused) return;
+  if (resumed) dispatch(server$game(gameId, gameMigrationResume(gameId, Date.now())));
   dispatch(addTimeout(game.settings.timeTraitResponse
     , makeMigrationTimeoutId(gameId)
     , server$locationsSuckerfishDecide(gameId, migration.id, migration.getDecider(), [])));
@@ -231,8 +238,10 @@ export const server$locationsMigrationAddTimeout = (gameId) => (dispatch, getSta
 export const server$locationsMigrationPauseTimeout = (gameId) => cancelTimeout(makeMigrationTimeoutId(gameId));
 
 export const server$locationsSuckerfishDecide = (gameId, migrationId, userId, animalIds) => (dispatch, getState) => {
-  const migration = getMigration(selectGame(getState, gameId));
+  const currentGame = selectGame(getState, gameId);
+  const migration = getMigration(currentGame);
   if (!migration || migration.id !== migrationId || migration.getDecider() !== userId) return;
+  if (currentGame.status.phase !== PHASE.FEEDING) return;
   logger.verbose(`server$locationsSuckerfishDecide: ${userId} [${animalIds}]`);
   dispatch(cancelTimeout(makeMigrationTimeoutId(gameId)));
 
@@ -264,11 +273,15 @@ const server$locationsMigrationEnd = (gameId) => (dispatch, getState) => {
   const {migrantPid, turnRemainingTime} = getMigration(game);
   dispatch(server$game(gameId, gameMigrationEnd(gameId)));
   dispatch(server$locationsBreakLinks(gameId));
-  if (game.status.currentPlayer === migrantPid && game.getPlayer(migrantPid).playing) {
+  if (game.status.currentPlayer !== migrantPid) return;
+  if (game.getPlayer(migrantPid).playing) {
     if (turnRemainingTime !== void 0) {
       dispatch(server$addTurnTimeout(gameId, void 0, turnRemainingTime));
     }
     dispatch(server$playerActed(gameId, migrantPid));
+  } else {
+    // The migrating player has left the game while the remoras were deciding
+    dispatch(server$gamePlayerContinue(gameId));
   }
 };
 // endregion
@@ -340,5 +353,6 @@ export const locationsServerToClient = {
   , gameMigrationStart: ({gameId, migration}) =>
     gameMigrationStart(gameId, MigrationRecord.fromJS(migration))
   , gameMigrationNextDecider: ({gameId, time}) => gameMigrationNextDecider(gameId, time)
+  , gameMigrationResume: ({gameId, time}) => gameMigrationResume(gameId, time)
   , gameMigrationEnd: ({gameId}) => gameMigrationEnd(gameId)
 };
