@@ -10,6 +10,7 @@ import * as tt from '../../models/game/evolution/traitTypes';
 import {PHASE, QuestionRecord} from '../../models/game/GameModel';
 import {TRAIT_ANIMAL_FLAG} from '../../models/game/evolution/constants';
 import {replaceGetRandom} from '../../utils/randomGenerator';
+import {testShiftTime} from '../../utils/reduxTimeout';
 
 import {makeGameSelectors} from '../../selectors';
 import ERRORS from "../errors";
@@ -311,5 +312,28 @@ players:
     expect(selectGame().question).not.ok;
     expect(findAnimal('$B')).not.ok;
     expect(findAnimal('$C')).ok;
+  });
+
+  it('Intellect question TIMEOUT', () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+players:
+  - continent: $A carn int wait
+  - continent: $B + tail
+settings:
+  timeTraitResponse: 100
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
+    expect(selectGame().question, 'Intellect Question').ok;
+    expect(selectGame().question.type).equal(QuestionRecord.INTELLECT);
+
+    serverStore.dispatch(testShiftTime(100));
+
+    expect(selectGame().question, 'Question is answered').not.ok;
+    expect(findAnimal('$A').getFood(), '$A ate $B').equal(2);
+    expect(findAnimal('$B'), '$B is eaten').null;
   });
 });

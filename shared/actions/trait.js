@@ -901,7 +901,7 @@ const server$traitQuestionDefaultAction = (gameId, questionId) => (dispatch, get
   const attackTrait = game.locateTrait(game.question.traitId, game.question.sourceAid, game.question.sourcePid);
   const targetAnimal = game.locateAnimal(game.question.targetAid, game.question.targetPid);
   if (game.question.type === QuestionRecord.INTELLECT) {
-    const targetId = getTraitDataModel(tt.TraitIntellect).customFns.defaultTarget(game, attackAnimal, attackTrait, defenseAnimal);
+    const targetId = getTraitDataModel(tt.TraitIntellect).customFns.defaultTarget(game, attackAnimal, attackTrait, targetAnimal);
     dispatch(server$traitIntellectAnswer(gameId, questionId, tt.TraitIntellect, targetId));
   } else if (game.question.type === QuestionRecord.DEFENSE) {
     const defaultDefence = findDefaultActiveDefence(game, attackAnimal, attackTrait, targetAnimal);
