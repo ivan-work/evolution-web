@@ -213,4 +213,57 @@ players:
 
     expect(findAnimal('$A').getFoodAndFat()).equal(0);
   });
+
+  it(`$A > $B (mimi) > attacker's $X error`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}] = mockGame(2);
+    const gameId = ParseGame(`
+phase: feeding
+food: 10
+players:
+  - continent: $A carn, $X
+  - continent: $B mimi, $C, $D
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
+    expect(selectGame().question).ok;
+
+    expectUnchanged(`Cannot mimicry to attacker's $X`, () => {
+      clientStore1.dispatch(traitAnswerRequest('TraitMimicry', '$X'));
+    }, serverStore, clientStore0, clientStore1);
+
+    clientStore1.dispatch(traitAnswerRequest('TraitMimicry', '$C'));
+
+    expect(findAnimal('$A').getFoodAndFat()).equal(2);
+    expect(findAnimal('$X'), '$X is alive').ok;
+    expect(findAnimal('$B'), '$B is alive').ok;
+    expect(findAnimal('$C'), '$C is eaten').null;
+    expect(findAnimal('$D'), '$D is alive').ok;
+  });
+
+  it(`$A > $B (mimi) > third player's $Y error`, () => {
+    const [{serverStore, ParseGame}, {clientStore0, User0}, {clientStore1, User1}, {clientStore2, User2}] = mockGame(3);
+    const gameId = ParseGame(`
+phase: feeding
+food: 10
+players:
+  - continent: $A carn, $W wait
+  - continent: $B mimi, $C, $D
+  - continent: $Y
+`);
+    const {selectGame, findAnimal} = makeGameSelectors(serverStore.getState, gameId);
+    clientStore0.dispatch(traitActivateRequest('$A', 'TraitCarnivorous', '$B'));
+    expect(selectGame().question).ok;
+
+    expectUnchanged(`Cannot mimicry to other player's $Y`, () => {
+      clientStore1.dispatch(traitAnswerRequest('TraitMimicry', '$Y'));
+    }, serverStore, clientStore0, clientStore1, clientStore2);
+
+    clientStore1.dispatch(traitAnswerRequest('TraitMimicry', '$D'));
+
+    expect(findAnimal('$A').getFoodAndFat()).equal(2);
+    expect(findAnimal('$Y'), '$Y is alive').ok;
+    expect(findAnimal('$B'), '$B is alive').ok;
+    expect(findAnimal('$C'), '$C is alive').ok;
+    expect(findAnimal('$D'), '$D is eaten').null;
+  });
 });

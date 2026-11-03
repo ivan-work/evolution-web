@@ -114,6 +114,7 @@ export const TraitMimicry = {
   , getErrorOfUseOnTarget: (game, mimicryAnimal, targetAnimal, attackAnimal, attackTrait) => {
     if (targetAnimal.id === mimicryAnimal.id) return ERRORS.TRAIT_TARGETING_SAME_ANIMAL;
     if (targetAnimal.id === attackAnimal.id) return ERRORS.TRAIT_TARGETING_SAME_ANIMAL;
+    if (targetAnimal.ownerId !== mimicryAnimal.ownerId) return ERRORS.TRAIT_TARGETING_ANIMAL_NOT_OWN;
 
     return attackTrait.getDataModel().getErrorOfUseOnTarget(game, attackAnimal, targetAnimal);
   }
