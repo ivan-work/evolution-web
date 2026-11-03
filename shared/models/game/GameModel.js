@@ -10,6 +10,7 @@ import {
   , Deck_Base
   , Deck_TimeToFly
   , Deck_ContinentsShort
+  , Deck_ContinentsLocations
   , Deck_Bonus
   , Deck_Plantarium
   , PlantDeck_Plantarium
@@ -25,6 +26,12 @@ import {selectUserName} from '../../selectors';
 import * as tt from './evolution/traitTypes';
 import * as pt from './evolution/plantarium/plantTypes';
 import PlantModel from "./evolution/plantarium/PlantModel";
+import {
+  LocationsRecord
+  , isLocationsModeSettings
+  , generateLocationsFood
+  , LOCATIONS_STARTING_HAND
+} from './evolution/locations';
 
 export const TEST_DECK_SIZE = 84;
 export const TEST_HAND_SIZE = 6;
@@ -239,6 +246,7 @@ const GameModelData = {
   , scoreboardFinal: null
   , winnerId: null
   , ambush: null
+  , locations: null // LocationsRecord of the "Continents" locations mode
 };
 
 // global.locateAnimalTime = 0;
@@ -265,6 +273,10 @@ export class GameModel extends Record({
     return FOOD_TABLE[this.getActualPlayers().size]();
   }
 
+  generateLocationsFood() {
+    return generateLocationsFood(this.getActualPlayers().size, rollDice);
+  }
+
   getPlantsConfig() {
     const playersSize = this.getActualPlayers().size;
     return PLANTS_TABLE[playersSize](playersSize);
@@ -283,6 +295,7 @@ export class GameModel extends Record({
     if (room.settings.addon_base2) deckConfig = deckConfig.concat(Deck_Base);
     if (room.settings.addon_timeToFly) deckConfig = deckConfig.concat(Deck_TimeToFly);
     if (room.settings.addon_continents) deckConfig = deckConfig.concat(Deck_ContinentsShort);
+    if (isLocationsModeSettings(room.settings)) deckConfig = deckConfig.concat(Deck_ContinentsLocations);
     if (room.settings.addon_bonus) deckConfig = deckConfig.concat(Deck_Bonus);
     if (room.settings.addon_plantarium) deckConfig = deckConfig.concat(Deck_Plantarium);
     if (room.settings.addon_plantarium) deckPlantsConfig = deckPlantsConfig.concat(PlantDeck_Plantarium);
@@ -324,6 +337,7 @@ export class GameModel extends Record({
       , deckPlants
       , players
       , settings: room.settings
+      , locations: isLocationsModeSettings(room.settings) ? LocationsRecord.new() : null
     })
       .setIn(['status', 'currentPlayer'], players.first().id)
       .setIn(['status', 'roundPlayer'], players.first().id)
@@ -347,6 +361,7 @@ export class GameModel extends Record({
         , log: List(js.log)
         , hunts: List(js.hunts.map(HuntRecord))
         , ambush: AmbushRecord.fromServer(js.ambush)
+        , locations: LocationsRecord.fromJS(js.locations)
       });
   }
 
@@ -396,6 +411,7 @@ export class GameModel extends Record({
         , addon_plantarium: game.settings.addon_plantarium
         , addon_customff: game.settings.addon_customff
         , addon_lifecycle: game.settings.addon_lifecycle
+        , ...(game.locations ? {continentsLocations: true} : {})
       }
       , status: {
         turn: game.status.turn
@@ -450,7 +466,9 @@ export class GameModel extends Record({
   }
 
   getStartingHandCount() {
-    return this.isPlantarium() ? 8 : 6;
+    return this.isPlantarium() ? 8
+      : this.locations ? LOCATIONS_STARTING_HAND
+        : 6;
   }
 
   // TODO remove

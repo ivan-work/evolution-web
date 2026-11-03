@@ -67,6 +67,7 @@ import {
 import {logTarget} from "./log.util";
 import {server$takeCardFromRandomPlayer} from "./game.plantarium";
 import {server$animalDeath} from "./game";
+import {server$locationsLockForAction} from "./game.locations";
 
 /**
  * Activation
@@ -764,6 +765,7 @@ export const server$takeFoodRequest = (gameId, playerId, animalId, plantId) => (
   if (!game.isPlantarium()) {
     throwError(getErrorOfAnimalEatingFromGame(game, animal));
 
+    dispatch(server$locationsLockForAction(gameId, playerId, animal.location));
     dispatch(server$startCooldownList(gameId, getFeedingCooldownList(gameId, playerId)));
     dispatch(server$startFeedingFromGame(game.id, animal.id));
   } else if (game.isPlantarium()) {
@@ -1095,6 +1097,7 @@ export const traitClientToServer = {
       throw new ActionCheckError(ERR.GAME_TRAIT_NOTFOUND, {gameId, traitId});
     }
 
+    dispatch(server$locationsLockForAction(gameId, userId, animal.location));
     dispatch(server$game(gameId, startCooldown(gameId, TRAIT_COOLDOWN_LINK.EATING, TRAIT_COOLDOWN_DURATION.ROUND, TRAIT_COOLDOWN_PLACE.PLAYER, userId)));
     dispatch(server$game(gameId, traitTakeShell(gameId, AREA.STANDARD, animalId, trait)));
     dispatch(server$playerActed(gameId, userId));
@@ -1173,6 +1176,7 @@ export const traitClientToServer = {
 
     const target = checkTraitActivation_Target(game, sourceAnimal, trait, ...targets);
     if (!trait.getDataModel().transient) checkPlayerCanAct(game, userId);
+    if (!trait.getDataModel().transient) dispatch(server$locationsLockForAction(gameId, userId, sourceAnimal.location));
 
     const result = dispatch(server$traitActivate(gameId, sourceAid, trait, target));
     if (result === void 0) {

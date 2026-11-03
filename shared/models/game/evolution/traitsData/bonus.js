@@ -25,6 +25,7 @@ import {
   getErrorOfPlantCounterAttack
 } from "../../../../actions/trait.checks";
 import {server$huntStart_Plant} from "./hunt";
+import {getFoodForAnimal} from '../locations';
 
 export const TraitRstrategy = {
   type: tt.TraitRstrategy
@@ -41,7 +42,7 @@ export const TraitHomeothermy = {
     [tt.TraitHomeothermy, TRAIT_COOLDOWN_PLACE.TRAIT, TRAIT_COOLDOWN_DURATION.ROUND]
   ])
   , _getErrorOfUse: (game, animal, traitSpec) => {
-    if (game.getFood() < 1) return ERRORS.GAME_FOOD;
+    if (getFoodForAnimal(game, animal) < 1) return ERRORS.GAME_FOOD;
     if (!animal.canEat(game)) return ERRORS.ANIMAL_DONT_WANT_FOOD;
     if (animal.getNeededFood() === 0) return ERRORS.ANIMAL_DONT_NEED_FOOD;
   }

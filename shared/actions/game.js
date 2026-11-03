@@ -59,6 +59,21 @@ import PlantVisitor from "../models/game/evolution/plantarium/PlantsVisitor";
 import ParasiteVisitor from "../models/game/evolution/plantarium/ParasiteVisitor";
 import {getIntRandom} from "../utils/randomGenerator";
 import traitDataModel from "../models/game/evolution/TraitDataModel";
+import {LOCATION, isLocationsGame, getMigration} from "../models/game/evolution/locations";
+import {
+  getErrorOfDeployLocation
+  , getErrorOfForcedAnimals
+  , getErrorOfLocationsLink
+  , getErrorOfLocationsTraitPlacement
+} from "./locations.checks";
+import {
+  server$locationsAfterDeployTrait
+  , server$locationsAnimalDeployed
+  , server$locationsForcedDeploy
+  , server$locationsMigrationAddTimeout
+  , server$locationsMigrationPauseTimeout
+  , server$locationsSetForcedAnimals
+} from "./game.locations";
 
 // region Game
 // region Init
@@ -189,6 +204,7 @@ const server$gameCheckForPause = (gameId) => (dispatch, getState) => {
       dispatch(server$game(gameId, gameSetPaused(gameId, true)));
       dispatch(server$gameCancelTurnTimeout(gameId));
       dispatch(server$questionPauseTimeout(game));
+      if (getMigration(game)) dispatch(server$locationsMigrationPauseTimeout(gameId));
     }
   } else {
     const playersCount = game.getActualPlayers().size;
@@ -197,6 +213,8 @@ const server$gameCheckForPause = (gameId) => (dispatch, getState) => {
       dispatch(server$game(gameId, gameSetPaused(gameId, false)));
       if (game.question) {
         dispatch(server$questionResumeTimeout(gameId, game.question));
+      } else if (getMigration(game)) {
+        dispatch(server$locationsMigrationAddTimeout(gameId));
       } else {
         dispatch(server$addTurnTimeout(gameId));
       }
@@ -208,9 +226,9 @@ const server$gameCheckForPause = (gameId) => (dispatch, getState) => {
 // region DEPLOY
 
 // region gameDeployAnimal
-export const gameDeployAnimalRequest = (cardId, animalPosition) => (dispatch, getState) => dispatch({
+export const gameDeployAnimalRequest = (cardId, animalPosition, location) => (dispatch, getState) => dispatch({
   type: 'gameDeployAnimalRequest'
-  , data: {gameId: getState().get('game').id, cardId, animalPosition}
+  , data: {gameId: getState().get('game').id, cardId, animalPosition, location}
   , meta: {server: true}
 });
 
@@ -240,6 +258,7 @@ export const server$gameDeployAnimalFromDeck = (gameId, sourceAnimal, onCreateCa
   const game = selectGame(getState, gameId);
   const userId = sourceAnimal.ownerId;
   let animal = AnimalModel.new(userId, game.deck.first() && game.deck.first().trait1);
+  if (isLocationsGame(game)) animal = animal.set('location', sourceAnimal.location);
   if (onCreateCallback) animal = onCreateCallback(animal);
   dispatch(gameDeployAnimalFromDeck(gameId, animal, sourceAnimal.id));
   dispatch(Object.assign(
@@ -397,8 +416,12 @@ export const server$gameEndTurn = (gameId, userId, debugSource) => (dispatch, ge
     // logger.debug(`game/server$gameEndTurn: ${userId} => ${nextPlayer}`);
     // do nothing if next player is available
   } else if (game.status.phase === PHASE.DEPLOY) {
-    const food = game.generateFood();
-    dispatch(server$gameStartPhase(gameId, PHASE.FEEDING, {food}));
+    if (isLocationsGame(game)) {
+      dispatch(server$gameStartPhase(gameId, PHASE.FEEDING, {locationsFood: game.generateLocationsFood()}));
+    } else {
+      const food = game.generateFood();
+      dispatch(server$gameStartPhase(gameId, PHASE.FEEDING, {food}));
+    }
     dispatch(server$gamePlayerStart(gameId));
   } else if (game.status.phase === PHASE.FEEDING) {
     dispatch(server$gameExtinct(gameId));
@@ -434,7 +457,7 @@ export const server$playerActed = (gameId, userId, debugSource) => (dispatch, ge
       return dispatch(server$gameEndTurn(gameId, userId, 'server$playerActed'));
     case PHASE.FEEDING:
       game = selectGame(getState, gameId);
-      const gameHasNoQuestions = !game.question;
+      const gameHasNoQuestions = !game.question && !getMigration(game);
       const playerHasNoOptions = !doesPlayerHasOptions(game, userId);
       const timeout = dispatch(checkTimeout(makeTurnTimeoutId(gameId)));
       const playerHasNoTimeouts = !timeout;
@@ -485,6 +508,7 @@ export const server$addTurnTimeout = (gameId, userId, turnTime) => (dispatch, ge
   dispatch(addTimeout(turnTime, makeTurnTimeoutId(gameId, userId), (dispatch, getState) => {
     logger.info(`Turn Timeout:`, `${gameId}: ${userId}`);
     dispatch(server$gameSetUserTimedOut(gameId, userId, true));
+    if (dispatch(server$locationsForcedDeploy(gameId, userId))) return;
     dispatch(server$gameEndTurn(gameId, userId, 'server$addTurnTimeout'))
   }));
 };
@@ -700,6 +724,7 @@ const server$gameDistributeCards = (gameId) => (dispatch, getState) => {
   const game = selectGame(getState, gameId);
   const playersWantedCards = {};
   const playersGiveCards = {};
+  const playersRestarted = [];
   let deckSize = game.deck.size;
 
   // Calculating what players want
@@ -707,6 +732,7 @@ const server$gameDistributeCards = (gameId) => (dispatch, getState) => {
     playersWantedCards[player.id] = 1;
     if (player.continent.size === 0 && player.hand.size === 0) {
       playersWantedCards[player.id] = game.getStartingHandCount();
+      if (isLocationsGame(game) && game.status.turn > 0) playersRestarted.push(player.id);
     } else {
       player.someAnimal((animal) => {
         if (
@@ -742,6 +768,11 @@ const server$gameDistributeCards = (gameId) => (dispatch, getState) => {
     .forEach((playerId) => {
       dispatch(server$gameGiveCards(gameId, playerId, playersGiveCards[playerId]));
     });
+
+  // Continents: player without cards and animals has to deploy two of the new cards as animals
+  playersRestarted.forEach((playerId) => {
+    dispatch(server$locationsSetForcedAnimals(gameId, playerId, playersGiveCards[playerId] || 0));
+  });
 };
 
 const server$gameDistributeAnimals = (gameId) => (dispatch, getState) => {
@@ -822,10 +853,11 @@ export const gameClientToServer = {
         , targetPhase: `${PHASE.FEEDING}/${PHASE.DEPLOY}`
       });
     }
+    throwError(getErrorOfForcedAnimals(game, userId));
     logger.verbose(`gameEndTurnRequest: ${userId} (${game.getPlayer(userId).acted ? 'acted' : 'not acted'})`);
     dispatch(server$gameEndTurn(gameId, userId, 'gameEndTurnRequest'));
   }
-  , gameDeployAnimalRequest: ({gameId, cardId, animalPosition = 0}, {userId}) => (dispatch, getState) => {
+  , gameDeployAnimalRequest: ({gameId, cardId, animalPosition = 0, location = LOCATION.LAURASIA}, {userId}) => (dispatch, getState) => {
     // console.time('gameDeployAnimalRequest body');
     const game = selectGame(getState, gameId);
     checkGameDefined(game);
@@ -834,11 +866,16 @@ export const gameClientToServer = {
     checkPlayerCanAct(game, userId);
     checkValidAnimalPosition(game, userId, animalPosition);
     const card = checkPlayerHasCard(game, userId, cardId);
-    const animal = AnimalModel.new(userId, card.trait1);
+    let animal = AnimalModel.new(userId, card.trait1);
+    if (isLocationsGame(game)) {
+      throwError(getErrorOfDeployLocation(location));
+      animal = animal.set('location', location);
+    }
     logger.verbose('selectGame > gameDeployAnimalRequest:', cardId);
     // console.timeEnd('gameDeployAnimalRequest body');
     // console.time('server$gameDeployAnimal');
     dispatch(server$gameDeployAnimalFromHand(gameId, userId, animal, parseInt(animalPosition), cardId));
+    if (isLocationsGame(game)) dispatch(server$locationsAnimalDeployed(gameId, userId));
     dispatch(server$playerActed(gameId, userId));
   }
   , gameDeployTraitRequest: ({gameId, cardId, entityId, alternateTrait, linkId}, {userId}) => (dispatch, getState) => {
@@ -847,6 +884,7 @@ export const gameClientToServer = {
     checkGameHasUser(game, userId);
     checkGamePhase(game, PHASE.DEPLOY);
     checkPlayerCanAct(game, userId);
+    throwError(getErrorOfForcedAnimals(game, userId));
 
 
     const card = checkPlayerHasCard(game, userId, cardId);
@@ -881,6 +919,7 @@ export const gameClientToServer = {
 
     throwError(traitData.getErrorOfTraitPlacement(entity));
     throwError(traitData.getErrorOfTraitPlacement_User(userId, entityOwnerId));
+    throwError(getErrorOfLocationsTraitPlacement(game, traitData.type, entity));
 
     let linkedEntity;
     let linkedEntityOwnerId;
@@ -900,6 +939,7 @@ export const gameClientToServer = {
         throw new ActionCheckError(ERR.GAME_LINK_SELF, {gameId, linkId});
       throwError(traitData.getErrorOfTraitPlacement(linkedEntity));
       throwError(traitData.getErrorOfTraitPlacement_LinkUser(userId, linkedEntityOwnerId));
+      throwError(getErrorOfLocationsLink(game, entity, linkedEntity));
     }
 
     let traits = [];
@@ -922,6 +962,7 @@ export const gameClientToServer = {
     }
 
     dispatch(server$gameDeployTrait(gameId, cardId, traits));
+    dispatch(server$locationsAfterDeployTrait(gameId, traitData.type, entity.id));
     dispatch(server$playerActed(gameId, userId));
   }
   , gameSetUserTimedOutRequest: ({gameId}, {userId}) => (dispatch, getState) => {

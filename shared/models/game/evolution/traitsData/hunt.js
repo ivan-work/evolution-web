@@ -37,6 +37,7 @@ import {QuestionRecord} from "../../GameModel";
 import {server$playerActed} from "../../../../actions/game";
 import {AnimalModel} from "../AnimalModel";
 import {server$gamePlantUpdateFood} from "../../../../actions/game.plantarium";
+import {isSameLocation} from "../locations";
 
 export const HUNT_TYPE = {ANIMAL: 'ANIMAL', PLANT: 'PLANT'};
 
@@ -434,7 +435,7 @@ export const server$huntEnd = (gameId) => (dispatch, getState) => {
 
       game.sortPlayersFromIndex(game.players, currentPlayerIndex).some(player => player.continent.some(animal => {
         const traitScavenger = animal.hasTrait(tt.TraitScavenger);
-        if (traitScavenger && animal.canEat(game) > 0) {
+        if (traitScavenger && animal.canEat(game) > 0 && isSameLocation(game, animal, attackEntity)) {
           dispatch(server$startFeeding(gameId, animal.id, 1, tt.TraitScavenger, attackEntity.id));
           return true;
         }

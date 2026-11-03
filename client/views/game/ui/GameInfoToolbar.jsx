@@ -29,6 +29,8 @@ const renderTime = (game) => {
     return (<span>{T.translate('Game.UI.Status.Pause')}</span>);
   } else if (game.question) {
     return (<Timer start={game.question.time} duration={game.settings.timeTraitResponse}/>);
+  } else if (game.locations && game.locations.migration) {
+    return (<Timer start={game.locations.migration.time} duration={game.settings.timeTraitResponse}/>);
   } else if (game.status.phase === PHASE.FINAL) {
     return '-';
   } else if (game.status.phase === PHASE.REGENERATION) {

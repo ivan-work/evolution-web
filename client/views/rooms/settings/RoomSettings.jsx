@@ -13,6 +13,7 @@ import IconCardsTooltip from "./IconCardsTooltip";
 import RoomAddonRow from "./RoomAddonRow";
 import SetMaxCardCountSlider from "./SetMaxCardCountSlider";
 import RoomCardCounter from "./RoomCardCounter";
+import RoomLocationsRow from "./RoomLocationsRow";
 
 import {SettingsRules, SETTINGS_MINUTES, SETTINGS_SECONDS} from '../../../../shared/models/game/GameSettings';
 import {roomEditSettingsRequest} from "../../../../shared/actions/rooms";
@@ -39,6 +40,7 @@ const propsToForm = (room) => ({
   , addon_plantarium: room.settings.addon_plantarium
   , addon_customff: room.settings.addon_customff
   , addon_lifecycle: room.settings.addon_lifecycle
+  , continentsLocations: room.settings.continentsLocations
   , _savedSettingsVersion: STORED_SETTINGS_VERSION
 });
 
@@ -115,6 +117,7 @@ export class RoomSettings extends React.Component {
         <RoomAddonRow name='addon_base2'/>
         <RoomAddonRow name='addon_timeToFly'/>
         <RoomAddonRow name='addon_continents'/>
+        <RoomLocationsRow/>
         <RoomAddonRow name='addon_bonus'/>
         <RoomAddonRow name='addon_plantarium'/>
         <RoomAddonRow name='addon_customff'/>

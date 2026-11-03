@@ -31,6 +31,7 @@ export const SettingsRules = {
   , addon_plantarium: `boolean`
   , addon_customff: `boolean`
   , addon_lifecycle: `boolean`
+  , continentsLocations: `boolean`
 };
 
 export class SettingsRecord extends Record({
@@ -48,6 +49,7 @@ export class SettingsRecord extends Record({
   , addon_plantarium: false
   , addon_customff: false
   , addon_lifecycle: false
+  , continentsLocations: false
   , seed: null
 }) {
   static fromJS(js) {
@@ -69,6 +71,7 @@ export class SettingsRecord extends Record({
         case 'addon_continents':
         case 'addon_bonus':
         case 'addon_plantarium':
+        case 'continentsLocations':
         case 'seed':
           return next;
         default:
@@ -189,6 +192,27 @@ export const Deck_ContinentsShort = [
 
   , [2, cardsData.CardNeoplasmAndSwimming.type]
   , [2, cardsData.CardNeoplasmAndCooperation.type]
+];
+
+// Cards of the "Continents" that work only with locations (added to Deck_ContinentsShort in the locations mode)
+export const Deck_ContinentsLocations = [
+// 0
+// стадность / водоплавающее - 2,
+// стадность / сотрудничество - 4,
+// стадность / хищник - 2,
+// миграция / хищник - 4,
+  [2, cardsData.CardHerdingAndSwimming.type]
+  , [4, cardsData.CardHerdingAndCommunication.type]
+  , [2, cardsData.CardHerdingAndCarnivorous.type]
+  , [4, cardsData.CardMigrationAndCarnivorous.type]
+
+// 1
+// миграция / водоплавающее - 4,
+// прилипала / водоплавающее - 2,
+// прилипала / сотрудничество - 2,
+  , [4, cardsData.CardMigrationAndSwimming.type]
+  , [2, cardsData.CardSuckerfishAndSwimming.type]
+  , [2, cardsData.CardSuckerfishAndCommunication.type]
 ];
 
 export const Deck_Bonus = [

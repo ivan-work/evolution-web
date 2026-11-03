@@ -16,6 +16,7 @@ import {
   getStaticDefenses
 } from "../models/game/evolution/traitsData/TraitCarnivorous";
 import {getOrThrowAnimalTrait, getOrThrowGameAnimal, getOrThrowGamePlant} from "./checks";
+import {getErrorOfLocationLock, getFoodForAnimal} from "../models/game/evolution/locations";
 
 export const getErrorOfEntityTraitActivation = (game, playerId, entity, trait, ...targets) => {
   if (!trait) return ERRORS.TRAIT_ACTION_NO_TRAIT;
@@ -154,9 +155,10 @@ export const getErrorOfAnimalEating = (game, animal) => {
 
 export const getErrorOfAnimalEatingFromGame = (game, animal) => {
   if (game.cooldowns.checkFor(TRAIT_COOLDOWN_LINK.EATING, animal.ownerId, animal.id)) return ERRORS.COOLDOWN;
-  if (game.getFood() < 1) return ERRORS.GAME_FOOD;
+  if (getFoodForAnimal(game, animal) < 1) return ERRORS.GAME_FOOD;
   return (
     getErrorOfEatingCooldown(game, animal.ownerId, animal.id)
+    || getErrorOfLocationLock(game, animal)
     || getErrorOfAnimalEating(game, animal)
   );
 };
@@ -288,7 +290,7 @@ export const checkAnimalCanTakeShellFails = (game, animal) => {
   if (animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) return ERRORS.TRAIT_REGENERATION_DEAD;
   const traitRegeneration = animal.hasTrait(tt.TraitRegeneration, true);
   if (traitRegeneration && traitRegeneration.getDataModel()._getErrorOfTraitPlacement(animal)) return ERRORS.TRAIT_REGENERATION_TRAIT_MAX;
-  return false;
+  return getErrorOfLocationLock(game, animal);
 };
 
 export const checkIfTraitDisabledByIntellect = (attackEntity, defenseTrait) => {

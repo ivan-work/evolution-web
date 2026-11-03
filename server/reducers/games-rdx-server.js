@@ -14,6 +14,7 @@ import * as pt from '../../shared/models/game/evolution/plantarium/plantTypes';
 
 import {TraitNeoplasm} from '../../shared/models/game/evolution/traitsData/cons';
 import * as ptt from "../../shared/models/game/evolution/plantarium/plantTraitTypes";
+import {LOCATIONS, LocationsRecord, isLocationsGame} from "../../shared/models/game/evolution/locations";
 
 const byId = id => object => object.id === id;
 
@@ -287,6 +288,7 @@ export const gameStartTurn = (game) => {
     .updateIn(['status', 'turn'], turn => ++turn)
     .setIn(['status', 'round'], 0)
     .setIn(['food'], 0)
+    .update(game => isLocationsGame(game) ? game.setIn(['locations', 'food'], LocationsRecord.emptyFood()) : game)
     .update('players', players => players.map(player => player
       .set('ended', !player.playing)
       .update('continent', continent => continent.map(animal => animal
@@ -331,7 +333,7 @@ export const gameStartDeploy = (game) => {
     ))
 };
 
-export const gameStartFeeding = (game, {food = 0}) => {
+export const gameStartFeeding = (game, {food = 0, locationsFood}) => {
   ensureParameter(food, 'number');
   let aedificators = 0;
   let pests = 0;
@@ -340,8 +342,9 @@ export const gameStartFeeding = (game, {food = 0}) => {
       .set('ended', !player.playing)))
     .update('plants', plants => plants.map(plant => plant.set('covers', plant.coverSlots)))
     .update(processNeoplasm)
+    .update(game => isLocationsGame(game) ? gameStartFeedingLocations(game, locationsFood) : game)
     .update(game => { // tap
-      if (!game.isPlantarium()) {
+      if (!game.isPlantarium() && !isLocationsGame(game)) {
         game.someAnimal((animal) => {
           if (animal.hasTrait(tt.TraitAedificator)) aedificators++;
           if (animal.hasTrait(tt.TraitPest)) pests++;
@@ -351,6 +354,19 @@ export const gameStartFeeding = (game, {food = 0}) => {
     })
     .set('food', Math.max(0, food + aedificators * 2 - pests))
     .setIn(['status', 'round'], 0)
+};
+
+// Continents: every location gets its own food base, aedificators add food to the base of their location
+const gameStartFeedingLocations = (game, locationsFood = {}) => {
+  const aedificators = LOCATIONS.reduce((result, location) => ({...result, [location]: 0}), {});
+  game.someAnimal((animal) => {
+    if (animal.hasTrait(tt.TraitAedificator)) aedificators[animal.location]++;
+  });
+  return game
+    .setIn(['locations', 'forcedAnimals'], Map())
+    .updateIn(['locations', 'food'], foodMap => LOCATIONS.reduce((foodMap, location) => foodMap
+        .set(location, Math.max(0, (locationsFood[location] || 0) + aedificators[location] * 2))
+      , foodMap));
 };
 
 const processNeoplasm = (game) => {
@@ -425,7 +441,9 @@ export const traitMoveFood = (game, {animalId, amount, sourceType, sourceId}) =>
   switch (sourceType) {
     case 'GAME': {
       return updatedGame
-        .update('food', food => food - amount)
+        .update(game => isLocationsGame(game)
+          ? game.updateIn(['locations', 'food', animal.location], food => food - amount)
+          : game.update('food', food => food - amount))
         .update(addToGameLog(['traitMoveFood', amount, sourceType, logAnimal(animal)]));
     }
     case 'PLANT': {
@@ -543,8 +561,14 @@ export const traitQuestion = (game, {question}) => game
 export const traitAnswerSuccess = (game, {questionId}) => game
   .remove('question');
 
-export const traitGrazeFood = (game, {food}) => game
-  .set('food', Math.max(game.food - 1, 0));
+export const traitGrazeFood = (game, {food, sourceAid}) => {
+  if (isLocationsGame(game)) {
+    const location = game.locateAnimal(sourceAid).location;
+    return game.updateIn(['locations', 'food', location], food => Math.max(food - 1, 0));
+  }
+  return game
+    .set('food', Math.max(game.food - 1, 0));
+};
 
 export const traitParalyze = (game, {animalId}) => {
   const animal = game.locateAnimal(animalId);
@@ -694,6 +718,30 @@ export const huntUnsetFlag = (game, {key, value}) => game.updateIn(['hunts', 0, 
 
 export const huntEnd = (game, {}) => game.update('hunts', hunts => hunts.shift());
 
+// region Locations
+export const animalChangeLocation = (game, {animalId, location, reason}) => {
+  const animal = game.locateAnimal(animalId);
+  return game
+    .setIn(['players', animal.ownerId, 'continent', animalId, 'location'], location)
+    .update(addToGameLog(['animalChangeLocation', reason, logAnimal(animal), animal.location, location]));
+};
+
+export const gameLocationsSetForcedAnimals = (game, {playerId, count}) => game
+  .updateIn(['locations', 'forcedAnimals'], forcedAnimals => count > 0
+    ? forcedAnimals.set(playerId, count)
+    : forcedAnimals.remove(playerId));
+
+export const gameMigrationStart = (game, {migration}) => game
+  .setIn(['locations', 'migration'], migration);
+
+export const gameMigrationNextDecider = (game, {time}) => game
+  .updateIn(['locations', 'migration', 'deciders'], deciders => deciders.shift())
+  .setIn(['locations', 'migration', 'time'], time);
+
+export const gameMigrationEnd = (game) => game
+  .setIn(['locations', 'migration'], null);
+// endregion
+
 // region Plantarium
 export const gameSpawnPlants = (game, {plants}) => {
   return game
@@ -831,6 +879,12 @@ export const reducer = createReducer(Map(), {
   , huntSetFlag: (state, data) => state.update(data.gameId, game => huntSetFlag(game, data))
   , huntUnsetFlag: (state, data) => state.update(data.gameId, game => huntUnsetFlag(game, data))
   , huntEnd: (state, data) => state.update(data.gameId, game => huntEnd(game, data))
+
+  , animalChangeLocation: (state, data) => state.update(data.gameId, game => animalChangeLocation(game, data))
+  , gameLocationsSetForcedAnimals: (state, data) => state.update(data.gameId, game => gameLocationsSetForcedAnimals(game, data))
+  , gameMigrationStart: (state, data) => state.update(data.gameId, game => gameMigrationStart(game, data))
+  , gameMigrationNextDecider: (state, data) => state.update(data.gameId, game => gameMigrationNextDecider(game, data))
+  , gameMigrationEnd: (state, data) => state.update(data.gameId, game => gameMigrationEnd(game, data))
 
   , gameSpawnPlants: (state, data) => state.update(data.gameId, game => gameSpawnPlants(game, data))
   , gamePestPlants: (state, data) => state.update(data.gameId, game => gamePestPlants(game, data))

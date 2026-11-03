@@ -58,6 +58,8 @@ App:
       addon_base2: Base (x2)
       addon_timeToFly: Time To Fly
       addon_continents: Continents (no locations)
+      continentsLocations: 'Locations: Laurasia, Gondwana, Ocean'
+      continentsLocationsHelp: Animals live on two continents and in the Ocean, every location has its own food base. Herding, Migration and Suckerfish are added to the deck, every player gets 10 cards. Needs Continents, not compatible with Plants and fan addons.
       addon_bonus: Bonus cards
       addon_plantarium: Plantarium
       addon_customff: Fan expansion
@@ -89,6 +91,10 @@ Game:
     Fruit: Edible for carnivores
     Food: Food
     Cover: Cover from carnivores
+  Location:
+    LAURASIA: Laurasia
+    GONDWANA: Gondwana
+    OCEAN: Ocean
   Phase:
     DEPLOY: Deploy phase
     FEEDING: Feeding phase
@@ -109,6 +115,18 @@ Game:
         PLANT_ATTACK: 'Attack the animal'
         COVER: 'Put on animal to protect it from attack'
     FoodBase: Food base
+    Locations:
+      Locked: In this round the player acts in another location
+      Empty: no animals
+      Migrate: Migration
+      MigrateTo: Migrate to
+      ForcedAnimals: 'You had no cards and no animals: deploy {count} more of the new cards as animals'
+    SuckerfishDialog:
+      Title: Suckerfish
+      Migrant: Migrating animal of
+      Text: Select the suckerfish that follow it.
+      Follow: Follow
+      Stay: Stay
     SelectLink: Drag and drop on the other creature
     EndTurn: End turn
     EndPhase: End phase
@@ -191,6 +209,10 @@ Game:
       0: '{0} is using trait ${1}'
       1: '{0} is using trait  ${1} on {2}'
       2: '{0} is using trait  ${1} on {2} and {3}'
+    animalChangeLocation:
+      SWIMMING: '{1} swims to the Ocean'
+      MIGRATION: '{1} migrates: {2} → {3}'
+      SUCKERFISH: '{1} follows the migrant: {2} → {3}'
   Plant:
     PlantEphemeral: Ephemeral
     PlantPerennial: Perennial
@@ -351,9 +373,9 @@ Game:
   
     TraitRegeneration   : $A can have only two traits, not leading to an increased need of food. If $A is killed, traits remain in game, but do not work. Before deploy phase caed od killed $A must be recovered from hand; If player don`t have any, recoveres from deck. Animal with this trait can be killed only by starvation. $Count 6
 
-    TraitSuckerfish     : To be added...
-    TraitHerding        : To be added....
-    TraitMigration      : To be added.....
+    TraitSuckerfish     : $A can move together with an $A (yours or not) migrating from the same location. It can't migrate by itself. The migrating player decides first, then the others clockwise. A swimming suckerfish can follow a swimming migrant from the Ocean to a continent and back. $Count 4
+    TraitHerding        : $A can't be attacked if there are as many or more $A with Herding in its location as predators. Animals of all players are counted. $Count 8
+    TraitMigration      : Once per turn, in your feeding phase $A can move to another location. In this round the player can't take $F or use other traits, but can migrate several $A with this trait. A regular $A migrates between the continents only, an $A from the Ocean goes to a continent and gets Swimming, a swimming $A goes from a continent to the Ocean. Paired traits of animals in different locations are discarded. $Count 8
 
     TraitRstrategy      : Can be deployed on any animal in game. Player do not receive cards for $A with this trait. Instead in the beginning of the deploy phase, two cards are deployed as new $A of that player. $Count 6
     TraitHomeothermy    : $CDRound. $A with this trait can receive additional $F from "food base". Can`t be used to fill Fat Tissue. $Count 6

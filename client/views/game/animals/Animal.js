@@ -50,6 +50,9 @@ import {
   getErrorOfAnimalTakingCover
 } from "../../../../shared/actions/trait.checks";
 import AnimalFlags from "./AnimalFlags";
+import MigrationButton from "../locations/MigrationButton";
+import {isLocationsGame, isSameLocation} from "../../../../shared/models/game/evolution/locations";
+import {getErrorOfForcedAnimals, getErrorOfLocationsTraitPlacement} from "../../../../shared/actions/locations.checks";
 import {gamePlantAttackRequest} from "../../../../shared/actions/game.plantarium";
 
 const DEATH_ANIMATION_TIME = `${AT_DEATH}ms`;
@@ -148,7 +151,7 @@ export class BaseAnimal extends React.PureComponent {
   }
 
   render() {
-    const {classes, animal, game, children, canInteract, acceptInteraction, place} = this.props;
+    const {classes, animal, game, children, canInteract, acceptInteraction, place, toolbarExtra} = this.props;
 
     const cnAnimal = cn(
       classes.animal
@@ -174,6 +177,7 @@ export class BaseAnimal extends React.PureComponent {
           </div>
           <div>
             <AnimalFlags animal={animal} />
+            {toolbarExtra}
           </div>
         </div>
         {traitList}
@@ -196,6 +200,7 @@ export const InteractiveAnimal = compose(
     return {
       game
       , userId: game.userId
+      , toolbarExtra: isLocationsGame(game) ? <MigrationButton animal={animal} /> : null
     }
   }, {
     // PHASE.DEPLOY
@@ -232,6 +237,8 @@ export const InteractiveAnimal = compose(
               return (
                 !traitData.getErrorOfTraitPlacement_User(userId, animal.ownerId)
                 && !traitData.getErrorOfTraitPlacement(animal)
+                && !getErrorOfForcedAnimals(game, userId)
+                && !getErrorOfLocationsTraitPlacement(game, traitType, animal)
               );
             case PHASE.REGENERATION:
               return animal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION);
@@ -246,13 +253,15 @@ export const InteractiveAnimal = compose(
             animal !== sourceAnimal
             && animal.ownerId === sourceAnimal.ownerId
             && !TraitModel.LinkBetweenCheck(traitType, sourceAnimal, animal)
+            && isSameLocation(game, sourceAnimal, animal)
           );
         }
         case InteractionItemType.FOOD: {
-          const {sourceId} = item;
+          const {sourceId, location} = item;
           const sourcePlant = game.getPlant(sourceId);
           return (
             game.userId === animal.ownerId
+            && (!location || location === animal.location)
             && (
               !sourcePlant && !getErrorOfAnimalEatingFromGame(game, animal)
               || !!sourcePlant && !getErrorOfAnimalEatingFromPlant(game, animal, sourcePlant)

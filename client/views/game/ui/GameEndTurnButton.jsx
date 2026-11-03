@@ -8,6 +8,7 @@ import Button from "@material-ui/core/Button";
 import {gameEndTurnRequest, traitAmbushContinueRequest} from '../../../../shared/actions/actions';
 import {compose, withProps} from "recompose";
 import {PHASE} from "../../../../shared/models/game/GameModel";
+import {getErrorOfForcedAnimals} from "../../../../shared/actions/locations.checks";
 
 const playerHasAmbushes = (game) => {
   if (game.getIn(['ambush', 'ambushers']) && game.userId) {
@@ -51,7 +52,7 @@ export default compose(
     const isActed = game.getPlayer().acted;
     return {
       color: isActed ? 'secondary' : 'primary'
-      , disabled: !game.isPlayerTurn()
+      , disabled: !game.isPlayerTurn() || !!getErrorOfForcedAnimals(game, game.userId)
       , onClick: $endTurn
       , text: T.translate(isActed ? 'Game.UI.EndTurn' : 'Game.UI.EndPhase')
     }

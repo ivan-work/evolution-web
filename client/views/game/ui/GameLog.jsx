@@ -50,6 +50,14 @@ const customLog = {
   , gameStartPhase: (message, [phase, data]) => {
     return T.translate('Game.Phase.' + phase, {data})
   }
+  , animalChangeLocation: (message, [reason, animal, from, to]) => {
+    return T.translate('Game.Log.' + message, {
+      context: reason
+      , 1: animal
+      , 2: T.translate('Game.Location.' + from)
+      , 3: T.translate('Game.Location.' + to)
+    })
+  }
   , default: (message, values) => T.translate('Game.Log.' + message, {...values})
 };
 

@@ -32,6 +32,7 @@ import {TraitCarnivorous} from './TraitCarnivorous';
 import {huntSetFlag, server$huntEnd, server$huntProcess} from "./hunt";
 import {getErrorOfAnimalEatingFromPlantNoCD} from "../../../../actions/trait.checks";
 import {server$activateViviparous, server$checkForViviparous} from "../../../../actions/trait";
+import {getFoodForAnimal, isSameLocation} from '../locations';
 
 export {TraitCarnivorous};
 export * from './ttf';
@@ -171,6 +172,7 @@ export const TraitPiracy = {
     return false;
   }
   , getErrorOfUseOnTarget: (game, sourceAnimal, targetAnimal) => {
+    if (!isSameLocation(game, sourceAnimal, targetAnimal)) return ERRORS.LOCATION_WRONG;
     if (targetAnimal.food === 0) return ERRORS.TRAIT_TARGETING_ANIMAL_NO_FOOD;
     if (targetAnimal.isSaturated()) return ERRORS.TRAIT_TARGETING_ANIMAL_SATURATED;
   }
@@ -225,7 +227,7 @@ export const TraitGrazing = {
     return true;
   }
   , _getErrorOfUse: (game, sourceAnimal) => {
-    if (game.getFood() < 1) return ERRORS.GAME_FOOD;
+    if (getFoodForAnimal(game, sourceAnimal) < 1) return ERRORS.GAME_FOOD;
     return false;
   }
 };
@@ -314,7 +316,7 @@ export const TraitCooperation = {
 
     const {sourceType, sourceId} = trait.value;
     if (sourceType === 'GAME') {
-      if (game.getFood() < 1) return ERRORS.GAME_FOOD;
+      if (getFoodForAnimal(game, linkedAnimal) < 1) return ERRORS.GAME_FOOD;
     } else if (sourceType === 'PLANT') {
       const plant = game.getPlant(sourceId);
       return getErrorOfAnimalEatingFromPlantNoCD(game, linkedAnimal, plant)

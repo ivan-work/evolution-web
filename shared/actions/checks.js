@@ -2,6 +2,7 @@ import logger from '~/shared/utils/logger';
 
 import ActionCheckError from '../models/ActionCheckError';
 import * as ERR from "../errors/ERR";
+import {getMigration} from "../models/game/evolution/locations";
 
 /**
  * PLEASE READ
@@ -110,6 +111,10 @@ export const checkPlayerTurn = (game, userId) => {
 };
 
 export const checkPlayerCanAct = (game, userId) => {
+  if (getMigration(game)) {
+    // Owners of TraitSuckerfish decide whether to follow the migrant
+    throw new ActionCheckError(ERR.GAME_PLAYER_ACT_ON_QUESTION, {gameId: game.id, userId});
+  }
   if (!game.question) {
     checkPlayerTurn(game, userId);
   } else {

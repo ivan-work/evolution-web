@@ -23,6 +23,7 @@ import {
   server$huntStart_Animal
 } from "./hunt";
 import * as ptt from "../plantarium/plantTraitTypes";
+import {isLocationsGame, isProtectedByHerd, isSameLocation} from '../locations';
 
 export const countUnavoidableDefenses = (game, sourceAnimal, targetAnimal) => {
   let defenses = 0;
@@ -31,6 +32,8 @@ export const countUnavoidableDefenses = (game, sourceAnimal, targetAnimal) => {
   if (targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION))
     defenses++;
   if (targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.IN_COVER))
+    defenses++;
+  if (isLocationsGame(game) && !isSameLocation(game, sourceAnimal, targetAnimal))
     defenses++;
   return defenses;
 };
@@ -47,6 +50,7 @@ export const getStaticDefenses = (game, sourceAnimal, targetAnimal) =>
       || (trait.type === tt.TraitFlight && !trait.getErrorOfUse(game, sourceAnimal, targetAnimal))
       || (trait.type === tt.TraitShy && targetAnimal.hasFlag(TRAIT_ANIMAL_FLAG.SHY))
       || (trait.type === tt.TraitPerspicuus && targetAnimal.getFood() === 0)
+      || (trait.type === tt.TraitHerding && isProtectedByHerd(game, targetAnimal))
     )).toArray();
 
 // [tt.TraitRunning, tt.TraitShell, tt.TraitInkCloud, tt.TraitCnidocytes, tt.TraitMimicry, tt.TraitTailLoss, tt.TraitPoisonous];
@@ -84,6 +88,7 @@ export const findAnglerfish = (game, targetAnimal) => {
         traitAnglerfish
         && !traitAnglerfish.getErrorOfUse(game, animal)
         && (animal === targetAnimal || traitAnglerfish.value)
+        && isSameLocation(game, animal, targetAnimal)
       );
     })
   }

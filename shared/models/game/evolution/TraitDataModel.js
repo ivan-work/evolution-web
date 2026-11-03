@@ -5,6 +5,7 @@ import {CARD_TARGET_TYPE, CTT_PARAMETER, TRAIT_ANIMAL_FLAG} from './constants';
 import TraitDataModelBaseProps from "./TraitDataModelBaseProps";
 import ERRORS from '../../../actions/errors';
 import {AnimalModel} from "./AnimalModel";
+import {getErrorOfLocationLock} from './locations';
 
 const TraitDataModelProps = {
   ...TraitDataModelBaseProps
@@ -76,6 +77,11 @@ export class TraitDataModel extends Record(TraitDataModelProps) {
     if (this.cooldowns && this.cooldowns
       .some(([link]) => game.cooldowns.checkFor(link, animal.ownerId, animal.id, trait.id)))
       return ERRORS.COOLDOWN;
+
+    if (this.playerControllable && !this.transient && !this.defense) {
+      const errorOfLocationLock = getErrorOfLocationLock(game, animal);
+      if (errorOfLocationLock) return errorOfLocationLock;
+    }
 
     return this._getErrorOfUse(game, animal, trait, ...targets);
   };

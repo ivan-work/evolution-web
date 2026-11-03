@@ -11,6 +11,7 @@ import {
   TraitNeoplasm, TraitVoracious
 } from './traitTypes';
 import {TRAIT_ANIMAL_FLAG, CTT_PARAMETER} from './constants';
+import {LOCATION} from './locations';
 
 /**
  * @class AnimalModel
@@ -20,6 +21,7 @@ import {TRAIT_ANIMAL_FLAG, CTT_PARAMETER} from './constants';
  * @property {number} foodSize
  * @property {number} fatSize
  * @property {string} ownerId - a PlayerModel ID.
+ * @property {string} location - a LOCATION of the "Continents" locations mode (null without it).
  */
 export class AnimalModel extends Record({
   id: null
@@ -29,6 +31,7 @@ export class AnimalModel extends Record({
   , fatSize: 0
   , traits: OrderedMap()
   , flags: Map()
+  , location: null
 }) {
   static new(ownerId, traitType) {
     let animal = new AnimalModel({
@@ -215,6 +218,7 @@ Animal#${this.id}\
   countScore() {
     let baseScore = 2;
     if (this.hasFlag(TRAIT_ANIMAL_FLAG.REGENERATION)) baseScore = 0;
+    else if (this.location === LOCATION.OCEAN) baseScore += 1; // Continents: every animal in the Ocean brings a point
     return (baseScore + this.traits.reduce((result, trait) => result + trait.countScore(), 0));
   }
 }

@@ -17,6 +17,8 @@ import {
   getErrorOfAnimalTakingCover, checkTraitActivation_Plant, getErrorOfEntityTraitActivation
 } from './trait.checks';
 import {server$autoFoodSharing, server$takeFoodRequest, server$traitTakeCover} from "./trait";
+import {isLocationsGame, LOCATIONS, LOCATIONS_COOLDOWN_LINK} from "../models/game/evolution/locations";
+import {getErrorOfMigration} from "./locations.checks";
 
 const logOptions = !!process.env.LOG_OPTIONS;
 const logOptionsAll = !!process.env.LOG_OPTIONS_ALL;
@@ -77,6 +79,18 @@ const makeOption = {
         , TRAIT_COOLDOWN_LINK.TAKE_SHELL
         , TRAIT_COOLDOWN_DURATION.TURN
         , TRAIT_COOLDOWN_PLACE.ANIMAL, animalId
+      )
+    })
+  }
+  , traitMigrationRequest: (animalId, location) => {
+    return new Option({
+      type: 'traitMigrationRequest'
+      , text: `traitMigrationRequest: ${animalId} to ${location}`
+      , cooldownAction: (gameId) => startCooldown(gameId
+        , LOCATIONS_COOLDOWN_LINK.MIGRATION
+        , TRAIT_COOLDOWN_DURATION.TURN
+        , TRAIT_COOLDOWN_PLACE.ANIMAL
+        , animalId
       )
     })
   }
@@ -173,7 +187,7 @@ export const searchPlayerOptions = (game, playerId, successFn) => {
     if (game.getArea().shells.size > 0 && !checkAnimalCanTakeShellFails(game, animal))
       return successFn(makeOption.traitTakeShellRequest(animal.id));
 
-    return animal.traits.some((trait) => {
+    const traitOption = animal.traits.some((trait) => {
       const traitData = trait.getDataModel();
 
       logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/trait/${trait.type}`);
@@ -211,6 +225,11 @@ export const searchPlayerOptions = (game, playerId, successFn) => {
         }
       }
     });
+    if (traitOption || !isLocationsGame(game)) return traitOption;
+
+    const migrationTarget = LOCATIONS.find(location => !getErrorOfMigration(game, animal, location));
+    logOptions && logger.debug(`endturn/options/search/${playerId}/animal/${animal.id}/migration = ${migrationTarget}`);
+    return !!migrationTarget && successFn(makeOption.traitMigrationRequest(animal.id, migrationTarget));
   });
 
   if (animalOption) return animalOption;

@@ -55,6 +55,11 @@ import {
   , traitNotify_Start
   , traitTakeShell
   , traitTakeCover
+  , animalChangeLocation
+  , gameLocationsSetForcedAnimals
+  , gameMigrationStart
+  , gameMigrationNextDecider
+  , gameMigrationEnd
 } from '../../server/reducers/games-rdx-server';
 
 export const reducer = createReducer(null, {
@@ -116,6 +121,11 @@ export const reducer = createReducer(null, {
   , traitNotify_Start
   , traitTakeShell
   , traitTakeCover
+  , animalChangeLocation
+  , gameLocationsSetForcedAnimals
+  , gameMigrationStart
+  , gameMigrationNextDecider
+  , gameMigrationEnd
   , debugMirrorPlayer: (game, {limit = 100}) => {
     const player = game.players.first();
     const updateId = id => id + '' + game.players.size;

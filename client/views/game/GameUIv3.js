@@ -26,6 +26,10 @@ import GameSVGOverlay from "./GameSVGOverlay";
 import GameTimedOutDialog from "./ui/GameTimedOutDialog";
 import QuestionIntellect from "./ui/QuestionIntellect";
 import QuestionDefence from "./ui/QuestionDefence";
+import QuestionSuckerfish from "./ui/QuestionSuckerfish";
+import LocationsContinent from "./locations/LocationsContinent";
+import LocationsFood from "./locations/LocationsFood";
+import LocationsForcedAnimals from "./locations/LocationsForcedAnimals";
 import GameStyles from "./GameStyles";
 import FoodWrapper from "./food/FoodWrapper";
 import PlantsContainer from "./plants/PlantsContainer";
@@ -84,6 +88,10 @@ const styles = theme => ({
       minWidth: 140
       , maxWidth: 320
     }
+    , '&.LocationsFood': {
+      minWidth: 250
+      , maxWidth: 400
+    }
     , '&.Compressed': {
       maxHeight: 36
       , minHeight: 36
@@ -95,6 +103,10 @@ const styles = theme => ({
       , '& .Food': {
         maxWidth: 140
         , flex: '0 0 0'
+      }
+      , '& .LocationsFood': {
+        minWidth: 190
+        , maxWidth: 220
       }
       , '& .Chat': {
         minWidth: 100
@@ -128,6 +140,13 @@ const styles = theme => ({
       background: '#F3FFFA'
     }
   }
+  // Locations: a panel of a player fits a phone screen
+  , LocationsPlayerWrapper: {
+    [theme.breakpoints.down('xs')]: {
+      minWidth: 0
+      , flexBasis: '100%'
+    }
+  }
   , ContinentContainer: {
     display: 'flex'
     , flex: '1 1 auto'
@@ -154,6 +173,7 @@ export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
         <GameTimedOutDialog />
         <QuestionIntellect />
         <QuestionDefence />
+        <QuestionSuckerfish />
 
         <Grid item className={cn(classes.gridMiscRow, {'Compressed': compress})}>
           {!compress && <Paper className={cn(classes.gridMiscItem, 'PlayersList', {'Compressed': compress})}>
@@ -163,8 +183,11 @@ export const GameUIv3 = ({classes, game, compress, toggleCompress}) => {
             <GameInfoToolbar game={game} compressControls={{compress, toggleCompress}} />
           </Paper>
           <div className={classes.gridMiscSubRow}>
-            {!game.isPlantarium() && <Paper className={cn(classes.gridMiscItem, 'Food', {'Compressed': compress})}>
-              <FoodWrapper game={game} />
+            {!game.isPlantarium() && <Paper className={cn(classes.gridMiscItem, 'Food', {
+              'Compressed': compress
+              , 'LocationsFood': !!game.locations
+            })}>
+              {game.locations ? <LocationsFood game={game} compressed={compress} /> : <FoodWrapper game={game} />}
             </Paper>}
             <Paper className={cn(classes.gridMiscItem, 'Chat', {'Compressed': compress})}>
               {!compress ? <ChatWrapper game={game} /> : <ChatWrapperSmall game={game} />}
@@ -205,11 +228,13 @@ export const PlayerWrapper = ({classes, playerId, game}) => {
     isUserWrapper
     , isPlayerTurn
     , isUserTurn: isUserWrapper && isPlayerTurn
+    , [classes.LocationsPlayerWrapper]: !!game.locations
   });
   return <Paper id={playerId} className={className}>
     <PlayerUser game={game} playerId={playerId} />
+    {isUserWrapper && game.locations && <LocationsForcedAnimals />}
     <div className={classes.ContinentContainer}>
-      <Continent playerId={playerId} />
+      {game.locations ? <LocationsContinent playerId={playerId} /> : <Continent playerId={playerId} />}
     </div>
     {isUserWrapper && <Grid item className={classes.gridHand}>
       <PlayerHandWrapper><PlayerHand /></PlayerHandWrapper>

@@ -30,6 +30,7 @@ import {
 } from './TraitCarnivorous';
 import * as tt from '../traitTypes';
 import {allHuntsSetFlag, huntSetFlag, server$huntEnd} from "./hunt";
+import {isLocationsGame, isSpecializationTrait} from '../locations';
 
 export const TraitMetamorphose = {
   type: tt.TraitMetamorphose
@@ -140,8 +141,13 @@ export const TraitThermosynthesis = {
   }
   , _getErrorOfUse: (game, animal, traitSpec) => {
     if (!animal.canEat(game)) return ERRORS.ANIMAL_BLOCKED_FROM_FOOD;
-    if (game.someAnimal((animal) => {
-      const trait = animal.hasTrait(traitSpec.type);
+    if (game.someAnimal((otherAnimal) => {
+      if (isLocationsGame(game)) {
+        // Continents: specializations A and B are the same and conflict only within a location
+        if (otherAnimal.location !== animal.location) return false;
+        return otherAnimal.getTraits().some(trait => isSpecializationTrait(trait) && trait.id !== traitSpec.id);
+      }
+      const trait = otherAnimal.hasTrait(traitSpec.type);
       return trait && trait.id !== traitSpec.id;
     })) return ERRORS.TRAIT_ACTION_SPECIFIC;
     return false;

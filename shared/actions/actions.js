@@ -2,6 +2,7 @@ export * from './auth';
 export * from './rooms';
 export * from './game';
 export * from './game.plantarium';
+export * from './game.locations';
 export * from './trait';
 export * from './debug';
 export * from './generic';
@@ -20,6 +21,8 @@ import {gameClientToServer} from './game';
 import {gameServerToClient} from './game';
 import {plantsClientToServer} from './game.plantarium';
 import {plantsServerToClient} from './game.plantarium';
+import {locationsClientToServer} from './game.locations';
+import {locationsServerToClient} from './game.locations';
 import {traitClientToServer} from './trait';
 import {traitServerToClient} from './trait';
 import {debugClientToServer} from './debug';
@@ -34,6 +37,7 @@ export const clientToServer = Object.assign({}
   , roomsClientToServer
   , gameClientToServer
   , plantsClientToServer
+  , locationsClientToServer
   , traitClientToServer
   , debugClientToServer
   , chatClientToServer
@@ -47,6 +51,7 @@ export const serverToClient = Object.assign({}
   , roomsServerToClient
   , gameServerToClient
   , plantsServerToClient
+  , locationsServerToClient
   , traitServerToClient
   , debugServerToClient
   , chatServerToClient

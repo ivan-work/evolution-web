@@ -16,6 +16,7 @@ import * as ptt from './evolution/plantarium/plantTraitTypes';
 import {TraitNeoplasm} from './evolution/traitsData';
 import yaml from 'yaml-js';
 import PlantModel from "./evolution/plantarium/PlantModel";
+import {LOCATION, LOCATIONS, LocationsRecord, isLocationsModeSettings, parseLocation} from "./evolution/locations";
 
 const searchCardType = (name) => Object.keys(cardsData)
   .find(cardType => ~cardType.toLowerCase().indexOf(name.toLowerCase()));
@@ -82,6 +83,11 @@ export const parseAnimalList = (userId, string) => {
         }
         if (/^!.*$/.test(prop)) {
           return animal.setIn(['flags', prop], true);
+        }
+        if (/^@.+$/.test(prop)) {
+          const location = parseLocation(prop.slice(1));
+          invariant(!!location, `GameModel.parseAnimalList wrong location: (${prop})`);
+          return animal.set('location', location);
         }
         else if (/\$/.test(prop)) {
           const [traitName, targetId] = prop.split('$');
@@ -169,6 +175,14 @@ export const parsePlantsList = (string) => {
   return plantsMap;
 };
 
+// Locations mode: `food` is a map of the food bases, e.g. {laurasia: 2, ocean: 3}
+const parseLocations = (food) => LocationsRecord.new()
+  .update('food', foodMap => Object.keys(food || {}).reduce((foodMap, key) => {
+    const location = parseLocation(key);
+    invariant(!!location, `GameModel.parseLocations wrong location: (${key})`);
+    return foodMap.set(location, +food[key]);
+  }, foodMap));
+
 export const parseFromRoom = (room, string = '') => {
   const seed = merge({
     players: []
@@ -177,12 +191,14 @@ export const parseFromRoom = (room, string = '') => {
 
   const deck = parseCardList(seed.deck || '').map(card => card.toClient());
   const deckPlants = seed.settings.addon_plantarium ? parsePlantDeck(seed.deckPlants || '') : null;
+  const locations = isLocationsModeSettings(seed.settings) ? parseLocations(seed.food) : null;
 
   const players = room.users.reduce((result, id, index) => {
     return [...result, [id, new PlayerModel({
       id
       , hand: parseCardList(seed.players[index] && seed.players[index].hand || '')
       , continent: parseAnimalList(id, seed.players[index] && seed.players[index].continent || '')
+        .map(animal => !locations || animal.location ? animal : animal.set('location', LOCATION.LAURASIA))
       , index
       , ended: false
     }).toClient()]];
@@ -192,7 +208,8 @@ export const parseFromRoom = (room, string = '') => {
     id: uuid.v4()
     , roomId: room.id
     , timeCreated: Date.now()
-    , food: seed.food || 0
+    , food: !locations && seed.food || 0
+    , locations
     , status: new StatusRecord({
       roundPlayer: room.users.first()
       , currentPlayer: room.users.first()

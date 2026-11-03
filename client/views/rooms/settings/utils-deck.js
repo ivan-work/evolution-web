@@ -10,11 +10,13 @@ import {
   Deck_Base,
   Deck_Bonus,
   Deck_ContinentsShort
+  , Deck_ContinentsLocations
   , Deck_customff
   , Deck_lifecycle,
   Deck_Plantarium,
   Deck_TimeToFly
 } from "../../../../shared/models/game/GameSettings";
+import {isLocationsModeSettings} from "../../../../shared/models/game/evolution/locations";
 
 const makeDeckHelp = (deck) => (
   <div>
@@ -47,6 +49,11 @@ export const decksHelper = {
     cardCount: countDeckCards(Deck_ContinentsShort)
     , help: makeDeckHelp(Deck_ContinentsShort)
   }
+  , 'continentsLocations': {
+    cardCount: countDeckCards(Deck_ContinentsLocations)
+    , help: makeDeckHelp(Deck_ContinentsLocations)
+    , isActive: isLocationsModeSettings
+  }
   , 'addon_bonus': {
     cardCount: countDeckCards(Deck_Bonus)
     , help: makeDeckHelp(Deck_Bonus)
@@ -67,7 +74,7 @@ export const decksHelper = {
 
 export const getCardsTotal = (model) => {
   let total = Object.keys(decksHelper)
-    .filter(addonName => model[addonName])
+    .filter(addonName => decksHelper[addonName].isActive ? decksHelper[addonName].isActive(model) : model[addonName])
     .map(addonName => decksHelper[addonName].cardCount)
     .reduce((result, addonCardCount) => result + addonCardCount, 0);
 
