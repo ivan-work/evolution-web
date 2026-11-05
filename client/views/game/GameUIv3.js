@@ -89,8 +89,9 @@ const styles = theme => ({
       , maxWidth: 320
     }
     , '&.LocationsFood': {
-      minWidth: 250
-      , maxWidth: 400
+      flex: '1 1 400px'
+      , minWidth: 320
+      , maxWidth: 480
     }
     , '&.Compressed': {
       maxHeight: 36
@@ -104,9 +105,9 @@ const styles = theme => ({
         maxWidth: 140
         , flex: '0 0 0'
       }
-      , '& .LocationsFood': {
-        minWidth: 190
-        , maxWidth: 220
+      , '&.LocationsFood': {
+        minWidth: 220
+        , maxWidth: 240
       }
       , '& .Chat': {
         minWidth: 100

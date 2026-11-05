@@ -25,8 +25,6 @@ import {
   , getLocationLockLink
 } from "../../../../shared/models/game/evolution/locations";
 
-const MAX_FOOD_ICONS = 5;
-
 // Food token of a location: it can be given only to an animal from the same location
 export const InteractiveLocationFood = compose(
   setPropTypes({
@@ -51,59 +49,42 @@ const styles = {
     height: '100%'
     , overflowX: 'hidden'
     , overflowY: 'auto'
-    , padding: '2px 4px'
+    , padding: '4px 8px'
     , boxSizing: 'border-box'
-  }
-  , title: {
-    fontSize: 13
-    , color: '#666'
-    , textAlign: 'center'
   }
   , row: {
     display: 'flex'
     , alignItems: 'center'
-    , minHeight: 30
-    , borderRadius: 4
-    , margin: '2px 0'
-    , padding: '0 4px'
+    , minHeight: 33
+    , paddingLeft: 4
     , borderLeft: '4px solid'
   }
   , rowLabel: {
     display: 'flex'
     , alignItems: 'center'
     , flex: '0 0 auto'
-    , width: 92
+    , width: 130
     , fontSize: 14
     , fontWeight: 500
+    , whiteSpace: 'nowrap'
   }
   , rowIcon: {
-    fontSize: 18
+    fontSize: 20
     , marginRight: 4
   }
-  , rowCount: {
-    flex: '0 0 auto'
-    , width: 24
-    , fontSize: 15
-    , fontWeight: 700
-    , textAlign: 'right'
-    , marginRight: 4
-  }
-  // Tokens overlap, so all of them and the rest counter fit the narrowest panel
+  // Only whole tokens are seen: the ones that don't fit wrap out of the row, the label has the exact number.
+  // The padding keeps a pulsating token whole
   , rowFood: {
     display: 'flex'
-    , flexWrap: 'nowrap'
-    , alignItems: 'center'
-    , '& svg': {
-      fontSize: 24
-    }
-    , '& svg + svg': {
-      marginLeft: -10
-    }
-  }
-  , more: {
-    fontSize: 13
-    , color: '#666'
-    , marginLeft: 2
+    , flexWrap: 'wrap'
+    , flex: '1 1 0px'
+    , minWidth: 0
+    , boxSizing: 'content-box'
+    , height: GameStyles.iconSize
+    , padding: 4
+    , margin: -4
+    , rowGap: 8
+    , overflow: 'hidden'
   }
   , shells: {
     textAlign: 'center'
@@ -113,24 +94,24 @@ const styles = {
     display: 'flex'
     , alignItems: 'center'
     , justifyContent: 'space-around'
-    , height: '100%'
+    , padding: 0
     , '& $row': {
-      borderLeft: 'none'
-      , margin: 0
-      , padding: 0
-      , minHeight: 0
+      minHeight: 0
+      , paddingLeft: 0
+      , borderLeft: 'none'
     }
-    , '& $rowCount': {
+    , '& $rowLabel': {
       width: 'auto'
+    }
+    , '& $rowFood': {
+      flex: '0 0 auto'
     }
   }
   , ...LOCATIONS.reduce((result, location) => ({
     ...result
     , [location]: {
-      background: LocationColors[location].light
-      , borderColor: LocationColors[location].border
-      , color: LocationColors[location].main
-      , '& $rowCount, & $rowLabel': {
+      borderColor: LocationColors[location].border
+      , '& $rowLabel': {
         color: LocationColors[location].main
       }
     }
@@ -139,24 +120,22 @@ const styles = {
 
 export const LocationFoodRow = ({classes, location, food, compressed}) => (
   <div className={cn(classes.row, classes[location])}>
-    {!compressed && <Typography component='div' className={classes.rowLabel}>
+    <Typography component='div' className={classes.rowLabel}>
       <LocationIcon location={location} className={classes.rowIcon} />
-      {T.translate('Game.Location.' + location)}
-    </Typography>}
-    {compressed && <LocationIcon location={location} className={classes.rowIcon} />}
-    <Typography component='span' className={classes.rowCount}>{food}</Typography>
+      {compressed
+        ? food
+        : <span>{T.translate('Game.Location.' + location)}&nbsp;({food}){food > 0 ? ':' : ''}</span>}
+    </Typography>
     <div className={classes.rowFood}>
-      {repeat(Math.min(food, compressed ? 1 : MAX_FOOD_ICONS), i => (
+      {repeat(compressed ? Math.min(food, 1) : food, i => (
         <InteractiveLocationFood key={i} index={i} location={location} />
       ))}
-      {!compressed && food > MAX_FOOD_ICONS && <span className={classes.more}>+{food - MAX_FOOD_ICONS}</span>}
     </div>
   </div>
 );
 
 export const LocationsFood = ({classes, game, compressed}) => (
   <div className={cn(classes.root, {[classes.compressed]: compressed})}>
-    {!compressed && <Typography className={classes.title}>{T.translate('Game.UI.FoodBase')}</Typography>}
     {LOCATIONS.map(location => (
       <LocationFoodRow key={location}
                        classes={classes}

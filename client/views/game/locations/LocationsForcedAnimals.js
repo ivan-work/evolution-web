@@ -14,11 +14,9 @@ const style = {
   , left: 0
   , right: 0
   , zIndex: 1
-  , background: '#FFF3CD'
-  , color: '#6B4E00'
-  , borderRadius: 4
-  , padding: '2px 8px'
-  , fontSize: 14
+  , background: '#FC8'
+  , padding: 2
+  , textAlign: 'center'
 };
 
 // Restart rule: a player without cards and animals deploys two of the new cards as animals

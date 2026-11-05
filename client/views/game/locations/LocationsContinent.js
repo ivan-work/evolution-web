@@ -22,10 +22,9 @@ import {gameDeployAnimalRequest} from "../../../../shared/actions/game";
 import {PHASE} from "../../../../shared/models/game/GameModel";
 import {LOCATIONS, isContinent, getLocationLockLink} from "../../../../shared/models/game/evolution/locations";
 
-// A lane takes its size from the panel, never from the animals inside: two animals in a row at least
-const LANE_PADDING = 6;
-const LANE_BASIS = (GameStyles.defaultWidth + 20) * 2 + LANE_PADDING * 2 + 2;
-const ANIMAL_SLOT_HEIGHT = GameStyles.animal.height + 20;
+// A lane takes its size from the panel, never from the animals inside:
+// a row holds two animals and a narrow zone at least
+const LANE_BASIS = (GameStyles.defaultWidth + 20) * 2 + 30;
 
 const styles = theme => ({
   lanes: {
@@ -40,32 +39,20 @@ const styles = theme => ({
   , lane: {
     flex: `1 1 ${LANE_BASIS}px`
     , boxSizing: 'border-box'
-    , position: 'relative'
     , display: 'flex'
     , flexDirection: 'column'
     , margin: 2
     , borderRadius: 6
     , border: '1px solid'
     , borderTopWidth: 4
-    , transition: 'opacity .25s'
   }
   , laneLocked: {
     '& $laneBody': {
       opacity: .45
     }
   }
-  // Deploy phase: clicks go through the lane to its drop area, animals and zones stay clickable
-  , laneDeploy: {
-    '& $laneHeader, & $laneBody': {
-      pointerEvents: 'none'
-    }
-    , '& $laneBody > *': {
-      pointerEvents: 'auto'
-    }
-  }
   , laneHeader: {
-    position: 'relative'
-    , display: 'flex'
+    display: 'flex'
     , alignItems: 'center'
     , padding: '2px 8px'
     , minHeight: 26
@@ -79,92 +66,36 @@ const styles = theme => ({
     , fontSize: 14
     , ...GameStyles.ellipsis
   }
-  , laneCount: {
-    marginLeft: 'auto'
-    , paddingLeft: 8
-    , fontSize: 13
-    , opacity: .8
-  }
   , laneLock: {
     fontSize: 16
     , marginLeft: 4
   }
   , laneBody: {
     ...GameStyles.gridContainerBase
-    , position: 'relative'
-    , justifyContent: 'flex-start'
     , margin: 0
-    , padding: `0 ${LANE_PADDING}px`
     , flex: '1 1 auto'
-    , minHeight: ANIMAL_SLOT_HEIGHT
+    , minHeight: GameStyles.animal.height + 20
     , transition: 'opacity .25s'
   }
-  , laneEmptyText: {
-    position: 'absolute'
-    , top: '50%'
-    , left: 0
-    , right: 0
-    , textAlign: 'center'
-    , fontSize: 12
-    , color: '#888'
-    , pointerEvents: 'none'
-  }
-  // The whole lane is a target for a new animal: it lights up and takes no place
-  , laneDrop: {
-    position: 'absolute'
-    , top: 0
-    , right: 0
-    , bottom: 0
-    , left: 0
-    , borderRadius: 4
-    , '&.canInteract': {
-      cursor: 'pointer'
-      , boxShadow: 'inset 0 0 0 3px #060'
-      , transition: GameStyles.animal.transition
-    }
-    , '&.canInteract:hover': {
-      boxShadow: 'inset 0 0 0 3px red'
-    }
-  }
-  , laneDropHint: {
-    position: 'absolute'
-    , top: 7
-    , right: 32
-    , fontSize: 12
-    , fontWeight: 500
-    , color: '#060'
-    , whiteSpace: 'nowrap'
-  }
-  // A place between the animals: a mark over the gap, without a width of its own
+  // The usual zone for a new animal, at the end of the lane. It takes what is left of the row,
+  // so a picked card doesn't open a new row and the lanes stay in place
   , zone: {
-    flex: '0 0 0px'
-    , position: 'relative'
-    , height: ANIMAL_SLOT_HEIGHT
-    , '&.canInteract::before': {
-      content: '""'
-      , position: 'absolute'
-      , top: 10
-      , bottom: 10
-      , left: -5
-      , width: 10
-      , borderRadius: 5
-      , background: '#060'
-      , opacity: .4
-      , cursor: 'pointer'
-    }
-    , '&.canInteract:hover::before': {
-      background: 'red'
+    ...GameStyles.animalBase
+    , flex: '1 1 0px'
+    , minWidth: 0
+    , maxWidth: GameStyles.animalBase.minWidth / 2
+    , display: 'none'
+    , '&.canInteract': {
+      display: 'block'
+      , ...GameStyles.animalCanInteract
+      , transition: GameStyles.animal.transition
     }
   }
   , ...LOCATIONS.reduce((result, location) => ({
     ...result
     , [location]: {
       borderColor: LocationColors[location].border
-      , background: LocationColors[location].light
-      , '& $laneHeader': {
-        color: LocationColors[location].main
-      }
-      , '& $laneTitle, & $laneCount': {
+      , '& $laneTitle': {
         color: LocationColors[location].main
       }
     }
@@ -175,43 +106,19 @@ const LaneZone = ({className, acceptInteraction, canInteract}) => (
   <div className={cn(className, {canInteract})} onClick={acceptInteraction} />
 );
 
-const LaneDrop = ({className, hintClassName, acceptInteraction, canInteract}) => (
-  <div className={cn(className, {canInteract})} onClick={acceptInteraction}>
-    {canInteract && <Typography className={hintClassName}>{T.translate('Game.UI.Locations.DeployHere')}</Typography>}
-  </div>
-);
-
-const DeployTarget = compose(
+const InteractiveLaneZone = compose(
   connect(null, {gameDeployAnimalRequest})
   , InteractionTarget([InteractionItemType.CARD_TRAIT], {
     onInteract: ({index, location, gameDeployAnimalRequest}, {item}) => {
       gameDeployAnimalRequest(item.cardId, index, location);
     }
   })
-);
+)(LaneZone);
 
-const InteractiveLaneZone = DeployTarget(LaneZone);
-const InteractiveLaneDrop = DeployTarget(LaneDrop);
-
+// A position in the whole list of the player's animals: after the last animal of the lane
 const getLaneEndIndex = (continent, animals) => (
   animals.size > 0 ? continent.indexOf(animals.last()) + 1 : continent.size
 );
-
-// Zones between the animals of the lane; index is a position in the whole list of the player's animals
-const renderLaneWithZones = (classes, location, continent, animals) => {
-  const result = [];
-  const zoneClass = classes.zone;
-  animals.forEach(animal => {
-    const index = continent.indexOf(animal);
-    result.push(<InteractiveLaneZone key={'zone' + index} className={zoneClass} index={index} location={location} />);
-    result.push(<AnimatedAnimal key={animal.id} animal={animal} />);
-  });
-  if (animals.size > 0) {
-    const lastIndex = getLaneEndIndex(continent, animals);
-    result.push(<InteractiveLaneZone key={'zone' + lastIndex} className={zoneClass} index={lastIndex} location={location} />);
-  }
-  return result;
-};
 
 // An animal that left the lane but is still in the game has migrated: no death animation for it
 const hasMovedAway = (continent, location, previousIds) => previousIds.some(animalId => {
@@ -224,11 +131,12 @@ export class LocationLane extends React.Component {
 
   previousIds = [];
 
-  // Lines of paired traits follow the animals, the last time when the leave animation is over
+  // Lines of paired traits follow the animals. The last update comes when the leave animation is over
+  // and doesn't wait for the debounce: dealing cards after an extinction keeps postponing it
   updateLinks() {
     this.context.updateSVGOverlay();
     clearTimeout(this.linksTimeout);
-    this.linksTimeout = setTimeout(this.context.updateSVGOverlay, AT_DEATH + 50);
+    this.linksTimeout = setTimeout(this.context.updateSVGOverlayNow, AT_DEATH + 50);
   }
 
   componentDidUpdate() {
@@ -251,35 +159,26 @@ export class LocationLane extends React.Component {
   }
 }
 
-const renderLocationLane = ({classes, location, continent, animals, withZones, locked, transitionLeave}) => (
-  <div className={cn(classes.lane, classes[location], {
-    [classes.laneLocked]: locked
-    , [classes.laneDeploy]: withZones
-  })}>
-    {withZones && <InteractiveLaneDrop className={classes.laneDrop}
-                                       hintClassName={classes.laneDropHint}
-                                       index={getLaneEndIndex(continent, animals)}
-                                       location={location} />}
+const renderLocationLane = ({classes, location, continent, animals, withZone, locked, transitionLeave}) => (
+  <div className={cn(classes.lane, classes[location], {[classes.laneLocked]: locked})}>
     <div className={classes.laneHeader}>
       <LocationIcon location={location} className={classes.laneIcon} />
       <Typography className={classes.laneTitle}>{T.translate('Game.Location.' + location)}</Typography>
       {locked && <Tooltip title={T.translate('Game.UI.Locations.Locked')}>
         <IconLock className={classes.laneLock} />
       </Tooltip>}
-      <Typography className={classes.laneCount}>{animals.size}</Typography>
     </div>
-    {animals.size === 0 && <Typography className={classes.laneEmptyText}>
-      {T.translate('Game.UI.Locations.Empty')}
-    </Typography>}
     <CSSTransitionGroup component="div"
                         className={classes.laneBody}
                         transitionName="Animate_Death"
                         transitionLeave={transitionLeave}
                         transitionEnterTimeout={1}
                         transitionLeaveTimeout={AT_DEATH}>
-      {withZones
-        ? renderLaneWithZones(classes, location, continent, animals)
-        : animals.map(animal => <AnimatedAnimal key={animal.id} animal={animal} />)}
+      {animals.map(animal => <AnimatedAnimal key={animal.id} animal={animal} />)}
+      {withZone && <InteractiveLaneZone key='zone'
+                                        className={classes.zone}
+                                        index={getLaneEndIndex(continent, animals)}
+                                        location={location} />}
     </CSSTransitionGroup>
   </div>
 );
@@ -292,7 +191,7 @@ export const LocationsContinent = ({classes, continent, isDeployZones, lockedLoc
                     location={location}
                     continent={continent}
                     animals={continent.filter(animal => animal.location === location)}
-                    withZones={isDeployZones && isContinent(location)}
+                    withZone={isDeployZones && isContinent(location)}
                     locked={!!lockedLocations[location]} />
     ))}
   </div>

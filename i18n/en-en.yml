@@ -114,11 +114,8 @@ Game:
         PLANT_LINK: 'Link with the other plant'
         PLANT_ATTACK: 'Attack the animal'
         COVER: 'Put on animal to protect it from attack'
-    FoodBase: Food base
     Locations:
       Locked: In this round the player acts in another location
-      Empty: no animals
-      DeployHere: Deploy here
       Migrate: Migration
       MigrateTo: Migrate to
       ForcedAnimals: 'You had no cards and no animals: deploy {count} more of the new cards as animals'

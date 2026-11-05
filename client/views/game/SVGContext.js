@@ -11,6 +11,8 @@ export class SVGContextProvider extends React.PureComponent {
 
   updateSVGOverlay = () => this.svgOverlayComponent && this.svgOverlayComponent.debounceUpdateSVG();
 
+  updateSVGOverlayNow = () => this.svgOverlayComponent && this.svgOverlayComponent.updateSVG();
+
   unmountSVGOverlay = () => {
     this.svgOverlayComponent = null;
   };
