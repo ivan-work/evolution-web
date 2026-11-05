@@ -11,6 +11,7 @@ import Typography from "@material-ui/core/Typography";
 
 import Food from "../food/Food";
 import {InteractiveShell} from "../food/Shell";
+import AnimatedHOC from "../../../services/AnimationService/AnimatedHOC";
 import {InteractionSource} from "../InteractionManager";
 import {InteractionItemType} from "../InteractionItemType";
 import {LocationColors, LocationIcon} from "./LocationsStyles";
@@ -24,7 +25,7 @@ import {
   , getLocationLockLink
 } from "../../../../shared/models/game/evolution/locations";
 
-const MAX_FOOD_ICONS = 6;
+const MAX_FOOD_ICONS = 5;
 
 // Food token of a location: it can be given only to an animal from the same location
 export const InteractiveLocationFood = compose(
@@ -71,7 +72,7 @@ const styles = {
     display: 'flex'
     , alignItems: 'center'
     , flex: '0 0 auto'
-    , width: 112
+    , width: 92
     , fontSize: 14
     , fontWeight: 500
   }
@@ -87,13 +88,16 @@ const styles = {
     , textAlign: 'right'
     , marginRight: 4
   }
+  // Tokens overlap, so all of them and the rest counter fit the narrowest panel
   , rowFood: {
     display: 'flex'
     , flexWrap: 'nowrap'
     , alignItems: 'center'
-    , overflow: 'hidden'
     , '& svg': {
       fontSize: 24
+    }
+    , '& svg + svg': {
+      marginLeft: -10
     }
   }
   , more: {
@@ -166,4 +170,7 @@ export const LocationsFood = ({classes, game, compressed}) => (
   </div>
 );
 
-export default withStyles(styles)(LocationsFood);
+export default compose(
+  withStyles(styles)
+  , AnimatedHOC(() => `FoodContainer`)
+)(LocationsFood);

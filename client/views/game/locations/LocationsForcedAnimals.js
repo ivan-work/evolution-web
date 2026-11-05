@@ -7,11 +7,16 @@ import Typography from "@material-ui/core/Typography";
 import {PHASE} from "../../../../shared/models/game/GameModel";
 import {getForcedAnimals} from "../../../../shared/models/game/evolution/locations";
 
+// Lies over the name line of the panel, so the lanes stay in place when it comes and goes
 const style = {
-  background: '#FFF3CD'
+  position: 'absolute'
+  , top: 0
+  , left: 0
+  , right: 0
+  , zIndex: 1
+  , background: '#FFF3CD'
   , color: '#6B4E00'
   , borderRadius: 4
-  , margin: '2px 4px'
   , padding: '2px 8px'
   , fontSize: 14
 };

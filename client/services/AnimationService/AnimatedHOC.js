@@ -13,11 +13,12 @@ export default (getName) => {
         const {animationComponentSubscribe} = this.props;
         this.name = getName(this.props);
         // console.log('ComponentMounted', this.name, ReactDOM.findDOMNode(this));
-        animationComponentSubscribe(this.name, ReactDOM.findDOMNode(this));
+        this.html = ReactDOM.findDOMNode(this);
+        animationComponentSubscribe(this.name, this.html);
       }
       , componentWillUnmount() {
         const {animationComponentUnsubscribe} = this.props;
-        animationComponentUnsubscribe(this.name);
+        animationComponentUnsubscribe(this.name, this.html);
       }
     })
   )

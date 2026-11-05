@@ -74,7 +74,7 @@ export class GameSVGOverlay extends React.Component {
   unmountLinkedTrait = (animalLinkedTraitComponent) => {
     if (this.$isMounted) {
       const trait = animalLinkedTraitComponent.props.trait;
-      if (this.traitComponents[trait.id]) {
+      if (this.traitComponents[trait.id] === animalLinkedTraitComponent) {
         delete this.traitComponents[trait.id];
         this.setState(({links}) => ({links: links.filter(link => !isTraitInLink(link, trait.id))}));
       }

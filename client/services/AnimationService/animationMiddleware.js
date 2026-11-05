@@ -2,7 +2,7 @@ import AnimationManager from './AnimationManager';
 import Velocity from 'velocity-animate';
 
 export const animationComponentSubscribe = (name, html) => ({type: 'animationComponentSubscribe', data: {name, html}});
-export const animationComponentUnsubscribe = (name) => ({type: 'animationComponentUnsubscribe', data: {name}});
+export const animationComponentUnsubscribe = (name, html) => ({type: 'animationComponentUnsubscribe', data: {name, html}});
 
 export default (subscriptions = {}) => {
   let ID = 0;
@@ -34,8 +34,8 @@ export default (subscriptions = {}) => {
           break;
         }
         case 'animationComponentUnsubscribe': {
-          const {name} = action.data;
-          manager.removeComponent(name);
+          const {name, html} = action.data;
+          manager.removeComponent(name, html);
           // next(action);
           break;
         }

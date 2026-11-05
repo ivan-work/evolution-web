@@ -10,7 +10,7 @@ export default class AnimationManager {
   }
 
   removeComponent(name, html) {
-    delete this.components[name];
+    if (this.components[name] === html) delete this.components[name];
   }
 
   getFoodContainer() {

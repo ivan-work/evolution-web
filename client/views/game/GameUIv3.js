@@ -142,7 +142,8 @@ const styles = theme => ({
   }
   // Locations: a panel of a player fits a phone screen
   , LocationsPlayerWrapper: {
-    [theme.breakpoints.down('xs')]: {
+    position: 'relative'
+    , [theme.breakpoints.down('xs')]: {
       minWidth: 0
       , flexBasis: '100%'
     }
