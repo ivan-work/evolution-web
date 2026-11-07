@@ -898,6 +898,8 @@ export const gameClientToServer = {
         throw new ActionCheckError(ERR.GAME_LINK_NOTFOUND, {gameId, linkId});
       if (entity === linkedEntity)
         throw new ActionCheckError(ERR.GAME_LINK_SELF, {gameId, linkId});
+      if ((traitData.linkTargetType & CTT_PARAMETER.ANIMAL) && linkedEntityOwnerId !== entityOwnerId)
+        throw new ActionCheckError(ERR.GAME_ANIMAL_OWNER, {gameId, userId: entityOwnerId, animalId: linkId});
       throwError(traitData.getErrorOfTraitPlacement(linkedEntity));
       throwError(traitData.getErrorOfTraitPlacement_LinkUser(userId, linkedEntityOwnerId));
     }
