@@ -130,15 +130,19 @@ export const checkTraitActivation_TwoTraits = (game, sourceAnimal, trait, trait1
   );
   const trait1 = getOrThrowAnimalTrait(gameId, sourceAnimal, trait1id, true);
   const trait2 = getOrThrowAnimalTrait(gameId, linkedAnimal, trait2id, true);
-  // remove on sight
-  // if (trait.getDataModel().getErrorOfUseOnTarget(game, sourceAnimal, trait1)) {
-  //   throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
-  //     , 'Animal(%s):Trait(%s) checkTarget on Trait@%s failed', sourceAnimal.id, trait.type, trait1.type)
-  // }
-  // if (trait.getDataModel().getErrorOfUseOnTarget(game, sourceAnimal, trait2)) {
-  //   throw new ActionCheckError(`checkTraitActivation_Trait@Game(${gameId})`
-  //     , 'Animal(%s):Trait(%s) checkTarget on Trait@%s failed', linkedAnimal.id, trait.type, trait2type)
-  // }
+  [[sourceAnimal, trait1], [linkedAnimal, trait2]].forEach(([targetAnimal, targetTrait]) => {
+    const error = trait.getDataModel().getErrorOfUseOnTarget(game, targetAnimal, targetTrait);
+    if (error) {
+      throw new ActionCheckError(ERR.GAME_TRAIT_TARGET_ERROR, {
+        gameId: game.id
+        , sourceEid: targetAnimal.id
+        , targetEid: targetTrait.id
+        , traitType: trait.type
+        , targetType: trait.getDataModel().targetType
+        , error
+      })
+    }
+  });
   return [trait1, trait2];
 };
 

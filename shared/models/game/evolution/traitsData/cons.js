@@ -83,7 +83,7 @@ export const TraitNeoplasm = {
 export const TraitRegeneration = {
   type: tt.TraitRegeneration
   , _getErrorOfTraitPlacement: (animal) => {
-    if (animal.traits.filter(t => !t.hidden).size >= 2) return ERRORS.TRAIT_REGENERATION_TRAIT_MAX;
+    if (animal.traits.filter(t => !t.getDataModel().hidden).size >= 2) return ERRORS.TRAIT_REGENERATION_TRAIT_MAX;
     if (!animal.traits.every(t => t.getDataModel().food === 0)) return tt.TraitRegeneration;
     return false;
   }
